@@ -39,9 +39,9 @@ object Menu {
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
-            li(inputStyle)(div(id := shared.searchDiv)),
-            li(linkButton("TEST IT!", shared.link.demo, classIs(btn ++ btn_default))),
-            li(linkButton("ADOPT IT!", Resource.script.openmole.file, classIs(btn ++ btn_mole))(marginLeft := -15))
+            li(linkButton("DEMO", shared.link.demo, classIs(btn ++ btn_default))),
+            li(linkButton("DOWNLOAD", Resource.script.openmole.file, classIs(btn ++ btn_mole))(marginLeft := -15)),
+            li(inputStyle)(div(id := shared.searchDiv))
           )
         )
       )
