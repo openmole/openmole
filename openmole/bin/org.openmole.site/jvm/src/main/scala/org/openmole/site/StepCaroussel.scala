@@ -22,7 +22,7 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
+case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], menu: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
 
 class StepCarousel(step: Step) {
 
@@ -35,16 +35,8 @@ class StepCarousel(step: Step) {
         div(stepHeader)(step.name),
         line
       ),
-      step.page.intro.map { i ⇒
-        div(
-          div(paddingTop := 20, i.intro),
-          i.more.map { more ⇒
-            div(more.render, id := shared.moreCollapse)
-          }.getOrElse(div)
-        )
-      }.getOrElse(div),
-      line,
-      div(paddingTop := 20)(step.element)
+      div(paddingTop := 70)(step.element),
+      step.menu
     )
   }
 }

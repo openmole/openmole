@@ -1,8 +1,0 @@
-
-@import org.openmole.site.tools._
-@import org.openmole.site._
-
-
-@p
-    OpenMOLE handles your model execution by framing it in a @b{workflow}.
-@br Select the language of your model below to see how it is done . If you can't find it, select the  @i{Native} tab.

@@ -2,7 +2,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{PSE Method}
+@h1{PSE}
 
 @figure
   @img(src := Resource.img.thumbnail_pse.file, width:= "90%")
