@@ -102,6 +102,8 @@ object Resource {
 
     val faq = imgResource("faq.svg")
 
+    val search = imgResource("search.svg")
+
     val previousVersion = imgResource("previousVersion.svg")
 
     val paper = imgResource("paper.svg")

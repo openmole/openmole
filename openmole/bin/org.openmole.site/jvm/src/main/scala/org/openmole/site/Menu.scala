@@ -41,7 +41,9 @@ object Menu {
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(linkButton("DEMO", shared.link.demo, classIs(btn ++ btn_default))),
             li(linkButton("DOWNLOAD", Resource.script.openmole.file, classIs(btn ++ btn_mole))(marginLeft := -15)),
-            li(inputStyle)(div(id := shared.searchDiv))
+            li(inputStyle)(img(id := shared.searchImg, src := Resource.img.search.file, Seq(width := 25, paddingTop := 5, pointer)))(
+              div(id := shared.searchDiv)
+            )
           )
         )
       )

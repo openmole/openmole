@@ -173,7 +173,9 @@ object DocumentationPages {
     documentationWebsite,
     plugin,
     branching,
-    webserver
+    webserver,
+    dataProcessing,
+    otherDoE
   )
 
   lazy val topPages = Seq(
