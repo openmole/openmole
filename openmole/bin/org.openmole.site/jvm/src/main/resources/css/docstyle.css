@@ -59,3 +59,10 @@ font-weight: 800;
  text-transform: uppercase;
  padding-top: 100px;
  }
+
+code{
+    color: #c83771;
+    font-size: small;
+    background-color:white;
+    font-weight:bold;
+}
