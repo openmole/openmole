@@ -35,10 +35,10 @@ object UserGuide {
           for {
             d ← p.details
           } yield {
-            div(paddingTop := 10)(linkButton(d.name, d.file, classIs(btn ++ btn_danger)))
+            div(paddingTop := 10)(linkButton(d.name, d.file, classIs(btn ++ btn_default)))
           }
         ),
-        div(paddingTop := 20)(
+        div(paddingTop := 10)(
           if (isCurrent) div(p.content)
           else div()
         )

@@ -26,13 +26,14 @@ case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], pag
 
 class StepCarousel(step: Step) {
 
+  val line = hr(classIs("line"), width := "80%", marginTop := 40)
   val render = {
     div(width := "100%")(
       glyphSpan(glyph_chevron_left, previousDoc, step.previous),
       glyphSpan(glyph_chevron_right, nextDoc, step.next),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
-        hr(classIs("line"), width := "80%", marginTop := 40)
+        line
       ),
       step.page.intro.map { i ⇒
         div(
@@ -42,7 +43,8 @@ class StepCarousel(step: Step) {
           }.getOrElse(div)
         )
       }.getOrElse(div),
-      div(paddingTop := 50)(step.element)
+      line,
+      div(paddingTop := 20)(step.element)
     )
   }
 }

@@ -3,10 +3,8 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-@p{Profile Method}
-    @p The method aims at testing the validity intervals of input parameters
-
-@img(src := Resource.img.profileID.file, width := "40%")
+The profile method is designed to test the sensitivity of the input parameters.
+@img(src := Resource.img.profileID.file, center(50))
 
 @figure
  @img(src := Resource.img.thumbnail_profiles.file, width:= "90%")

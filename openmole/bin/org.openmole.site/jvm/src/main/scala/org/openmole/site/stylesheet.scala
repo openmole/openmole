@@ -36,7 +36,8 @@ package object stylesheet {
 
   def center(percentage: Int) = Seq(
     width := s"$percentage%",
-    margin := "0 auto"
+    margin := "0 auto",
+    display := "block"
   )
 
   lazy val mainDiv = Seq(
