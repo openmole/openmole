@@ -54,6 +54,12 @@ object Resource {
 
     val profileID = imgResource("profileID.svg")
 
+    val pseID = imgResource("pseID.svg")
+
+    val GAsingleID = imgResource("GAsingleID.svg")
+
+    val GAmultiID = imgResource("GAmultiID.svg")
+
     val completeID = imgResource("completeID.svg")
 
     val thumbnail_pse = imgResource("pse_anim.svg")

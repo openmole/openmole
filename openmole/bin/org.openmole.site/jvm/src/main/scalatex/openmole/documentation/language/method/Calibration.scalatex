@@ -1,6 +1,7 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.stylesheet._
 
 @p{Calibration }
     @p Using Genetic Algorithms (GA) , OpenMOLE find the inputs set matching one or several criteria.
@@ -8,10 +9,13 @@
 
 @h2{Single criterion and multi-criteria Calibration}
 
-@p
+
+@img(src := Resource.img.GAsingleID.file, center(60), padding := 20)
+
+@img(src := Resource.img.GAmultiID.file, center(60), padding := 20)
 
 @figure
- @img(src := Resource.img.thumbnail_calib_mono.file, width:= "50%")
+ @img(src := Resource.img.thumbnail_calib_mono.file, center(50))
  @figcaption
     Figure: Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
     parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?

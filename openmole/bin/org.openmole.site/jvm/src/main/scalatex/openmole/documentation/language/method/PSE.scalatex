@@ -1,11 +1,13 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.stylesheet._
 
-@h1{PSE}
+
+@img(src := Resource.img.pseID.file, center(60), padding := 20)
 
 @figure
-  @img(src := Resource.img.thumbnail_pse.file, width:= "90%")
+  @img(src := Resource.img.thumbnail_pse.file, center(70), paddingTop := 10 )
     @figcaption
       Figure: Input parameter values are selected to produce new output
       values, such that as the exploration progresses, the region of
