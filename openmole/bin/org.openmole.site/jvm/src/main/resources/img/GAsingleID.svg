@@ -15,7 +15,7 @@
    version="1.1"
    id="svg4853"
    inkscape:version="0.92.1 r15371"
-   sodipodi:docname="profileID.svg">
+   sodipodi:docname="GAsingleID.svg">
   <defs
      id="defs4847">
     <inkscape:path-effect
@@ -30,7 +30,7 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.815529"
+     inkscape:zoom="2.8284271"
      inkscape:cx="78.45905"
      inkscape:cy="13.29398"
      inkscape:document-units="mm"
@@ -158,14 +158,6 @@
            inkscape:transform-center-y="1.5900491" />
       </g>
     </g>
-    <rect
-       ry="0.38352668"
-       y="130.53557"
-       x="1.2524374"
-       height="4.1792822"
-       width="19.822035"
-       id="rect4775"
-       style="fill:#2f2f3b;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.17796548;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        id="text4801"
        y="133.40308"
@@ -189,12 +181,20 @@
          id="tspan4807"
          sodipodi:role="line">OExp</tspan></text>
     <rect
+       ry="0.39458767"
+       y="123.91213"
+       x="1.251788"
+       height="4.2998133"
+       width="1.8012739"
+       id="rect5005"
+       style="fill:#a02c2c;fill-opacity:1;fill-rule:evenodd;stroke:#550000;stroke-width:0.17666984;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
        style="opacity:1;fill:#a6bf26;fill-opacity:1;fill-rule:evenodd;stroke:#7e8b00;stroke-width:0.15438353;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect4773"
        width="24.845617"
        height="4.1928287"
        x="1.2745111"
-       y="137.02733"
+       y="130.52879"
        ry="0.38476986" />
     <text
        id="text5009"
@@ -257,12 +257,12 @@
          id="path4672" />
     </g>
     <rect
-       ry="0.39458767"
-       y="123.89992"
-       x="1.2738442"
-       height="4.2998133"
-       width="1.8012739"
+       style="fill:#a02c2c;fill-opacity:1;fill-rule:evenodd;stroke:#550000;stroke-width:0.17666984;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect42"
-       style="fill:#a02c2c;fill-opacity:1;fill-rule:evenodd;stroke:#550000;stroke-width:0.17666984;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       width="1.8012739"
+       height="4.2998133"
+       x="1.251788"
+       y="136.97385"
+       ry="0.39458767" />
   </g>
 </svg>
