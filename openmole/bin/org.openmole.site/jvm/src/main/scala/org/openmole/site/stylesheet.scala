@@ -54,7 +54,6 @@ package object stylesheet {
   )
 
   lazy val navigateDoc = Seq(
-    float := "left",
     fixedPosition,
     top := 200,
     fontSize := "32px",
@@ -78,11 +77,13 @@ package object stylesheet {
   )
 
   lazy val previousDoc = Seq(
-    marginLeft := -200
+    float := "left",
+    left := 300
   ) ++ navigateDoc
 
   lazy val nextDoc = Seq(
-    paddingLeft := "calc(50% + 200px)"
+    right := 300,
+    float := "right"
   ) ++ navigateDoc
 
   lazy val mainTitle = Seq(
