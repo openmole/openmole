@@ -4,10 +4,10 @@
 @import org.openmole.site.stylesheet._
 
 The profile method is designed to test the sensitivity of the input parameters.
-@img(src := Resource.img.profileID.file, center(50))
+@img(src := Resource.img.profileID.file, center(50), padding := 20)
 
 @figure
- @img(src := Resource.img.thumbnail_profiles.file, width:= "90%")
+ @img(src := Resource.img.thumbnail_profiles.file, center(70), paddingTop := 10 )
    @figcaption
     Calibration Profiles finds the domain of a parameter within which the model can produce dynamics
     under a given threshold of acceptance, @b{every other parameter being calibrated}.

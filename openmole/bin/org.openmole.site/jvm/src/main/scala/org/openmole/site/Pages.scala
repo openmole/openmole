@@ -245,7 +245,7 @@ object DocumentationPages {
 
   lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid(), intro = Some(envIntro))
 
-  def methodPages = Seq(calibration, sensitivity, profile, pse)
+  def methodPages = Seq(calibration, sensitivity, profile, pse, otherDoE, dataProcessing)
 
   lazy val method = DocumentationPage(name = "Methods", content = scalatex.documentation.language.Method())
 
@@ -259,6 +259,8 @@ object DocumentationPages {
   lazy val sensitivity = DocumentationPage(name = "Sensitivity Analysis", content = scalatex.documentation.language.method.Sensitivity(), intro = Some(methIntro))
   lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile(), intro = Some(methIntro))
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE(), intro = Some(methIntro))
+  lazy val otherDoE = DocumentationPage(name = "other DoE", content = scalatex.documentation.language.method.OtherDoE(), intro = Some(methIntro))
+  lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing(), intro = Some(methIntro))
 
   lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)
 
