@@ -70,9 +70,11 @@ package object tools {
 
   def to(page: Page): TypedTag[String] = to(Pages.file(page), otherTab = false)
 
-  def to(link: String, linkName: String = "", otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
+  def to(link: String, otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
 
   def innerLink(page: Page, title: String) = to(page)(span(title))
+
+  def outerLink(linkName: String, link: String, otherTab: Boolean = true) = to(link, otherTab = true)(span(linkName))
 
   // CONVINIENT KEYS
   implicit class SString(ss: String) {
