@@ -1,0 +1,56 @@
+/*
+ *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.ui.console.internal.command.viewer;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import org.openmole.core.workflow.model.execution.ExecutionState;
+import org.openmole.core.workflow.model.execution.IEnvironment;
+import org.openmole.core.workflow.model.execution.IExecutionJob;
+import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
+import org.openmole.misc.tools.structure.Counter;
+
+
+/**
+ *
+ * @author Romain Reuillon <romain.reuillon at openmole.org>
+ */
+public class EnvironmentViewer implements IViewer<IEnvironment> {
+
+    @Override
+    public void view(IEnvironment object, List<Object> args) {
+        Map<ExecutionState, Counter> accounting = new TreeMap<ExecutionState, Counter>();
+
+        for(ExecutionState state : ExecutionState.values()) {
+            accounting.put(state, new Counter());
+        }
+
+        IExecutionJobRegistries<IExecutionJob> executionJobRegistries = object.getJobRegistries();
+
+        for(IExecutionJob executionJob: executionJobRegistries.allExecutionjobs()) {
+            accounting.get(executionJob.getState()).increment();
+        }
+
+        for(ExecutionState state : ExecutionState.values()) {
+            System.out.println(state.getLabel() + ": " + accounting.get(state));
+        }
+
+    }
+
+}

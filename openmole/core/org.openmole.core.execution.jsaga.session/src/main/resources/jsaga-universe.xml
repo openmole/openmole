@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UNIVERSE name="World" xmlns="http://www.in2p3.fr/jsaga">
+   <GRID contextType="VOMS">
+       <job type="WMS">
+           <attribute name="GlueCEStateStatus" value="Production" />
+       </job>
+   </GRID>
+</UNIVERSE> 

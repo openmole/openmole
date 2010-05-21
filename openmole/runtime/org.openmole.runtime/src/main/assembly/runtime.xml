@@ -1,0 +1,12 @@
+<assembly>
+  <id>runtime</id>
+  <formats>
+    <format>tar.bz2</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>${product.directory}</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+</assembly>

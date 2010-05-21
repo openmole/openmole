@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>runtime</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3</version>
+    </parent>
+
+    <artifactId>org.openmole.runtime</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.workflow.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.workflow.implementation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.workflow.methods</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.caching</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.executorservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.pluginmanager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.hashservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>app</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- dependencies for the runtime -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.nuiton.j2r</artifactId>
+            <version>${lib.org.nuiton.j2r.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fr.in2p3.jsaga</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>com.springsource.javax.servlet.jsp</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>com.springsource.org.aspectj.weaver</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+	<dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.apache.ant</artifactId>
+	    <version>${lib.org.apache.ant.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>uk.com.robustit.cloning</artifactId>
+            <version>${lib.uk.com.robust-it.cloning.version}</version>
+	    <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId} ${project.version}</name>
+    <description></description>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <product.directory>${project.build.directory}/product</product.directory>
+        <product.plugins.directory>${product.directory}/plugins/</product.plugins.directory>
+        <product.configuration.directory>${product.directory}/configuration/</product.configuration.directory>
+        <import.packages>*</import.packages>
+        <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
+        <include.resources>src/main/resources/plugin.xml</include.resources>
+        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
+        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
+        <bundle.activationpolicy>lazy</bundle.activationpolicy>
+    </properties>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>install</phase>
+                        <goals>
+                            <!-- Will copy all dependencies into plugins directory -->
+                            <goal>copy-dependencies</goal>
+                            <!-- Will copy missing bundles into plugins directory with correct filenames for equinox launcher -->
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Exclude transitive dependencies osgi that are explicitely copyed by copy goal -->
+                            <excludeScope>provided</excludeScope>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-jre</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sun.java</groupId>
+                                    <artifactId>java-jre</artifactId>
+                                    <version>1.6.0_14-b08</version>
+                                    <type>tgz</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${product.directory}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${product.directory}</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-equinox-configuration</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${product.configuration.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <includes>
+                                        <include>config.ini</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-run-script</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${product.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <includes>
+                                        <include>run.sh</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/runtime.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+
+
+
+

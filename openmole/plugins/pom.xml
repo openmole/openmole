@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>openmole</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3</version>
+    </parent>
+
+    <artifactId>plugins</artifactId>
+
+    <modules>
+        <module>au.com.bytecode.opencsv</module>
+        <module>org.jfree.jfreechart</module>
+	<module>org.scala-lang.scala</module>
+        <module>org.openmole.plugin.tools.code</module>
+        <module>org.openmole.plugin.tools.groovy</module>
+        <module>org.openmole.plugin.environmentprovider.jsaga</module>
+        <module>org.openmole.plugin.environmentprovider.glite</module>
+        <module>org.openmole.plugin.molejobgroupingstrategy.onvariablevaluegroupingstrategy</module>
+        <module>org.openmole.plugin.molejobgroupingstrategy.batchgroupingstrategy</module>
+        <module>org.openmole.plugin.task.netlogotask</module>
+        <module>org.simexplorer.openmole.plugin.task.sensitivitytask</module>
+        <module>org.openmole.plugin.task.storeintocsvtask</module>
+        <module>org.openmole.plugin.task.externaltask</module>
+        <module>org.openmole.plugin.task.systemexectask</module>
+        <module>org.openmole.plugin.task.codetask</module>
+        <module>org.openmole.plugin.task.groovytask</module>
+        <module>org.openmole.plugin.task.filemanagement</module>
+        <module>org.openmole.plugin.task.datasetdistributiontask</module>
+        <module>org.openmole.plugin.domain.interval</module>
+        <module>org.openmole.plugin.domain.relativerange</module>
+        <module>org.openmole.plugin.domain.uniformintegerdistribution</module>
+        <module>org.openmole.plugin.domain.groovydomain</module>
+        <module>org.openmole.plugin.plan.csvplan</module>
+        <module>org.openmole.plugin.plan.boxbehnkenplan</module>
+        <module>org.openmole.plugin.plan.centralcompositeplan</module>
+        <module>org.openmole.plugin.plan.completeplan</module>
+        <module>org.openmole.plugin.plan.lhsplan</module>
+        <module>org.openmole.plugin.plan.combine</module>
+        <module>org.openmole.plugin.plan.filtredplan</module>
+        <module>org.openmole.plugin.executionprofiler.csvprofiler</module>
+        <module>org.openmole.plugin.jars</module>
+    </modules>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId}</name>
+    <description>Third-party OSGi bundles used by SimExplorer</description>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>pom</packaging>
+
+</project>

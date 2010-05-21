@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>openmole</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3</version>
+    </parent>
+
+    <artifactId>misc</artifactId>
+
+    <modules>
+        <module>org.openmole.misc.tools</module>
+	<module>org.openmole.misc.caching</module>
+	<module>org.openmole.misc.eventdispatcher</module>
+        <module>org.openmole.misc.exception</module>
+        <module>org.openmole.misc.clonning</module>
+        <module>org.openmole.misc.executorservice</module>
+        <module>org.openmole.misc.hashservice</module>
+        <module>org.openmole.misc.pluginmanager</module>
+        <module>org.openmole.misc.updater</module>
+        <module>org.openmole.misc.workspace</module>
+        <module>org.openmole.misc.backgroundexecutor</module>
+    </modules>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId}</name>
+    <description>Miscileanous software used by OpenMOLE</description>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>pom</packaging>
+
+</project>
