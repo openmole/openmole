@@ -13,6 +13,7 @@
     </parent>
 
     <artifactId>openmole</artifactId>
+    <name>${project.artifactId}</name>
 
     <modules>
         <module>core</module>
