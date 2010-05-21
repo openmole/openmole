@@ -12,7 +12,7 @@
 
     <modules>
         <module>openmole</module>
-        <!--module>aspects</module-->
+        <module>aspects</module>
         <!--module>plugins</module-->
         <module>simexplorer-ide</module>
     </modules>

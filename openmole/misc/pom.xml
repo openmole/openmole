@@ -17,8 +17,6 @@
 
     <modules>
         <module>org.openmole.misc.tools</module>
-	<module>org.openmole.misc.caching</module>
-	<module>org.openmole.misc.eventdispatcher</module>
         <module>org.openmole.misc.exception</module>
         <module>org.openmole.misc.clonning</module>
         <module>org.openmole.misc.executorservice</module>

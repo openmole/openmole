@@ -8,17 +8,27 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>misc</artifactId>
         <groupId>org.openmole</groupId>
+        <artifactId>aspects</artifactId>
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.misc.caching</artifactId>
+    <artifactId>org.openmole.misc.eventdispatcher</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.executorservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -29,11 +39,6 @@
             <groupId>net.sourceforge.collections</groupId>
             <artifactId>collections-generic</artifactId>
    	</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.tools</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -49,7 +54,7 @@
 
     <packaging>jar</packaging>
 
-
+            
     <build>
       <plugins>
         <plugin>
@@ -65,9 +70,8 @@
 	</plugin>
        </plugins>
     </build>
-
+   
 </project>
-
 
 
 

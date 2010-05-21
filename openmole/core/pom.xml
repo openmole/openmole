@@ -15,11 +15,11 @@
 
     <artifactId>core</artifactId>
 
- <modules>
+    <modules>
         <module>org.openmole.core.commons.metadataservice</module>
-	<module>org.openmole.core.commons.objectidservice</module>
-	<module>org.openmole.core.commons.persitenceservice</module>
-	<module>org.openmole.core.commons.fileservice</module>
+        <module>org.openmole.core.commons.objectidservice</module>
+        <module>org.openmole.core.commons.persitenceservice</module>
+        <module>org.openmole.core.commons.fileservice</module>
         <module>org.openmole.core.file</module>
         <module>org.openmole.core.batchservicecontrol</module>
         <module>org.openmole.core.workflow.model</module>
@@ -28,9 +28,9 @@
         <module>org.openmole.core.execution.jsaga.session</module>
         <module>org.openmole.core.execution.runtimemessageserializer</module>
         <module>org.openmole.core.execution.structuregenerator</module>
-	<module>org.openmole.core.execution.replicacatalog</module>
+        <module>org.openmole.core.execution.replicacatalog</module>
         <module>org.openmole.core.execution.environmentprovider</module>
-  </modules>
+    </modules>
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
