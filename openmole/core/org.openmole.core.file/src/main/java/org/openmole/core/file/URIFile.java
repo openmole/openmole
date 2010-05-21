@@ -52,7 +52,6 @@ import org.openmole.core.batchservicecontrol.BatchStorageDescription;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.core.file.internal.Activator;
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.tools.io.LocalHostDetector;
 import org.openmole.misc.caching.SoftCachable;
 import org.openmole.misc.tools.filecache.IFileCache;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
@@ -62,6 +61,8 @@ import org.openmole.misc.tools.filecache.FileCacheDeleteOnFinalize;
 import org.openmole.misc.tools.io.FastCopy;
 import org.openmole.misc.tools.io.FileCache;
 import org.openmole.misc.tools.io.StringBuilderOutputStream;
+
+import static org.openmole.misc.tools.io.Network.*;
 
 public class URIFile implements IURIFile {
 
@@ -169,10 +170,10 @@ public class URIFile implements IURIFile {
         try {
             task.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
-            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error when closing entry for URL " + location, e);
+            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
         } catch (TimeoutException e) {
             task.cancel(true);
-            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error when closing entry for URL " + location, e);
+            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
         }
 
     }
@@ -505,7 +506,7 @@ public class URIFile implements IURIFile {
     }
 
     private boolean isLocal() throws IOException {
-        return (getCachedURL().getHost() == null || getCachedURL().getScheme() == null || (getCachedURL().getScheme() != null && getCachedURL().getScheme().compareToIgnoreCase("file") == 0) || LocalHostDetector.IsLocalHost(getCachedURL().getHost()));
+        return (getCachedURL().getHost() == null || getCachedURL().getScheme() == null || (getCachedURL().getScheme() != null && getCachedURL().getScheme().compareToIgnoreCase("file") == 0) || IsLocalHost(getCachedURL().getHost()));
     }
 
     @Override
