@@ -26,6 +26,7 @@
         <module>org.openmole.plugin.environmentprovider.glite</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.onvariablevaluegroupingstrategy</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.batchgroupingstrategy</module>
+	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogotask</module>
         <module>org.simexplorer.openmole.plugin.task.sensitivitytask</module>
         <module>org.openmole.plugin.task.storeintocsvtask</module>
