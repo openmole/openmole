@@ -17,7 +17,6 @@
 
     <modules>
         <module>com.db4o</module>
-        <module>com.developpez.adiguba.shell</module>
         <module>com.ice.tar</module>
         <module>com.jcraft.jsch</module>
         <module>uk.com.robust-it.cloning</module>

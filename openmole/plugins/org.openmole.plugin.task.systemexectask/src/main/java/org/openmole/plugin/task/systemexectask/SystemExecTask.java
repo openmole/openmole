@@ -25,10 +25,11 @@ import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 
-import com.developpez.adiguba.shell.ProcessConsumer;
-import com.developpez.adiguba.shell.Shell;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.core.workflow.implementation.data.Variable;
 import org.openmole.core.workflow.model.data.IPrototype;
@@ -40,27 +41,33 @@ import org.openmole.plugin.task.systemexectask.internal.Activator;
 import static org.openmole.core.workflow.implementation.tools.VariableExpansion.*;
 public class SystemExecTask extends ExternalTask {
 
-    final static IPrototype<File> PWD = new Prototype<File>("PWD", File.class);
+    final public static IPrototype<File> PWD = new Prototype<File>("PWD", File.class);
 
-    String cmd;
+    final String cmd;
+    final Prototype<Integer> returnValue;
 
-    public SystemExecTask(String name) throws UserBadDataError, InternalProcessingError {
-        super(name);
-    }
-    
     public SystemExecTask(String name, String cmd) throws UserBadDataError,
+            InternalProcessingError {
+        this(name, cmd, null);
+    }
+
+    public SystemExecTask(String name, String cmd, Prototype<Integer> returnValue) throws UserBadDataError,
             InternalProcessingError {
         super(name);
         this.cmd = cmd;
+        this.returnValue = returnValue;
+        if(returnValue != null) addOutput(returnValue);
     }
 
     public String getCmd() {
         return cmd;
     }
 
-    public void setCmd(String cmd) {
-        this.cmd = cmd;
+    public Prototype<Integer> getReturnValue() {
+        return returnValue;
     }
+
+
 
     @Override
     protected void process(IContext context, IExecutionContext executionContext, IProgress progress)
@@ -69,21 +76,22 @@ public class SystemExecTask extends ExternalTask {
             File tmpDir = Activator.getWorkspace().newTmpDir("systemExecTask");
 
             prepareInputFiles(context, progress, tmpDir);
-
-            Shell shell = new Shell();
-            shell.setDirectory(tmpDir);
-
+            
             List<IVariable> tmpVariables = new LinkedList<IVariable>();
             tmpVariables.add(new Variable(PWD, tmpDir));
+            CommandLine commandLine = CommandLine.parse(expandData(context,tmpVariables, cmd));
 
-            ProcessConsumer c;
-            c = shell.command(expandData(context,tmpVariables, cmd));
+            DefaultExecutor executor = new DefaultExecutor();
+            executor.setProcessDestroyer(new ShutdownHookProcessDestroyer());
+            executor.setWorkingDirectory(tmpDir);
+
 
             try {
-                c.consume();
+                Integer ret = executor.execute(commandLine);
+                if(returnValue != null) context.setValue(returnValue, ret);
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
-            }
+            } 
 
             fetchOutputFiles(context, progress, tmpDir);
 

@@ -33,8 +33,8 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.developpez.adiguba.shell</artifactId>
-            <version>${lib.com.developpez.adiguba.shell.version}</version>
+            <artifactId>org.apache.commons.exec</artifactId>
+            <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
     </dependencies>
 

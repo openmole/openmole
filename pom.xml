@@ -64,11 +64,6 @@
                 <artifactId>ant</artifactId>
                 <version>${lib.org.apache.ant.version}</version>
             </dependency>
-            <!-- <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-launcher</artifactId>
-                <version>${lib.org.apache.tools.ant.version}</version>
-            </dependency>-->
             <dependency>
                 <groupId>org.jasypt</groupId>
                 <artifactId>com.springsource.org.jasypt.encryption</artifactId>
@@ -79,16 +74,10 @@
                 <artifactId>com.springsource.org.objenesis</artifactId>
                 <version>${lib.org.objenesis.version}</version>
             </dependency>
-            <!-- Dependencies used to built OSGi bundles -->
             <dependency>
                 <groupId>com.db4o</groupId>
                 <artifactId>com.db4o</artifactId>
                 <version>${lib.com.db4o.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.developpez.adiguba</groupId>
-                <artifactId>Shell</artifactId>
-                <version>${lib.com.developpez.adiguba.shell.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ibm.icu</groupId>
@@ -352,7 +341,6 @@
         <symbolic.name>${pom.artifactId}</symbolic.name>
         <!-- versions of libraries used -->
         <lib.com.db4o.version>7.4.58</lib.com.db4o.version>
-        <lib.com.developpez.adiguba.shell.version>1.0.0</lib.com.developpez.adiguba.shell.version>
         <lib.com.ice.tar.version>2.5</lib.com.ice.tar.version>
         <lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>
         <lib.com.thoughtworks.xstream.version>1.3.1</lib.com.thoughtworks.xstream.version>
