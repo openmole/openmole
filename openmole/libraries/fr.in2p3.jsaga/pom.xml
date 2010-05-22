@@ -18,11 +18,6 @@
     <version>${lib.fr.in2p3.jsaga.version}</version>
 
     <dependencies>
-       <!-- <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.ogf.saga</artifactId>
-            <version>${lib.org.ogf.saga.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>fr.in2p3.jsaga</groupId>
             <artifactId>jsaga-engine</artifactId>
@@ -58,43 +53,6 @@
             <artifactId>jsaga-adaptor-ssh</artifactId>
             <scope>provided</scope>
         </dependency>
-<!--        <dependency>
-            <groupId>org.glite</groupId>
-            <artifactId>glite-security-util-java</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glite</groupId>
-            <artifactId>glite-security-delegation-java</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.globus</groupId>
-            <artifactId>cog-jglobus</artifactId>
-            <scope>provided</scope>
-        </dependency>
--->
-       <!--  <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>jce-jdk13</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.claymoresystems</groupId>
-            <artifactId>puretls</artifactId>
-            <scope>provided</scope>
-        </dependency>
-	 <dependency>
-            <groupId>cryptx</groupId>
-            <artifactId>cryptx32</artifactId>
-	    <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>cryptx</groupId>
-            <artifactId>asn1</artifactId>
-            <scope>provided</scope>
-        </dependency>-->
-
     </dependencies>
 
     <!-- ************************************************************* -->

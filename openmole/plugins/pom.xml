@@ -19,6 +19,7 @@
         <module>au.com.bytecode.opencsv</module>
         <module>org.jfree.jfreechart</module>
 	<module>org.scala-lang.scala</module>
+	<module>org.apache.commons.exec</module>
         <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>
         <module>org.openmole.plugin.environmentprovider.jsaga</module>
