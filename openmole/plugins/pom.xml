@@ -48,7 +48,7 @@
         <module>org.openmole.plugin.plan.combine</module>
         <module>org.openmole.plugin.plan.filtredplan</module>
         <module>org.openmole.plugin.executionprofiler.csvprofiler</module>
-        <module>org.openmole.plugin.jars</module>
+        <!--<module>org.openmole.plugin.jars</module>-->
     </modules>
 
     <!-- ************************************************************* -->
