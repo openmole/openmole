@@ -109,6 +109,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.structuregeneration</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.domain.groovydomain</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
