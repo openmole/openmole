@@ -24,7 +24,6 @@
         <module>org.openmole.core.batchservicecontrol</module>
         <module>org.openmole.core.workflow.model</module>
         <module>org.openmole.core.workflow.implementation</module>
-        <module>org.openmole.core.workflow.methods</module>
         <module>org.openmole.core.execution.jsaga.session</module>
         <module>org.openmole.core.execution.runtimemessageserializer</module>
         <module>org.openmole.core.execution.structuregenerator</module>
