@@ -29,7 +29,6 @@ import org.openmole.core.workflow.implementation.mole.Mole;
 import org.openmole.core.workflow.implementation.plan.Factor;
 import org.openmole.core.workflow.implementation.task.ExplorationTask;
 import org.openmole.core.workflow.implementation.transition.ExplorationTransition;
-import org.openmole.core.workflow.methods.task.ModelStructuresGenerationTask;
 import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.model.data.IPrototype;
@@ -43,6 +42,7 @@ import org.openmole.plugin.domain.interval.RangeDouble;
 import org.openmole.plugin.domain.interval.RangeInteger;
 import org.openmole.plugin.plan.completeplan.CompletePlan;
 import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.structuregeneration.ModelStructuresGenerationTask;
 
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
 

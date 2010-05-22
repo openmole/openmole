@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.methods.task;
+package org.openmole.plugin.task.structuregeneration;
 
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
