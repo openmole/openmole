@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -55,7 +56,6 @@ import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.workflow.model.job.IJob;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.misc.tools.structure.Counter;
 
 public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends IBatchEnvironmentDescription> extends Environment<DESC, IBatchExecutionJob> implements IBatchEnvironment<JS, DESC> {
 
@@ -119,7 +119,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
         }*/
 
         final Semaphore oneFinished = new Semaphore(0);
-        final Counter nbLeftRunning = new Counter(stors.size());
+        final AtomicInteger nbLeftRunning = new AtomicInteger(stors.size());
 
         for (final IBatchStorage storage : stors) {
             Runnable r = new Runnable() {
@@ -138,7 +138,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
 
                         
                     } finally {
-                        nbLeftRunning.decrement();
+                        nbLeftRunning.decrementAndGet();
                         oneFinished.release();
                     }
                 }
@@ -147,7 +147,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
             Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(r);
         }
 
-        while ((storages.isEmpty()) && nbLeftRunning.getValue() > 0) {
+        while ((storages.isEmpty()) && nbLeftRunning.get() > 0) {
             try {
                 oneFinished.acquire();
             } catch (InterruptedException e) {
@@ -166,7 +166,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
         final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsDouble(BestJobServiceRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
         Collection<JS> allJobServices = allJobServices();
         final Semaphore done = new Semaphore(0);
-        final Counter nbStillRunning = new Counter(allJobServices.size());
+        final AtomicInteger nbStillRunning = new AtomicInteger(allJobServices.size());
 
         for (final JS js : allJobServices) {
 
@@ -182,7 +182,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
                             Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Not accepted JS " + js.toString());
                         }*/
                     } finally {
-                        nbStillRunning.decrement();
+                        nbStillRunning.decrementAndGet();
                         done.release();
                     }
                 }
@@ -192,7 +192,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
         }
 
 
-        while (jobServices.isEmpty() && nbStillRunning.getValue() > 0) {
+        while (jobServices.isEmpty() && nbStillRunning.get() > 0) {
             try {
                 done.acquire();
             } catch (InterruptedException e) {

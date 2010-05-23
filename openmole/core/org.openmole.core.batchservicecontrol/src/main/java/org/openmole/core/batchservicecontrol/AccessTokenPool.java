@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
@@ -34,24 +35,24 @@ public class AccessTokenPool implements IAccessTokenPool {
 	BlockingDeque<IAccessToken> tokens = new LinkedBlockingDeque<IAccessToken>();
 	Set<IAccessToken> taken = Collections.synchronizedSet(new HashSet<IAccessToken>());
 
-	volatile int load;
+	AtomicInteger load;
 
 	public AccessTokenPool(int nbTokens) {
 		for(int i = 0; i < nbTokens; i++) {
 			tokens.add(new AccessToken());
 		}
-		load = -nbTokens;
+		load.addAndGet(-nbTokens);
 	}
 
 	@Override
 	public IAccessToken waitAToken() throws InterruptedException {
-		load++;
+		load.incrementAndGet();
 		IAccessToken token;
 		
 		try {
 			token = tokens.take();
 		} catch (InterruptedException e) {
-			load--;
+			load.decrementAndGet();
 			throw e;
 		} 
 
@@ -61,17 +62,17 @@ public class AccessTokenPool implements IAccessTokenPool {
 
 	@Override
 	public IAccessToken waitAToken(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
-		load++;
+		load.incrementAndGet();
 		IAccessToken ret;
 		
 		try {
 			ret = tokens.poll(time, unit);
 		} catch (InterruptedException e){
-			load--;
+			load.decrementAndGet();
 			throw e;
 		} 
 		if(ret == null) {
-			load--;
+			load.decrementAndGet();
 			throw new TimeoutException();
 		}
 		
@@ -88,23 +89,23 @@ public class AccessTokenPool implements IAccessTokenPool {
 		}
 
 		tokens.add(token);					
-		load--;
+		load.decrementAndGet();
 	}
 
 	@Override
 	public IAccessToken getAccessTokenInterruptly() {
-		load++;
+		load.incrementAndGet();
 		IAccessToken token = tokens.poll();
 		if(token != null) {
 			taken.add(token);
-		} else load--;
+		} else load.decrementAndGet();
 		return token;
 	}
 
 	@Override
 	public int getLoad() {
 		//if(load < 0 && tokens.isEmpty()) Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error load is " + load + " and token pool is empty.");
-		return load;
+		return load.get();
 	}
 
 

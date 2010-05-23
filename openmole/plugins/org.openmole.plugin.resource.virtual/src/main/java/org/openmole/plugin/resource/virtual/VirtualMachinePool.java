@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.collections15.bidimap.TreeBidiMap;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
@@ -42,7 +43,8 @@ public class VirtualMachinePool implements IVirtualMachinePool {
     static {
         Activator.getWorkspace().addToConfigurations(UnusedVMKeepOn, "120000");
     }
-    volatile static long PooledVMID = 0L;
+
+    final static AtomicLong PooledVMID = new AtomicLong(0L);
 
     private class PooledVM implements Comparable<PooledVM> {
 
@@ -53,7 +55,7 @@ public class VirtualMachinePool implements IVirtualMachinePool {
         public PooledVM(IVirtualMachine virtualMachine, long killTime) {
             this.virtualMachine = virtualMachine;
             this.killTime = killTime;
-            this.id = PooledVMID++;
+            this.id = PooledVMID.getAndIncrement();
         }
 
         @Override
