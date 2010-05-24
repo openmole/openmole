@@ -54,7 +54,7 @@
                             <artifactId>org.openmole.misc.caching</artifactId>
                         </aspectLibrary>
                     </aspectLibrarys>
-                    <weaveDependencies>
+                    <!--<weaveDependencies>
                         <weaveDependency>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.misc.eventdispatcher</artifactId>
@@ -63,7 +63,7 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.misc.caching</artifactId>
                         </weaveDependency>
-                    </weaveDependencies>
+                    </weaveDependencies>-->
                 </configuration>
                 <executions>
                     <execution>

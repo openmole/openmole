@@ -372,6 +372,7 @@
         <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
         <bundle.namespace>${project.artifactId}</bundle.namespace>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
+	<embed-transitive>false</embed-transitive>
     </properties>
 
     <build>
@@ -568,7 +569,7 @@
                         <Bundle-Description>${bundle.description}</Bundle-Description>
                         <Import-Package>${import.packages},org.aspectj.lang,org.aspectj.runtime.internal,org.aspectj.runtime.reflect</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>
-                        <Embed-Dependency>${embed-dep}</Embed-Dependency>
+                        <!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
                         <!--<Embed-Dependency>true</Embed-Dependency>-->
                         <!--<Embed-Transitive>true</Embed-Transitive>-->

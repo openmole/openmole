@@ -54,7 +54,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         Activator.getWorkspace().addToConfigurations(UpdateInterval, "PT2M");
     }
 
-    long updateInterval;
+    Integer updateInterval;
     IUpdatableFuture future;
     IBatchJob batchJob;
     Boolean killed = false;

@@ -23,6 +23,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import java.io.File;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ProcessDestroyer;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
@@ -101,12 +102,14 @@ public class VirtualMachineResource extends ComposedResource {
         try {
             Session session = jsch.getSession(user, virtualMachine.getHost(), 22);
             session.setPassword(password);
+            session.setConfig("StrictHostKeyChecking", "no");
             session.connect( Activator.getWorkspace().getPreferenceAsDurationInS(VirtualMachineBootTimeOut) );
             session.disconnect();
+
+            Logger.getLogger(VirtualMachineResource.class.getName()).info("VM booted");
         } catch (JSchException ex) {
             throw new InternalProcessingError(ex);
         }
-
 
         return connector.getVirtualMachine();
     }

@@ -33,6 +33,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.plugin.resource.virtual</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
