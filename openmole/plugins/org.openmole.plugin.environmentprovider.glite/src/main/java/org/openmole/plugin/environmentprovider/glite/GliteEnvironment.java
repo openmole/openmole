@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environmentprovider.glite;
 
 import org.openmole.plugin.environmentprovider.glite.internal.OverSubmissionAgent;
@@ -73,41 +72,31 @@ import org.openmole.plugin.environmentprovider.jsaga.JSAGAJobService;
 import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobService;
 import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGALaunchingScript;
 
-
 public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescription> {
 
     final static String ConfigGroup = GliteEnvironment.class.getSimpleName();
-
-    @InteractiveConfiguration(label="Certificate location")
+    @InteractiveConfiguration(label = "Certificate location")
     final static ConfigurationLocation CertificatePathLocation = new ConfigurationLocation(ConfigGroup, "CertificatePath");
-    @InteractiveConfiguration(label="Key location")
+    @InteractiveConfiguration(label = "Key location")
     final static ConfigurationLocation KeyPathLocation = new ConfigurationLocation(ConfigGroup, "KeyPath");
-    @InteractiveConfiguration(label="Key password")
+    @InteractiveConfiguration(label = "Key password")
     final static ConfigurationLocation PasswordLocation = new ConfigurationLocation(ConfigGroup, "Password", true);
-    @InteractiveConfiguration(label="Fqan")
+    @InteractiveConfiguration(label = "Fqan")
     final static ConfigurationLocation FqanLocation = new ConfigurationLocation(ConfigGroup, "Fqan");
-
     final static ConfigurationLocation TimeLocation = new ConfigurationLocation(ConfigGroup, "Time");
     final static ConfigurationLocation FetchRessourcesTimeOutLocation = new ConfigurationLocation(ConfigGroup, "FetchRessourcesTimeOut");
     final static ConfigurationLocation CACertificatesSiteLocation = new ConfigurationLocation(ConfigGroup, "CACertificatesSite");
-
     final static ConfigurationLocation OverSubmissionIntervalLocation = new ConfigurationLocation(ConfigGroup, "OverSubmissionInterval");
     final static ConfigurationLocation OverSubmissionRatioWaitingLocation = new ConfigurationLocation(ConfigGroup, "OverSubmissionRatioWaiting");
     final static ConfigurationLocation OverSubmissionRatioRunningLocation = new ConfigurationLocation(ConfigGroup, "OverSubmissionRatioRunning");
     final static ConfigurationLocation OverSubmissionMinJob = new ConfigurationLocation(ConfigGroup, "OverSubmissionMinJob");
     final static ConfigurationLocation OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation(ConfigGroup, "OverSubmissionNumberOfJobUnderMin");
-
-
     final static ConfigurationLocation OverSubmissionRatioEpsilonLocation = new ConfigurationLocation(ConfigGroup, "OverSubmissionRatioEpsilon");
-
     final static ConfigurationLocation LocalThreadsBySELocation = new ConfigurationLocation(ConfigGroup, "LocalThreadsBySE");
     final static ConfigurationLocation LocalThreadsByWMSLocation = new ConfigurationLocation(ConfigGroup, "LocalThreadsByWMS");
-
     final static ConfigurationLocation ProxyRenewalRatio = new ConfigurationLocation(ConfigGroup, "ProxyRenewalRatio");
 
-
-   // final static Integer RemoteThreadsBySE = 2;
-
+    // final static Integer RemoteThreadsBySE = 2;
     static {
         Activator.getWorkspace().addToConfigurations(CertificatePathLocation, new ConfigurationElement() {
 
@@ -136,19 +125,18 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
         Activator.getWorkspace().addToConfigurations(ProxyRenewalRatio, "0.2");
 
-       Activator.getWorkspace().addToConfigurations(OverSubmissionRatioWaitingLocation, "0.5");
+        Activator.getWorkspace().addToConfigurations(OverSubmissionRatioWaitingLocation, "0.5");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioRunningLocation, "0.2");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioEpsilonLocation, "0.01");
         Activator.getWorkspace().addToConfigurations(OverSubmissionIntervalLocation, Integer.toString(5 * 60 * 1000));
 
 
-           Activator.getWorkspace().addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
-   Activator.getWorkspace().addToConfigurations(OverSubmissionNumberOfJobUnderMin, Integer.toString(3));
+        Activator.getWorkspace().addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
+        Activator.getWorkspace().addToConfigurations(OverSubmissionNumberOfJobUnderMin, Integer.toString(3));
 
 
-    //    Activator.getUpdater().delay(new WaitingThreadInterrupter(), ExecutorType.OWN);
+        //    Activator.getUpdater().delay(new WaitingThreadInterrupter(), ExecutorType.OWN);
     }
-    
     transient WorkloadOnAverages workload;
     transient File CACertificatesDir;
     transient BDII bdii;
@@ -168,9 +156,9 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
         //Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new WorkloadOnAverages(MinimumStatistic, ResubmitRatioWating, KillRatioWaiting, ResubmitRatioRunning, KillRatioRunning, MaxNumberOfSimultaneousExecutionForAJob, this), Activator.getWorkspace().getPreferenceAsInt(MinimumNumberOfJobsLocation), Activator.getWorkspace().getPreferenceAsInt(NumberOfSimultaneousExecutionForAJobWhenUnderMinJobLocation)), ExecutorType.OWN);
-        Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio,overSubmissionEpsilonRatio), minJobs,numberOfJobUnderMin,overSubmissionInterval), ExecutorType.OWN);
+        Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin, overSubmissionInterval), ExecutorType.OWN);
 
-       // Activator.getUpdater().registerForUpdate(new WaitingThreadInterrupter(), ExecutorType.OWN);
+        // Activator.getUpdater().registerForUpdate(new WaitingThreadInterrupter(), ExecutorType.OWN);
 
     }
 
@@ -236,8 +224,8 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         String time = getTime();
         long interval;
         try {
-            interval = ((long) (UDuration.toInt(time) * Activator.getWorkspace().getPreferenceAsDouble(ProxyRenewalRatio)))  * 1000;
-          //  Logger.getLogger(GliteEnvironment.class.getName()).log(Level.INFO, "Proxy renewal interval: " + interval);
+            interval = ((long) (UDuration.toInt(time) * Activator.getWorkspace().getPreferenceAsDouble(ProxyRenewalRatio))) * 1000;
+            //  Logger.getLogger(GliteEnvironment.class.getName()).log(Level.INFO, "Proxy renewal interval: " + interval);
         } catch (ParseException ex) {
             throw new UserBadDataError(ex);
         }
@@ -258,43 +246,44 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
     public void initContext(Context ctx) throws InternalProcessingError, InterruptedException {
 
-       // Logger.getLogger(GliteEnvironment.class.getName()).log(Level.INFO, "Initializing context");
+        // Logger.getLogger(GliteEnvironment.class.getName()).log(Level.INFO, "Initializing context");
 
         try {
             //synchronized (ctx) {
-                ctx.setAttribute(Context.TYPE, "VOMS");
-                ctx.setAttribute(VOMSContext.VOMSDIR, "");
-                ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
+            ctx.setAttribute(Context.TYPE, "VOMS");
+            ctx.setAttribute(VOMSContext.VOMSDIR, "");
+            ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
-                ctx.setAttribute(Context.LIFETIME, getTime());
+            ctx.setAttribute(Context.LIFETIME, getTime());
 
-               // String proxyPath = ctx.getAttribute(Context.USERPROXY);
-               // if(proxyPath == null)
+            // String proxyPath = ctx.getAttribute(Context.USERPROXY);
+            // if(proxyPath == null)
 
-                if(proxy == null)
-                    proxy =  Activator.getWorkspace().newTmpFile("proxy", ".x509");
-                ctx.setAttribute(Context.USERPROXY,proxy.getCanonicalPath());
+            if (proxy == null) {
+                proxy = Activator.getWorkspace().newTmpFile("proxy", ".x509");
+            }
+            ctx.setAttribute(Context.USERPROXY, proxy.getCanonicalPath());
 
-                ctx.setAttribute(Context.USERCERT, getCertPath());
-                ctx.setAttribute(Context.USERKEY, getKeyPath());
+            ctx.setAttribute(Context.USERCERT, getCertPath());
+            ctx.setAttribute(Context.USERKEY, getKeyPath());
 
-                ctx.setAttribute(Context.SERVER, getVomsURL());
-                ctx.setAttribute(Context.USERVO, getVoName());
+            ctx.setAttribute(Context.SERVER, getVomsURL());
+            ctx.setAttribute(Context.USERVO, getVoName());
 
-                String fqan = getFQAN();
+            String fqan = getFQAN();
 
-                if (!fqan.isEmpty()) {
-                    ctx.setAttribute(VOMSContext.USERFQAN, fqan);
-                }
+            if (!fqan.isEmpty()) {
+                ctx.setAttribute(VOMSContext.USERFQAN, fqan);
+            }
 
-                String keyPassword = Activator.getWorkspace().getPreference(PasswordLocation);
+            String keyPassword = Activator.getWorkspace().getPreference(PasswordLocation);
 
-                ctx.setAttribute(Context.USERPASS, keyPassword);
+            ctx.setAttribute(Context.USERPASS, keyPassword);
 
-                //FIXME For testing puroposes
-                //ctx.getAttribute(Context.USERID);
+            //FIXME For testing puroposes
+            //ctx.getAttribute(Context.USERID);
 
-          //  }
+            //  }
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
         } catch (NotImplementedException e) {
@@ -361,8 +350,8 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
                         FileOutputStream os = new FileOutputStream(dest);
                         try {
-                           FastCopy.copy(tis, os);
-                          
+                            FastCopy.copy(tis, os);
+
                         } finally {
                             os.close();
                         }
@@ -384,7 +373,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
     @Override
     public Collection<IJSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
 
-        List<URI> jss =getBDII().queryWMSURIs(getVoName(), Activator.getWorkspace().getPreferenceAsInt(FetchRessourcesTimeOutLocation));
+        List<URI> jss = getBDII().queryWMSURIs(getVoName(), Activator.getWorkspace().getPreferenceAsInt(FetchRessourcesTimeOutLocation));
 
         Collection<IJSAGAJobService> jobServices = new LinkedList<IJSAGAJobService>();
 
@@ -484,17 +473,15 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
     }
 
-  /*  @Override
+    /*  @Override
     public void setConfigurationMode(EnvironmentConfiguration configuration) throws InternalProcessingError {
-        switch (configuration) {
-            case Local:
-                threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
-                break;
-            case Remote:
-                threadsBySE = RemoteThreadsBySE;
-                break;
-        }
+    switch (configuration) {
+    case Local:
+    threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
+    break;
+    case Remote:
+    threadsBySE = RemoteThreadsBySE;
+    break;
+    }
     }*/
-
-   
 }
