@@ -51,7 +51,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     final static ConfigurationLocation UpdateInterval = new ConfigurationLocation(configurationGroup, "UpdateInterval");
 
     static {
-        Activator.getWorkspace().addToConfigurations(UpdateInterval, Long.toString(2 * 60 * 1000));
+        Activator.getWorkspace().addToConfigurations(UpdateInterval, "PT2M");
     }
 
     long updateInterval;
@@ -69,7 +69,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     public BatchExecutionJob(BatchEnvironment<JS, ?> executionEnvironment, IJob job, IExecutionContext executionContext) throws InternalProcessingError {
         super(executionEnvironment, job);
-        this.updateInterval = Activator.getWorkspace().getPreferenceAsLong(UpdateInterval);
+        this.updateInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(UpdateInterval);
         this.initStorage = new CopyToEnvironment(executionEnvironment, job, executionContext);
     }
 

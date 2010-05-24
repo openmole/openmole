@@ -18,6 +18,9 @@
 package org.openmole.plugin.resource.virtual;
 
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import java.io.File;
 import java.util.HashMap;
 import org.apache.commons.exec.CommandLine;
@@ -31,6 +34,8 @@ import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.misc.caching.Cachable;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.misc.workspace.ConfigurationLocation;
+import org.openmole.plugin.resource.virtual.internal.Activator;
 import static org.openmole.misc.tools.io.Network.*;
 
 /**
@@ -39,15 +44,28 @@ import static org.openmole.misc.tools.io.Network.*;
  */
 public class VirtualMachineResource extends ComposedResource {
 
+    static ConfigurationLocation VirtualMachineBootTimeOut = new ConfigurationLocation(VirtualMachine.class.getSimpleName(), "VirtualMachineBootTimeOut");
+
+    static {
+        Activator.getWorkspace().addToConfigurations(VirtualMachineBootTimeOut, "PT5M");
+    }
+
+
     @Resource
     final FileResource emulator;
 
     @Resource
     final FileResource system;
 
-    public VirtualMachineResource(File emulator, File system) {
+    final String user;
+
+    final String password;
+
+    public VirtualMachineResource(File emulator, File system, String user, String password) {
         this.emulator = new FileResource(emulator);
         this.system = new FileResource(system);
+        this.user = user;
+        this.password = password;
     }
 
     IVirtualMachine launchAVirtualMachine() throws InternalProcessingError, UserBadDataError {
@@ -77,6 +95,18 @@ public class VirtualMachineResource extends ComposedResource {
         } catch (Exception e) {
             throw new InternalProcessingError(e);
         }
+        IVirtualMachine virtualMachine = connector.getVirtualMachine();
+        JSch jsch = new JSch();
+
+        try {
+            Session session = jsch.getSession(user, virtualMachine.getHost(), 22);
+            session.setPassword(password);
+            session.connect( Activator.getWorkspace().getPreferenceAsDurationInS(VirtualMachineBootTimeOut) );
+            session.disconnect();
+        } catch (JSchException ex) {
+            throw new InternalProcessingError(ex);
+        }
+
 
         return connector.getVirtualMachine();
     }

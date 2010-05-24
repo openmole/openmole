@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.resource.virtual;
 
-import java.util.concurrent.Future;
-
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>

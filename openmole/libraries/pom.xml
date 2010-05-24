@@ -30,6 +30,7 @@
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>
         <module>net.sourceforge.jline</module>
+	<module>org.joda.time</module>
     </modules>
 
     <!-- ************************************************************* -->

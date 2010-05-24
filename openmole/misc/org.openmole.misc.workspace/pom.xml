@@ -50,6 +50,11 @@
             <artifactId>org.openmole.misc.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.joda.time</artifactId>
+            <version>${lib.org.joda.time.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

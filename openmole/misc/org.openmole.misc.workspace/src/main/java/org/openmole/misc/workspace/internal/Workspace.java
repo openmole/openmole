@@ -15,6 +15,9 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.util.text.BasicTextEncryptor;
+import org.joda.time.DurationField;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormat;
 import org.openmole.misc.caching.Cachable;
 import org.openmole.misc.caching.ChangeState;
 import org.openmole.misc.exception.InternalProcessingError;
@@ -36,11 +39,7 @@ public class Workspace implements IWorkspace {
     Map<ConfigurationLocation, ConfigurationElement> configurations = new TreeMap<ConfigurationLocation, ConfigurationElement>();
     transient IPasswordProvider passwordProvider;
     transient long currentTime = System.currentTimeMillis();
-    /*transient TempDir tmpDir;
-    transient FileConfiguration configuration;
-    transient BasicTextEncryptor textEncryptor;
-    transient IPasswordProvider passwordProvider;
-    transient File configurationCache;*/
+
 
     Workspace(File location) throws InternalProcessingError {
         this.location = location;
@@ -321,5 +320,16 @@ public class Workspace implements IWorkspace {
         } catch (EncryptionOperationNotPossibleException e) {
             throw new UserBadDataError(e, "Wrong password");
         }
+    }
+
+
+    @Override
+    public Integer getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError {
+        return ISOPeriodFormat.standard().parsePeriod(getPreference(location)).getMillis();
+    }
+
+    @Override
+    public Integer getPreferenceAsDurationInS(ConfigurationLocation location) throws InternalProcessingError {
+        return ISOPeriodFormat.standard().parsePeriod(getPreference(location)).getSeconds();
     }
 }

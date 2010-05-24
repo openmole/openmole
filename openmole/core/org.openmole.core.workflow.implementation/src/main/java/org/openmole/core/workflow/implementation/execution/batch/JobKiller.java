@@ -17,13 +17,11 @@
 
 package org.openmole.core.workflow.implementation.execution.batch;
 
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IBatchJob;
 
 public class JobKiller implements Runnable {

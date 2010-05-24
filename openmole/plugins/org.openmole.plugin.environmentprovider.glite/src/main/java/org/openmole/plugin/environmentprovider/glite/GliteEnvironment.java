@@ -115,7 +115,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         });
 
         Activator.getWorkspace().addToConfigurations(TimeLocation, "PT24H");
-        Activator.getWorkspace().addToConfigurations(FetchRessourcesTimeOutLocation, Integer.toString(2 * 60 * 1000));
+        Activator.getWorkspace().addToConfigurations(FetchRessourcesTimeOutLocation, "PT2M");
         Activator.getWorkspace().addToConfigurations(CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/");
         Activator.getWorkspace().addToConfigurations(FqanLocation, "");
 
@@ -128,7 +128,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioWaitingLocation, "0.5");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioRunningLocation, "0.2");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioEpsilonLocation, "0.01");
-        Activator.getWorkspace().addToConfigurations(OverSubmissionIntervalLocation, Integer.toString(5 * 60 * 1000));
+        Activator.getWorkspace().addToConfigurations(OverSubmissionIntervalLocation, "PT5M");
 
 
         Activator.getWorkspace().addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
@@ -152,7 +152,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         Double overSubmissionWaitingRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioWaitingLocation);
         Double overSubmissionRunningRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioRunningLocation);
         Double overSubmissionEpsilonRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioEpsilonLocation);
-        Long overSubmissionInterval = Activator.getWorkspace().getPreferenceAsLong(OverSubmissionIntervalLocation);
+        Integer overSubmissionInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(OverSubmissionIntervalLocation);
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
         //Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new WorkloadOnAverages(MinimumStatistic, ResubmitRatioWating, KillRatioWaiting, ResubmitRatioRunning, KillRatioRunning, MaxNumberOfSimultaneousExecutionForAJob, this), Activator.getWorkspace().getPreferenceAsInt(MinimumNumberOfJobsLocation), Activator.getWorkspace().getPreferenceAsInt(NumberOfSimultaneousExecutionForAJobWhenUnderMinJobLocation)), ExecutorType.OWN);
@@ -373,7 +373,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
     @Override
     public Collection<IJSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
 
-        List<URI> jss = getBDII().queryWMSURIs(getVoName(), Activator.getWorkspace().getPreferenceAsInt(FetchRessourcesTimeOutLocation));
+        List<URI> jss = getBDII().queryWMSURIs(getVoName(), Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation));
 
         Collection<IJSAGAJobService> jobServices = new LinkedList<IJSAGAJobService>();
 

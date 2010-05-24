@@ -16,6 +16,8 @@
  */
 package org.openmole.plugin.resource.virtual.internal;
 
+import org.ogf.saga.context.Context;
+import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -29,6 +31,7 @@ public class Activator implements BundleActivator {
 
     static BundleContext context;
     private static IWorkspace workspace;
+    private static IJSagaSessionService jSagaSessionService;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -46,6 +49,20 @@ public class Activator implements BundleActivator {
             workspace = (IWorkspace) getContext().getService(ref);
         }
         return workspace;
+    }
+
+    public static IJSagaSessionService getJSagaSessionService() {
+        if (jSagaSessionService != null) {
+            return jSagaSessionService;
+        }
+
+        synchronized (Activator.class) {
+            if (jSagaSessionService == null) {
+                ServiceReference ref = getContext().getServiceReference(IJSagaSessionService.class.getName());
+                jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
+            }
+            return jSagaSessionService;
+        }
     }
 
     private static BundleContext getContext() {
