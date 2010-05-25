@@ -49,11 +49,11 @@
                 <artifactId>com.springsource.org.apache.commons.pool</artifactId>
                 <version>1.4.0</version>
             </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.logging</artifactId>
-            <version>1.1.1</version>
-        </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>com.springsource.org.apache.commons.logging</artifactId>
+                <version>1.1.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.log4j</groupId>
                 <artifactId>com.springsource.org.apache.log4j</artifactId>
@@ -299,7 +299,7 @@
                 <artifactId>scala-library</artifactId>
                 <version>${lib.org.scala-lang.scala.version}</version>
             </dependency>
-	    <dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-exec</artifactId>
                 <version>${lib.org.apache.commons.exec.version}</version>
@@ -362,9 +362,9 @@
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
         <lib.org.scala-lang.scala.version>2.8.0.RC2</lib.org.scala-lang.scala.version>
-	<lib.org.objenesis.version>1.0.0</lib.org.objenesis.version>
-	<lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
-	<lib.org.joda.time.version>1.6</lib.org.joda.time.version>
+        <lib.org.objenesis.version>1.0.0</lib.org.objenesis.version>
+        <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
+        <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
@@ -372,7 +372,7 @@
         <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
         <bundle.namespace>${project.artifactId}</bundle.namespace>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
-	<embed-transitive>false</embed-transitive>
+        <embed-transitive>false</embed-transitive>
     </properties>
 
     <build>

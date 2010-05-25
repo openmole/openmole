@@ -16,10 +16,6 @@
     <artifactId>plugins</artifactId>
 
     <modules>
-        <module>au.com.bytecode.opencsv</module>
-        <module>org.jfree.jfreechart</module>
-	<module>org.scala-lang.scala</module>
-	<module>org.apache.commons.exec</module>
         <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>
         <module>org.openmole.plugin.environmentprovider.jsaga</module>
@@ -49,7 +45,6 @@
         <module>org.openmole.plugin.plan.combine</module>
         <module>org.openmole.plugin.plan.filtredplan</module>
         <module>org.openmole.plugin.executionprofiler.csvprofiler</module>
-        <!--<module>org.openmole.plugin.jars</module>-->
     </modules>
 
     <!-- ************************************************************* -->

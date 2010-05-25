@@ -8,50 +8,37 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>plugins</artifactId>
+        <artifactId>libraries</artifactId>
         <groupId>org.openmole</groupId>
         <version>0.3</version>
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
-    <artifactId>org.scala-lang.scala</artifactId>
-    <version>${lib.org.scala-lang.scala.version}</version>
-
-    <dependencies>
-	<dependency>
-    	   <groupId>org.scala-lang</groupId>
-    	   <artifactId>scala-library</artifactId>
-	   <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <artifactId>org.jfree.jfreechart</artifactId>
+    <version>${lib.org.jfree.jfreechart.version}</version>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
-    <name>${project.artifactId}</name>
+    <name>${project.artifactId} ${project.version}</name>
+    <description></description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
-
-
-    <properties>
-        <!-- Default properties for bundles creation -->
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
-        <import.packages>*;resolution:=optional</import.packages>
-	<export.packages>*</export.packages>
-        <bundle.name>${pom.name}</bundle.name>
-        <bundle.description>${pom.name}</bundle.description>
-        <bundle.classpath>.</bundle.classpath>
-    </properties>
-
-    <!--optional. Use this property to tune the exported packages-->
-<!--    <properties>
-        <eclipse.buddypolicy>global</eclipse.buddypolicy>
-    </properties>-->
+    <dependencies>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jcommon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
+

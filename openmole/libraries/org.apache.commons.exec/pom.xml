@@ -8,14 +8,14 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>plugins</artifactId>
         <groupId>org.openmole</groupId>
+        <artifactId>libraries</artifactId>
         <version>0.3</version>
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
-    <artifactId>org.jfree.jfreechart</artifactId>
-    <version>${lib.org.jfree.jfreechart.version}</version>
+    <artifactId>org.apache.commons.exec</artifactId>
+    <version>${lib.org.apache.commons.exec.version}</version>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
@@ -31,22 +31,10 @@
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
-            <groupId>jfree</groupId>
-            <artifactId>jcommon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jfree</groupId>
-            <artifactId>jfreechart</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
         </dependency>
     </dependencies>
-    <properties>
-        <bundle.namespace>${project.artifactId}</bundle.namespace>
-        <import.packages>*;resolution:=optional</import.packages>
-        <export.packages>*;version="${pom.version}"</export.packages>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
-    </properties>
 
 </project>
 

@@ -16,21 +16,25 @@
     <artifactId>libraries</artifactId>
 
     <modules>
+        <module>au.com.bytecode.opencsv</module>
         <module>com.db4o</module>
+        <module>com.ibm.icu</module>
         <module>com.ice.tar</module>
         <module>com.jcraft.jsch</module>
-        <module>uk.com.robust-it.cloning</module>
-	<module>org.apache.ant</module>
-        <module>fr.in2p3.jsaga</module>
         <module>com.thoughtworks.xstream</module>
+        <module>fr.in2p3.jsaga</module>
+        <module>net.sourceforge.jline</module>
         <module>org.codehaus.groovy</module>
+        <module>org.apache.ant</module>
         <module>org.apache.commons.collections15</module>
         <module>org.apache.commons.compress</module>
-        <module>org.nuiton.j2r</module>
+        <module>org.apache.commons.exec</module>
         <module>org.gnu.crypto</module>
-        <module>com.ibm.icu</module>
-        <module>net.sourceforge.jline</module>
-	<module>org.joda.time</module>
+        <module>org.joda.time</module>
+        <module>org.jfree.jfreechart</module>
+        <module>org.nuiton.j2r</module>
+        <module>org.scala-lang.scala</module>
+        <module>uk.com.robust-it.cloning</module>
     </modules>
 
     <!-- ************************************************************* -->
@@ -49,11 +53,11 @@
     <properties>
         <!-- Default properties for bundles creation -->
         <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
+        <embed-transitive>false</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
         <bundle.name>${pom.name}</bundle.name>
         <bundle.description>${pom.name}</bundle.description>
-	<bundle.classpath>.</bundle.classpath>
+        <bundle.classpath>.</bundle.classpath>
     </properties>
 
     <build>
@@ -77,8 +81,8 @@
                         <Require-Bundle>${require.bundle}</Require-Bundle>
                         <_exportcontents>${export.packages}</_exportcontents>
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
-			<Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
-		    </instructions>
+                        <Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
