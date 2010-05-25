@@ -37,21 +37,4 @@
 
     <packaging>bundle</packaging>
 
-
-    <properties>
-        <!-- Default properties for bundles creation -->
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
-        <import.packages>*;resolution:=optional</import.packages>
-	<export.packages>*</export.packages>
-        <bundle.name>${pom.name}</bundle.name>
-        <bundle.description>${pom.name}</bundle.description>
-        <bundle.classpath>.</bundle.classpath>
-    </properties>
-
-    <!--optional. Use this property to tune the exported packages-->
-<!--    <properties>
-        <eclipse.buddypolicy>global</eclipse.buddypolicy>
-    </properties>-->
-
 </project>
