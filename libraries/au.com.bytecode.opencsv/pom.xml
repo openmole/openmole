@@ -35,6 +35,9 @@
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
+    <properties>
+        <excludeDependencies>org.openmole:org.openmole.misc.eventdispatcher</excludeDependencies>
+    </properties>
 
     <packaging>bundle</packaging>
 

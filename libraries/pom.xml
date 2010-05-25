@@ -8,8 +8,8 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole</artifactId>
         <groupId>org.openmole</groupId>
+        <artifactId>openmole-ecosystem</artifactId>
         <version>0.3</version>
     </parent>
 
@@ -17,7 +17,7 @@
 
     <modules>
         <module>au.com.bytecode.opencsv</module>
-        <module>com.db4o</module>
+        <!--module>com.db4o</module>
         <module>com.ibm.icu</module>
         <module>com.ice.tar</module>
         <module>com.jcraft.jsch</module>
@@ -34,7 +34,7 @@
         <module>org.jfree.jfreechart</module>
         <module>org.nuiton.j2r</module>
         <module>org.scala-lang.scala</module>
-        <module>uk.com.robust-it.cloning</module>
+        <module>uk.com.robust-it.cloning</module-->
     </modules>
 
     <!-- ************************************************************* -->
@@ -77,6 +77,7 @@
                         <Export-Package>*,${export.packages}</Export-Package>
                         <Include-Resource>${include.resources}</Include-Resource>
                         <Embed-Dependency>${embed-dep}</Embed-Dependency>
+                        <excludeDependencies>${excludeDependencies}</excludeDependencies>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
                         <Require-Bundle>${require.bundle}</Require-Bundle>
                         <_exportcontents>${export.packages}</_exportcontents>
