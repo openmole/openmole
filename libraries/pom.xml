@@ -17,7 +17,7 @@
 
     <modules>
         <module>au.com.bytecode.opencsv</module>
-        <!--module>com.db4o</module>
+        <module>com.db4o</module>
         <module>com.ibm.icu</module>
         <module>com.ice.tar</module>
         <module>com.jcraft.jsch</module>
@@ -34,7 +34,7 @@
         <module>org.jfree.jfreechart</module>
         <module>org.nuiton.j2r</module>
         <module>org.scala-lang.scala</module>
-        <module>uk.com.robust-it.cloning</module-->
+        <module>uk.com.robust-it.cloning</module>
     </modules>
 
     <!-- ************************************************************* -->
