@@ -21,44 +21,45 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.ArrayList;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.implementation.Preferences;
-import org.openmole.ui.workflow.implementation.TaskCapsuleModelUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleNode extends AbstractNode{
+public class PrototypeNode extends AbstractNode {
 
     private DataFlavor dataFlavor;
+    private Class prototypeClass;
 
-    public TaskCapsuleNode(DataFlavor key) {
+    public PrototypeNode(DataFlavor key,
+                         Class prototypeClass) {
         super(Children.LEAF, Lookups.fixed(new Object[]{key}));
         this.dataFlavor = key;
-
-        setIconBaseWithExtension(Preferences.getInstance().getModelSettings(TaskCapsuleModelUI.class).getThumbImagePath());
+        this.prototypeClass = prototypeClass;
+        String[] name = prototypeClass.getName().split("\\.");
+        setName(name[name.length-1]);
+      //  setIconBaseWithExtension(Preferences.getInstance().getModelSettings(Preferences.getInstance().getModelClass(coreTask)).getThumbImagePath());
     }
-
-
 
      //DND start
     @Override
     public Transferable drag() throws IOException {
+        System.out.println("+++++++ drag");
         ExTransferable retValue = ExTransferable.create( super.drag() );
         //add the 'data' into the Transferable
-        retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR) {
+        retValue.put( new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) {
             @Override
-            protected Object getData() throws IOException, UnsupportedFlavorException {
-                return TaskCapsuleModelUI.class;
-            }
+            protected Object getData() throws IOException, UnsupportedFlavorException
+            {return prototypeClass;}
+
         });
         return retValue;
     }
     //DND end
 }
-

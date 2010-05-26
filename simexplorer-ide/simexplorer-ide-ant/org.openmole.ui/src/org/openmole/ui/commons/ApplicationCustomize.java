@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.lang.Class;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
@@ -100,6 +101,7 @@ public class ApplicationCustomize {
     public static final int NB_MAX_SLOTS = 5;
 
    // public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTaskModelUI.class, "Tasks" );
+    public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );
 

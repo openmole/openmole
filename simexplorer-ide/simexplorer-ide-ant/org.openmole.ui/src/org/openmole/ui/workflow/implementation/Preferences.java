@@ -18,7 +18,13 @@ package org.openmole.ui.workflow.implementation;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
@@ -29,6 +35,7 @@ import org.openmole.core.workflow.implementation.task.ExplorationTask;
 import org.openmole.plugin.task.groovytask.GroovyTask;
 import org.openmole.core.workflow.methods.task.JavaTask;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.misc.tools.service.HierarchicalRegistry;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
 
@@ -50,10 +57,25 @@ public class Preferences {
                                                             app.getColor(ApplicationCustomize.TASK_CAPSULE_BORDER_COLOR),
                                                             "Task capsules");
 
+    private Collection<Class> prototypes= new ArrayList<Class>();
+
     public void initialize() {
        // setBusinessModelMap();
         //setModelSettings();
         setCapsuleMapping();
+    }
+
+    private void setPrototypes(){
+        prototypes.add(BigInteger.class);
+        prototypes.add(BigDecimal.class);
+        prototypes.add(File.class);
+    }
+
+    public Collection getPrototypes(){
+        if (prototypes.isEmpty()){
+            setPrototypes();
+        }
+        return prototypes;
     }
 
     private void setCapsuleMapping() {

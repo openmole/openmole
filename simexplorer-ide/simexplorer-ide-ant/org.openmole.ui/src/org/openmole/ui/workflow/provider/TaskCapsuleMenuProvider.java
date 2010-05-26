@@ -51,7 +51,8 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider{
 
       Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
         for (Class c :Preferences.getInstance().getBusinessClasses()){
-            JMenuItem it = new JMenuItem(c.toString());
+            String[] name = c.getName().split("\\.");
+            JMenuItem it = new JMenuItem(name[name.length-1]);
             it.addActionListener(new AddTaskAction(scene,
                                                    capsuleView,
                                                    //Preferences.getInstance().getModelClass(c)));

@@ -16,29 +16,28 @@
  */
 package org.openmole.ui.palette;
 
-import org.openide.nodes.Children;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.openide.nodes.Node;
+import org.openmole.ui.commons.ApplicationCustomize;
+import org.openmole.ui.workflow.implementation.Preferences;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class CategoryBuilder extends Children.Keys {
-
-    private ICategory[] categories = new ICategory[]{new TaskCapsuleCategory(),new TaskCategory(), new PrototypeCategory()};
-
-    public CategoryBuilder() {
-    }
+public class PrototypeChildren extends GenericChildren {
 
     @Override
-    protected Node[] createNodes(Object key) {
-        ICategory obj = (ICategory) key;
-        return new Node[]{new CategoryNode(obj)};
-    }
+    protected List<Node> initCollection() {
+        Collection<Class> protos = Preferences.getInstance().getPrototypes();
 
-    @Override
-    protected void addNotify() {
-        super.addNotify();
-        setKeys(categories);
+        ArrayList childrenNodes = new ArrayList(protos.size());
+        for (Class proto : protos) {
+            childrenNodes.add(new PrototypeNode(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR,
+                                                proto));
+        }
+        return childrenNodes;
     }
 }

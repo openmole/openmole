@@ -16,11 +16,13 @@
  */
 package org.openmole.ui.workflow.implementation;
 
+import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.openmole.ui.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.workflow.model.IObjectModelUI;
 import org.openmole.ui.workflow.model.ITaskViewUI;
+import org.openmole.ui.workflow.provider.DnDAddPrototypeProvider;
 
 /**
  *

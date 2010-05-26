@@ -14,31 +14,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ui.palette;
 
-import org.openide.nodes.Children;
-import org.openide.nodes.Node;
+package org.openmole.ui.palette;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class CategoryBuilder extends Children.Keys {
+public class PrototypeCategory implements ICategory{
 
-    private ICategory[] categories = new ICategory[]{new TaskCapsuleCategory(),new TaskCategory(), new PrototypeCategory()};
+    private final static String name = "Prototypes";
 
-    public CategoryBuilder() {
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
-    protected Node[] createNodes(Object key) {
-        ICategory obj = (ICategory) key;
-        return new Node[]{new CategoryNode(obj)};
+    public GenericChildren getChildren() {
+        return new PrototypeChildren();
     }
 
-    @Override
-    protected void addNotify() {
-        super.addNotify();
-        setKeys(categories);
-    }
 }

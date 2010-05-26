@@ -24,45 +24,49 @@ import java.io.IOException;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
 import org.openide.util.Exceptions;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
+import org.openmole.ui.workflow.implementation.TaskCapsuleModelUI;
 import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
-import org.openmole.ui.workflow.implementation.UIFactory;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class DnDNewTaskProvider extends DnDProvider{
-    private TaskCapsuleViewUI capsuleView;
+public class DnDAddPrototypeProvider extends DnDProvider{
+    private boolean encapsulated = false;
+    private TaskCapsuleViewUI view;
 
-    public DnDNewTaskProvider(MoleScene molescene,
-                              TaskCapsuleViewUI cv) {
+    public DnDAddPrototypeProvider(MoleScene molescene,
+                                   TaskCapsuleViewUI view) {
         super(molescene);
-        this.capsuleView = cv;
+        this.view = view;
+    }
+
+    public void setEncapsulated(boolean encapsulated) {
+        this.encapsulated = encapsulated;
     }
 
     @Override
     public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
         ConnectorState state = ConnectorState.REJECT;
-        if (transferable.isDataFlavorSupported(ApplicationCustomize.TASK_DATA_FLAVOR))
+        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)&&
+            encapsulated == true)
             state = ConnectorState.ACCEPT;
         return state;
     }
 
-@Override
-    public void accept(Widget widget, Point point, Transferable transferable) {
+    @Override
+    public void accept(Widget widget, Point point, Transferable t) {
         try {
-            capsuleView.encapsule((Class<? extends IGenericTask>) transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR));
+            System.out.println("Add " + t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR));
+            System.out.println("Widget "+ (view.getTaskModel()));
         } catch (UnsupportedFlavorException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-           
-        scene.repaint();
-        scene.revalidate();
     }
+
 }

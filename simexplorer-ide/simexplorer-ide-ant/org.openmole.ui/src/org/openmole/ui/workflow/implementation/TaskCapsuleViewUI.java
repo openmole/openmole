@@ -32,6 +32,7 @@ import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;
 import org.openmole.ui.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.workflow.provider.DnDAddPrototypeProvider;
 import org.openmole.ui.workflow.provider.DnDNewTaskProvider;
 
 /**
@@ -43,6 +44,7 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
     private IGenericTaskModelUI<IGenericTask> taskModel = null;
     protected MyConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
+    private DnDAddPrototypeProvider dnDAddPrototypeProvider;
 
     public TaskCapsuleViewUI(MoleScene scene,
             ICapsuleModelUI tcm) {
@@ -64,9 +66,16 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         addInputSlot();
         addOutputSlot();
 
+        dnDAddPrototypeProvider = new DnDAddPrototypeProvider(scene, this);
+
         getActions().addAction(ActionFactory.createPopupMenuAction(new TaskCapsuleMenuProvider(scene, this)));
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(scene, this)));
+        getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider));
 
+    }
+
+    public IGenericTaskModelUI<IGenericTask> getTaskModel() {
+        return taskModel;
     }
 
     public void encapsule(Class<? extends IGenericTask> coreTaskClass) {
@@ -78,6 +87,7 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         connectableWidget.setBorderCol(sets.getDefaultBorderColor());
         connectableWidget.setBackgroundImaqe(sets.getDefaultBackgroundImage());
 
+        dnDAddPrototypeProvider.setEncapsulated(true);
 
         scene.getManager().incrementNodeName();
         connectableWidget.addTitle(scene.getManager().getNodeName());

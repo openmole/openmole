@@ -34,7 +34,6 @@ public class TaskChildren extends GenericChildren{
 
         ArrayList childrenNodes = new ArrayList(businessClasses.size());
         for (Class bclass : businessClasses) {
-           // childrenNodes.add(new TaskNode(new DataFlavor(bclass, "Task"),
             childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,
                                            bclass));
 
