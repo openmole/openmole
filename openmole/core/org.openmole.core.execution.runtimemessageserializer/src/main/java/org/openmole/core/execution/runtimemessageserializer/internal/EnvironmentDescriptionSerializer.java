@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
 
 import com.thoughtworks.xstream.XStream;

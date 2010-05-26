@@ -21,8 +21,8 @@ import java.io.File;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.resource.ILocalFileCache;
 import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

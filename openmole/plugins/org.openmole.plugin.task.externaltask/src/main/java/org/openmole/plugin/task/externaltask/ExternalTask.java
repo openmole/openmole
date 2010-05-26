@@ -25,17 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.implementation.resource.FileSetResource;
 import org.openmole.core.workflow.implementation.task.Task;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.tools.io.FastCopy;
-import org.openmole.misc.tools.structure.Duo;
+import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.misc.tools.io.IFileOperation;
+import org.openmole.commons.tools.io.IFileOperation;
 
 import static org.openmole.core.workflow.implementation.tools.VariableExpansion.*;
 

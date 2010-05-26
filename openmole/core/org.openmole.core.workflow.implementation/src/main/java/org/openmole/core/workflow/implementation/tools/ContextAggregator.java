@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.implementation.data.Variable;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.data.IVariable;

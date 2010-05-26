@@ -18,7 +18,7 @@ package org.openmole.core.workflow.implementation.execution.local;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openmole.misc.exception.ExecutionException;
+import org.openmole.commons.exception.ExecutionException;
 
 
 import org.openmole.core.workflow.model.execution.ExecutionState;
@@ -28,7 +28,7 @@ import org.openmole.core.workflow.model.job.IJob;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.task.IMoleTask;
-import org.openmole.misc.tools.structure.Trio;
+import org.openmole.commons.tools.structure.Trio;
 
 public class LocalExecuter implements Runnable {
 

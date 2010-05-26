@@ -19,8 +19,8 @@ package org.openmole.core.workflow.model.transition;
 import java.util.Collection;
 import java.util.Set;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.mole.IMoleExecution;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;

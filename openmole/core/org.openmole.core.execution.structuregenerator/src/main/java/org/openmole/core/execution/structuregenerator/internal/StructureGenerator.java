@@ -20,7 +20,7 @@
 package org.openmole.core.execution.structuregenerator.internal;
 
 import org.osgi.framework.Bundle;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 
 import java.io.BufferedWriter;
@@ -43,7 +43,7 @@ import org.openmole.core.execution.structuregenerator.PrototypeNode;
 import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.core.execution.structuregenerator.SequenceNode;
 import org.openmole.core.execution.structuregenerator.StructureNode;
-import org.openmole.misc.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FastCopy;
 
 public class StructureGenerator implements IStructureGenerator {
 

@@ -20,7 +20,7 @@
 package org.simexplorer.ui.ide.is;
 
 import fr.cemagref.simexplorer.is.entities.metadata.MetaData;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 
 public interface ExplorationApplicationSaver {

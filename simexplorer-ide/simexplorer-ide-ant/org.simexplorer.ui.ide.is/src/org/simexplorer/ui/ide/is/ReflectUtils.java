@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.openide.util.Exceptions;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public class ReflectUtils {
 

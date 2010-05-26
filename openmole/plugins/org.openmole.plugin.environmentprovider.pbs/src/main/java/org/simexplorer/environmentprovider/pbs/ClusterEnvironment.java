@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.geclipse.GEclipseExecutionEnvironment;
 import org.openmole.geclipse.GEclipseLimitedAccessJobService;
 import org.openmole.geclipse.GEclipseURIStorage;

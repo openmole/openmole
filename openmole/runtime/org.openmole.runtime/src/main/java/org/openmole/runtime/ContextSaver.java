@@ -21,12 +21,12 @@ import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import org.openmole.misc.eventdispatcher.IObjectChangedSynchronousListener;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
 import org.openmole.core.workflow.implementation.tools.FileMigrator;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.tools.structure.Duo;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.workflow.model.job.IMoleJobId;
 import org.openmole.core.workflow.model.job.State;
 

@@ -3,8 +3,8 @@ package org.openmole.misc.workspace;
 import java.io.File;
 import java.io.IOException;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public interface IWorkspace {
 	static final String ConfigurationFile = ".preferences";

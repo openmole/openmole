@@ -25,12 +25,12 @@
     <dependencies>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
             <version>0.3</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.caching</artifactId>
+            <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>0.3</version>
         </dependency>
     </dependencies>
@@ -47,21 +47,21 @@
                     <aspectLibrarys>
                         <aspectLibrary>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+                            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
                         </aspectLibrary>
                         <aspectLibrary>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.misc.caching</artifactId>
+                            <artifactId>org.openmole.commons.aspect.caching</artifactId>
                         </aspectLibrary>
                     </aspectLibrarys>
                     <!--<weaveDependencies>
                         <weaveDependency>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+                            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
                         </weaveDependency>
                         <weaveDependency>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.misc.caching</artifactId>
+                            <artifactId>org.openmole.commons.aspect.caching</artifactId>
                         </weaveDependency>
                     </weaveDependencies>-->
                 </configuration>

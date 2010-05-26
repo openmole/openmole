@@ -2,8 +2,8 @@ package org.simexplorer.ui.ide.workflow.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.execution.structuregenerator.IStructureGenerator;
 import org.openmole.core.workflow.implementation.task.ExplorationTask;
 import org.openmole.core.workflow.methods.task.ModelStructuresGenerationTask;

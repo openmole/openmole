@@ -19,14 +19,14 @@ package org.openmole.core.workflow.implementation.execution.batch;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.execution.ExecutionState;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IBatchJob;
 import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public abstract class BatchJob implements IBatchJob {
 

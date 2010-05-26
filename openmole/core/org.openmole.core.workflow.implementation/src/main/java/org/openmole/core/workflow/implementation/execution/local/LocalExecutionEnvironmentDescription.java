@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.implementation.execution.local;
 
 import org.openmole.core.workflow.implementation.execution.EnvironmentDescription;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 
 public class LocalExecutionEnvironmentDescription extends  EnvironmentDescription<LocalExecutionEnvironment>{

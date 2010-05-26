@@ -22,7 +22,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.workspace.IWorkspace;
 

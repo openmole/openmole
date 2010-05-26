@@ -26,8 +26,8 @@ import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.PermissionDeniedException;
 import org.ogf.saga.error.TimeoutException;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.plugin.environmentprovider.glite.GliteEnvironment;
 

@@ -21,7 +21,7 @@ package org.simexplorer.ui.ide.is.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.util.Exceptions;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ui.ide.is.InformationSystem;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 

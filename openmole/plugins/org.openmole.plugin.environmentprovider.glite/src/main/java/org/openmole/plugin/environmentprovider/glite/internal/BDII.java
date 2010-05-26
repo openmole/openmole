@@ -32,7 +32,7 @@ import javax.naming.NamingException;
 
 import javax.naming.directory.SearchResult;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public class BDII {
 

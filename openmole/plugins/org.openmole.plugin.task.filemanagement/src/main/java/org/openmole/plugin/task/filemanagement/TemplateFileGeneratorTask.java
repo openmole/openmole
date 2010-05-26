@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import org.openmole.core.workflow.implementation.data.Data;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.caching.ChangeState;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.core.workflow.implementation.task.Task;
 
 import org.openmole.core.workflow.model.data.IData;

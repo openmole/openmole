@@ -38,22 +38,22 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.exception</artifactId>
+            <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.tools</artifactId>
+            <artifactId>org.openmole.commons.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.caching</artifactId>
+            <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -121,6 +121,12 @@
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>${lib.uk.com.robust-it.cloning.version}</version>
 	    <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.joda.time</artifactId>
+            <version>${lib.org.joda.time.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

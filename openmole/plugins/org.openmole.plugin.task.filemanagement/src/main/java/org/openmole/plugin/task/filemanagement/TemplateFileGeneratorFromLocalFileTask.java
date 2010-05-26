@@ -6,9 +6,9 @@
 package org.openmole.plugin.task.filemanagement;
 
 import java.io.File;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.caching.ChangeState;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.core.workflow.implementation.resource.FileResource;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.task.annotations.Resource;

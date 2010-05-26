@@ -6,7 +6,7 @@
 package org.openmole.plugin.plan.csvplan;
 
 import java.io.File;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

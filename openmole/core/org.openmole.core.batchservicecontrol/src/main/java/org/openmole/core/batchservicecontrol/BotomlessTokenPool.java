@@ -21,7 +21,7 @@ package org.openmole.core.batchservicecontrol;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IAccessTokenPool;
 

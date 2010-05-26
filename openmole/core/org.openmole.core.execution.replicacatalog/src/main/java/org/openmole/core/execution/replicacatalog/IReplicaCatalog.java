@@ -20,9 +20,9 @@ package org.openmole.core.execution.replicacatalog;
 
 import java.io.File;
 import java.io.IOException;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.workflow.model.execution.IEnvironment;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IBatchStorage;

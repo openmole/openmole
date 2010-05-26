@@ -31,7 +31,7 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.ExportedPackage;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.pluginmanager.IPluginManager;
 
 public class PluginManager implements IPluginManager {

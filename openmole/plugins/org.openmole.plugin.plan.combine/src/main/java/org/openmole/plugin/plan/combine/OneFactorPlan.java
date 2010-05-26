@@ -24,8 +24,8 @@ import org.openmole.core.workflow.model.plan.IFactor;
 import org.openmole.core.workflow.model.plan.IFactorValues;
 import org.openmole.core.workflow.model.plan.IPlan;
 import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

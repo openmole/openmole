@@ -24,8 +24,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.transition.ITransition;
@@ -33,7 +34,6 @@ import org.openmole.core.workflow.model.transition.ITransitionSlot;
 import org.openmole.core.workflow.model.job.IMoleJobId;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.model.job.ITicket;
-import org.openmole.misc.tools.pattern.Priority;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.implementation.mole.ExecutionInfoRegistry;
 import org.openmole.core.workflow.implementation.transition.MultiOut;
@@ -43,7 +43,7 @@ import org.openmole.core.workflow.model.data.IDataChannel;
 import org.openmole.core.workflow.model.job.State;
 import org.openmole.core.workflow.model.mole.IMoleExecution;
 import org.openmole.core.workflow.model.mole.ISubMoleExecution;
-import org.openmole.misc.eventdispatcher.IObjectChangedSynchronousListener;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
 import static org.openmole.core.workflow.implementation.tools.ToCloneFinder.getVariablesToClone;
 

@@ -20,8 +20,8 @@ package org.openmole.plugin.task.systemexectask;
 import java.io.File;
 import java.io.IOException;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 

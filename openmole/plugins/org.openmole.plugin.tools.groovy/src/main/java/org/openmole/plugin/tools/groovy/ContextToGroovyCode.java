@@ -32,15 +32,15 @@ import org.openmole.core.workflow.implementation.execution.Progress;
 import org.openmole.core.workflow.model.data.IData;
 import org.openmole.core.workflow.model.data.IPrototype;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.tools.groovy.GroovyProxyPool;
-import org.openmole.misc.tools.groovy.IGroovyProxy;
-import org.openmole.misc.caching.Cachable;
-import org.openmole.misc.caching.ChangeState;
-import org.openmole.misc.caching.SoftCachable;
+import org.openmole.commons.tools.groovy.GroovyProxyPool;
+import org.openmole.commons.tools.groovy.IGroovyProxy;
+import org.openmole.commons.aspect.caching.Cachable;
+import org.openmole.commons.aspect.caching.ChangeState;
+import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.workflow.model.data.IVariable;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.plugin.tools.code.FileSourceCode;

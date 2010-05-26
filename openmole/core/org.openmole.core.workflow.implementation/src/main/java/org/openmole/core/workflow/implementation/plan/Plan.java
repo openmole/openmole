@@ -26,8 +26,8 @@ import java.util.List;
 import org.openmole.core.workflow.model.plan.IFactor;
 import org.openmole.core.workflow.model.resource.IResource;
 import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 import static org.openmole.core.workflow.implementation.tools.MarkedFieldFinder.*;
 

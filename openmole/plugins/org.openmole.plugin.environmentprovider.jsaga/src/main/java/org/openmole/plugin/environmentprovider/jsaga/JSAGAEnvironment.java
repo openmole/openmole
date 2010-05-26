@@ -18,7 +18,7 @@
 package org.openmole.plugin.environmentprovider.jsaga;
 
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.implementation.execution.batch.BatchEnvironment;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.misc.workspace.ConfigurationLocation;

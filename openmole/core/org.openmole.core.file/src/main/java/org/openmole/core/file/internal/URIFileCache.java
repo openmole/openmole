@@ -17,11 +17,11 @@
 
 package org.openmole.core.file.internal;
 
-import org.openmole.misc.tools.filecache.IFileCache;
+import org.openmole.commons.tools.filecache.IFileCache;
 import java.io.IOException;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.tools.cache.AssociativeCache;
-import org.openmole.misc.tools.cache.ICachable;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.tools.cache.AssociativeCache;
+import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 

@@ -25,7 +25,7 @@ import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.ta.Activatable;
 import java.io.File;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.execution.replicacatalog.IReplica;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;

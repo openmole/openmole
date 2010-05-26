@@ -19,8 +19,8 @@ package org.openmole.misc.hashservice;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import org.openmole.misc.exception.FatalError;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.exception.FatalError;
+import org.openmole.commons.tools.io.IHash;
 
 
 //Should stay in the public part for serialization purposes

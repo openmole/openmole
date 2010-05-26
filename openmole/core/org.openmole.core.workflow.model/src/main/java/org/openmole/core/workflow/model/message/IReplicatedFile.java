@@ -20,7 +20,7 @@ package org.openmole.core.workflow.model.message;
 import java.io.File;
 
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.io.IHash;
 
 public interface IReplicatedFile  {
 	File getSrc();

@@ -19,13 +19,13 @@ package org.openmole.core.workflow.implementation.task;
 
 import java.util.Collection;
 import java.util.HashSet;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.resource.ILocalFileCache;
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.exception.MultipleException;
-import org.openmole.misc.caching.SoftCachable;
+import org.openmole.commons.exception.MultipleException;
+import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.workflow.implementation.job.Context;
 import org.openmole.core.workflow.implementation.mole.MoleExecution;
 import org.openmole.core.workflow.model.data.IData;

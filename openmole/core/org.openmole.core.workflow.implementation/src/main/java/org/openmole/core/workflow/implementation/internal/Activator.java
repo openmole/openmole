@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.misc.clonning.IClonningService;
-import org.openmole.misc.eventdispatcher.IEventDispatcher;
+import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.commons.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;

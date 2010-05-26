@@ -17,9 +17,9 @@
 
 package org.openmole.core.workflow.implementation.transition;
 
-import org.openmole.misc.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.mole.IMoleExecution;

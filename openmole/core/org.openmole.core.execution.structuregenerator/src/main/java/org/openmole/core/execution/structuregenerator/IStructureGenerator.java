@@ -5,7 +5,7 @@
 
 package org.openmole.core.execution.structuregenerator;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *

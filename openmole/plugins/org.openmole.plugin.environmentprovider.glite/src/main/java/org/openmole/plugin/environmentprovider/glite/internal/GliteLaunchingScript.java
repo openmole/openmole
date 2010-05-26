@@ -17,8 +17,8 @@
 package org.openmole.plugin.environmentprovider.glite.internal;
 
 import org.openmole.core.workflow.implementation.execution.batch.BatchEnvironment;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.caching.SoftCachable;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.workflow.model.execution.batch.IRuntime;
 import org.openmole.core.workflow.model.file.IURIFile;

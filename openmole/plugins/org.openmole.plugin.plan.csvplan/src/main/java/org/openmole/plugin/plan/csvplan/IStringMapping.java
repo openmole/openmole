@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.plan.csvplan;
 
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
 import org.osgi.framework.Bundle;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *

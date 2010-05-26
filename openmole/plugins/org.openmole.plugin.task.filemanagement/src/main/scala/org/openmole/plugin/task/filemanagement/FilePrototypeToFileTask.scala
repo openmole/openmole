@@ -23,8 +23,8 @@ import java.util.Iterator
 import java.util.LinkedList
 import java.util.List
 
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.commons.exception.UserBadDataError
 
 import org.openmole.core.workflow.model.execution.IProgress
 import org.openmole.core.workflow.model.job.IContext
@@ -33,7 +33,7 @@ import org.openmole.core.workflow.model.data.IPrototype
 import org.openmole.core.workflow.model.mole.IExecutionContext
 import scala.collection.mutable.ListBuffer
 
-import org.openmole.misc.tools.io.FastCopy.copy
+import org.openmole.commons.tools.io.FastCopy.copy
 import org.openmole.core.workflow.implementation.tools.VariableExpansion._
 
 class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Task(name) {

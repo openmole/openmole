@@ -17,7 +17,7 @@
 package org.openmole.core.workflow.model.tools;
 
 import org.openmole.core.workflow.model.job.ITicket;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *

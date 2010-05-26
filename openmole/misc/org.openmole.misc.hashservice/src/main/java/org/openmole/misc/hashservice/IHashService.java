@@ -20,7 +20,7 @@ package org.openmole.misc.hashservice;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.io.IHash;
 
 /**
  *

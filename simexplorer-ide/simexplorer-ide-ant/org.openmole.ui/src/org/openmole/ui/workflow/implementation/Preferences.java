@@ -14,17 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.ui.workflow.implementation;
 
 import java.awt.Color;
 import java.awt.Image;
-import java.io.File;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
@@ -35,52 +30,37 @@ import org.openmole.core.workflow.implementation.task.ExplorationTask;
 import org.openmole.plugin.task.groovytask.GroovyTask;
 import org.openmole.core.workflow.methods.task.JavaTask;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.misc.tools.service.HierarchicalRegistry;
+import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
+import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 
 /**
  *
  * @author mathieu
  */
 public class Preferences {
-
     private static Preferences instance = null;
     private ApplicationCustomize app = ApplicationCustomize.getInstance();
 
-    private HierarchicalRegistry<Class<? extends IObjectModelUI>> models = new HierarchicalRegistry<Class<? extends IObjectModelUI>>();
-    private Map<Class<? extends IObjectModelUI>, Preferences.Settings> modelSettingsMap =
-            new HashMap<Class<? extends IObjectModelUI>, Preferences.Settings>();
-    private Map<Class<? extends IGenericTaskCapsule>, Class<? extends ICapsuleModelUI>> capsuleMapping = new HashMap();
+    private HierarchicalRegistry<Class<? extends IGenericTaskModelUI>> models = new HierarchicalRegistry<Class<? extends IGenericTaskModelUI>>();
+
+    private Map<Class<? extends IGenericTaskModelUI>, Preferences.Settings> modelSettingsMap =
+            new HashMap<Class<? extends IGenericTaskModelUI>, Preferences.Settings>();
+
+    private Map<Class<? extends IGenericTaskCapsule>,Class<? extends ICapsuleModelUI>> capsuleMapping = new HashMap();
 
     private Settings capsuleModelSettingsMap = new Settings(app.getColor(ApplicationCustomize.TASK_CAPSULE_BACKGROUND_COLOR),
-                                                            app.getColor(ApplicationCustomize.TASK_CAPSULE_BORDER_COLOR),
-                                                            "Task capsules");
+                                                            app.getColor(ApplicationCustomize.TASK_CAPSULE_BORDER_COLOR));
 
-    private Collection<Class> prototypes= new ArrayList<Class>();
-
-    public void initialize() {
-       // setBusinessModelMap();
-        //setModelSettings();
+    public void initialize(){
+        setBusinessModelMap();
+        setModelSettings();
         setCapsuleMapping();
     }
 
-    private void setPrototypes(){
-        prototypes.add(BigInteger.class);
-        prototypes.add(BigDecimal.class);
-        prototypes.add(File.class);
-    }
-
-    public Collection getPrototypes(){
-        if (prototypes.isEmpty()){
-            setPrototypes();
-        }
-        return prototypes;
-    }
-
-    private void setCapsuleMapping() {
-        capsuleMapping.put(TaskCapsule.class, TaskCapsuleModelUI.class);
-        capsuleMapping.put(ExplorationTaskCapsule.class, ExplorationTaskCapsuleModelUI.class);
+    private void setCapsuleMapping(){
+        capsuleMapping.put(TaskCapsule.class,TaskCapsuleModelUI.class);
+        capsuleMapping.put(ExplorationTaskCapsule.class,ExplorationTaskCapsuleModelUI.class);
     }
 
     private void setBusinessModelMap() {
@@ -89,55 +69,40 @@ public class Preferences {
         models.register(ExplorationTask.class, ExplorationTaskModelUI.class);
     }
 
-    public Set<Class> getBusinessClasses() {
-        if (models.size() == 0){
-            setBusinessModelMap();
-        }
+    public Set<Class> getBusinessClasses(){
         return models.getAllRegistred();
     }
 
-    public Class<? extends ICapsuleModelUI> getCapsuleMapping(Class<? extends IGenericTaskCapsule> gtc) {
+    public Class<? extends ICapsuleModelUI> getCapsuleMapping(Class<? extends IGenericTaskCapsule> gtc){
         return capsuleMapping.get(gtc);
     }
 
-    public Class<? extends IObjectModelUI> getModelClass(Class c) {
+    public Class<? extends IGenericTaskModelUI> getModelClass(Class c){
         return models.getClosestRegistred(c).iterator().next();
     }
 
-    public void addModelSettings(Class<? extends IObjectModelUI> modelClass,
-            Preferences.Settings s) {
+    public void addModelSettings(Class<? extends IGenericTaskModelUI> modelClass,
+                                  Preferences.Settings s){
         modelSettingsMap.put(modelClass, s);
     }
 
-    private void setModelSettings() {
+    private void setModelSettings(){
         ApplicationCustomize app = ApplicationCustomize.getInstance();
 
         modelSettingsMap.put(TaskModelUI.class, new Settings(app.getColor(ApplicationCustomize.TASK_BACKGROUND_COLOR),
-                app.getColor(ApplicationCustomize.TASK_BORDER_COLOR),
-                "Tasks",
-                ApplicationCustomize.IMAGE_THUMB_PATH_TASK));
+                                                        app.getColor(ApplicationCustomize.TASK_BORDER_COLOR)));
         modelSettingsMap.put(ExplorationTaskModelUI.class, new Settings(app.getColor(ApplicationCustomize.EXPLORATION_TASK_BACKGROUND_COLOR),
-                app.getColor(ApplicationCustomize.EXPLORATION_TASK_BORDER_COLOR),
-                "Tasks",
-                ApplicationCustomize.IMAGE_THUMB_PATH_EXPLORATION));
+                                                                   app.getColor(ApplicationCustomize.EXPLORATION_TASK_BORDER_COLOR)));
         modelSettingsMap.put(GroovyTaskModelUI.class, new Settings(app.getColor(ApplicationCustomize.GROOVY_TASK_BACKGROUND_COLOR),
-                app.getColor(ApplicationCustomize.GROOVY_TASK_BORDER_COLOR),
-                "Tasks",
-                ApplicationCustomize.IMAGE_THUMB_PATH_GROOVY));
-        modelSettingsMap.put(TaskCapsuleModelUI.class, new Settings(app.getColor(ApplicationCustomize.GROOVY_TASK_BACKGROUND_COLOR),
-                app.getColor(ApplicationCustomize.GROOVY_TASK_BORDER_COLOR),
-                "Task capsules",
-                ApplicationCustomize.IMAGE_THUMB_PATH_TASK_CAPSULE));
+                                                                   app.getColor(ApplicationCustomize.GROOVY_TASK_BORDER_COLOR),
+                                                                   ApplicationCustomize.IMAGE_GROOVY));
     }
 
-    public Settings getModelSettings(Class<? extends IObjectModelUI> model) {
-        if (modelSettingsMap.isEmpty()){
-            setModelSettings();
-        }
+    public Settings getModelSettings(Class<? extends IGenericTaskModelUI> model){
         return modelSettingsMap.get(model);
     }
 
-    public Settings getCapsuleModelSettings() {
+    public Settings getCapsuleModelSettings(){
         return capsuleModelSettingsMap;
     }
 
@@ -149,35 +114,20 @@ public class Preferences {
     }
 
     public class Settings {
-
         private Color defaultBackgroundColor;
         private Color defaultBorderColor;
         private Image defaultBackgroundImage = null;
-        private String thumbImagePath;
-        private String modelGroup;
 
         public Settings(Color defaultBackgroundColor,
-                Color defaultBorderColor,
-                String modelGroup) {
+                        Color defaultBorderColor) {
             this.defaultBackgroundColor = defaultBackgroundColor;
             this.defaultBorderColor = defaultBorderColor;
-            this.modelGroup = modelGroup;
         }
 
         public Settings(Color defaultBackgroundColor,
-                Color defaultBorderColor,
-                String molelGroup,
-                String thumbImagePath) {
-            this(defaultBackgroundColor, defaultBorderColor, molelGroup);
-            this.thumbImagePath = thumbImagePath;
-        }
-
-        public Settings(Color defaultBackgroundColor,
-                Color defaultBorderColor,
-                String modelGroup,
-                String thumbImagePath,
-                Image backgroundImaqe) {
-            this(defaultBackgroundColor, defaultBorderColor, modelGroup, thumbImagePath);
+                        Color defaultBorderColor,
+                        Image backgroundImaqe) {
+            this(defaultBackgroundColor, defaultBorderColor);
             this.defaultBackgroundImage = backgroundImaqe;
         }
 
@@ -193,12 +143,7 @@ public class Preferences {
             return defaultBorderColor;
         }
 
-        public String getModelGroup() {
-            return modelGroup;
-        }
 
-        public String getThumbImagePath() {
-            return thumbImagePath;
-        }
     }
+
 }

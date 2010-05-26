@@ -18,13 +18,13 @@ package org.openmole.core.workflow.implementation.tools;
 
 import java.util.Set;
 import java.util.TreeSet;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.transition.ITransition;
 import org.openmole.core.workflow.model.data.IDataChannel;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.model.data.IData;
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

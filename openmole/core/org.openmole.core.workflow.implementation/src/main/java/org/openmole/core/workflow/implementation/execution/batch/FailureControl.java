@@ -19,7 +19,7 @@
 package org.openmole.core.workflow.implementation.execution.batch;
 
 import org.openmole.core.workflow.model.execution.batch.IFailureControl;
-import org.openmole.misc.tools.stat.FailureRate;
+import org.openmole.commons.tools.stat.FailureRate;
 
 public class FailureControl implements IFailureControl {
 

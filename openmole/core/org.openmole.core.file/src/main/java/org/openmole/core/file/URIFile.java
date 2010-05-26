@@ -49,20 +49,20 @@ import org.ogf.saga.task.TaskMode;
 import org.ogf.saga.url.URL;
 import org.ogf.saga.url.URLFactory;
 import org.openmole.core.batchservicecontrol.BatchStorageDescription;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.internal.Activator;
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.caching.SoftCachable;
-import org.openmole.misc.tools.filecache.IFileCache;
+import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.misc.tools.io.FastCopy;
-import org.openmole.misc.tools.io.FileCache;
-import org.openmole.misc.tools.io.StringBuilderOutputStream;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
+import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileCache;
+import org.openmole.commons.tools.io.StringBuilderOutputStream;
 
-import static org.openmole.misc.tools.io.Network.*;
+import static org.openmole.commons.tools.io.Network.*;
 
 public class URIFile implements IURIFile {
 

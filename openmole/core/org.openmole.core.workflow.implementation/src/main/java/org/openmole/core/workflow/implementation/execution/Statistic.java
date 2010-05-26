@@ -23,7 +23,7 @@ import java.util.TreeMap;
 
 import org.openmole.core.workflow.model.execution.IStatistic;
 import org.openmole.core.workflow.model.execution.batch.SampleType;
-import org.openmole.misc.tools.stat.Samples;
+import org.openmole.commons.tools.stat.Samples;
 
 public class Statistic implements IStatistic {
 

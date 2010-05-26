@@ -20,7 +20,7 @@ package org.openmole.core.workflow.model.job;
 import java.util.List;
 import java.util.Map;
 import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.misc.tools.pattern.IVisitable;
+import org.openmole.commons.tools.pattern.IVisitable;
 
 import org.openmole.core.workflow.model.data.IVariable;
 

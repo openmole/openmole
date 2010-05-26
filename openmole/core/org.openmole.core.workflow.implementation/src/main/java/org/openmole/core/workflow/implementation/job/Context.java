@@ -19,7 +19,7 @@
  */
 package org.openmole.core.workflow.implementation.job;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.implementation.data.Variable;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,9 +30,9 @@ import java.util.logging.Logger;
 
 
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.pattern.IVisitable;
-import org.openmole.misc.tools.pattern.IVisitor;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.pattern.IVisitable;
+import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.workflow.model.data.IVariable;
 import org.openmole.core.workflow.model.data.IPrototype;
 
@@ -320,7 +320,7 @@ public class Context implements IVisitable<IVariable>, IContext {
     }*/
 
     /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#visit(org.openmole.misc.tools.IVisitor)
+     * @see org.openmole.core.task.IContext#visit(org.openmole.commons.tools.IVisitor)
      */
     @Override
     public void visit(IVisitor<IVariable> visitor) throws InternalProcessingError, UserBadDataError {

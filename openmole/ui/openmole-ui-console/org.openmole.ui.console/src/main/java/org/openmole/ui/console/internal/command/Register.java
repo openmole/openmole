@@ -20,7 +20,7 @@ package org.openmole.ui.console.internal.command;
 import java.util.List;
 import org.codehaus.groovy.tools.shell.CommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
-import org.openmole.misc.tools.structure.Duo;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.ui.console.internal.command.registry.Registry;
 
 /**

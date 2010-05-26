@@ -19,8 +19,8 @@ package org.openmole.core.workflow.implementation.domain;
 
 import java.util.Iterator;
 import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

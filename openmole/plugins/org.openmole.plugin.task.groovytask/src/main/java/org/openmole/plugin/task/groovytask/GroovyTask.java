@@ -20,8 +20,8 @@
 package org.openmole.plugin.task.groovytask;
 
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.plugin.task.codetask.CodeTask;
 
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode;

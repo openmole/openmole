@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
@@ -30,7 +30,7 @@ import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
 import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
 import org.openmole.core.workflow.model.job.IJob;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.misc.tools.structure.Trio;
+import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.updater.IUpdatable;
 
 public class BatchJobWatcher implements IUpdatable {

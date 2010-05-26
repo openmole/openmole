@@ -19,7 +19,7 @@ package org.openmole.core.workflow.implementation.mole;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.implementation.execution.local.LocalExecutionEnvironmentDescription;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;

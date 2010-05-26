@@ -20,7 +20,7 @@ package org.openmole.core.execution.replicacatalog;
 import java.io.File;
 
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
 

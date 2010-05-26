@@ -5,8 +5,8 @@
 package org.simexplorer.ide.ui.tools;
 
 import org.openide.util.Exceptions;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 import java.awt.Image;
 import java.awt.event.ActionEvent;

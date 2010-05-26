@@ -19,12 +19,12 @@ package org.openmole.core.batchservicecontrol;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.workflow.model.execution.batch.IFailureControl;
 import org.openmole.core.workflow.model.execution.batch.IUsageControl;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public interface IBatchServiceControl {
 

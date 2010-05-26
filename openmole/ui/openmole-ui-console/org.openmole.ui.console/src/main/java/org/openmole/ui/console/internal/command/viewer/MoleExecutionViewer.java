@@ -20,10 +20,10 @@ package org.openmole.ui.console.internal.command.viewer;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.job.State;
 import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.misc.tools.structure.Counter;
 
 /**
  *
@@ -33,14 +33,14 @@ public class MoleExecutionViewer implements IViewer<IMoleExecution>{
 
     @Override
     public void view(IMoleExecution object, List<Object> args) {
-        Map<State,Counter> toDisplay = new TreeMap<State, Counter>();
+        Map<State,AtomicInteger> toDisplay = new TreeMap<State, AtomicInteger>();
 
         for(State state : State.values()) {
-            toDisplay.put(state, new Counter());
+            toDisplay.put(state, new AtomicInteger());
         }
 
         for(IMoleJob job : object.getAllMoleJobs()) {
-            toDisplay.get(job.getState()).increment();
+            toDisplay.get(job.getState()).incrementAndGet();
         }
 
         for(State state : State.values()) {

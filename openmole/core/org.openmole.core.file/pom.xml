@@ -23,12 +23,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.tools</artifactId>
+            <artifactId>org.openmole.commons.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.caching</artifactId>
+            <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

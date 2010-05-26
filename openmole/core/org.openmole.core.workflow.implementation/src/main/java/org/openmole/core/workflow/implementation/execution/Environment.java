@@ -25,7 +25,7 @@ import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
 import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
 import org.openmole.core.workflow.model.execution.batch.SampleType;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
 public abstract class Environment<DESC extends IEnvironmentDescription, EXECUTIONJOB extends IExecutionJob> implements IEnvironment<DESC, EXECUTIONJOB> {

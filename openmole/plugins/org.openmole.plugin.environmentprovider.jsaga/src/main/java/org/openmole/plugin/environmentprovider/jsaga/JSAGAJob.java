@@ -37,7 +37,7 @@ import org.ogf.saga.monitoring.Metric;
 import org.ogf.saga.task.State;
 import org.ogf.saga.url.URL;
 import org.ogf.saga.url.URLFactory;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.ExecutionState;
 import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
 

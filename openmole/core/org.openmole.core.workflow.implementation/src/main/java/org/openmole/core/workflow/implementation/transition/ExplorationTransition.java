@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.openmole.misc.clonning.IClonningService;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.implementation.job.Context;
 import org.openmole.core.workflow.implementation.data.Variable;

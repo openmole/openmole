@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.job.IMoleJobId;
-import org.openmole.misc.exception.ExecutionException;
+import org.openmole.commons.exception.ExecutionException;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.job.IJob;
 import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public class Job implements IJob {
 

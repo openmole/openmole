@@ -20,7 +20,7 @@ package org.openmole.core.execution.runtimemessageserializer;
 import java.io.File;
 import java.io.IOException;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.message.IExecutionMessage;
 import org.openmole.core.workflow.model.message.IJobForRuntime;
 import org.openmole.core.workflow.model.message.IRuntimeResult;

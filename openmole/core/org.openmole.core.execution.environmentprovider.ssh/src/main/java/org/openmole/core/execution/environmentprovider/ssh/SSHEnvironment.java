@@ -5,8 +5,8 @@
 package org.openmole.core.execution.environmentprovider.ssh;
 
 import java.util.Collection;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.execution.environmentprovider.jsaga.JSAGAExecutionEnvironment;
 import org.openmole.core.execution.environmentprovider.jsaga.model.IJSAGAJobService;

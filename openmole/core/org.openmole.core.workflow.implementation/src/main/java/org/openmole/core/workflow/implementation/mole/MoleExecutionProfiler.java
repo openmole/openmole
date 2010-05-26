@@ -20,11 +20,11 @@ package org.openmole.core.workflow.implementation.mole;
 import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.misc.eventdispatcher.IObjectChangedSynchronousListener;
-import org.openmole.misc.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.pattern.Priority;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.structure.Priority;
 
 /**
  *

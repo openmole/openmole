@@ -12,9 +12,8 @@
 
     <modules>
         <module>openmole</module>
-        <module>aspects</module>
+        <module>commons</module>
         <module>libraries</module>
-        <!--module>plugins</module-->
         <module>simexplorer-ide</module>
     </modules>
 

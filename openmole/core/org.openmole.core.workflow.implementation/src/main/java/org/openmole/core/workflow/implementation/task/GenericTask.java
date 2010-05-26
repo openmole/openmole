@@ -29,9 +29,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.caching.ChangeState;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.resource.ILocalFileCache;
 import org.openmole.core.workflow.model.resource.IResource;
@@ -40,7 +40,7 @@ import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.core.workflow.model.task.annotations.Input;
 import org.openmole.core.workflow.model.task.annotations.Output;
-import org.openmole.misc.caching.SoftCachable;
+import org.openmole.commons.aspect.caching.SoftCachable;
 
 import org.openmole.core.workflow.implementation.data.Data;
 import org.openmole.core.workflow.implementation.data.Parameter;

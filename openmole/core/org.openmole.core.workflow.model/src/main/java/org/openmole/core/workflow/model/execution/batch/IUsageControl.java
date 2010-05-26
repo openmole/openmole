@@ -20,8 +20,8 @@ package org.openmole.core.workflow.model.execution.batch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public interface IUsageControl {
 	IAccessToken tryGetToken(long milliSeconds, TimeUnit unit) throws InterruptedException, TimeoutException;

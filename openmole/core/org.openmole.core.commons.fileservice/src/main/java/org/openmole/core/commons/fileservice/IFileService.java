@@ -18,8 +18,8 @@
 package org.openmole.core.commons.fileservice;
 
 import java.io.File;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.tools.io.IHash;
 
 /**
  *

@@ -19,9 +19,9 @@
 package org.openmole.core.workflow.model.execution.batch;
 
 import java.io.File;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.structure.Duo;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.workflow.model.execution.IEnvironment;
 
 public interface IBatchEnvironment<JS extends IBatchJobService, DESC extends IBatchEnvironmentDescription> extends IEnvironment<DESC, IBatchExecutionJob> {

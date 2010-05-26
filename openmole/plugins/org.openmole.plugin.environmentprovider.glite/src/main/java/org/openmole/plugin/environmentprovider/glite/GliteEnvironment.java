@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.openmole.misc.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FastCopy;
 
 import org.ogf.saga.context.Context;
 import org.ogf.saga.error.AuthenticationFailedException;
@@ -48,12 +48,12 @@ import org.ogf.saga.error.IncorrectStateException;
 import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.PermissionDeniedException;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.caching.Cachable;
+import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.misc.workspace.ConfigurationElement;
 
 import fr.in2p3.jsaga.adaptor.security.VOMSContext;

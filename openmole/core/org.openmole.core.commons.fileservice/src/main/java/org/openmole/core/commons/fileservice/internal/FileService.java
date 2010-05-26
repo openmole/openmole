@@ -21,14 +21,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.commons.fileservice.IFileService;
-import org.openmole.misc.tools.cache.AssociativeCache;
-import org.openmole.misc.tools.cache.ICachable;
-import org.openmole.misc.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.misc.tools.filecache.IFileCache;
-import org.openmole.misc.tools.io.IHash;
-import org.openmole.misc.tools.io.TarArchiver;
+import org.openmole.commons.tools.cache.AssociativeCache;
+import org.openmole.commons.tools.cache.ICachable;
+import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
+import org.openmole.commons.tools.filecache.IFileCache;
+import org.openmole.commons.tools.io.IHash;
+import org.openmole.commons.tools.io.TarArchiver;
 
 public class FileService implements IFileService {
 

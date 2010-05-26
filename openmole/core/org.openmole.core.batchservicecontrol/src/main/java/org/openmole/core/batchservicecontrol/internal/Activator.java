@@ -20,7 +20,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
-import org.openmole.misc.eventdispatcher.IEventDispatcher;
+import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.osgi.framework.ServiceReference;
 
 public class Activator implements BundleActivator {

@@ -23,11 +23,11 @@ import java.util.LinkedList;
 import org.openmole.core.workflow.model.resource.ILocalFileCache;
 import org.openmole.core.workflow.model.resource.IResource;
 import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.misc.caching.SoftCachable;
+import org.openmole.commons.aspect.caching.SoftCachable;
 
 import static org.openmole.core.workflow.implementation.tools.MarkedFieldFinder.*;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *

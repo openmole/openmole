@@ -21,7 +21,7 @@ package org.openmole.core.workflow.model.execution.batch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public interface IAccessTokenPool {
 	IAccessToken waitAToken() throws InterruptedException;

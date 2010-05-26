@@ -30,13 +30,13 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.implementation.resource.LocalFileCache;
 import org.openmole.core.workflow.implementation.job.Context;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.misc.tools.pattern.IVisitor;
+import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.workflow.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.workflow.model.execution.IJobStatisticCategorizationStrategy;
 import org.openmole.core.workflow.model.execution.IMoleJobGroupingStrategy;

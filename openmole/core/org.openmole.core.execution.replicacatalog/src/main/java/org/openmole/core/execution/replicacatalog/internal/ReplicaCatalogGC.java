@@ -16,8 +16,8 @@
  */
 package org.openmole.core.execution.replicacatalog.internal;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.core.execution.replicacatalog.IReplica;
 

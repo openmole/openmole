@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.exception</artifactId>
+            <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -58,7 +58,7 @@
         </dependency>
 	<dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.caching</artifactId>
+            <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

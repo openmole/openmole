@@ -28,7 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openmole.core.batchservicecontrol.BatchStorageDescription;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
@@ -36,7 +36,7 @@ import org.openmole.core.workflow.implementation.internal.Activator;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.tools.service.RNG;
+import org.openmole.commons.tools.service.RNG;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 

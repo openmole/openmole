@@ -22,13 +22,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 
 import org.openmole.core.workflow.implementation.execution.Statistic;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
 import org.openmole.misc.updater.IUpdatable;
@@ -38,12 +39,10 @@ import org.openmole.core.workflow.model.execution.IStatistic;
 import org.openmole.core.workflow.model.execution.batch.SampleType;
 import org.openmole.core.workflow.model.job.IJob;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.misc.tools.cache.AssociativeCache;
-import org.openmole.misc.tools.cache.ICachable;
-//import org.openmole.misc.tools.structure.Counter;
-import org.openmole.misc.tools.structure.Counter;
-import org.openmole.misc.tools.structure.Duo;
-import org.openmole.misc.tools.structure.Trio;
+import org.openmole.commons.tools.cache.AssociativeCache;
+import org.openmole.commons.tools.cache.ICachable;
+import org.openmole.commons.tools.structure.Duo;
+import org.openmole.commons.tools.structure.Trio;
 import org.openmole.plugin.environmentprovider.glite.GliteEnvironment;
 
 public class OverSubmissionAgent implements IUpdatable {
@@ -78,7 +77,7 @@ public class OverSubmissionAgent implements IUpdatable {
         synchronized (registries) {
 
 
-            Map<Duo<IExecutionContext, IJobStatisticCategory>, Counter> nbJobsByCategory = new HashMap<Duo<IExecutionContext, IJobStatisticCategory>, Counter>();
+            Map<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger> nbJobsByCategory = new HashMap<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger>();
 
             Long curTime = System.currentTimeMillis();
             AssociativeCache<Trio<IExecutionContext, IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Trio<IExecutionContext, IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
@@ -138,20 +137,20 @@ public class OverSubmissionAgent implements IUpdatable {
                     
                     // Count nb execution
                     Duo<IExecutionContext, IJobStatisticCategory> keyCount = new Duo<IExecutionContext, IJobStatisticCategory>(executionContext, jobStatisticCategory);
-                    Counter executionJobCounter = nbJobsByCategory.get(keyCount);
+                    AtomicInteger executionJobCounter = nbJobsByCategory.get(keyCount);
                     if (executionJobCounter == null) {
-                        executionJobCounter = new Counter();
+                        executionJobCounter = new AtomicInteger();
                         nbJobsByCategory.put(keyCount, executionJobCounter);
                     }
-                    executionJobCounter.increment(registries.getNbExecutionJobs(executionContext, jobStatisticCategory, job));
+                    executionJobCounter.addAndGet(registries.getNbExecutionJobs(executionContext, jobStatisticCategory, job));
 
 
                 }
             }
 
 
-            for (Map.Entry<Duo<IExecutionContext, IJobStatisticCategory>, Counter> entry : nbJobsByCategory.entrySet()) {
-                int nbRessub = minNumberOfJobsByCategory - entry.getValue().getValue();
+            for (Map.Entry<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger> entry : nbJobsByCategory.entrySet()) {
+                int nbRessub = minNumberOfJobsByCategory - entry.getValue().get();
                 IExecutionContext executionContext = entry.getKey().getLeft();
                 IJobStatisticCategory jobStatisticCategory = entry.getKey().getRight();
 

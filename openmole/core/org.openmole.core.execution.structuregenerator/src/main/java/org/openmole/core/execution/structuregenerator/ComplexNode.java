@@ -19,7 +19,7 @@
  */
 package org.openmole.core.execution.structuregenerator;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 import java.util.HashMap;
 import java.util.Iterator;

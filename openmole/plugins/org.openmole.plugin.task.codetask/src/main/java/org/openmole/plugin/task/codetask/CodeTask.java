@@ -30,13 +30,13 @@ import java.util.List;
 import org.openmole.core.workflow.implementation.resource.FileSetResource;
 import org.openmole.core.workflow.model.data.IPrototype;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.misc.caching.ChangeState;
+import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.codetask.internal.Activator;
 import org.openmole.plugin.task.externaltask.ExternalTask;
 

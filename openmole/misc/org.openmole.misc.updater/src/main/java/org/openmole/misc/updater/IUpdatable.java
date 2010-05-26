@@ -17,8 +17,8 @@
 
 package org.openmole.misc.updater;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public interface IUpdatable {
 	static final long DefaultInterval = 2 * 60 * 1000;

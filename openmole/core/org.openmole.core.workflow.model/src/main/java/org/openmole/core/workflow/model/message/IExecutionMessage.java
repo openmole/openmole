@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.model.message;
 
-import org.openmole.misc.tools.structure.Duo;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.structure.Duo;
+import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.workflow.model.file.IURIFile;
 
 /**

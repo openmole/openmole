@@ -25,7 +25,7 @@ import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.session.Session;
 import org.ogf.saga.session.SessionFactory;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
 
 

@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>org.openmole.misc.exception</code-name-base>
+                    <code-name-base>org.openmole.commons.exception</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

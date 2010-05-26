@@ -18,7 +18,7 @@
 
 package org.openmole.core.workflow.implementation.execution.batch;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.workflow.model.execution.batch.IBatchJobDescription;
 import org.openmole.core.workflow.model.execution.batch.IBatchJobService;

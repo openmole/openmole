@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import org.openmole.core.workflow.implementation.plan.Factor;
 

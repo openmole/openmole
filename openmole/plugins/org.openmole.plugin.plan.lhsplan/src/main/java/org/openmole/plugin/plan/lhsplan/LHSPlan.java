@@ -25,9 +25,9 @@ import java.util.Collections;
 import org.openmole.core.workflow.implementation.plan.ExploredPlan;
 
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.service.RNG;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.service.RNG;
 import org.openmole.core.workflow.implementation.plan.FactorsValues;
 import org.openmole.core.workflow.implementation.plan.Plan;
 import org.openmole.core.workflow.model.plan.IFactor;

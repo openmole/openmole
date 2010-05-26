@@ -19,8 +19,8 @@ package org.openmole.core.workflow.model.execution.batch;
 
 
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public interface IBatchJobService<JOBDESC extends IBatchJobDescription> extends IBatchService {
 	IBatchJob createBatchJob(JOBDESC batchJobDescription) throws InternalProcessingError;

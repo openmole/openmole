@@ -21,14 +21,14 @@ package org.openmole.core.workflow.implementation.transition;
 import groovy.lang.Binding;
 import java.util.Collections;
 import org.openmole.core.workflow.implementation.tools.GroovyShellProxyAdapter;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.transition.ICondition;
-import org.openmole.misc.caching.ChangeState;
-import org.openmole.misc.caching.SoftCachable;
-import org.openmole.misc.tools.groovy.GroovyProxy;
+import org.openmole.commons.aspect.caching.ChangeState;
+import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.commons.tools.groovy.GroovyProxy;
 
 
 public class Condition implements ICondition {

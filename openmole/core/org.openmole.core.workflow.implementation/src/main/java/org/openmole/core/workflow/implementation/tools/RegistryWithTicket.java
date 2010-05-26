@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.implementation.tools;
 
-import org.openmole.misc.tools.structure.Registry;
-import org.openmole.misc.tools.structure.IRegistry;
+import org.openmole.commons.tools.structure.Registry;
+import org.openmole.commons.tools.structure.IRegistry;
 import org.openmole.core.workflow.model.tools.IRegistryWithTicket;
 import java.util.Map;
 import java.util.WeakHashMap;

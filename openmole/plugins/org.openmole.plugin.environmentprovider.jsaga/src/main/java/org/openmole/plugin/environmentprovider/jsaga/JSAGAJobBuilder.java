@@ -36,7 +36,7 @@ import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.core.workflow.implementation.execution.batch.BatchEnvironment;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IRuntime;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
 import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAEnvironment;

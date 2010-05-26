@@ -3,7 +3,7 @@ package org.openmole.misc.clonning.internal;
 import org.openmole.misc.clonning.*;
 
 import com.rits.cloning.Cloner;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public class ClonningService implements IClonningService {
 

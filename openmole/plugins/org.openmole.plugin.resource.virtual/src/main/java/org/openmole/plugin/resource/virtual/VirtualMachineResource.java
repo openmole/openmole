@@ -22,6 +22,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
@@ -32,12 +33,12 @@ import org.apache.commons.exec.launcher.CommandLauncherFactory;
 import org.openmole.core.workflow.implementation.resource.ComposedResource;
 import org.openmole.core.workflow.implementation.resource.FileResource;
 import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.misc.caching.Cachable;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.aspect.caching.Cachable;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
-import static org.openmole.misc.tools.io.Network.*;
+import static org.openmole.commons.tools.io.Network.*;
 
 /**
  *
@@ -51,10 +52,6 @@ public class VirtualMachineResource extends ComposedResource {
         Activator.getWorkspace().addToConfigurations(VirtualMachineBootTimeOut, "PT5M");
     }
 
-
-    @Resource
-    final FileResource emulator;
-
     @Resource
     final FileResource system;
 
@@ -62,8 +59,7 @@ public class VirtualMachineResource extends ComposedResource {
 
     final String password;
 
-    public VirtualMachineResource(File emulator, File system, String user, String password) {
-        this.emulator = new FileResource(emulator);
+    public VirtualMachineResource(File system, String user, String password) {
         this.system = new FileResource(system);
         this.user = user;
         this.password = password;
@@ -76,7 +72,7 @@ public class VirtualMachineResource extends ComposedResource {
 
             @Override
             public void connect(int port) throws Exception {
-               CommandLine commandLine = CommandLine.parse(emulator.getDeployedFile().getAbsolutePath() + " -hda " + system.getDeployedFile().getAbsolutePath() + " tcp:" + port + "::22");
+               CommandLine commandLine = CommandLine.parse(new File(getQEmuDir(), "qemu").getAbsolutePath() + " -nographic -hda " + system.getDeployedFile().getAbsolutePath() + " tcp:" + port + "::22");
                
                Process process = getCommandLauncher().exec(commandLine, new HashMap());
                getProcessDestroyer().add(process);
@@ -129,4 +125,16 @@ public class VirtualMachineResource extends ComposedResource {
         return new VirtualMachinePool(this);
     }
     
+    @Cachable
+    private File getQEmuDir() throws IOException, InternalProcessingError {
+        String os = System.getProperty("os.name");
+        File qemuDir = Activator.getWorkspace().newTmpDir();
+        //String jarDir
+
+        if(os.toLowerCase().contains("linux")) {
+
+        }
+        return null;
+    }
+
 }

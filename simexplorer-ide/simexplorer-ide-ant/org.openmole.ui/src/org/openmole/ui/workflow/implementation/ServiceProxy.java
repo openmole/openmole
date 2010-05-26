@@ -5,7 +5,7 @@
 
 package org.openmole.ui.workflow.implementation;
 
-/*import org.openmole.misc.eventdispatcher.IEventDispatcher;
+/*import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

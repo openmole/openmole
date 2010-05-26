@@ -20,7 +20,7 @@ import java.util.List;
 import org.codehaus.groovy.tools.shell.CommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.misc.tools.service.HierarchicalRegistry;
+import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.ui.console.internal.command.initializer.EnvironmentInitializer;
 import org.openmole.ui.console.internal.command.initializer.IInitializer;

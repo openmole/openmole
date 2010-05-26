@@ -31,7 +31,7 @@ import org.openide.execution.ExecutionEngine;
 import org.openide.execution.ExecutorTask;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public class ExplorationsManager {
 

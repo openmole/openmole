@@ -20,11 +20,11 @@ package org.openmole.ui.console.internal.command.viewer;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.core.workflow.model.execution.ExecutionState;
 import org.openmole.core.workflow.model.execution.IEnvironment;
 import org.openmole.core.workflow.model.execution.IExecutionJob;
 import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
-import org.openmole.misc.tools.structure.Counter;
 
 
 /**
@@ -35,16 +35,16 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
 
     @Override
     public void view(IEnvironment object, List<Object> args) {
-        Map<ExecutionState, Counter> accounting = new TreeMap<ExecutionState, Counter>();
+        Map<ExecutionState, AtomicInteger> accounting = new TreeMap<ExecutionState, AtomicInteger>();
 
         for(ExecutionState state : ExecutionState.values()) {
-            accounting.put(state, new Counter());
+            accounting.put(state, new AtomicInteger());
         }
 
         IExecutionJobRegistries<IExecutionJob> executionJobRegistries = object.getJobRegistries();
 
         for(IExecutionJob executionJob: executionJobRegistries.allExecutionjobs()) {
-            accounting.get(executionJob.getState()).increment();
+            accounting.get(executionJob.getState()).incrementAndGet();
         }
 
         for(ExecutionState state : ExecutionState.values()) {

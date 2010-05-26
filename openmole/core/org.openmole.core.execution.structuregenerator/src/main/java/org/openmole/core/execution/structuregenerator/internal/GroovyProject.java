@@ -11,7 +11,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 
 import org.codehaus.groovy.ant.Groovyc;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public class GroovyProject {
 

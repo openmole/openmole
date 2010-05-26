@@ -19,11 +19,11 @@ package org.openmole.core.workflow.model.job;
 
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import java.io.File;
-import org.openmole.misc.exception.ExecutionException;
+import org.openmole.commons.exception.ExecutionException;
 
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.core.workflow.model.resource.IResource;

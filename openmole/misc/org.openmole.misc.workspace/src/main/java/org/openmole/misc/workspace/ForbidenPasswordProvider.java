@@ -1,6 +1,6 @@
 package org.openmole.misc.workspace;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 public class ForbidenPasswordProvider implements IPasswordProvider {
 

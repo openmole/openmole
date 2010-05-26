@@ -17,7 +17,7 @@
 
 package org.openmole.misc.workspace.internal;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.IPasswordProvider;
 import org.openmole.misc.workspace.IPasswordProvider;
 

@@ -25,8 +25,8 @@ import org.openmole.core.workflow.model.file.IURIFile;
 import org.openmole.core.workflow.model.message.IRuntimeResult;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.job.IMoleJobId;
-import org.openmole.misc.tools.structure.Duo;
-import org.openmole.misc.tools.io.IHash;
+import org.openmole.commons.tools.structure.Duo;
+import org.openmole.commons.tools.io.IHash;
 
 
 public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {

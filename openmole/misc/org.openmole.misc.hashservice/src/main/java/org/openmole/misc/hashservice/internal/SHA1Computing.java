@@ -39,8 +39,8 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.hashservice.SHA1Hash;
-import org.openmole.misc.tools.io.ReaderRunnable;
-import org.openmole.misc.tools.pattern.BufferFactory;
+import org.openmole.commons.tools.io.ReaderRunnable;
+import org.openmole.commons.tools.pattern.BufferFactory;
 
 public class SHA1Computing implements IHashService {
 

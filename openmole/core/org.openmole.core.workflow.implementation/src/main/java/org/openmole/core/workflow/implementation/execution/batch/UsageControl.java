@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.openmole.core.batchservicecontrol.AccessTokenPool;
 import org.openmole.core.batchservicecontrol.BotomlessTokenPool;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IAccessToken;
 import org.openmole.core.workflow.model.execution.batch.IAccessTokenPool;
 import org.openmole.core.workflow.model.execution.batch.IUsageControl;

@@ -3,7 +3,7 @@ package org.openmole.misc.workspace.internal;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.IPasswordProvider;
 
 

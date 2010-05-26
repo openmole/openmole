@@ -28,9 +28,9 @@ import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.structure.Duo;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.plugin.task.externaltask.ExternalTask;
 import org.openmole.plugin.task.netlogotask.internal.Activator;
 

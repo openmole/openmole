@@ -17,7 +17,7 @@
 
 package org.openmole.core.execution.replicacatalog.internal;
 
-import org.openmole.misc.tools.service.LockRepository;
+import org.openmole.commons.tools.service.LockRepository;
 
 /**
  *

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environmentprovider.jsaga.model;
 
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.batch.IRuntime;
 
 public interface IJSAGALaunchingScript<ENV extends IJSAGAEnvironment<?>> {

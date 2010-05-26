@@ -18,8 +18,8 @@
  */
 package org.simexplorer.ide.ui.domain;
 
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.plugin.domain.interval.RangeDouble;
 import org.openmole.plugin.domain.interval.RangeInteger;
 import org.openmole.plugin.domain.relativerange.RelativeRangeInteger;

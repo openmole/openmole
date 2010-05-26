@@ -34,7 +34,7 @@ import javax.swing.JTextField;
 import org.openide.util.Lookup;
 import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.misc.clonning.internal.ClonningService;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ide.ui.PanelFactory;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import org.simexplorer.ide.ui.tools.SimpleWizard;

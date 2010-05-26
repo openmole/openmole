@@ -27,7 +27,7 @@ import org.openmole.core.workflow.implementation.resource.FileSetResource;
 import org.openmole.core.workflow.model.data.IParameter;
 import org.openmole.core.workflow.model.resource.IPortable;
 import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *

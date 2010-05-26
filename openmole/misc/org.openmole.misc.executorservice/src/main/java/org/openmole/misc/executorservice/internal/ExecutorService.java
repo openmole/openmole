@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;

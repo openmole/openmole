@@ -14,15 +14,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.ui.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
+import org.openide.util.Exceptions;
 import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.ui.workflow.implementation.MoleScene;
-import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
-import org.openmole.ui.workflow.implementation.UIFactory;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
+import org.openmole.commons.tools.object.Instanciator;
+import org.openmole.ui.workflow.model.IMoleScene;
 
 /**
  *
@@ -30,24 +31,30 @@ import org.openmole.ui.workflow.model.IGenericTaskModelUI;
  */
 public class AddTaskAction implements ActionListener {
 
-    MoleScene moleScene;
-    Class<? extends IGenericTask> coreTaskClass;
-    private TaskCapsuleViewUI capsuleView;
+    IMoleScene moleScene;
+    Class<? extends IGenericTask> taskClass;
 
-    public AddTaskAction(MoleScene moleScene,
-            TaskCapsuleViewUI capsuleView,
-           // Class<? extends IGenericTaskModelUI> taskClass) {
-            Class<? extends IGenericTask> coreTaskClass) {
+    public AddTaskAction(IMoleScene moleScene,
+                         Class<? extends IGenericTask> taskClass) {
         this.moleScene = moleScene;
-        this.capsuleView = capsuleView;
-        this.coreTaskClass = coreTaskClass;
+        this.taskClass = taskClass;
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-      //  capsuleView.encapsule(UIFactory.getInstance().createTaskModelInstance(taskClass));
-        capsuleView.encapsule(coreTaskClass);
-        moleScene.validate();
+        try {
+            moleScene.createTask(Instanciator.instanciate(taskClass));
+        } catch (IllegalArgumentException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (NoSuchMethodException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (InstantiationException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IllegalAccessException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (InvocationTargetException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         moleScene.refresh();
     }
 }
