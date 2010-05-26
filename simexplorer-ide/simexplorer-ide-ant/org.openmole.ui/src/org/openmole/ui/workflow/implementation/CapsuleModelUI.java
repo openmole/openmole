@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import org.openmole.ui.workflow.implementation.paint.IOType;
+import org.openmole.ui.commons.IOType;
 
 import java.util.HashMap;
 import java.util.Map;

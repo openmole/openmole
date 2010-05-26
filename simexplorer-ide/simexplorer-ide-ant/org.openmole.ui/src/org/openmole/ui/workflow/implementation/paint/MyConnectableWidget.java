@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation.paint;
 
+import org.openmole.ui.commons.IOType;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;

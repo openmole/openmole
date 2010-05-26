@@ -16,13 +16,15 @@
  */
 package org.openmole.ui.workflow.implementation;
 
+import java.awt.Point;
 import org.openide.util.Exceptions;
-import org.openmole.ui.exception.MoleExceptionManagement;
 import java.lang.reflect.InvocationTargetException;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.netbeans.api.visual.widget.Widget;
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.workflow.model.IUIFactory;
-import org.openmole.commons.tools.object.Instanciator;
-import org.openmole.ui.workflow.model.ICapsuleModelUI;
+import org.openmole.misc.tools.object.Instanciator;
+import org.openmole.ui.exception.MoleExceptionManagement;
+import org.openmole.ui.workflow.model.ITaskCapsuleView;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 
 /**
@@ -36,46 +38,78 @@ public class UIFactory implements IUIFactory<Object> {
 
     private static UIFactory instance = null;
 
-    @Override
+    /*   @Override
     public ICapsuleModelUI createTaskCapsuleModel(IGenericTaskCapsule gtc) {
+    try {
+    return Instanciator.instanciate(Preferences.getInstance().getCapsuleMapping(gtc.getClass()));
+    } catch (IllegalArgumentException illE) {
+    MoleExceptionManagement.showException(illE);
+    } catch (NoSuchMethodException methE) {
+    MoleExceptionManagement.showException(methE);
+    } catch (InstantiationException instE) {
+    MoleExceptionManagement.showException(instE);
+    } catch (IllegalAccessException accessE) {
+    MoleExceptionManagement.showException(accessE);
+    } catch (InvocationTargetException invokE) {
+    MoleExceptionManagement.showException(invokE);
+    }
+    return null;
+    }*/
+    public IGenericTask createCoreTaskInstance(Class<? extends IGenericTask> taskClass) {
         try {
-            return Instanciator.instanciate(Preferences.getInstance().getCapsuleMapping(gtc.getClass()));
+            return Instanciator.instanciate(taskClass);
         } catch (IllegalArgumentException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         } catch (NoSuchMethodException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         } catch (InstantiationException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         } catch (IllegalAccessException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         } catch (InvocationTargetException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         }
         return null;
     }
 
-
     @Override
-    public <T> IGenericTaskModelUI createTaskModel(T obj) {
-                try {
-                    return Instanciator.instanciate(Preferences.getInstance().getModelClass(obj.getClass()));
-                } catch (IllegalArgumentException illE) {
-                    MoleExceptionManagement.showException(illE);
-                } catch (NoSuchMethodException methE) {
-                   MoleExceptionManagement.showException(methE);
-                } catch (InstantiationException instE) {
-                    MoleExceptionManagement.showException(instE);
-                } catch (IllegalAccessException accessE) {
-                    MoleExceptionManagement.showException(accessE);
-                } catch (InvocationTargetException invokE) {
-                    MoleExceptionManagement.showException(invokE);
-                }
+    public IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass) {
+        try {
+            return Instanciator.instanciate(modelClass);
+        } catch (IllegalArgumentException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (NoSuchMethodException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (InstantiationException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (IllegalAccessException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (InvocationTargetException ex) {
+            MoleExceptionManagement.showException(ex);
+        }
         return null;
     }
 
+    public ITaskCapsuleView createTaskCapsule(MoleScene scene) {
+        return createTaskCapsule(scene, new Point(0, 0));
+    }
+
+    public ITaskCapsuleView createTaskCapsule(MoleScene scene,
+            Point locationPoint) {
+        TaskCapsuleModelUI tcm = new TaskCapsuleModelUI();
+        Widget obUI = new TaskCapsuleViewUI(scene, tcm);
+        scene.initCapsuleAdd(obUI);
+        scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
+        scene.getManager().registerTaskCapsuleModel(tcm);
+
+        scene.getManager().printTaskC();
+
+        return (ITaskCapsuleView) obUI;
+    }
+
     @Override
-    public void objectConstructed(Object obj){
-     //   ServiceProxy.getEventDispatcher().registerListner(obj,createTaskModel(obj));
+    public void objectConstructed(Object t) {
+        //   ServiceProxy.getEventDispatcher().registerListner(obj,createTaskModel(obj));
     }
 
     public static UIFactory getInstance() {

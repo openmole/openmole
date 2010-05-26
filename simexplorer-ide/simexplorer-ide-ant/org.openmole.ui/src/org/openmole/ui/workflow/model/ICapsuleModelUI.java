@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.workflow.model;
 
-import org.openmole.ui.workflow.implementation.paint.IOType;
+import org.openmole.ui.commons.IOType;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 
 /**

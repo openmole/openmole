@@ -1,5 +1,6 @@
 package org.openmole.ui.workflow.implementation.paint;
 
+import org.openmole.ui.commons.IOType;
 import org.netbeans.api.visual.anchor.Anchor;
 
 /**

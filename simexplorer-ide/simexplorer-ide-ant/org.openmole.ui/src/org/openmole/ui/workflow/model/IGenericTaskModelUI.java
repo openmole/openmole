@@ -21,12 +21,15 @@ package org.openmole.ui.workflow.model;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 import java.util.Collection;
+import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.ui.control.TableType;
 import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.ui.commons.IOType;
 
 public interface IGenericTaskModelUI<T extends IGenericTask> {
     Collection<TableType.Name> getFields();
     void setFields();
     void setTask(IGenericTask task);
     IGenericTask getTask();
+    void addPrototype(IPrototype p,IOType ioType);
 }

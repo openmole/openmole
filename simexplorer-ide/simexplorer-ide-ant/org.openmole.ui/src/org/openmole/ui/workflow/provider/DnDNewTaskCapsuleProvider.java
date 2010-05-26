@@ -49,10 +49,6 @@ public class DnDNewTaskCapsuleProvider extends DnDProvider{
     public void accept(Widget widget, Point point, Transferable transferable) {
     Widget w = UIFactory.getInstance().createTaskCapsule(scene,
                                                          point).getConnectableWidget();
-   // System.out.println("Point " + widget.convertLocalToScene(point).x + ", " + widget.convertLocalToScene(point).y);
-   // System.out.println("Point " + widget.convertSceneToLocal(point).x + ", " + widget.convertSceneToLocal(point).y);
-   // System.out.println("Point " + point.x + ", " + point.y);
-   // w.setPreferredLocation(widget.convertLocalToScene(point));
     scene.repaint();
     scene.revalidate();
 }

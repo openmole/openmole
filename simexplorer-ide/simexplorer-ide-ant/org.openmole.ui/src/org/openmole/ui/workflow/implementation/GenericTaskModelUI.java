@@ -16,13 +16,16 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import org.openmole.core.workflow.implementation.task.GenericTask;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.ui.commons.IOType;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
-import org.openmole.ui.workflow.model.ITaskViewUI;
 
 /**
  *
@@ -31,9 +34,27 @@ import org.openmole.ui.workflow.model.ITaskViewUI;
 public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI<T> {
 
     protected transient Collection<TableType.Name> fields;
-    private Collection<ITaskViewUI> views = new ArrayList<ITaskViewUI>();
+    private Set<IPrototype> prototypesIn;
+    private Set<IPrototype> prototypesOut;
     private final static String category = "Tasks";
     protected IGenericTask coreTask;
+
+    @Override
+    public void addPrototype(IPrototype p,
+                             IOType ioType){
+        if (ioType == IOType.INPUT) addPrototypeIn(p);
+        else addPrototypeOut(p);
+    }
+
+    private void addPrototypeIn(IPrototype p){
+        if (prototypesIn == null) prototypesIn = new HashSet<IPrototype>();
+        prototypesIn.add(p);
+    }
+
+     private void addPrototypeOut(IPrototype p){
+        if (prototypesOut == null) prototypesOut = new HashSet<IPrototype>();
+        prototypesOut.add(p);
+    }
 
     @Override
     public String getCategory() {

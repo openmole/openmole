@@ -27,7 +27,7 @@ import org.openmole.ui.workflow.model.IObjectModelUI;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class PopupMenuProviderFactory {
 
@@ -47,7 +47,7 @@ public class PopupMenuProviderFactory {
         return popupMenu;
     }
 
-    public static GenericMenuProvider merge(IGenericMenuProvider gmp1,
+  /*  public static GenericMenuProvider merge(IGenericMenuProvider gmp1,
                                             IGenericMenuProvider gmp2,
                                             IObjectModelUI mergedModel) {
 
@@ -73,10 +73,10 @@ public class PopupMenuProviderFactory {
             gmp.getItems().add(it2.next());
         }
         return gmp;
-    }
+    }*/
 
     public static JMenu addSubMenu(String subMenuTitle,
-            Collection<JMenuItem> items) {
+                                   Collection<JMenuItem> items) {
 
         JMenu subMenu = new JMenu(subMenuTitle);
         Iterator<JMenuItem> it = items.iterator();

@@ -17,17 +17,27 @@
 
 package org.openmole.ui.workflow.provider;
 
+import java.awt.Dialog;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.util.Exceptions;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.commons.ApplicationCustomize;
+import org.openmole.ui.commons.IOType;
+import org.openmole.ui.exception.MoleExceptionManagement;
 import org.openmole.ui.workflow.implementation.MoleScene;
-import org.openmole.ui.workflow.implementation.TaskCapsuleModelUI;
+import org.openmole.ui.workflow.implementation.MoleSceneManager;
 import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
 
 /**
@@ -37,10 +47,14 @@ import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
 public class DnDAddPrototypeProvider extends DnDProvider{
     private boolean encapsulated = false;
     private TaskCapsuleViewUI view;
+    private MoleScene moleScene;
+
+    private boolean dialogOK = false;
 
     public DnDAddPrototypeProvider(MoleScene molescene,
                                    TaskCapsuleViewUI view) {
         super(molescene);
+        this.moleScene = molescene;
         this.view = view;
     }
 
@@ -60,12 +74,23 @@ public class DnDAddPrototypeProvider extends DnDProvider{
     @Override
     public void accept(Widget widget, Point point, Transferable t) {
         try {
-            System.out.println("Add " + t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR));
-            System.out.println("Widget "+ (view.getTaskModel()));
+            String[] name = ((Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)).getName().split("\\.");
+            String inputValue = JOptionPane.showInputDialog("Create a new "+name[name.length-1]+" prototype");
+
+            MoleSceneManager manager = moleScene.getManager();
+            if (inputValue != null){
+            manager.registerPrototype(new Prototype(inputValue,
+                                                    (Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)));
+
+            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH/2) view.getTaskModel().addPrototype(manager.getPrototype(inputValue), IOType.INPUT);
+            else view.getTaskModel().addPrototype(manager.getPrototype(inputValue), IOType.OUTPUT);
+            }
+        } catch (UserBadDataError ex) {
+            MoleExceptionManagement.showException(ex);
         } catch (UnsupportedFlavorException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         }
     }
 

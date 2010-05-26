@@ -16,12 +16,14 @@
  */
 package org.openmole.ui.workflow.implementation;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
-import org.openmole.commons.exception.UserBadDataError;
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
-import org.openmole.ui.workflow.model.IObjectViewUI;
 
 /**
  *
@@ -29,57 +31,64 @@ import org.openmole.ui.workflow.model.IObjectViewUI;
  */
 public class MoleSceneManager {
 
-    private Map<String, ICapsuleModelUI> taskCapsuleModels = new WeakHashMap<String, ICapsuleModelUI>();
-    private Map<String, IGenericTaskModelUI> taskModels = new WeakHashMap<String, IGenericTaskModelUI>();
+    private BidiMap<String, ICapsuleModelUI> taskCapsuleModels = new DualHashBidiMap<String, ICapsuleModelUI>();
+    private Map<String, IPrototype> prototypes = new HashMap<String, IPrototype>();
+    private int nodeCounter = 0;
+    private int nodeID = 0;
 
-    public void registerTaskCapsuleModel(String nodeName,
-            ICapsuleModelUI cm) {
-      //  System.out.println("REGISTER " + nodeName + ", " + cm);
-        taskCapsuleModels.put(nodeName, cm);
+    public void incrementNodeName() {
+        nodeCounter++;
     }
 
-    public void registerTaskModel(String nodeName,
-                                  IGenericTaskModelUI tm) {
-        System.out.println("REGISTESR " + nodeName);
-        taskModels.put(nodeName,tm);
-    }
-    
-    public void setTransition(String start,
-            String end) throws UserBadDataError {
-        testTransitionAbility(start);
-        testTransitionAbility(end);
-        taskCapsuleModels.get(start).setTransitionTo(taskCapsuleModels.get(end).getTaskCapsule());
+    public String getNodeName() {
+        return "task" + nodeCounter;
     }
 
-    private boolean testTaskCapsuleExistence(String capsule){
-        System.out.println("testTaskCapsuleExistence " +taskCapsuleModels.containsKey(capsule) );
-        return taskCapsuleModels.containsKey(capsule);
+    public String getNodeID() {
+        return "node" + nodeID;
     }
 
-    public  boolean testTaskExistence(String task){
-        return taskModels.containsKey(task);
+    public void registerPrototype(IPrototype p) {
+        prototypes.put(p.getName(), p);
     }
 
-    public void testTransitionAbility(String capsule) throws UserBadDataError {
-        if (!testTaskCapsuleExistence(capsule)) {
-            throw new UserBadDataError(capsule + " is not a Task capsule. The transition can not be completed");
+    public IPrototype getPrototype(String st) throws UserBadDataError {
+        if (prototypes.containsKey(st)) {
+            return prototypes.get(st);
+        } else {
+            throw new UserBadDataError("The prototype " + st + " doest not exist.");
         }
     }
 
-    public boolean isObjectRenamable(String object){
-        if (testTaskExistence(object)) return true;
-        else if(testTaskCapsuleExistence(object)) return false;
-        else return false;
+    public Collection<String> getPrototypes(){
+        return prototypes.keySet();
+    }
+    
+    public void registerTaskCapsuleModel(ICapsuleModelUI cm) {
+        taskCapsuleModels.put(getNodeID(), cm);
+        nodeID++;
     }
 
-    IGenericTaskModelUI getTaskModelUI(String st){
-        if (testTaskExistence(st)) return taskModels.get(st);
-        else return null;
+    public String getTaskCapsuleModel(ICapsuleModelUI cm) {
+        return taskCapsuleModels.getKey(cm);
     }
 
-    public void printTask(){
-        for(String t: taskModels.keySet()){
-            System.out.println("TASK :: " + t);
+    public ICapsuleModelUI getTaskCapsuleModel(String name) {
+        return taskCapsuleModels.get(name);
+    }
+
+    public void removeTaskCapsuleModel(ICapsuleModelUI tc) {
+        taskCapsuleModels.remove(tc);
+    }
+
+    public void setTransition(String start,
+            String end) {
+        taskCapsuleModels.get(start).setTransitionTo(taskCapsuleModels.get(end).getTaskCapsule());
+    }
+
+    public void printTaskC() {
+        for (String t : taskCapsuleModels.keySet()) {
+            System.out.println("TASKC :: " + t);
         }
     }
 }

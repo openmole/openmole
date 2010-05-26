@@ -50,7 +50,6 @@ public class PrototypeNode extends AbstractNode {
      //DND start
     @Override
     public Transferable drag() throws IOException {
-        System.out.println("+++++++ drag");
         ExTransferable retValue = ExTransferable.create( super.drag() );
         //add the 'data' into the Transferable
         retValue.put( new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) {

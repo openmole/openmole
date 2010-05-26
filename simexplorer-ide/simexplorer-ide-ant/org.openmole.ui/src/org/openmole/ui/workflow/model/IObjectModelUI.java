@@ -16,7 +16,8 @@
  */
 package org.openmole.ui.workflow.model;
 
-import org.openmole.commons.aspect.eventdispatcher.IObjectChangedAsynchronousListener;
+import java.awt.Image;
+import org.openmole.misc.eventdispatcher.IObjectChangedAsynchronousListener;
 
 /**
  *
@@ -28,4 +29,6 @@ public interface IObjectModelUI <T> extends IObjectChangedAsynchronousListener<T
     void updateData();
     void setName(String name);
     String getName();
+    String getModelGroup();
+    String getCategory();
 }

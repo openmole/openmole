@@ -18,9 +18,13 @@ package org.openmole.ui.workflow.implementation;
 
 import org.openmole.ui.workflow.provider.MoleSceneMenuProvider;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Point;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.util.Iterator;
-import javax.swing.JComponent;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.ConnectProvider;
 import org.netbeans.api.visual.action.ConnectorState;
@@ -36,19 +40,20 @@ import org.netbeans.api.visual.widget.ConnectionWidget;
 import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
+import org.openide.util.ImageUtilities;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.model.IConnectable;
+import org.openmole.ui.workflow.model.ITaskCapsuleView;
 import org.openmole.ui.workflow.model.IMoleScene;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.pattern.IVisitor;
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.misc.tools.pattern.IVisitor;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.core.workflow.model.transition.ITransition;
 import org.openmole.core.workflow.model.transition.ITransitionSlot;
-import org.openmole.ui.exception.MoleExceptionManagement;
+import org.openmole.ui.control.MoleScenesManager;
+import org.openmole.ui.workflow.model.ICapsuleModelUI;
+import org.openmole.ui.workflow.provider.DnDNewTaskCapsuleProvider;
 
 /**
  *
@@ -66,8 +71,6 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     private LayerWidget connectLayer = new LayerWidget(this);
     private LayerWidget currentLayer = null;
     private Widget obUI = null;
-    private JComponent view;
-    private int nbNodes = 0;
     private int nbEdges = 0;
     private WidgetAction connectAction = ActionFactory.createConnectAction(connectLayer, new MoleSceneConnectProvider());
     private WidgetAction reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider());
@@ -81,88 +84,41 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         addChild(connectLayer);
 
         setPreferredSize(new Dimension((int) (ApplicationCustomize.SCREEN_WIDTH * 0.8), (int) (ApplicationCustomize.SCREEN_HEIGHT * 0.8)));
-        view = createView();
+       // view = createView();
         getActions().addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)));
-        getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskLayer));
-        getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskCapsuleLayer));
-        getActions().addAction(ActionFactory.createZoomAction());
+        //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskLayer));
+        //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskCapsuleLayer));
+       // getActions().addAction(ActionFactory.createZoomAction());
+      //  getActions().addAction(ActionFactory.createPanAction());
+
+        getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskCapsuleProvider(this)));
+
+        //getActions().addAction(ActionFactory.createAcceptAction(new DnDProvider(this)));
+
+        setMovable(true);
+        MoleScenesManager.getInstance().addMoleScene(this);
     }
 
     @Override
-    public JComponent getView() {
-        return view;
-    }
-
     public MoleSceneManager getManager() {
         return manager;
     }
 
-    public IConnectable createTaskComposite(IGenericTaskCapsule obj,
-            String text) throws InternalProcessingError, UserBadDataError {
-        nbNodes++;
-        obUI = new TaskCompositeViewUI(this,
-                UIFactory.getInstance().createTaskCapsuleModel(obj),
-                (IGenericTaskModelUI) UIFactory.getInstance().createTaskModel(obj.getAssignedTask()),
-                text);
-        currentLayer = taskCompositeLayer;
-        addNode(text).setPreferredLocation(new Point(nbNodes % 5 * 200, nbNodes % 4100));
-        return (IConnectable) obUI;
-
-    }
-
-    public TaskViewUI createTask(IGenericTask obj,
-            String text) {
-        nbNodes++;
-        obUI = new TaskViewUI(this,
-                (IGenericTaskModelUI) UIFactory.getInstance().createTaskModel(obj), text);
-
-        currentLayer = taskLayer;
-        addNode(text).setPreferredLocation(new Point(nbNodes % 5 * 200, nbNodes % 4100));
-
-        TaskViewUI tv = (TaskViewUI) obUI;
-        tv.setTask(obj);
-        return tv;
-    }
-
-    @Override
-    public TaskViewUI createTask(IGenericTask obj) {
-        return createTask(obj, "Task" + (nbNodes + 1));
-    }
-
-    @Override
-    public IConnectable createTaskCapsule() {
-        return createTaskCapsule("TaskCapsule" + (nbNodes + 1));
-    }
-
-    public IConnectable createTaskCapsule(String name) {
-        nbNodes++;
-        obUI = new TaskCapsuleViewUI(this,
-                new TaskCapsuleModelUI(),
-                name);
-        currentLayer = taskCapsuleLayer;
-        addNode(name).setPreferredLocation(new Point(nbNodes % 5 * 200, nbNodes % 4100));
-        return (IConnectable) obUI;
-    }
-
     public void createEdge(String sourceNodeID, String targetNodeID) {
-        try {
-            //  manager.setSingleTransition(sourceNodeID, targetNodeID);
-            manager.setTransition(sourceNodeID, targetNodeID);
             String ed = "edge" + String.valueOf(nbEdges++);
             addEdge(ed);
             setEdgeSource(ed, sourceNodeID);
             setEdgeTarget(ed, targetNodeID);
-        } catch (UserBadDataError ex) {
-            MoleExceptionManagement.getInstance().showException(ex);
         }
-    }
 
-    public void removeElement(Widget wi) {
-        taskLayer.removeChild(wi);
+    public void removeElement(ICapsuleModelUI cm){
+        removeNode(getManager().getTaskCapsuleModel(cm));
+        getManager().removeTaskCapsuleModel(cm);
     }
 
     @Override
     protected Widget attachNodeWidget(String n) {
+
         currentLayer.addChild(obUI);
         obUI.createActions(CONNECT).addAction(connectAction);
         obUI.getActions().addAction(createObjectHoverAction());
@@ -185,14 +141,14 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     @Override
     protected void attachEdgeSourceAnchor(String edge, String oldSourceNode, String sourceNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        cw.setSourceAnchor(((IConnectable) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
+        cw.setSourceAnchor(((ITaskCapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
         cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
     }
 
     @Override
     protected void attachEdgeTargetAnchor(String edge, String oldTargetNode, String targetNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        cw.setTargetAnchor(((IConnectable) (findWidget(targetNode))).getConnectableWidget().getInputSlotAnchor(0));
+        cw.setTargetAnchor(((ITaskCapsuleView) (findWidget(targetNode))).getConnectableWidget().getInputSlotAnchor(0));
     }
 
     @Override
@@ -244,33 +200,35 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
     private void buildXXTasks(IGenericTaskCapsule tCapsule,
             String nodeID) throws InternalProcessingError, UserBadDataError {
-        IConnectable connectable = null;
+        ITaskCapsuleView connectable = null;
 
         if (tCapsule.getTask() != null) {
             if (!getNodes().contains(nodeID)) {
-                connectable = createTaskComposite(tCapsule, nodeID);
-                initConnectable(tCapsule, connectable);
+              //  connectable = createTaskComposite(tCapsule, nodeID);
+              //  connectable = UIFactory.getInstance().createTaskComposite(this, tCapsule);
+              //  initConnectable(tCapsule, connectable);
             }
         } else {
             if (!getNodes().contains(nodeID)) {
-                if (nodeID.isEmpty()) {
+               /* if (nodeID.isEmpty()) {
                     connectable = createTaskCapsule(nodeID);
                 } else {
                     connectable = createTaskCapsule();
-                }
-                initConnectable(tCapsule, connectable);
+                }*/
+                UIFactory.getInstance().createTaskCapsule(this);
+             //   initConnectable(tCapsule, connectable);
             }
         }
     }
 
-    private void initConnectable(IGenericTaskCapsule tCapsule,
+  /*  private void initConnectable(IGenericTaskCapsule tCapsule,
             IConnectable connectable) {
         for (int i = 0; i < tCapsule.getIntputTransitionsSlots().size(); ++i) {
             connectable.addInputSlot();
             connectable.addOutputSlot();
         }
         connectable.setTaskCapsule(tCapsule);
-    }
+    }*/
 
     @Override
     public void refresh() {
@@ -287,6 +245,18 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
             setActiveTool(CONNECT);
             setActiveTool(RECONNECT);
         }
+    }
+
+    @Override
+    public void initCompositeAdd(Widget w) {
+        currentLayer = taskCompositeLayer;
+        obUI = w;
+    }
+
+    @Override
+    public void initCapsuleAdd(Widget w) {
+        currentLayer = taskCapsuleLayer;
+        obUI = w;
     }
 
     private class MoleSceneConnectProvider implements ConnectProvider {
@@ -389,4 +359,16 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
             MoleScene.this.repaint();
         }
     }
+
+    public Image getImageFromTransferable(Transferable transferable) {
+    Object o = null;
+    try {
+        o = transferable.getTransferData(DataFlavor.imageFlavor);
+    } catch (IOException ex) {
+        ex.printStackTrace();
+    } catch (UnsupportedFlavorException ex) {
+        ex.printStackTrace();
+    }
+    return o instanceof Image ? (Image) o : ImageUtilities.loadImage("ressources/shape1.png");
+}
 }

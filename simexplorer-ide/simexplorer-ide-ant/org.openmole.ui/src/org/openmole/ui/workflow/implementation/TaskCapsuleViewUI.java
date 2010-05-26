@@ -16,9 +16,6 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import org.openmole.ui.workflow.provider.PopupMenuProviderFactory;
-import org.openmole.ui.workflow.provider.TaskMenuProvider;
-import org.openmole.ui.workflow.provider.GenericMenuProvider;
 import org.openmole.ui.workflow.provider.TaskCapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
@@ -45,6 +42,7 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
     protected MyConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeProvider dnDAddPrototypeProvider;
+    private TaskCapsuleMenuProvider taskCapsuleMenuProvider;
 
     public TaskCapsuleViewUI(MoleScene scene,
             ICapsuleModelUI tcm) {
@@ -68,7 +66,8 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
 
         dnDAddPrototypeProvider = new DnDAddPrototypeProvider(scene, this);
 
-        getActions().addAction(ActionFactory.createPopupMenuAction(new TaskCapsuleMenuProvider(scene, this)));
+        taskCapsuleMenuProvider = new TaskCapsuleMenuProvider(scene, this);
+        getActions().addAction(ActionFactory.createPopupMenuAction(taskCapsuleMenuProvider));
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(scene, this)));
         getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider));
 
@@ -92,12 +91,11 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         scene.getManager().incrementNodeName();
         connectableWidget.addTitle(scene.getManager().getNodeName());
 
+       // getActions().removeAction(taskCapsuleWidgetAction);
+       // getActions().addAction(ActionFactory.createPopupMenuAction(gmp));
+       // getActions().addAction(ActionFactory.createPopupMenuAction(new TaskCapsuleMenuProvider(scene, this)));
 
-        GenericMenuProvider gmp = PopupMenuProviderFactory.merge(new TaskMenuProvider(taskModel),
-                new TaskCapsuleMenuProvider(scene, this),
-                capsuleModel);
-
-        getActions().addAction(ActionFactory.createPopupMenuAction(gmp));
+        taskCapsuleMenuProvider.addTaskMenus();
         getActions().addAction(new TaskActions(taskModel, this));
     }
 

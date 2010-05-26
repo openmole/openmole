@@ -16,11 +16,14 @@
  */
 package org.openmole.ui.workflow.provider;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import org.netbeans.api.visual.widget.Widget;
+import org.openmole.ui.workflow.action.AddExistingPrototype;
 import org.openmole.ui.workflow.action.AddInputAction;
 import org.openmole.ui.workflow.action.AddOutputAction;
 import org.openmole.ui.workflow.action.AddTaskAction;
@@ -30,13 +33,31 @@ import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleMenuProvider extends GenericMenuProvider{
+public class TaskCapsuleMenuProvider extends GenericMenuProvider {
+
+    private JMenu prototypeMenu;
+    private MoleScene scene;
+    private boolean encapsulated = false;
+
+    @Override
+    public JPopupMenu getPopupMenu(Widget widget, Point point) {
+        if (encapsulated) {
+            Collection<JMenuItem> col = fillPrototypeMenu();
+            if (!col.isEmpty()) {
+                menus.remove(prototypeMenu);
+                prototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ",col);
+                menus.add(prototypeMenu);
+            }
+        }
+        return super.getPopupMenu(widget, point);
+    }
 
     public TaskCapsuleMenuProvider(MoleScene scene,
-                                   TaskCapsuleViewUI capsuleView) {
+            TaskCapsuleViewUI capsuleView) {
         super();
+        this.scene = scene;
         JMenuItem mItemI = new JMenuItem("an input slot");
         mItemI.addActionListener(new AddInputAction(capsuleView));
 
@@ -49,28 +70,35 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider{
         colI.add(mItemO);
 
 
-      Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
-        for (Class c :Preferences.getInstance().getBusinessClasses()){
+        Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
+        for (Class c : Preferences.getInstance().getBusinessClasses()) {
             String[] name = c.getName().split("\\.");
-            JMenuItem it = new JMenuItem(name[name.length-1]);
+            JMenuItem it = new JMenuItem(name[name.length - 1]);
             it.addActionListener(new AddTaskAction(scene,
-                                                   capsuleView,
-                                                   //Preferences.getInstance().getModelClass(c)));
-                                                    c));
+                    capsuleView,
+                    c));
             colTask.add(it);
         }
 
-   /*     Collection<JMenuItem> colI = new ArrayList<JMenuItem>();
-        colI.add(itemTCapsule);
-        colI.add(PopupMenuProviderFactory.addSubMenu("a Task ",colTask));*/
-
-        menus.add(PopupMenuProviderFactory.addSubMenu("Encapsulate a task ",colTask));
-
-
+        menus.add(PopupMenuProviderFactory.addSubMenu("Encapsulate a task ", colTask));
         menus.add(PopupMenuProviderFactory.addSubMenu("Add ",
-                                                       colI));
-        
+                colI));
         JMenuItem itR = new JMenuItem("Remove");
         items.add(itR);
+    }
+
+    public void addTaskMenus() {
+        encapsulated = true;
+    }
+
+    public Collection<JMenuItem> fillPrototypeMenu() {
+        Collection<JMenuItem> prototypeCol = new ArrayList<JMenuItem>();
+        ;
+        for (String p : scene.getManager().getPrototypes()) {
+            JMenuItem it = new JMenuItem(p);
+            it.addActionListener(new AddExistingPrototype(p));
+            prototypeCol.add(it);
+        }
+        return prototypeCol;
     }
 }

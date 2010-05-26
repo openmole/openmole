@@ -18,7 +18,6 @@ package org.openmole.ui.palette;
 
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.beans.BeanInfo;
 import java.io.IOException;
