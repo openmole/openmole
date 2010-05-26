@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Export-Package: org.openmole.commons.aspect.eventdispatcher;aspects=EventAspect;aspect-policy:=opt-out;uses:="org.aspectj.lang.annotation,org.aspectj.lang";version="0.3"
+Bundle-ActivationPolicy: lazy
+Built-By: reuillon
+Bundle-Version: 0.3
+Bundle-Name: org.openmole.commons.aspect.eventdispatcher
+Created-By: Apache Maven Bundle Plugin
+Bundle-ManifestVersion: 2
+Bundle-Activator: org.openmole.commons.aspect.eventdispatcher.internal.Activator
+Bundle-License: http://www.gnu.org/copyleft/gpl.html
+Bundle-SymbolicName: org.openmole.commons.aspect.eventdispatcher;singleton:=true
+Import-Package: org.osgi.framework;version="1.5", org.openmole.commons.exception, org.aspectj.lang, org.aspectj.lang.reflect, org.aspectj.lang.annotation, org.aspectj.runtime.internal, org.openmole.commons.tools.pattern, org.openmole.commons.tools.structure, org.openmole.commons.tools.object
+
