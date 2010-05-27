@@ -15,7 +15,7 @@ public aspect CachingAspect {
 	Object around(): execution(* *(..)) && @annotation(org.openmole.commons.aspect.caching.Cachable) {
 		
 		Object object = thisJoinPoint.getThis();
-		String method = thisJoinPoint.getSignature().toString();		
+		String method = thisJoinPointStaticPart.getSignature().toString();
 
 		Object ret = methodCache.getCachedMethodResult(object, method);
 		
@@ -45,7 +45,7 @@ public aspect CachingAspect {
 
 	Object around(): execution(* *(..)) && @annotation(org.openmole.commons.aspect.caching.SoftCachable) {
 		Object object = thisJoinPoint.getThis();
-		String method = thisJoinPoint.getSignature().toString();
+		String method = thisJoinPointStaticPart.getSignature().toString();
 
 		
 		Object ret = softMethodCache.getCachedMethodResult(object, method);

@@ -16,7 +16,7 @@ public aspect EventAspect {
 		
 		Object object = thisJoinPoint.getThis();
 
-                Method method = ((MethodSignature) thisJoinPoint.getSignature()).getMethod();
+                Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                 ObjectModified annotation = method.getAnnotation(ObjectModified.class);
 
                 Activator.getEventDispatcher().objectChanged(object,annotation.type(), thisJoinPoint.getArgs());
@@ -28,10 +28,10 @@ public aspect EventAspect {
 		Object object = thisJoinPoint.getThis();
 		//Object ret = proceed();
 
-               // Method method = ((MethodSignature) thisJoinPoint.getSignature()).getMethod();
+               // Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                // ObjectModified annotation = method.getAnnotation(ObjectModified.class);
 
-               // Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,"ctr: " + thisJoinPoint.getSignature().toString());
+               // Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,"ctr: " + thisJoinPointStaticPart.getSignature().toString());
 
                 Activator.getEventDispatcher().objectConstructed(object);
 		//Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,object.toString() + " "+ method);
