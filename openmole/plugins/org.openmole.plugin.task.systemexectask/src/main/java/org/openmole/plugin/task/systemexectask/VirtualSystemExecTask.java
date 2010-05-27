@@ -29,11 +29,11 @@ import org.openmole.commons.exception.UserBadDataError;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public class VirtualSystemExecTask extends Task {
+    
 
     public VirtualSystemExecTask(String name) throws UserBadDataError, InternalProcessingError {
         super(name);
     }
-
 
     @Override
     protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {

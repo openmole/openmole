@@ -21,8 +21,11 @@ package org.openmole.plugin.resource.virtual;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
@@ -36,6 +39,7 @@ import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.io.FastCopy;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
 import static org.openmole.commons.tools.io.Network.*;
@@ -45,6 +49,8 @@ import static org.openmole.commons.tools.io.Network.*;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public class VirtualMachineResource extends ComposedResource {
+
+    static String[] files = {"qemu", "bios.bin"};
 
     static ConfigurationLocation VirtualMachineBootTimeOut = new ConfigurationLocation(VirtualMachine.class.getSimpleName(), "VirtualMachineBootTimeOut");
 
@@ -72,7 +78,8 @@ public class VirtualMachineResource extends ComposedResource {
 
             @Override
             public void connect(int port) throws Exception {
-               CommandLine commandLine = CommandLine.parse(new File(getQEmuDir(), "qemu").getAbsolutePath() + " -nographic -hda " + system.getDeployedFile().getAbsolutePath() + " tcp:" + port + "::22");
+                File qemuDir = getQEmuDir();
+               CommandLine commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + system.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " tcp:" + port + "::22");
                
                Process process = getCommandLauncher().exec(commandLine, new HashMap());
                getProcessDestroyer().add(process);
@@ -129,12 +136,27 @@ public class VirtualMachineResource extends ComposedResource {
     private File getQEmuDir() throws IOException, InternalProcessingError {
         String os = System.getProperty("os.name");
         File qemuDir = Activator.getWorkspace().newTmpDir();
-        //String jarDir
+        String qemuJarPath;
 
         if(os.toLowerCase().contains("linux")) {
-
+            qemuJarPath = "qemu_linux/";
+        } else {
+            throw new InternalProcessingError("Unsuported OS " + os);
         }
-        return null;
+
+        for(String f: files) {
+            File dest = new File(qemuDir, f);
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
+
+            try {
+                FastCopy.copy(this.getClass().getResourceAsStream(qemuJarPath + f), outputStream);
+            } finally {
+                outputStream.close();
+            }
+            dest.setExecutable(true);
+        }
+
+        return qemuDir;
     }
 
 }
