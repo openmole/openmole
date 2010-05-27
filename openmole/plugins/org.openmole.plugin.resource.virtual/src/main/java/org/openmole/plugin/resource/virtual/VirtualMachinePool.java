@@ -17,7 +17,6 @@
 package org.openmole.plugin.resource.virtual;
 
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -25,7 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.collections15.bidimap.TreeBidiMap;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -77,7 +75,7 @@ public class VirtualMachinePool implements IVirtualMachinePool {
     }
 
     @Override
-    public IVirtualMachine borrowAVirtualMachine() throws InternalProcessingError, UserBadDataError {
+    public IVirtualMachine borrowAVirtualMachine() throws InternalProcessingError, UserBadDataError, InterruptedException {
         synchronized (pool) {
             if (!pool.isEmpty()) {
                 PooledVM pooledVM = pool.pollFirst();

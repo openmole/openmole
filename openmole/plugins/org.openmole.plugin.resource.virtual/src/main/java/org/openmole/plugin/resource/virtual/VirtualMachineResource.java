@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
@@ -76,7 +77,7 @@ public class VirtualMachineResource extends ComposedResource {
         this(new File(system), user, password);
     }
 
-    IVirtualMachine launchAVirtualMachine() throws InternalProcessingError, UserBadDataError {
+    IVirtualMachine launchAVirtualMachine() throws InternalProcessingError, UserBadDataError, InterruptedException {
        
         class VirtualMachineConnector implements IConnectable {
             IVirtualMachine virtualMachine;
@@ -84,7 +85,7 @@ public class VirtualMachineResource extends ComposedResource {
             @Override
             public void connect(int port) throws Exception {
                 File qemuDir = getQEmuDir();
-               CommandLine commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + system.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " tcp:" + port + "::22");
+               CommandLine commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + system.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22");
                
                Process process = getCommandLauncher().exec(commandLine, new HashMap());
                getProcessDestroyer().add(process);
@@ -104,11 +105,12 @@ public class VirtualMachineResource extends ComposedResource {
         } catch (Exception e) {
             throw new InternalProcessingError(e);
         }
+
         IVirtualMachine virtualMachine = connector.getVirtualMachine();
         JSch jsch = new JSch();
 
         try {
-            Session session = jsch.getSession(user, virtualMachine.getHost(), 22);
+            Session session = jsch.getSession(user, virtualMachine.getHost(), virtualMachine.getPort());
             session.setPassword(password);
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect( Activator.getWorkspace().getPreferenceAsDurationInS(VirtualMachineBootTimeOut) );
@@ -144,7 +146,7 @@ public class VirtualMachineResource extends ComposedResource {
         String qemuJarPath;
 
         if(os.toLowerCase().contains("linux")) {
-            qemuJarPath = "qemu_linux/";
+            qemuJarPath = "/qemu_linux/";
         } else {
             throw new InternalProcessingError("Unsuported OS " + os);
         }
@@ -154,7 +156,7 @@ public class VirtualMachineResource extends ComposedResource {
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
 
             try {
-               FastCopy.copy(this.getClass().getResourceAsStream(qemuJarPath + f), outputStream);
+                FastCopy.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
             } finally {
                 outputStream.close();
             }

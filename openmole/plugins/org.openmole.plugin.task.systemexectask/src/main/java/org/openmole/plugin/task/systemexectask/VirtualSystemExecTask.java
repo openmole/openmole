@@ -24,6 +24,8 @@ import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.task.annotations.Resource;
+import org.openmole.plugin.resource.virtual.IVirtualMachine;
+import org.openmole.plugin.resource.virtual.IVirtualMachinePool;
 import org.openmole.plugin.resource.virtual.VirtualMachineResource;
 
 /**
@@ -43,6 +45,10 @@ public class VirtualSystemExecTask extends Task {
     @Override
     protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         System.out.println("Execute virtual task.");
+        IVirtualMachinePool pool = virtualMachineResource.getVirtualMachinePool();
+        IVirtualMachine virtualMachine = pool.borrowAVirtualMachine();
+        pool.returnVirtualMachine(virtualMachine);
+         System.out.println("Executed virtual task.");
     }
 
 }
