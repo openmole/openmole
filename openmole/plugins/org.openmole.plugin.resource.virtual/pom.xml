@@ -22,6 +22,20 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.exec</artifactId>
+            <version>${lib.org.apache.commons.exec.version}</version>
+        </dependency>
+    </dependencies>
+
+<!--
+    <dependencies>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.core.workflow.implementation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
@@ -42,7 +56,7 @@
             <version>${lib.com.jcraft.jsch.version}</version>
         </dependency>
     </dependencies>
-
+-->
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
@@ -57,12 +71,6 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <bundle.namespace>${project.artifactId}</bundle.namespace>
-        <import.packages>*;resolution:=optional</import.packages>
-        <export.packages>${bundle.namespace}.*;version="${pom.version}"</export.packages>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
 	<bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
     </properties>
 

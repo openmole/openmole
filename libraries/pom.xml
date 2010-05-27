@@ -16,6 +16,7 @@
     <artifactId>libraries</artifactId>
 
     <modules>
+	<module>au.com.bytecode.opencsv</module>
         <module>com.db4o</module>
         <module>com.ice.tar</module>
         <module>com.jcraft.jsch</module>
@@ -31,6 +32,9 @@
         <module>com.ibm.icu</module>
         <module>net.sourceforge.jline</module>
 	<module>org.joda.time</module>
+	<module>org.scala-lang.scala</module>
+	<module>org.jfree.jfreechart</module>
+	<module>org.apache.commons.exec</module>
     </modules>
 
     <!-- ************************************************************* -->

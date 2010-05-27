@@ -36,15 +36,6 @@
 
     <packaging>bundle</packaging>
 
-    <properties>
-        <bundle.namespace>${project.artifactId}</bundle.namespace>
-        <import.packages>*;resolution:=optional</import.packages>
-        <export.packages>${bundle.namespace}.*;version="${pom.version}"</export.packages>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
-    </properties>
-
 </project>
 
 

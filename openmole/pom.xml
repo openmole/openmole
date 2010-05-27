@@ -48,10 +48,12 @@
                         <aspectLibrary>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
+			    <version>${project.version}</version>
                         </aspectLibrary>
                         <aspectLibrary>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.caching</artifactId>
+			    <version>${project.version}</version>
                         </aspectLibrary>
                     </aspectLibrarys>
                     <!--<weaveDependencies>

@@ -96,10 +96,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <bundle.namespace>${project.artifactId}</bundle.namespace>
-	<export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-        <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>
 
 </project>

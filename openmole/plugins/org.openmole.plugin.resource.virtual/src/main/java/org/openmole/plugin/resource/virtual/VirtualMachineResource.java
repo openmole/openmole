@@ -42,6 +42,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.FastCopy;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
+
 import static org.openmole.commons.tools.io.Network.*;
 
 /**
@@ -69,6 +70,10 @@ public class VirtualMachineResource extends ComposedResource {
         this.system = new FileResource(system);
         this.user = user;
         this.password = password;
+    }
+
+    public VirtualMachineResource(String system, String user, String password) {
+        this(new File(system), user, password);
     }
 
     IVirtualMachine launchAVirtualMachine() throws InternalProcessingError, UserBadDataError {
@@ -149,7 +154,7 @@ public class VirtualMachineResource extends ComposedResource {
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
 
             try {
-                FastCopy.copy(this.getClass().getResourceAsStream(qemuJarPath + f), outputStream);
+               FastCopy.copy(this.getClass().getResourceAsStream(qemuJarPath + f), outputStream);
             } finally {
                 outputStream.close();
             }
