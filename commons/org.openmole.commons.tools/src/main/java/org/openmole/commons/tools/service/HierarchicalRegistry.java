@@ -54,7 +54,7 @@ public class HierarchicalRegistry<T> {
 
     public Collection<T> getClosestRegistred(Class c) {
 
-        class PrioritySort implements Comparable<PrioritySort>{
+        class PrioritySort<T> implements Comparable<PrioritySort>{
             Integer priority;
             T t;
 
@@ -73,7 +73,7 @@ public class HierarchicalRegistry<T> {
         toProceed.offer(new Duo<Class, Integer>(c, 0));
 
 
-        SortedBag<PrioritySort> result = new TreeBag<PrioritySort>();
+        SortedBag<PrioritySort<T>> result = new TreeBag<PrioritySort<T>>();
 
 
         while(result.isEmpty() && !toProceed.isEmpty()) {
@@ -84,7 +84,7 @@ public class HierarchicalRegistry<T> {
             Duo<T, Integer> registred = registry.get(curClass);
 
             if(registred != null) {
-                result.add(new PrioritySort(registred.getRight(), registred.getLeft()));
+                result.add(new PrioritySort<T>(registred.getRight(), registred.getLeft()));
                 Set<Class> seen = new HashSet<Class>();
                 seen.add(curClass);
 
@@ -118,7 +118,7 @@ public class HierarchicalRegistry<T> {
 
         Collection<T> res = new ArrayList<T>(result.size());
 
-        for(PrioritySort p : result) {
+        for(PrioritySort<T> p : result) {
             res.add(p.t);
         }
 
