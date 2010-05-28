@@ -31,7 +31,7 @@ public abstract class JSAGAEnvironment<DESC extends IBatchEnvironmentDescription
     final public static ConfigurationLocation CPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "CPUTime");
 
     static  {
-        Activator.getWorkspace().addToConfigurations(CPUTime, Long.toString(12 * 60 * 60));
+        Activator.getWorkspace().addToConfigurations(CPUTime, "PT12H");
     }
  
 

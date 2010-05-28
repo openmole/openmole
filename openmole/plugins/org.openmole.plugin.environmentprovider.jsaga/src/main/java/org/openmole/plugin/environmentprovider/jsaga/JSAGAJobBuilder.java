@@ -76,7 +76,7 @@ public class JSAGAJobBuilder {
             writter.close();
 
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
-            description.setAttribute(JobDescription.TOTALCPUTIME, Activator.getWorkspace().getPreference(JSAGAEnvironment.CPUTime));
+            description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(Activator.getWorkspace().getPreferenceAsDurationInS(JSAGAEnvironment.CPUTime)).toString());
             description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(Activator.getWorkspace().getPreferenceAsInt(BatchEnvironment.MemorySizeForRuntime) + 100).toString());
 
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().getSchemeSpecificPart() + ">" + tmpScript.getName()});

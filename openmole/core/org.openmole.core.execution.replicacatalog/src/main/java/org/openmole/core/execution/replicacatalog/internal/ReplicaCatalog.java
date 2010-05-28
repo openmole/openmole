@@ -66,7 +66,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
     static ConfigurationLocation GCUpdateInterval = new ConfigurationLocation(ReplicaCatalog.class.getSimpleName(), "GCUpdateInterval");
 
     static {
-        Activator.getWorkpace().addToConfigurations(GCUpdateInterval, "240000");
+        Activator.getWorkpace().addToConfigurations(GCUpdateInterval, "PT2M");
     }
     final ReplicaLockRepository locks;
     final ObjectContainer objServeur;
@@ -77,7 +77,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             String objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
-            long updateInterval = Activator.getWorkpace().getPreferenceAsInt(GCUpdateInterval);
+            long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
             Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this, updateInterval), ExecutorType.OWN);
         } catch (Db4oIOException e) {
             throw new InternalProcessingError(e);

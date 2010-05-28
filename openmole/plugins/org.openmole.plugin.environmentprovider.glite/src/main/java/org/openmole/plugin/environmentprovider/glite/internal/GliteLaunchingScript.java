@@ -33,7 +33,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript<GliteEnvironm
     final Integer memorySize;
 
     static {
-        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "1800000");
+        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT30M");
     }
 
     public GliteLaunchingScript(Integer memorySize) {
@@ -92,7 +92,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript<GliteEnvironm
 
     @SoftCachable
     String getTimeOut() throws InternalProcessingError {
-        String timeOut = new Integer(Activator.getWorkspace().getPreferenceAsInt(LCGCPTimeOut) / 1000).toString();
+        String timeOut = new Integer(Activator.getWorkspace().getPreferenceAsDurationInS(LCGCPTimeOut)).toString();
         return timeOut;
     }
 }
