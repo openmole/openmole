@@ -6,9 +6,7 @@
 package org.openmole.ui.workflow.model;
 
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.workflow.implementation.MoleSceneManager;
-import org.openmole.ui.workflow.implementation.TaskViewUI;
 
 /**
  *

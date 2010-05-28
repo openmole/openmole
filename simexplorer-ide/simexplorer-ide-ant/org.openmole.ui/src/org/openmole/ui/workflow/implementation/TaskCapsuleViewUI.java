@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation;
 
+import java.util.Properties;
 import org.openmole.ui.workflow.provider.TaskCapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
@@ -24,7 +25,6 @@ import org.openmole.ui.workflow.model.IObjectModelUI;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.implementation.Preferences.Settings;
 import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;
 import org.openmole.ui.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
@@ -45,11 +45,13 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
     private TaskCapsuleMenuProvider taskCapsuleMenuProvider;
 
     public TaskCapsuleViewUI(MoleScene scene,
-            ICapsuleModelUI tcm) {
+                             ICapsuleModelUI tcm,
+                             Properties properties) {
 
-        super(scene,
+       /* super(scene,
                 Preferences.getInstance().getCapsuleModelSettings().getDefaultBackgroundColor(),
-                Preferences.getInstance().getCapsuleModelSettings().getDefaultBorderColor());
+                Preferences.getInstance().getCapsuleModelSettings().getDefaultBorderColor());*/
+        super(scene,properties);
         capsuleModel = tcm;
 
         ApplicationCustomize colorCustomize = ApplicationCustomize.getInstance();
@@ -78,16 +80,21 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
     }
 
     public void encapsule(Class<? extends IGenericTask> coreTaskClass) {
-        this.taskModel = UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModelClass(coreTaskClass));
+        this.taskModel = UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(PropertyManager.TASK,coreTaskClass));
         this.taskModel.setTask(UIFactory.getInstance().createCoreTaskInstance(coreTaskClass));
 
-        Settings sets = Preferences.getInstance().getModelSettings((Class<? extends IObjectModelUI>) taskModel.getClass());
-        connectableWidget.setBackgroundCol(sets.getDefaultBackgroundColor());
-        connectableWidget.setBorderCol(sets.getDefaultBorderColor());
-        connectableWidget.setBackgroundImaqe(sets.getDefaultBackgroundImage());
+     //   Settings sets = Preferences.getInstance().getModelSettings((Class<? extends IObjectModelUI>) taskModel.getClass());
+
+        //properties = PropertyManager.read("src/resources/task/"+coreTaskClass.getName());
+        properties = Preferences.getInstance().getProperties(PropertyManager.TASK, coreTaskClass);
+        connectableWidget.setBackgroundCol(getBackgroundColor());
+        connectableWidget.setBorderCol(getBorderColor());
+        connectableWidget.setBackgroundImaqe(getBackgroundImage());
 
         dnDAddPrototypeProvider.setEncapsulated(true);
 
+        System.out.println("scene " +scene );
+        System.out.println("sceneM" +scene.getManager() );
         scene.getManager().incrementNodeName();
         connectableWidget.addTitle(scene.getManager().getNodeName());
 

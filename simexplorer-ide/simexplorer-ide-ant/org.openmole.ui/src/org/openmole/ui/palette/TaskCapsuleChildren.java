@@ -16,11 +16,9 @@
  */
 package org.openmole.ui.palette;
 
-import java.awt.datatransfer.DataFlavor;
 import java.util.ArrayList;
 import org.openide.nodes.Node;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.implementation.TaskCapsuleModelUI;
 
 /**
  *
@@ -31,7 +29,6 @@ public class TaskCapsuleChildren extends GenericChildren {
     @Override
     protected java.util.List<Node> initCollection() {
         ArrayList childrenNodes = new ArrayList(1);
-           // childrenNodes.add(new TaskCapsuleNode(new DataFlavor(TaskCapsuleModelUI.class,"Tasks capsule")));
             childrenNodes.add(new TaskCapsuleNode(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR));
     return childrenNodes;
     }

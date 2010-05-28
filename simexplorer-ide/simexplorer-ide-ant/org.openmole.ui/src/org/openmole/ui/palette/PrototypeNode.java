@@ -42,8 +42,7 @@ public class PrototypeNode extends AbstractNode {
         super(Children.LEAF, Lookups.fixed(new Object[]{key}));
         this.dataFlavor = key;
         this.prototypeClass = prototypeClass;
-        String[] name = prototypeClass.getName().split("\\.");
-        setName(name[name.length-1]);
+        setName(prototypeClass.getSimpleName());
       //  setIconBaseWithExtension(Preferences.getInstance().getModelSettings(Preferences.getInstance().getModelClass(coreTask)).getThumbImagePath());
     }
 

@@ -17,7 +17,6 @@
 package org.openmole.ui.workflow.implementation;
 
 import java.awt.Point;
-import org.openide.util.Exceptions;
 import java.lang.reflect.InvocationTargetException;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.core.workflow.model.task.IGenericTask;
@@ -91,13 +90,16 @@ public class UIFactory implements IUIFactory<Object> {
     }
 
     public ITaskCapsuleView createTaskCapsule(MoleScene scene) {
-        return createTaskCapsule(scene, new Point(0, 0));
+            return createTaskCapsule(scene, new Point(0, 0));
     }
 
     public ITaskCapsuleView createTaskCapsule(MoleScene scene,
-            Point locationPoint) {
+                                              Point locationPoint){
         TaskCapsuleModelUI tcm = new TaskCapsuleModelUI();
-        Widget obUI = new TaskCapsuleViewUI(scene, tcm);
+        Widget obUI = new TaskCapsuleViewUI(scene,
+                                            tcm,
+                                            Preferences.getInstance().getProperties(PropertyManager.TASK_CAPSULE,
+                                                                                    org.openmole.core.workflow.implementation.capsule.TaskCapsule.class));
         scene.initCapsuleAdd(obUI);
         scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
         scene.getManager().registerTaskCapsuleModel(tcm);

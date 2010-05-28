@@ -14,20 +14,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ui.workflow.model;
-
-import java.awt.Color;
-import java.awt.Image;
-import org.openmole.ui.workflow.implementation.paint.MyWidget;
+package org.openmole.ui.commons;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public interface IObjectViewUI{
-    IObjectModelUI getModel();
-    Color getBackgroundColor();
-    Color getBorderColor();
-    Image getBackgroundImage();
-    MyWidget getWidget();
+public enum IOType {
+	INPUT,
+	OUTPUT
 }

@@ -20,41 +20,31 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
 import org.openide.util.datatransfer.ExTransferable;
 
-import org.openide.util.lookup.Lookups;
 import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.implementation.Preferences;
+import org.openmole.ui.workflow.implementation.PropertyManager;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskNode extends AbstractNode {
+public class TaskNode extends GenericNode {
 
-    private DataFlavor dataFlavor;
-   // private Class<? extends IGenericTaskModelUI> model;
     private Class<? extends IGenericTask> coreTask;
 
     public TaskNode(DataFlavor key,
-                  //  Class<? extends IGenericTaskModelUI> taskModel) {
                     Class<? extends IGenericTask> coreTask) {
-        super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-        this.dataFlavor = key;
-       // this.model = taskModel;
-        this.coreTask = coreTask;
+        super(key,PropertyManager.TASK,coreTask);
 
-        setIconBaseWithExtension(Preferences.getInstance().getModelSettings(Preferences.getInstance().getModelClass(coreTask)).getThumbImagePath());
+        this.coreTask = coreTask;
     }
 
      //DND start
     @Override
     public Transferable drag() throws IOException {
         ExTransferable retValue = ExTransferable.create( super.drag() );
-        //add the 'data' into the Transferable
         retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_DATA_FLAVOR) {
             @Override
             protected Object getData() throws IOException, UnsupportedFlavorException 

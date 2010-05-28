@@ -20,7 +20,6 @@ import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.workflow.implementation.transition.ExplorationTransition;
 import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.ui.workflow.model.IExplorationTaskCapsuleModelUI;
 
 /**
  *

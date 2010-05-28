@@ -21,7 +21,8 @@ import java.awt.Image;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.workflow.model.IObjectViewUI;
-import org.openmole.ui.workflow.provider.WidgetSetlectionProvider;
+import java.util.Properties;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -30,68 +31,35 @@ import org.openmole.ui.workflow.provider.WidgetSetlectionProvider;
 public abstract class ObjectViewUI extends Widget implements IObjectViewUI {
 
     protected MoleScene scene;
-    private final Color defaultBorderColor;
-    private final Color defaultBackgroundColor;
-
-    protected Image backgroundImage= null;
-    protected Color borderColor;
-    protected Color backgroundColor;
+    protected Properties properties;
 
     public ObjectViewUI(MoleScene scene,
-            Color defaultBackgroundColor,
-            Color defaultBorderColor) {
+                        Properties properties){
         super(scene);
         this.scene = scene;
-        this.defaultBorderColor = defaultBorderColor;
-        this.defaultBackgroundColor = defaultBackgroundColor;
-        this.borderColor = defaultBorderColor;
-        this.backgroundColor = defaultBackgroundColor;
+        this.properties = properties;
         createActions(MoleScene.MOVE).addAction (ActionFactory.createMoveAction());
-        getActions().addAction(ActionFactory.createSelectAction(new WidgetSetlectionProvider()));
-    }
-
-    public ObjectViewUI(MoleScene scene,
-            Color defaultBackgroundColor,
-            Color defaultBorderColor,
-            Image image) {
-        this(scene, defaultBackgroundColor, defaultBorderColor);
-        this.backgroundImage = image;
-    }
-
-
-
-    @Override
-    public void setBackgroundColor(Color col) {
-        this.backgroundColor = col;
     }
 
     @Override
     public Color getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    @Override
-    public void setBorderColor(Color col) {
-        this.borderColor = col;
-    }
-
-    @Override
-    public void setDefaultBackgroundColor() {
-        borderColor = defaultBorderColor;
-    }
-
-    @Override
-    public void setDefaultBorderColor() {
-        backgroundColor = defaultBackgroundColor;
+        return getColor(PropertyManager.BG_COLOR);
     }
 
     @Override
     public Color getBorderColor() {
-        return borderColor;
+        return getColor(PropertyManager.BORDER_COLOR);
+    }
+
+    private Color getColor(String colorString){
+        String[] colors = properties.getProperty(colorString).split(",");
+        return new Color(Integer.parseInt(colors[0]),
+                         Integer.parseInt(colors[1]),
+                         Integer.parseInt(colors[2]));
     }
 
     @Override
     public Image getBackgroundImage() {
-        return backgroundImage;
+      return ImageUtilities.loadImage(properties.getProperty(PropertyManager.BG_IMG));
     }
 }

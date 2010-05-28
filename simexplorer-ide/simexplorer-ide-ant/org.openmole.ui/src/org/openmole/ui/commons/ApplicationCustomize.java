@@ -20,13 +20,10 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
-import java.lang.Class;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.workflow.model.ITaskCapsuleModelUI;
 
 /**
@@ -38,24 +35,10 @@ public class ApplicationCustomize {
     private static ApplicationCustomize instance = null;
     private LinkedHashMap<String, Color> colorMap = new LinkedHashMap<String, Color>();
 
-  //  public static final String TASK_INTERNAL_BORDER_COLOR = "TASK_INTERNAL_BORDER_COLOR";
-    public static final String TASK_BORDER_COLOR = "TASK_BORDER_COLOR";
-    public static final String TASK_BACKGROUND_COLOR = "TASK_BACKGROUND_COLOR";
- //   public static final String TASK_INPUT_BACKGROUND_COLOR = "TASK_INPUT_BACKGROUND_COLOR";
-  //  public static final String TRANSPARENT_COLOR = "TRANSPARENT_COLOR";
     public static final String TASK_HEADER_BACKGROUND_COLOR = "TASK_HEADER_BACKGROUND_COLOR";
     public static final String TASK_SELECTION_COLOR = "TASK_SELECTION_COLOR";
-    ///public static final String SUB_BOX_BORDER_COLOR = "SUB_BOX_BORDER_COLOR";
 
-    public static final String TASK_CAPSULE_BACKGROUND_COLOR = "TASK_CAPSULE_BACKGROUND_COLOR";
-    public static final String TASK_CAPSULE_BORDER_COLOR = "TASK_CAPSULE_BORDER_COLOR";
-
-    public static final String  EXPLORATION_TASK_BACKGROUND_COLOR = "EXPLORATION_TASK_BACKGROUND_COLOR";
-    public static final String  EXPLORATION_TASK_BORDER_COLOR = "EXPLORATION_TASK_BORDER_COLOR";
-    
-    public static final String  GROOVY_TASK_BACKGROUND_COLOR = "GROOVY_TASK_BACKGROUND_COLOR";
-    public static final String  GROOVY_TASK_BORDER_COLOR = "GROOVY_TASK_BORDER_COLOR";
-
+   
     public static final String TABLE_HEADER_COLOR = "TABLE_HEADER_COLOR";
     public static final String TABLE_ROW_COLOR = "TABLE_ROW_COLOR";
 
@@ -76,31 +59,15 @@ public class ApplicationCustomize {
     public static final int DATA_TABLE_X_OFFSET = (int) (2 + TASK_CONTAINER_WIDTH * 0.1);
     public static final int DATA_TABLE_Y_OFFSET = (int) (TASK_CONTAINER_HEIGHT * 0.1 - 2);
 
- //   public static final int TASK_INPUT_WIDTH = TASK_CONTAINER_WIDTH/2;
- //   public static final int TASK_INPUT_HEIGHT = 40;
-  //  public static final int INPUT_SLOT_WIDTH = 30;
-  //  public static final int INPUT_SLOT_HEIGHT = 20;
-
-
-    public static final Image IMAGE_COLLAPSE = ImageUtilities.loadImage("resources/collapse.png");
-    public static final Image IMAGE_EXPAND = ImageUtilities.loadImage("resources/expand.png");
-    public static final Image IMAGE_INPUT_ARROW = ImageUtilities.loadImage("resources/inputArrow.png");
-    public static final Image IMAGE_OUTPUT_ARROW = ImageUtilities.loadImage("resources/outputArrow.png");
-    public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/inputSlot.png");
-    public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/outputSlot.png");
-    public static final Image IMAGE_GROOVY = ImageUtilities.loadImage("resources/groovy.png");
-    public static final Image IMAGE_JAVA = ImageUtilities.loadImage("resources/java.png");
-
-    //FIXME: mettre les bonnes icones
-    public static final String IMAGE_THUMB_PATH_TASK_CAPSULE = "resources/thumb/taskCapsule.png";
-    public static final String IMAGE_THUMB_PATH_EXPLORATION = "resources/thumb/explorationTask.png";
-    public static final String IMAGE_THUMB_PATH_TASK ="resources/thumb/java.png";
-    public static final String IMAGE_THUMB_PATH_GROOVY = "resources/thumb/groovy.png";
-    public static final String IMAGE_THUMB_PATH_JAVA = "resources/thumb/java.png";
+    public static final Image IMAGE_COLLAPSE = ImageUtilities.loadImage("resources/img/collapse.png");
+    public static final Image IMAGE_EXPAND = ImageUtilities.loadImage("resources/img/expand.png");
+    public static final Image IMAGE_INPUT_ARROW = ImageUtilities.loadImage("resources/img/inputArrow.png");
+    public static final Image IMAGE_OUTPUT_ARROW = ImageUtilities.loadImage("resources/img/outputArrow.png");
+    public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/img/inputSlot.png");
+    public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/img/outputSlot.png");
 
     public static final int NB_MAX_SLOTS = 5;
 
-   // public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTaskModelUI.class, "Tasks" );
     public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );
@@ -116,26 +83,8 @@ public class ApplicationCustomize {
     }
 
     private void setDefaultColors() {
-        //colorMap.put(TASK_INTERNAL_BORDER_COLOR, new Color(0,0,0));
-        //colorMap.put(TRANSPARENT_COLOR, new Color(0,0,0,0));
-        //colorMap.put(TASK_INPUT_BACKGROUND_COLOR, new Color(238,255,170));
-        colorMap.put(TASK_BORDER_COLOR, new Color(68,120,33));
-        colorMap.put(TASK_BACKGROUND_COLOR, new Color(238,255,170));
         colorMap.put(TASK_HEADER_BACKGROUND_COLOR, new Color(68,120,33));
         colorMap.put(TASK_SELECTION_COLOR, new Color(255, 100, 0));
-       // colorMap.put(SUB_BOX_BORDER_COLOR, new Color(68,120,33,128));
-
-        colorMap.put(TASK_CAPSULE_BACKGROUND_COLOR, new Color(112,112,112));
-        colorMap.put(TASK_CAPSULE_BORDER_COLOR, new Color(179,179,179));
-
-        colorMap.put(EXPLORATION_TASK_BACKGROUND_COLOR, new Color(255,179,128));
-        colorMap.put(EXPLORATION_TASK_BORDER_COLOR, new Color(230,112,32));
-
-        colorMap.put(GROOVY_TASK_BACKGROUND_COLOR, new Color(219,227,226));
-        colorMap.put(GROOVY_TASK_BORDER_COLOR, new Color(99,152,170));
-
-
-
         colorMap.put(TABLE_HEADER_COLOR, new Color(227,222,219,150));
         colorMap.put(TABLE_ROW_COLOR, new Color(255,238,170,150));
     }

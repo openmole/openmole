@@ -19,8 +19,6 @@ package org.openmole.ui.workflow.implementation;
 import org.openmole.core.workflow.implementation.capsule.TaskCapsule;
 import org.openmole.core.workflow.implementation.transition.SingleTransition;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.model.ITaskCapsuleModelUI;
 
 /**
  *

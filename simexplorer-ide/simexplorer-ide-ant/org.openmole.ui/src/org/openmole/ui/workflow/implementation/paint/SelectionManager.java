@@ -3,7 +3,6 @@ package org.openmole.ui.workflow.implementation.paint;
 
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.model.IObjectViewUI;
-import org.openmole.ui.workflow.model.ITaskViewUI;
 
 /**
  *
@@ -16,9 +15,9 @@ public class SelectionManager {
 
     public void setSelected(IObjectViewUI wi){
         if (selected != null) {
-            selected.setDefaultBackgroundColor();
+       //     selected.setDefaultBackgroundColor();
         }
-        wi.setBackgroundColor(ApplicationCustomize.getInstance().getColor(ApplicationCustomize.TASK_SELECTION_COLOR));
+      //  wi.setBackgroundColor(ApplicationCustomize.getInstance().getColor(ApplicationCustomize.TASK_SELECTION_COLOR));
         selected = wi;
     }
 

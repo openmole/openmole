@@ -30,7 +30,7 @@ public class TaskChildren extends GenericChildren{
 
     @Override
     protected java.util.List<Node> initCollection() {
-        Set<Class> businessClasses = Preferences.getInstance().getBusinessClasses();
+        Set<Class> businessClasses = Preferences.getInstance().getCoreTaskClasses();
 
         ArrayList childrenNodes = new ArrayList(businessClasses.size());
         for (Class bclass : businessClasses) {
