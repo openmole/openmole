@@ -88,7 +88,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

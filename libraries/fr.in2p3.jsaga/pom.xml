@@ -18,6 +18,11 @@
     <version>${lib.fr.in2p3.jsaga.version}</version>
 
     <dependencies>
+<!--        <dependency>
+            <groupId>org.ogf.saga</groupId>
+            <artifactId>saga-api</artifactId>
+            <scope>provided</scope>
+        </dependency>-->
         <dependency>
             <groupId>fr.in2p3.jsaga</groupId>
             <artifactId>jsaga-engine</artifactId>
