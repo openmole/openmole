@@ -35,7 +35,7 @@ public class AccessTokenPool implements IAccessTokenPool {
 	BlockingDeque<IAccessToken> tokens = new LinkedBlockingDeque<IAccessToken>();
 	Set<IAccessToken> taken = Collections.synchronizedSet(new HashSet<IAccessToken>());
 
-	AtomicInteger load;
+	AtomicInteger load = new AtomicInteger();
 
 	public AccessTokenPool(int nbTokens) {
 		for(int i = 0; i < nbTokens; i++) {
