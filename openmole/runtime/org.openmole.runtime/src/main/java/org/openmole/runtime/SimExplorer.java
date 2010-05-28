@@ -45,7 +45,6 @@ import org.openmole.runtime.internal.Activator;
 import org.openmole.commons.tools.io.FastCopy;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.commons.tools.pattern.Priority;
 import org.openmole.commons.tools.io.TarArchiver;
 
 import org.openmole.misc.workspace.ForbidenPasswordProvider;
@@ -60,6 +59,7 @@ import org.openmole.core.workflow.model.message.IExecutionMessage;
 import org.openmole.core.workflow.model.message.IReplicatedFile;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.commons.tools.io.StringInputStream;
+import org.openmole.commons.tools.structure.Priority;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
