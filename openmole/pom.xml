@@ -61,7 +61,7 @@
 			    <version>${project.version}</version>
                         </aspectLibrary>
                     </aspectLibrarys>
-                    <!--<weaveDependencies>
+                    <weaveDependencies>
                         <weaveDependency>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
@@ -70,7 +70,7 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.caching</artifactId>
                         </weaveDependency>
-                    </weaveDependencies>-->
+                    </weaveDependencies>
                 </configuration>
                 <executions>
                     <execution>
