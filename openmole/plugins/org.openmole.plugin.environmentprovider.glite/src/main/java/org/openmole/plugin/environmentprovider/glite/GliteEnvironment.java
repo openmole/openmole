@@ -397,7 +397,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
         Collection<IBatchStorage> allStorages = new LinkedList<IBatchStorage>();
 
-        Set<URI> stors = getBDII().querySRMURIs(getVoName(), Activator.getWorkspace().getPreferenceAsInt(FetchRessourcesTimeOutLocation));
+        Set<URI> stors = getBDII().querySRMURIs(getVoName(), Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation));
 
         for (URI stor : stors) {
             IBatchStorage storage = new BatchStorage(stor, this, threadsBySE);
