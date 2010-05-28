@@ -26,12 +26,17 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
-            <version>0.3</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.aspect.caching</artifactId>
-            <version>0.3</version>
+            <version>${project.version}</version>
+        </dependency>
+	<dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.scala-lang.scala</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
     </dependencies>
 

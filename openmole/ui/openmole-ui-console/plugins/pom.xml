@@ -13,16 +13,10 @@
         <version>0.3</version>
     </parent>
 
-    <groupId>org.openmole.ui.console</groupId>
+    <!--<groupId>org.openmole.ui.console</groupId>-->
     <artifactId>plugins</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.scala-lang.scala</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-	    <scope>runtime</scope>
-        </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.tools.code</artifactId>

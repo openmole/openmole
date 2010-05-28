@@ -31,11 +31,6 @@
             <artifactId>org.jfree.jfreechart</artifactId>
             <version>${lib.org.jfree.jfreechart.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.scala-lang.scala</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

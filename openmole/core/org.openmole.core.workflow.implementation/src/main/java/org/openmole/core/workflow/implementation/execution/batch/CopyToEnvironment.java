@@ -197,7 +197,6 @@ class CopyToEnvironment implements ITransferable {
         }
 
         for (File f : plugins) {
-
             IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true, executionContext);
             pluginReplicas.add(replicatedPlugin);
         }

@@ -198,7 +198,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             if (initStorageExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
                 Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
                 try {
-                    Logger.getLogger(BatchExecutionJob.class.getName()).info(js.getLeft().getDescription() + ": " + Activator.getBatchRessourceControl().getFailureRate(js.getLeft().getDescription()));
+                    //Logger.getLogger(BatchExecutionJob.class.getName()).info(js.getLeft().getDescription() + ": " + Activator.getBatchRessourceControl().getFailureRate(js.getLeft().getDescription()));
 
                     IBatchJob bj = js.getLeft().createBatchJob(getInitStorage().getInputFile(), getInitStorage().getOutputFile(), getInitStorage().getRuntime());
                     bj.submit(js.getRight());

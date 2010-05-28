@@ -136,6 +136,11 @@
             <artifactId>org.joda.time</artifactId>
             <version>${lib.org.joda.time.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.scala-lang.scala</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
