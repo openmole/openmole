@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.datasetdistributiontask
+package org.openmole.plugin.task.datasetdistribution
 
 import java.io.BufferedOutputStream
 import java.io.FileNotFoundException

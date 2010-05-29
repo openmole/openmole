@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.plan.centralcompositeplan
+package org.openmole.plugin.plan.centralcomposite
 
 import org.openmole.core.workflow.implementation.plan.Plan
 import org.openmole.core.workflow.model.domain.IDiscretizedIntervalDomain
