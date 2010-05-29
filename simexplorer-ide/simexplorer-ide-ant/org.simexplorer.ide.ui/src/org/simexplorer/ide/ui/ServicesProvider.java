@@ -28,7 +28,7 @@ import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 import org.openmole.plugin.task.groovytask.GroovyTask;
 import org.openmole.core.workflow.methods.task.JavaTask;
 import org.openmole.plugin.task.filemanagment.TemplateFileGeneratorFromLocalFileTask;
-import org.openmole.plugin.task.systemexectask.SystemExecTask;
+import org.openmole.plugin.task.systemexec.SystemExecTask;
 
 public class ServicesProvider {
 

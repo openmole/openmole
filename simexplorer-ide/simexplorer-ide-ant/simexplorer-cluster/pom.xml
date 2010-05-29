@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.systemexectask</artifactId>
+            <artifactId>org.openmole.plugin.task.systemexec</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

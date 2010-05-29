@@ -26,8 +26,8 @@
         <module>org.openmole.plugin.task.netlogotask</module>
         <module>org.simexplorer.openmole.plugin.task.sensitivitytask</module>
         <module>org.openmole.plugin.task.storeintocsvtask</module>
-        <module>org.openmole.plugin.task.externaltask</module>
-        <module>org.openmole.plugin.task.systemexectask</module>
+        <module>org.openmole.plugin.task.external</module>
+        <module>org.openmole.plugin.task.systemexec</module>
         <module>org.openmole.plugin.task.codetask</module>
         <module>org.openmole.plugin.task.groovytask</module>
         <module>org.openmole.plugin.task.filemanagement</module>

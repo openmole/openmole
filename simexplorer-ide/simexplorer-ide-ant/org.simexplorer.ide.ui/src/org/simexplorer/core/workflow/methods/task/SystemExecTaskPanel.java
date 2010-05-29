@@ -19,7 +19,7 @@
  */
 package org.simexplorer.core.workflow.methods.task;
 
-import org.openmole.plugin.task.systemexectask.SystemExecTask;
+import org.openmole.plugin.task.systemexec.SystemExecTask;
 import java.io.File;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;

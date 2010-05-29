@@ -103,7 +103,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.externaltask</code-name-base>
+                    <code-name-base>org.openmole.plugin.task.external</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

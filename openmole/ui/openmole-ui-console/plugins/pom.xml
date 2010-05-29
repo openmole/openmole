@@ -73,7 +73,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.systemexectask</artifactId>
+            <artifactId>org.openmole.plugin.task.systemexec</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -91,7 +91,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.externaltask</artifactId>
+            <artifactId>org.openmole.plugin.task.external</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

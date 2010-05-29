@@ -31,7 +31,7 @@ import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.plugin.task.externaltask.ExternalTask;
+import org.openmole.plugin.task.external.ExternalTask;
 import org.openmole.plugin.task.netlogotask.internal.Activator;
 
 /**

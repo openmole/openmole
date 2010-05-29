@@ -38,7 +38,7 @@ import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.codetask.internal.Activator;
-import org.openmole.plugin.task.externaltask.ExternalTask;
+import org.openmole.plugin.task.external.ExternalTask;
 
 public abstract class CodeTask<T extends IContextToCode> extends ExternalTask {
 
