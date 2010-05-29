@@ -16,7 +16,7 @@
  */
 
 
-package org.openmole.core.execution.runtimemessageserializer;
+package org.openmole.core.runtimemessageserializer;
 
 import java.io.File;
 import java.io.OutputStream;

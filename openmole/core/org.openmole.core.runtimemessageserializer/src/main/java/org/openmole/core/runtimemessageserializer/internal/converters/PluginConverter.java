@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.runtimemessageserializer.internal.converters;
+package org.openmole.core.runtimemessageserializer.internal.converters;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -23,8 +23,8 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.openmole.core.execution.runtimemessageserializer.internal.Activator;
-import org.openmole.core.execution.runtimemessageserializer.internal.ISerializerWithExtensibleClassListing;
+import org.openmole.core.runtimemessageserializer.internal.Activator;
+import org.openmole.core.runtimemessageserializer.internal.ISerializerWithExtensibleClassListing;
 
 /**
  *

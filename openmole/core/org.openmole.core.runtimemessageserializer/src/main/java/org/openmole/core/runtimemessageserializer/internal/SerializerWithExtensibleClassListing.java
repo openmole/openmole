@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.runtimemessageserializer.internal;
+package org.openmole.core.runtimemessageserializer.internal;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
-import org.openmole.core.execution.runtimemessageserializer.internal.converters.PluginConverter;
+import org.openmole.core.runtimemessageserializer.internal.converters.PluginConverter;
 import org.openmole.core.workflow.model.message.IJobForRuntime;
 
 /**

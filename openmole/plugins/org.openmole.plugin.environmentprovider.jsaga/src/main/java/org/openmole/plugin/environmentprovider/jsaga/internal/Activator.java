@@ -26,8 +26,8 @@ import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.workflow.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
-import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;
-import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
+import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
 

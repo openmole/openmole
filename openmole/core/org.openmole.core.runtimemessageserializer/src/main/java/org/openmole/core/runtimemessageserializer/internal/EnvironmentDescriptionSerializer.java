@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.runtimemessageserializer.internal;
+package org.openmole.core.runtimemessageserializer.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +27,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
 
 import com.thoughtworks.xstream.XStream;
-import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;
+import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
 
 public class EnvironmentDescriptionSerializer implements IEnvironmentDescriptionSerializer {
 

@@ -16,7 +16,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.core.execution.runtimemessageserializer.internal;
+package org.openmole.core.runtimemessageserializer.internal;
 
 import com.thoughtworks.xstream.XStream;
 import java.io.File;
@@ -32,7 +32,7 @@ import org.openmole.core.workflow.model.message.IJobForRuntime;
 import org.openmole.core.workflow.model.message.IRuntimeResult;
 
 
-import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 
 
 public class RuntimeMessageSerializer implements IRuntimeMessageSerializer {

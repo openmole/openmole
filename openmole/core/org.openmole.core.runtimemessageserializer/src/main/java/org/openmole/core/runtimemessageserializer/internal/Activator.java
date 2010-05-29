@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.runtimemessageserializer.internal;
+package org.openmole.core.runtimemessageserializer.internal;
 
 
 import org.osgi.framework.BundleActivator;
@@ -23,8 +23,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;
-import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
+import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {

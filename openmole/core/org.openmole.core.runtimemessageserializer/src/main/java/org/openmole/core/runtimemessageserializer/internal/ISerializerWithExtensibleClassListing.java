@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.execution.runtimemessageserializer.internal;
+package org.openmole.core.runtimemessageserializer.internal;
 
 import java.io.OutputStream;
 import org.openmole.core.workflow.model.message.IJobForRuntime;
