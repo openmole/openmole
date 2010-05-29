@@ -13,7 +13,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.core.commons.metadataservice</artifactId>
+    <artifactId>org.openmole.core.metadataservice</artifactId>
 
     <dependencies>
         <dependency>

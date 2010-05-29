@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.openmole.core.commons.metadataservice;
+package org.openmole.core.metadataservice;
 
 /**
  *

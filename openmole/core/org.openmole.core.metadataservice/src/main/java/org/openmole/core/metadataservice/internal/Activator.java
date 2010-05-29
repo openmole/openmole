@@ -1,4 +1,4 @@
-package org.openmole.core.commons.metadataservice.internal;
+package org.openmole.core.metadataservice.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

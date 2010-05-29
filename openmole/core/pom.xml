@@ -16,7 +16,7 @@
     <artifactId>core</artifactId>
 
     <modules>
-        <module>org.openmole.core.commons.metadataservice</module>
+        <module>org.openmole.core.metadataservice</module>
         <module>org.openmole.core.commons.objectidservice</module>
         <module>org.openmole.core.commons.persitenceservice</module>
         <module>org.openmole.core.fileservice</module>
