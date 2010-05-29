@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.netlogotask</artifactId>
+            <artifactId>org.openmole.plugin.task.netlogo</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
