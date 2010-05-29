@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.task.datasetdistributiontask</artifactId>
+    <artifactId>org.openmole.plugin.task.datasetdistribution</artifactId>
 
     <dependencies>
         <dependency>

@@ -31,7 +31,7 @@
         <module>org.openmole.plugin.task.codetask</module>
         <module>org.openmole.plugin.task.groovy</module>
         <module>org.openmole.plugin.task.filemanagement</module>
-        <module>org.openmole.plugin.task.datasetdistributiontask</module>
+        <module>org.openmole.plugin.task.datasetdistribution</module>
 	<module>org.openmole.plugin.task.structuregeneration</module>
         <module>org.openmole.plugin.domain.interval</module>
         <module>org.openmole.plugin.domain.relativerange</module>

@@ -97,7 +97,7 @@
         </dependency>
 	<dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.datasetdistributiontask</artifactId>
+            <artifactId>org.openmole.plugin.task.datasetdistribution</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
