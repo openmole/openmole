@@ -16,7 +16,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.plan.centralcompositeplan;
+package org.openmole.plugin.plan.centralcomposite;
 
 import java.util.Enumeration;
 import javax.swing.AbstractButton;

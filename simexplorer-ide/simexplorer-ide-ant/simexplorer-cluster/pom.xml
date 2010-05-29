@@ -73,12 +73,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.boxbehnkenplan</artifactId>
+            <artifactId>org.openmole.plugin.plan.boxbehnken</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.centralcompositeplan</artifactId>
+            <artifactId>org.openmole.plugin.plan.centralcomposite</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

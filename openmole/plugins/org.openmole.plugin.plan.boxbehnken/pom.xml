@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.plan.boxbehnkenplan</artifactId>
+    <artifactId>org.openmole.plugin.plan.boxbehnken</artifactId>
 
     <dependencies>
         <dependency>

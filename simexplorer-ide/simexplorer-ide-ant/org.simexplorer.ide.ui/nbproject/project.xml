@@ -223,7 +223,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.plan.boxbehnkenplan</code-name-base>
+                    <code-name-base>org.openmole.plugin.plan.boxbehnken</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -239,7 +239,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.plan.centralcompositeplan</code-name-base>
+                    <code-name-base>org.openmole.plugin.plan.centralcomposite</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
