@@ -1,4 +1,4 @@
-package org.openmole.core.execution.jsaga.session.internal;
+package org.openmole.core.jsagasession.internal;
 
 /*****************************************************************************
  * Copyright (c) 2006, 2007 g-Eclipse Consortium 

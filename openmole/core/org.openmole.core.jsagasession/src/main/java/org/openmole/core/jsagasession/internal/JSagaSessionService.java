@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.jsaga.session.internal;
+package org.openmole.core.jsagasession.internal;
 
 import org.ogf.saga.context.Context;
 import org.ogf.saga.context.ContextFactory;
@@ -26,7 +26,7 @@ import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.session.Session;
 import org.ogf.saga.session.SessionFactory;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
+import org.openmole.core.jsagasession.IJSagaSessionService;
 
 
 public class JSagaSessionService implements IJSagaSessionService {

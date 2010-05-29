@@ -13,7 +13,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.core.execution.jsaga.session</artifactId>
+    <artifactId>org.openmole.core.jsagasession</artifactId>
 
     <dependencies>
         <dependency>

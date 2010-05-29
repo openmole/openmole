@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.execution.jsaga.session</artifactId>
+            <artifactId>org.openmole.core.jsagasession</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

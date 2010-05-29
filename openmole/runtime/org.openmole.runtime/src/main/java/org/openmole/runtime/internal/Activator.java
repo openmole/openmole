@@ -6,7 +6,7 @@ import org.osgi.framework.ServiceReference;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
+import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
 import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;
 import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSerializer;

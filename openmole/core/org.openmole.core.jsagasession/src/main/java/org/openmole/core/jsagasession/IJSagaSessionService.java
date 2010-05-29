@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.jsaga.session;
+package org.openmole.core.jsagasession;
 
 import org.ogf.saga.context.Context;
 import org.ogf.saga.session.Session;

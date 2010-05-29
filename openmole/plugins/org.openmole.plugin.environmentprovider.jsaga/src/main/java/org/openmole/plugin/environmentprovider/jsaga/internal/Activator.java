@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import org.openmole.misc.executorservice.IExecutorService;
-import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
+import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.workflow.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
 import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;

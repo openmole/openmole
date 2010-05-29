@@ -22,7 +22,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.misc.executorservice.IExecutorService;
-import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
+import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {

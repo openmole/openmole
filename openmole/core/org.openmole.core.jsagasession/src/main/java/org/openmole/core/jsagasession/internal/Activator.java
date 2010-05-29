@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.jsaga.session.internal;
+package org.openmole.core.jsagasession.internal;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
-import org.openmole.core.execution.jsaga.session.IJSagaSessionService;
+import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.ServiceReference;
 
