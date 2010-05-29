@@ -16,7 +16,7 @@
  */
 
 
-package org.openmole.core.execution.replicacatalog.internal;
+package org.openmole.core.replicacatalog.internal;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
+import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.misc.workspace.IWorkspace;
 
 import com.db4o.Db4o;
@@ -49,7 +49,7 @@ import java.util.Iterator;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.core.execution.replicacatalog.IReplica;
+import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;

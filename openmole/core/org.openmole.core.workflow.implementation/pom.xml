@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.execution.replicacatalog</artifactId>
+            <artifactId>org.openmole.core.replicacatalog</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

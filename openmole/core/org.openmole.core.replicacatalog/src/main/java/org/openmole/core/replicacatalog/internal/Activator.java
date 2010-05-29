@@ -16,7 +16,7 @@
  */
 
 
-package org.openmole.core.execution.replicacatalog.internal;
+package org.openmole.core.replicacatalog.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.updater.IUpdater;
-import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
+import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.environmentprovider.IEnvironmentProvider;
 

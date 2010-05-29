@@ -47,7 +47,7 @@ import org.openmole.core.workflow.model.message.IJobForRuntime;
 import org.openmole.core.workflow.model.message.IReplicatedFile;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.execution.replicacatalog.IReplica;
+import org.openmole.core.replicacatalog.IReplica;
 
 /**
  *

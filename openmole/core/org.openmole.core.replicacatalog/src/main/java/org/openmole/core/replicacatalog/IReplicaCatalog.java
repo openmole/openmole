@@ -16,7 +16,7 @@
  */
 
 
-package org.openmole.core.execution.replicacatalog;
+package org.openmole.core.replicacatalog;
 
 import java.io.File;
 import java.io.IOException;

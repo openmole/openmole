@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.execution.replicacatalog.internal;
+package org.openmole.core.replicacatalog.internal;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.updater.IUpdatable;
-import org.openmole.core.execution.replicacatalog.IReplica;
+import org.openmole.core.replicacatalog.IReplica;
 
 /**
  *

@@ -27,7 +27,7 @@ import org.openmole.core.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
-import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
+import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.updater.IUpdater;

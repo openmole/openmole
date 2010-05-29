@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.replicacatalog.internal;
+package org.openmole.core.replicacatalog.internal;
 
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;

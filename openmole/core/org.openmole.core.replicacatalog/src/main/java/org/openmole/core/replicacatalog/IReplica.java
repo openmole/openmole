@@ -15,14 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.execution.replicacatalog.internal;
+package org.openmole.core.replicacatalog;
 
-import org.openmole.commons.tools.service.LockRepository;
+import java.io.File;
 
-/**
- *
- * @author reuillon
- */
-public class ReplicaLockRepository extends LockRepository<ReplicaCatalogKey> {
-    
+import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.commons.tools.io.IHash;
+import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+
+public interface IReplica  {
+
+    IBatchServiceDescription getStorageDescription();
+
+    boolean isZipped();
+
+    IBatchEnvironmentDescription getEnvironmentDescription();
+
+    IHash getSourceHash();
+
+    File getSource();
+
+    IURIFile getDestination();
+
 }
