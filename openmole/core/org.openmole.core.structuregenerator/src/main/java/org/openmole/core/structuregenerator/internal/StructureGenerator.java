@@ -17,7 +17,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.core.execution.structuregenerator.internal;
+package org.openmole.core.structuregenerator.internal;
 
 import org.osgi.framework.Bundle;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -37,12 +37,12 @@ import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import org.openmole.core.execution.structuregenerator.IStructureGenerator;
-import org.openmole.core.execution.structuregenerator.ComplexNode;
-import org.openmole.core.execution.structuregenerator.PrototypeNode;
+import org.openmole.core.structuregenerator.IStructureGenerator;
+import org.openmole.core.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.workflow.implementation.data.Prototype;
-import org.openmole.core.execution.structuregenerator.SequenceNode;
-import org.openmole.core.execution.structuregenerator.StructureNode;
+import org.openmole.core.structuregenerator.SequenceNode;
+import org.openmole.core.structuregenerator.StructureNode;
 import org.openmole.commons.tools.io.FastCopy;
 
 public class StructureGenerator implements IStructureGenerator {

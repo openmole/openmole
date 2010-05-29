@@ -1,4 +1,4 @@
-package org.openmole.core.execution.structuregenerator.internal;
+package org.openmole.core.structuregenerator.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -6,7 +6,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.execution.structuregenerator.IStructureGenerator;
+import org.openmole.core.structuregenerator.IStructureGenerator;
 
 public class Activator implements BundleActivator {
 

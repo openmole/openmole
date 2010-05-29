@@ -19,7 +19,7 @@
 package org.simexplorer.ide.ui.dataexplorer.structure;
 
 import org.openide.nodes.Children;
-import org.openmole.core.execution.structuregenerator.PrototypeNode;
+import org.openmole.core.structuregenerator.PrototypeNode;
 
 class PrototypeNodeNode extends StructureNodeNode<PrototypeNode> {
 

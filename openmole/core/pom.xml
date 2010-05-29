@@ -26,7 +26,7 @@
         <module>org.openmole.core.workflow.implementation</module>
         <module>org.openmole.core.jsagasession</module>
         <module>org.openmole.core.runtimemessageserializer</module>
-        <module>org.openmole.core.execution.structuregenerator</module>
+        <module>org.openmole.core.structuregenerator</module>
         <module>org.openmole.core.replicacatalog</module>
         <module>org.openmole.core.environmentprovider</module>
     </modules>

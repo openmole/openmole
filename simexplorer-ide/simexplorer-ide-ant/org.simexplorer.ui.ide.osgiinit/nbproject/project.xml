@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.core.execution.structuregenerator</code-name-base>
+                    <code-name-base>org.openmole.core.structuregenerator</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.openmole.core.execution.structuregenerator.IStructureGenerator;
+import org.openmole.core.structuregenerator.IStructureGenerator;
 
 /**
  *

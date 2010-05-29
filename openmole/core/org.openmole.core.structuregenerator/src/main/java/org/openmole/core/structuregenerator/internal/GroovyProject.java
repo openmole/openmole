@@ -1,4 +1,4 @@
-package org.openmole.core.execution.structuregenerator.internal;
+package org.openmole.core.structuregenerator.internal;
 
 import java.io.File;
 import java.io.FileInputStream;

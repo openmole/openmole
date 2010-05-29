@@ -123,7 +123,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.execution.structuregenerator</artifactId>
+            <artifactId>org.openmole.core.structuregenerator</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

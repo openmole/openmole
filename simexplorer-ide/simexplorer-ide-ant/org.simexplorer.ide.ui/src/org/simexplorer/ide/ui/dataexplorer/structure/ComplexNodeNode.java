@@ -20,7 +20,7 @@ package org.simexplorer.ide.ui.dataexplorer.structure;
 
 import javax.swing.Action;
 import org.openide.util.Utilities;
-import org.openmole.core.execution.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.ComplexNode;
 
 class ComplexNodeNode extends StructureNodeNode<ComplexNode> {
 

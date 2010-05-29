@@ -62,7 +62,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JTable;
-import org.openmole.core.execution.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.core.workflow.model.data.SequenceNode;
 import org.openmole.core.workflow.model.data.StructureNode;

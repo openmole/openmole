@@ -18,7 +18,7 @@
  */
 package org.simexplorer.ide.ui.dataexplorer.structure;
 
-import org.openmole.core.execution.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.ComplexNode;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import java.io.Serializable;
 import java.util.logging.Logger;

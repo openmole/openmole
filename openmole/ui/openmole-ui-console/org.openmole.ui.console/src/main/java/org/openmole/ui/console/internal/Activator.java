@@ -5,7 +5,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.execution.structuregenerator.IStructureGenerator;
+import org.openmole.core.structuregenerator.IStructureGenerator;
 import org.openmole.ui.console.IConsole;
 import org.osgi.framework.ServiceRegistration;
 

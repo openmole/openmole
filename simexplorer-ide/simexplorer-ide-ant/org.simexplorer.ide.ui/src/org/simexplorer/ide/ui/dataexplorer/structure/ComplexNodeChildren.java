@@ -20,8 +20,8 @@ package org.simexplorer.ide.ui.dataexplorer.structure;
 
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openmole.core.execution.structuregenerator.ComplexNode;
-import org.openmole.core.execution.structuregenerator.StructureNode;
+import org.openmole.core.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.StructureNode;
 
 class ComplexNodeChildren extends Children.Keys<StructureNode> {
 

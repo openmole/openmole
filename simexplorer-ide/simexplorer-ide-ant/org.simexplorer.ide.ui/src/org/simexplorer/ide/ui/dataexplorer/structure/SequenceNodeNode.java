@@ -21,9 +21,9 @@ package org.simexplorer.ide.ui.dataexplorer.structure;
 
 import javax.swing.Action;
 import org.openide.nodes.Children;
-import org.openmole.core.execution.structuregenerator.ComplexNode;
-import org.openmole.core.execution.structuregenerator.PrototypeNode;
-import org.openmole.core.execution.structuregenerator.SequenceNode;
+import org.openmole.core.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.PrototypeNode;
+import org.openmole.core.structuregenerator.SequenceNode;
 import org.openmole.core.workflow.implementation.data.Prototype;
 
 public class SequenceNodeNode extends StructureNodeNode<SequenceNode> {

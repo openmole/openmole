@@ -6,7 +6,7 @@
 package org.openmole.ui.console;
 
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.execution.structuregenerator.IStructureGenerator;
+import org.openmole.core.structuregenerator.IStructureGenerator;
 import org.openmole.ui.console.internal.Activator;
 
 /**

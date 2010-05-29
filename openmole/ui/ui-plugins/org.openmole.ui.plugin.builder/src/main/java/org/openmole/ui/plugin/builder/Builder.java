@@ -20,8 +20,8 @@
 
 package org.openmole.ui.plugin.builder;
 
-import org.openmole.core.execution.structuregenerator.ComplexNode;
-import org.openmole.core.execution.structuregenerator.PrototypeNode;
+import org.openmole.core.structuregenerator.ComplexNode;
+import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.workflow.implementation.capsule.TaskCapsule;
 import org.openmole.core.workflow.implementation.data.Prototype;
