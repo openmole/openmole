@@ -115,7 +115,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.groovydomain</artifactId>
+            <artifactId>org.openmole.plugin.domain.groovy</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

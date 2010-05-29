@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.groovydomain;
+package org.openmole.plugin.domain.groovy;
 
 import java.io.File;
 import java.util.ArrayList;
