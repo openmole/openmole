@@ -152,7 +152,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         Double overSubmissionWaitingRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioWaitingLocation);
         Double overSubmissionRunningRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioRunningLocation);
         Double overSubmissionEpsilonRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioEpsilonLocation);
-        Integer overSubmissionInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(OverSubmissionIntervalLocation);
+        long overSubmissionInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(OverSubmissionIntervalLocation);
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
         //Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new WorkloadOnAverages(MinimumStatistic, ResubmitRatioWating, KillRatioWaiting, ResubmitRatioRunning, KillRatioRunning, MaxNumberOfSimultaneousExecutionForAJob, this), Activator.getWorkspace().getPreferenceAsInt(MinimumNumberOfJobsLocation), Activator.getWorkspace().getPreferenceAsInt(NumberOfSimultaneousExecutionForAJobWhenUnderMinJobLocation)), ExecutorType.OWN);
@@ -359,7 +359,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
                         tarEntry = tis.getNextTarEntry();
                     }
                 } catch (IOException e) {
-                    Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to untar " + child.toString(), e);
+                    Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);
                 } finally {
                     tis.close();
                 }
@@ -373,7 +373,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
     @Override
     public Collection<IJSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
 
-        List<URI> jss = getBDII().queryWMSURIs(getVoName(), Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation));
+        List<URI> jss = getBDII().queryWMSURIs(getVoName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation)).intValue());
 
         Collection<IJSAGAJobService> jobServices = new LinkedList<IJSAGAJobService>();
 
@@ -384,7 +384,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
                 IJSAGAJobService jobService = new JSAGAJobService(wms, this, threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
-                Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
+                Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
             }
         }
 
@@ -397,7 +397,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
         Collection<IBatchStorage> allStorages = new LinkedList<IBatchStorage>();
 
-        Set<URI> stors = getBDII().querySRMURIs(getVoName(), Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation));
+        Set<URI> stors = getBDII().querySRMURIs(getVoName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation)).intValue());
 
         for (URI stor : stors) {
             IBatchStorage storage = new BatchStorage(stor, this, threadsBySE);

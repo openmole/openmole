@@ -30,15 +30,15 @@ public interface IWorkspace {
 
         String getPreference(ConfigurationLocation location) throws InternalProcessingError;
 
-        Integer getPreferenceAsInt(ConfigurationLocation location) throws InternalProcessingError;
+        int getPreferenceAsInt(ConfigurationLocation location) throws InternalProcessingError;
 
-        Long getPreferenceAsLong(ConfigurationLocation location) throws InternalProcessingError;
+        long getPreferenceAsLong(ConfigurationLocation location) throws InternalProcessingError;
 
-        Double getPreferenceAsDouble(ConfigurationLocation location) throws InternalProcessingError;
+        double getPreferenceAsDouble(ConfigurationLocation location) throws InternalProcessingError;
 
-        Integer getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError;
+        long getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError;
 
-        Integer getPreferenceAsDurationInS(ConfigurationLocation location) throws InternalProcessingError;
+        int getPreferenceAsDurationInS(ConfigurationLocation location) throws InternalProcessingError;
 
 	void setPreference(ConfigurationLocation configurationLocation, String value) throws InternalProcessingError;
 

@@ -15,33 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.systemexec.internal
+package org.openmole.plugin.task.systemexec.internal;
 
+import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.openmole.commons.aspect.caching.SoftCachable
 
-object Activator extends BundleActivator {
+/**
+ *
+ * @author Romain Reuillon <romain.reuillon at openmole.org>
+ */
+public class Activator implements BundleActivator {
+   
+    static Activator instance = new Activator();
+    
+    BundleContext context = null;
 
-  var context: BundleContext = null
- 
-  override def start(context: BundleContext) = {
-    this.context = context
-  }
-
-  override def stop(context: BundleContext) = {
-    this.context = null
-  }
-
-  @SoftCachable
-  def getWorkspace: IWorkspace = {
-    def ref = context.getServiceReference(classOf[IWorkspace].getName)
-    return context.getService(ref) match {
-      case ws: IWorkspace => ws
-      case _ => throw new ClassCastException
+    public static IWorkspace workspace() {
+        return instance.getWorkspace();
     }
-  }
+
+    @SoftCachable
+    private IWorkspace getWorkspace()
+    {
+      ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
+      return (IWorkspace) context.getService(ref);
+    }
+
+    @Override
+    public void start(BundleContext bc) throws Exception {
+        instance.context = bc;
+    }
+
+    @Override
+    public void stop(BundleContext bc) throws Exception {
+        instance.context = null;
+    }
 
 }

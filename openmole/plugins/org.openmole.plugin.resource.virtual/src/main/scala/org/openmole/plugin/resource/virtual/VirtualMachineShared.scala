@@ -35,7 +35,7 @@ class VirtualMachineShared(resource: VirtualMachineResource) extends IVirtualMac
 
   override def borrowAVirtualMachine(): IVirtualMachine = {
     synchronized {
-      val ret: IVirtualMachine =  if(running.get()) vm
+      val ret: IVirtualMachine =  if(running.get) vm
       else {
         running.set(true)
         vm = resource.launchAVirtualMachine
@@ -53,13 +53,14 @@ class VirtualMachineShared(resource: VirtualMachineResource) extends IVirtualMac
 
           override def run() = {
             VirtualMachineShared.this.synchronized {
-              if(!running.get) {
+              if(used.get == 0) {
                 vm.shutdown
                 running.set(false)
                 vm = null
               }
             }
           }
+
         }, delay, TimeUnit.MILLISECONDS)
       }
     }

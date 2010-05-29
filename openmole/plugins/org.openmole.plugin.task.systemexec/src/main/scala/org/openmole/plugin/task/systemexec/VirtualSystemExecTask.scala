@@ -27,14 +27,62 @@ import org.openmole.core.model.task.annotations.Resource
 import org.openmole.plugin.resource.virtual.IVirtualMachine
 import org.openmole.plugin.resource.virtual.IVirtualMachinePool
 import org.openmole.plugin.resource.virtual.VirtualMachineResource
+import org.openmole.plugin.task.systemexec.internal.Activator._
+import org.openmole.misc.workspace.ConfigurationLocation
+import com.jcraft.jsch.ChannelExec
+import java.io.PrintStream
 
-class VirtualSystemExecTask(name: String,@Resource val virtualMachineResource: VirtualMachineResource) extends Task(name) {
-    
-    override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
-        System.out.println("Execute virtual task.")
-        val pool = virtualMachineResource.getVirtualMachineShared
-        val virtualMachine = pool.borrowAVirtualMachine
-        pool.returnVirtualMachine(virtualMachine)
-        System.out.println("Executed virtual task.")
+
+class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String) extends Task(name) {
+
+  @Resource
+  val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
+
+
+  object Configuration {
+    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[VirtualSystemExecTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
+    val ActiveWaitInterval = new ConfigurationLocation(classOf[VirtualSystemExecTask].getSimpleName(), "ActiveWaitInterval")
+    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT1M")
+    workspace.addToConfigurations(ActiveWaitInterval, "PT1S")
+  }
+
+
+  override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
+
+    val pool = virtualMachineResource.getVirtualMachineShared
+    val virtualMachine = pool.borrowAVirtualMachine
+    try {
+      val session = virtualMachineResource.getSSHSession(virtualMachine)
+      session.connect( workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
+      try {
+        val channel = session.openChannel("exec") match {
+          case ch: ChannelExec => ch
+          case _ => throw new ClassCastException
+        }
+
+	channel.setCommand(cmd)
+
+        channel.setOutputStream(new PrintStream(System.out)  {
+          override def close() = {}
+        })
+
+        channel.setErrStream(new PrintStream(System.err)  {
+          override def close() = {}
+        })
+      
+        // start job
+	channel.connect
+
+        //Ugly active wait
+        while(!channel.isClosed) {
+           Thread.sleep( workspace.getPreferenceAsDurationInMs(Configuration.ActiveWaitInterval).intValue )
+        }
+
+      } finally {
+        session.disconnect
+      }
+    } finally {
+       pool.returnVirtualMachine(virtualMachine)
     }
+  }
 }

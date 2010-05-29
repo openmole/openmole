@@ -16,8 +16,10 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.joda.time.DurationField;
+import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -274,12 +276,12 @@ public class Workspace implements IWorkspace {
     }
 
     @Override
-    public Integer getPreferenceAsInt(ConfigurationLocation location) throws InternalProcessingError {
+    public int getPreferenceAsInt(ConfigurationLocation location) throws InternalProcessingError {
         return new Integer(getPreference(location));
     }
 
     @Override
-    public Double getPreferenceAsDouble(ConfigurationLocation location) throws InternalProcessingError {
+    public double getPreferenceAsDouble(ConfigurationLocation location) throws InternalProcessingError {
         return new Double(getPreference(location));
     }
 
@@ -307,7 +309,7 @@ public class Workspace implements IWorkspace {
     }
 
     @Override
-    public Long getPreferenceAsLong(ConfigurationLocation location) throws InternalProcessingError {
+    public long getPreferenceAsLong(ConfigurationLocation location) throws InternalProcessingError {
         return new Long(getPreference(location));
     }
 
@@ -324,12 +326,14 @@ public class Workspace implements IWorkspace {
 
 
     @Override
-    public Integer getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError {
-        return ISOPeriodFormat.standard().parsePeriod(getPreference(location)).getMillis();
+    public long getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError {
+        return ISOPeriodFormat.standard().parsePeriod(getPreference(location)).toStandardSeconds().getSeconds() * 1000L;
     }
 
     @Override
-    public Integer getPreferenceAsDurationInS(ConfigurationLocation location) throws InternalProcessingError {
-        return ISOPeriodFormat.standard().parsePeriod(getPreference(location)).getSeconds();
+    public int getPreferenceAsDurationInS(ConfigurationLocation location) throws InternalProcessingError {
+        PeriodFormatter formatter = ISOPeriodFormat.standard();
+        Period period = formatter.parsePeriod(getPreference(location));
+        return period.toStandardSeconds().getSeconds();
     }
 }

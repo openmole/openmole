@@ -36,8 +36,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.IExecutionContext
 import org.openmole.plugin.task.external.ExternalTask
-import org.openmole.plugin.task.systemexec.internal.Activator
-
+import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
@@ -54,7 +53,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
 
   override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) = {
     try {
-      val tmpDir = Activator.getWorkspace.newTmpDir("systemExecTask")
+      val tmpDir = workspace.newTmpDir("systemExecTask")
 
       prepareInputFiles(context, progress, tmpDir)
 

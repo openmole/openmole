@@ -61,7 +61,7 @@ class VirtualMachinePool(resource: VirtualMachineResource) extends IVirtualMachi
   }
 
   override def returnVirtualMachine(virtualMachine: IVirtualMachine) = {
-        
+
     val killTime : Long = System.currentTimeMillis + delay
 
     val pooledVM = new PooledVM(virtualMachine, killTime)

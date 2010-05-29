@@ -46,111 +46,112 @@ import org.openmole.commons.tools.io.Network._
 
 class VirtualMachineResource(system: File, user: String, password: String) extends ComposedResource {
 
-    object Files {
-      def list = List("qemu", "bios.bin")
-    }
+  object Files {
+    def list = List("qemu", "bios.bin")
+  }
 
-    object Configuration {
-      def VirtualMachineBootTimeOut = {
-        val ret = new ConfigurationLocation(classOf[VirtualMachine].getSimpleName(), "VirtualMachineBootTimeOut")
-        Activator.getWorkspace().addToConfigurations(ret, "PT5M")
-        ret
+  object Configuration {
+    val VirtualMachineBootTimeOut = new ConfigurationLocation(classOf[VirtualMachine].getSimpleName(), "VirtualMachineBootTimeOut")
+    Activator.getWorkspace().addToConfigurations(VirtualMachineBootTimeOut, "PT5M")
+  }
+
+  @Resource
+  val systemResource: FileResource = new FileResource(system)
+
+
+  def this(system: String, user: String, password: String) {
+    this(new File(system), user, password)
+  }
+
+  def launchAVirtualMachine: IVirtualMachine = {
+
+    class VirtualMachineConnector extends IConnectable {
+      var virtualMachine: IVirtualMachine = null
+
+      override def connect(port: Int) = {
+        val qemuDir = getQEmuDir
+        val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
+
+        val process = commandLauncher.exec(commandLine, new HashMap())
+        processDestroyer.add(process)
+
+        virtualMachine = new VirtualMachine("localhost", port, process)
       }
     }
 
-    @Resource
-    val systemResource: FileResource = new FileResource(system)
+    val connector = new VirtualMachineConnector
 
-
-    def this(system: String, user: String, password: String) {
-        this(new File(system), user, password)
+    try {
+      ConnectToFreePort(connector)
+    } catch {
+      case e: Exception => throw new InternalProcessingError(e)
     }
 
-    def launchAVirtualMachine: IVirtualMachine = {
-
-        class VirtualMachineConnector extends IConnectable {
-            var virtualMachine: IVirtualMachine = null
-
-            override def connect(port: Int) = {
-               val qemuDir = getQEmuDir
-               val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
-
-               val process = commandLauncher.exec(commandLine, new HashMap())
-               processDestroyer.add(process)
-
-               virtualMachine = new VirtualMachine("localhost", port, process)
-            }
-        }
-
-        val connector = new VirtualMachineConnector
-
-        try {
-            ConnectToFreePort(connector)
-        } catch {
-          case e: Exception => throw new InternalProcessingError(e)
-        }
-
-        val virtualMachine = connector.virtualMachine
-        val jsch = new JSch()
-
-        try {
-            val session = jsch.getSession(user, virtualMachine.host, virtualMachine.port)
-            session.setPassword(password)
-            session.setConfig("StrictHostKeyChecking", "no")
-            session.connect( Activator.getWorkspace().getPreferenceAsDurationInS(Configuration.VirtualMachineBootTimeOut).intValue )
-            session.disconnect
-
-        } catch {
-          case ex: JSchException => throw new InternalProcessingError(ex)
-        }
-
-        connector.virtualMachine
+    val virtualMachine = connector.virtualMachine
+ 
+    try {
+      val session = getSSHSession(virtualMachine)
+      session.connect( Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.VirtualMachineBootTimeOut).intValue )
+      session.disconnect
+    } catch {
+      case ex: JSchException => throw new InternalProcessingError(ex)
     }
 
-    @Cachable
-    private def commandLauncher: CommandLauncher = {
-        CommandLauncherFactory.createVMLauncher
-    }
+    connector.virtualMachine
+  }
 
-    @Cachable
-    private def processDestroyer: ShutdownHookProcessDestroyer = {
-        new ShutdownHookProcessDestroyer
-    }
+  def getSSHSession(virtualMachine: IVirtualMachine): Session = {
+    val jsch = new JSch
+    val session = jsch.getSession(user, virtualMachine.host, virtualMachine.port)
+    session.setPassword(password)
+    session.setConfig("StrictHostKeyChecking", "no")
+    return session
+  }
 
-    @Cachable
-    def getVirtualMachinePool: IVirtualMachinePool = {
-        new VirtualMachinePool(this)
-    }
+  @Cachable
+  private def commandLauncher: CommandLauncher = {
+    CommandLauncherFactory.createVMLauncher
+  }
 
-    @Cachable
-    def getVirtualMachineShared: IVirtualMachinePool = {
-        new VirtualMachineShared(this)
-    }
+  @Cachable
+  private def processDestroyer: ShutdownHookProcessDestroyer = {
+    new ShutdownHookProcessDestroyer
+  }
 
-    @Cachable
-    private def getQEmuDir: File = {
-        val os = System.getProperty("os.name")
-        val qemuDir = Activator.getWorkspace().newTmpDir()
-        val qemuJarPath = 
-          if(os.toLowerCase().contains("linux")) {
-            "/qemu_linux/"
-          } else {
-            throw new InternalProcessingError("Unsuported OS " + os)
-          }
+  @Cachable
+  def getVirtualMachinePool: IVirtualMachinePool = {
+    new VirtualMachinePool(this)
+  }
+
+  @Cachable
+  def getVirtualMachineShared: IVirtualMachinePool = {
+    new VirtualMachineShared(this)
+  }
+
+  @Cachable
+  private def getQEmuDir: File = {
+    val os = System.getProperty("os.name")
+    val qemuDir = Activator.getWorkspace().newTmpDir()
+    val qemuJarPath =
+      if(os.toLowerCase().contains("linux")) {
+        "/qemu_linux/"
+      } else {
+        throw new InternalProcessingError("Unsuported OS " + os)
+      }
         
         
-        Files.list.foreach( f => {
-            val dest = new File(qemuDir, f)
-            val outputStream = new BufferedOutputStream(new FileOutputStream(dest))
+    Files.list.foreach( f => {
+        val dest = new File(qemuDir, f)
+        val outputStream = new BufferedOutputStream(new FileOutputStream(dest))
 
-            try {
-                FastCopy.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream)
-            } finally {
-                outputStream.close
-            }
-            dest.setExecutable(true)
-        } )
+        try {
+          FastCopy.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream)
+        } finally {
+          outputStream.close
+        }
+        dest.setExecutable(true)
+      } )
 
-        qemuDir
-    }
+    qemuDir
+  }
 }
