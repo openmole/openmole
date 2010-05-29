@@ -1,9 +1,9 @@
-package org.openmole.core.commons.objectidservice.internal;
+package org.openmole.core.objectidservice.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.openmole.core.commons.objectidservice.IObjectIDService;
+import org.openmole.core.objectidservice.IObjectIDService;
 
 public class Activator implements BundleActivator {
 

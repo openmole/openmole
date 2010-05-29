@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.commons.objectidservice;
+package org.openmole.core.objectidservice;
 
 /**
  *

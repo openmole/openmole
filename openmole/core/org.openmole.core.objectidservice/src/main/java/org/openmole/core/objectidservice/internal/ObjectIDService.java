@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.commons.objectidservice.internal;
+package org.openmole.core.objectidservice.internal;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
-import org.openmole.core.commons.objectidservice.IObjectIDService;
+import org.openmole.core.objectidservice.IObjectIDService;
 
 /**
  *
