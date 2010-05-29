@@ -29,20 +29,20 @@ import java.util.List;
 import java.util.Map;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.execution.Progress;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.tools.groovy.GroovyProxyPool;
 import org.openmole.commons.tools.groovy.IGroovyProxy;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.commons.aspect.caching.SoftCachable;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.execution.IProgress;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.execution.IProgress;
 import org.openmole.plugin.tools.code.FileSourceCode;
 import org.openmole.plugin.tools.code.IContextToCode;
 import org.openmole.plugin.tools.code.ISourceCode;

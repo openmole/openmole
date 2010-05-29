@@ -26,7 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
-import org.openmole.core.workflow.model.execution.IExecutionJob;
+import org.openmole.core.model.execution.IExecutionJob;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -34,11 +34,11 @@ import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Job;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.workspace.ConfigurationLocation;
 

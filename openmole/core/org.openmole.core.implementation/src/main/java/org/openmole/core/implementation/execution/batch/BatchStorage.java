@@ -33,12 +33,12 @@ import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.service.RNG;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessToken;
 
 public class BatchStorage extends BatchService implements IBatchStorage {
 

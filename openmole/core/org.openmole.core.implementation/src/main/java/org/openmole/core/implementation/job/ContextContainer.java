@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.job;
 
 
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 
 public class ContextContainer {
 

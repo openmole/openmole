@@ -24,11 +24,11 @@ import java.util.List;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
 import org.openmole.core.implementation.tools.FileMigrator;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.core.workflow.model.job.IMoleJobId;
-import org.openmole.core.workflow.model.job.State;
+import org.openmole.core.model.job.IMoleJobId;
+import org.openmole.core.model.job.State;
 
 public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob> {
 

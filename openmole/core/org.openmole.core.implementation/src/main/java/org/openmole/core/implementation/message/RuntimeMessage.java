@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.message;
 
-import org.openmole.core.workflow.model.message.IRuntimeMessage;
+import org.openmole.core.model.message.IRuntimeMessage;
 
 public class RuntimeMessage implements IRuntimeMessage {
 	

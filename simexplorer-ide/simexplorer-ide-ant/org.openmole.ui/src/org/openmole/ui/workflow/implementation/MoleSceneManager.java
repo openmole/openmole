@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
 

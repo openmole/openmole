@@ -23,9 +23,9 @@ import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchStorage;
 
 public interface IReplicaCatalog {
 

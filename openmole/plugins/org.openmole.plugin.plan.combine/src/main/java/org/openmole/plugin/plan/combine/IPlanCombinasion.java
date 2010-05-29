@@ -5,7 +5,7 @@
 
 package org.openmole.plugin.plan.combine;
 
-import org.openmole.core.workflow.model.plan.IPlan;
+import org.openmole.core.model.plan.IPlan;
 
 /**
  *

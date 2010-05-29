@@ -19,8 +19,8 @@ package org.openmole.plugin.domain.uniformintegerdistribution;
 
 import java.util.Iterator;
 import java.util.Random;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.domain.IDomain;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

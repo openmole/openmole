@@ -17,7 +17,7 @@
 package org.openmole.core.runtimemessageserializer.internal;
 
 import java.io.OutputStream;
-import org.openmole.core.workflow.model.message.IJobForRuntime;
+import org.openmole.core.model.message.IJobForRuntime;
 
 
 /**

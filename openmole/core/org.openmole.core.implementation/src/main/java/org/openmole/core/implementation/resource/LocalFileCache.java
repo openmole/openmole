@@ -22,7 +22,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.ILocalFileCache;
 
 public class LocalFileCache implements ILocalFileCache {
 	Map<File, File> localFileCache;

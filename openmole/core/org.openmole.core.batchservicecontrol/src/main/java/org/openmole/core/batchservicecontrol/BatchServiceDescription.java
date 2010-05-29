@@ -18,7 +18,7 @@
 
 package org.openmole.core.batchservicecontrol;
 
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 
 public class BatchServiceDescription implements IBatchServiceDescription {

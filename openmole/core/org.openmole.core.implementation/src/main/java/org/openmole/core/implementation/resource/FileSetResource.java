@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.TreeBidiMap;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

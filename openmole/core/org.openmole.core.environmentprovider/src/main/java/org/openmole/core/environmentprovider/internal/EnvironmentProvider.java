@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.environmentprovider.IEnvironmentProvider;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IEnvironmentDescription;
 
 public class EnvironmentProvider implements IEnvironmentProvider {
 

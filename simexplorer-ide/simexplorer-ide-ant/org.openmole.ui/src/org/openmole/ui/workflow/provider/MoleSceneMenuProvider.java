@@ -19,7 +19,7 @@ package org.openmole.ui.workflow.provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.JMenuItem;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.workflow.action.AddTaskAction;
 import org.openmole.ui.workflow.action.AddTaskCapsuleAction;
 import org.openmole.ui.workflow.implementation.MoleScene;

@@ -22,12 +22,12 @@ package org.openmole.core.implementation.plan;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.openmole.core.workflow.model.plan.IFactor;
+import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.domain.IDomain;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.task.annotations.Resource;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.domain.IDomain;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.exception.InternalProcessingError;
 
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;

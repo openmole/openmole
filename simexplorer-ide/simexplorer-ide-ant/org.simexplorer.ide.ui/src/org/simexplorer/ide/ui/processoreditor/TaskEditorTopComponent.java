@@ -45,7 +45,7 @@ import org.simexplorer.ide.ui.ProcessorChooserPanel;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 import org.simexplorer.core.workflow.model.metada.MetadataLoader;
-import org.openmole.core.workflow.model.plan.IPlan;
+import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.commons.tools.structure.Duo;
 import org.simexplorer.core.workflow.model.metada.Metadata;

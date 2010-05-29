@@ -24,8 +24,8 @@ import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.IResource;
 
 public class FileResource implements IResource {
 

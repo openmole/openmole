@@ -19,8 +19,8 @@ package org.openmole.core.implementation.mole;
 
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *

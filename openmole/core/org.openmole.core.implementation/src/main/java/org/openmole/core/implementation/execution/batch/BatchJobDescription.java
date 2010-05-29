@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.execution.batch;
 
-import org.openmole.core.workflow.model.execution.batch.IBatchJobDescription;
+import org.openmole.core.model.execution.batch.IBatchJobDescription;
 
 public abstract class BatchJobDescription implements IBatchJobDescription {
 	

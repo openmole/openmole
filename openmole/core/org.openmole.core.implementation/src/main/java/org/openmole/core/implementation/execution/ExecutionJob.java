@@ -16,9 +16,9 @@
  */
 package org.openmole.core.implementation.execution;
 
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IExecutionJob;
-import org.openmole.core.workflow.model.job.IJob;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IExecutionJob;
+import org.openmole.core.model.job.IJob;
 
 public abstract class ExecutionJob<ENV extends IEnvironment<?, ?>>  implements IExecutionJob<ENV> {
 

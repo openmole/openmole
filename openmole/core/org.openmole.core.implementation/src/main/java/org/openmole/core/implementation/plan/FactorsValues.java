@@ -19,12 +19,12 @@
  */
 package org.openmole.core.implementation.plan;
 
-import org.openmole.core.workflow.model.plan.IFactorValues;
+import org.openmole.core.model.plan.IFactorValues;
 
 import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 public class FactorsValues implements IFactorValues {
  

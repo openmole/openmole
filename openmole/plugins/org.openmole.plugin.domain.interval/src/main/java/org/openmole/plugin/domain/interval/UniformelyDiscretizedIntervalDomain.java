@@ -19,9 +19,9 @@ package org.openmole.plugin.domain.interval;
 
 import org.openmole.core.implementation.domain.FiniteDomain;
 import org.openmole.core.implementation.domain.Interval;
-import org.openmole.core.workflow.model.domain.IDiscretizedIntervalDomain;
-import org.openmole.core.workflow.model.domain.IDomainWithCenter;
-import org.openmole.core.workflow.model.domain.IDomainWithRange;
+import org.openmole.core.model.domain.IDiscretizedIntervalDomain;
+import org.openmole.core.model.domain.IDomainWithCenter;
+import org.openmole.core.model.domain.IDomainWithRange;
 
 /**
  *

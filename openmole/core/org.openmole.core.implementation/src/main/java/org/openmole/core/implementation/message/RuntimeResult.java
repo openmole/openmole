@@ -21,10 +21,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.workflow.model.message.IRuntimeResult;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.job.IMoleJobId;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.message.IRuntimeResult;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 

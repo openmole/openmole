@@ -26,7 +26,7 @@ import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.domain.IDomain;
 import org.simexplorer.ide.ui.PanelFactory;
 import org.simexplorer.core.workflow.methods.DomainEditorPanel;
 import org.simexplorer.core.workflow.methods.EditorPanel;

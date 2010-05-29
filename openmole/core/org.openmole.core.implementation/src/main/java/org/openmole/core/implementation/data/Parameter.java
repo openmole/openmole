@@ -16,9 +16,9 @@
  */
 package org.openmole.core.implementation.data;
 
-import org.openmole.core.workflow.model.data.IParameter;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.data.IVariable;
+import org.openmole.core.model.data.IParameter;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.data.IVariable;
 
 /**
  *

@@ -23,9 +23,9 @@ import java.util.concurrent.TimeoutException;
 import org.openmole.core.batchservicecontrol.AccessTokenPool;
 import org.openmole.core.batchservicecontrol.BotomlessTokenPool;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IAccessTokenPool;
-import org.openmole.core.workflow.model.execution.batch.IUsageControl;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessTokenPool;
+import org.openmole.core.model.execution.batch.IUsageControl;
 
 public class UsageControl implements IUsageControl {
 

@@ -31,12 +31,12 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.core.implementation.task.Task;
 
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.task.annotations.Output;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.task.annotations.Output;
 import org.openmole.plugin.task.filemanagement.internal.Activator;
 
 import static org.openmole.core.implementation.tools.VariableExpansion.*;

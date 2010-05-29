@@ -28,11 +28,11 @@ import org.openmole.core.batchservicecontrol.BotomlessTokenPool;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IAccessTokenPool;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.workflow.model.execution.batch.IFailureControl;
-import org.openmole.core.workflow.model.execution.batch.IUsageControl;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessTokenPool;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IFailureControl;
+import org.openmole.core.model.execution.batch.IUsageControl;
 import org.openmole.commons.aspect.eventdispatcher.ObjectModified;
 import org.openmole.commons.exception.UserBadDataError;
 

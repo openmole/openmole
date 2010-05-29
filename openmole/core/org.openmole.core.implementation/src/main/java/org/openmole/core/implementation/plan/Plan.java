@@ -20,12 +20,12 @@ package org.openmole.core.implementation.plan;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import org.openmole.core.workflow.model.plan.IPlan;
+import org.openmole.core.model.plan.IPlan;
 import java.util.List;
 
-import org.openmole.core.workflow.model.plan.IFactor;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.task.annotations.Resource;
+import org.openmole.core.model.plan.IFactor;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

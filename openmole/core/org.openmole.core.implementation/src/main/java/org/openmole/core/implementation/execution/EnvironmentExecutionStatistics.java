@@ -20,11 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.openmole.core.workflow.model.execution.IEnvironmentExecutionStatistics;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.execution.IStatistic;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
+import org.openmole.core.model.execution.batch.SampleType;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.IStatistic;
+import org.openmole.core.model.mole.IExecutionContext;
 
 public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStatistics {
 

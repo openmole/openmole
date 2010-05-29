@@ -32,23 +32,23 @@ import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.core.workflow.model.task.annotations.Resource;
-import org.openmole.core.workflow.model.task.annotations.Input;
-import org.openmole.core.workflow.model.task.annotations.Output;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.model.task.annotations.Resource;
+import org.openmole.core.model.task.annotations.Input;
+import org.openmole.core.model.task.annotations.Output;
 import org.openmole.commons.aspect.caching.SoftCachable;
 
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.Parameter;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IParameter;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IParameter;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.mole.IExecutionContext;
 
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
 

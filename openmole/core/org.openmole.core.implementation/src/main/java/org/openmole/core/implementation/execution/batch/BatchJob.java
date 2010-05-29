@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchJob;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchJob;
+import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
 
 public abstract class BatchJob implements IBatchJob {

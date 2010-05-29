@@ -18,11 +18,11 @@
 package org.openmole.plugin.tools.code;
 
 import java.io.File;
-import org.openmole.core.workflow.model.data.IData;
+import org.openmole.core.model.data.IData;
 
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

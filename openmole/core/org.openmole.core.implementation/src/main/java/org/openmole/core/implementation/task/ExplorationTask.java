@@ -18,17 +18,17 @@ package org.openmole.core.implementation.task;
 
 import java.util.Collection;
 import org.openmole.core.implementation.data.Data;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.plan.IExploredPlan;
-import org.openmole.core.workflow.model.plan.IPlan;
-import org.openmole.core.workflow.model.task.IExplorationTask;
-import org.openmole.core.workflow.model.task.annotations.Output;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.plan.IExploredPlan;
+import org.openmole.core.model.plan.IPlan;
+import org.openmole.core.model.task.IExplorationTask;
+import org.openmole.core.model.task.annotations.Output;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.commons.aspect.caching.SoftCachable;
 

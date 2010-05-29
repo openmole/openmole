@@ -26,7 +26,7 @@ import javax.swing.Action;
 import org.openide.nodes.AbstractNode;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 class VariablesNode extends AbstractNode {
 

@@ -25,7 +25,7 @@ import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.tools.VariableExpansion;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 
 public class EnumerationDomain<T> extends FiniteDomain<T> {
 

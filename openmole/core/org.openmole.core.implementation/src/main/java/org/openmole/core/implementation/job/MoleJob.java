@@ -26,21 +26,21 @@ import org.openmole.commons.exception.ExecutionException;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.job.State;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.core.workflow.model.job.IMoleJobId;
-import org.openmole.core.workflow.model.job.ITicket;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.job.State;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.model.job.IMoleJobId;
+import org.openmole.core.model.job.ITicket;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.implementation.tools.LocalHostName;
-import org.openmole.core.workflow.model.job.ITimeStamp;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.job.ITimeStamp;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.resource.IResource;
 
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 

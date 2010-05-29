@@ -26,10 +26,10 @@ import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.job.IContext;
 
 /**
  *

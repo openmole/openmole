@@ -20,13 +20,13 @@ package org.openmole.core.implementation.job;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.job.IMoleJobId;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.exception.ExecutionException;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.job.IMoleJob;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.job.IMoleJob;
 import org.openmole.commons.exception.UserBadDataError;
 
 public class Job implements IJob {

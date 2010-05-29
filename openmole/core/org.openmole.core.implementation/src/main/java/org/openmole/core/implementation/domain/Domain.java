@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.domain;
 
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.domain.IDomain;
 
 /**
  *

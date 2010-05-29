@@ -21,20 +21,20 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.mole.MoleExecution;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.task.IMoleTask;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.IMoleTask;
 
 public class MoleTask extends Task implements IMoleTask {
 

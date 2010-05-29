@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.mole;
 
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.execution.IJobStatisticCategory;
 
 /**
  *

@@ -19,7 +19,7 @@ package org.openmole.core.file.internal;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessToken;
 
 /**
  *

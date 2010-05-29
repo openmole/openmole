@@ -19,7 +19,7 @@ package org.simexplorer.openmole.plugin.task.sensitivity;
 
 import java.util.Iterator;
 import org.openmole.core.implementation.domain.Domain;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

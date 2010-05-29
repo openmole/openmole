@@ -51,8 +51,8 @@ import org.ogf.saga.error.PermissionDeniedException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.misc.workspace.ConfigurationElement;
 

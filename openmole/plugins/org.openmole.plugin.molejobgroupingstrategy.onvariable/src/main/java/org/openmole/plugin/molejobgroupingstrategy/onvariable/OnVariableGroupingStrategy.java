@@ -19,11 +19,11 @@ package org.openmole.plugin.molejobgroupingstrategy.onvariable;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.openmole.core.workflow.model.execution.IMoleJobCategory;
-import org.openmole.core.workflow.model.execution.IMoleJobGroupingStrategy;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.execution.IMoleJobCategory;
+import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.job.IContext;
 import org.openmole.core.implementation.mole.MoleJobCategory;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 /**
  *

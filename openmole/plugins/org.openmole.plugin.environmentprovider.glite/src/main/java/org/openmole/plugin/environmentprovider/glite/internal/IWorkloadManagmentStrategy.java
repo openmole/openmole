@@ -16,8 +16,8 @@
  */
 package org.openmole.plugin.environmentprovider.glite.internal;
 
-import org.openmole.core.workflow.model.execution.IStatistic;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
+import org.openmole.core.model.execution.IStatistic;
+import org.openmole.core.model.execution.batch.SampleType;
 
 public interface IWorkloadManagmentStrategy {
     Long getWhenJobShouldBeResubmited(SampleType type, IStatistic finishedStat, IStatistic runningStat);

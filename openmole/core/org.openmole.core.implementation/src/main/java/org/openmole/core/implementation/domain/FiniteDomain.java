@@ -22,8 +22,8 @@ package org.openmole.core.implementation.domain;
 import java.util.Iterator;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.domain.IFiniteDomain;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.domain.IFiniteDomain;
+import org.openmole.core.model.job.IContext;
 
 
 public abstract class FiniteDomain<T> extends Domain<T> implements IFiniteDomain<T> {

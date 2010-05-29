@@ -20,7 +20,7 @@ package org.openmole.core.file;
 import java.io.IOException;
 
 import org.openmole.misc.backgroundexecutor.ITransferable;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.file.IURIFile;
 
 
 public interface IURIFileCopy extends ITransferable {

@@ -5,7 +5,7 @@
 
 package org.openmole.core.implementation.domain;
 
-import org.openmole.core.workflow.model.domain.IInterval;
+import org.openmole.core.model.domain.IInterval;
 
 /**
  *

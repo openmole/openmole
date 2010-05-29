@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.job;
 
-import org.openmole.core.workflow.model.job.IMoleJobId;
+import org.openmole.core.model.job.IMoleJobId;
 
 public class MoleJobId implements IMoleJobId {
 	Long id;

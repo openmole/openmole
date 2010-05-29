@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.workflow.model</artifactId>
+            <artifactId>org.openmole.core.model</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

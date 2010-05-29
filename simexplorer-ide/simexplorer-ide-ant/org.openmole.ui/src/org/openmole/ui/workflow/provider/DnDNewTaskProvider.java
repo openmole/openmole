@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
 import org.openide.util.Exceptions;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;

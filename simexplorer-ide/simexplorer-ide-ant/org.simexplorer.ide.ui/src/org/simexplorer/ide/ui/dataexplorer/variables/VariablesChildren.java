@@ -21,7 +21,7 @@ package org.simexplorer.ide.ui.dataexplorer.variables;
 import java.util.Collection;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 
 class VariablesChildren extends Children.Keys<IPrototype> {

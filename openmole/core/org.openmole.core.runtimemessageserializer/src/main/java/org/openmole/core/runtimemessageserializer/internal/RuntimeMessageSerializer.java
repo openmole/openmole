@@ -27,9 +27,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.message.IExecutionMessage;
-import org.openmole.core.workflow.model.message.IJobForRuntime;
-import org.openmole.core.workflow.model.message.IRuntimeResult;
+import org.openmole.core.model.message.IExecutionMessage;
+import org.openmole.core.model.message.IJobForRuntime;
+import org.openmole.core.model.message.IRuntimeResult;
 
 
 import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;

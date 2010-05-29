@@ -6,9 +6,9 @@ import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.GenericTask;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.mole.IExecutionContext;
 
 
 public class TasksList extends GenericTask implements Iterable<GenericTask> {

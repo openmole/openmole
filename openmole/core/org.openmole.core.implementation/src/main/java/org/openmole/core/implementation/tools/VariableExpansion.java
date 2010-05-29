@@ -23,11 +23,11 @@ import groovy.lang.Binding;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import org.openmole.core.workflow.model.data.IVariable;
+import org.openmole.core.model.data.IVariable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.groovy.GroovyProxy;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 
 public class VariableExpansion {
 

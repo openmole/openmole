@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.data;
 
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
 
 public class Data<T> implements IData<T> {
 

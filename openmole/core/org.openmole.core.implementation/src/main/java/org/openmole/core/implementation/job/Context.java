@@ -29,12 +29,12 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitable;
 import org.openmole.commons.tools.pattern.IVisitor;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.data.IPrototype;
 
 public class Context implements IVisitable<IVariable>, IContext {
 

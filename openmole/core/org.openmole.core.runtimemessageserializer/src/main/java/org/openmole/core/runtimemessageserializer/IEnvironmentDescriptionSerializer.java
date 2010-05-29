@@ -22,7 +22,7 @@ import java.io.File;
 import java.io.OutputStream;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
+import org.openmole.core.model.execution.IEnvironmentDescription;
 
 public interface IEnvironmentDescriptionSerializer {
 	//IEnvironmentDescription<?> deserialize(IURIFile file) throws InternalProcessingError, InterruptedException;

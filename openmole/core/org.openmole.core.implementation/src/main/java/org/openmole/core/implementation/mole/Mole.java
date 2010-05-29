@@ -34,19 +34,19 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.resource.LocalFileCache;
 import org.openmole.core.implementation.job.Context;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategorizationStrategy;
-import org.openmole.core.workflow.model.execution.IMoleJobGroupingStrategy;
-import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.mole.IEnvironmentSelectionStrategy;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.core.workflow.model.transition.ITransition;
+import org.openmole.core.model.execution.IJobStatisticCategorizationStrategy;
+import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.model.transition.ITransition;
 
 /**
  * A Mole is a workflow with a defined start capsule. Indeed, it is a set of

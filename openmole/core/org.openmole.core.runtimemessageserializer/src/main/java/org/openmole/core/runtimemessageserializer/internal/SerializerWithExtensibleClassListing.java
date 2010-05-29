@@ -23,7 +23,7 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import org.openmole.core.runtimemessageserializer.internal.converters.PluginConverter;
-import org.openmole.core.workflow.model.message.IJobForRuntime;
+import org.openmole.core.model.message.IJobForRuntime;
 
 /**
  *

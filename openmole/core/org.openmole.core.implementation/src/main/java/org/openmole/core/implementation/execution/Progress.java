@@ -19,7 +19,7 @@
 package org.openmole.core.implementation.execution;
 
 
-import org.openmole.core.workflow.model.execution.IProgress;
+import org.openmole.core.model.execution.IProgress;
 
 public class Progress implements IProgress {
     final public static IProgress DUMMY = new IProgress() {};

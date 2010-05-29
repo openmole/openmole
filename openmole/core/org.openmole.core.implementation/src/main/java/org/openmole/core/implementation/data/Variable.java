@@ -20,14 +20,14 @@
 package org.openmole.core.implementation.data;
 
 
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.data.IVariable;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.data.IVariable;
 
 /**
  * This class handle a multi-purpose variable. A variable has a name, a type and
  * a value.
  * @param T
- * @see org.openmole.core.workflow.model.data.DataContainer
+ * @see org.openmole.core.model.data.DataContainer
  */
 public class Variable<T> implements IVariable<T> {
 

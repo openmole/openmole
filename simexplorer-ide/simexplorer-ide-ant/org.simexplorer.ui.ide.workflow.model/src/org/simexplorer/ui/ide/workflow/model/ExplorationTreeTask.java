@@ -8,8 +8,8 @@ import org.openmole.core.structuregenerator.IStructureGenerator;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.core.workflow.methods.task.ModelStructuresGenerationTask;
 import org.openmole.core.structuregenerator.ComplexNode;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.plan.IFactor;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.plan.IFactor;
 import org.simexplorer.ui.ide.osgiinit.Installer;
 
 public class ExplorationTreeTask extends TasksList {

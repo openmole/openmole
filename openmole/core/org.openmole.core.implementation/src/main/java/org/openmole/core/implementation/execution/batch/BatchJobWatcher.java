@@ -24,12 +24,12 @@ import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchExecutionJob;
+import org.openmole.core.model.execution.IExecutionJobRegistries;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.updater.IUpdatable;
 

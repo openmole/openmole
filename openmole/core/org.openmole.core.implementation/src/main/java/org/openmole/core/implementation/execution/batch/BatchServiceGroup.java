@@ -28,9 +28,9 @@ import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchService;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceGroup;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchService;
+import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;

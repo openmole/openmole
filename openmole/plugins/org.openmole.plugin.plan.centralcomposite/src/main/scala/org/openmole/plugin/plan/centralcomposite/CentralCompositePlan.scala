@@ -18,13 +18,13 @@
 package org.openmole.plugin.plan.centralcomposite
 
 import org.openmole.core.implementation.plan.Plan
-import org.openmole.core.workflow.model.domain.IDiscretizedIntervalDomain
-import org.openmole.core.workflow.model.domain.IDomainWithCenter
-import org.openmole.core.workflow.model.domain.IDomainWithRange
-import org.openmole.core.workflow.model.plan.IFactor
-import org.openmole.core.workflow.model.plan.IFactorValues
-import org.openmole.core.workflow.model.job.IContext
-import org.openmole.core.workflow.model.plan.IExploredPlan
+import org.openmole.core.model.domain.IDiscretizedIntervalDomain
+import org.openmole.core.model.domain.IDomainWithCenter
+import org.openmole.core.model.domain.IDomainWithRange
+import org.openmole.core.model.plan.IFactor
+import org.openmole.core.model.plan.IFactorValues
+import org.openmole.core.model.job.IContext
+import org.openmole.core.model.plan.IExploredPlan
 import org.openmole.core.implementation.plan.FactorsValues
 import org.openmole.core.implementation.plan.Plan
 import org.openmole.core.implementation.plan.ExploredPlan

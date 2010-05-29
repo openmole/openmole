@@ -20,7 +20,7 @@ package org.openmole.plugin.environmentprovider.jsaga.model;
 import java.io.File;
 
 import org.ogf.saga.job.JobDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobDescription;
+import org.openmole.core.model.execution.batch.IBatchJobDescription;
 
 
 public interface IJSAGAJobDescription extends IBatchJobDescription {

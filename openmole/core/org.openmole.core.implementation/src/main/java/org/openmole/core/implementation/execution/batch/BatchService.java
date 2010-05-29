@@ -17,11 +17,11 @@
 package org.openmole.core.implementation.execution.batch;
 
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchService;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.workflow.model.execution.batch.IFailureControl;
-import org.openmole.core.workflow.model.execution.batch.IUsageControl;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchService;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IFailureControl;
+import org.openmole.core.model.execution.batch.IUsageControl;
 
 /**
  *

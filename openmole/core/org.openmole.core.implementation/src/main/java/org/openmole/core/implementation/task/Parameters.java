@@ -24,9 +24,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.core.implementation.data.Parameter;
 import org.openmole.core.implementation.resource.FileSetResource;
-import org.openmole.core.workflow.model.data.IParameter;
-import org.openmole.core.workflow.model.resource.IPortable;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.data.IParameter;
+import org.openmole.core.model.resource.IPortable;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 
 /**

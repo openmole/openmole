@@ -30,7 +30,7 @@ import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-import org.openmole.core.workflow.model.plan.IFactor;
+import org.openmole.core.model.plan.IFactor;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 //import org.openide.util.Utilities;
 

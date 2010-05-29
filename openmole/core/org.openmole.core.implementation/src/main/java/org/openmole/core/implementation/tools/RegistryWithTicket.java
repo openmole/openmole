@@ -19,11 +19,11 @@ package org.openmole.core.implementation.tools;
 
 import org.openmole.commons.tools.structure.Registry;
 import org.openmole.commons.tools.structure.IRegistry;
-import org.openmole.core.workflow.model.tools.IRegistryWithTicket;
+import org.openmole.core.model.tools.IRegistryWithTicket;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.openmole.core.workflow.model.job.ITicket;
+import org.openmole.core.model.job.ITicket;
 
 public class RegistryWithTicket<K,V>  implements IRegistryWithTicket<K,V> {
 

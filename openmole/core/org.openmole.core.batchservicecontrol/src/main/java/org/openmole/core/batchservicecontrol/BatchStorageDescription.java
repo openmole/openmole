@@ -18,7 +18,7 @@
 package org.openmole.core.batchservicecontrol;
 
 import java.net.URI;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.batch.IBatchStorage;
 
 
 public class BatchStorageDescription extends BatchServiceDescription {

@@ -38,24 +38,24 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
-import org.openmole.core.workflow.model.execution.batch.IBatchService;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceGroup;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.IBatchService;
+import org.openmole.core.model.execution.batch.IBatchServiceGroup;
+import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchExecutionJob;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.mole.IExecutionContext;
 
 public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends IBatchEnvironmentDescription> extends Environment<DESC, IBatchExecutionJob> implements IBatchEnvironment<JS, DESC> {
 

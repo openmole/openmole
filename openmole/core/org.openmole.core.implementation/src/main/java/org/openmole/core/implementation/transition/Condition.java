@@ -24,8 +24,8 @@ import org.openmole.core.implementation.tools.GroovyShellProxyAdapter;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.transition.ICondition;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.transition.ICondition;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.commons.tools.groovy.GroovyProxy;

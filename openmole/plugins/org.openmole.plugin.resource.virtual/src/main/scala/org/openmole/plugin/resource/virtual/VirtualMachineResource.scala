@@ -33,7 +33,7 @@ import org.apache.commons.exec.launcher.CommandLauncher
 import org.apache.commons.exec.launcher.CommandLauncherFactory
 import org.openmole.core.implementation.resource.ComposedResource
 import org.openmole.core.implementation.resource.FileResource
-import org.openmole.core.workflow.model.task.annotations.Resource
+import org.openmole.core.model.task.annotations.Resource
 import org.openmole.commons.aspect.caching.Cachable
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError

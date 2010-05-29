@@ -38,8 +38,8 @@ import org.ogf.saga.task.State;
 import org.ogf.saga.url.URL;
 import org.ogf.saga.url.URLFactory;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.execution.batch.IBatchJobService;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;

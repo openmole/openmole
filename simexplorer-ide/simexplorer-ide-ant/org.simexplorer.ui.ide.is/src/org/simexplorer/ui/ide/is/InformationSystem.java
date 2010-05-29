@@ -64,8 +64,8 @@ import javax.swing.JFrame;
 import javax.swing.JTable;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.data.SequenceNode;
-import org.openmole.core.workflow.model.data.StructureNode;
+import org.openmole.core.model.data.SequenceNode;
+import org.openmole.core.model.data.StructureNode;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -75,9 +75,9 @@ import org.openmole.core.implementation.task.ExplorationTask;
 import org.simexplorer.core.commons.tools.Instanciator;
 import org.openmole.core.implementation.plan.Domain;
 import org.openmole.core.implementation.task.GenericTask;
-import org.openmole.core.workflow.model.metada.Metadata;
-import org.openmole.core.workflow.model.plan.IFactor;
-import org.openmole.core.workflow.model.plan.IPlan;
+import org.openmole.core.model.metada.Metadata;
+import org.openmole.core.model.plan.IFactor;
+import org.openmole.core.model.plan.IPlan;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 import org.simexplorer.ui.ide.workflow.model.TasksList;
 
@@ -94,9 +94,9 @@ import org.simexplorer.ui.ide.workflow.model.TasksList;
  *   {@link InformationSystem#VARIABLES_NAME}</li>
  *  <li>For each component :</li><ul>
  *   <li>Codes are extracted from attributes and methods annoted with
- *    {@link org.openmole.core.workflow.model.task.annotations.Code}.</li>
+ *    {@link org.openmole.core.model.task.annotations.Code}.</li>
  *   <li>Constants are extracted from attributes and methods annoted with
- *    {@link org.openmole.core.workflow.model.task.annotations.Constant}</li>
+ *    {@link org.openmole.core.model.task.annotations.Constant}</li>
  *   <li>Methods that should be used as codes and constants should be designed
  *    as getters, so without any arguments.</li>
  *   <li>In case of an exploration task, an {@link ExplorationComponent} is
@@ -285,10 +285,10 @@ public class InformationSystem implements ExplorationApplicationLoader, Explorat
 
     private void syncCodesToComponent(Object codesCarrier, final Component component) throws InternalProcessingError {
         // searching codes in fields
-        ReflectUtils.processAllTaggedField(codesCarrier, org.openmole.core.workflow.model.task.annotations.Code.class, new ReflectUtils.FieldGetter<org.openmole.core.workflow.model.task.annotations.Code>() {
+        ReflectUtils.processAllTaggedField(codesCarrier, org.openmole.core.model.task.annotations.Code.class, new ReflectUtils.FieldGetter<org.openmole.core.model.task.annotations.Code>() {
 
             @Override
-            public void process(Field f, Object object, org.openmole.core.workflow.model.task.annotations.Code annotation, Object value) throws InternalProcessingError {
+            public void process(Field f, Object object, org.openmole.core.model.task.annotations.Code annotation, Object value) throws InternalProcessingError {
                 Code isCode = new Code();
                 isCode.setLanguage(annotation.langage());
                 isCode.setCode(value.toString());
@@ -296,10 +296,10 @@ public class InformationSystem implements ExplorationApplicationLoader, Explorat
             }
         });
         // searching codes in methods
-        ReflectUtils.processAllTaggedMethod(codesCarrier, org.openmole.core.workflow.model.task.annotations.Code.class, new ReflectUtils.MethodGetter<org.openmole.core.workflow.model.task.annotations.Code>() {
+        ReflectUtils.processAllTaggedMethod(codesCarrier, org.openmole.core.model.task.annotations.Code.class, new ReflectUtils.MethodGetter<org.openmole.core.model.task.annotations.Code>() {
 
             @Override
-            public void process(Method m, Object object, org.openmole.core.workflow.model.task.annotations.Code annotation, Object value) throws InternalProcessingError {
+            public void process(Method m, Object object, org.openmole.core.model.task.annotations.Code annotation, Object value) throws InternalProcessingError {
                 Code isCode = new Code();
                 isCode.setLanguage(annotation.langage());
                 isCode.setCode(value.toString());
@@ -310,24 +310,24 @@ public class InformationSystem implements ExplorationApplicationLoader, Explorat
 
     private void syncConstantsToComponent(Object constantsCarrier, final Component component, final ExplorationData explorationData) throws InternalProcessingError {
         // searching constants in fields
-        ReflectUtils.processAllTaggedField(constantsCarrier, org.openmole.core.workflow.model.task.annotations.Constant.class, new ReflectUtils.FieldGetter<org.openmole.core.workflow.model.task.annotations.Constant>() {
+        ReflectUtils.processAllTaggedField(constantsCarrier, org.openmole.core.model.task.annotations.Constant.class, new ReflectUtils.FieldGetter<org.openmole.core.model.task.annotations.Constant>() {
 
             @Override
-            public void process(Field f, Object object, org.openmole.core.workflow.model.task.annotations.Constant annotation, Object value) throws InternalProcessingError {
+            public void process(Field f, Object object, org.openmole.core.model.task.annotations.Constant annotation, Object value) throws InternalProcessingError {
                 syncConstant(component, explorationData, f.getName(), f.getType(), value, annotation);
             }
         });
         // searching constants in methods
-        ReflectUtils.processAllTaggedMethod(constantsCarrier, org.openmole.core.workflow.model.task.annotations.Constant.class, new ReflectUtils.MethodGetter<org.openmole.core.workflow.model.task.annotations.Constant>() {
+        ReflectUtils.processAllTaggedMethod(constantsCarrier, org.openmole.core.model.task.annotations.Constant.class, new ReflectUtils.MethodGetter<org.openmole.core.model.task.annotations.Constant>() {
 
             @Override
-            public void process(Method m, Object object, org.openmole.core.workflow.model.task.annotations.Constant annotation, Object value) throws InternalProcessingError {
+            public void process(Method m, Object object, org.openmole.core.model.task.annotations.Constant annotation, Object value) throws InternalProcessingError {
                 syncConstant(component, explorationData, m.getName(), m.getReturnType(), value, annotation);
             }
         });
     }
 
-    private void syncConstant(Component component, ExplorationData explorationData, String declaredName, Class declaredType, Object constantValue, org.openmole.core.workflow.model.task.annotations.Constant annotation) {
+    private void syncConstant(Component component, ExplorationData explorationData, String declaredName, Class declaredType, Object constantValue, org.openmole.core.model.task.annotations.Constant annotation) {
         Constant isConstant = new Constant();
         // if the name in the annotation is empty, we use the field name
         isConstant.setName(annotation.name().length() == 0 ? declaredName : annotation.name());
@@ -484,18 +484,18 @@ public class InformationSystem implements ExplorationApplicationLoader, Explorat
     private void syncCodesFromComponent(final Component component, Object codesCarrier) throws InternalProcessingError {
         if (!component.getCodes().isEmpty()) {
             // syncing codes to attributes
-            ReflectUtils.processAllTaggedField(codesCarrier, org.openmole.core.workflow.model.task.annotations.Code.class, new ReflectUtils.FieldSetter<org.openmole.core.workflow.model.task.annotations.Code>() {
+            ReflectUtils.processAllTaggedField(codesCarrier, org.openmole.core.model.task.annotations.Code.class, new ReflectUtils.FieldSetter<org.openmole.core.model.task.annotations.Code>() {
 
                 @Override
-                public Object getValueToSet(Field f, Object object, org.openmole.core.workflow.model.task.annotations.Code annotation, int counter) throws InternalProcessingError {
+                public Object getValueToSet(Field f, Object object, org.openmole.core.model.task.annotations.Code annotation, int counter) throws InternalProcessingError {
                     return component.getCodes().get(counter).getCode();
                 }
             });
             // syncing codes to methods
-            ReflectUtils.processAllTaggedMethod(codesCarrier, org.openmole.core.workflow.model.task.annotations.Code.class, new ReflectUtils.MethodSetter<org.openmole.core.workflow.model.task.annotations.Code>() {
+            ReflectUtils.processAllTaggedMethod(codesCarrier, org.openmole.core.model.task.annotations.Code.class, new ReflectUtils.MethodSetter<org.openmole.core.model.task.annotations.Code>() {
 
                 @Override
-                public Object getValueToSet(Method m, Object object, org.openmole.core.workflow.model.task.annotations.Code annotation, int counter) throws InternalProcessingError {
+                public Object getValueToSet(Method m, Object object, org.openmole.core.model.task.annotations.Code annotation, int counter) throws InternalProcessingError {
                     return component.getCodes().get(counter).getCode();
                 }
             });
@@ -505,18 +505,18 @@ public class InformationSystem implements ExplorationApplicationLoader, Explorat
     private void syncConstantsFromComponent(final Component component, Object constantsCarrier, final ExplorationData explorationData) throws InternalProcessingError {
         if (!component.getConstants().isEmpty()) {
             // syncing constants to fields
-            ReflectUtils.processAllTaggedField(constantsCarrier, org.openmole.core.workflow.model.task.annotations.Constant.class, new ReflectUtils.FieldSetter<org.openmole.core.workflow.model.task.annotations.Constant>() {
+            ReflectUtils.processAllTaggedField(constantsCarrier, org.openmole.core.model.task.annotations.Constant.class, new ReflectUtils.FieldSetter<org.openmole.core.model.task.annotations.Constant>() {
 
                 @Override
-                public Object getValueToSet(Field f, Object object, org.openmole.core.workflow.model.task.annotations.Constant annotation, int counter) throws InternalProcessingError {
+                public Object getValueToSet(Field f, Object object, org.openmole.core.model.task.annotations.Constant annotation, int counter) throws InternalProcessingError {
                     return explorationData.getConstantValue(component.getConstants().get(counter));
                 }
             });
             // syncing constants to methods
-            ReflectUtils.processAllTaggedMethod(constantsCarrier, org.openmole.core.workflow.model.task.annotations.Constant.class, new ReflectUtils.MethodSetter<org.openmole.core.workflow.model.task.annotations.Constant>() {
+            ReflectUtils.processAllTaggedMethod(constantsCarrier, org.openmole.core.model.task.annotations.Constant.class, new ReflectUtils.MethodSetter<org.openmole.core.model.task.annotations.Constant>() {
 
                 @Override
-                public Object getValueToSet(Method m, Object object, org.openmole.core.workflow.model.task.annotations.Constant annotation, int counter) throws InternalProcessingError {
+                public Object getValueToSet(Method m, Object object, org.openmole.core.model.task.annotations.Constant annotation, int counter) throws InternalProcessingError {
                     return explorationData.getConstantValue(component.getConstants().get(counter));
                 }
             });

@@ -17,14 +17,14 @@
 package org.openmole.core.implementation.execution;
 
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.IEnvironmentExecutionStatistics;
-import org.openmole.core.workflow.model.execution.IExecutionJob;
-import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IEnvironmentDescription;
+import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
+import org.openmole.core.model.execution.IExecutionJob;
+import org.openmole.core.model.execution.IExecutionJobRegistries;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.batch.SampleType;
+import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.ConfigurationLocation;
 

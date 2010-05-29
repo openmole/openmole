@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -53,11 +53,11 @@ import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchStorage;
 
 
 //FIXME when Equinox bug #221329 is resolved remove the synchronized

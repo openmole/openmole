@@ -18,7 +18,7 @@
 package org.simexplorer.ui.ide.workflow.model;
 
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 import org.simexplorer.core.workflow.model.metada.Metadata;
 import org.simexplorer.core.workflow.model.metada.MetadataHandler;
 

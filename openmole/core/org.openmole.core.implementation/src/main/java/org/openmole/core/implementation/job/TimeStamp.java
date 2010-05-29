@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.job;
 
-import org.openmole.core.workflow.model.job.ITimeStamp;
-import org.openmole.core.workflow.model.job.State;
+import org.openmole.core.model.job.ITimeStamp;
+import org.openmole.core.model.job.State;
 
 /**
  *

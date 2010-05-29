@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.file.IURIFile;
 
 public class URIFileCleaner implements Runnable {
 

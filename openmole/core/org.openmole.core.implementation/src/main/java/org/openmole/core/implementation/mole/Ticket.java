@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.mole;
 
-import org.openmole.core.workflow.model.job.ITicket;
+import org.openmole.core.model.job.ITicket;
 
 public class Ticket implements ITicket, Comparable<ITicket> {
 

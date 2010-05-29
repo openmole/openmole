@@ -17,7 +17,7 @@
 
 package org.openmole.ui.workflow.model;
 
-import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 
 /**
  *

@@ -24,11 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.openmole.core.workflow.model.execution.IExecutionJob;
-import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IExecutionJob;
+import org.openmole.core.model.execution.IExecutionJobRegistries;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.structure.Trio;
 

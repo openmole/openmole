@@ -20,8 +20,8 @@ import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.core.workflow.model.execution.batch.IRuntime;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IRuntime;
+import org.openmole.core.model.file.IURIFile;
 import org.openmole.plugin.environmentprovider.glite.GliteEnvironment;
 import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGALaunchingScript;
 

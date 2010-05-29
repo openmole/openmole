@@ -2,7 +2,7 @@ package org.openmole.core.environmentprovider.ssh;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.environmentprovider.jsaga.model.IJSAGALaunchingScript;
-import org.openmole.core.workflow.model.execution.batch.IRuntime;
+import org.openmole.core.model.execution.batch.IRuntime;
 
 public class SSHLaunchingScript implements IJSAGALaunchingScript<SSHEnvironment>{
 

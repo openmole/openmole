@@ -19,11 +19,11 @@ package org.openmole.plugin.environmentprovider.glite.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.IEnvironmentExecutionStatistics;
-import org.openmole.core.workflow.model.execution.IStatistic;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
+import org.openmole.core.model.execution.IStatistic;
+import org.openmole.core.model.execution.batch.SampleType;
 
 
 public class WorkloadOnAverages implements IWorkloadManagmentStrategy {

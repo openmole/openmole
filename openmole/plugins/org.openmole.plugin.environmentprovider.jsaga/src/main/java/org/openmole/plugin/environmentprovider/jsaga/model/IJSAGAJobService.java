@@ -18,7 +18,7 @@
 package org.openmole.plugin.environmentprovider.jsaga.model;
 
 
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.IBatchJobService;
 
 public interface IJSAGAJobService extends IBatchJobService<IJSAGAJobDescription>{
 //	URI getURI();

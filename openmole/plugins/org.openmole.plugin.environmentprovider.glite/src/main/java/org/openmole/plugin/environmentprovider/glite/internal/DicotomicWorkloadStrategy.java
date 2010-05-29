@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmole.core.workflow.model.execution.IStatistic;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
+import org.openmole.core.model.execution.IStatistic;
+import org.openmole.core.model.execution.batch.SampleType;
 
 /**
  *

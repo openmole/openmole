@@ -18,9 +18,9 @@
 package org.openmole.core.implementation.mole;
 
 
-import org.openmole.core.workflow.model.mole.IEnvironmentSelectionStrategy;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
+import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.resource.ILocalFileCache;
 
 public class ExecutionContext implements IExecutionContext {
 

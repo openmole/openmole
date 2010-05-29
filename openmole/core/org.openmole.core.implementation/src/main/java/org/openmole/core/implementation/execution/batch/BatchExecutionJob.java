@@ -28,22 +28,22 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.workflow.model.execution.batch.IBatchJob;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchExecutionJob;
+import org.openmole.core.model.execution.batch.IBatchJob;
+import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.mole.IExecutionContext;
 
 public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS, ?>> implements IBatchExecutionJob<BatchEnvironment<JS, ?>>, IUpdatable {
 

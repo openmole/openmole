@@ -19,7 +19,7 @@
 package org.openmole.core.implementation.data;
 
 import java.util.Collection;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 public class Prototype<T> implements IPrototype<T> {
 

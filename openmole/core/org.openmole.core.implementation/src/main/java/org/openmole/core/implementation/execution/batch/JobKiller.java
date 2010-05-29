@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.batch.IBatchJob;
+import org.openmole.core.model.execution.batch.IBatchJob;
 
 public class JobKiller implements Runnable {
 

@@ -18,9 +18,9 @@
 
 package org.openmole.core.implementation.capsule;
 
-import org.openmole.core.workflow.model.task.ITask;
-import org.openmole.core.workflow.model.transition.ISingleTransition;
-import org.openmole.core.workflow.model.capsule.ITaskCapsule;
+import org.openmole.core.model.task.ITask;
+import org.openmole.core.model.transition.ISingleTransition;
+import org.openmole.core.model.capsule.ITaskCapsule;
 
 public class TaskCapsule extends GenericTaskCapsule<ISingleTransition, ITask> implements ITaskCapsule {
 

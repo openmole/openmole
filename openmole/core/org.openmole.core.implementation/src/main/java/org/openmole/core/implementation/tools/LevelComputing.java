@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.tools;
 
-import org.openmole.core.workflow.model.tools.ILevelComputing;
+import org.openmole.core.model.tools.ILevelComputing;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,13 +25,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openmole.core.workflow.model.transition.IAggregationTransition;
-import org.openmole.core.workflow.model.transition.IExplorationTransition;
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.transition.ITransitionSlot;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
+import org.openmole.core.model.transition.IAggregationTransition;
+import org.openmole.core.model.transition.IExplorationTransition;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *

@@ -25,12 +25,12 @@ import org.openmole.plugin.domain.interval.RangeInteger;
 import org.openmole.plugin.domain.relativerange.RelativeRangeInteger;
 import org.openmole.plugin.domain.relativerange.RelativeRangeDouble;
 import org.openmole.core.implementation.domain.FiniteDomain;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.domain.IDomain;
 
 /**
  *

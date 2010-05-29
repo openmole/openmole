@@ -20,8 +20,8 @@ package org.openmole.core.implementation.execution;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IEnvironmentDescription;
 
 /**
  *

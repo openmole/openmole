@@ -19,8 +19,8 @@ package org.openmole.core.implementation.plan;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.openmole.core.workflow.model.plan.IExploredPlan;
-import org.openmole.core.workflow.model.plan.IFactorValues;
+import org.openmole.core.model.plan.IExploredPlan;
+import org.openmole.core.model.plan.IFactorValues;
 
 public class ExploredPlan implements IExploredPlan {
 

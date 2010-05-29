@@ -37,7 +37,7 @@ import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.batch.IRuntime;
+import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
 import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAEnvironment;
 

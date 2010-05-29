@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.execution.IExecutionJob;
-import org.openmole.core.workflow.model.execution.IExecutionJobRegistries;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.execution.IExecutionJob;
+import org.openmole.core.model.execution.IExecutionJobRegistries;
 
 
 /**

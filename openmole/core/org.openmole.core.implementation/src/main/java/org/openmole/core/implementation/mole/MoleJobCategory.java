@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.mole;
 
 import java.util.Arrays;
-import org.openmole.core.workflow.model.execution.IMoleJobCategory;
+import org.openmole.core.model.execution.IMoleJobCategory;
 
 /**
  *

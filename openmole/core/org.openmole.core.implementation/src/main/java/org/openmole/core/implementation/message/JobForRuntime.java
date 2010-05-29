@@ -21,10 +21,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.workflow.model.message.IJobForRuntime;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.message.IReplicatedFile;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.message.IJobForRuntime;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.message.IReplicatedFile;
 
 public class JobForRuntime extends RuntimeMessage implements IJobForRuntime {
 

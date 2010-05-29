@@ -29,20 +29,20 @@ import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.mole.SubMoleExecution;
 import org.openmole.core.implementation.task.ExplorationTask;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.plan.IExploredPlan;
-import org.openmole.core.workflow.model.plan.IFactorValues;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.transition.IExplorationTransition;
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.workflow.model.tools.IRegistryWithTicket;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.job.ITicket;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.core.workflow.model.mole.ISubMoleExecution;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.plan.IExploredPlan;
+import org.openmole.core.model.plan.IFactorValues;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.transition.IExplorationTransition;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.model.tools.IRegistryWithTicket;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.job.ITicket;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.mole.ISubMoleExecution;
 
 public class ExplorationTransition extends Transition<IExplorationTaskCapsule> implements IExplorationTransition {
 

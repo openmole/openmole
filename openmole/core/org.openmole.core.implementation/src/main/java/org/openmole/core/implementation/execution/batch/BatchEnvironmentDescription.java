@@ -18,8 +18,8 @@
 package org.openmole.core.implementation.execution.batch;
 
 import org.openmole.core.implementation.execution.EnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 
 /**
  *

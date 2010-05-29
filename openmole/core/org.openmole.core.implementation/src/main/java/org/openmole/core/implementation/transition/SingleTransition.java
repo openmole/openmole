@@ -22,16 +22,16 @@ import java.util.Set;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.tools.LevelComputing;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.transition.ICondition;
-import org.openmole.core.workflow.model.transition.ISingleTransition;
-import org.openmole.core.workflow.model.transition.ITransitionSlot;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.tools.ILevelComputing;
-import org.openmole.core.workflow.model.capsule.ITaskCapsule;
-import org.openmole.core.workflow.model.job.ITicket;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.core.workflow.model.mole.ISubMoleExecution;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.transition.ICondition;
+import org.openmole.core.model.transition.ISingleTransition;
+import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.tools.ILevelComputing;
+import org.openmole.core.model.capsule.ITaskCapsule;
+import org.openmole.core.model.job.ITicket;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.mole.ISubMoleExecution;
 
 public class SingleTransition extends Transition<ITaskCapsule> implements ISingleTransition {
 

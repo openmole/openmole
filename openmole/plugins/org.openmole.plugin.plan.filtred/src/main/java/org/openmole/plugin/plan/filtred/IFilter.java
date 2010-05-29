@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.plan.filtred;
 
-import org.openmole.core.workflow.model.plan.IFactorValues;
+import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

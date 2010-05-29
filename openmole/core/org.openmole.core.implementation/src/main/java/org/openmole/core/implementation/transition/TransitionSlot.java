@@ -20,9 +20,9 @@ package org.openmole.core.implementation.transition;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.transition.ITransitionSlot;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 
 public class TransitionSlot implements ITransitionSlot {
 

@@ -19,10 +19,10 @@
 package org.openmole.core.implementation.execution.batch;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchJobDescription;
+import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 public abstract class BatchJobService<BJ extends IBatchJobDescription> extends BatchService implements IBatchJobService<BJ> {
 

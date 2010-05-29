@@ -19,8 +19,8 @@ package org.openmole.core.implementation.resource;
 
 import java.io.File;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

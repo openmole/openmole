@@ -23,9 +23,9 @@ import java.net.URL;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.groovy.IGroovyProxy;
-import org.openmole.core.workflow.model.data.IVariable;
+import org.openmole.core.model.data.IVariable;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.implementation.internal.Activator;
 /**

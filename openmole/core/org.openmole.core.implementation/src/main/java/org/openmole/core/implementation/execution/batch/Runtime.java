@@ -18,8 +18,8 @@
 package org.openmole.core.implementation.execution.batch;
 
 import java.util.Collection;
-import org.openmole.core.workflow.model.execution.batch.IRuntime;
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IRuntime;
+import org.openmole.core.model.file.IURIFile;
 
 /**
  *

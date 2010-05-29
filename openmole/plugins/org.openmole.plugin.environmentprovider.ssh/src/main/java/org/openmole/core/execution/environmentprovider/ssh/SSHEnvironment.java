@@ -12,8 +12,8 @@ import org.openmole.core.environmentprovider.jsaga.JSAGAExecutionEnvironment;
 import org.openmole.core.environmentprovider.jsaga.model.IJSAGAJobService;
 import org.openmole.core.environmentprovider.jsaga.model.IJSAGALaunchingScript;
 import org.openmole.core.environmentprovider.ssh.internal.Activator;
-import org.openmole.core.workflow.model.execution.EnvironmentConfiguration;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.EnvironmentConfiguration;
+import org.openmole.core.model.execution.batch.IBatchStorage;
 
 /**
  *

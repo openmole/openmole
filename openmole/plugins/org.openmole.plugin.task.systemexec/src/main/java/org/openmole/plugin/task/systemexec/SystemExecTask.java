@@ -22,8 +22,8 @@ import java.io.IOException;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,9 +32,9 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.data.Variable;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.plugin.task.external.ExternalTask;
 import org.openmole.plugin.task.systemexec.internal.Activator;
 

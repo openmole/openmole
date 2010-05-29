@@ -23,17 +23,17 @@ import org.openmole.commons.tools.io.TarArchiver;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.workflow.model.execution.IJobStatisticCategory;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IBatchStorage;
-import org.openmole.core.workflow.model.execution.batch.SampleType;
+import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.misc.backgroundexecutor.ITransferable;
-import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.job.IJob;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.message.IRuntimeResult;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.message.IRuntimeResult;
+import org.openmole.core.model.mole.IExecutionContext;
 
 /**
  *

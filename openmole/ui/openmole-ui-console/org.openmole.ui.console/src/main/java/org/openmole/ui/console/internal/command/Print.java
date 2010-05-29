@@ -19,8 +19,8 @@ package org.openmole.ui.console.internal.command;
 
 import java.util.List;
 import org.codehaus.groovy.tools.shell.Shell;
-import org.openmole.core.workflow.model.execution.IEnvironment;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.ui.console.internal.command.registry.Registry;

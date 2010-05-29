@@ -18,8 +18,8 @@
 package org.openmole.core.implementation.mole;
 
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
 import org.openmole.commons.exception.InternalProcessingError;

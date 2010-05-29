@@ -18,9 +18,9 @@ package org.openmole.plugin.molejobgroupingstrategy.batch;
 
 
 import org.openmole.core.implementation.mole.MoleJobCategory;
-import org.openmole.core.workflow.model.execution.IMoleJobCategory;
-import org.openmole.core.workflow.model.execution.IMoleJobGroupingStrategy;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.execution.IMoleJobCategory;
+import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

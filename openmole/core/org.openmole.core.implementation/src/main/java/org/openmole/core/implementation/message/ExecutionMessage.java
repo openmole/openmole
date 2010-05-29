@@ -18,9 +18,9 @@ package org.openmole.core.implementation.message;
 
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.workflow.model.file.IURIFile;
-import org.openmole.core.workflow.model.message.IExecutionMessage;
-import org.openmole.core.workflow.model.message.IReplicatedFile;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.message.IExecutionMessage;
+import org.openmole.core.model.message.IReplicatedFile;
 
 /**
  *

@@ -22,8 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 
 public class MultiOut<TOUT extends ITransition>  {
 

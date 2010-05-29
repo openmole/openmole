@@ -23,7 +23,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.workflow.model.ITaskCapsuleModelUI;
 
 /**

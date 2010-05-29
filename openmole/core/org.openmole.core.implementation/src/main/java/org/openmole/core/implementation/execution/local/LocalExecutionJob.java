@@ -19,8 +19,8 @@
 package org.openmole.core.implementation.execution.local;
 
 import org.openmole.core.implementation.execution.ExecutionJob;
-import org.openmole.core.workflow.model.execution.ExecutionState;
-import org.openmole.core.workflow.model.job.IJob;
+import org.openmole.core.model.execution.ExecutionState;
+import org.openmole.core.model.job.IJob;
 
 public class LocalExecutionJob extends ExecutionJob<LocalExecutionEnvironment> {
 

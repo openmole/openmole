@@ -38,7 +38,7 @@ import org.openide.nodes.Node.Property;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 public final class VariablesTopComponent extends TopComponent implements ExplorerManager.Provider {
 

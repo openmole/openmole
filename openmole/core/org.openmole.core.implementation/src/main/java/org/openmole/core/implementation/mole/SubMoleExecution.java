@@ -18,7 +18,7 @@ package org.openmole.core.implementation.mole;
 
 import java.util.logging.Logger;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.workflow.model.mole.ISubMoleExecution;
+import org.openmole.core.model.mole.ISubMoleExecution;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

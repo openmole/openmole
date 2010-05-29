@@ -17,7 +17,7 @@
 
 package org.openmole.ui.plugin.transitionfactory;
 
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirst;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleLast;

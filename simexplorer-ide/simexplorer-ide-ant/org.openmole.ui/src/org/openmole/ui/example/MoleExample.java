@@ -15,11 +15,11 @@ import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.transition.TransitionFactory;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.plugin.task.groovy.GroovyTask;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.transition.ITransitionSlot;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.ITransitionSlot;
 
 /**
  *

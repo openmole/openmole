@@ -6,7 +6,7 @@
 package org.openmole.plugin.domain.interval;
 
 import org.openmole.core.implementation.domain.Interval;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

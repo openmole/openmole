@@ -67,7 +67,7 @@ public class GroovyProject {
             manifestS.println("Bundle-ManifestVersion: 2");
             manifestS.println("Bundle-Name: " + getNameSpace());
             manifestS.println("Bundle-SymbolicName: " + getNameSpace());
-            manifestS.println("Require-Bundle: org.codehaus.groovy, org.openmole.core.workflow.model");
+            manifestS.println("Require-Bundle: org.codehaus.groovy, org.openmole.core.model");
             manifestS.println("Export-Package: " + getNameSpace());
             manifestS.println("");
         } finally {

@@ -19,7 +19,7 @@
 package org.openmole.core.replicacatalog.internal;
 
 
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.file.IURIFile;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
@@ -27,8 +27,8 @@ import com.db4o.ta.Activatable;
 import java.io.File;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.replicacatalog.IReplica;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 
 public class Replica implements IReplica, Activatable {

@@ -21,10 +21,10 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.data.Data;
-import org.openmole.core.workflow.model.execution.IProgress;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.task.annotations.Output;
+import org.openmole.core.model.execution.IProgress;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.task.annotations.Output;
 
 /**
  *

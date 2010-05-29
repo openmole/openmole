@@ -3,7 +3,7 @@ package org.openmole.core.environmentprovider.ssh;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 
 public class SSHEnvironmentDescription extends BatchEnvironmentDescription<SSHEnvironment> {
 

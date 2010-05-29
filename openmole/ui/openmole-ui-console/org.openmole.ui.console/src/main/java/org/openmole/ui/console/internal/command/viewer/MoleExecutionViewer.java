@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.job.State;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.job.State;
+import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *

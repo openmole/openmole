@@ -20,9 +20,9 @@ package org.openmole.core.implementation.resource;
 import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
-import org.openmole.core.workflow.model.resource.IResource;
-import org.openmole.core.workflow.model.task.annotations.Resource;
+import org.openmole.core.model.resource.ILocalFileCache;
+import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.SoftCachable;
 
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;

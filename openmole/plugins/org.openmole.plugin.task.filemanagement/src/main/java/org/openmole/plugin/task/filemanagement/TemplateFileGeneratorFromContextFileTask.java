@@ -7,13 +7,13 @@ package org.openmole.plugin.task.filemanagement;
 
 import java.io.File;
 import org.openmole.core.implementation.data.Data;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.task.annotations.Input;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.task.annotations.Input;
 
 /**
  *

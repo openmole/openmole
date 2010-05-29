@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environmentprovider.jsaga.model;
 
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 
 
 public interface IJSAGAEnvironment<DESC extends IBatchEnvironmentDescription> extends IBatchEnvironment<IJSAGAJobService, DESC>{

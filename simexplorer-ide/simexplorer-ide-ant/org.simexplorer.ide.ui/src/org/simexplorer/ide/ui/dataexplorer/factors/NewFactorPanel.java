@@ -41,9 +41,9 @@ import org.simexplorer.ide.ui.tools.SimpleWizard;
 import org.openmole.core.implementation.plan.Factor;
 import org.simexplorer.core.workflow.methods.DomainEditorPanel;
 import org.openmole.core.implementation.domain.Domain;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.core.workflow.model.plan.IFactor;
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.plan.IFactor;
+import org.openmole.core.model.domain.IDomain;
 import org.simexplorer.core.workflow.model.metada.Metadata;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 

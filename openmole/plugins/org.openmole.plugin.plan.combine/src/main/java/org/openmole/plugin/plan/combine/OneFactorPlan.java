@@ -18,12 +18,12 @@
 package org.openmole.plugin.plan.combine;
 
 import java.util.Iterator;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.plan.IExploredPlan;
-import org.openmole.core.workflow.model.plan.IFactor;
-import org.openmole.core.workflow.model.plan.IFactorValues;
-import org.openmole.core.workflow.model.plan.IPlan;
-import org.openmole.core.workflow.model.resource.IResource;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.plan.IExploredPlan;
+import org.openmole.core.model.plan.IFactor;
+import org.openmole.core.model.plan.IFactorValues;
+import org.openmole.core.model.plan.IPlan;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

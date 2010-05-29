@@ -24,8 +24,8 @@ import java.util.TreeSet;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.model.data.IVariable;
-import org.openmole.core.workflow.model.resource.ILocalFileCache;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.resource.ILocalFileCache;
 
 
 /*TODO suport arrays and set*/

@@ -19,11 +19,11 @@ package org.openmole.core.implementation.tools;
 import java.util.Set;
 import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.data.IDataChannel;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.job.IContext;
+import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.data.IDataChannel;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.UserBadDataError;
 
 /**

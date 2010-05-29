@@ -23,7 +23,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessToken;
 
 /**
  *

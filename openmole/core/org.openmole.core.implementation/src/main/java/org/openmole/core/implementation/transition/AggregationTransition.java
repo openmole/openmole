@@ -32,17 +32,17 @@ import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.mole.ExecutionInfoRegistry;
 
 
-import org.openmole.core.workflow.model.job.IMoleJob;
-import org.openmole.core.workflow.model.job.IContext;
-import org.openmole.core.workflow.model.transition.IAggregationTransition;
-import org.openmole.core.workflow.model.tools.IRegistryWithTicket;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.capsule.ITaskCapsule;
-import org.openmole.core.workflow.model.data.IData;
-import org.openmole.core.workflow.model.job.ITicket;
-import org.openmole.core.workflow.model.mole.IExecutionContext;
-import org.openmole.core.workflow.model.mole.IMoleExecution;
-import org.openmole.core.workflow.model.mole.ISubMoleExecution;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.transition.IAggregationTransition;
+import org.openmole.core.model.tools.IRegistryWithTicket;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.ITaskCapsule;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.job.ITicket;
+import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.mole.ISubMoleExecution;
 
 import static org.openmole.core.implementation.tools.ContextAggregator.aggregate;
 import static org.openmole.core.implementation.tools.ContextAggregator.findDataIn1WhichAreAlsoIn2;

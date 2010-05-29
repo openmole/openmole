@@ -17,7 +17,7 @@
 
 package org.openmole.core.batchservicecontrol;
 
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessToken;
 
 
 public class AccessToken implements IAccessToken {

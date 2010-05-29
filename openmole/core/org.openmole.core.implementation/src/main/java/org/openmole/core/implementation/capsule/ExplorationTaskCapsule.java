@@ -19,9 +19,9 @@
 package org.openmole.core.implementation.capsule;
 
 
-import org.openmole.core.workflow.model.task.IExplorationTask;
-import org.openmole.core.workflow.model.transition.IExplorationTransition;
-import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.model.task.IExplorationTask;
+import org.openmole.core.model.transition.IExplorationTransition;
+import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 
 
 public class ExplorationTaskCapsule extends GenericTaskCapsule<IExplorationTransition, IExplorationTask> implements IExplorationTaskCapsule {

@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
+import org.openmole.core.model.execution.IEnvironmentDescription;
 
 import com.thoughtworks.xstream.XStream;
 import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;

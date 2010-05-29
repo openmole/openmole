@@ -18,8 +18,8 @@
 package org.openmole.core.replicacatalog.internal;
 
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.workflow.model.execution.batch.IBatchEnvironmentDescription;
-import org.openmole.core.workflow.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 /**
  *

@@ -33,7 +33,7 @@ public class MetadataLoader {
 
     /**
      * Build metadata for a given object, by usign its type.
-     * @see org.openmole.core.workflow.model.metada.MetadataLoader#loadMetada(Class)
+     * @see org.openmole.core.model.metada.MetadataLoader#loadMetada(Class)
      * @param o
      * @return The built metadata container
      */

@@ -22,9 +22,9 @@ import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.transition.AggregationTransition;
 import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.implementation.transition.SingleTransition;
-import org.openmole.core.workflow.model.capsule.ITaskCapsule;
-import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.ITaskCapsule;
+import org.openmole.core.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast;
 
 /**

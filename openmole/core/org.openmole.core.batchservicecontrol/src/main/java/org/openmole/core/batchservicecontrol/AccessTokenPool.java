@@ -26,8 +26,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.workflow.model.execution.batch.IAccessToken;
-import org.openmole.core.workflow.model.execution.batch.IAccessTokenPool;
+import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IAccessTokenPool;
 
 
 public class AccessTokenPool implements IAccessTokenPool {

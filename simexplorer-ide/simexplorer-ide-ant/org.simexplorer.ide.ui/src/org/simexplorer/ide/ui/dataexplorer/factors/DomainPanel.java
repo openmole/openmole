@@ -1,7 +1,7 @@
 package org.simexplorer.ide.ui.dataexplorer.factors;
 
 import javax.swing.JPanel;
-import org.openmole.core.workflow.model.domain.IDomain;
+import org.openmole.core.model.domain.IDomain;
 
 public class DomainPanel extends JPanel{
     IDomain domain;

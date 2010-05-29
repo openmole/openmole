@@ -21,7 +21,7 @@ package org.simexplorer.ide.ui.dataexplorer.variables;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.util.NbBundle;
-import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.core.model.data.IPrototype;
 
 public final class EditVariableAction implements ActionListener {
 

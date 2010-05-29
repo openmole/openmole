@@ -19,7 +19,7 @@ package org.openmole.core.file;
 
 import java.io.IOException;
 
-import org.openmole.core.workflow.model.file.IURIFile;
+import org.openmole.core.model.file.IURIFile;
 
 public class URIFileMove extends URIFileCopy {
 
