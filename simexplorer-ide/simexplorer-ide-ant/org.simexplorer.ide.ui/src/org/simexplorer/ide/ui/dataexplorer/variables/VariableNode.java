@@ -37,7 +37,7 @@ import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.simexplorer.ide.ui.dataexplorer.MetadataProperties;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 

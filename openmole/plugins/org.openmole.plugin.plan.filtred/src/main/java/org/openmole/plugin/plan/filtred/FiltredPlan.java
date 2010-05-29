@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.openmole.core.workflow.implementation.plan.ExploredPlan;
+import org.openmole.core.implementation.plan.ExploredPlan;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.plan.IExploredPlan;
 import org.openmole.core.workflow.model.plan.IFactorValues;

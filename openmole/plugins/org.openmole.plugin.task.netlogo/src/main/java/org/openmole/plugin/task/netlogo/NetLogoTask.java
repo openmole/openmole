@@ -23,7 +23,7 @@ import java.util.List;
 import org.nlogo.api.CompilerException;
 import org.nlogo.api.LogoException;
 import org.nlogo.headless.HeadlessWorkspace;
-import org.openmole.core.workflow.implementation.tools.VariableExpansion;
+import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;

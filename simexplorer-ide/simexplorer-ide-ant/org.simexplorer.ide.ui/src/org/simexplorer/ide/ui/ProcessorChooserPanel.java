@@ -33,9 +33,9 @@ import javax.swing.ToolTipManager;
 import org.openide.DialogDescriptor;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 import org.simexplorer.core.workflow.model.metada.MetadataLoader;
-import org.openmole.core.workflow.implementation.task.GenericTask;
+import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.commons.tools.structure.Duo;
 import org.simexplorer.core.workflow.model.metada.Metadata;
 

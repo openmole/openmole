@@ -24,12 +24,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import org.openmole.core.workflow.implementation.data.Data;
+import org.openmole.core.implementation.data.Data;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 
 import org.openmole.core.workflow.model.data.IData;
 import org.openmole.core.workflow.model.data.IPrototype;
@@ -39,7 +39,7 @@ import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.task.annotations.Output;
 import org.openmole.plugin.task.filemanagement.internal.Activator;
 
-import static org.openmole.core.workflow.implementation.tools.VariableExpansion.*;
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 public abstract class TemplateFileGeneratorTask extends Task {
 

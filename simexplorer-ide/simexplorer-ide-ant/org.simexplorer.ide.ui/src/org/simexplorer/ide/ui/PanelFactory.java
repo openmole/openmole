@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Lookup;
-import org.openmole.core.workflow.implementation.task.ExplorationTask;
+import org.openmole.core.implementation.task.ExplorationTask;
 
 public class PanelFactory {
 

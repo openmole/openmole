@@ -35,7 +35,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.lookup.Lookups;
 import org.simexplorer.ide.ui.ProcessorChooserPanel;
 import org.simexplorer.ui.ide.workflow.model.TasksList;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 
 public class ProcessorsListNode<T extends TasksList> extends AbstractProcessorNode<T> {
 

@@ -21,7 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import org.openide.util.Exceptions;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 import org.simexplorer.ide.ui.dataexplorer.structure.InputStructureTopComponent;
 import org.simexplorer.ide.ui.dataexplorer.structure.OutputStructureTopComponent;
 import org.simexplorer.ide.ui.tools.ActionsUtils;

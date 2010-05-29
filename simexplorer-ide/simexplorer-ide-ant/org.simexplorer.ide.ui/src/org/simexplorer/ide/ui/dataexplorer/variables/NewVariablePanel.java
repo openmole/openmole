@@ -22,7 +22,7 @@ package org.simexplorer.ide.ui.dataexplorer.variables;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.simexplorer.ide.ui.tools.SimpleWizard;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;

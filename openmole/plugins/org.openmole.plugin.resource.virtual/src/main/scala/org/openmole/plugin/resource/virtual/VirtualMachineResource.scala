@@ -31,8 +31,8 @@ import org.apache.commons.exec.ProcessDestroyer
 import org.apache.commons.exec.ShutdownHookProcessDestroyer
 import org.apache.commons.exec.launcher.CommandLauncher
 import org.apache.commons.exec.launcher.CommandLauncherFactory
-import org.openmole.core.workflow.implementation.resource.ComposedResource
-import org.openmole.core.workflow.implementation.resource.FileResource
+import org.openmole.core.implementation.resource.ComposedResource
+import org.openmole.core.implementation.resource.FileResource
 import org.openmole.core.workflow.model.task.annotations.Resource
 import org.openmole.commons.aspect.caching.Cachable
 import org.openmole.commons.exception.InternalProcessingError

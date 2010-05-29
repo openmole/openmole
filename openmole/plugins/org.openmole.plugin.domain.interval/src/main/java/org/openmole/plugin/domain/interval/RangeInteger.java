@@ -21,10 +21,10 @@ package org.openmole.plugin.domain.interval;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openmole.core.workflow.implementation.domain.Interval;
+import org.openmole.core.implementation.domain.Interval;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.implementation.tools.VariableExpansion;
+import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.workflow.model.job.IContext;
 
 public class RangeInteger extends UniformelyDiscretizedIntervalDomain<Integer> {

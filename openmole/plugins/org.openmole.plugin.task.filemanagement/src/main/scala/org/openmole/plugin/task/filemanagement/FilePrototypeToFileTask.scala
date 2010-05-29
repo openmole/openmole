@@ -28,13 +28,13 @@ import org.openmole.commons.exception.UserBadDataError
 
 import org.openmole.core.workflow.model.execution.IProgress
 import org.openmole.core.workflow.model.job.IContext
-import org.openmole.core.workflow.implementation.task.Task
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.workflow.model.data.IPrototype
 import org.openmole.core.workflow.model.mole.IExecutionContext
 import scala.collection.mutable.ListBuffer
 
 import org.openmole.commons.tools.io.FastCopy.copy
-import org.openmole.core.workflow.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools.VariableExpansion._
 
 class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Task(name) {
 

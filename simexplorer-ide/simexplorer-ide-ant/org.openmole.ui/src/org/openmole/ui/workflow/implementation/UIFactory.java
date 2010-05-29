@@ -99,7 +99,7 @@ public class UIFactory implements IUIFactory<Object> {
         Widget obUI = new TaskCapsuleViewUI(scene,
                                             tcm,
                                             Preferences.getInstance().getProperties(PropertyManager.TASK_CAPSULE,
-                                                                                    org.openmole.core.workflow.implementation.capsule.TaskCapsule.class));
+                                                                                    org.openmole.core.implementation.capsule.TaskCapsule.class));
         scene.initCapsuleAdd(obUI);
         scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
         scene.getManager().registerTaskCapsuleModel(tcm);

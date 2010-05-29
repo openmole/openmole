@@ -18,10 +18,10 @@
 package org.openmole.ui.plugin.transitionfactory;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.openmole.core.workflow.implementation.capsule.TaskCapsule;
-import org.openmole.core.workflow.implementation.transition.AggregationTransition;
-import org.openmole.core.workflow.implementation.transition.ExplorationTransition;
-import org.openmole.core.workflow.implementation.transition.SingleTransition;
+import org.openmole.core.implementation.capsule.TaskCapsule;
+import org.openmole.core.implementation.transition.AggregationTransition;
+import org.openmole.core.implementation.transition.ExplorationTransition;
+import org.openmole.core.implementation.transition.SingleTransition;
 import org.openmole.core.workflow.model.capsule.ITaskCapsule;
 import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;

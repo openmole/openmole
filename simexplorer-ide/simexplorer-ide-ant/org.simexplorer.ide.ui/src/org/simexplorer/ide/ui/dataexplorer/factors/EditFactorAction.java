@@ -24,7 +24,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
-import org.openmole.core.workflow.implementation.plan.Factor;
+import org.openmole.core.implementation.plan.Factor;
 
 public final class EditFactorAction implements ActionListener {
 

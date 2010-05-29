@@ -24,7 +24,7 @@ import org.openide.nodes.Children;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.structuregenerator.SequenceNode;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 
 public class SequenceNodeNode extends StructureNodeNode<SequenceNode> {
 

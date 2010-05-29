@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.systemexec;
 
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.mole.IExecutionContext;

@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import org.openmole.core.workflow.implementation.resource.FileSetResource;
+import org.openmole.core.implementation.resource.FileSetResource;
 import org.openmole.core.workflow.model.data.IPrototype;
 
 import org.openmole.commons.exception.InternalProcessingError;

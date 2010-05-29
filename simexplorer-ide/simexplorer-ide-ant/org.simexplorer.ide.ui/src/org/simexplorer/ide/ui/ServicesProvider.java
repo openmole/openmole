@@ -18,7 +18,7 @@
  */
 package org.simexplorer.ide.ui;
 
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

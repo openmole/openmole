@@ -29,8 +29,8 @@ import java.util.Iterator
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.statistics.HistogramDataset
-import org.openmole.core.workflow.implementation.task.Task
-import org.openmole.core.workflow.implementation.tools.VariableExpansion
+import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.workflow.model.data.IPrototype
 import org.openmole.core.workflow.model.execution.IProgress
 import org.openmole.core.workflow.model.job.IContext
@@ -45,7 +45,7 @@ import org.jfree.chart.ChartUtilities._
 import org.jfree.chart.ChartFactory._
 import scala.collection.JavaConversions._
 
-import org.openmole.core.workflow.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools.VariableExpansion._
 
 class DatasetDistributionTask (name: String, outputDirectoryPath: String, minBound: String, maxBound: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
 

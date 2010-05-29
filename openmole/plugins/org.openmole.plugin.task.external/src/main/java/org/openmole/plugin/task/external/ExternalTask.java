@@ -27,8 +27,8 @@ import java.util.TreeMap;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.implementation.resource.FileSetResource;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.resource.FileSetResource;
+import org.openmole.core.implementation.task.Task;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
@@ -37,7 +37,7 @@ import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.commons.tools.io.IFileOperation;
 
-import static org.openmole.core.workflow.implementation.tools.VariableExpansion.*;
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 public abstract class ExternalTask extends Task {
 

@@ -29,7 +29,7 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
-import org.openmole.core.workflow.implementation.plan.Factor;
+import org.openmole.core.implementation.plan.Factor;
 import org.openmole.core.workflow.model.plan.IFactor;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 

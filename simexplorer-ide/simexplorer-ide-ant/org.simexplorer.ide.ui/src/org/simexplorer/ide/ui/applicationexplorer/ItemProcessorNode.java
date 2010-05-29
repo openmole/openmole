@@ -27,7 +27,7 @@ import javax.swing.Action;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
 import org.openide.util.lookup.Lookups;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 
 class ItemProcessorNode extends AbstractProcessorNode<Task> {
 

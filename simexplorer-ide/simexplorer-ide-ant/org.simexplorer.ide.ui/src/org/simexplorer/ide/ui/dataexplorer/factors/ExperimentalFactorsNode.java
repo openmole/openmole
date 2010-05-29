@@ -25,7 +25,7 @@ import javax.swing.Action;
 import org.openide.nodes.AbstractNode;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
-import org.openmole.core.workflow.implementation.plan.Factor;
+import org.openmole.core.implementation.plan.Factor;
 import org.openmole.core.workflow.model.plan.IFactor;
 
 public class ExperimentalFactorsNode extends AbstractNode {

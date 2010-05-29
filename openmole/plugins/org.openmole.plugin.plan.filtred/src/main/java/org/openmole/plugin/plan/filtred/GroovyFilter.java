@@ -21,7 +21,7 @@ package org.openmole.plugin.plan.filtred;
 
 import groovy.lang.Binding;
 import java.util.Collections;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;

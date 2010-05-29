@@ -40,7 +40,7 @@ import java.util.jar.Manifest;
 import org.openmole.core.structuregenerator.IStructureGenerator;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.structuregenerator.SequenceNode;
 import org.openmole.core.structuregenerator.StructureNode;
 import org.openmole.commons.tools.io.FastCopy;

@@ -24,7 +24,7 @@ import org.openmole.plugin.domain.interval.RangeDouble;
 import org.openmole.plugin.domain.interval.RangeInteger;
 import org.openmole.plugin.domain.relativerange.RelativeRangeInteger;
 import org.openmole.plugin.domain.relativerange.RelativeRangeDouble;
-import org.openmole.core.workflow.implementation.domain.FiniteDomain;
+import org.openmole.core.implementation.domain.FiniteDomain;
 import org.openmole.core.workflow.model.job.IContext;
 import java.util.ArrayList;
 import java.util.HashMap;

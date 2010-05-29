@@ -30,15 +30,15 @@ import java.util.List;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
-import org.openmole.core.workflow.implementation.data.Prototype;
-import org.openmole.core.workflow.implementation.data.Variable;
+import org.openmole.core.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.data.IVariable;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.plugin.task.external.ExternalTask;
 import org.openmole.plugin.task.systemexec.internal.Activator;
 
-import static org.openmole.core.workflow.implementation.tools.VariableExpansion.*;
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 public class SystemExecTask extends ExternalTask {
 
     final public static IPrototype<File> PWD = new Prototype<File>("PWD", File.class);

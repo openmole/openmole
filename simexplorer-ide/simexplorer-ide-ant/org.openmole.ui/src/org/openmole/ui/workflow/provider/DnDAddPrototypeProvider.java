@@ -31,7 +31,7 @@ import org.netbeans.api.visual.widget.Widget;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.util.Exceptions;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.commons.IOType;

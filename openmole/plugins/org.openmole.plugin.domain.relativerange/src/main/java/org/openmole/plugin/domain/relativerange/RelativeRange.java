@@ -19,7 +19,7 @@
  */
 package org.openmole.plugin.domain.relativerange;
 
-import org.openmole.core.workflow.implementation.domain.FiniteDomain;
+import org.openmole.core.implementation.domain.FiniteDomain;
 
 
 public abstract class RelativeRange<T> extends FiniteDomain<T> {

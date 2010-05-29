@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import org.openide.util.lookup.ServiceProvider;
-import org.openmole.core.workflow.implementation.domain.EnumerationDomain;
+import org.openmole.core.implementation.domain.EnumerationDomain;
 import org.simexplorer.core.workflow.methods.DomainEditorPanel;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 

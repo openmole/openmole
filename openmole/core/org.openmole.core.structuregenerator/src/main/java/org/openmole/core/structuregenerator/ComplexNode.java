@@ -24,7 +24,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 
 public class ComplexNode implements StructureNode, Iterable<StructureNode> {
 

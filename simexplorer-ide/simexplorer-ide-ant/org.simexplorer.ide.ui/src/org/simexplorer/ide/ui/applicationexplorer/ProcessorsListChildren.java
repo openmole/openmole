@@ -23,7 +23,7 @@ import javax.swing.event.ChangeListener;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.simexplorer.ui.ide.workflow.model.TasksList;
-import org.openmole.core.workflow.implementation.task.Task;
+import org.openmole.core.implementation.task.Task;
 
 public class ProcessorsListChildren extends Children.Keys<Object> {
 

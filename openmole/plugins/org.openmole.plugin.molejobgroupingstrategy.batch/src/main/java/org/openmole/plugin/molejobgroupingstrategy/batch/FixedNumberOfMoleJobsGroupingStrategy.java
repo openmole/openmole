@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.molejobgroupingstrategy.batch;
 
-import org.openmole.core.workflow.implementation.mole.MoleJobCategory;
+import org.openmole.core.implementation.mole.MoleJobCategory;
 import org.openmole.core.workflow.model.execution.IMoleJobCategory;
 import org.openmole.core.workflow.model.execution.IMoleJobGroupingStrategy;
 import org.openmole.core.workflow.model.job.IContext;

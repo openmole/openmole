@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.workflow.implementation.task.GenericTask;
+import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.workflow.model.execution.IProgress;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.mole.IExecutionContext;

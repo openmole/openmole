@@ -6,7 +6,7 @@
 package org.openmole.plugin.task.filemanagement;
 
 import java.io.File;
-import org.openmole.core.workflow.implementation.data.Data;
+import org.openmole.core.implementation.data.Data;
 import org.openmole.core.workflow.model.data.IData;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;

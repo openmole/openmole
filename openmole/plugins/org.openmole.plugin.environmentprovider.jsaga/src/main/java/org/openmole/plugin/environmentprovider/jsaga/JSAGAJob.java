@@ -43,7 +43,7 @@ import org.openmole.core.workflow.model.execution.batch.IBatchJobService;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
-import org.openmole.core.workflow.implementation.execution.batch.BatchJob;
+import org.openmole.core.implementation.execution.batch.BatchJob;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
 
 public class JSAGAJob extends BatchJob {

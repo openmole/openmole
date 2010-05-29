@@ -1,12 +1,12 @@
-import org.openmole.core.workflow.implementation.data.*
-import org.openmole.core.workflow.implementation.transition.*
-import org.openmole.core.workflow.implementation.mole.Mole
-import org.openmole.core.workflow.implementation.task.*
-import org.openmole.core.workflow.implementation.capsule.*
-import org.openmole.core.workflow.implementation.plan.*
-import org.openmole.core.workflow.implementation.domain.*
-import org.openmole.core.workflow.implementation.resource.*
-import org.openmole.core.workflow.implementation.mole.execution.*
+import org.openmole.core.implementation.data.*
+import org.openmole.core.implementation.transition.*
+import org.openmole.core.implementation.mole.Mole
+import org.openmole.core.implementation.task.*
+import org.openmole.core.implementation.capsule.*
+import org.openmole.core.implementation.plan.*
+import org.openmole.core.implementation.domain.*
+import org.openmole.core.implementation.resource.*
+import org.openmole.core.implementation.mole.execution.*
 import org.simexplorer.openmole.plugin.task.sensitivitytask.*
 import org.openmole.plugin.task.groovytask.*
 

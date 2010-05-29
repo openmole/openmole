@@ -19,7 +19,7 @@ package org.openmole.plugin.tools.groovy;
 
 
 import groovy.lang.Binding;
-import org.openmole.core.workflow.implementation.tools.GroovyShellProxyAdapter;
+import org.openmole.core.implementation.tools.GroovyShellProxyAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.openmole.core.workflow.implementation.data.Prototype;
-import org.openmole.core.workflow.implementation.execution.Progress;
+import org.openmole.core.implementation.data.Prototype;
+import org.openmole.core.implementation.execution.Progress;
 import org.openmole.core.workflow.model.data.IData;
 import org.openmole.core.workflow.model.data.IPrototype;
 

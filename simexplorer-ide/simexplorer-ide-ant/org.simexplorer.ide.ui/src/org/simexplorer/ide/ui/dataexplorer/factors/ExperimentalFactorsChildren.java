@@ -22,7 +22,7 @@ package org.simexplorer.ide.ui.dataexplorer.factors;
 import java.util.Collection;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openmole.core.workflow.implementation.plan.Factor;
+import org.openmole.core.implementation.plan.Factor;
 import org.openmole.core.workflow.model.plan.IFactor;
 
 class ExperimentalFactorsChildren extends Children.Keys<IFactor<?,?>> {

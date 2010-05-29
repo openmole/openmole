@@ -30,7 +30,7 @@ import javax.swing.event.UndoableEditListener;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.WindowManager;
 import org.simexplorer.ide.ui.tools.ActionsUtils;
-import org.openmole.core.workflow.implementation.resource.FileResource;
+import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.plugin.task.groovy.GroovyTask;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 

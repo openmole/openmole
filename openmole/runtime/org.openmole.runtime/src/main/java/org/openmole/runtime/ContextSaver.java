@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
-import org.openmole.core.workflow.implementation.tools.FileMigrator;
+import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.workflow.model.job.IMoleJob;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.commons.tools.structure.Duo;

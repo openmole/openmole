@@ -46,7 +46,7 @@ import org.openmole.core.batchservicecontrol.BatchJobServiceDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.Cachable;
-import org.openmole.core.workflow.implementation.execution.batch.BatchJobService;
+import org.openmole.core.implementation.execution.batch.BatchJobService;
 import org.openmole.core.workflow.model.execution.batch.IBatchJob;
 import org.openmole.core.workflow.model.execution.batch.IRuntime;
 import org.openmole.core.workflow.model.file.IURIFile;

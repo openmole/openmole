@@ -9,7 +9,7 @@ import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.core.workflow.implementation.resource.FileResource;
+import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.task.annotations.Resource;
 

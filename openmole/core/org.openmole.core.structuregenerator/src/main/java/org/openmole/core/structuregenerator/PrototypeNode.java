@@ -5,7 +5,7 @@
 
 package org.openmole.core.structuregenerator;
 
-import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Prototype;
 
 /**
  *

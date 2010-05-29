@@ -5,7 +5,7 @@ import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.structuregenerator.IStructureGenerator;
-import org.openmole.core.workflow.implementation.task.ExplorationTask;
+import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.core.workflow.methods.task.ModelStructuresGenerationTask;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.workflow.model.data.IPrototype;

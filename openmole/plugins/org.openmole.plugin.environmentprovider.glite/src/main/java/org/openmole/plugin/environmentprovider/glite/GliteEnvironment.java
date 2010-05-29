@@ -63,7 +63,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.misc.executorservice.ExecutorType;
 
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.core.workflow.implementation.execution.batch.BatchStorage;
+import org.openmole.core.implementation.execution.batch.BatchStorage;
 import org.openmole.misc.workspace.InteractiveConfiguration;
 import org.openmole.plugin.environmentprovider.glite.internal.Activator;
 

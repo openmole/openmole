@@ -22,14 +22,14 @@ package org.openmole.plugin.plan.lhs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
-import org.openmole.core.workflow.implementation.plan.ExploredPlan;
+import org.openmole.core.implementation.plan.ExploredPlan;
 
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.service.RNG;
-import org.openmole.core.workflow.implementation.plan.FactorsValues;
-import org.openmole.core.workflow.implementation.plan.Plan;
+import org.openmole.core.implementation.plan.FactorsValues;
+import org.openmole.core.implementation.plan.Plan;
 import org.openmole.core.workflow.model.plan.IFactor;
 import org.openmole.core.workflow.model.plan.IFactorValues;
 import org.openmole.core.workflow.model.job.IContext;

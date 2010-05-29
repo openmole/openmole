@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 
-import org.openmole.core.workflow.implementation.execution.Statistic;
+import org.openmole.core.implementation.execution.Statistic;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.workflow.model.execution.batch.IBatchExecutionJob;
