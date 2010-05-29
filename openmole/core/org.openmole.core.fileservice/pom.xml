@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.core.commons.fileservice</artifactId>
+    <artifactId>org.openmole.core.fileservice</artifactId>
 
     <dependencies>
         <dependency>

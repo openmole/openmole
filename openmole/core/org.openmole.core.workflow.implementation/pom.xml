@@ -107,7 +107,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.commons.fileservice</artifactId>
+            <artifactId>org.openmole.core.fileservice</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

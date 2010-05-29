@@ -19,7 +19,7 @@
         <module>org.openmole.core.commons.metadataservice</module>
         <module>org.openmole.core.commons.objectidservice</module>
         <module>org.openmole.core.commons.persitenceservice</module>
-        <module>org.openmole.core.commons.fileservice</module>
+        <module>org.openmole.core.fileservice</module>
         <module>org.openmole.core.file</module>
         <module>org.openmole.core.batchservicecontrol</module>
         <module>org.openmole.core.workflow.model</module>

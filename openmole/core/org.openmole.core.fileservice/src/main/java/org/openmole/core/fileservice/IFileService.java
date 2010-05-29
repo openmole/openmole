@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.commons.fileservice;
+package org.openmole.core.fileservice;
 
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
