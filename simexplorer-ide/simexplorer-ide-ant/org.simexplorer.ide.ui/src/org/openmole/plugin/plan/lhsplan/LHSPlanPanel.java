@@ -16,7 +16,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.plan.lhsplan;
+package org.openmole.plugin.plan.lhs;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;

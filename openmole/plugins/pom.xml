@@ -41,7 +41,7 @@
         <module>org.openmole.plugin.plan.boxbehnkenplan</module>
         <module>org.openmole.plugin.plan.centralcompositeplan</module>
         <module>org.openmole.plugin.plan.completeplan</module>
-        <module>org.openmole.plugin.plan.lhsplan</module>
+        <module>org.openmole.plugin.plan.lhs</module>
         <module>org.openmole.plugin.plan.combine</module>
         <module>org.openmole.plugin.plan.filtredplan</module>
         <module>org.openmole.plugin.executionprofiler.csvprofiler</module>

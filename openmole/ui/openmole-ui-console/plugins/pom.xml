@@ -139,7 +139,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.lhsplan</artifactId>
+            <artifactId>org.openmole.plugin.plan.lhs</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

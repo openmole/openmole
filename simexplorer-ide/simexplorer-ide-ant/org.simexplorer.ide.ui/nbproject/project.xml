@@ -247,7 +247,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.plan.lhsplan</code-name-base>
+                    <code-name-base>org.openmole.plugin.plan.lhs</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
