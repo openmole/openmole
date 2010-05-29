@@ -26,7 +26,7 @@ import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.core.execution.replicacatalog.IReplicaCatalog;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.execution.environmentprovider.IEnvironmentProvider;
+import org.openmole.core.environmentprovider.IEnvironmentProvider;
 
 public class Activator implements BundleActivator {
 

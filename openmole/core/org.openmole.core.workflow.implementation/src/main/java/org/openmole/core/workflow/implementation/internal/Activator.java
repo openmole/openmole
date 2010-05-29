@@ -32,7 +32,7 @@ import org.openmole.core.execution.runtimemessageserializer.IRuntimeMessageSeria
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.execution.environmentprovider.IEnvironmentProvider;
+import org.openmole.core.environmentprovider.IEnvironmentProvider;
 import org.openmole.core.execution.runtimemessageserializer.IEnvironmentDescriptionSerializer;
 
 public class Activator implements BundleActivator {

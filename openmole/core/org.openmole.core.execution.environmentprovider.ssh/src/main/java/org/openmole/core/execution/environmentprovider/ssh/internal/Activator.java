@@ -1,4 +1,4 @@
-package org.openmole.core.execution.environmentprovider.ssh.internal;
+package org.openmole.core.environmentprovider.ssh.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

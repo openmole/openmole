@@ -1,9 +1,9 @@
-package org.openmole.core.execution.environmentprovider.internal;
+package org.openmole.core.environmentprovider.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.openmole.core.execution.environmentprovider.IEnvironmentProvider;
+import org.openmole.core.environmentprovider.IEnvironmentProvider;
 
 public class Activator implements BundleActivator {
 

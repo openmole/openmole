@@ -13,7 +13,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.core.execution.environmentprovider.ssh</artifactId>
+    <artifactId>org.openmole.core.environmentprovider.ssh</artifactId>
 
     <dependencies>
         <dependency>
@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.execution.environmentprovider.jsaga</artifactId>
+            <artifactId>org.openmole.core.environmentprovider.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

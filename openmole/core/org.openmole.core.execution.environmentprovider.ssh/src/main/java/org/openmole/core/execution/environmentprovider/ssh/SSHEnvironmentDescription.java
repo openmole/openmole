@@ -1,4 +1,4 @@
-package org.openmole.core.execution.environmentprovider.ssh;
+package org.openmole.core.environmentprovider.ssh;
 
 
 import org.openmole.commons.exception.InternalProcessingError;

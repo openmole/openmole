@@ -102,7 +102,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.execution.environmentprovider</artifactId>
+            <artifactId>org.openmole.core.environmentprovider</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

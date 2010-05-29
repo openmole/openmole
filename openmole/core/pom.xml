@@ -28,7 +28,7 @@
         <module>org.openmole.core.execution.runtimemessageserializer</module>
         <module>org.openmole.core.execution.structuregenerator</module>
         <module>org.openmole.core.execution.replicacatalog</module>
-        <module>org.openmole.core.execution.environmentprovider</module>
+        <module>org.openmole.core.environmentprovider</module>
     </modules>
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->

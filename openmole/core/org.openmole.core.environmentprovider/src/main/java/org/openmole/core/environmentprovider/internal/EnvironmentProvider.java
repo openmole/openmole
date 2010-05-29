@@ -1,11 +1,11 @@
-package org.openmole.core.execution.environmentprovider.internal;
+package org.openmole.core.environmentprovider.internal;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.execution.environmentprovider.IEnvironmentProvider;
+import org.openmole.core.environmentprovider.IEnvironmentProvider;
 import org.openmole.core.workflow.model.execution.IEnvironment;
 import org.openmole.core.workflow.model.execution.IEnvironmentDescription;
 

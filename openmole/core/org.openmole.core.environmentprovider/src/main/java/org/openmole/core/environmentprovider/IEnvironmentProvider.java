@@ -1,4 +1,4 @@
-package org.openmole.core.execution.environmentprovider;
+package org.openmole.core.environmentprovider;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.workflow.model.execution.IEnvironment;
