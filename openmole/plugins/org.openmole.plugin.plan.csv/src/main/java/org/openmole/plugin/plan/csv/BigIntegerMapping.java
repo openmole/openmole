@@ -14,18 +14,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.plan.csvplan;
+package org.openmole.plugin.plan.csv;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@iscpif.fr>
  */
-public class BigDecimalMapping implements IStringMapping {
+public class BigIntegerMapping implements IStringMapping {
 
     @Override
     public Object convert(String stringToBeConverted) {
-        return new BigDecimal(stringToBeConverted);
+        return new BigInteger(stringToBeConverted);
     }
 }

@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.plan.csvplan</artifactId>
+    <artifactId>org.openmole.plugin.plan.csv</artifactId>
 
     <dependencies>
         <dependency>

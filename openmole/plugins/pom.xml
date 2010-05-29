@@ -37,7 +37,7 @@
         <module>org.openmole.plugin.domain.relativerange</module>
         <module>org.openmole.plugin.domain.uniformintegerdistribution</module>
         <module>org.openmole.plugin.domain.groovydomain</module>
-        <module>org.openmole.plugin.plan.csvplan</module>
+        <module>org.openmole.plugin.plan.csv</module>
         <module>org.openmole.plugin.plan.boxbehnkenplan</module>
         <module>org.openmole.plugin.plan.centralcompositeplan</module>
         <module>org.openmole.plugin.plan.completeplan</module>

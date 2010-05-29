@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.openmole.plugin.plan.csvplan;
+package org.openmole.plugin.plan.csv;
 
 import java.io.File;
 import org.openmole.commons.exception.UserBadDataError;
