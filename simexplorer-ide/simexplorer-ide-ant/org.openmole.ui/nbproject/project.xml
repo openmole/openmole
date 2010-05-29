@@ -95,7 +95,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.codetask</code-name-base>
+                    <code-name-base>org.openmole.plugin.task.code</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

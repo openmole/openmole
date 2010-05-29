@@ -17,7 +17,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.task.codetask;
+package org.openmole.plugin.task.code;
 
 import org.openmole.plugin.tools.code.StringSourceCode;
 import org.openmole.plugin.tools.code.ISourceCode;
@@ -37,7 +37,7 @@ import org.openmole.core.workflow.model.job.IContext;
 import org.openmole.core.workflow.model.mole.IExecutionContext;
 import org.openmole.core.workflow.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.plugin.task.codetask.internal.Activator;
+import org.openmole.plugin.task.code.internal.Activator;
 import org.openmole.plugin.task.external.ExternalTask;
 
 public abstract class CodeTask<T extends IContextToCode> extends ExternalTask {

@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.codetask</artifactId>
+            <artifactId>org.openmole.plugin.task.code</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

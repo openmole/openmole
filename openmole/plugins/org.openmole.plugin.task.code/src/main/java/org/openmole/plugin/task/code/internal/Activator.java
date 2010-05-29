@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.codetask.internal;
+package org.openmole.plugin.task.code.internal;
 
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;

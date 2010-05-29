@@ -22,7 +22,7 @@ package org.openmole.plugin.task.groovy;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.plugin.task.codetask.CodeTask;
+import org.openmole.plugin.task.code.CodeTask;
 
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode;
 
