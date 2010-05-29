@@ -15,38 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.resource.virtual;
+package org.openmole.plugin.resource.virtual
 
-/**
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public class VirtualMachine  implements IVirtualMachine {
-
-    private final String host;
-    private final int port;
-    private final Process process;
-
-    public VirtualMachine(String host, int port, Process process) {
-        this.host = host;
-        this.port = port;
-        this.process = process;
+class VirtualMachine(val host: String, val port: Int, process: Process) extends IVirtualMachine {
+    override def shutdown = {
+        process.destroy
     }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
-    public String getHost() {
-        return host;
-    }
-
-    @Override
-    public void shutdown() {
-        process.destroy();
-    }
-
-    
 }

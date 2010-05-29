@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.resource.virtual;
+package org.openmole.plugin.resource.virtual
 
-/**
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public interface IVirtualMachine {
-    int getPort();
-    String getHost();
-    void shutdown();
+trait IVirtualMachine {
+    def port: Int
+    def host: String
+    def shutdown
 }
