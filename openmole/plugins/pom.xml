@@ -24,7 +24,7 @@
         <module>org.openmole.plugin.molejobgroupingstrategy.batchgroupingstrategy</module>
 	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogo</module>
-        <module>org.simexplorer.openmole.plugin.task.sensitivitytask</module>
+        <module>org.simexplorer.openmole.plugin.task.sensitivity</module>
         <module>org.openmole.plugin.task.csv</module>
         <module>org.openmole.plugin.task.external</module>
         <module>org.openmole.plugin.task.systemexec</module>

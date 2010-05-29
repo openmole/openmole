@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.simexplorer.openmole.plugin.task.sensitivitytask;
+package org.simexplorer.openmole.plugin.task.sensitivity;
 
 import java.util.Iterator;
 import org.openmole.core.workflow.implementation.domain.Domain;

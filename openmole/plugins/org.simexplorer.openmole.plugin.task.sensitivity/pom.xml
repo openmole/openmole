@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.simexplorer.openmole.plugin.task.sensitivitytask</artifactId>
+    <artifactId>org.simexplorer.openmole.plugin.task.sensitivity</artifactId>
 
     <dependencies>
         <dependency>

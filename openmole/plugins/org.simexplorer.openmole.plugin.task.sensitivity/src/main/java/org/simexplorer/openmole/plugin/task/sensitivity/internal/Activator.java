@@ -17,9 +17,9 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.simexplorer.openmole.plugin.task.sensitivitytask.internal;
+package org.simexplorer.openmole.plugin.task.sensitivity.internal;
 
-import org.simexplorer.openmole.plugin.task.sensitivitytask.R;
+import org.simexplorer.openmole.plugin.task.sensitivity.R;
 import org.openmole.ui.console.IConsole;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
