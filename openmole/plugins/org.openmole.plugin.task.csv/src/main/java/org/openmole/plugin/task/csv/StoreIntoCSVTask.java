@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.task.storeintocsvtask;
+package org.openmole.plugin.task.csv;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import java.io.BufferedWriter;

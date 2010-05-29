@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.storeintocsvtask</artifactId>
+            <artifactId>org.openmole.plugin.task.csv</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
