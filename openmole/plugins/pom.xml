@@ -43,7 +43,7 @@
         <module>org.openmole.plugin.plan.completeplan</module>
         <module>org.openmole.plugin.plan.lhs</module>
         <module>org.openmole.plugin.plan.combine</module>
-        <module>org.openmole.plugin.plan.filtredplan</module>
+        <module>org.openmole.plugin.plan.filtred</module>
         <module>org.openmole.plugin.executionprofiler.csvprofiler</module>
     </modules>
 

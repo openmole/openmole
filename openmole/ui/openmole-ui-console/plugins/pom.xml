@@ -175,7 +175,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.filtredplan</artifactId>
+            <artifactId>org.openmole.plugin.plan.filtred</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

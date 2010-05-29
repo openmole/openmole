@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.plan.filtredplan;
+package org.openmole.plugin.plan.filtred;
 
 import org.openmole.core.workflow.model.plan.IFactorValues;
 import org.openmole.commons.exception.InternalProcessingError;

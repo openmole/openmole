@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.plan.filtredplan</artifactId>
+    <artifactId>org.openmole.plugin.plan.filtred</artifactId>
 
     <dependencies>
         <dependency>
