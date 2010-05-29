@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
-import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 import org.openmole.core.workflow.methods.task.JavaTask;
 import org.openmole.plugin.task.filemanagment.TemplateFileGeneratorFromLocalFileTask;
 import org.openmole.plugin.task.systemexec.SystemExecTask;

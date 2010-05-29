@@ -17,7 +17,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.task.groovytask;
+package org.openmole.plugin.task.groovy;
 
 
 import org.openmole.commons.exception.InternalProcessingError;

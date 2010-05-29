@@ -14,7 +14,7 @@ import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.workflow.implementation.mole.Mole;
 import org.openmole.core.workflow.implementation.transition.TransitionFactory;
 import org.openmole.core.workflow.implementation.task.ExplorationTask;
-import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.core.workflow.model.mole.IMole;

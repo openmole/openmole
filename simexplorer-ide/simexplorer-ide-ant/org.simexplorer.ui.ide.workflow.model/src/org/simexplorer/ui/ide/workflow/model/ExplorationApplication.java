@@ -43,7 +43,7 @@ import org.openmole.core.workflow.implementation.data.Prototype;
 import org.openmole.core.workflow.model.data.IPrototype;
 import org.openmole.core.workflow.model.plan.IFactor;
 import org.openmole.core.workflow.model.task.ITask;
-import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 public class ExplorationApplication {
 

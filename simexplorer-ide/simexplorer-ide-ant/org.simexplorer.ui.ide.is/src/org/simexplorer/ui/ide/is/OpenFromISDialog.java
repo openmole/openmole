@@ -32,7 +32,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
-import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 public class OpenFromISDialog extends javax.swing.JDialog {
 

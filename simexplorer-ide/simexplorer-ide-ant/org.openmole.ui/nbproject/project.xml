@@ -111,7 +111,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.groovytask</code-name-base>
+                    <code-name-base>org.openmole.plugin.task.groovy</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

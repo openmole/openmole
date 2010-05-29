@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.control.TableType.Name;
 import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.plugin.task.groovytask.GroovyTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 /**
  *

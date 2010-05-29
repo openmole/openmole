@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.groovytask</artifactId>
+            <artifactId>org.openmole.plugin.task.groovy</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
