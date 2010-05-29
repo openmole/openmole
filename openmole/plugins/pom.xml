@@ -21,7 +21,7 @@
         <module>org.openmole.plugin.environmentprovider.jsaga</module>
         <module>org.openmole.plugin.environmentprovider.glite</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.onvariable</module>
-        <module>org.openmole.plugin.molejobgroupingstrategy.batchgroupingstrategy</module>
+        <module>org.openmole.plugin.molejobgroupingstrategy.batch</module>
 	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogo</module>
         <module>org.simexplorer.openmole.plugin.task.sensitivity</module>
