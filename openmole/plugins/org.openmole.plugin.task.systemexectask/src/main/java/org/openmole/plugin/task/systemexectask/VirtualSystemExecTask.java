@@ -45,7 +45,7 @@ public class VirtualSystemExecTask extends Task {
     @Override
     protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         System.out.println("Execute virtual task.");
-        IVirtualMachinePool pool = virtualMachineResource.getVirtualMachinePool();
+        IVirtualMachinePool pool = virtualMachineResource.getVirtualMachineShared();
         IVirtualMachine virtualMachine = pool.borrowAVirtualMachine();
         pool.returnVirtualMachine(virtualMachine);
          System.out.println("Executed virtual task.");

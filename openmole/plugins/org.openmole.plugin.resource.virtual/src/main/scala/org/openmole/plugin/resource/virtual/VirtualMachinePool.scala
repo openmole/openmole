@@ -33,13 +33,13 @@ class VirtualMachinePool(resource: VirtualMachineResource) extends IVirtualMachi
     val id = new AtomicLong(0L)
   }
 
-  private class PooledVM(val virtualMachine: IVirtualMachine, val killTime: Long, val id: Long = PooledVMID.id.getAndIncrement()) extends Comparable[PooledVM] {
-    override def compareTo(t: PooledVM): Int = {
+  private class PooledVM(val virtualMachine: IVirtualMachine, val killTime: Long, val id: Long = PooledVMID.id.getAndIncrement()) extends Ordered[PooledVM] {
+    override def compare(t: PooledVM): Int = {
       val compare = killTime.compare(t.killTime)
       if (compare != 0) {
         return compare
       }
-      long2Long(id).compareTo(t.id)
+      id.compare(t.id)
     }
   }
    
