@@ -47,7 +47,7 @@ import scala.collection.JavaConversions._
 abstract class ExternalTask(name: String) extends Task(name) {
 
     @Resource
-    val inFiles = new FileSetResource()
+    val inFiles = new FileSetResource
 
     val inContextFiles = new ListBuffer[(IPrototype[File], String)]
     val inContextFileList = new ListBuffer[(IPrototype[List[File]], IPrototype[List[String]])]
@@ -60,8 +60,8 @@ abstract class ExternalTask(name: String) extends Task(name) {
     protected def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) = {
         try {
             inFileNames.entrySet().foreach(entry => {
-                val localFile = inFiles.getDeployed(entry.getKey())
-                val correctName = new File(tmpDir, expandData(context, entry.getValue()))
+                val localFile = inFiles.getDeployed(entry.getKey)
+                val correctName = new File(tmpDir, expandData(context, entry.getValue))
                 copy(localFile, correctName)
             })
 

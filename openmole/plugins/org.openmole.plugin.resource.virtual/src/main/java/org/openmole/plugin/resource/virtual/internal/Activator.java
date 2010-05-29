@@ -16,7 +16,6 @@
  */
 package org.openmole.plugin.resource.virtual.internal;
 
-import org.ogf.saga.context.Context;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;

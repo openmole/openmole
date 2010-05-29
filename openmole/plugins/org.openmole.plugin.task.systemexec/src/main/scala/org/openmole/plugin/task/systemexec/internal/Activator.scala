@@ -15,46 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.systemexec.internal;
+package org.openmole.plugin.task.systemexec.internal
 
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.openmole.commons.aspect.caching.SoftCachable
 
-/**
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public class Activator implements BundleActivator {
+object Activator extends BundleActivator {
 
-	static BundleContext context;
-	private static IWorkspace workspace;
-	//private static ITransferMonitor transferMonitor;
+  var context: BundleContext = null
+ 
+  override def start(context: BundleContext) = {
+    this.context = context
+  }
 
+  override def stop(context: BundleContext) = {
+    this.context = null
+  }
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
-	}
+  @SoftCachable
+  def getWorkspace: IWorkspace = {
+    def ref = context.getServiceReference(classOf[IWorkspace].getName)
+    return context.getService(ref) match {
+      case ws: IWorkspace => ws
+      case _ => throw new ClassCastException
+    }
+  }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		context = null;
-
-	}
-
-	public synchronized static IWorkspace getWorkspace() {
-		if(workspace  == null) {
-			ServiceReference ref = getContext().getServiceReference(IWorkspace.class.getName());
-			workspace = (IWorkspace) getContext().getService(ref);
-		}
-		return workspace;
-	}
-
-
-
-	private static BundleContext getContext() {
-		return context;
-	}
 }
