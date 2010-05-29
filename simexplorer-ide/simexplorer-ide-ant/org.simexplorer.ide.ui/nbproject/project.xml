@@ -231,7 +231,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.plan.completeplan</code-name-base>
+                    <code-name-base>org.openmole.plugin.plan.complete</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

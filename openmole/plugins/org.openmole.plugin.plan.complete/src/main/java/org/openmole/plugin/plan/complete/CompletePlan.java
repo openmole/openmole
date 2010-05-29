@@ -18,7 +18,7 @@
  *  MA  02110-1301  USA
  */
 
-package org.openmole.plugin.plan.completeplan;
+package org.openmole.plugin.plan.complete;
 
 import java.util.ArrayList;
 import java.util.Collections;

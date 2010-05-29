@@ -40,7 +40,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.plugin.domain.interval.RangeDouble;
 import org.openmole.plugin.domain.interval.RangeInteger;
-import org.openmole.plugin.plan.completeplan.CompletePlan;
+import org.openmole.plugin.plan.complete.CompletePlan;
 import org.openmole.plugin.task.groovy.GroovyTask;
 import org.openmole.plugin.task.structuregeneration.ModelStructuresGenerationTask;
 

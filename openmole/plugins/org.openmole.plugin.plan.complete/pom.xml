@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.plan.completeplan</artifactId>
+    <artifactId>org.openmole.plugin.plan.complete</artifactId>
 
     <dependencies>
         <dependency>

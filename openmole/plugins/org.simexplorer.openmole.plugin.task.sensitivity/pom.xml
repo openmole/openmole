@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.plugin.plan.completeplan</artifactId>
+            <artifactId>org.openmole.plugin.plan.complete</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
