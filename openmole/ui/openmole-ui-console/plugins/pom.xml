@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.molejobgroupingstrategy.onvariablegroupingstrategy</artifactId>
+            <artifactId>org.openmole.plugin.molejobgroupingstrategy.onvariable</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.molejobgroupingstrategy.onvariablegroupingstrategy;
+package org.openmole.plugin.molejobgroupingstrategy.onvariable;
 
 import java.util.LinkedList;
 import java.util.List;

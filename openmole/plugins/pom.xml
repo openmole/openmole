@@ -20,7 +20,7 @@
         <module>org.openmole.plugin.tools.groovy</module>
         <module>org.openmole.plugin.environmentprovider.jsaga</module>
         <module>org.openmole.plugin.environmentprovider.glite</module>
-        <module>org.openmole.plugin.molejobgroupingstrategy.onvariablevaluegroupingstrategy</module>
+        <module>org.openmole.plugin.molejobgroupingstrategy.onvariable</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.batchgroupingstrategy</module>
 	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogo</module>
