@@ -171,7 +171,6 @@ class CopyToEnvironment implements ITransferable {
 
         IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token, true, executionContext).getReplica();
         return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);
-
     }
 
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {

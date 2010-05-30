@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environmentprovider.jsaga.model;
+package org.openmole.plugin.environmentprovider.jsaga;
 
 import java.io.File;
 

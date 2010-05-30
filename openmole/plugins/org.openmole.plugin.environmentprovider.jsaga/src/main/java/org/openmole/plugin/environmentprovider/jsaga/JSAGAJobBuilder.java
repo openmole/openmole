@@ -39,7 +39,6 @@ import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAEnvironment;
 
 public class JSAGAJobBuilder {
 
@@ -53,7 +52,7 @@ public class JSAGAJobBuilder {
     }
     JobDescription hello;
 
-    public JobDescription getJobDescription(URI in, URI out, IJSAGAEnvironment env, IRuntime runtime, File tmpScript) throws InternalProcessingError, InterruptedException {
+    public JobDescription getJobDescription(URI in, URI out, JSAGAEnvironment env, IRuntime runtime, File tmpScript) throws InternalProcessingError, InterruptedException {
         try {
 
             JobDescription description = JobFactory.createJobDescription();
@@ -77,7 +76,7 @@ public class JSAGAJobBuilder {
 
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(Activator.getWorkspace().getPreferenceAsDurationInS(JSAGAEnvironment.CPUTime)).toString());
-            description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(Activator.getWorkspace().getPreferenceAsInt(BatchEnvironment.MemorySizeForRuntime) + 100).toString());
+            description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(Activator.getWorkspace().getPreferenceAsInt(JSAGAEnvironment.Memory)).toString());
 
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().getSchemeSpecificPart() + ">" + tmpScript.getName()});
 

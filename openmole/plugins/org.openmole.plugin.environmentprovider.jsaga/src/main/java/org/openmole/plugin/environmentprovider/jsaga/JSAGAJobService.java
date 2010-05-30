@@ -47,21 +47,18 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.core.implementation.execution.batch.BatchJobService;
-import org.openmole.core.model.execution.batch.IBatchJob;
-import org.openmole.core.model.execution.batch.IRuntime;
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAEnvironment;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobDescription;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobService;
+import org.openmole.core.model.execution.batch.IBatchJob;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.execution.batch.IRuntime;
 
-public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> implements IJSAGAJobService {
+public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
     final static long TimeOut = 2 * 60 * 1000;
     URI jobServiceURI;
-    IJSAGAEnvironment<?> environment;
+    JSAGAEnvironment<?> environment;
 
-    public JSAGAJobService(URI jobServiceURI, IJSAGAEnvironment<?> environment, int nbAccess) throws InternalProcessingError {
+    public JSAGAJobService(URI jobServiceURI, JSAGAEnvironment<?> environment, int nbAccess) throws InternalProcessingError {
         super(environment, new BatchJobServiceDescription(jobServiceURI.toString()), nbAccess);
         this.jobServiceURI = jobServiceURI;
         this.environment = environment;
@@ -109,7 +106,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> imple
         return true;
     }
 
-    protected IJSAGAEnvironment getEnvironment() {
+    protected JSAGAEnvironment getEnvironment() {
         return environment;
     }
 

@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environmentprovider.glite;
 
-import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironmentDescription;
 

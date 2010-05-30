@@ -14,35 +14,30 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.plugin.environmentprovider.jsaga;
 
 import java.io.File;
 
 import org.ogf.saga.job.JobDescription;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobDescription;
 
 public class JSAGAJobDescription implements IJSAGAJobDescription {
 
-	JobDescription descritpion;
-	File script;
-	
+    JobDescription descritpion;
+    File script;
 
-	public JSAGAJobDescription(JobDescription descritpion, File script) {
-		super();
-		this.descritpion = descritpion;
-		this.script = script;
-	}
+    public JSAGAJobDescription(JobDescription descritpion, File script) {
+        super();
+        this.descritpion = descritpion;
+        this.script = script;
+    }
 
-	@Override
-	public JobDescription getJobDescription() {
-		return descritpion;
-	}
-	
-	@Override
-	public File getScript() {
-		return script;
-	}
+    @Override
+    public JobDescription getJobDescription() {
+        return descritpion;
+    }
 
+    @Override
+    public File getScript() {
+        return script;
+    }
 }

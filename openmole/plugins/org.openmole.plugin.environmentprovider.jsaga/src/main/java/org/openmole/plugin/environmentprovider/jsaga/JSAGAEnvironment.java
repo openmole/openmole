@@ -23,19 +23,22 @@ import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.environmentprovider.jsaga.internal.Activator;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAEnvironment;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobService;
 
-public abstract class JSAGAEnvironment<DESC extends IBatchEnvironmentDescription>  extends BatchEnvironment<IJSAGAJobService, DESC> implements IJSAGAEnvironment<DESC> {
+
+public abstract class JSAGAEnvironment<DESC extends IBatchEnvironmentDescription>  extends BatchEnvironment<JSAGAJobService, DESC> {
 
     final public static ConfigurationLocation CPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "CPUTime");
+    final public static ConfigurationLocation Memory  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "Memory");
 
     static  {
         Activator.getWorkspace().addToConfigurations(CPUTime, "PT12H");
+        Activator.getWorkspace().addToConfigurations(Memory, "800");
     }
  
 
     public JSAGAEnvironment(DESC description) throws InternalProcessingError {
         super(description);
     }
+
+    abstract public IJSAGALaunchingScript<?> getLaunchingScript();
 }

@@ -23,7 +23,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.plugin.environmentprovider.glite.GliteEnvironment;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGALaunchingScript;
+import org.openmole.plugin.environmentprovider.jsaga.IJSAGALaunchingScript;
 
 public class GliteLaunchingScript implements IJSAGALaunchingScript<GliteEnvironment> {
 

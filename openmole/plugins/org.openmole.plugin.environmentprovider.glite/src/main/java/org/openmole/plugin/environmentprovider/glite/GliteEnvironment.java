@@ -69,8 +69,7 @@ import org.openmole.plugin.environmentprovider.glite.internal.Activator;
 
 import org.openmole.plugin.environmentprovider.jsaga.JSAGAEnvironment;
 import org.openmole.plugin.environmentprovider.jsaga.JSAGAJobService;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGAJobService;
-import org.openmole.plugin.environmentprovider.jsaga.model.IJSAGALaunchingScript;
+import org.openmole.plugin.environmentprovider.jsaga.IJSAGALaunchingScript;
 
 public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescription> {
 
@@ -133,10 +132,8 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
         Activator.getWorkspace().addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
         Activator.getWorkspace().addToConfigurations(OverSubmissionNumberOfJobUnderMin, Integer.toString(3));
-
-
-        //    Activator.getUpdater().delay(new WaitingThreadInterrupter(), ExecutorType.OWN);
     }
+
     transient WorkloadOnAverages workload;
     transient File CACertificatesDir;
     transient BDII bdii;
@@ -371,17 +368,17 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
 //   @Cachable
     @Override
-    public Collection<IJSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
+    public Collection<JSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
 
         List<URI> jss = getBDII().queryWMSURIs(getVoName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation)).intValue());
 
-        Collection<IJSAGAJobService> jobServices = new LinkedList<IJSAGAJobService>();
+        Collection<JSAGAJobService> jobServices = new LinkedList<JSAGAJobService>();
 
         for (URI js : jss) {
             try {
                 URI wms = new URI("wms:" + js.getRawSchemeSpecificPart());
 
-                IJSAGAJobService jobService = new JSAGAJobService(wms, this, threadsByWMS);
+                JSAGAJobService jobService = new JSAGAJobService(wms, this, threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);

@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environmentprovider.jsaga.model;
+package org.openmole.plugin.environmentprovider.jsaga;
 
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.core.model.execution.batch.IRuntime;
 
-import org.openmole.core.model.execution.batch.IBatchJobService;
-
-public interface IJSAGAJobService extends IBatchJobService<IJSAGAJobDescription>{
-//	URI getURI();
-	//public long getAverageTimeForAnOperation();
+public interface IJSAGALaunchingScript<ENV extends JSAGAEnvironment<?>> {
+	String getScript(String args, IRuntime runtime, ENV env) throws InternalProcessingError;
 }

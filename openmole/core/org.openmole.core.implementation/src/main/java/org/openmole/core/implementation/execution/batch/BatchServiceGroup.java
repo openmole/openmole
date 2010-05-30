@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 
 import org.openmole.commons.exception.InternalProcessingError;
