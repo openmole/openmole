@@ -28,8 +28,10 @@ public class AssociativeCache<K, T> {
     public static final int WEAK = ReferenceMap.WEAK;
     public static final int SOFT = ReferenceMap.SOFT;
     public static final int HARD = ReferenceMap.HARD;
+
     final Map<Object, Map<K, T>> hashCache = new WeakHashMap<Object, Map<K, T>>();
     final LockRepository<K> lockRepository = new LockRepository<K>();
+
     final int keyRefType;
     final int valRefType;
 
