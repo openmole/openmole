@@ -42,7 +42,7 @@ import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IRuntimeResult;
 import org.openmole.core.model.job.IContext;
 import org.openmole.runtime.internal.Activator;
-import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
@@ -246,7 +246,7 @@ public class SimExplorer implements IApplication {
                         entry.setSize(toArchive.length());
                         tos.putArchiveEntry(entry);
                         try {
-                            FastCopy.copy(new FileInputStream(toArchive), tos);
+                            FileUtil.copy(new FileInputStream(toArchive), tos);
                         } finally {
                             tos.closeArchiveEntry();
                         }
