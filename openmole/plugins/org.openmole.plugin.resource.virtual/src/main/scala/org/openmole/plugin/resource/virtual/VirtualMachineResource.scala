@@ -37,7 +37,7 @@ import org.openmole.core.model.task.annotations.Resource
 import org.openmole.commons.aspect.caching.Cachable
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.io.FastCopy
+import org.openmole.commons.tools.io.FileUtil
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.resource.virtual.internal.Activator
 
@@ -145,7 +145,7 @@ class VirtualMachineResource(system: File, user: String, password: String) exten
         val outputStream = new BufferedOutputStream(new FileOutputStream(dest))
 
         try {
-          FastCopy.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream)
+          FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream)
         } finally {
           outputStream.close
         }

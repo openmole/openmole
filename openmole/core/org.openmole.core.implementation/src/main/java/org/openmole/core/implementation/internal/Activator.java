@@ -20,7 +20,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
-import org.openmole.misc.clonning.IClonningService;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.fileservice.IFileService;
@@ -38,7 +37,6 @@ import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSeriali
 public class Activator implements BundleActivator {
 
     static BundleContext context;
-    private static transient IClonningService clonning;
     private static transient IUpdater updater;
     private static transient IReplicaCatalog replicaCatalog;
     private static IWorkspace workspace;
@@ -97,19 +95,6 @@ public class Activator implements BundleActivator {
         return workspace;
     }
 
-    public static IClonningService getClonningService() {
-        if (clonning != null) {
-            return clonning;
-        }
-
-        synchronized (Activator.class) {
-            if (clonning == null) {
-                ServiceReference ref = getContext().getServiceReference(IClonningService.class.getName());
-                clonning = (IClonningService) getContext().getService(ref);
-            }
-        }
-        return clonning;
-    }
 
     public static IUpdater getUpdater() {
         if (updater != null) {

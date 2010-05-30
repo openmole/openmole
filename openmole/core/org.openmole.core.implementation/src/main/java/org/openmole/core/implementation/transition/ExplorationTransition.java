@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.openmole.misc.clonning.IClonningService;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.internal.Activator;
@@ -29,6 +28,7 @@ import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.mole.SubMoleExecution;
 import org.openmole.core.implementation.task.ExplorationTask;
+import org.openmole.core.implementation.tools.ClonningService;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
@@ -79,10 +79,16 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
             for (IData<?> in : getEnd().getCapsule().getTask().getInput()) {
                 //Check filtred here to avoid useless clonning
                 if (context.contains(in.getPrototype()) && !getFiltred().contains(in.getPrototype().getName())) {
-                    IClonningService clonningService = Activator.getClonningService();
+
 
                     IVariable<?> varToClone = context.getLocalVariable(in.getPrototype());
-                    IVariable<?> var = new Variable(varToClone.getPrototype(), clonningService.clone(varToClone.getValue()));
+                    IVariable<?> var;
+
+                    if(!in.getMod().isImmutable() && factorIt.hasNext()) {
+                        var = new Variable(varToClone.getPrototype(), ClonningService.clone(varToClone));
+                    } else {
+                        var = varToClone;
+                    }
 
                     destContext.putVariable(var);
                 } else {

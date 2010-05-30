@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.fileservice.internal;
 
 import java.io.File;
@@ -26,19 +25,51 @@ import org.openmole.core.fileservice.IFileService;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.commons.tools.filecache.IFileCache;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 
 public class FileService implements IFileService {
 
-    AssociativeCache<String, IHash> hashCach = new AssociativeCache<String, IHash>(AssociativeCache.SOFT, AssociativeCache.SOFT);
-    AssociativeCache<String, IFileCache> archiveCach = new AssociativeCache<String, IFileCache>(AssociativeCache.SOFT, AssociativeCache.SOFT);
+    class CachedArchiveForDir extends FileCacheDeleteOnFinalize {
 
+        final long lastModified;
+
+        public CachedArchiveForDir(File file, long lastModified) {
+            super(file);
+            this.lastModified = lastModified;
+        }
+
+        public long getLastModified() {
+            return lastModified;
+        }
+    }
+
+    class HashWithLastModified {
+
+        final IHash hash;
+        final long lastModified;
+
+        public HashWithLastModified(IHash hash, long lastModified) {
+            this.hash = hash;
+            this.lastModified = lastModified;
+        }
+
+        public IHash getHash() {
+            return hash;
+        }
+
+        public long getLastModified() {
+            return lastModified;
+        }
+    }
+    
+    AssociativeCache<String, HashWithLastModified> hashCach = new AssociativeCache<String, HashWithLastModified>(AssociativeCache.SOFT, AssociativeCache.SOFT);
+    AssociativeCache<String, CachedArchiveForDir> archiveCache = new AssociativeCache<String, CachedArchiveForDir>(AssociativeCache.SOFT, AssociativeCache.SOFT);
 
     @Override
     public IHash getHashForFile(File file) throws InternalProcessingError, InterruptedException {
-       return getHashForFile(file, file);
+        return getHashForFile(file, file);
     }
 
     @Override
@@ -47,26 +78,41 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public IHash getHashForFile(final File file, Object cacheLength) throws InternalProcessingError, InterruptedException {
-        return hashCach.getCache(cacheLength, file.getAbsolutePath(), new ICachable<IHash>() {
+    public IHash getHashForFile(final File file, final Object cacheLength) throws InternalProcessingError, InterruptedException {
+        invalidateHashCacheIfModified(file, cacheLength);
+        return hashCach.getCache(cacheLength, file.getAbsolutePath(), new ICachable<HashWithLastModified>() {
 
             @Override
-            public IHash compute() throws InternalProcessingError, InterruptedException {
+            public HashWithLastModified compute() throws InternalProcessingError, InterruptedException {
                 try {
-                    return Activator.getHashService().computeHash(file);
+                    return new HashWithLastModified(Activator.getHashService().computeHash(file), file.lastModified());
                 } catch (IOException ex) {
                     throw new InternalProcessingError(ex);
                 }
             }
-        });
+        }).getHash();
+    }
+
+    private void invalidateHashCacheIfModified(final File file, final Object cacheLength) {
+        HashWithLastModified hashWithLastModified = hashCach.getCached(cacheLength, file.getAbsolutePath());
+        if (hashWithLastModified == null) {
+            return;
+        }
+
+        if (hashWithLastModified.getLastModified() < file.lastModified()) {
+            hashCach.invalidateCache(cacheLength, file.getAbsolutePath());
+        }
     }
 
     @Override
     public File getArchiveForDir(final File file, Object cacheLenght) throws InternalProcessingError, InterruptedException {
-        return archiveCach.getCache(cacheLenght, file.getAbsolutePath(), new ICachable<IFileCache>() {
+
+        invalidateDirCacheIfModified(file, cacheLenght);
+
+        return archiveCache.getCache(cacheLenght, file.getAbsolutePath(), new ICachable<CachedArchiveForDir>() {
 
             @Override
-            public IFileCache compute() throws InternalProcessingError, InterruptedException {
+            public CachedArchiveForDir compute() throws InternalProcessingError, InterruptedException {
                 try {
                     File ret = Activator.getWorkspace().newFile("archive", ".tar");
                     OutputStream os = new FileOutputStream(ret);
@@ -76,13 +122,24 @@ public class FileService implements IFileService {
                     } finally {
                         os.close();
                     }
-                    
-                    return new FileCacheDeleteOnFinalize(ret);
+
+                    return new CachedArchiveForDir(ret, FileUtil.getLastModification(file));
                 } catch (IOException ex) {
                     throw new InternalProcessingError(ex);
                 }
             }
         }).getFile();
+    }
+
+    private void invalidateDirCacheIfModified(final File file, Object cacheLenght) {
+        CachedArchiveForDir cached = archiveCache.getCached(cacheLenght, file.getAbsolutePath());
+        if (cached == null) {
+            return;
+        }
+
+        if (cached.getLastModified() < FileUtil.getLastModification(file)) {
+            archiveCache.invalidateCache(cacheLenght, file.getAbsolutePath());
+        }
     }
 }
 

@@ -20,30 +20,67 @@ package org.openmole.plugin.task.external
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
-import org.openmole.commons.tools.io.FastCopy
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.io.IFileOperation
+import java.net.URI
+import org.openmole.core.model.execution.IProgress
+import org.openmole.core.model.job.IContext
+import java.util.TreeSet
+import scala.collection.mutable.ListBuffer
+import scala.collection.JavaConversions._
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
-  protected def copyTo(from: File, to: File) = {
-    FastCopy.copy(from, to)
 
-    FastCopy.applyRecursive(to, new IFileOperation() {
+  def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
+    listInputFiles(context, progress).foreach( f => {
+        val to = new File(tmpDir, f._2)
 
-        override def execute(file: File) =  {
-          if (file.isFile()) {
-            file.setExecutable(true)
-          }
-          file.deleteOnExit
+        copy(f._1, to)
+
+        applyRecursive(to, new IFileOperation() {
+            override def execute(file: File) =  {
+              if (file.isFile()) {
+                file.setExecutable(true)
+              }
+              file.deleteOnExit
+            }
+          })
+      }
+    )
+  }
+
+
+  def fetchOutputFiles(context: IContext, progress: IProgress, localDir: File) = {
+    val usedFiles = new TreeSet[File]
+
+    setOutputFilesVariables(context,progress,localDir).foreach( f => {
+        val current = new File(localDir,f)
+        if (!current.exists) {
+          throw new UserBadDataError("Output file " + current.getAbsolutePath + " for task " + getName + " doesn't exist")
         }
-      })
+        usedFiles add (current)
+      }
+    )
+
+    val unusedFiles = new ListBuffer[File]
+    val unusedDirs = new ListBuffer[File]
+
+    applyRecursive(localDir, new IFileOperation() {
+        override def execute(file: File) =  {
+          if(file.isFile) unusedFiles += (file)
+          else unusedDirs += (file)
+        }
+      }, usedFiles)
+
+    unusedFiles.foreach( f => {
+      f.delete
+    })
+
+    unusedDirs.foreach( d => {
+      if(d.exists && dirContainsNoFileRecursive(d)) recursiveDelete(d)
+    } )
   }
 
-  protected def copyFrom(from: File): File = {
-     if (!from.exists()) {
-          throw new UserBadDataError("Output file " + from.getAbsolutePath + " for task " + getName + " doesn't exist")
-     }
-     return from
-  }
 
 }

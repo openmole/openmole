@@ -53,7 +53,7 @@ public class MoleTask extends Task implements IMoleTask {
         IContext firstTaskContext = new Context(rootContext);
 
         for (IData<?> input : getInput()) {
-            if (!input.isOptional() || input.isOptional() && context.contains(input.getPrototype())) {
+            if (!input.getMod().isOptional() || input.getMod().isOptional() && context.contains(input.getPrototype())) {
                 IPrototype p = input.getPrototype();
                 firstTaskContext.putVariable(p, context.getLocalValue(p));
             }

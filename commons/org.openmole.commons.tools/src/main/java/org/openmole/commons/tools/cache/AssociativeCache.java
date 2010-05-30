@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.commons.tools.cache;
 
 import java.util.Collections;
@@ -29,8 +28,6 @@ public class AssociativeCache<K, T> {
     public static final int WEAK = ReferenceMap.WEAK;
     public static final int SOFT = ReferenceMap.SOFT;
     public static final int HARD = ReferenceMap.HARD;
-
-
     final Map<Object, Map<K, T>> hashCache = new WeakHashMap<Object, Map<K, T>>();
     final LockRepository<K> lockRepository = new LockRepository<K>();
     final int keyRefType;
@@ -41,27 +38,68 @@ public class AssociativeCache<K, T> {
         this.valRefType = valRefType;
     }
 
+    public void invalidateCache(final Object cacheAssociation, final K key) {
+        final Map<K, T> cache;
 
-    public T getCache(final Object cacheAssociation, K key, ICachable<? extends T> cachable) throws InternalProcessingError, InterruptedException {
+        synchronized (hashCache) {
+            cache = hashCache.get(cacheAssociation);
+            if (cache == null) {
+                return;
+            }
+        }
+
+        lockRepository.lock(key);
+        try {
+            cache.remove(key);
+        } finally {
+            lockRepository.unlock(key);
+        }
+        
+    }
+
+    public T getCached(final Object cacheAssociation, K key) {
+        final Map<K, T> cache;
+
+        synchronized (hashCache) {
+            cache = hashCache.get(cacheAssociation);
+            if (cache == null) {
+                return null;
+            }
+        }
+
+        return cache.get(key);
+    }
+
+    public T getCache(final Object cacheAssociation, final K key, ICachable<? extends T> cachable) throws InternalProcessingError, InterruptedException {
 
         final Map<K, T> cache = getHashCache(cacheAssociation);
 
         T ret = cache.get(key);
 
-        if (ret == null) {
-            lockRepository.lock(key);
-            try {
+        lockRepository.lock(key);
+        try {
+            if (ret == null) {
+
                 ret = cachable.compute();
-            } finally {
+                cache.put(key, ret);
+
+                /* lockRepository.lock(key);
+                try {
+                ret = cachable.compute();
+                cache.put(key, ret);
+                } finally {
                 lockRepository.unlock(key);
+                }*/
             }
+        } finally {
+            lockRepository.unlock(key);
         }
 
-        synchronized(cache) {
-            if(!cache.containsKey(key)) {
-                cache.put(key, ret);
-            }
+        /* synchronized(cache) {
+        if(!cache.containsKey(key)) {
+        cache.put(key, ret);
         }
+        }*/
 
         return ret;
     }

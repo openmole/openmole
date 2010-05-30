@@ -33,7 +33,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.IExecutionContext
 import scala.collection.mutable.ListBuffer
 
-import org.openmole.commons.tools.io.FastCopy.copy
+import org.openmole.commons.tools.io.FileUtil.copy
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Task(name) {

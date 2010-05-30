@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.tools;
 
 import java.io.File;
@@ -31,21 +30,25 @@ import org.openmole.core.model.resource.ILocalFileCache;
 /*TODO suport arrays and set*/
 public class FileMigrator {
 
-    public static void initFilesInVariables(Iterable<IVariable> context, ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        for (IVariable<?> v : context) {
-            if (File.class.isAssignableFrom(v.getPrototype().getType())) {
-                initFileInVariable((IVariable<File>) v, fileCache);
-            } else {
-                if (List.class.isAssignableFrom(v.getPrototype().getType())) {
-                    initFilesInList(((IVariable<List>) v).getValue(), fileCache);
-                }
+    public static void initFilesInVariable(IVariable variable, ILocalFileCache fileCache) {
+        if (File.class.isAssignableFrom(variable.getPrototype().getType())) {
+            initFileInVariable((IVariable<File>) variable, fileCache);
+        } else {
+            if (List.class.isAssignableFrom(variable.getPrototype().getType())) {
+                initFilesInList(((IVariable<List>) variable).getValue(), fileCache);
             }
+        }
+    }
+
+    public static void initFilesInVariables(Iterable<IVariable> context, ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
+        for (IVariable v : context) {
+            initFileInVariable(v, fileCache);
         }
     }
 
     private static void initFilesInList(List list, ILocalFileCache fileCache) {
         int i = 0;
-        for (Object o: list) {
+        for (Object o : list) {
             //Object o = list.get(i);
             if (File.class.isAssignableFrom(o.getClass())) {
                 File src = (File) o;
@@ -62,30 +65,34 @@ public class FileMigrator {
     }
 
     private static void initFileInVariable(IVariable<File> v, ILocalFileCache fileCache) {
-
-        File src = (File) v.getValue();
+        File src = v.getValue();
         File local = fileCache.getLocalFileCache(src);
         v.setValue(local);
-
     }
 
-    public static Iterable<File> extractFilesFromVariables(Iterable<IVariable> context) {
+    public static Set<File> extractFilesFromVariable(IVariable variable) {
         Set<File> fileMap = new TreeSet<File>();
-
-        for (IVariable<?> v : context) {
-            if (File.class.isAssignableFrom(v.getPrototype().getType())) {
-                fileMap.add(((IVariable<File>) v).getValue());
-            } else {
-                if (List.class.isAssignableFrom(v.getPrototype().getType())) {
-                    extractFilesFromList(((IVariable<List>) v).getValue(), fileMap);
-                }
+        if (File.class.isAssignableFrom(variable.getPrototype().getType())) {
+            fileMap.add(((IVariable<File>) variable).getValue());
+        } else {
+            if (List.class.isAssignableFrom(variable.getPrototype().getType())) {
+                extractFilesFromList(((IVariable<List>) variable).getValue(), fileMap);
             }
         }
         return fileMap;
     }
 
+    public static Set<File> extractFilesFromVariables(Iterable<IVariable> context) {
+        Set<File> fileMap = new TreeSet<File>();
+
+        for (IVariable<?> v : context) {
+            fileMap.addAll(extractFilesFromVariable(v));
+        }
+        return fileMap;
+    }
+
     private static void extractFilesFromList(List list, Set<File> fileMap) {
-        for (Object o: list) {
+        for (Object o : list) {
 
             if (File.class.isAssignableFrom(o.getClass())) {
                 fileMap.add((File) o);

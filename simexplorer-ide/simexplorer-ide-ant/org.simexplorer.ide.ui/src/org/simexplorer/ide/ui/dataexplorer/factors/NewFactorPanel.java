@@ -33,7 +33,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import org.openide.util.Lookup;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.misc.clonning.internal.ClonningService;
+import org.openmole.core.clonning.internal.ClonningService;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ide.ui.PanelFactory;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;

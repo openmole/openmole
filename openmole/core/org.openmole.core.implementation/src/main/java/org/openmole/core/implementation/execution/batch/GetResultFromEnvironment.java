@@ -17,7 +17,7 @@ import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 import org.openmole.core.implementation.internal.Activator;
@@ -88,7 +88,7 @@ public class GetResultFromEnvironment implements ITransferable {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
                     }
 
-                    FastCopy.copy(new FileInputStream(stdOutFile), System.out);
+                    FileUtil.copy(new FileInputStream(stdOutFile), System.out);
                 } catch (IOException e) {
                     Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
                 }
@@ -106,7 +106,7 @@ public class GetResultFromEnvironment implements ITransferable {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
                     }
 
-                    FastCopy.copy(new FileInputStream(stdErrFile), System.err);
+                    FileUtil.copy(new FileInputStream(stdErrFile), System.err);
                 } catch (IOException e) {
                     Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
                 }
@@ -144,7 +144,7 @@ public class GetResultFromEnvironment implements ITransferable {
                         FileOutputStream os = new FileOutputStream(dest);
 
                         try {
-                            FastCopy.copy(tis, os);
+                            FileUtil.copy(tis, os);
                         } finally {
                             os.close();
                         }

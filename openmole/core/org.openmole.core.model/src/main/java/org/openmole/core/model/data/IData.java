@@ -13,13 +13,9 @@ package org.openmole.core.model.data;
  */
 public interface IData<T> {
 
-    /**
-     *
-     * Get if the data is optional or mandatory.
-     *
-     * @return true if the data is optional
-     */
-    boolean isOptional();
+ 
+    IDataMod getMod();
+
 
     /**
      *

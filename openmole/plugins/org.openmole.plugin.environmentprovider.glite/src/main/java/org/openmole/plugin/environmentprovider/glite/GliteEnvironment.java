@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileUtil;
 
 import org.ogf.saga.context.Context;
 import org.ogf.saga.error.AuthenticationFailedException;
@@ -350,7 +350,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
 
                         FileOutputStream os = new FileOutputStream(dest);
                         try {
-                            FastCopy.copy(tis, os);
+                            FileUtil.copy(tis, os);
 
                         } finally {
                             os.close();

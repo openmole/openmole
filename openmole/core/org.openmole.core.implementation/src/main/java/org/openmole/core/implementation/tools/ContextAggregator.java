@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Variable;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
@@ -56,20 +56,20 @@ public class ContextAggregator {
         return toAggregate;
     }
 
-    public static void aggregate(IContext inContext, Collection<IData<?>> aggregate, Set<String> toClone, boolean forceArrays, Collection<IContext> toAgregate) throws InternalProcessingError {
+    public static void aggregate(IContext inContext, Collection<IData<?>> aggregate, Set<String> toClone, boolean forceArrays, Collection<IContext> toAgregate) throws InternalProcessingError, UserBadDataError {
         Set<String> mergingVars = new TreeSet<String>();
 
         for (IContext current : toAgregate) {
             for (IData<?> data : aggregate) {
                 IPrototype<?> inProt = data.getPrototype();
 
-                if ((!data.isOptional() || data.isOptional()) && current.containsVariableWithName(inProt.getName())) {
+                if ((!data.getMod().isOptional() || data.getMod().isOptional()) && current.containsVariableWithName(inProt.getName())) {
                     // if (current.exist(inProt.getName())) {
                     IVariable<?> tmp;
 
                     if (toClone.contains(inProt.getName())) {
                         IVariable<?> varToClone = current.getLocalVariable(inProt);
-                        tmp = new Variable(varToClone.getPrototype(), Activator.getClonningService().clone(varToClone.getValue()));
+                        tmp = new Variable(varToClone.getPrototype(), ClonningService.clone(varToClone));
                     } else {
                         tmp = current.getVariable(inProt.getName());
                     }

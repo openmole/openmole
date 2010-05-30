@@ -67,9 +67,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.clonning</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.openmole</groupId>
+            <artifactId>uk.com.robustit.cloning</artifactId>
+            <version>${lib.uk.com.robust-it.cloning.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

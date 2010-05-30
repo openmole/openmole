@@ -16,7 +16,6 @@
     <artifactId>misc</artifactId>
 
     <modules>
-        <module>org.openmole.misc.clonning</module>
         <module>org.openmole.misc.executorservice</module>
         <module>org.openmole.misc.hashservice</module>
         <module>org.openmole.misc.pluginmanager</module>

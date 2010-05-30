@@ -33,11 +33,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.clonning</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.environmentprovider.glite</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -43,7 +43,7 @@ import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.structuregenerator.SequenceNode;
 import org.openmole.core.structuregenerator.StructureNode;
-import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileUtil;
 
 public class StructureGenerator implements IStructureGenerator {
 
@@ -213,7 +213,7 @@ public class StructureGenerator implements IStructureGenerator {
                 anEntry.setTime(f.lastModified());
                 zos.putNextEntry(anEntry);
 
-                FastCopy.copy(fis, zos);
+                FileUtil.copy(fis, zos);
 
             } finally {
                 fis.close();

@@ -31,7 +31,8 @@ import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.misc.workspace.ConfigurationLocation
 import com.jcraft.jsch.ChannelExec
 import java.io.PrintStream
-
+import org.openmole.core.implementation.tools.VariableExpansion._
+import scala.collection.JavaConversions._
 
 class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String) extends Task(name) {
 
@@ -48,41 +49,14 @@ class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMach
 
 
   override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
-
-    val pool = virtualMachineResource.getVirtualMachineShared
-    val virtualMachine = pool.borrowAVirtualMachine
-    try {
-      val session = virtualMachineResource.getSSHSession(virtualMachine)
-      session.connect( workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
-      try {
-        val channel = session.openChannel("exec") match {
-          case ch: ChannelExec => ch
-          case _ => throw new ClassCastException
-        }
-
-	channel.setCommand(cmd)
-
-        channel.setOutputStream(new PrintStream(System.out)  {
-          override def close() = {}
-        })
-
-        channel.setErrStream(new PrintStream(System.err)  {
-          override def close() = {}
-        })
-      
-        // start job
-	channel.connect
-
-        //Ugly active wait
-        while(!channel.isClosed) {
-           Thread.sleep( workspace.getPreferenceAsDurationInMs(Configuration.ActiveWaitInterval).intValue )
-        }
-
-      } finally {
-        session.disconnect
-      }
-    } finally {
-       pool.returnVirtualMachine(virtualMachine)
-    }
+    
+//    val pool = virtualMachineResource.getVirtualMachineShared
+//    val virtualMachine = pool.borrowAVirtualMachine
+//    val session = virtualMachineResource.getSSHSession(virtualMachine)
+//    try {
+//       execute(expandData(context,vals, cmd), session)
+//    } finally {
+//       pool.returnVirtualMachine(virtualMachine)
+//    }
   }
 }

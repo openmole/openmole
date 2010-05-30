@@ -16,8 +16,11 @@
  */
 package org.openmole.core.implementation.tools;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.transition.ITransition;
 import org.openmole.core.model.data.IDataChannel;
@@ -32,23 +35,34 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public class ToCloneFinder {
 
-
     //TODO Improvement condition are evaluated several times
     public static Set<String> getVariablesToClone(IGenericTaskCapsule<?, ?> caps, IContext context) throws InternalProcessingError, UserBadDataError {
+
+        class DataInfo {
+
+            AtomicInteger nbUsage = new AtomicInteger();
+            AtomicInteger nbMutable = new AtomicInteger();
+        }
+
         Iterable<? extends ITransition> outputTransitions = caps.getOutputTransitions();
 
-        Set<String> allReadySeen = new TreeSet<String>();
-        Set<String> ret = new TreeSet<String>();
+        Map<String, DataInfo> counters = new TreeMap<String, DataInfo>();
 
         for (ITransition transition : outputTransitions) {
             if (transition.isConditionTrue(context)) {
                 for (IData<?> data : transition.getEnd().getCapsule().getTask().getInput()) {
                     String name = data.getPrototype().getName();
 
-                    if (allReadySeen.contains(name)) {
-                        ret.add(name);
-                    } else {
-                        allReadySeen.add(name);
+                    DataInfo info = counters.get(name);
+
+                    if (info == null) {
+                        info = new DataInfo();
+                        counters.put(name, info);
+                    }
+
+                    info.nbUsage.incrementAndGet();
+                    if (!data.getMod().isImmutable()) {
+                        info.nbMutable.incrementAndGet();
                     }
                 }
             }
@@ -58,14 +72,28 @@ public class ToCloneFinder {
             for (IData<?> data : channel.getData()) {
                 String name = data.getPrototype().getName();
 
-                if (allReadySeen.contains(name)) {
-                    ret.add(name);
-                } else {
-                    allReadySeen.add(name);
+                DataInfo info = counters.get(name);
+
+                if (info == null) {
+                    info = new DataInfo();
+                    counters.put(name, info);
+                }
+
+                info.nbUsage.incrementAndGet();
+                if (!data.getMod().isImmutable()) {
+                    info.nbMutable.incrementAndGet();
                 }
             }
         }
 
-        return ret;
+        Set<String> toClone = new TreeSet<String>();
+
+        for(Map.Entry<String, DataInfo> entry: counters.entrySet()) {
+            if(entry.getValue().nbUsage.get() > 1 && entry.getValue().nbMutable.get() > 0) {
+                toClone.add(entry.getKey());
+            }
+        }
+
+        return toClone;
     }
 }

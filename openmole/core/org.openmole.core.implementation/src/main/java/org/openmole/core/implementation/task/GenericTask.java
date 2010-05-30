@@ -44,20 +44,23 @@ import org.openmole.commons.aspect.caching.SoftCachable;
 
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.Parameter;
+import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.mole.IExecutionContext;
 
+import static org.openmole.core.model.data.DataModMask.*;
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
 
 public abstract class GenericTask implements IGenericTask {
 
     @Output
     final static public IData<Collection> Timestamps = new Data<Collection>("Timestamps", Collection.class);
+
     @Output
-    final static public IData<Throwable> Exception = new Data<Throwable>("Exception", Throwable.class, true);
+    final static public IData<Throwable> Exception = new Data<Throwable>("Exception", Throwable.class, OPTIONAL);
 
     private String name;
 
@@ -81,7 +84,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     protected void verifyInput(IContext context) throws UserBadDataError, InternalProcessingError {
         for (IData<?> d : getInput()) {
-            if (!d.isOptional()) {
+            if (!d.getMod().isOptional()) {
                 IPrototype<?> p = d.getPrototype();
 
                 IVariable<?> v = context.getVariable(p.getName());
@@ -106,7 +109,7 @@ public abstract class GenericTask implements IGenericTask {
                     Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " has been found but type doesn't match : " + var.getPrototype().getType().getName() + " in task " + getName() + ".");
                 }
             } else {
-                if (!d.isOptional()) {
+                if (!d.getMod().isOptional()) {
                     Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " not found in output of task " + getName() + ".");
                 }
             }
@@ -161,12 +164,12 @@ public abstract class GenericTask implements IGenericTask {
      */
     @Override
     public void addOutput(IPrototype prototype) {
-        addOutput(prototype, false);
+        addOutput(new Data(prototype));
     }
 
     @Override
-    public void addOutput(IPrototype prototype, boolean optional) {
-        addOutput(new Data(prototype, optional));
+    public void addOutput(IPrototype prototype, DataModMask... masks) {
+        addOutput(new Data(prototype, masks));
     }
 
     @ChangeState
@@ -195,20 +198,18 @@ public abstract class GenericTask implements IGenericTask {
         }
     }
 
-    
-
-
+   
     /* (non-Javadoc)
      * @see org.openmole.core.processors.ITask#addInPrototype(org.openmole.core.data.structure.Prototype)
      */
     @Override
     public void addInput(IPrototype prototype) {
-        addInput(prototype, false);
+        addInput(new Data(prototype));
     }
 
     @Override
-    public void addInput(IPrototype prototype, boolean optional) {
-        addInput(new Data(prototype, optional));
+    public void addInput(IPrototype prototype, DataModMask... masks) {
+        addInput(new Data(prototype, masks));
     }
 
     @ChangeState

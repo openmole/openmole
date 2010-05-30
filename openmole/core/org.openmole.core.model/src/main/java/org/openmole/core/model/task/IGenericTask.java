@@ -24,7 +24,7 @@ import org.openmole.core.model.job.IContext;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.resource.ILocalFileCache;
@@ -121,14 +121,8 @@ public interface IGenericTask extends IPortable {
      */
     void addInput(IData data);
 
-    /**
-     *
-     * Add a data constructed from <code>prototype</code> and <code>optional</code> as an input for this task.
-     *
-     * @param prototype the prototype of the data
-     * @param optional true if the presence of the data at the begining of the execution of this task is optionnal
-     */
-    void addInput(IPrototype prototype, boolean optional);
+
+    void addInput(IPrototype prototype, DataModMask... masks);
 
     /**
      *
@@ -170,14 +164,8 @@ public interface IGenericTask extends IPortable {
      */
     void addOutput(IData data);
 
-    /**
-     *
-     * Add a data constructed from <code>prototype</code> and <code>optional</code> as an output for this task.
-     *
-     * @param prototype the prototype of the data
-     * @param optional true if the data should be found in the context at the end of the execution of this task
-     */
-    void addOutput(IPrototype prototype, boolean optional);
+
+    void addOutput(IPrototype prototype, DataModMask... masks);
 
     /**
      *

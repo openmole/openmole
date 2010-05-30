@@ -58,7 +58,7 @@ import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.commons.tools.io.FastCopy;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.FileCache;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
 
@@ -467,7 +467,7 @@ public class URIFile implements IURIFile {
             OutputStream os = new StringBuilderOutputStream(ret);
 
             try {
-                FastCopy.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
             } finally {
                 os.close();
             }
@@ -588,7 +588,7 @@ public class URIFile implements IURIFile {
                 OutputStream os = dest.openOutputStream(token);
 
                 try {
-                    FastCopy.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                    FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
                     Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());
                 } catch (IOException t) {
                     Activator.getBatchRessourceControl().failed(dest.getStorageDescription());
@@ -660,7 +660,7 @@ public class URIFile implements IURIFile {
             OutputStream os = dest.openOutputStream(destToken);
 
             try {
-                FastCopy.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
                 Activator.getBatchRessourceControl().sucess(src.getStorageDescription());
                 if (!sameRessource) {
                     Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());

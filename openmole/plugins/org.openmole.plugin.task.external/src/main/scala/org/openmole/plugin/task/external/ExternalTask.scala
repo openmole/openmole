@@ -25,6 +25,7 @@ import java.util.LinkedList
 import java.util.List
 import java.util.Map
 import java.util.TreeMap
+import java.net.URI
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
@@ -33,12 +34,12 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
+import org.openmole.commons.tools.io.FileUtil
 
 import org.openmole.core.model.task.annotations.Resource
 import org.openmole.commons.tools.io.IFileOperation
 
 import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.commons.tools.io.FastCopy
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -56,12 +57,15 @@ abstract class ExternalTask(name: String) extends Task(name) {
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
   val outFileNamesVar = new HashMap[IPrototype[File], IPrototype[String]]
 
-  protected def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) = {
+  protected def listInputFiles(context: IContext, progress: IProgress): List[(File,String)] = {
     try {
+      var ret = new ListBuffer[(File,String)]
+
       inFileNames.entrySet().foreach(entry => {
           val localFile = inFiles.getDeployed(entry.getKey)
-          val correctName = new File(tmpDir, expandData(context, entry.getValue))
-          copyTo(localFile, correctName)
+          //val correctName = new File(tmpDir,expandData(context, entry.getValue))
+          ret += ((localFile, expandData(context, entry.getValue)))
+          //   copyTo(localFile, correctName)
         })
 
       inContextFiles.foreach( p => {
@@ -71,8 +75,10 @@ abstract class ExternalTask(name: String) extends Task(name) {
             throw new UserBadDataError("File supposed to be present in variable \"" + p._1.getName + "\" at the beging of the task \"" + getName + "\" and is not.")
           }
 
-          val correctName = new File(tmpDir, expandData(context, p._2))
-          copyTo(f, correctName)
+          //val correctName = new File(tmpDir,expandData(context, p._2))
+          ret += ((f, expandData(context, p._2)))
+
+          //  copyTo(f, correctName)
         })
 
       inContextFileList.foreach( p => {
@@ -87,22 +93,22 @@ abstract class ExternalTask(name: String) extends Task(name) {
               val f = fIt.next
               val name = sIt.next
 
-              val fo = new File(tmpDir, expandData(context, name))
+              //val fo = new File(tmpDir,expandData(context, name))
 
-              copyTo(f, fo)
+              ret += ((f,expandData(context, name)))
+              //   copyTo(f, fo)
             }
           }
         })
+      return ret.toList
+
     } catch {
       case e: IOException => throw new InternalProcessingError(e)
     }
   }
 
-  protected def copyTo(from: File, to: File)
-  protected def copyFrom(from: File): File
-
   private def setDeleteOnExit(file: File) = {
-    FastCopy.applyRecursive(file, new IFileOperation() {
+    FileUtil.applyRecursive(file, new IFileOperation() {
 
         override def execute(file: File) = {
           file.deleteOnExit
@@ -110,34 +116,36 @@ abstract class ExternalTask(name: String) extends Task(name) {
       })
   }
 
-  protected def fetchOutputFiles(context: IContext, progress: IProgress, tmpDir: File) {
+  protected def setOutputFilesVariables(context: IContext, progress: IProgress, localDir: File): List[String] = {
+
+    var ret = new ListBuffer[String]
+
     outFileNames.foreach(p => {
         val filename = expandData(context, p._2)
-        val fo = new File(tmpDir, filename)
+        val fo = new File(localDir,filename)
 
-        val local = copyFrom(fo)
-        setDeleteOnExit(local)
+        ret += (filename)
 
-        context.putVariable(p._1, local)
+        context.putVariable(p._1, fo)
         if (outFileNamesVar.containsKey(p._1)) {
-          context.putVariable(outFileNamesVar.get(p._1), filename)
+          context putVariable (outFileNamesVar.get(p._1), filename)
         }
       })
 
-    outFileNamesFromVar.foreach( p => {
+    outFileNamesFromVar foreach ( p => {
 
         if (!context.contains(p._2)) {
           throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + getName)
         }
 
-        val fo = new File(tmpDir, context.getLocalValue(p._2))
+        val filename = context getLocalValue (p._2);
+        val fo = new File(localDir, filename)
+        ret += (filename)
 
-        val local = copyFrom(fo)
-       
-        setDeleteOnExit(local)
-        context.putVariable(p._1, local)
+        context putVariable (p._1, fo)
       })
-
+    setDeleteOnExit(localDir)
+    return ret.toList
   }
 
   def exportFilesFromContextAs(fileList: IPrototype[List[File]], names: IPrototype[List[String]]) = {

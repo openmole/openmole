@@ -60,7 +60,7 @@ public class TarArchiver implements IArchiver {
                     e.setSize(cur.getLeft().length());
                     tos.putArchiveEntry(e);
                     try {
-                        FastCopy.copy(new FileInputStream(cur.getLeft()), tos);
+                        FileUtil.copy(new FileInputStream(cur.getLeft()), tos);
                     } finally {
                         tos.closeArchiveEntry();
                     }
@@ -83,7 +83,7 @@ public class TarArchiver implements IArchiver {
             while ((e = tis.getNextTarEntry()) != null) {
                 File dest = new File(baseDir, e.getName());
                 dest.getParentFile().mkdirs();
-                FastCopy.copy(tis, new FileOutputStream(dest));
+                FileUtil.copy(tis, new FileOutputStream(dest));
             }
         } finally {
             tis.close();

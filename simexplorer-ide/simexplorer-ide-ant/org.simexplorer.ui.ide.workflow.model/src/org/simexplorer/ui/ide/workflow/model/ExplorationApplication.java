@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
-import org.openmole.misc.clonning.internal.ClonningService;
+import org.openmole.core.clonning.internal.ClonningService;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;

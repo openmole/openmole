@@ -23,8 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.util.Stack;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,45 +37,103 @@ import java.util.concurrent.TimeoutException;
 import org.openmole.commons.tools.pattern.BufferFactory;
 import org.openmole.commons.tools.structure.Duo;
 
-public class FastCopy {
+public class FileUtil {
 
     final static ExecutorService pool = Executors.newCachedThreadPool();
 
+    public static long getLastModification(File file) {
 
-    public static void applyRecursive(File file, IFileOperation operation) {
-        Stack<File> toProceed = new Stack<File>();
-        toProceed.push(file);
+        long lastModification = file.lastModified();
 
-        while(!toProceed.isEmpty()) {
-            File f = toProceed.pop();
-            operation.execute(f);
-            if(f.isDirectory()) {
-                for(File child : f.listFiles()) {
-                    toProceed.add(child);
+        if (file.isDirectory()) {
+            Queue<File> toProceed = new LinkedList<File>();
+            toProceed.offer(file);
+
+            while (!toProceed.isEmpty()) {
+                File f = toProceed.poll();
+
+                if (f.lastModified() > lastModification) {
+                    lastModification = f.lastModified();
+                }
+                if (f.isDirectory()) {
+                    for (File child : f.listFiles()) {
+                        toProceed.offer(child);
+                    }
                 }
             }
         }
 
+        return lastModification;
     }
 
+    public static void applyRecursive(File file, IFileOperation operation) {
+        applyRecursive(file, operation, Collections.EMPTY_SET);
+    }
 
+    public static void applyRecursive(File file, IFileOperation operation, Set<File> stopPath) {
+        Queue<File> toProceed = new LinkedList<File>();
+        toProceed.offer(file);
+
+        while (!toProceed.isEmpty()) {
+            File f = toProceed.poll();
+            if (!stopPath.contains(f)) {
+
+                operation.execute(f);
+                if (f.isDirectory()) {
+                    for (File child : f.listFiles()) {
+                        toProceed.offer(child);
+                    }
+                }
+            }
+        }
+    }
+
+    public static boolean dirContainsNoFileRecursive(File dir) {
+        Queue<File> toProceed = new LinkedList<File>();
+
+        while (!toProceed.isEmpty()) {
+            File f = toProceed.poll();
+            for (File sub : f.listFiles()) {
+                if (sub.isDirectory()) {
+                    return false;
+                } else {
+                    toProceed.offer(sub);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    static public boolean recursiveDelete(File dir) {
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    recursiveDelete(files[i]);
+                } else {
+                    files[i].delete();
+                }
+            }
+        }
+        return dir.delete();
+    }
 
     public static void copy(File fromF, File toF) throws IOException {
+        Queue<Duo<File, File>> toCopy = new LinkedList<Duo<File, File>>();
+        toCopy.offer(new Duo<File, File>(fromF, toF));
 
-        Stack<Duo<File,File>> toCopy = new Stack<Duo<File,File>>();
-        toCopy.add(new Duo<File, File>(fromF, toF));
-
-        while(!toCopy.isEmpty()) {
-            Duo<File,File> cur = toCopy.pop();
+        while (!toCopy.isEmpty()) {
+            Duo<File, File> cur = toCopy.poll();
             File curFrom = cur.getLeft();
             File curTo = cur.getRight();
             if (curFrom.isDirectory()) {
 
                 curTo.mkdir();
 
-                for(File child : curFrom.listFiles()) {
+                for (File child : curFrom.listFiles()) {
                     File to = new File(curTo, child.getName());
-                    toCopy.push(new Duo<File, File>(child, to));
+                    toCopy.offer(new Duo<File, File>(child, to));
                 }
             } else {
                 copyFile(curFrom, curTo);

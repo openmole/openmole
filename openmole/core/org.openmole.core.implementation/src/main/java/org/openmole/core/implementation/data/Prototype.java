@@ -26,9 +26,8 @@ public class Prototype<T> implements IPrototype<T> {
     final private String name;
     final private Class<? extends T> type;
 
-
     //Dirty private constructor for building list prototypes
-    private Prototype(String name, Class type, boolean unChecked) {
+    private Prototype(String name, Class type, boolean unchecked) {
         this.name = name;
         this.type = type;
     }
@@ -51,19 +50,11 @@ public class Prototype<T> implements IPrototype<T> {
         return name;
     }
 
-   /* public void setName(String name) {
-        this.name = name;
-    }*/
-
     @Override
     public Class<? extends T> getType() {
         return type;
     }
 
-    /*public void setType(Class type) {
-        this.type = type;
-    }
-*/
     @Override
     public boolean isAssignableFrom(IPrototype<?> p) {
     	return getType().isAssignableFrom(p.getType());
@@ -71,7 +62,7 @@ public class Prototype<T> implements IPrototype<T> {
 
     @Override
     public IPrototype<Collection<T>> array() {
-    	return new Prototype<Collection<T>>(name, Collection.class, true);
+    	return new Prototype<Collection<T>>( name, Collection.class, true);
     }
 
     @Override
