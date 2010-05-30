@@ -86,7 +86,7 @@ public class FileService implements IFileService {
             @Override
             public HashWithLastModified compute() throws InternalProcessingError, InterruptedException {
                 try {
-                    Logger.getLogger(FileService.class.getName()).info("Compute cache");
+          //          Logger.getLogger(FileService.class.getName()).info("Compute cache");
                     return new HashWithLastModified(Activator.getHashService().computeHash(file), file.lastModified());
                 } catch (IOException ex) {
                     throw new InternalProcessingError(ex);
@@ -102,7 +102,7 @@ public class FileService implements IFileService {
         }
 
         if (hashWithLastModified.getLastModified() < file.lastModified()) {
-            Logger.getLogger(FileService.class.getName()).info("Invalidate cache");
+        //    Logger.getLogger(FileService.class.getName()).info("Invalidate cache");
             hashCach.invalidateCache(cacheLength, file.getAbsolutePath());
         }
     }
@@ -117,7 +117,7 @@ public class FileService implements IFileService {
             @Override
             public CachedArchiveForDir compute() throws InternalProcessingError, InterruptedException {
                 try {
-                    Logger.getLogger(FileService.class.getName()).info("Compute cache");
+               //     Logger.getLogger(FileService.class.getName()).info("Compute cache");
 
                     File ret = Activator.getWorkspace().newFile("archive", ".tar");
                     OutputStream os = new FileOutputStream(ret);
@@ -143,7 +143,7 @@ public class FileService implements IFileService {
         }
 
         if (cached.getLastModified() < FileUtil.getLastModification(file)) {
-            Logger.getLogger(FileService.class.getName()).info("Invalidate cache");
+          //  Logger.getLogger(FileService.class.getName()).info("Invalidate cache");
             archiveCache.invalidateCache(cacheLenght, file.getAbsolutePath());
         }
     }

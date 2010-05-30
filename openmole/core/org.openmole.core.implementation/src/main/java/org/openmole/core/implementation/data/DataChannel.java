@@ -161,7 +161,7 @@ public class DataChannel implements IDataChannel {
                         IVariable tmp;
 
                         if (toClone.contains(data.getPrototype().getName())) {
-                            tmp = new Variable(var.getPrototype(), ClonningService.clone(var));
+                            tmp = ClonningService.clone(var);
                         } else {
                             tmp = var;
                         }

@@ -161,7 +161,7 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
 
             }
 
-            Logger.getLogger(BatchServiceGroup.class.getName()).info(ret.getLeft().getDescription() + " " + Activator.getBatchRessourceControl().getFailureRate(ret.getLeft().getDescription()));
+           // Logger.getLogger(BatchServiceGroup.class.getName()).info(ret.getLeft().getDescription() + " " + Activator.getBatchRessourceControl().getFailureRate(ret.getLeft().getDescription()));
             return ret;
         } finally {
             getSelectingRessource().unlock();

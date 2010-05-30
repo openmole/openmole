@@ -69,7 +69,7 @@ public class ContextAggregator {
 
                     if (toClone.contains(inProt.getName())) {
                         IVariable<?> varToClone = current.getLocalVariable(inProt);
-                        tmp = new Variable(varToClone.getPrototype(), ClonningService.clone(varToClone));
+                        tmp = ClonningService.clone(varToClone);
                     } else {
                         tmp = current.getVariable(inProt.getName());
                     }

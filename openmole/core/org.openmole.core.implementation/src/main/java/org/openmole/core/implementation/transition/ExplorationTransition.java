@@ -85,7 +85,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
                     IVariable<?> var;
 
                     if(!in.getMod().isImmutable() && factorIt.hasNext()) {
-                        var = new Variable(varToClone.getPrototype(), ClonningService.clone(varToClone));
+                        var = ClonningService.clone(varToClone);
                     } else {
                         var = varToClone;
                     }
