@@ -31,14 +31,14 @@ import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.plugin.task.external.ExternalTask;
+import org.openmole.plugin.task.external.ExternalSystemTask;
 import org.openmole.plugin.task.netlogo.internal.Activator;
 
 /**
  *
  * @author reuillon
  */
-public class NetLogoTask extends ExternalTask {
+public class NetLogoTask extends ExternalSystemTask {
 
     Iterable<String> launchingCommands;
 

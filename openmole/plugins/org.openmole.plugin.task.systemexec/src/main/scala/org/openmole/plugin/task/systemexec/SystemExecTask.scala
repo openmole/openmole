@@ -35,12 +35,12 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.IExecutionContext
-import org.openmole.plugin.task.external.ExternalTask
+import org.openmole.plugin.task.external.ExternalSystemTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
-class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer] = null) extends ExternalTask(name) {
+class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer] = null) extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
 
   object Prototypes {

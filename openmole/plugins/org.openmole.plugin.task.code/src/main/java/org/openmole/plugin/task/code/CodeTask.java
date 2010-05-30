@@ -25,10 +25,7 @@ import org.openmole.plugin.tools.code.IContextToCode;
 import org.openmole.plugin.tools.code.FileSourceCode;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import org.openmole.core.implementation.resource.FileSetResource;
-import org.openmole.core.model.data.IPrototype;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -38,9 +35,9 @@ import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.code.internal.Activator;
-import org.openmole.plugin.task.external.ExternalTask;
+import org.openmole.plugin.task.external.ExternalSystemTask;
 
-public abstract class CodeTask<T extends IContextToCode> extends ExternalTask {
+public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemTask {
 
     private T contextToCode;
     
