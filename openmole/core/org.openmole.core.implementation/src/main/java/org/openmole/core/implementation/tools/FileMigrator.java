@@ -32,7 +32,7 @@ public class FileMigrator {
 
     public static void initFilesInVariable(IVariable variable, ILocalFileCache fileCache) {
         if (File.class.isAssignableFrom(variable.getPrototype().getType())) {
-            initFileInVariable((IVariable<File>) variable, fileCache);
+            initFile((IVariable<File>) variable, fileCache);
         } else {
             if (List.class.isAssignableFrom(variable.getPrototype().getType())) {
                 initFilesInList(((IVariable<List>) variable).getValue(), fileCache);
@@ -42,7 +42,7 @@ public class FileMigrator {
 
     public static void initFilesInVariables(Iterable<IVariable> context, ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
         for (IVariable v : context) {
-            initFileInVariable(v, fileCache);
+            initFilesInVariable(v, fileCache);
         }
     }
 
@@ -64,7 +64,7 @@ public class FileMigrator {
 
     }
 
-    private static void initFileInVariable(IVariable<File> v, ILocalFileCache fileCache) {
+    private static void initFile(IVariable<File> v, ILocalFileCache fileCache) {
         File src = v.getValue();
         File local = fileCache.getLocalFileCache(src);
         v.setValue(local);
