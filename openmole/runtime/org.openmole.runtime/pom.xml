@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.structuregenerator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
