@@ -18,17 +18,12 @@ package org.openmole.ui;
 
 import java.awt.BorderLayout;
 import java.util.logging.Logger;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
+import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-//import org.openide.util.ImageUtilities;
-import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.control.ControlPanel;
 import org.openmole.ui.workflow.implementation.MoleScene;

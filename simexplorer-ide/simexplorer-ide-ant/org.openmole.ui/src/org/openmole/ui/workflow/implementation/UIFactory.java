@@ -109,15 +109,15 @@ public class UIFactory implements IUIFactory<Object> {
         return (ITaskCapsuleView) obUI;
     }
 
-    @Override
-    public void objectConstructed(Object t) {
-        //   ServiceProxy.getEventDispatcher().registerListner(obj,createTaskModel(obj));
-    }
-
     public static UIFactory getInstance() {
         if (instance == null) {
             instance = new UIFactory();
         }
         return instance;
+    }
+
+    @Override
+    public void objectConstructed(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -5,9 +5,7 @@
 
 package org.openmole.ui.workflow.model;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.misc.eventdispatcher.IObjectConstructedAsynchronousListener;
-
+import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedAsynchronousListener;
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>

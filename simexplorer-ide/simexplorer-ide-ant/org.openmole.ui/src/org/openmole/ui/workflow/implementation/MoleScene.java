@@ -163,7 +163,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         setLayout();
 
-        mole.visit(new IVisitor<IGenericTaskCapsule>() {
+     /*   mole.visit(new IVisitor<IGenericTaskCapsule>() {
 
             int i = 0;
 
@@ -187,7 +187,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
             }
         });
-        validate();
+        validate();*/
     }
 
     private String getConnectableName(IGenericTaskCapsule tCapsule) {
