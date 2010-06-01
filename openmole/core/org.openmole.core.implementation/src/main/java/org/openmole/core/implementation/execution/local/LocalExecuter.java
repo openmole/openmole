@@ -65,11 +65,11 @@ public class LocalExecuter implements Runnable {
                         }
                         moleJob.perform(executionContext);
 
-                        try {
+                        /*try {
                             moleJob.rethrowException(moleJob.getContext());
                         } catch (ExecutionException e) {
                             LOGGER.log(Level.SEVERE, "Error in user job execution, trying to keep going...", e);
-                        }
+                        }*/
                         moleJob.finished(moleJob.getContext());
                         LOGGER.finer("End of job group execution: " + moleJob);
                     }

@@ -19,6 +19,8 @@ package org.openmole.core.implementation.job;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.Progress;
 import org.openmole.commons.aspect.eventdispatcher.ObjectConstructed;
 import org.openmole.commons.aspect.eventdispatcher.ObjectModified;
@@ -43,6 +45,9 @@ import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.resource.IResource;
 
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
+
+    private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
+
 
     final private ITicket ticket;
     final private IProgress progress;
@@ -136,6 +141,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         if (!context.containsVariableWithName(GenericTask.Exception.getPrototype())) {
             setState(State.COMPLETED);
         } else {
+            LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", context.getLocalValue(GenericTask.Exception.getPrototype()));
             setState(State.FAILED);
         }
     }
