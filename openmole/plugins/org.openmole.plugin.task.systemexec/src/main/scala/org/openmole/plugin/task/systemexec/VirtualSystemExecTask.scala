@@ -40,7 +40,6 @@ class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMach
   val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 
   override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
-    
     val pool = virtualMachineResource.getVirtualMachineShared
     val virtualMachine = pool.borrowAVirtualMachine
     val session = virtualMachineResource.getSSHSession(virtualMachine)
