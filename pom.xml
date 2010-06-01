@@ -162,7 +162,7 @@
             <dependency>
                 <groupId>net.sf.opencsv</groupId>
                 <artifactId>opencsv</artifactId>
-                <version>${lib.net.sf.opencsv.version}</version>
+                <version>${lib.au.com.bytecode.opencsv.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.nuiton</groupId>
@@ -356,7 +356,7 @@
         <lib.net.sourceforge.jline.version>0.9.94</lib.net.sourceforge.jline.version>
         <lib.org.objectweb.asm.version>3.2</lib.org.objectweb.asm.version>
         <lib.org.apache.ant.version>1.8.0</lib.org.apache.ant.version>
-        <lib.net.sf.opencsv.version>2.0</lib.net.sf.opencsv.version>
+        <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
         <lib.org.scala-lang.scala.version>2.8.0.RC3</lib.org.scala-lang.scala.version>

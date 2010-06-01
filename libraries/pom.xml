@@ -19,7 +19,6 @@
 	<module>au.com.bytecode.opencsv</module>
         <module>com.db4o</module>
         <module>com.ice.tar</module>
-        <module>com.jcraft.jsch</module>
         <module>uk.com.robust-it.cloning</module>
 	<module>org.apache.ant</module>
         <module>fr.in2p3.jsaga</module>
