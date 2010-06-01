@@ -84,11 +84,11 @@
                 <artifactId>icu4j</artifactId>
                 <version>${lib.com.ibm.icu.version}</version>
             </dependency>
-            <dependency>
+            <!--<dependency>
                 <groupId>com.jcraft</groupId>
                 <artifactId>jsch</artifactId>
                 <version>${lib.com.jcraft.jsch.version}</version>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
@@ -340,7 +340,7 @@
         <!-- versions of libraries used -->
         <lib.com.db4o.version>7.4.58</lib.com.db4o.version>
         <lib.com.ice.tar.version>2.5</lib.com.ice.tar.version>
-        <lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>
+        <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.3.1</lib.com.thoughtworks.xstream.version>
         <lib.fr.in2p3.jsaga.version>0.9.9-SNAPSHOT</lib.fr.in2p3.jsaga.version>
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
