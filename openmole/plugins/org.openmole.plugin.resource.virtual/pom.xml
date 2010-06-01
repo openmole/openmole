@@ -26,6 +26,11 @@
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>ch.ethz.ssh2</artifactId>
+            <version>${lib.ch.ethz.ssh2.version}</version>
+        </dependency>
     </dependencies>
 
 <!--

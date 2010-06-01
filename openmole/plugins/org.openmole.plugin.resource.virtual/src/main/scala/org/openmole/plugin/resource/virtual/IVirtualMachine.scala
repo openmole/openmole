@@ -18,7 +18,7 @@
 package org.openmole.plugin.resource.virtual
 
 trait IVirtualMachine {
-    def port: Int
-    def host: String
-    def shutdown
+  def port: Int
+  def host: String
+  def shutdown
 }

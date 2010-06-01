@@ -299,6 +299,11 @@
                 <artifactId>scala-library</artifactId>
                 <version>${lib.org.scala-lang.scala.version}</version>
             </dependency>
+	    <dependency>
+    	        <groupId>ch.ethz.ganymed</groupId>
+                <artifactId>ganymed-ssh2</artifactId>
+                <version>${lib.ch.ethz.ssh2.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-exec</artifactId>
@@ -358,6 +363,7 @@
         <lib.org.objenesis.version>1.0.0</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
+	<lib.ch.ethz.ssh2.version>build250</lib.ch.ethz.ssh2.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
@@ -721,6 +727,12 @@
             <name>SimExplorer Snapshots repository</name>
             <url>http://maven.simexplorer.org/snapshots/</url>
         </repository>
+	<repository>
+            <id>maven.iscpif.fr</id>
+            <name>ISCPIF repository</name>
+            <url>http://maven.iscpif.fr/public/</url>
+        </repository>
+
         <!--Code Lutin Repositories-->
         <repository>
             <id>SEIS-codelutin</id>

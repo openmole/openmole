@@ -35,6 +35,7 @@
 	<module>org.scala-lang.scala</module>
 	<module>org.jfree.jfreechart</module>
 	<module>org.apache.commons.exec</module>
+	<module>ch.ethz.ssh2</module>
     </modules>
 
     <!-- ************************************************************* -->

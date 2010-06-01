@@ -17,9 +17,7 @@
 
 package org.openmole.plugin.resource.virtual
 
-import com.jcraft.jsch.JSch
-import com.jcraft.jsch.JSchException
-import com.jcraft.jsch.Session
+
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -42,9 +40,9 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.resource.virtual.internal.Activator
 
 import org.openmole.commons.tools.io.Network._
+import ch.ethz.ssh2._
 
-
-class VirtualMachineResource(system: File, user: String, password: String) extends ComposedResource {
+class VirtualMachineResource(system: File, val user: String, val password: String, memory: Int = 256, vcore: Int = 1) extends ComposedResource {
 
   object Files {
     def list = List("qemu", "bios.bin")
@@ -58,9 +56,16 @@ class VirtualMachineResource(system: File, user: String, password: String) exten
   @Resource
   val systemResource: FileResource = new FileResource(system)
 
-
   def this(system: String, user: String, password: String) {
     this(new File(system), user, password)
+  }
+
+  def this(system: String, user: String, password: String, memory: Int) {
+    this(new File(system), user, password, memory)
+  }
+
+  def this(system: String, user: String, password: String, memory: Int, vcore: Int) {
+    this(new File(system), user, password, memory, vcore)
   }
 
   def launchAVirtualMachine: IVirtualMachine = {
@@ -70,7 +75,7 @@ class VirtualMachineResource(system: File, user: String, password: String) exten
 
       override def connect(port: Int) = {
         val qemuDir = getQEmuDir
-        val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
+        val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
 
         val process = commandLauncher.exec(commandLine, new HashMap())
         processDestroyer.add(process)
@@ -89,24 +94,20 @@ class VirtualMachineResource(system: File, user: String, password: String) exten
 
     val virtualMachine = connector.virtualMachine
  
-    try {
-      val session = getSSHSession(virtualMachine)
-      session.connect( Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.VirtualMachineBootTimeOut).intValue )
-      session.disconnect
-    } catch {
-      case ex: JSchException => throw new InternalProcessingError(ex)
-    }
+    val timeOut = Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.VirtualMachineBootTimeOut).intValue
+    val connection = new Connection(virtualMachine.host, virtualMachine.port)
+    connection.connect(new ServerHostKeyVerifier() {
+        override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = {
+          true
+        }
+      }, timeOut, timeOut)
+      
+    connection.close
+
 
     connector.virtualMachine
   }
 
-  def getSSHSession(virtualMachine: IVirtualMachine): Session = {
-    val jsch = new JSch
-    val session = jsch.getSession(user, virtualMachine.host, virtualMachine.port)
-    session.setPassword(password)
-    session.setConfig("StrictHostKeyChecking", "no")
-    return session
-  }
 
   @Cachable
   private def commandLauncher: CommandLauncher = {
