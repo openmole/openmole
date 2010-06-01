@@ -39,7 +39,6 @@ public class ToCloneFinder {
     public static Set<String> getVariablesToClone(IGenericTaskCapsule<?, ?> caps, IContext context) throws InternalProcessingError, UserBadDataError {
 
         class DataInfo {
-
             AtomicInteger nbUsage = new AtomicInteger();
             AtomicInteger nbMutable = new AtomicInteger();
         }

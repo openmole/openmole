@@ -23,9 +23,7 @@ import java.util.Set;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
-import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.mole.SubMoleExecution;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.core.implementation.tools.ClonningService;
@@ -79,7 +77,6 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
             for (IData<?> in : getEnd().getCapsule().getTask().getInput()) {
                 //Check filtred here to avoid useless clonning
                 if (context.contains(in.getPrototype()) && !getFiltred().contains(in.getPrototype().getName())) {
-
 
                     IVariable<?> varToClone = context.getLocalVariable(in.getPrototype());
                     IVariable<?> var;

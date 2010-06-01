@@ -307,13 +307,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>com.springsource.org.aspectj.runtime</artifactId>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->

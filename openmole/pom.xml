@@ -24,6 +24,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>com.springsource.org.aspectj.runtime</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
             <version>${project.version}</version>

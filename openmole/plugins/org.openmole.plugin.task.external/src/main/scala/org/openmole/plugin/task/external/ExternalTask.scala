@@ -35,7 +35,6 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.tools.io.FileUtil
-
 import org.openmole.core.model.task.annotations.Resource
 import org.openmole.commons.tools.io.IFileOperation
 
@@ -57,14 +56,17 @@ abstract class ExternalTask(name: String) extends Task(name) {
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
   val outFileNamesVar = new HashMap[IPrototype[File], IPrototype[String]]
 
-  protected def listInputFiles(context: IContext, progress: IProgress): List[(File,String)] = {
+  protected class ToPut(val file: File, val name: String)
+  protected class ToGet(val name: String, val file: File)
+
+  protected def listInputFiles(context: IContext, progress: IProgress): List[ToPut] = {
     try {
-      var ret = new ListBuffer[(File,String)]
+      var ret = new ListBuffer[ToPut]
 
       inFileNames.entrySet().foreach(entry => {
           val localFile = inFiles.getDeployed(entry.getKey)
           //val correctName = new File(tmpDir,expandData(context, entry.getValue))
-          ret += ((localFile, expandData(context, entry.getValue)))
+          ret += (new ToPut(localFile, expandData(context, entry.getValue)))
           //   copyTo(localFile, correctName)
         })
 
@@ -76,7 +78,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
           }
 
           //val correctName = new File(tmpDir,expandData(context, p._2))
-          ret += ((f, expandData(context, p._2)))
+          ret += (new ToPut(f, expandData(context, p._2)))
 
           //  copyTo(f, correctName)
         })
@@ -95,7 +97,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
               //val fo = new File(tmpDir,expandData(context, name))
 
-              ret += ((f,expandData(context, name)))
+              ret += (new ToPut(f, expandData(context, name)))
               //   copyTo(f, fo)
             }
           }
@@ -116,15 +118,16 @@ abstract class ExternalTask(name: String) extends Task(name) {
       })
   }
 
-  protected def setOutputFilesVariables(context: IContext, progress: IProgress, localDir: File): List[String] = {
 
-    var ret = new ListBuffer[String]
+  protected def setOutputFilesVariables(context: IContext, progress: IProgress, localDir: File): List[ToGet] = {
+
+    var ret = new ListBuffer[ToGet]
 
     outFileNames.foreach(p => {
         val filename = expandData(context, p._2)
         val fo = new File(localDir,filename)
 
-        ret += (filename)
+        ret += (new ToGet(filename, fo))
 
         context.putVariable(p._1, fo)
         if (outFileNamesVar.containsKey(p._1)) {
@@ -140,7 +143,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
         val filename = context getLocalValue (p._2);
         val fo = new File(localDir, filename)
-        ret += (filename)
+        ret += (new ToGet(filename, fo))
 
         context putVariable (p._1, fo)
       })

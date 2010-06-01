@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.core.model.mole.IExecutionContext
@@ -27,36 +26,29 @@ import org.openmole.core.model.task.annotations.Resource
 import org.openmole.plugin.resource.virtual.IVirtualMachine
 import org.openmole.plugin.resource.virtual.IVirtualMachinePool
 import org.openmole.plugin.resource.virtual.VirtualMachineResource
+import org.openmole.plugin.task.external.ExternalVirtualTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.misc.workspace.ConfigurationLocation
 import com.jcraft.jsch.ChannelExec
+import java.util.Collections
 import java.io.PrintStream
-import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
-class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String) extends Task(name) {
+class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String) extends ExternalVirtualTask(name) {
 
   @Resource
   val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 
-
-  object Configuration {
-    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[VirtualSystemExecTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
-    val ActiveWaitInterval = new ConfigurationLocation(classOf[VirtualSystemExecTask].getSimpleName(), "ActiveWaitInterval")
-    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT1M")
-    workspace.addToConfigurations(ActiveWaitInterval, "PT1S")
-  }
-
-
   override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
     
-//    val pool = virtualMachineResource.getVirtualMachineShared
-//    val virtualMachine = pool.borrowAVirtualMachine
-//    val session = virtualMachineResource.getSSHSession(virtualMachine)
-//    try {
-//       execute(expandData(context,vals, cmd), session)
-//    } finally {
-//       pool.returnVirtualMachine(virtualMachine)
-//    }
+    val pool = virtualMachineResource.getVirtualMachineShared
+    val virtualMachine = pool.borrowAVirtualMachine
+    val session = virtualMachineResource.getSSHSession(virtualMachine)
+   
+    try {
+       execute(context, progress, cmd, session)
+    } finally {
+       pool.returnVirtualMachine(virtualMachine)
+    }
   }
 }

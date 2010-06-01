@@ -199,6 +199,12 @@
         </dependency>
 	<dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>com.jcraft.jsch</artifactId>
+            <version>${lib.com.jcraft.jsch.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+	<dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
             <scope>runtime</scope>

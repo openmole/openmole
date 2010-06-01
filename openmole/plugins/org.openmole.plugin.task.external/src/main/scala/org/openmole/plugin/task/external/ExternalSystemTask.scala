@@ -27,16 +27,19 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import java.util.TreeSet
 import scala.collection.mutable.ListBuffer
+
+
 import scala.collection.JavaConversions._
+import org.openmole.plugin.task.external.internal.Activator._
+
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
-
   def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
     listInputFiles(context, progress).foreach( f => {
-        val to = new File(tmpDir, f._2)
+        val to = new File(tmpDir, f.name)
 
-        copy(f._1, to)
+        copy(f.file, to)
 
         applyRecursive(to, new IFileOperation() {
             override def execute(file: File) =  {
@@ -55,11 +58,10 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
     val usedFiles = new TreeSet[File]
 
     setOutputFilesVariables(context,progress,localDir).foreach( f => {
-        val current = new File(localDir,f)
-        if (!current.exists) {
-          throw new UserBadDataError("Output file " + current.getAbsolutePath + " for task " + getName + " doesn't exist")
+        if (!f.file.exists) {
+          throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + getName + " doesn't exist")
         }
-        usedFiles add (current)
+        usedFiles add (f.file)
       }
     )
 
