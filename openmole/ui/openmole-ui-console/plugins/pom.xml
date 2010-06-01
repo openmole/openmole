@@ -181,7 +181,7 @@
         </dependency>
     	<dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.executionprofiler.csvprofiler</artifactId>
+            <artifactId>org.openmole.plugin.executionprofiler.csv</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
