@@ -51,12 +51,13 @@ public class LogarithmRangeDouble extends LogarithmIntervalDomain<Double>{
     public List<Double> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
         Double min = Math.log(getInterval().getMin(context));
         Double max = Math.log(getInterval().getMax(context));
-        Double step = new Double(Math.abs(max - min)) / new Double(VariableExpansion.expandData(context,getNbStep()));
-        Double cur = min;
+        Integer nbstep = new Integer(VariableExpansion.expandData(context,getNbStep()));
+        Double step = new Double(Math.abs(max - min)) / nbstep;
 
         List<Double> val = new ArrayList<Double>(step.intValue()+1);
-
-        for (int i = 0; i <= step; i++) {
+        Double cur = min;
+        
+        for (int i = 0; i <= nbstep; i++) {
             val.add(Math.exp(cur));
             cur += step;
         }

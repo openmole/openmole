@@ -22,6 +22,7 @@
         <module>org.openmole.misc.updater</module>
         <module>org.openmole.misc.workspace</module>
         <module>org.openmole.misc.backgroundexecutor</module>
+	    <module>org.openmole.misc.math</module>
     </modules>
 
     <!-- ************************************************************* -->
