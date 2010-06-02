@@ -37,6 +37,10 @@ public class LogarithmRangeBigDecimal extends LogarithmIntervalDomain<BigDecimal
         super(interval, nbStep);
     }
 
+    public LogarithmRangeBigDecimal(String min, String max, String nbStep) {
+        this(new BigDecimalInterval(min, max), nbStep);
+    }
+
     @Override
     //TODO: use a gopd implementation of bigdecimal operations. Operation currently return double
     public List<BigDecimal> computeValues(IContext ic) throws InternalProcessingError, UserBadDataError {
