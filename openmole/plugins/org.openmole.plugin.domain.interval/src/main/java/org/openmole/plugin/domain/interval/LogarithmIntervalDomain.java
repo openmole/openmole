@@ -30,19 +30,19 @@ import org.openmole.core.model.domain.IInterval;
  */
 public abstract class LogarithmIntervalDomain<T> extends FiniteDomain<T> implements IDiscretizedIntervalDomain<T>, IDomainWithCenter<T>, IDomainWithRange<T> {
     private Interval<T> interval;
-    private int nbStep;
+    private String nbStep;
 
 
-public LogarithmIntervalDomain(Interval<T> interval, int nbStep) {
+public LogarithmIntervalDomain(Interval<T> interval, String nbStep) {
         this.interval = interval;
         this.nbStep = nbStep;
     }
 
-    public int getNbStep() {
+    public String getNbStep() {
         return nbStep;
     }
 
-    public void setNbStep(int nbStep) {
+    public void setNbStep(String nbStep) {
         this.nbStep = nbStep;
     }
 

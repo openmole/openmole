@@ -22,6 +22,7 @@ import org.openmole.core.implementation.domain.Interval;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.tools.VariableExpansion;
 
 /**
  *
@@ -30,14 +31,14 @@ import org.openmole.commons.exception.UserBadDataError;
 public class LogarithmRangeDouble extends LogarithmIntervalDomain<Double>{
 
     LogarithmRangeDouble(){
-        this("1","1000",100);
+        this("1","1000","100");
     }
 
-    public LogarithmRangeDouble(String min, String max, int nbStep) {
+    public LogarithmRangeDouble(String min, String max, String nbStep) {
         this(new DoubleInterval(min,max), nbStep);
     }
 
-    public LogarithmRangeDouble(Interval<Double> interval, int nbStep) {
+    public LogarithmRangeDouble(Interval<Double> interval, String nbStep) {
         super(interval, nbStep);
     }
 
@@ -50,12 +51,12 @@ public class LogarithmRangeDouble extends LogarithmIntervalDomain<Double>{
     public List<Double> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
         Double min = Math.log(getInterval().getMin(context));
         Double max = Math.log(getInterval().getMax(context));
-        Double step = new Double(Math.abs(max - min) / getNbStep());
+        Double step = new Double(Math.abs(max - min)) / new Double(VariableExpansion.expandData(context,getNbStep()));
         Double cur = min;
 
-        List<Double> val = new ArrayList<Double>(getNbStep()+1);
+        List<Double> val = new ArrayList<Double>(step.intValue()+1);
 
-        for (int i = 0; i <= getNbStep(); i++) {
+        for (int i = 0; i <= step; i++) {
             val.add(Math.exp(cur));
             cur += step;
         }
