@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain.interval;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -47,14 +48,14 @@ public class LogarithmRangeBigDecimal extends LogarithmIntervalDomain<BigDecimal
         BigDecimal min = BigDecimalOperations.log(getInterval().getMin(ic));
         BigDecimal max = BigDecimalOperations.log(getInterval().getMax(ic));
         Integer nbstep = new Integer(VariableExpansion.expandData(ic,getNbStep()));
-        BigDecimal step = max.subtract(min).abs().divide(new BigDecimal(nbstep));
+        BigDecimal step = max.subtract(min).abs().divide(new BigDecimal(nbstep),RoundingMode.HALF_UP);
 
         BigDecimal cur = min;
         List<BigDecimal> val = new ArrayList<BigDecimal>(step.intValue()+1);
 
         for (int i = 0; i <= nbstep; i++) {
             val.add(BigDecimalOperations.exp(cur));
-            cur.add(step);
+            cur = cur.add(step);
         }
 
         return val;
