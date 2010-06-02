@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.resource.IResource;
@@ -219,6 +220,34 @@ public abstract class GenericTask implements IGenericTask {
             input =  new TreeMap<String, IData<?>>();
         }
         input.put(data.getPrototype().getName(),data);
+    }
+
+    @Override
+    public void addInput(IDataSet dataSet) {
+        for(IData data: dataSet) {
+            addInput(data);
+        }
+    }
+
+    @Override
+    public void addOutput(IDataSet dataSet) {
+        for(IData data: dataSet) {
+            addOutput(data);
+        }
+    }
+
+    @Override
+    public void removeInput(IDataSet dataSet) {
+        for(IData data: dataSet){
+            removeInput(data);
+        }
+    }
+
+    @Override
+    public void removeOutput(IDataSet dataSet) {
+        for(IData data: dataSet) {
+            removeOutput(data);
+        }
     }
 
     @Override

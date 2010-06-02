@@ -25,6 +25,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.DataModMask;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.resource.ILocalFileCache;
@@ -121,6 +122,7 @@ public interface IGenericTask extends IPortable {
      */
     void addInput(IData data);
 
+    void addInput(IDataSet dataSet);
 
     void addInput(IPrototype prototype, DataModMask... masks);
 
@@ -139,6 +141,8 @@ public interface IGenericTask extends IPortable {
      * @param data the data to remove of the input
      */
     void removeInput(IData data);
+
+    void removeInput(IDataSet data);
 
     /**
      *
@@ -163,7 +167,7 @@ public interface IGenericTask extends IPortable {
      * @param data the data to add
      */
     void addOutput(IData data);
-
+    void addOutput(IDataSet dataSet);
 
     void addOutput(IPrototype prototype, DataModMask... masks);
 
@@ -181,8 +185,9 @@ public interface IGenericTask extends IPortable {
      *
      * @param data the data to remove
      */
-    void removeOutput(IData data);
+    void removeOutput(IData dataSet);
 
+    void removeOutput(IDataSet dataSet);
     /**
      *
      * Remove the user defined output data given its prototype.
