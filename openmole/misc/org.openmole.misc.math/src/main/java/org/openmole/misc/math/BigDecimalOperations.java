@@ -24,21 +24,14 @@ import java.math.BigDecimal;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class BigDecimalOperations {
-    private static BigDecimalOperations instance = null;
+    //TODO: use a gopd implementation of bigdecimal operations. Operation currently return double
 
-    public Double log(BigDecimal bd){
-    return Math.log(bd.doubleValue());
+    public static BigDecimal log(BigDecimal bd){
+    return new BigDecimal(Math.log(bd.doubleValue()));
     }
 
-    public Double exp(BigDecimal bd){
-    return Math.exp(bd.doubleValue());
+    public static BigDecimal exp(BigDecimal bd){
+    return new BigDecimal(Math.exp(bd.doubleValue()));
 
-    }
-
-    public static BigDecimalOperations getInstance() {
-        if (instance == null) {
-            instance = new BigDecimalOperations();
-        }
-        return instance;
     }
 }
