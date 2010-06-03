@@ -20,6 +20,7 @@
 
 package org.openmole.ui.plugin.builder;
 
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
@@ -66,6 +67,10 @@ public class Builder {
 
     public Prototype buildPrototype(String name, Class type) {
         return new Prototype(name, type);
+    }
+
+    public DataSet buildDataSet(IPrototype...prototypes){
+        return new DataSet(prototypes);
     }
 
     public TaskCapsule buildTaskCapsule(ITask task) {

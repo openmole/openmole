@@ -81,6 +81,12 @@ public class TransitionFactory {
         return new PuzzleFirstAndLast(workflowPuzzles[0].getFirstCapsule(), workflowPuzzles[length - 1].getLastCapsule());
     }
 
+    public static PuzzleFirst buildChain(ITask task, IPuzzleFirst firstPuzzle) {
+        TaskCapsule firstCapsule = new TaskCapsule(task);
+        new SingleTransition(firstCapsule, firstPuzzle.getFirstCapsule());
+        return new PuzzleFirst(firstCapsule);
+    }
+
     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildDiamond(ITaskCapsule... capsules) throws InstantiationException {
         return new PuzzleFirstAndLast(buildFork((ITaskCapsule[]) (ArrayUtils.subarray(capsules, 0, capsules.length - 1))).getFirstCapsule(),
                 buildJoin((ITaskCapsule[]) (ArrayUtils.subarray(capsules, 1, capsules.length))).getLastCapsule());
