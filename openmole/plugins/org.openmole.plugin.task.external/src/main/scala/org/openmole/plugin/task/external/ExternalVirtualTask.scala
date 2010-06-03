@@ -29,19 +29,25 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.Callable
 import org.openmole.plugin.resource.virtual.IVirtualMachine
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.plugin.task.external.internal.Activator._
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.commons.tools.service.Retry.retry
 
 abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
+
+  implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
 
   object Configuration {
     val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
     workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT60S")
     val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
     workspace.addToConfigurations(CommandWait, "PT1S")
+    val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
+    workspace.addToConfigurations(SSHConnectionRetry, "5")
   }
 
   def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
@@ -92,13 +98,14 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
   def getSSHConnection(virtualMachine: IVirtualMachine, user: String, password: String, timeOut: Int): Connection = {
     val connection = new Connection(virtualMachine.host, virtualMachine.port)
-    connection.connect(new ServerHostKeyVerifier() {
-        override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = {
-          true
-        }
 
-      }, timeOut, timeOut)
+    val verifier = new ServerHostKeyVerifier() {
+      override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = true
+    }
 
+    //Not supossed to fail but sometimes it does on remote machines
+    retry( () => {connection.connect( verifier , timeOut, timeOut)} ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
+    
     val isAuthenticated = connection.authenticateWithPassword(user, password)
 
     if (!isAuthenticated)
