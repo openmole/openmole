@@ -547,19 +547,13 @@
                 <configuration>
                     <manifestLocation>target/META-INF</manifestLocation>
                     <finalName>${symbolic.name}_${project.version}</finalName>
-                    <!--<outputDirectory>${basedir}</outputDirectory>-->
                     <instructions>
                         <Bundle-Name>${bundle.name}</Bundle-Name>
                         <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
                         <Bundle-Description>${bundle.description}</Bundle-Description>
                         <Import-Package>${import.packages},org.aspectj.lang,org.aspectj.runtime.internal,org.aspectj.runtime.reflect</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>
-                        <!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
-                        <!--<Embed-Dependency>true</Embed-Dependency>-->
-                        <!--<Embed-Transitive>true</Embed-Transitive>-->
-                        <!--<Require-Bundle>com.springsource.org.aspectj.runtime</Require-Bundle>-->
-                        <!--<_exportcontents>${export.packages}</_exportcontents>-->
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
                         <Bundle-Activator>${bundle.activator}</Bundle-Activator>
                         <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>
