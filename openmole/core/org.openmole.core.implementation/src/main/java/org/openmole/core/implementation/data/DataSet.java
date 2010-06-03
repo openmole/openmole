@@ -40,14 +40,14 @@ public class DataSet implements IDataSet {
     public DataSet(IPrototype<?>... prototypes) {
         data = new ArrayList<IData<?>>(prototypes.length);
         for(int i = 0; i < prototypes.length; i++) {
-            data.set(i, new Data(prototypes[i]));
+            data.add(new Data(prototypes[i]));
         }
     }
 
     public DataSet(DataMod dataMod, IPrototype<?>... prototypes) {
         data = new ArrayList<IData<?>>(prototypes.length);
         for(int i = 0; i < prototypes.length; i++) {
-            data.set(i, new Data(prototypes[i], dataMod));
+            data.add(new Data(prototypes[i], dataMod));
         }
     }
 
