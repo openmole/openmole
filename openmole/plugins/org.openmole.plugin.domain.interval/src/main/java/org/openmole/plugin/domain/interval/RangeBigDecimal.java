@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain.interval;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmole.core.implementation.domain.Interval;
@@ -46,7 +47,7 @@ public class RangeBigDecimal extends UniformelyDiscretizedIntervalDomain<BigDeci
         BigDecimal max = getInterval().getMax(context);
         BigDecimal step = new BigDecimal(VariableExpansion.getInstance().expandData(context, getStep()));
 
-        int size = max.subtract(min).abs().divide(step).intValue();
+        int size = max.subtract(min).abs().divide(step,RoundingMode.HALF_UP).intValue();
         BigDecimal cur = min;
 
 
