@@ -134,6 +134,10 @@ public interface IGenericTask extends IPortable {
      */
     void addInput(IPrototype prototype);
 
+    boolean containsInput(String name);
+    boolean containsInput(IPrototype name);
+
+
     /**
      *
      * Remove the user defined input data.
@@ -160,6 +164,8 @@ public interface IGenericTask extends IPortable {
      */
     void removeInput(String name);
 
+
+
     /**
      *
      * Add <code>data</code> as an output for this task.
@@ -179,6 +185,8 @@ public interface IGenericTask extends IPortable {
      */
     void addOutput(IPrototype prototype);
 
+    boolean containsOutput(String name);
+    boolean containsOutput(IPrototype name);
     /**
      *
      * Remove the user defined output data.

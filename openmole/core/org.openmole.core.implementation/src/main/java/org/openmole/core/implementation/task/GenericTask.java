@@ -285,6 +285,27 @@ public abstract class GenericTask implements IGenericTask {
         }
     }
 
+    @Override
+    public synchronized boolean containsInput(String name) {
+        if(input == null) return false;
+        return input.containsKey(name);
+    }
+
+    @Override
+    public boolean containsInput(IPrototype prototype) {
+        return containsInput(prototype.getName());
+    }
+
+    @Override
+    public synchronized  boolean containsOutput(String name) {
+        if(output == null) return false;
+        return output.containsKey(name);
+    }
+
+    @Override
+    public boolean containsOutput(IPrototype prototype) {
+        return output.containsKey(prototype.getName());
+    }
 
     /* (non-Javadoc)
      * @see org.openmole.core.processors.ITask#getName()
