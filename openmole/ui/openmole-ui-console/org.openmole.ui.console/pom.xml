@@ -79,6 +79,13 @@
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>app</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- dependency added in scope provided for forcing exclusion in copy-dependencies task -->
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- dependencies for the runtime -->
         <dependency>
@@ -100,11 +107,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>com.springsource.org.aspectj.weaver</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -136,7 +138,7 @@
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>${lib.uk.com.robust-it.cloning.version}</version>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.joda.time</artifactId>
             <version>${lib.org.joda.time.version}</version>
@@ -188,6 +190,9 @@
                             <!-- Will copy missing bundles into plugins directory with correct filenames for equinox launcher -->
                             <goal>copy</goal>
                         </goals>
+                        <configuration>
+                            <excludeScope>provided</excludeScope>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -226,7 +231,7 @@
                                     <directory>src/main/resources</directory>
                                     <includes>
                                         <include>run.sh</include>
-					<include>run.bat</include>
+                                        <include>run.bat</include>
                                     </includes>
                                 </resource>
                             </resources>
