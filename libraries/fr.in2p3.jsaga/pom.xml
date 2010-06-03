@@ -75,6 +75,9 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
+        <!-- For not including extracted class in final jar. Commented because
+        it will not generate correct Export-Package directive in manifest -->
+        <!--libraries.export.packages>!*</libraries.export.packages-->
 	<embed-dep>*;scope=provided</embed-dep>
         <bundle.classpath>{maven-dependencies},.</bundle.classpath>
     </properties>

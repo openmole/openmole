@@ -55,6 +55,7 @@
         <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
+        <libraries.export.packages>*,${export.packages}</libraries.export.packages>
         <bundle.name>${pom.name}</bundle.name>
         <bundle.description>${pom.name}</bundle.description>
 	<bundle.classpath>.</bundle.classpath>
@@ -74,7 +75,7 @@
                         <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
                         <Bundle-Description>${bundle.description}</Bundle-Description>
                         <Import-Package>${import.packages}</Import-Package>
-                        <Export-Package>*,${export.packages}</Export-Package>
+                        <Export-Package>${libraries.export.packages}</Export-Package>
                         <Include-Resource>${include.resources}</Include-Resource>
                         <Embed-Dependency>${embed-dep}</Embed-Dependency>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
