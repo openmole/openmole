@@ -43,7 +43,7 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
   object Configuration {
     val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
-    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT60S")
+    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
     val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
     workspace.addToConfigurations(CommandWait, "PT1S")
     val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
@@ -103,8 +103,14 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
       override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = true
     }
 
-    //Not supossed to fail but sometimes it does on remote machines
-    retry( () => {connection.connect( verifier , timeOut, timeOut)} ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
+    //Not supossed to fail but sometimes it does
+    retry( () => {
+        try{
+          connection.connect( verifier , timeOut, timeOut)
+        } catch {
+          case e: Exception => connection.close; throw e
+        }
+      } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
     
     val isAuthenticated = connection.authenticateWithPassword(user, password)
 

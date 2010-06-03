@@ -69,13 +69,15 @@ class VirtualMachineResource(system: File, val user: String, val password: Strin
   }
 
   def launchAVirtualMachine: IVirtualMachine = {
+    val vmImage = systemResource.getDeployedFile
+    if(!vmImage.isFile) throw new UserBadDataError("Image " + vmImage.getAbsolutePath + " doesn't exist or is not a file.")
 
     class VirtualMachineConnector extends IConnectable {
       var virtualMachine: IVirtualMachine = null
 
       override def connect(port: Int) = {
         val qemuDir = getQEmuDir
-        val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
+        val commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22")
 
         val process = commandLauncher.exec(commandLine, new HashMap())
         processDestroyer.add(process)
@@ -92,17 +94,17 @@ class VirtualMachineResource(system: File, val user: String, val password: Strin
       case e: Exception => throw new InternalProcessingError(e)
     }
 
-    val virtualMachine = connector.virtualMachine
- 
-    val timeOut = Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.VirtualMachineBootTimeOut).intValue
-    val connection = new Connection(virtualMachine.host, virtualMachine.port)
-    connection.connect(new ServerHostKeyVerifier() {
-        override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = {
-          true
-        }
-      }, timeOut, timeOut)
-      
-    connection.close
+//    val virtualMachine = connector.virtualMachine
+//
+//    val timeOut = Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.VirtualMachineBootTimeOut).intValue
+//    val connection = new Connection(virtualMachine.host, virtualMachine.port)
+//    connection.connect(new ServerHostKeyVerifier() {
+//        override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = {
+//          true
+//        }
+//      }, timeOut, timeOut)
+//
+//    connection.close
 
 
     connector.virtualMachine
