@@ -38,7 +38,6 @@ import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
 
 public class Builder {

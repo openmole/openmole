@@ -26,6 +26,11 @@
             <artifactId>org.openmole.ui.console</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ui.plugin.transitionfactory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
