@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.plan;
 
 import java.util.ArrayList;
@@ -35,6 +34,15 @@ public abstract class Plan<T extends IFactor<?, ?>> implements IPlan {
 
     List<T> factors = new ArrayList<T>();
 
+    public Plan() {
+    }
+
+    public Plan(T... factors) {
+        for (T f : factors) {
+            addFactor(f);
+        }
+    }
+
     public void addFactor(T e) {
         factors.add(e);
     }
@@ -47,8 +55,8 @@ public abstract class Plan<T extends IFactor<?, ?>> implements IPlan {
     public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
         Collection<IResource> resourcesCache = new LinkedList<IResource>();
 
-        for(IFactor factor: getFactors()) {
-            for(IResource resource: factor.getResources()) {
+        for (IFactor factor : getFactors()) {
+            for (IResource resource : factor.getResources()) {
                 resourcesCache.add(resource);
             }
         }
@@ -56,5 +64,4 @@ public abstract class Plan<T extends IFactor<?, ?>> implements IPlan {
         addAllMarkedFields(this, Resource.class, resourcesCache);
         return resourcesCache;
     }
-
 }
