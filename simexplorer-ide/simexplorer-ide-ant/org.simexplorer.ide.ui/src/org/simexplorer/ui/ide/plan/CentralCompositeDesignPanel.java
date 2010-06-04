@@ -16,11 +16,12 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.plan.centralcomposite;
+package org.simexplorer.ui.ide.plan;
 
 import java.util.Enumeration;
 import javax.swing.AbstractButton;
 import org.openide.util.lookup.ServiceProvider;
+import org.openmole.plugin.plan.centralcomposite.CentralCompositePlan;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
 @ServiceProvider(service=EditorPanel.class)
@@ -35,10 +36,6 @@ public class CentralCompositeDesignPanel extends EditorPanel<CentralCompositePla
     @Override
     public void applyChanges() {
         super.applyChanges();
-        getObjectEdited().setNbCenterPoint((Integer)nbCenterPointsjSpinner.getValue());
-        getObjectEdited().setNbReplicatesForAxialPoint((Integer)replicationAxialPointsjSpinner.getValue());
-        getObjectEdited().setNbReplicatesForFactorialPoint((Integer)replicationFactorialPointsjSpinner.getValue());
-
         int i=0;
         Enumeration<AbstractButton> but=buttonGroup1.getElements();
         while (but.hasMoreElements()){
@@ -48,6 +45,11 @@ public class CentralCompositeDesignPanel extends EditorPanel<CentralCompositePla
             }
             i++;
         }
+        setObjectEdited(new CentralCompositePlan((Integer)nbCenterPointsjSpinner.getValue(),
+                (Integer)replicationFactorialPointsjSpinner.getValue(),
+                (Integer)replicationAxialPointsjSpinner.getValue(),
+                // FIXME getObjectEdited().getAlphan(i)
+                0));
     }
 
     @Override
@@ -58,6 +60,7 @@ public class CentralCompositeDesignPanel extends EditorPanel<CentralCompositePla
         replicationFactorialPointsjSpinner.setValue(getObjectEdited().getNbReplicatesForFactorialPoint());
 
         int i=0;
+        // FIXME getAlphan has disappeared
         /*jLabelRotatable.setText(((Double)getObjectEdited().getAlphan(i++)).toString());
         jLabelSphericale.setText(((Double)getObjectEdited().getAlphan(i++)).toString());
         jLabelPracticale.setText(((Double)getObjectEdited().getAlphan(i++)).toString());

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 import org.openmole.plugin.task.groovy.GroovyTask;
-import org.openmole.core.workflow.methods.task.JavaTask;
 import org.openmole.plugin.task.filemanagment.TemplateFileGeneratorFromLocalFileTask;
 import org.openmole.plugin.task.systemexec.SystemExecTask;
 
@@ -40,7 +39,7 @@ public class ServicesProvider {
         processorImplementations = new ArrayList<Class<? extends Task>>(Arrays.asList(GroovyTask.class, TemplateFileGeneratorFromLocalFileTask.class, SystemExecTask.class, JavaTask.class));
         processorsMap = new HashMap<String, List<Class<? extends Task>>>();
         addInMap(processorsMap, ExplorationApplication.LABEL_INPUT_GENERATION, TemplateFileGeneratorFromLocalFileTask.class, GroovyTask.class);
-        addInMap(processorsMap, ExplorationApplication.LABEL_MODEL_LAUNCHER, SystemExecTask.class, JavaTask.class, GroovyTask.class);
+        addInMap(processorsMap, ExplorationApplication.LABEL_MODEL_LAUNCHER, SystemExecTask.class, GroovyTask.class);
         addInMap(processorsMap, ExplorationApplication.LABEL_OUTPUT_PROCESSING, GroovyTask.class);
         addInMap(processorsMap, ExplorationApplication.LABEL_FINAL_OUTPUT_PROCESSING, GroovyTask.class);
         addInMap(processorsMap, "Init", GroovyTask.class);

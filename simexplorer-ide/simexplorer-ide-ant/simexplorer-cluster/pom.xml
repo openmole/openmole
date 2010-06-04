@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.simexplorer</groupId>
-        <artifactId>simexplorer</artifactId>
+        <groupId>org.openmole</groupId>
+        <artifactId>openmole-ecosystem</artifactId>
         <version>0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -22,13 +22,53 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.workflow.methods</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.core.file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.commons.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.commons.tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.commons.aspect.caching</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.executorservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.clonning</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.structuregenerator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.structuregeneration</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -53,7 +93,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.filemanagment</artifactId>
+            <artifactId>org.openmole.plugin.task.filemanagement</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

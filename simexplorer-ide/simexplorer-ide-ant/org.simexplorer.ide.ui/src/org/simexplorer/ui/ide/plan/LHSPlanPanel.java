@@ -16,7 +16,7 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.plan.lhs;
+package org.simexplorer.ui.ide.plan;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -24,6 +24,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import org.openide.util.lookup.ServiceProvider;
 import org.simexplorer.core.workflow.methods.EditorPanel;
+import org.openmole.plugin.plan.lhs.LHSPlan;
 
 @ServiceProvider(service=EditorPanel.class)
 public class LHSPlanPanel extends EditorPanel<LHSPlan> {

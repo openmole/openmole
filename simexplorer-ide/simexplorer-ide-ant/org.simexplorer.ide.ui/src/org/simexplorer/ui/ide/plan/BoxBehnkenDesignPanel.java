@@ -16,9 +16,10 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-package org.openmole.plugin.plan.boxbehnken;
+package org.simexplorer.ui.ide.plan;
 
 import org.openide.util.lookup.ServiceProvider;
+import org.openmole.plugin.plan.boxbehnken.BoxBehnkenPlan;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
 @ServiceProvider(service=EditorPanel.class)
@@ -33,7 +34,7 @@ public class BoxBehnkenDesignPanel extends EditorPanel<BoxBehnkenPlan> {
     @Override
     public void applyChanges() {
         super.applyChanges();
-        getObjectEdited().setNbCenterPoint((Integer)nbCenterPointsjSpinner.getValue());
+        setObjectEdited(new BoxBehnkenPlan((Integer)nbCenterPointsjSpinner.getValue()));
     }
 
     @Override
