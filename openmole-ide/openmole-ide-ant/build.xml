@@ -7,7 +7,7 @@
     <import file="nbproject/build-impl.xml"/>
     <!-- Create the cluster for openmole core modules -->
     <ant antfile="${harness.dir}/suite.xml" target="clusterize">
-        <property name="cluster" location="openmole-cluster/target/"/>
+        <property name="cluster" location="simexplorer-cluster/target/"/>
         <property name="includes" value="dependency/*.jar"/>
     </ant>
 

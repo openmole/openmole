@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.simexplorer</groupId>
-        <artifactId>simexplorer</artifactId>
+        <groupId>org.openmole</groupId>
+        <artifactId>openmole-ecosystem</artifactId>
         <version>0.3</version>
     </parent>
 
@@ -41,7 +41,7 @@
                                 <artifactItem>
                                     <groupId>org.netbeans</groupId>
                                     <artifactId>org.netbeans.netbinox</artifactId>
-                                    <version>hg-201005211517</version>
+                                    <version>hg-201006041137</version>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
