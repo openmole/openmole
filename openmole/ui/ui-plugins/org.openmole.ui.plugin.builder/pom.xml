@@ -26,31 +26,6 @@
             <artifactId>org.openmole.ui.console</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.groovy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-	<dependency>
-	    <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.structuregeneration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.complete</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.interval</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.ui.plugin.transitionfactory</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
