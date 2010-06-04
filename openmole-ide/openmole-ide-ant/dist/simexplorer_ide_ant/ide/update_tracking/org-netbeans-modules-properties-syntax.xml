@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.properties.syntax/1">
-    <module_version install_time="1274747832115" last="true" origin="installer" specification_version="1.28.1">
-        <file crc="3912872678" name="config/Modules/org-netbeans-modules-properties-syntax.xml"/>
-        <file crc="1209198910" name="modules/org-netbeans-modules-properties-syntax.jar"/>
-    </module_version>
-</module>

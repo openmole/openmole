@@ -1,6 +1,0 @@
-name=Groovy
-impl= org.openmole.ui.workflow.implementation.GroovyTaskModelUI
-bg-color=219,227,226
-border-color=99,152,170
-bg-img=resources/img/groovy.png
-thumb-img=resources/img/thumb/groovy.png

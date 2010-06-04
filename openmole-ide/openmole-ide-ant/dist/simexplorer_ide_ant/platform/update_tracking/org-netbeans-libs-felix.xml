@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<module codename='org.netbeans.libs.felix'>
-  <module_version install_time='1274447540843' last='true' origin='Ant' specification_version='1.2'>
-    <file crc='1327048437' name='config/Modules/org-netbeans-libs-felix.xml'/>
-    <file crc='2029104172' name='modules/ext/felix-2.0.3.jar'/>
-    <file crc='901663228' name='modules/ext/felix-main-2.0.2.jar'/>
-    <file crc='932954636' name='modules/org-netbeans-libs-felix.jar'/>
-  </module_version>
-</module>

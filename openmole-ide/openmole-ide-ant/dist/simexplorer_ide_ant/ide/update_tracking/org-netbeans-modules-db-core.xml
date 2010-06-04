@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.db.core">
-    <module_version install_time="1274747001473" last="true" origin="installer" specification_version="1.15.1">
-        <file crc="3235026915" name="config/Modules/org-netbeans-modules-db-core.xml"/>
-        <file crc="2883225410" name="modules/org-netbeans-modules-db-core.jar"/>
-    </module_version>
-</module>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.api.java.classpath/1">
-    <module_version install_time="1274745106636" last="true" origin="installer" specification_version="1.25.1">
-        <file crc="4102554259" name="config/Modules/org-netbeans-api-java-classpath.xml"/>
-        <file crc="3755205229" name="modules/org-netbeans-api-java-classpath.jar"/>
-    </module_version>
-</module>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.core.ide/1">
-    <module_version install_time="1274746612071" last="true" origin="installer" specification_version="1.20.1">
-        <file crc="577140527" name="config/Modules/org-netbeans-core-ide.xml"/>
-        <file crc="1421258375" name="modules/org-netbeans-core-ide.jar"/>
-    </module_version>
-</module>

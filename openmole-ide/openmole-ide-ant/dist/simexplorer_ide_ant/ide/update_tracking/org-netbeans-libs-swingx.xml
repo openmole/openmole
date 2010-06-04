@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.libs.swingx/1">
-    <module_version install_time="1274743495215" last="true" origin="installer" specification_version="1.6.1">
-        <file crc="1452133379" name="config/Modules/org-netbeans-libs-swingx.xml"/>
-        <file crc="3123084890" name="modules/ext/swingx-0.9.5.jar"/>
-        <file crc="2995833343" name="modules/org-netbeans-libs-swingx.jar"/>
-    </module_version>
-</module>

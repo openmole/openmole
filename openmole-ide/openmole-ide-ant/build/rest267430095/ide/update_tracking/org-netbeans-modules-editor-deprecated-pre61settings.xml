@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.editor.deprecated.pre61settings/0">
-    <module_version install_time="1274747923494" last="true" origin="installer" specification_version="1.8.1.1.3.10.2">
-        <file crc="3256053627" name="config/Modules/org-netbeans-modules-editor-deprecated-pre61settings.xml"/>
-        <file crc="3822311043" name="modules/org-netbeans-modules-editor-deprecated-pre61settings.jar"/>
-    </module_version>
-</module>

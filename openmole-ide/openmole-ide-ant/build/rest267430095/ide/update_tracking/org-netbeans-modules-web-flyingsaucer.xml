@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.web.flyingsaucer/1">
-    <module_version install_time="1274744579311" last="true" origin="installer" specification_version="1.8.1.1">
-        <file crc="2199372492" name="config/Modules/org-netbeans-modules-web-flyingsaucer.xml"/>
-        <file crc="1739327929" name="modules/ext/core-renderer.jar"/>
-        <file crc="2092794464" name="modules/org-netbeans-modules-web-flyingsaucer.jar"/>
-    </module_version>
-</module>

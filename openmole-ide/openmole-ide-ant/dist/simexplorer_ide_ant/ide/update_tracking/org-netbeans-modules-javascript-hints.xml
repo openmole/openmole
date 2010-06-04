@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.javascript.hints/1">
-    <module_version install_time="1274749589332" last="true" origin="installer" specification_version="0.45.1">
-        <file crc="2801559414" name="config/Modules/org-netbeans-modules-javascript-hints.xml"/>
-        <file crc="3678660657" name="modules/org-netbeans-modules-javascript-hints.jar"/>
-    </module_version>
-</module>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.editor.plain/2">
-    <module_version install_time="1274747908514" last="true" origin="installer" specification_version="1.14.1">
-        <file crc="977811071" name="config/Modules/org-netbeans-modules-editor-plain.xml"/>
-        <file crc="2013730593" name="modules/org-netbeans-modules-editor-plain.jar"/>
-    </module_version>
-</module>

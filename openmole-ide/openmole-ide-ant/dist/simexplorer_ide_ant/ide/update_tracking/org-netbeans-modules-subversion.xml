@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.subversion">
-    <module_version install_time="1274749153290" last="true" origin="installer" specification_version="1.12.1.42.1">
-        <file crc="1100323445" name="config/Modules/org-netbeans-modules-subversion.xml"/>
-        <file crc="4002921696" name="modules/docs/org-netbeans-modules-subversion.jar"/>
-        <file crc="2069105025" name="modules/org-netbeans-modules-subversion.jar"/>
-    </module_version>
-</module>

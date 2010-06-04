@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.editor.settings.storage/1">
-    <module_version install_time="1274745282813" last="true" origin="installer" specification_version="1.25.1">
-        <file crc="417708896" name="config/Modules/org-netbeans-modules-editor-settings-storage.xml"/>
-        <file crc="5703489" name="modules/org-netbeans-modules-editor-settings-storage.jar"/>
-    </module_version>
-</module>

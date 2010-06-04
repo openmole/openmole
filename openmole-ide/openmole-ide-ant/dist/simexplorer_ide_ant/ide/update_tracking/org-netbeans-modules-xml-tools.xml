@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.xml.tools/2">
-    <module_version install_time="1274749358532" last="true" origin="installer" specification_version="1.22.1">
-        <file crc="3189568242" name="config/Modules/org-netbeans-modules-xml-tools.xml"/>
-        <file crc="1941037122" name="modules/org-netbeans-modules-xml-tools.jar"/>
-    </module_version>
-</module>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.web.client.tools.api">
-    <module_version install_time="1274745639637" last="true" origin="installer" specification_version="1.6.1">
-        <file crc="3283144197" name="config/Modules/org-netbeans-modules-web-client-tools-api.xml"/>
-        <file crc="2432866212" name="modules/org-netbeans-modules-web-client-tools-api.jar"/>
-    </module_version>
-</module>

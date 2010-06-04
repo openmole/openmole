@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<tc-ref version="2.2">
-    <module name="org.openmole.ui" spec="1.0" />
-    <tc-id id="MoleSceneTopComponentTopComponent" />
-    <state opened="true" />
-</tc-ref>

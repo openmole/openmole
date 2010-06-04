@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<module codename='org.openide.io'>
-  <module_version install_time='1274447534058' last='true' origin='Ant' specification_version='1.24'>
-    <file crc='3834804485' name='config/Modules/org-openide-io.xml'/>
-    <file crc='782960858' name='modules/org-openide-io.jar'/>
-  </module_version>
-</module>

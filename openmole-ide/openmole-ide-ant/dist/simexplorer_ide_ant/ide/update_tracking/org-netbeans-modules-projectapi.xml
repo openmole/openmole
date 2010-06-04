@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.projectapi/1">
-    <module_version install_time="1274745604626" last="true" origin="installer" specification_version="1.31.1">
-        <file crc="2566874220" name="config/ModuleAutoDeps/org-netbeans-modules-projectapi.xml"/>
-        <file crc="1088517943" name="config/Modules/org-netbeans-modules-projectapi.xml"/>
-        <file crc="3561558056" name="modules/org-netbeans-modules-projectapi.jar"/>
-    </module_version>
-</module>

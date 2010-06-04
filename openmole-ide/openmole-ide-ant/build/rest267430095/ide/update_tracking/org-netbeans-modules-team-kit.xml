@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.team.kit">
-    <module_version install_time="1274749172832" last="true" origin="installer" specification_version="1.5.1">
-        <file crc="3093635599" name="config/Modules/org-netbeans-modules-team-kit.xml"/>
-        <file crc="2761838063" name="modules/org-netbeans-modules-team-kit.jar"/>
-    </module_version>
-</module>

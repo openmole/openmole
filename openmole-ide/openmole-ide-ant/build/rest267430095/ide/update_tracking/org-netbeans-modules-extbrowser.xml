@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.extbrowser/1">
-    <module_version install_time="1274745128345" last="true" origin="installer" specification_version="1.19.1">
-        <file crc="1411316007" name="config/Modules/org-netbeans-modules-extbrowser.xml"/>
-        <file crc="3513992934" name="modules/lib/extbrowser.dll"/>
-        <file crc="2616869923" name="modules/lib/extbrowser64.dll"/>
-        <file crc="763163564" name="modules/org-netbeans-modules-extbrowser.jar"/>
-    </module_version>
-</module>

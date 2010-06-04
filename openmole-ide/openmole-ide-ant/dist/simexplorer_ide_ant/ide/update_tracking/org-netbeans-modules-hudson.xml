@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.hudson">
-    <module_version install_time="1274749038319" last="true" origin="installer" specification_version="1.6.1">
-        <file crc="1746424730" name="config/Modules/org-netbeans-modules-hudson.xml"/>
-        <file crc="2147411108" name="modules/org-netbeans-modules-hudson.jar"/>
-    </module_version>
-</module>

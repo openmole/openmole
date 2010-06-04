@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.xml.retriever/1">
-    <module_version install_time="1274746124025" last="true" origin="installer" specification_version="1.10.1">
-        <file crc="3602039916" name="config/Modules/org-netbeans-modules-xml-retriever.xml"/>
-        <file crc="3843833503" name="modules/org-netbeans-modules-xml-retriever.jar"/>
-    </module_version>
-</module>

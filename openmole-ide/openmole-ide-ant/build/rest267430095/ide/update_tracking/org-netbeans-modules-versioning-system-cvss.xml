@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.versioning.system.cvss/1">
-    <module_version install_time="1274749114816" last="true" origin="installer" specification_version="1.19.1.1.42.1">
-        <file crc="2451257488" name="config/Modules/org-netbeans-modules-versioning-system-cvss.xml"/>
-        <file crc="482455451" name="modules/docs/org-netbeans-modules-versioning-system-cvss.jar"/>
-        <file crc="2936949989" name="modules/org-netbeans-modules-versioning-system-cvss.jar"/>
-    </module_version>
-</module>

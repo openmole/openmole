@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.libs.ini4j/1">
-    <module_version install_time="1274744979554" last="true" origin="installer" specification_version="1.9.1">
-        <file crc="1737694963" name="config/Modules/org-netbeans-libs-ini4j.xml"/>
-        <file crc="1683492422" name="modules/ext/ini4j-0.4.1.jar"/>
-        <file crc="2991564196" name="modules/org-netbeans-libs-ini4j.jar"/>
-    </module_version>
-</module>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="org.netbeans.modules.editor.completion/1">
-    <module_version install_time="1274747847704" last="true" origin="installer" specification_version="1.20.1.1">
-        <file crc="1327033579" name="config/Modules/org-netbeans-modules-editor-completion.xml"/>
-        <file crc="881792514" name="modules/org-netbeans-modules-editor-completion.jar"/>
-    </module_version>
-</module>
