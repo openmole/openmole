@@ -1,3 +1,7 @@
 *.log
 target
 *.orig
+build
+build/*
+dist
+dist/*
