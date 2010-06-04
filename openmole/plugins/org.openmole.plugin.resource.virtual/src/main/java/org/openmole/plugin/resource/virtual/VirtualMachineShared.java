@@ -48,8 +48,8 @@ public class VirtualMachineShared extends AbstractVirtualMachinePool {
     public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError {
         synchronized (this) {
             if (!running.get()) {
-                running.set(true);
                 vm = resource().launchAVirtualMachine();
+                running.set(true);
             }
 
             used.incrementAndGet();

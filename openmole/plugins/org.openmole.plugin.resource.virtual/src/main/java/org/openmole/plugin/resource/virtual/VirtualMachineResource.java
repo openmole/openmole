@@ -129,7 +129,6 @@ public class VirtualMachineResource extends ComposedResource {
 
     @Cachable
     public IVirtualMachinePool getVirtualMachineShared() {
-        System.out.println("New VMShared");
         return new VirtualMachineShared(this);
     }
 
