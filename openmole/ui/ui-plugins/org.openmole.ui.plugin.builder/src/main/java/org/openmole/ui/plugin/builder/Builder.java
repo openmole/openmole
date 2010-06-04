@@ -28,7 +28,6 @@ import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.plan.Factor;
-import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
@@ -39,31 +38,10 @@ import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.plugin.domain.interval.RangeDouble;
-import org.openmole.plugin.domain.interval.RangeInteger;
-import org.openmole.plugin.plan.complete.CompletePlan;
-import org.openmole.plugin.task.groovy.GroovyTask;
-import org.openmole.plugin.task.structuregeneration.ModelStructuresGenerationTask;
 
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
 
 public class Builder {
-
-    public GroovyTask buildGroovyTask(String name) throws UserBadDataError, InternalProcessingError {
-        return new GroovyTask(name);
-    }
-
-    public GroovyTask buildGroovyTask(String name, String code) throws UserBadDataError, InternalProcessingError {
-        GroovyTask groovyTask = new GroovyTask(name);
-        groovyTask.setCode(code);
-        return groovyTask;
-    }
-
-    public GroovyTask buildGroovyTaskFromFile(String name, String filename) throws UserBadDataError, InternalProcessingError {
-        GroovyTask groovyTask = new GroovyTask(name);
-        groovyTask.setCodeFile(filename);
-        return groovyTask;
-    }
 
     public Prototype buildPrototype(String name, Class type) {
         return new Prototype(name, type);
@@ -92,22 +70,6 @@ public class Builder {
         public IFactor buildFactor(IPrototype prototype, IDomain domain) {
             return new Factor(prototype, domain);
         }
-
-        public RangeInteger buildRange(Integer min, Integer max, Integer step) {
-            return new RangeInteger(min.toString(), max.toString(), step.toString());
-        }
-
-        public RangeDouble buildRange(Double min, Double max, Double step) {
-            return new RangeDouble(min.toString(), max.toString(), step.toString());
-        }
-
-        public ExplorationTask buildCompletePlanTask(String name, Factor... factors) throws UserBadDataError, InternalProcessingError {
-            CompletePlan plan = new CompletePlan();
-            for (Factor factor : factors) {
-                plan.addFactor(factor);
-            }
-            return new ExplorationTask(name, plan);
-        }
         
         public ExplorationTaskCapsule buildExplorationTaskCapsule(IExplorationTask task) {
             return new ExplorationTaskCapsule(task);
@@ -133,10 +95,6 @@ public class Builder {
 
         public ComplexNode buildComplexNode(String name, ComplexNode parent) {
             return new ComplexNode(name, parent);
-        }
-
-        public ModelStructuresGenerationTask buildModelStructuresGenerationTask(String name, Class<?> inputDataStructure, Class<?> outputDataStructure) throws UserBadDataError, InternalProcessingError {
-            return new ModelStructuresGenerationTask(name, inputDataStructure, outputDataStructure);
         }
     }
 }
