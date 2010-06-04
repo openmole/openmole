@@ -43,6 +43,7 @@ import scala.collection.JavaConversions._
  */
 class BoxBehnkenPlan(nbCenterPoint: Int = 3) extends Plan[IFactor[Double,IDiscretizedIntervalDomain[Double] with IDomainWithCenter[Double]]] {
 
+    val getNbCenterPoint = nbCenterPoint
 
     override def build(context: IContext): IExploredPlan = {
 
