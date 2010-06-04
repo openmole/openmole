@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.workflow.model.IUIFactory;
-import org.openmole.misc.tools.object.Instanciator;
+import org.openmole.commons.tools.object.Instanciator;
 import org.openmole.ui.exception.MoleExceptionManagement;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;

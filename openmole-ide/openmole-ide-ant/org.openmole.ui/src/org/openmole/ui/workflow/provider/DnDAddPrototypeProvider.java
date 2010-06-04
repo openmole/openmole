@@ -25,7 +25,7 @@ import javax.swing.JOptionPane;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.commons.IOType;
 import org.openmole.ui.exception.MoleExceptionManagement;

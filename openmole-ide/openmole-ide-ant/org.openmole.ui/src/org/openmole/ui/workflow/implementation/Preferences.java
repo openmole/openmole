@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.openmole.ui.workflow.model.IObjectModelUI;
-import org.openmole.misc.tools.service.HierarchicalRegistry;
+import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.ui.exception.MoleExceptionManagement;
 
 /**
