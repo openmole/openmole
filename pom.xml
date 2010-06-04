@@ -516,6 +516,9 @@
                         <jvmArg>-Xms64m</jvmArg>
                         <jvmArg>-Xmx512m</jvmArg>
                     </jvmArgs>
+		    <args>
+                        <arg>-target:jvm-1.5</arg>
+		    </args>
                 </configuration>
             </plugin>
 

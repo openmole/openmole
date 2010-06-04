@@ -46,8 +46,8 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
     workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
     val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
     workspace.addToConfigurations(CommandWait, "PT1S")
-    val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
-    workspace.addToConfigurations(SSHConnectionRetry, "5")
+//    val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
+ //   workspace.addToConfigurations(SSHConnectionRetry, "5")
   }
 
   def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
@@ -104,13 +104,13 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
     }
 
     //Not supossed to fail but sometimes it does
-    retry( () => {
-        try{
+  //  retry( () => {
+  //      try{
           connection.connect( verifier , timeOut, timeOut)
-        } catch {
-          case e: Exception => connection.close; throw e
-        }
-      } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
+   //     } catch {
+   //       case e: Exception => connection.close; throw e
+ //       }
+  //    } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
     
     val isAuthenticated = connection.authenticateWithPassword(user, password)
 

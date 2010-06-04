@@ -15,30 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.resource.virtual
+package org.openmole.commons.aspect.caching;
 
+/**
+ *
+ * @author Romain Reuillon <romain.reuillon at openmole.org>
+ */
+public interface ICache {
 
-import org.openmole.plugin.resource.virtual.internal.Activator
-import org.openmole.misc.workspace.ConfigurationLocation
-
-
-trait IVirtualMachinePool {
-
-
-  protected val delay : Int = Activator.getWorkspace().getPreferenceAsDurationInMs(Configuration.unusedVMKeepOn).intValue
-
-  object Configuration {
-
-    val group = classOf[VirtualMachinePool].getSimpleName
-
-    val unusedVMKeepOn = {
-      val ret = new ConfigurationLocation(group, "UnusedVMKeepOn")
-      Activator.getWorkspace().addToConfigurations(ret, "PT2M")
-      ret
-    }
-
-  }
-
-  def borrowAVirtualMachine(): IVirtualMachine
-  def returnVirtualMachine(virtualMachine : IVirtualMachine)
 }
