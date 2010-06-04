@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
+                            "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="xml">
+        <folder name="entities">
+            <folder name="org_openmole_ui">
+                <file name="MoleSceneTopComponent" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--org.openmole.ui.MoleSceneTopComponentTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//org.openmole.ui//MoleSceneTopComponent//EN"/>
+                </file>
+            </folder>
+        </folder>
+        <folder name="memory">
+            <folder name="org">
+                <folder name="openmole">
+                    <folder name="ui">
+                        <file name="MoleSceneTopComponentTopComponent">
+                            <!--org.openmole.ui.MoleSceneTopComponentTopComponent-->
+                            <attr name="settings.providerPath" stringvalue="xml/lookups//org_openmole_ui/MoleSceneTopComponent.instance"/>
+                        </file>
+                    </folder>
+                </folder>
+            </folder>
+        </folder>
+        <folder name="lookups">
+            <folder name="org_openmole_ui">
+                <file name="MoleSceneTopComponent.instance">
+                    <!--org.openmole.ui.MoleSceneTopComponentTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="org.openmole.ui.MoleSceneTopComponentTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="org.openmole.ui.MoleSceneTopComponentTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

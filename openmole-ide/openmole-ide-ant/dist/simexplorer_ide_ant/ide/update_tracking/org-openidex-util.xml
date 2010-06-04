@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.openidex.util/3">
+    <module_version install_time="1274747324790" last="true" origin="installer" specification_version="3.25.1">
+        <file crc="2386101868" name="config/Modules/org-openidex-util.xml"/>
+        <file crc="226816763" name="modules/org-openidex-util.jar"/>
+    </module_version>
+</module>

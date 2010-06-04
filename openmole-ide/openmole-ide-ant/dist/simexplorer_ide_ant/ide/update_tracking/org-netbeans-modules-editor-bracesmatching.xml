@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.editor.bracesmatching/0">
+    <module_version install_time="1274747881383" last="true" origin="installer" specification_version="1.13.1">
+        <file crc="3381231321" name="config/Modules/org-netbeans-modules-editor-bracesmatching.xml"/>
+        <file crc="2583688765" name="modules/org-netbeans-modules-editor-bracesmatching.jar"/>
+    </module_version>
+</module>

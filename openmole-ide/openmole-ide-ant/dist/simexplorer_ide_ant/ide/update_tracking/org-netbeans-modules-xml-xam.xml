@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.xml.xam/1">
+    <module_version install_time="1274744891360" last="true" origin="installer" specification_version="1.10.1.1">
+        <file crc="2361317231" name="config/Modules/org-netbeans-modules-xml-xam.xml"/>
+        <file crc="1712611017" name="modules/org-netbeans-modules-xml-xam.jar"/>
+    </module_version>
+</module>

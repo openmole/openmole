@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.terminal">
+    <module_version install_time="1274746229543" last="true" origin="installer" specification_version="1.1.1">
+        <file crc="4156507734" name="config/Modules/org-netbeans-modules-terminal.xml"/>
+        <file crc="585370890" name="modules/org-netbeans-modules-terminal.jar"/>
+    </module_version>
+</module>

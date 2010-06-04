@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.openmole.ui">
+    <module_version install_time="1275645846949" last="true" origin="installer" specification_version="1.0">
+        <file crc="3872955812" name="config/Modules/org-openmole-ui.xml"/>
+        <file crc="910390291" name="modules/org-openmole-ui.jar"/>
+    </module_version>
+</module>

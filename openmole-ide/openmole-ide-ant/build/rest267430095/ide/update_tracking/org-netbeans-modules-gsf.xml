@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.gsf/2">
+    <module_version install_time="1274749664209" last="true" origin="installer" specification_version="0.84.1.2.1.1">
+        <file crc="3922844870" name="config/Modules/org-netbeans-modules-gsf.xml"/>
+        <file crc="1129959663" name="modules/org-netbeans-modules-gsf.jar"/>
+    </module_version>
+</module>

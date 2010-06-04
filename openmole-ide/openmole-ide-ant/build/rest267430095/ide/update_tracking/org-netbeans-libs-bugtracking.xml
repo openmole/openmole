@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.libs.bugtracking">
+    <module_version install_time="1274745112411" last="true" origin="installer" specification_version="1.5.1.1">
+        <file crc="1716512341" name="config/Modules/org-netbeans-libs-bugtracking.xml"/>
+        <file crc="2870023463" name="modules/ext/commons-httpclient-3.1.jar"/>
+        <file crc="1083919118" name="modules/ext/commons-lang-2.3.jar"/>
+        <file crc="4185761237" name="modules/ext/org.eclipse.mylyn.commons.core_3.3.1.jar"/>
+        <file crc="1493922948" name="modules/ext/org.eclipse.mylyn.commons.net_3.3.0.jar"/>
+        <file crc="3107822342" name="modules/ext/org.eclipse.mylyn.tasks.core_3.3.1.jar"/>
+        <file crc="1442046600" name="modules/org-netbeans-libs-bugtracking.jar"/>
+    </module_version>
+</module>

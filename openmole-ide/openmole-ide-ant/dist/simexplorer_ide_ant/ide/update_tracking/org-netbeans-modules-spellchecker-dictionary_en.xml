@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.spellchecker.dictionary_en">
+    <module_version install_time="1274744501379" last="true" origin="installer" specification_version="1.2.1">
+        <file crc="3063149510" name="config/Modules/org-netbeans-modules-spellchecker-dictionary_en.xml"/>
+        <file crc="1095946908" name="modules/dict/dictionary_en.description"/>
+        <file crc="1395082238" name="modules/dict/dictionary_en_GB.description"/>
+        <file crc="1095946908" name="modules/dict/dictionary_en_US.description"/>
+        <file crc="1358256909" name="modules/dict/ispell-enwl-3.1.20.zip"/>
+        <file crc="3532633496" name="modules/org-netbeans-modules-spellchecker-dictionary_en.jar"/>
+    </module_version>
+</module>

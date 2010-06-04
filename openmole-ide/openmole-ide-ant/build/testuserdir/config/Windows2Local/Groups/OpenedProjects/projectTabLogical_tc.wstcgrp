@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-group version="2.0">
+ <module name="org.netbeans.modules.projectui" spec="1.0" />
+ <tc-id id="projectTabLogical_tc"/>
+ <open-close-behavior open="true" close="false" was-opened="false"/>
+</tc-group>

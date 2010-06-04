@@ -1,0 +1,8 @@
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/target/netbinox/platform=1274447588000
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/build/cluster=1275645847000
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/target/netbinox/platform=1274447588000
+/home/mathieu/Applications/netbeans-6.9rc1/ide=1274870354000
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/target/netbinox/netbinox=1274447576000
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/simexplorer-cluster/target=1275579906000
+/home/mathieu/Bureau/coGit/openmole-ecosystem/openmole-ide/openmole-ide-ant/org.openmole.ui/../build/testuserdir=1275645847000
+crc=7

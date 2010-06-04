@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.libs.commons_logging/1">
+    <module_version install_time="1274743205367" last="true" origin="installer" specification_version="1.13.1.11">
+        <file crc="698416739" name="config/Modules/org-netbeans-libs-commons_logging.xml"/>
+        <file crc="3163580034" name="modules/ext/commons-logging-1.1.jar"/>
+        <file crc="3184322603" name="modules/org-netbeans-libs-commons_logging.jar"/>
+    </module_version>
+</module>

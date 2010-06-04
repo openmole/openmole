@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-group version="2.0">
+ <module name="org.netbeans.core.ide/1" spec="1.13" />
+ <tc-id id="services"/>
+ <open-close-behavior open="true" close="false" was-opened="false"/>
+</tc-group>

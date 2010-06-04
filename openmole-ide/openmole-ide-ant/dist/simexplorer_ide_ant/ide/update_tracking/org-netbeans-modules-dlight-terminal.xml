@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.dlight.terminal">
+    <module_version install_time="1274747057496" last="true" origin="installer" specification_version="1.1.1">
+        <file crc="2542683547" name="config/Modules/org-netbeans-modules-dlight-terminal.xml"/>
+        <file crc="115500606" name="modules/org-netbeans-modules-dlight-terminal.jar"/>
+    </module_version>
+</module>

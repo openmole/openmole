@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-group version="2.0">
+ <module name="org.netbeans.spi.navigator/1" spec="1.5" />
+ <tc-id id="navigatorTC"/>
+ <open-close-behavior open="true" close="true" was-opened="false"/>
+</tc-group>

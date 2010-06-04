@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.apidesign.netbinox">
+    <module_version install_time="1274447577883" last="true" origin="installer" specification_version="1.6">
+        <file crc="2841256998" name="config/Modules/org-apidesign-netbinox.xml"/>
+        <file crc="1656220626" name="modules/ext/equinox.jar"/>
+        <file crc="3151477500" name="modules/org-apidesign-netbinox.jar"/>
+    </module_version>
+</module>

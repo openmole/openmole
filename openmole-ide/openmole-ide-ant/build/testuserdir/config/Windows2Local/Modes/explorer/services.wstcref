@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-ref version="2.2">
+    <module name="org.netbeans.core.ide/1" spec="1.13" />
+    <tc-id id="services" />
+    <state opened="false" />
+</tc-ref>

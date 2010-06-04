@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<module codename='org.netbeans.libs.osgi'>
+  <module_version install_time='1274447474519' last='true' origin='Ant' specification_version='1.2'>
+    <file crc='3882420389' name='config/Modules/org-netbeans-libs-osgi.xml'/>
+    <file crc='3805933642' name='modules/ext/osgi.cmpn-4.2.jar'/>
+    <file crc='3776012940' name='modules/ext/osgi.core-4.2.jar'/>
+    <file crc='3647484151' name='modules/org-netbeans-libs-osgi.jar'/>
+  </module_version>
+</module>

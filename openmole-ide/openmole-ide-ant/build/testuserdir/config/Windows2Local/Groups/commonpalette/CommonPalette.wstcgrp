@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-group version="2.0">
+ <module name="org.netbeans.spi.palette/0" spec="1.0" />
+ <tc-id id="CommonPalette"/>
+ <open-close-behavior open="true" close="true" was-opened="false"/>
+</tc-group>

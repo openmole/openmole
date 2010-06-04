@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tc-ref version="2.2">
+    <module name="org.netbeans.modules.tasklist.ui" spec="1.0" />
+    <tc-id id="TaskListTopComponent" />
+    <state opened="false" />
+</tc-ref>

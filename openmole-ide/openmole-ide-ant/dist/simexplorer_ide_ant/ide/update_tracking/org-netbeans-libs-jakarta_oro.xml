@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.libs.jakarta_oro/1">
+    <module_version install_time="1274743222637" last="true" origin="installer" specification_version="1.7.1.208">
+        <file crc="2314134082" name="config/Modules/org-netbeans-libs-jakarta_oro.xml"/>
+        <file crc="1768422690" name="modules/ext/jakarta-oro-2.0.8.jar"/>
+        <file crc="3666577223" name="modules/org-netbeans-libs-jakarta_oro.jar"/>
+    </module_version>
+</module>

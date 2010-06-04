@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.libs.bugzilla">
+    <module_version install_time="1274745124453" last="true" origin="installer" specification_version="1.5.1">
+        <file crc="3152597703" name="config/Modules/org-netbeans-libs-bugzilla.xml"/>
+        <file crc="3128992652" name="modules/ext/org.eclipse.mylyn.bugzilla.core_3.3.1.jar"/>
+        <file crc="1973275161" name="modules/org-netbeans-libs-bugzilla.jar"/>
+    </module_version>
+</module>

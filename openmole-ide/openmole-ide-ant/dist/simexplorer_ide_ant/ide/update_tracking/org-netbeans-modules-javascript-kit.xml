@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.javascript.kit/1">
+    <module_version install_time="1274749593401" last="true" origin="installer" specification_version="0.111.1">
+        <file crc="1357808967" name="config/Modules/org-netbeans-modules-javascript-kit.xml"/>
+        <file crc="2462002870" name="modules/org-netbeans-modules-javascript-kit.jar"/>
+    </module_version>
+</module>

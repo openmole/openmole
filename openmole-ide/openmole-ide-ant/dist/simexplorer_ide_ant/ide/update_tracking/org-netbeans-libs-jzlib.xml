@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.libs.jzlib/1">
+    <module_version install_time="1274744958363" last="true" origin="installer" specification_version="1.4.1.107">
+        <file crc="3845858694" name="config/Modules/org-netbeans-libs-jzlib.xml"/>
+        <file crc="2464973981" name="modules/ext/jzlib-1.0.7.jar"/>
+        <file crc="1699348052" name="modules/org-netbeans-libs-jzlib.jar"/>
+    </module_version>
+</module>

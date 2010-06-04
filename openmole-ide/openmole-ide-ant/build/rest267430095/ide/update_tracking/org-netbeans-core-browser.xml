@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.core.browser/1">
+    <module_version install_time="1274744914008" last="true" origin="installer" specification_version="1.6.1.1">
+        <file crc="2536127157" name="config/Modules/org-netbeans-core-browser.xml"/>
+        <file crc="1069375236" name="modules/org-netbeans-core-browser.jar"/>
+    </module_version>
+</module>
