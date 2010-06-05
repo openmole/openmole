@@ -74,10 +74,12 @@ import org.openmole.plugin.environmentprovider.jsaga.IJSAGALaunchingScript;
 public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescription> {
 
     final static String ConfigGroup = GliteEnvironment.class.getSimpleName();
+
     @InteractiveConfiguration(label = "Certificate location")
     final static ConfigurationLocation CertificatePathLocation = new ConfigurationLocation(ConfigGroup, "CertificatePath");
     @InteractiveConfiguration(label = "Key location")
     final static ConfigurationLocation KeyPathLocation = new ConfigurationLocation(ConfigGroup, "KeyPath");
+
     @InteractiveConfiguration(label = "Key password")
     final static ConfigurationLocation PasswordLocation = new ConfigurationLocation(ConfigGroup, "Password", true);
     @InteractiveConfiguration(label = "Fqan")
@@ -158,6 +160,7 @@ public class GliteEnvironment extends JSAGAEnvironment<GliteEnvironmentDescripti
         // Activator.getUpdater().registerForUpdate(new WaitingThreadInterrupter(), ExecutorType.OWN);
 
     }
+
 
     private File getCACertificatesDir() throws InternalProcessingError, InterruptedException {
         if (CACertificatesDir != null) {

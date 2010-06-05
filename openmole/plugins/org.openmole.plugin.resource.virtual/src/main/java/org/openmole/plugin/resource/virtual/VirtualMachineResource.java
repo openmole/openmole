@@ -42,10 +42,10 @@ import static org.openmole.commons.tools.io.Network.*;
  */
 public class VirtualMachineResource extends ComposedResource {
 
-    final static String[] list = {"qemu", "bios.bin"};
+    final static String[] CommonFiles = {"bios.bin"};
+    final static String Executable = "qemu";
     @Resource
     final FileResource systemResource;
-
     final String user;
     final String password;
     final int memory;
@@ -92,7 +92,7 @@ public class VirtualMachineResource extends ComposedResource {
             @Override
             public void connect(int port) throws IOException, InternalProcessingError {
                 File qemuDir = getQEmuDir();
-                CommandLine commandLine = CommandLine.parse(new File(qemuDir, "qemu").getAbsolutePath() + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -redir tcp:" + port + "::22");
+                CommandLine commandLine = CommandLine.parse(new File(qemuDir, Executable).getAbsolutePath() + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -monitor null -serial none -redir tcp:" + port + "::22");
 
                 Process process = commandLauncher().exec(commandLine, new HashMap());
                 processDestroyer().add(process);
@@ -140,20 +140,30 @@ public class VirtualMachineResource extends ComposedResource {
 
         if (os.toLowerCase().contains("linux")) {
             qemuJarPath = "/qemu_linux/";
+        } else if (os.toLowerCase().contains("windows")) {
+            qemuJarPath = "/qemu_windows/";
         } else {
             throw new InternalProcessingError("Unsuported OS " + os);
         }
+        
+        File qemu = new File(qemuDir, Executable);
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(qemu));
+        try {
+            FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + Executable).openStream(), outputStream);
+            qemu.setExecutable(true);
+        } finally {
+            outputStream.close();
+        }
 
-        for (String f : list) {
+        for (String f : CommonFiles) {
             File dest = new File(qemuDir, f);
-            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
+            outputStream = new BufferedOutputStream(new FileOutputStream(dest));
 
             try {
-                FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
+                FileUtil.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
             } finally {
                 outputStream.close();
             }
-            dest.setExecutable(true);
         }
 
 
@@ -167,7 +177,4 @@ public class VirtualMachineResource extends ComposedResource {
     public String user() {
         return user;
     }
-
-
-
 }
