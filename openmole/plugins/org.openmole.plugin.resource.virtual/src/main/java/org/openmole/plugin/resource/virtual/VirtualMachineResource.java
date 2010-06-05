@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.apache.commons.exec.launcher.CommandLauncher;
@@ -91,10 +92,20 @@ public class VirtualMachineResource extends ComposedResource {
 
             @Override
             public void connect(int port) throws IOException, InternalProcessingError {
-                File qemuDir = getQEmuDir();
-                CommandLine commandLine = CommandLine.parse(new File(qemuDir, Executable).getAbsolutePath() + " -m " + memory + " -smp " + vcore + " -nographic -hda " + systemResource.getDeployedFile().getAbsolutePath() + " -L " + qemuDir.getAbsolutePath() + " -monitor null -serial none -redir tcp:" + port + "::22");
+                File qemuDir = getQEmuDir();  
 
-                Process process = commandLauncher().exec(commandLine, new HashMap());
+                CommandLine commandLine = new CommandLine(new File(qemuDir, Executable));
+                commandLine.addArguments("-m " + memory + " -smp " + vcore +  " -redir tcp:" + port + "::22 -nographic -hda ");
+                commandLine.addArgument(systemResource.getDeployedFile().getAbsolutePath());
+                commandLine.addArguments("-L");
+                commandLine.addArgument(qemuDir.getAbsolutePath());
+                commandLine.addArguments("-monitor null -serial none");
+
+               // Logger.getLogger(VirtualMachineResource.class.getName()).info(commandLine.toString());
+
+                Process process = Runtime.getRuntime().exec(commandLine.toString());
+                //Prevent qemu network from working on Windoze?
+                //Process process = commandLauncher().exec(commandLine, new HashMap());
                 processDestroyer().add(process);
 
                 virtualMachine = new VirtualMachine("localhost", port, process);
@@ -137,27 +148,31 @@ public class VirtualMachineResource extends ComposedResource {
         final String os = System.getProperty("os.name");
         final File qemuDir = Activator.getWorkspace().newTmpDir();
         final String qemuJarPath;
+        final String[] toCopy;
 
         if (os.toLowerCase().contains("linux")) {
             qemuJarPath = "/qemu_linux/";
+            toCopy = new String[]{Executable};
         } else if (os.toLowerCase().contains("windows")) {
             qemuJarPath = "/qemu_windows/";
+            toCopy = new String[]{Executable + ".exe", "SDL.dll"};
         } else {
             throw new InternalProcessingError("Unsuported OS " + os);
         }
-        
-        File qemu = new File(qemuDir, Executable);
-        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(qemu));
-        try {
-            FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + Executable).openStream(), outputStream);
-            qemu.setExecutable(true);
-        } finally {
-            outputStream.close();
-        }
 
+        for (String f : toCopy) {
+            File qemu = new File(qemuDir, f);
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(qemu));
+            try {
+                FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
+                qemu.setExecutable(true);
+            } finally {
+                outputStream.close();
+            }
+        }
         for (String f : CommonFiles) {
             File dest = new File(qemuDir, f);
-            outputStream = new BufferedOutputStream(new FileOutputStream(dest));
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
 
             try {
                 FileUtil.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
