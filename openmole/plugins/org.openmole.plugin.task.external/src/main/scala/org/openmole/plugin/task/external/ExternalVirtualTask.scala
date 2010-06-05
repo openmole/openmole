@@ -108,7 +108,7 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
         try{
           connection.connect( verifier , timeOut, timeOut)
         } catch {
-          case e: Exception => connection.close; throw e
+          case e: Exception => throw e
         }
       } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
     
