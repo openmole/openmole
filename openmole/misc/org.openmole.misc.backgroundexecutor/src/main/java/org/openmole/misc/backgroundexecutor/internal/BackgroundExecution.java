@@ -1,24 +1,24 @@
 package org.openmole.misc.backgroundexecutor.internal;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.openmole.misc.executorservice.ExecutorType;
 
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
-import org.openmole.misc.backgroundexecutor.ITransferable;
 
 public class BackgroundExecution implements IBackgroundExecution {
 
-    final ITransferable transferable;
+    final Callable callable;
     Throwable exception = null;
     boolean finished = false;
     boolean started = false;
  
     Future future;
 
-    public BackgroundExecution(ITransferable transferable) {
+    public BackgroundExecution(Callable callable) {
         super();
-        this.transferable = transferable;
+        this.callable = callable;
     }
 
     @Override
@@ -30,8 +30,15 @@ public class BackgroundExecution implements IBackgroundExecution {
 
             @Override
             public void run() {
+                Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread thread, Throwable thrwbl) {
+                       exception = thrwbl;
+                    }
+                });
+
                 try {
-                    transferable.transfert();
+                    callable.call();
                 } catch (Throwable e) {
                     exception = e;
                 } finally {
@@ -39,6 +46,7 @@ public class BackgroundExecution implements IBackgroundExecution {
                 }
             }
         });
+
         started = true;
     }
 

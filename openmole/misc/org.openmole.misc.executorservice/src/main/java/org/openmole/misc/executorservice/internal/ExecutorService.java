@@ -28,11 +28,12 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class ExecutorService implements IExecutorService {
 
-    static ConfigurationLocation NbTread = new ConfigurationLocation("ExecutorService", "NbThreadsByExecutorTypes");
+    static ConfigurationLocation NbTread = new ConfigurationLocation(ExecutorService.class.getSimpleName(), "NbThreadsByExecutorTypes");
 
     static {
         Activator.getWorkspace().addToConfigurations(NbTread, "20");
     }
+    
     final ThreadFactory threadFactory;
     final Map<Object, java.util.concurrent.ExecutorService> executorServices = new TreeMap<Object, java.util.concurrent.ExecutorService>();
     final java.util.concurrent.ExecutorService cachedPool;

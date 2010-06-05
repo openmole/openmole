@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
@@ -38,7 +39,6 @@ import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.execution.batch.IRuntime;
-import org.openmole.misc.backgroundexecutor.ITransferable;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
@@ -53,7 +53,7 @@ import org.openmole.core.replicacatalog.IReplica;
  *
  * @author reuillon
  */
-class CopyToEnvironment implements ITransferable {
+class CopyToEnvironment implements Callable<Void> {
 
     private IBatchStorage communicationStorage;
     private IURIFile communicationDir;
@@ -71,7 +71,7 @@ class CopyToEnvironment implements ITransferable {
         this.executionContext = executionContext;
     }
 
-    void initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException, Throwable {
+    void initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         Duo<IBatchStorage, IAccessToken> duo = getEnvironment().getAStorage();
 
@@ -105,8 +105,9 @@ class CopyToEnvironment implements ITransferable {
     }
 
     @Override
-    public void transfert() throws Throwable {
+    public Void call() throws Exception {
         initCommunication();
+        return null;
     }
 
     public boolean isInitialized() {

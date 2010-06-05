@@ -708,7 +708,7 @@ public class URIFile implements IURIFile {
     public void remove(boolean timeOut, final boolean recursive, final IAccessToken token) throws IOException, InterruptedException {
         final NSEntry entry = fetchEntry();
         try {
-            boolean directory = isDirectory(entry);
+           /* boolean directory = isDirectory(entry);
 
             if (recursive && directory) {
                 List<String> chlids = list(token);
@@ -717,11 +717,11 @@ public class URIFile implements IURIFile {
                     getChild(child).remove(timeOut, recursive, token);
                 }
 
-            }
+            }*/
 
             Task<?, ?> task;
             try {
-                if (recursive && directory) {
+                if (recursive /*&& directory*/) {
                     task = entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue());
                 } else {
                     task = entry.remove(TaskMode.ASYNC);

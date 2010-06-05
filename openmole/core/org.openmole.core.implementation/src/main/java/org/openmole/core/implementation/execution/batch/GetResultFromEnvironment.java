@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -27,7 +28,6 @@ import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.misc.backgroundexecutor.ITransferable;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
@@ -39,7 +39,7 @@ import org.openmole.core.model.mole.IExecutionContext;
  *
  * @author reuillon
  */
-public class GetResultFromEnvironment implements ITransferable {
+public class GetResultFromEnvironment implements Callable<Void> {
 
     final IBatchStorage communicationStorage;
     final IURIFile outputFile;
@@ -64,7 +64,7 @@ public class GetResultFromEnvironment implements ITransferable {
      }
 
     @Override
-    public void transfert() throws Throwable {
+    public Void call() throws Exception {
 
         IAccessToken token = Activator.getBatchRessourceControl().waitAToken(communicationStorage.getDescription());
 
@@ -90,7 +90,7 @@ public class GetResultFromEnvironment implements ITransferable {
 
                     FileUtil.copy(new FileInputStream(stdOutFile), System.out);
                 } catch (IOException e) {
-                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
+                   Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
                 }
 
             } else {
@@ -221,6 +221,7 @@ public class GetResultFromEnvironment implements ITransferable {
         } finally {
             Activator.getBatchRessourceControl().releaseToken(communicationStorage.getDescription(), token);
         }
+        return null;
     }
 
     public IJob getJob() {
