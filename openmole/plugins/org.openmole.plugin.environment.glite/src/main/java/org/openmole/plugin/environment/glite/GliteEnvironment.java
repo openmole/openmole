@@ -18,6 +18,7 @@ package org.openmole.plugin.environment.glite;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent;
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
@@ -119,8 +120,49 @@ public class GliteEnvironment extends JSAGAEnvironment {
     Integer threadsBySE;
     String VOName;
 
-    public GliteEnvironment(GliteEnvironmentDescription description) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError {
         super(description);
+        init(description);
+        this.bdiiURL = bdii;
+    }
+
+    public GliteEnvironment(GliteEnvironmentDescription description, String requieredCPUTime, String bdii) throws InternalProcessingError {
+        super(description, requieredCPUTime);
+        init(description);
+        this.bdiiURL = bdii;
+    }
+
+    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String bdii) throws InternalProcessingError {
+        super(description, requieredMemory);
+        init(description);
+        this.bdiiURL = bdii;
+    }
+
+    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String requieredCPUTime, String bdii) throws InternalProcessingError {
+        super(description, requieredMemory, requieredCPUTime);
+        init(description);
+        this.bdiiURL = bdii;
+    }
+
+    public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL),bdii);
+    }
+
+    public GliteEnvironment(String voName, String vomsURL, String requieredCPUTime, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), requieredCPUTime, bdii);
+    }
+
+    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, bdii);
+    }
+
+    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, String requieredCPUTime, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, requieredCPUTime, bdii);
+    }
+
+    
+
+    private void init(GliteEnvironmentDescription description) throws InternalProcessingError{
         VOName = description.getVoName();
         threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
         threadsByWMS = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsByWMSLocation);
@@ -130,10 +172,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         long overSubmissionInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(OverSubmissionIntervalLocation);
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
-        //Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new WorkloadOnAverages(MinimumStatistic, ResubmitRatioWating, KillRatioWaiting, ResubmitRatioRunning, KillRatioRunning, MaxNumberOfSimultaneousExecutionForAJob, this), Activator.getWorkspace().getPreferenceAsInt(MinimumNumberOfJobsLocation), Activator.getWorkspace().getPreferenceAsInt(NumberOfSimultaneousExecutionForAJobWhenUnderMinJobLocation)), ExecutorType.OWN);
         Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin, overSubmissionInterval), ExecutorType.OWN);
-
-        // Activator.getUpdater().registerForUpdate(new WaitingThreadInterrupter(), ExecutorType.OWN);
 
     }
 
@@ -194,15 +233,4 @@ public class GliteEnvironment extends JSAGAEnvironment {
         return new BDII(bdiiURL);
     }
 
-    /*  @Override
-    public void setConfigurationMode(EnvironmentConfiguration configuration) throws InternalProcessingError {
-    switch (configuration) {
-    case Local:
-    threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
-    break;
-    case Remote:
-    threadsBySE = RemoteThreadsBySE;
-    break;
-    }
-    }*/
 }

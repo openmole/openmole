@@ -28,29 +28,41 @@ import org.openmole.plugin.environment.jsaga.internal.Activator;
 
 public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService> {
 
-    final static ConfigurationLocation CPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "CPUTime");
-    final static ConfigurationLocation Memory  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "Memory");
+    final static ConfigurationLocation DefaultRequieredCPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredCPUTime");
+    final static ConfigurationLocation DefaultRequieredMemory  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredMemory");
 
     static  {
-        Activator.getWorkspace().addToConfigurations(CPUTime, "PT12H");
-        Activator.getWorkspace().addToConfigurations(Memory, "800");
+        Activator.getWorkspace().addToConfigurations(DefaultRequieredCPUTime, "PT12H");
+        Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "800");
     }
 
-    int memoryVal;
-    String CPUTimeVal;
+    final private int requieredMemory;
+    final private String requieredCPUTime;
+
+    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
+        super(description);
+        this.requieredMemory = requieredMemory;
+        this.requieredCPUTime = requieredCPUTime;
+    }
+
+    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory) throws InternalProcessingError {
+        this(description, requieredMemory, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    }
+
+    public JSAGAEnvironment(IBatchEnvironmentDescription description, String requieredCPUTime) throws InternalProcessingError {
+        this(description, Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), requieredCPUTime);
+    }
 
     public JSAGAEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
-        super(description);
-        this.memoryVal = Activator.getWorkspace().getPreferenceAsInt(Memory);
-        this.CPUTimeVal = Activator.getWorkspace().getPreference(CPUTime);
+        this(description, Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
-    public int getCPUTime() {
-        return ISOPeriodFormat.standard().parsePeriod(CPUTimeVal).toStandardSeconds().getSeconds();
+    public int getRequieredCPUTime() {
+        return ISOPeriodFormat.standard().parsePeriod(requieredCPUTime).toStandardSeconds().getSeconds();
     }
 
-    public int getMemory() {
-        return memoryVal;
+    public int getRequieredMemory() {
+        return requieredMemory;
     }
 
     abstract public IJSAGALaunchingScript getLaunchingScript();
