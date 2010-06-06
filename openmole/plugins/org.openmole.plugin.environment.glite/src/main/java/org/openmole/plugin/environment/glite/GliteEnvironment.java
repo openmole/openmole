@@ -101,14 +101,12 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Activator.getWorkspace().addToConfigurations(LocalThreadsBySELocation, "5");
         Activator.getWorkspace().addToConfigurations(LocalThreadsByWMSLocation, "5");
 
-
         Activator.getWorkspace().addToConfigurations(ProxyRenewalRatio, "0.2");
 
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioWaitingLocation, "0.5");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioRunningLocation, "0.2");
         Activator.getWorkspace().addToConfigurations(OverSubmissionRatioEpsilonLocation, "0.01");
         Activator.getWorkspace().addToConfigurations(OverSubmissionIntervalLocation, "PT5M");
-
 
         Activator.getWorkspace().addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
         Activator.getWorkspace().addToConfigurations(OverSubmissionNumberOfJobUnderMin, Integer.toString(3));

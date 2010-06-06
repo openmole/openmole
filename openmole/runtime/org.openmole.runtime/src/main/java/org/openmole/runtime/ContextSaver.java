@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.runtime;
 
 import java.io.File;
@@ -49,16 +48,17 @@ public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob>
 
     @Override
     public void objectChanged(IMoleJob job) {
-        if (job.getState() == State.COMPLETED) {
-            Iterable<File> files = FileMigrator.extractFilesFromVariables(job.getContext());
+        switch (job.getState()) {
+            case COMPLETED:
+                Iterable<File> files = FileMigrator.extractFilesFromVariables(job.getContext());
 
-            for (File f : files) {
-                outFiles.add(f);
-            }
-
-            IContext res = job.getContext();
-            res.chRoot();
-            results.add(new Duo<IMoleJobId, IContext>(job.getId(), res));
+                for (File f : files) {
+                    outFiles.add(f);
+                }
+            case FAILED:
+                IContext res = job.getContext();
+                res.chRoot();
+                results.add(new Duo<IMoleJobId, IContext>(job.getId(), res));
         }
     }
 }
