@@ -28,7 +28,6 @@ import org.openmole.commons.exception.ExecutionException;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.State;

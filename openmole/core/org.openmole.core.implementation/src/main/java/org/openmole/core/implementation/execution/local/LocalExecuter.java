@@ -18,8 +18,6 @@ package org.openmole.core.implementation.execution.local;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openmole.commons.exception.ExecutionException;
-
 
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IJobStatisticCategory;

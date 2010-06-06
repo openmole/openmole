@@ -88,7 +88,10 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
                     }
 
-                    FileUtil.copy(new FileInputStream(stdOutFile), System.out);
+                    synchronized(System.out) {
+                        System.out.println("Output on remote host:");
+                        FileUtil.copy(new FileInputStream(stdOutFile), System.out);
+                    }
                 } catch (IOException e) {
                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
                 }
@@ -105,8 +108,10 @@ public class GetResultFromEnvironment implements Callable<Void> {
                     if (!stdErrHash.equals(result.getStdErr().getRight())) {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
                     }
-
-                    FileUtil.copy(new FileInputStream(stdErrFile), System.err);
+                    synchronized(System.err) {
+                        System.err.println("Error output on remote host:");
+                        FileUtil.copy(new FileInputStream(stdErrFile), System.err);
+                    }
                 } catch (IOException e) {
                     Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
                 }
