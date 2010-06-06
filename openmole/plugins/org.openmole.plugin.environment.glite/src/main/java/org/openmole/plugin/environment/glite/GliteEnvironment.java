@@ -18,7 +18,6 @@ package org.openmole.plugin.environment.glite;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent;
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
@@ -53,13 +52,21 @@ public class GliteEnvironment extends JSAGAEnvironment {
 
     final static String ConfigGroup = GliteEnvironment.class.getSimpleName();
 
-    @InteractiveConfiguration(label = "Certificate location")
+    @InteractiveConfiguration(label = "CertificateType type", choices = {"pem", "p12"})
+    final static ConfigurationLocation CertificateType = new ConfigurationLocation(ConfigGroup, "CertificateType");
+
+    @InteractiveConfiguration(label = "PEM Certificate location", dependOn = "CertificateType", value = "pem")
     final static ConfigurationLocation CertificatePathLocation = new ConfigurationLocation(ConfigGroup, "CertificatePath");
-    @InteractiveConfiguration(label = "Key location")
+
+    @InteractiveConfiguration(label = "PEM Key location", dependOn = "CertificateType", value = "pem")
     final static ConfigurationLocation KeyPathLocation = new ConfigurationLocation(ConfigGroup, "KeyPath");
+
+    @InteractiveConfiguration(label = "P12 Certificate Location", dependOn = "CertificateType", value = "p12")
+    final static ConfigurationLocation P12CertificateLocation = new ConfigurationLocation(ConfigGroup, "P12CertificateLocation");
 
     @InteractiveConfiguration(label = "Key password")
     final static ConfigurationLocation PasswordLocation = new ConfigurationLocation(ConfigGroup, "Password", true);
+
     @InteractiveConfiguration(label = "Fqan")
     
     final static ConfigurationLocation FqanLocation = new ConfigurationLocation(ConfigGroup, "Fqan");
@@ -93,6 +100,15 @@ public class GliteEnvironment extends JSAGAEnvironment {
             }
         });
 
+        Activator.getWorkspace().addToConfigurations(P12CertificateLocation, new ConfigurationElement() {
+
+            @Override
+            public String getDefaultValue() {
+                return System.getProperty("user.home") + "/.globus/certificate.p12";
+            }
+        });
+
+        Activator.getWorkspace().addToConfigurations(CertificateType, "pem");
         Activator.getWorkspace().addToConfigurations(TimeLocation, "PT24H");
         Activator.getWorkspace().addToConfigurations(FetchRessourcesTimeOutLocation, "PT2M");
         Activator.getWorkspace().addToConfigurations(CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/");

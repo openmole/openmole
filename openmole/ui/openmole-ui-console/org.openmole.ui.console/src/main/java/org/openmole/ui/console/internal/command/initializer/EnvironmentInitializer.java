@@ -18,7 +18,6 @@ package org.openmole.ui.console.internal.command.initializer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.object.SuperClassesLister;
@@ -31,6 +30,16 @@ import org.openmole.ui.console.internal.Activator;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public class EnvironmentInitializer implements IInitializer<IEnvironment> {
+
+    static private boolean isValueInArray(String value, String[] values) {
+        boolean ret = false;
+        for (String v : values) {
+            if (value.equals(v)) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
 
     @Override
     public void initialize(IEnvironment environment, Class object) {
@@ -47,17 +56,43 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                             f.setAccessible(true);
                             ConfigurationLocation location = (ConfigurationLocation) f.get(null);
                             f.setAccessible(accessible);
-                            String line;
-                            String label = interactiveConfiguration.label() + " (" + Activator.getWorkspace().getDefaultValue(location) + "): ";
-                            if (location.isCyphered()) {
-                                line = new jline.ConsoleReader().readLine(label, '*');
+
+                            boolean enabled;
+
+                            if (!interactiveConfiguration.dependOn().isEmpty()) {
+                                String value = Activator.getWorkspace().getPreference(new ConfigurationLocation(location.getGroup(), interactiveConfiguration.dependOn()));
+                                enabled = value.equals(interactiveConfiguration.value());
                             } else {
-                                line = new jline.ConsoleReader().readLine(label);
+                                enabled = true;
                             }
-                            if(!line.isEmpty()) {
-                                Activator.getWorkspace().setPreference(location, line);
-                            } else {
-                                Activator.getWorkspace().removePreference(location);
+
+                            if (enabled) {
+
+                                String line;
+                                do {
+                                    String possibleValues;
+                                    if(interactiveConfiguration.choices().length != 0) {
+                                        possibleValues = "[";
+                                        for(int i = 0; i < interactiveConfiguration.choices().length; i++) {
+                                            possibleValues += interactiveConfiguration.choices()[i];
+                                            if(i < interactiveConfiguration.choices().length - 1) possibleValues += ','; 
+                                        }
+                                        possibleValues += ']';
+                                    } else possibleValues = "";
+
+                                    String label = interactiveConfiguration.label() + " (" + Activator.getWorkspace().getDefaultValue(location) + ") " + possibleValues + ':';
+                                    if (location.isCyphered()) {
+                                        line = new jline.ConsoleReader().readLine(label, '*');
+                                    } else {
+                                        line = new jline.ConsoleReader().readLine(label);
+                                    }
+                                } while (interactiveConfiguration.choices().length != 0 && !isValueInArray(line, interactiveConfiguration.choices()));
+
+                                if (!line.isEmpty()) {
+                                    Activator.getWorkspace().setPreference(location, line);
+                                } else {
+                                    Activator.getWorkspace().removePreference(location);
+                                }
                             }
                         } catch (IOException e) {
                             throw new Error(e);

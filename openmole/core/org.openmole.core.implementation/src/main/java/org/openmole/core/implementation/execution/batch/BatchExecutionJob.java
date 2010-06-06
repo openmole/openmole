@@ -41,7 +41,6 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
 import org.openmole.core.model.execution.IJobStatisticCategory;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.mole.IExecutionContext;

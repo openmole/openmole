@@ -145,7 +145,7 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
         Activator.getJSagaSessionService().addContext(ctx);
     }
 
-    public void initContext(Context ctx) throws InternalProcessingError, InterruptedException {
+    public void initContext(Context ctx) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
         try {
             ctx.setAttribute(Context.TYPE, "VOMS");
@@ -159,8 +159,14 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
             }
             ctx.setAttribute(Context.USERPROXY, proxy.getCanonicalPath());
 
-            ctx.setAttribute(Context.USERCERT, getCertPath());
-            ctx.setAttribute(Context.USERKEY, getKeyPath());
+            if(getCertType().equalsIgnoreCase("p12")) {
+                ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath());
+            } else if(getCertType().equalsIgnoreCase("pem")) {
+                ctx.setAttribute(Context.USERCERT, getCertPath());
+                ctx.setAttribute(Context.USERKEY, getKeyPath());
+            } else {
+                throw new UserBadDataError("Unknown cert type " + getCertType());
+            }
 
             ctx.setAttribute(Context.SERVER, getVomsURL());
             ctx.setAttribute(Context.USERVO, getVoName());
@@ -196,6 +202,14 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
         } catch (IOException e) {
             throw new InternalProcessingError(e);
         }
+    }
+
+    private static String getCertType() throws InternalProcessingError {
+        return Activator.getWorkspace().getPreference(GliteEnvironment.CertificateType);
+    }
+
+    private static String getP12CertPath() throws InternalProcessingError {
+        return Activator.getWorkspace().getPreference(GliteEnvironment.P12CertificateLocation);
     }
 
     private static String getCertPath() throws InternalProcessingError {

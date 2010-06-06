@@ -21,6 +21,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  *
@@ -30,4 +32,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface InteractiveConfiguration {
     String label();
+    String[] choices() default {};
+    String dependOn() default "";
+    String value() default "";
 }
