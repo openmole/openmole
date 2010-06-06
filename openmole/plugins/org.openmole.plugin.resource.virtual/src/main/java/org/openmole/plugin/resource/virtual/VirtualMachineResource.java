@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
@@ -81,9 +82,16 @@ public class VirtualMachineResource extends ComposedResource {
     }
 
     public IVirtualMachine launchAVirtualMachine() throws UserBadDataError, InternalProcessingError {
-        File vmImage = systemResource.getDeployedFile();
-        if (!vmImage.isFile()) {
-            throw new UserBadDataError("Image " + vmImage.getAbsolutePath() + " doesn't exist or is not a file.");
+        if (!systemResource.getDeployedFile().isFile()) {
+            throw new UserBadDataError("Image " + systemResource.getDeployedFile().getAbsolutePath() + " doesn't exist or is not a file.");
+        }
+
+        final File vmImage;
+        try {
+            vmImage = Activator.getWorkspace().newTmpFile();
+            FileUtil.copy(systemResource.getDeployedFile(), vmImage);
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
         }
 
         class VirtualMachineConnector implements IConnectable {
