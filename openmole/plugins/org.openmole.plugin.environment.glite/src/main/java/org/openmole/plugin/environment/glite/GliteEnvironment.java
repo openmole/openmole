@@ -122,28 +122,34 @@ public class GliteEnvironment extends JSAGAEnvironment {
 
     public GliteEnvironment(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError {
         super(description);
-        init(description);
-        this.bdiiURL = bdii;
+        init(description, bdii);
     }
 
     public GliteEnvironment(GliteEnvironmentDescription description, String requieredCPUTime, String bdii) throws InternalProcessingError {
         super(description, requieredCPUTime);
-        init(description);
-        this.bdiiURL = bdii;
+        init(description, bdii);
     }
 
     public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String bdii) throws InternalProcessingError {
         super(description, requieredMemory);
-        init(description);
-        this.bdiiURL = bdii;
+        init(description, bdii);
     }
 
     public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String requieredCPUTime, String bdii) throws InternalProcessingError {
         super(description, requieredMemory, requieredCPUTime);
-        init(description);
-        this.bdiiURL = bdii;
+        init(description, bdii);
     }
 
+    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, int memoryForRuntime, String bdii) throws InternalProcessingError {
+        super(description, requieredMemory, memoryForRuntime);
+        init(description, bdii);
+    }
+
+    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, int memoryForRuntime , String requieredCPUTime, String bdii) throws InternalProcessingError {
+        super(description, requieredMemory, memoryForRuntime, requieredCPUTime);
+        init(description, bdii);
+    }
+    
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
         this(new GliteEnvironmentDescription(voName, vomsURL),bdii);
     }
@@ -160,9 +166,16 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, requieredCPUTime, bdii);
     }
 
-    
+    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, int memoryForRuntime, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, memoryForRuntime, bdii);
+    }
 
-    private void init(GliteEnvironmentDescription description) throws InternalProcessingError{
+    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, int memoryForRuntime, String requieredCPUTime, String bdii) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory,memoryForRuntime, requieredCPUTime, bdii);
+    }
+
+    private void init(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError{
+        this.bdiiURL = bdii;
         VOName = description.getVoName();
         threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
         threadsByWMS = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsByWMSLocation);

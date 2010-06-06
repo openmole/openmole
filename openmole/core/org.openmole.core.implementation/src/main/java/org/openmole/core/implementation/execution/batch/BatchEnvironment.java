@@ -62,15 +62,12 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
 
-    static {
-        Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
-    }
-
     final static ConfigurationLocation BestStoragesRatio = new ConfigurationLocation(ConfigGroup, "BestStoragesRatio");
     final static ConfigurationLocation BestJobServiceRatio = new ConfigurationLocation(ConfigGroup, "BestJobServiceRatio");
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
 
     static {
+        Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
         Activator.getWorkspace().addToConfigurations(BestStoragesRatio, "1.0");
         Activator.getWorkspace().addToConfigurations(BestJobServiceRatio, "1.0");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "0.5");
@@ -85,15 +82,19 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     Integer memorySizeForRuntime;
     File runtime;
 
-    public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
+    public BatchEnvironment(IBatchEnvironmentDescription description, int memorySizeForRuntime) throws InternalProcessingError {
         super();
         Activator.getBatchEnvironmentAuthenticationRegistry().createAuthenticationIfNeeded(description);
 
         this.description = description;
-        memorySizeForRuntime = Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime);
+        this.memorySizeForRuntime = memorySizeForRuntime;
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN);
     }
     
+    public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
+        this(description, Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime));
+    }
+
     @Override
     public void submit(IJob job, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError {
         final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job, executionContext);
@@ -111,14 +112,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         }
 
         return runtime;
-    }
-
-    public void setRuntime(File runtime) {
-        this.runtime = runtime;
-    }
-
-    public void setRuntime(String runtime) {
-        this.runtime = new File(runtime);
     }
 
     @Override

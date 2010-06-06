@@ -30,7 +30,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
  */
 public abstract class BatchService implements IBatchService {
 
-    final static ConfigurationLocation HistorySize = new ConfigurationLocation(BatchService.class.getName(), "HistorySize");
+    final static ConfigurationLocation HistorySize = new ConfigurationLocation(BatchService.class.getSimpleName(), "HistorySize");
 
     static {
         Activator.getWorkspace().addToConfigurations(HistorySize, "100");

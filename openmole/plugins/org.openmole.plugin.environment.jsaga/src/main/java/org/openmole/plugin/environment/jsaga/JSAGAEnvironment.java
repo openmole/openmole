@@ -33,7 +33,7 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
 
     static  {
         Activator.getWorkspace().addToConfigurations(DefaultRequieredCPUTime, "PT12H");
-        Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "800");
+        Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "1024");
     }
 
     final private int requieredMemory;
@@ -55,6 +55,16 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
 
     public JSAGAEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
         this(description, Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    }
+
+    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
+        super(description, memoryForRuntime);
+        this.requieredMemory = requieredMemory;
+        this.requieredCPUTime = requieredCPUTime;
+    }
+
+    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
+        this(description, requieredMemory, memoryForRuntime, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
     public int getRequieredCPUTime() {
