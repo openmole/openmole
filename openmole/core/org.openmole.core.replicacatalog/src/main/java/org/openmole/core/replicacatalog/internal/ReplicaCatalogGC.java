@@ -40,9 +40,10 @@ public class ReplicaCatalogGC implements IUpdatable {
 
         for (IReplica replica : catalog.getAllReplicas()) {
 
-            //May be the pluggin is not loaded in this case a version of the description class is persisted by db4o
-            if (Activator.getEnvironmentProvider().isDescriptionRegistred(replica.getEnvironmentDescription())) {
-                if (!replica.getSource().exists() && replica.getEnvironmentDescription().getMatching().isAccessInitialized()) {
+            //May be the env pluggin is not loaded in this case a version of the description class is persisted by db4o
+            if (Activator.getBatchEnvironmentAuthenticationRegistry().isRegistred(replica.getEnvironmentDescription())) {
+                boolean initialized = Activator.getBatchEnvironmentAuthenticationRegistry().getAuthentication(replica.getEnvironmentDescription()).isAccessInitialized();
+                if (!replica.getSource().exists() && initialized) {
                     catalog.clean(replica);
                 }
             }

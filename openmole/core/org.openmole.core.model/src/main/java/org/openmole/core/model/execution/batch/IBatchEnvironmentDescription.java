@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.execution.batch;
 
-import org.openmole.core.model.execution.IEnvironmentDescription;
 
-public interface IBatchEnvironmentDescription<ENV extends IBatchEnvironment> extends IEnvironmentDescription<ENV>{
-    
+public interface IBatchEnvironmentDescription {
+    IBatchEnvironmentAuthentication createBatchEnvironmentAuthentication();
 }

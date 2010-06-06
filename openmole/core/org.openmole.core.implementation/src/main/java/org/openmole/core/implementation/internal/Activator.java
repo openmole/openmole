@@ -21,18 +21,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
+import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
+import org.openmole.core.runtimemessageserializer.IBatchEnvironmentDescriptionSerializer;
 import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.environmentprovider.IEnvironmentProvider;
-import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
 
 public class Activator implements BundleActivator {
 
@@ -47,10 +47,10 @@ public class Activator implements BundleActivator {
     private static IBackgroundExecutor transferMonitor;
     private static IEventDispatcher eventDispatcher;
     private static IPluginManager pluginManager;
-    private static IEnvironmentProvider environmentProvider;
+    private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
     private static IFileService fileService;
     private static IHashService hashService;
-    private static IEnvironmentDescriptionSerializer environmentDescriptionSerializer;
+    private static IBatchEnvironmentDescriptionSerializer batchEnvironmentDescriptionSerializer;
 
     @Override
     public synchronized void start(BundleContext context) throws Exception {
@@ -197,12 +197,12 @@ public class Activator implements BundleActivator {
     }
 
 
-    public synchronized static IEnvironmentProvider getEnvironmentProvider() {
-        if (environmentProvider == null) {
-            ServiceReference ref = getContext().getServiceReference(IEnvironmentProvider.class.getName());
-            environmentProvider = (IEnvironmentProvider) getContext().getService(ref);
+    public synchronized static IBatchEnvironmentAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
+        if (batchEnvironmentAuthenticationRegistry == null) {
+            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentAuthenticationRegistry.class.getName());
+            batchEnvironmentAuthenticationRegistry = (IBatchEnvironmentAuthenticationRegistry) getContext().getService(ref);
         }
-        return environmentProvider;
+        return batchEnvironmentAuthenticationRegistry;
     }
 
     public synchronized static IFileService getFileService() {
@@ -227,11 +227,11 @@ public class Activator implements BundleActivator {
         return hashService;
     }
 
-    public synchronized static IEnvironmentDescriptionSerializer getEnvironmentDescriptionSerializer() {
-        if (environmentDescriptionSerializer == null) {
-            ServiceReference ref = getContext().getServiceReference(IEnvironmentDescriptionSerializer.class.getName());
-            environmentDescriptionSerializer = (IEnvironmentDescriptionSerializer) getContext().getService(ref);
+    public synchronized static IBatchEnvironmentDescriptionSerializer getEnvironmentDescriptionSerializer() {
+        if (batchEnvironmentDescriptionSerializer == null) {
+            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentDescriptionSerializer.class.getName());
+            batchEnvironmentDescriptionSerializer = (IBatchEnvironmentDescriptionSerializer) getContext().getService(ref);
         }
-        return environmentDescriptionSerializer;
+        return batchEnvironmentDescriptionSerializer;
     }
 }

@@ -20,7 +20,7 @@ package org.openmole.core.implementation.mole;
 import java.util.HashMap;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmentDescription;
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.execution.IEnvironment;
@@ -32,11 +32,11 @@ import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
  */
 public class FixedEnvironmentStrategy implements IEnvironmentSelectionStrategy {
 
-    Map<IGenericTaskCapsule, IEnvironment> environments = new HashMap<IGenericTaskCapsule, IEnvironment>();
-    IEnvironment defaultEnvironment;
+    final Map<IGenericTaskCapsule, IEnvironment> environments = new HashMap<IGenericTaskCapsule, IEnvironment>();
+    final IEnvironment defaultEnvironment;
 
     public FixedEnvironmentStrategy() throws InternalProcessingError {
-        defaultEnvironment = Activator.getEnvironmentProvider().getEnvironment(new LocalExecutionEnvironmentDescription());
+        defaultEnvironment = LocalExecutionEnvironment.getInstance();
     }
 
     @Override

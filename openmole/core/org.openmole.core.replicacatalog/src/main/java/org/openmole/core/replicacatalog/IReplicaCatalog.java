@@ -25,6 +25,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 
 public interface IReplicaCatalog {
@@ -37,5 +38,5 @@ public interface IReplicaCatalog {
 
     void remove(IReplica replica);
 
-    void removeAllReplicaForEnvironment(IEnvironment environment);
+    void removeAllReplicaForEnvironment(IBatchEnvironment environment);
 }

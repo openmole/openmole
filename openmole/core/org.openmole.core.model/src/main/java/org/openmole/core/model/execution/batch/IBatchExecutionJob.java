@@ -22,7 +22,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
 
-public interface IBatchExecutionJob<ENV extends IBatchEnvironment<?,?>> extends IExecutionJob<ENV> {
+public interface IBatchExecutionJob<ENV extends IBatchEnvironment<?>> extends IExecutionJob<ENV> {
         IBatchJob getBatchJob();
 	void kill() throws UserBadDataError, InternalProcessingError, InterruptedException;
 }

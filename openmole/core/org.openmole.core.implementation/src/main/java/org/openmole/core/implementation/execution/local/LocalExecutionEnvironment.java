@@ -17,10 +17,8 @@
 
 package org.openmole.core.implementation.execution.local;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -42,7 +40,7 @@ import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public class LocalExecutionEnvironment extends Environment<LocalExecutionEnvironmentDescription, IExecutionJob> {
+public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     final static String ConfigGroup = LocalExecutionEnvironment.class.getSimpleName();
     final static ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "Time");
@@ -59,7 +57,7 @@ public class LocalExecutionEnvironment extends Environment<LocalExecutionEnviron
     int nbThread;
 
     private LocalExecutionEnvironment() throws InternalProcessingError {
-        super(new LocalExecutionEnvironmentDescription());
+        super();
         this.nbThread = Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads);
         addExecuters(nbThread);
     }
@@ -128,15 +126,6 @@ public class LocalExecutionEnvironment extends Environment<LocalExecutionEnviron
     Trio<IExecutionContext,IJobStatisticCategory, LocalExecutionJob> takeNextjob() throws InterruptedException {
         return jobs.take();
     }
-
-    @Override
-    public void initializeAccess() {}
-
-    @Override
-    public boolean isAccessInitialized() {
-        return true;
-    }
-
 
     public synchronized static LocalExecutionEnvironment getInstance() throws InternalProcessingError {
         if(instance == null) {

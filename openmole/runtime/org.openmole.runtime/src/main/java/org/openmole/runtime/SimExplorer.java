@@ -60,6 +60,7 @@ import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
@@ -95,8 +96,8 @@ public class SimExplorer implements IApplication {
         Activator.getPluginManager().loadDir(environmentPluginDir);
 
         /* get env and init */
-        IEnvironment real = Activator.getEnvironmentDescriptionSerializer().deserialize(new GZipedURIFile(new URIFile(new File(environmentDescription))).getFile()).getMatching();
-        real.initializeAccess();
+        IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(new GZipedURIFile(new URIFile(new File(environmentDescription))).getFile());
+        real.createBatchEnvironmentAuthentication().initializeAccess();
         //real.setConfigurationMode(EnvironmentConfiguration.Remote);
 
 

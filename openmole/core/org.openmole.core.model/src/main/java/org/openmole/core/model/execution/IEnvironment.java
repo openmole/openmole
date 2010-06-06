@@ -24,14 +24,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.mole.IExecutionContext;
 
-public interface IEnvironment<DESC extends IEnvironmentDescription,EXECUTIONJOB extends IExecutionJob> {
+public interface IEnvironment<EXECUTIONJOB extends IExecutionJob> {
         void submit(IJob job, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError;
-
-	DESC getDescription();
-
-        void initializeAccess() throws UserBadDataError, InternalProcessingError, InterruptedException;
-        boolean isAccessInitialized();
-
         IExecutionJobRegistries<EXECUTIONJOB> getJobRegistries();
         IEnvironmentExecutionStatistics getStatistics();
 }

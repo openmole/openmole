@@ -18,6 +18,7 @@
 
 package org.openmole.core.replicacatalog.internal;
 
+import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -26,7 +27,6 @@ import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.misc.workspace.IWorkspace;
-import org.openmole.core.environmentprovider.IEnvironmentProvider;
 
 public class Activator implements BundleActivator {
 
@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
     private static IExecutorService executorService;
  //   private static IBatchRessourceControl batchRessourceControl;
     private static IUpdater updater;
-    private static IEnvironmentProvider environmentProvider;
+    private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
     private IReplicaCatalog catalog;
     private ServiceRegistration reg;
 
@@ -82,19 +82,6 @@ public class Activator implements BundleActivator {
         return executorService;
     }
 
-   /* public static IBatchRessourceControl getBatchRessourceControl() {
-        if (batchRessourceControl != null) {
-            return batchRessourceControl;
-        }
-
-        synchronized (Activator.class) {
-            if (batchRessourceControl == null) {
-                ServiceReference ref = getContext().getServiceReference(IBatchRessourceControl.class.getName());
-                batchRessourceControl = (IBatchRessourceControl) getContext().getService(ref);
-            }
-            return batchRessourceControl;
-        }
-    }*/
 
     public static IUpdater getUpdater() {
         if (updater != null) {
@@ -111,11 +98,11 @@ public class Activator implements BundleActivator {
     }
 
 
-      public synchronized static IEnvironmentProvider getEnvironmentProvider() {
-        if (environmentProvider == null) {
-            ServiceReference ref = getContext().getServiceReference(IEnvironmentProvider.class.getName());
-            environmentProvider = (IEnvironmentProvider) getContext().getService(ref);
+      public synchronized static IBatchEnvironmentAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
+        if (batchEnvironmentAuthenticationRegistry == null) {
+            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentAuthenticationRegistry.class.getName());
+            batchEnvironmentAuthenticationRegistry = (IBatchEnvironmentAuthenticationRegistry) getContext().getService(ref);
         }
-        return environmentProvider;
+        return batchEnvironmentAuthenticationRegistry;
     }
 }

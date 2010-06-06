@@ -33,12 +33,12 @@ import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.service.RNG;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 
 public class BatchStorage extends BatchService implements IBatchStorage {
 
@@ -51,8 +51,8 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     transient IURIFile tmpSpace;
     transient IURIFile persistentSpace;
 
-    public BatchStorage(URI baselocation, IBatchEnvironment<?, ?> executionEnvironment, int nbAccess) throws InternalProcessingError {
-        super(executionEnvironment, new BatchStorageDescription(baselocation),  new UsageControl(nbAccess), new FailureControl(historySize));
+    public BatchStorage(URI baselocation, IBatchEnvironmentDescription batchEnvironmentDescription, int nbAccess) throws InternalProcessingError {
+        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation),  new UsageControl(nbAccess), new FailureControl(Activator.getWorkspace().getPreferenceAsInt(HistorySize)));
         this.location = baselocation;
     }
 

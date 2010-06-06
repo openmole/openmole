@@ -17,11 +17,12 @@
 package org.openmole.core.implementation.execution.batch;
 
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.IFailureControl;
 import org.openmole.core.model.execution.batch.IUsageControl;
+import org.openmole.misc.workspace.ConfigurationLocation;
 
 /**
  *
@@ -29,12 +30,19 @@ import org.openmole.core.model.execution.batch.IUsageControl;
  */
 public abstract class BatchService implements IBatchService {
 
+    final static ConfigurationLocation HistorySize = new ConfigurationLocation(BatchService.class.getName(), "HistorySize");
+
+    static {
+        Activator.getWorkspace().addToConfigurations(HistorySize, "100");
+    }
+
+
     private IBatchServiceDescription description;
-    private IBatchEnvironment executionEnvironment;
+    private IBatchEnvironmentDescription batchEnvironmentDescription;
 
    // private IBatchServiceGroup<?> group;
 
-    public BatchService(IBatchEnvironment executionEnvironment, IBatchServiceDescription description, IUsageControl usageControl, IFailureControl failureControl) {
+    public BatchService(IBatchEnvironmentDescription batchEnvironmentDescription, IBatchServiceDescription description, IUsageControl usageControl, IFailureControl failureControl) {
 
         if(!Activator.getBatchRessourceControl().contains(description)) {
             Activator.getBatchRessourceControl().registerRessouce(description, usageControl, failureControl);
@@ -43,7 +51,7 @@ public abstract class BatchService implements IBatchService {
         }
 
         this.description = description;
-        this.executionEnvironment = executionEnvironment;
+        this.batchEnvironmentDescription = batchEnvironmentDescription;
     }
 
     @Override
@@ -51,10 +59,9 @@ public abstract class BatchService implements IBatchService {
         return description;
     }
 
-   
     @Override
-    public IBatchEnvironment<?, ?> getExecutionEnvironment() {
-        return executionEnvironment;
+    public IBatchEnvironmentDescription getBatchExecutionEnvironmentDescription() {
+        return batchEnvironmentDescription;
     }
 
     @Override

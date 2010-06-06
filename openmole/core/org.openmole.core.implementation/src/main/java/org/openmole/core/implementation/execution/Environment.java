@@ -18,7 +18,6 @@ package org.openmole.core.implementation.execution;
 
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.IEnvironment;
-import org.openmole.core.model.execution.IEnvironmentDescription;
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.execution.IExecutionJobRegistries;
@@ -28,7 +27,7 @@ import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public abstract class Environment<DESC extends IEnvironmentDescription, EXECUTIONJOB extends IExecutionJob> implements IEnvironment<DESC, EXECUTIONJOB> {
+public abstract class Environment<EXECUTIONJOB extends IExecutionJob> implements IEnvironment<EXECUTIONJOB> {
 
     final static String ConfigGroup = Environment.class.getSimpleName();
     final static ConfigurationLocation StatisticsHistorySize = new ConfigurationLocation(ConfigGroup, "StatisticsHistorySize");
@@ -37,20 +36,12 @@ public abstract class Environment<DESC extends IEnvironmentDescription, EXECUTIO
             Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "1000");
     }
 
-
-    DESC description;
     IEnvironmentExecutionStatistics statistics;
     IExecutionJobRegistries<EXECUTIONJOB> jobRegistries = new ExecutionJobRegistries<EXECUTIONJOB>();
 
-    public Environment(DESC description) throws InternalProcessingError {
+    public Environment() throws InternalProcessingError {
         super();
-        this.description = description;
         statistics = new EnvironmentExecutionStatistics(Activator.getWorkspace().getPreferenceAsInt(StatisticsHistorySize));
-    }
-
-    @Override
-    public DESC getDescription() {
-        return description;
     }
 
     @Override

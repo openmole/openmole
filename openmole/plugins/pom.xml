@@ -18,8 +18,8 @@
     <modules>
         <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>
-        <module>org.openmole.plugin.environmentprovider.jsaga</module>
-        <module>org.openmole.plugin.environmentprovider.glite</module>
+        <module>org.openmole.plugin.environment.jsaga</module>
+        <module>org.openmole.plugin.environment.glite</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.onvariable</module>
         <module>org.openmole.plugin.molejobgroupingstrategy.batch</module>
 	<module>org.openmole.plugin.resource.virtual</module>

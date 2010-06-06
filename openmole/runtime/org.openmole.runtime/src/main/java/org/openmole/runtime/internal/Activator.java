@@ -7,8 +7,7 @@ import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
-import org.openmole.core.replicacatalog.IReplicaCatalog;
-import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
+import org.openmole.core.runtimemessageserializer.IBatchEnvironmentDescriptionSerializer;
 import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.workspace.IWorkspace;
@@ -17,9 +16,8 @@ public class Activator implements BundleActivator {
 
     private static BundleContext context;
     private static IRuntimeMessageSerializer messageSerializer;
-    private static IReplicaCatalog replicaCatalog;
     private static IWorkspace workspace;
-    private static IEnvironmentDescriptionSerializer environmentDescriptionSerializer;
+    private static IBatchEnvironmentDescriptionSerializer batchEnvironmentDescriptionSerializer;
     private static IJSagaSessionService jSagaSessionService;
     private static IBackgroundExecutor backgroundExecutor;
     private static IEventDispatcher eventDispatcher;
@@ -49,14 +47,6 @@ public class Activator implements BundleActivator {
         return context;
     }
 
-    public synchronized static IReplicaCatalog getReplicaCatalog() {
-        if (replicaCatalog == null) {
-            ServiceReference ref = getContext().getServiceReference(IReplicaCatalog.class.getName());
-            replicaCatalog = (IReplicaCatalog) getContext().getService(ref);
-        }
-        return replicaCatalog;
-    }
-
     public synchronized static IWorkspace getWorkspace() {
         if (workspace == null) {
             ServiceReference ref = getContext().getServiceReference(IWorkspace.class.getName());
@@ -65,12 +55,12 @@ public class Activator implements BundleActivator {
         return workspace;
     }
 
-    public synchronized static IEnvironmentDescriptionSerializer getEnvironmentDescriptionSerializer() {
-        if (environmentDescriptionSerializer == null) {
-            ServiceReference ref = getContext().getServiceReference(IEnvironmentDescriptionSerializer.class.getName());
-            environmentDescriptionSerializer = (IEnvironmentDescriptionSerializer) getContext().getService(ref);
+    public synchronized static IBatchEnvironmentDescriptionSerializer getEnvironmentDescriptionSerializer() {
+        if (batchEnvironmentDescriptionSerializer == null) {
+            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentDescriptionSerializer.class.getName());
+            batchEnvironmentDescriptionSerializer = (IBatchEnvironmentDescriptionSerializer) getContext().getService(ref);
         }
-        return environmentDescriptionSerializer;
+        return batchEnvironmentDescriptionSerializer;
     }
 
     public static IJSagaSessionService getJSagaSessionService() {

@@ -31,21 +31,30 @@ import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Trio;
+import org.openmole.core.implementation.internal.Activator;
 import org.openmole.misc.updater.IUpdatable;
+import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchJobWatcher implements IUpdatable {
 
-    static long CheckInterval = 2 * 60 * 1000;
-    IBatchEnvironment<?, ?> watchedEnv;
+    final static ConfigurationLocation CheckInterval = new ConfigurationLocation(BatchJobWatcher.class.getName(), "CheckInterval");
 
-    public BatchJobWatcher(IBatchEnvironment<?, ?> watchedEnv) {
+    static {
+        Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
+    }
+
+    final long interval;
+    final IBatchEnvironment<?> watchedEnv;
+
+    public BatchJobWatcher(IBatchEnvironment<?> watchedEnv) throws InternalProcessingError {
         super();
+        this.interval = Activator.getWorkspace().getPreferenceAsDurationInMs(CheckInterval);
         this.watchedEnv = watchedEnv;
     }
 
     @Override
     public long getUpdateInterval() {
-        return CheckInterval;
+        return interval;
     }
 
     @Override

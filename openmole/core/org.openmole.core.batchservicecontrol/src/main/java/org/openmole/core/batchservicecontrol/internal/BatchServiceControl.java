@@ -94,9 +94,9 @@ public class BatchServiceControl implements IBatchServiceControl {
     public synchronized void registerRessouce(IBatchServiceDescription ressource, IUsageControl usageControl, IFailureControl failureControl) {
         if (!contains(ressource)) {
             ressources.put(ressource, new Duo<IUsageControl, IFailureControl>(usageControl, failureControl));
-        } else {
+        } /*else {
             Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Ressource with description " + ressource.toString() + " is allready registred.");
-        }
+        }*/
     }
 
     @ObjectModified(type = resourceReleased)

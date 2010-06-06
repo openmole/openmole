@@ -20,7 +20,7 @@ import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.job.IJob;
 
-public abstract class ExecutionJob<ENV extends IEnvironment<?, ?>>  implements IExecutionJob<ENV> {
+public abstract class ExecutionJob<ENV extends IEnvironment<?>>  implements IExecutionJob<ENV> {
 
     ENV executionEnvironment;
     IJob job;

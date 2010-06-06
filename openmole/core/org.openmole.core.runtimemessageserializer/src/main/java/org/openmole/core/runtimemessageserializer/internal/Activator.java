@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.runtimemessageserializer.IEnvironmentDescriptionSerializer;
+import org.openmole.core.runtimemessageserializer.IBatchEnvironmentDescriptionSerializer;
 import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
         this.context = context;
 
         msgSerial = context.registerService(IRuntimeMessageSerializer.class.getName(), getRuntimeMessageSerializer(), null);
-        descSerial = context.registerService(IEnvironmentDescriptionSerializer.class.getName(), new EnvironmentDescriptionSerializer(), null);
+        descSerial = context.registerService(IBatchEnvironmentDescriptionSerializer.class.getName(), new BatchEnvironmentDescriptionSerializer(), null);
  
     }
 

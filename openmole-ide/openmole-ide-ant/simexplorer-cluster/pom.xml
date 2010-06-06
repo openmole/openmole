@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.environmentprovider.glite</artifactId>
+            <artifactId>org.openmole.plugin.environment.glite</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.environmentprovider.jsaga</artifactId>
+            <artifactId>org.openmole.plugin.environment.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

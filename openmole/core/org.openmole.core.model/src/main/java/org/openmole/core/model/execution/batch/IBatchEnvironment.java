@@ -14,28 +14,34 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.model.execution.batch;
 
 import java.io.File;
+import java.util.Collection;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.model.execution.IEnvironment;
 
-public interface IBatchEnvironment<JS extends IBatchJobService, DESC extends IBatchEnvironmentDescription> extends IEnvironment<DESC, IBatchExecutionJob> {
-	IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
-	IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException;
-	
-	//IBatchService getRessource(IBatchServiceDescription desc) throws InternalProcessingError, UserBadDataError;
-	//IBatchStorage getStorage(IBatchStorageDescription desc) throws InternalProcessingError, UserBadDataError;
-	
-	Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException ;
-	Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException;
+public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnvironment<IBatchExecutionJob> {
 
-	
-	File getRuntime() throws UserBadDataError;
-	
-        void clean() throws InterruptedException, UserBadDataError, InternalProcessingError;
+    File getRuntime() throws UserBadDataError, InternalProcessingError;
+
+    void clean() throws InterruptedException, UserBadDataError, InternalProcessingError;
+
+    IBatchEnvironmentDescription getDescription();
+
+    IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError;
+
+    Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError;
+
+    Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError;
+
+    IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

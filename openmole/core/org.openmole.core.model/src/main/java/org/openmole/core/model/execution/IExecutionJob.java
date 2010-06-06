@@ -19,7 +19,7 @@ package org.openmole.core.model.execution;
 
 import org.openmole.core.model.job.IJob;
 
-public interface IExecutionJob<ENV extends IEnvironment<?, ?>> {
+public interface IExecutionJob<ENV extends IEnvironment<?>> {
 	ExecutionState getState();
 	ENV getEnvironment();
 	IJob getJob();

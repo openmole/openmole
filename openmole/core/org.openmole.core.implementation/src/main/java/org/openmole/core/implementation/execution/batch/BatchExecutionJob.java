@@ -41,11 +41,12 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
 import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.mole.IExecutionContext;
 
-public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS, ?>> implements IBatchExecutionJob<BatchEnvironment<JS, ?>>, IUpdatable {
+public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatable {
 
     final static String configurationGroup = BatchExecutionJob.class.getSimpleName();
     final static ConfigurationLocation UpdateInterval = new ConfigurationLocation(configurationGroup, "UpdateInterval");
@@ -67,7 +68,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     transient IURIFile outputFile;
     transient Lock killLock;
 
-    public BatchExecutionJob(BatchEnvironment<JS, ?> executionEnvironment, IJob job, IExecutionContext executionContext) throws InternalProcessingError {
+    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job, IExecutionContext executionContext) throws InternalProcessingError {
         super(executionEnvironment, job);
         this.updateInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(UpdateInterval);
         this.initStorage = new CopyToEnvironment(executionEnvironment, job, executionContext);
@@ -197,8 +198,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             if (initStorageExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
                 Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
                 try {
-                    //Logger.getLogger(BatchExecutionJob.class.getName()).info(js.getLeft().getDescription() + ": " + Activator.getBatchRessourceControl().getFailureRate(js.getLeft().getDescription()));
-
                     IBatchJob bj = js.getLeft().createBatchJob(getInitStorage().getInputFile(), getInitStorage().getOutputFile(), getInitStorage().getRuntime());
                     bj.submit(js.getRight());
                     setBatchJob(bj);

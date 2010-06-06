@@ -14,19 +14,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.execution.batch;
 
-
 public interface IBatchService {
-	final static int historySize = 100;
-	//public static long WaitTimeout = 2 * 60 * 1000;
 
-	//public void setGroup(IBatchServiceGroup<?> group);
-	
-	boolean test();
-	
-	IBatchServiceDescription getDescription();
-	
-	IBatchEnvironment<?,?> getExecutionEnvironment();
+    boolean test();
+
+    IBatchServiceDescription getDescription();
+
+    IBatchEnvironmentDescription getBatchExecutionEnvironmentDescription();
 }

@@ -21,10 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,63 +35,62 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchJobService;
-import org.openmole.core.model.execution.batch.IBatchService;
-import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.aspect.caching.Cachable;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.model.execution.IJobStatisticCategory;
+import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.misc.workspace.InteractiveConfiguration;
 
-public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends IBatchEnvironmentDescription> extends Environment<DESC, IBatchExecutionJob> implements IBatchEnvironment<JS, DESC> {
+public abstract class BatchEnvironment<JS extends IBatchJobService> extends Environment<IBatchExecutionJob> implements IBatchEnvironment<JS> {
 
     final static String ConfigGroup = BatchEnvironment.class.getSimpleName();
+    final static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
+
+    @InteractiveConfiguration(label = "Runtime location")
+    final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
+
+    static {
+        Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
+    }
+
     final static ConfigurationLocation BestStoragesRatio = new ConfigurationLocation(ConfigGroup, "BestStoragesRatio");
     final static ConfigurationLocation BestJobServiceRatio = new ConfigurationLocation(ConfigGroup, "BestJobServiceRatio");
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
-    final public static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
 
     static {
         Activator.getWorkspace().addToConfigurations(BestStoragesRatio, "1.0");
         Activator.getWorkspace().addToConfigurations(BestJobServiceRatio, "1.0");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "0.5");
-        Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
     }
-    
-    transient BatchServiceGroup<JS> jobServices;
-    transient BatchServiceGroup<IBatchStorage> storages;
-    transient Lock initJS;
-    transient Lock initST;
-    transient Map<IBatchServiceDescription, IBatchStorage> storageCache;
-    transient Lock storageCacheLock;
-    transient Map<IBatchServiceDescription, IBatchService> ressourceCache;
-    transient Lock ressourceCacheLock;
-    transient Integer memorySizeForRuntime;
 
-    transient boolean isAccessInitialized = false;
+    BatchServiceGroup<JS> jobServices;
+    BatchServiceGroup<IBatchStorage> storages;
+    Lock initJS;
+    Lock initST;
 
-
-
-     //FIXME potential problems for serialization
+    IBatchEnvironmentDescription description;
+    Integer memorySizeForRuntime;
     File runtime;
 
-    //final Map<IJob, IGenericTaskCapsule<?, ?>> taskCapsuleForJob = Collections.synchronizedMap(new WeakHashMap<IJob, IGenericTaskCapsule<?, ?>>());
+    public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
+        super();
+        Activator.getBatchEnvironmentAuthenticationRegistry().createAuthenticationIfNeeded(description);
 
-    public BatchEnvironment(DESC description) throws InternalProcessingError {
-        super(description);
+        this.description = description;
         memorySizeForRuntime = Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime);
-        //Logger.getLogger(BatchEnvironment.class.getName()).info("Initializing " + toString() + " " + getDescription().toString());
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN);
     }
     
@@ -108,287 +104,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
         getJobRegistries().register(executionContext, statisticCategory, bej);
     }
 
-
-    protected BatchServiceGroup<IBatchStorage> selectStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        initializeAccessIfNeeded();
-        final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsDouble(BestStoragesRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
-
-        Collection<IBatchStorage> stors = allStorages();
-
-
-        /*for(IBatchStorage storage: stors) {
-            Logger.getLogger(BatchEnvironment.class.getName()).info(storage.getURI().toString());
-        }*/
-
-        final Semaphore oneFinished = new Semaphore(0);
-        final AtomicInteger nbLeftRunning = new AtomicInteger(stors.size());
-
-        for (final IBatchStorage storage : stors) {
-            Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        if (storage.test()) {
-                           // Logger.getLogger(BatchEnvironment.class.getName()).info("Accepted " + storage.getURI().toString());
-                            //System.out.println("Found " + storage.toString());
-                            storages.put(storage);
-                        }/* else {
-                               Logger.getLogger(BatchEnvironment.class.getName()).info("Rejected " + storage.getURI().toString());
-
-                        }*/
-
-                        
-                    } finally {
-                        nbLeftRunning.decrementAndGet();
-                        oneFinished.release();
-                    }
-                }
-            };
-
-            Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(r);
-        }
-
-        while ((storages.isEmpty()) && nbLeftRunning.get() > 0) {
-            try {
-                oneFinished.acquire();
-            } catch (InterruptedException e) {
-                Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, null, e);
-            }
-        }
-
-        if (storages.isEmpty()) {
-            throw new InternalProcessingError("No storage available");
-        }
-        return storages;
-    }
-
-    protected BatchServiceGroup<JS> selectWorkingJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        initializeAccessIfNeeded();
-        final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsDouble(BestJobServiceRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
-        Collection<JS> allJobServices = allJobServices();
-        final Semaphore done = new Semaphore(0);
-        final AtomicInteger nbStillRunning = new AtomicInteger(allJobServices.size());
-
-        for (final JS js : allJobServices) {
-
-            Runnable test = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        if (js.test()) {
-                            //Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Accepted JS " + js.toString());
-                            jobServices.put(js);
-                        } /*else {
-                            Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Not accepted JS " + js.toString());
-                        }*/
-                    } finally {
-                        nbStillRunning.decrementAndGet();
-                        done.release();
-                    }
-                }
-            };
-
-            Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(test);
-        }
-
-
-        while (jobServices.isEmpty() && nbStillRunning.get() > 0) {
-            try {
-                done.acquire();
-            } catch (InterruptedException e) {
-                Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, null, e);
-            }
-        }
-
-        if (jobServices.isEmpty()) {
-            throw new InternalProcessingError("No job submission service available");
-        }
-
-        return jobServices;
-    }
-
     @Override
-    public Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        return getStorages().getAService();
-    }
-
-    @Override
-    public IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
-
-        getInitJS().lock();
-        try {
-            if (jobServices == null || jobServices.isEmpty()) {
-                //initialize();
-                jobServices = selectWorkingJobServices();
-            }
-            return jobServices;
-        } finally {
-            getInitJS().unlock();
-        }
-    }
-
-    @Override
-    public IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        getInitST().lock();
-
-        try {
-            if (storages == null || storages.isEmpty()) {
-                //Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Initializing storages for " + System.identityHashCode(this));
-                storages = selectStorages();
-            }
-            return storages;
-        } finally {
-            getInitST().unlock();
-        }
-
-
-    }
-
-    @Override
-    public Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException {
-            return getJobServices().getAService();
-    }
-
- /*   @Override
-    public IBatchService getRessource(IBatchServiceDescription desc) throws InternalProcessingError, UserBadDataError {
-        IBatchService ressource = getBatchStorageCache().get(desc);
-        if (ressource == null) {
-            ressource = getRessourceCache().get(desc);
-        }
-        if (ressource == null) {
-            throw new InternalProcessingError("Ressource with description " + desc.toString() + " doesn't exist.");
-        }
-        return ressource;
-    }
-
-    @Override
-    public IBatchStorage getStorage(IBatchStorageDescription desc) throws InternalProcessingError, UserBadDataError {
-        IBatchStorage storage = getBatchStorageCache().get(desc);
-        if (storage == null) {
-            throw new InternalProcessingError("Storage with description " + desc.toString() + " doesn't exist.");
-        }
-        return storage;
-    }*/
-
-    private Map<IBatchServiceDescription, IBatchService> getRessourceCache() throws InternalProcessingError, UserBadDataError {
-        if (ressourceCache != null) {
-            return ressourceCache;
-        }
-
-        getRessourceCacheLock().lock();
-        try {
-
-            if (ressourceCache == null) {
-                Map<IBatchServiceDescription, IBatchService> ressourceCacheTmp = new HashMap<IBatchServiceDescription, IBatchService>();
-
-                Iterator<JS> it = allJobServices().iterator();
-
-                while (it.hasNext()) {
-                    JS js = it.next();
-                    IBatchServiceDescription desc = js.getDescription();
-                    ressourceCacheTmp.put(desc, js);
-                }
-
-                ressourceCache = ressourceCacheTmp;
-            }
-            return ressourceCache;
-        } finally {
-            getRessourceCacheLock().unlock();
-        }
-    }
-
-    private Map<IBatchServiceDescription, IBatchStorage> getBatchStorageCache() throws InternalProcessingError, UserBadDataError {
-        if (storageCache != null) {
-            return storageCache;
-        }
-
-        getStorageCacheLock().lock();
-
-        try {
-
-            if (storageCache == null) {
-                Map<IBatchServiceDescription, IBatchStorage> storageCacheTmp = new HashMap<IBatchServiceDescription, IBatchStorage>();
-
-
-                Iterator<IBatchStorage> itStorage = allStorages().iterator();
-
-                while (itStorage.hasNext()) {
-                    IBatchStorage sto = itStorage.next();
-                    IBatchServiceDescription desc = sto.getDescription();
-                    storageCacheTmp.put(desc, sto);
-                }
-
-                storageCache = storageCacheTmp;
-            }
-
-            return storageCache;
-
-        } finally {
-            getStorageCacheLock().unlock();
-        }
-
-
-    }
-
-    private Lock getInitJS() {
-        if (initJS != null) {
-            return initJS;
-        }
-
-        synchronized (this) {
-            if (initJS == null) {
-                initJS = new ReentrantLock();
-            }
-            return initJS;
-        }
-    }
-
-    private Lock getInitST() {
-        if (initST != null) {
-            return initST;
-        }
-
-        synchronized (this) {
-            if (initST == null) {
-                initST = new ReentrantLock();
-            }
-            return initST;
-        }
-    }
-
-    private Lock getRessourceCacheLock() {
-        if (ressourceCacheLock != null) {
-            return ressourceCacheLock;
-        }
-
-        synchronized (this) {
-            if (ressourceCacheLock == null) {
-                ressourceCacheLock = new ReentrantLock();
-            }
-            return ressourceCacheLock;
-        }
-    }
-
-    private Lock getStorageCacheLock() {
-        if (storageCacheLock != null) {
-            return storageCacheLock;
-        }
-
-        synchronized (this) {
-            if (storageCacheLock == null) {
-                storageCacheLock = new ReentrantLock();
-            }
-            return storageCacheLock;
-        }
-    }
-
-
-    @Override
-    public File getRuntime() throws UserBadDataError {
+    public synchronized File getRuntime() throws UserBadDataError, InternalProcessingError{
         if (runtime == null) {
-            throw new UserBadDataError("Runtime archive URI has not been set for environment " + toString());
+            runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
         }
 
         return runtime;
@@ -404,7 +123,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
 
     @Override
     public void clean() throws InterruptedException, InternalProcessingError, UserBadDataError {
-        initializeAccessIfNeeded();
+        getAuthentication().initializeAccessIfNeeded();
         Activator.getReplicaCatalog().removeAllReplicaForEnvironment(this);
 
         Collection<Future> futures = new LinkedList<Future>();
@@ -466,23 +185,15 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
     }
 
 
-    public synchronized void initializeAccessIfNeeded() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        if(!isAccessInitialized) {
-            initializeAccess();
-            isAccessInitialized = true;
-        }
-    }
-
-    @Override
-    public boolean isAccessInitialized() {
-        return isAccessInitialized;
-    }
 
     public Integer getMemorySizeForRuntime() {
         return memorySizeForRuntime;
     }
 
-
+    @Override
+    public IBatchEnvironmentDescription getDescription() {
+        return description;
+    }
 
     @Cachable
     public File getDescriptionFile() throws InternalProcessingError, InterruptedException {
@@ -495,7 +206,153 @@ public abstract class BatchEnvironment<JS extends IBatchJobService, DESC extends
         }
     }
 
-    protected abstract Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError;
+    @Override
+    public IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError {
+        return Activator.getBatchEnvironmentAuthenticationRegistry().getAuthentication(description);
+    }
 
-    protected abstract Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError;
+    protected BatchServiceGroup<IBatchStorage> selectStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
+        getAuthentication().initializeAccessIfNeeded();
+        final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsDouble(BestStoragesRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
+
+        Collection<IBatchStorage> stors = allStorages();
+
+        final Semaphore oneFinished = new Semaphore(0);
+        final AtomicInteger nbLeftRunning = new AtomicInteger(stors.size());
+
+        for (final IBatchStorage storage : stors) {
+            Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        if (storage.test()) {
+                            storages.put(storage);
+                        }
+                    } finally {
+                        nbLeftRunning.decrementAndGet();
+                        oneFinished.release();
+                    }
+                }
+            };
+
+            Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(r);
+        }
+
+        while ((storages.isEmpty()) && nbLeftRunning.get() > 0) {
+             oneFinished.acquire();
+        }
+
+        if (storages.isEmpty()) {
+            throw new InternalProcessingError("No storage available");
+        }
+        return storages;
+    }
+
+    protected BatchServiceGroup<JS> selectWorkingJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
+        getAuthentication().initializeAccessIfNeeded();
+        final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsDouble(BestJobServiceRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
+        Collection<JS> allJobServices = allJobServices();
+        final Semaphore done = new Semaphore(0);
+        final AtomicInteger nbStillRunning = new AtomicInteger(allJobServices.size());
+
+        for (final JS js : allJobServices) {
+
+            Runnable test = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        if (js.test()) {
+                            jobServices.put(js);
+                        }
+                    } finally {
+                        nbStillRunning.decrementAndGet();
+                        done.release();
+                    }
+                }
+            };
+
+            Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(test);
+        }
+
+
+        while (jobServices.isEmpty() && nbStillRunning.get() > 0) {
+                done.acquire();
+        }
+
+        if (jobServices.isEmpty()) {
+            throw new InternalProcessingError("No job submission service available");
+        }
+
+        return jobServices;
+    }
+
+    @Override
+    public Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException {
+        return getStorages().getAService();
+    }
+
+    @Override
+    public IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
+
+        getInitJS().lock();
+        try {
+            if (jobServices == null || jobServices.isEmpty()) {
+                jobServices = selectWorkingJobServices();
+            }
+            return jobServices;
+        } finally {
+            getInitJS().unlock();
+        }
+    }
+
+    @Override
+    public IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
+        getInitST().lock();
+
+        try {
+            if (storages == null || storages.isEmpty()) {
+                //Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Initializing storages for " + System.identityHashCode(this));
+                storages = selectStorages();
+            }
+            return storages;
+        } finally {
+            getInitST().unlock();
+        }
+
+
+    }
+
+    @Override
+    public Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException {
+            return getJobServices().getAService();
+    }
+
+    private Lock getInitJS() {
+        if (initJS != null) {
+            return initJS;
+        }
+
+        synchronized (this) {
+            if (initJS == null) {
+                initJS = new ReentrantLock();
+            }
+            return initJS;
+        }
+    }
+
+    private Lock getInitST() {
+        if (initST != null) {
+            return initST;
+        }
+
+        synchronized (this) {
+            if (initST == null) {
+                initST = new ReentrantLock();
+            }
+            return initST;
+        }
+    }
+
 }

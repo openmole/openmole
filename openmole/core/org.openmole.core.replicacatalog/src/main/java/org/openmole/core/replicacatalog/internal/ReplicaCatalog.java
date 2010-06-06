@@ -55,6 +55,7 @@ import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.IBatchStorage;
@@ -148,14 +149,14 @@ public class ReplicaCatalog implements IReplicaCatalog {
     @Override
     public IReplica uploadAndGet(final File src, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
-        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getExecutionEnvironment().getDescription());
+        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription());
 
         locks.lock(key);
 
         Replica replica;
         try {
             IBatchServiceDescription storageDescription = storage.getDescription();
-            IBatchEnvironmentDescription environmentDescription = storage.getExecutionEnvironment().getDescription();
+            IBatchEnvironmentDescription environmentDescription = storage.getBatchExecutionEnvironmentDescription();
 
             replica = getReplica(src, hash, storageDescription, environmentDescription, zipped);
             if (replica == null) {
@@ -178,7 +179,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                         URIFile.copy(new URIFile(src), newFile, token);
 
-                        replica = new Replica(src, hash, storage.getDescription(), storage.getExecutionEnvironment().getDescription(), zipped, newFile);
+                        replica = new Replica(src, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);
 
                        // Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Upload replica " + replica.toString());
@@ -339,7 +340,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
     }
 
     @Override
-    synchronized public void removeAllReplicaForEnvironment(IEnvironment environment) {
+    synchronized public void removeAllReplicaForEnvironment(IBatchEnvironment environment) {
 
         ObjectContainer container = objServeur;
         try {
