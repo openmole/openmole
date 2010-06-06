@@ -80,10 +80,11 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                                         possibleValues += ']';
                                     } else possibleValues = "";
 
-                                    String label = interactiveConfiguration.label() + " (" + Activator.getWorkspace().getDefaultValue(location) + ") " + possibleValues + ':';
+                                    String label = interactiveConfiguration.label();
                                     if (location.isCyphered()) {
                                         line = new jline.ConsoleReader().readLine(label, '*');
                                     } else {
+                                        label += " (" + Activator.getWorkspace().getPreference(location) + ") " + possibleValues + ':';
                                         line = new jline.ConsoleReader().readLine(label);
                                     }
                                 } while (interactiveConfiguration.choices().length != 0 && !isValueInArray(line, interactiveConfiguration.choices()));
