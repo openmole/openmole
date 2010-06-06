@@ -72,7 +72,7 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                                 do {
                                     String possibleValues;
                                     if(interactiveConfiguration.choices().length != 0) {
-                                        possibleValues = "[";
+                                        possibleValues = " [";
                                         for(int i = 0; i < interactiveConfiguration.choices().length; i++) {
                                             possibleValues += interactiveConfiguration.choices()[i];
                                             if(i < interactiveConfiguration.choices().length - 1) possibleValues += ','; 
@@ -82,9 +82,10 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
 
                                     String label = interactiveConfiguration.label();
                                     if (location.isCyphered()) {
+                                        label += ": ";
                                         line = new jline.ConsoleReader().readLine(label, '*');
                                     } else {
-                                        label += " (" + Activator.getWorkspace().getPreference(location) + ") " + possibleValues + ':';
+                                        label += " (" + Activator.getWorkspace().getPreference(location) + ")" + possibleValues + ": ";
                                         line = new jline.ConsoleReader().readLine(label);
                                     }
                                 } while (interactiveConfiguration.choices().length != 0 && !isValueInArray(line, interactiveConfiguration.choices()));
