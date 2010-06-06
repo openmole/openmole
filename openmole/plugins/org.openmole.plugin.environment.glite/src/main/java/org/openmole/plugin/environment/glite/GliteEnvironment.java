@@ -61,7 +61,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     @InteractiveConfiguration(label = "PEM Key location", dependOn = "CertificateType", value = "pem")
     final static ConfigurationLocation KeyPathLocation = new ConfigurationLocation(ConfigGroup, "KeyPath");
 
-    @InteractiveConfiguration(label = "P12 Certificate Location", dependOn = "CertificateType", value = "p12")
+    @InteractiveConfiguration(label = "P12 Certificate Location", dependOn = "CertificateType", value = "p12")
     final static ConfigurationLocation P12CertificateLocation = new ConfigurationLocation(ConfigGroup, "P12CertificateLocation");
 
     @InteractiveConfiguration(label = "Key password")
