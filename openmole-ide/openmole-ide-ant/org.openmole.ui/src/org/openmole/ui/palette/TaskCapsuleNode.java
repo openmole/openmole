@@ -23,7 +23,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import org.openide.util.datatransfer.ExTransferable;
 import org.openmole.ui.commons.ApplicationCustomize;
-import org.openmole.ui.workflow.implementation.PropertyManager;
+import org.openmole.ui.palette.Category.CategoryName;
 import org.openmole.ui.workflow.implementation.TaskCapsuleModelUI;
 
 /**
@@ -34,8 +34,8 @@ public class TaskCapsuleNode extends GenericNode{
 
     public TaskCapsuleNode(DataFlavor key) {
         super(key,
-              PropertyManager.TASK_CAPSULE,
-              org.openmole.core.implementation.capsule.TaskCapsule.class);
+              CategoryName.TASK_CAPSULE,
+              org.openmole.core.workflow.implementation.capsule.TaskCapsule.class);
     }
 
      //DND start

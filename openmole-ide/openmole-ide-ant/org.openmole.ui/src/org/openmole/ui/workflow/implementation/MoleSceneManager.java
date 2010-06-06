@@ -16,14 +16,16 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+<<<<<<< HEAD
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.exception.UserBadDataError;
+=======
+>>>>>>> ide update
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
+import org.openmole.ui.workflow.model.ITaskCapsuleView;
 
 /**
  *
@@ -31,8 +33,7 @@ import org.openmole.ui.workflow.model.ICapsuleModelUI;
  */
 public class MoleSceneManager {
 
-    private BidiMap<String, ICapsuleModelUI> taskCapsuleModels = new DualHashBidiMap<String, ICapsuleModelUI>();
-    private Map<String, IPrototype> prototypes = new HashMap<String, IPrototype>();
+    private BidiMap<String, ITaskCapsuleView> taskViews = new DualHashBidiMap<String, ITaskCapsuleView>();
     private int nodeCounter = 0;
     private int nodeID = 0;
 
@@ -48,46 +49,34 @@ public class MoleSceneManager {
         return "node" + nodeID;
     }
 
-    public void registerPrototype(IPrototype p) {
-        prototypes.put(p.getName(), p);
+    public Set<ITaskCapsuleView> getTaskViews(){
+        return taskViews.values();
     }
 
-    public IPrototype getPrototype(String st) throws UserBadDataError {
-        if (prototypes.containsKey(st)) {
-            return prototypes.get(st);
-        } else {
-            throw new UserBadDataError("The prototype " + st + " doest not exist.");
-        }
-    }
-
-    public Collection<String> getPrototypes(){
-        return prototypes.keySet();
-    }
-    
-    public void registerTaskCapsuleModel(ICapsuleModelUI cm) {
-        taskCapsuleModels.put(getNodeID(), cm);
+    public void registerTaskView(ITaskCapsuleView cv) {
+        taskViews.put(getNodeID(), cv);
         nodeID++;
     }
 
-    public String getTaskCapsuleModel(ICapsuleModelUI cm) {
-        return taskCapsuleModels.getKey(cm);
+    public String getTaskViewID(ITaskCapsuleView cv) {
+        return taskViews.getKey(cv);
     }
 
-    public ICapsuleModelUI getTaskCapsuleModel(String name) {
-        return taskCapsuleModels.get(name);
+    public ITaskCapsuleView getTaskView(String name) {
+        return taskViews.get(name);
     }
 
-    public void removeTaskCapsuleModel(ICapsuleModelUI tc) {
-        taskCapsuleModels.remove(tc);
+    public void removeTaskView(ITaskCapsuleView cv) {
+        taskViews.remove(cv);
     }
 
     public void setTransition(String start,
             String end) {
-        taskCapsuleModels.get(start).setTransitionTo(taskCapsuleModels.get(end).getTaskCapsule());
+    //    taskViews.get(start).setTransitionTo(taskViews.get(end).getTaskCapsule());
     }
 
     public void printTaskC() {
-        for (String t : taskCapsuleModels.keySet()) {
+        for (String t : taskViews.keySet()) {
             System.out.println("TASKC :: " + t);
         }
     }

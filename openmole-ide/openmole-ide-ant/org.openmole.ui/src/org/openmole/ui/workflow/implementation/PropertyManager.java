@@ -22,6 +22,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 import org.openmole.ui.exception.MoleExceptionManagement;
+import org.openmole.ui.palette.Category;
+import org.openmole.ui.palette.Category.CategoryName;
 
 /**
  *
@@ -29,9 +31,6 @@ import org.openmole.ui.exception.MoleExceptionManagement;
  */
 public class PropertyManager {
 
-    public static final String TASK = "task";
-    public static final String TASK_CAPSULE = "taskcapsule";
-    
     public static final String NAME = "name";
     public static final String IMPL = "impl";
     public static final String BG_COLOR = "bg-color";
@@ -39,13 +38,13 @@ public class PropertyManager {
     public static final String BG_IMG = "bg-img";
     public static final String THUMB_IMG = "thumb-img";
 
-    public static void buildLookup(String type) {
+    public static void buildLookup(CategoryName cat) {
 
-        File actual = new File("src/resources/" + type + "/");
+        File actual = new File("src/resources/" + Category.toString(cat) + "/");
         for (File f : actual.listFiles()) {
             Properties props = read(f.getPath());
             try {
-                Preferences.getInstance().register(type,
+                Preferences.getInstance().register(cat,
                                                    Class.forName(f.getName()),
                                                    props);
             } catch (ClassNotFoundException ex) {

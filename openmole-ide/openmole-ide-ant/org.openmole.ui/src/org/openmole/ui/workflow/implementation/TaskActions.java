@@ -63,7 +63,7 @@ public class TaskActions extends WidgetAction.Adapter {
     public State mouseClicked(Widget widget,
             WidgetMouseEvent event) {
         SelectionManager.getInstance().setSelected(view);
-        try {
+     /*   try {
             if (event.getClickCount() == 2) {
                 ControlPanel.getInstance().switchTableTabbedPane(TableModelMapping.getInstance().getTabbedPane(model));
                 //  model.updateData();
@@ -73,7 +73,7 @@ public class TaskActions extends WidgetAction.Adapter {
             Exceptions.printStackTrace(ex);
         } catch (IllegalAccessException ex) {
             Exceptions.printStackTrace(ex);
-        }
+        }*/
         return State.REJECTED;
     }
 

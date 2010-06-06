@@ -16,16 +16,21 @@
  */
 package org.openmole.ui.workflow.implementation.paint;
 
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.commons.IOType;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import org.netbeans.api.visual.anchor.Anchor;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
+import org.openmole.ui.workflow.implementation.PrototypeUI;
+import org.openmole.ui.workflow.implementation.TaskModelUI;
+import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 
 /**
  *
@@ -37,29 +42,44 @@ public class MyConnectableWidget extends MyWidget {
     private int nbOutSlot = 0;
     private int inputDelta = 0;
     private int outputDelta = 0;
+    private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
 
     public MyConnectableWidget(MoleScene scene,
-            Color backgroundCol,
-            Color borderCol) {
+                               Color backgroundCol,
+                               Color borderCol) {
         super(scene,
-                backgroundCol);
+              backgroundCol);
     }
 
     public MyConnectableWidget(MoleScene scene,
-            Color col) {
+                               Color col) {
         super(scene,
-                col);
+              col);
     }
 
     public MyConnectableWidget(MoleScene scene,
-            Color backgroundCol,
-            Color borderCol,
-            Image img) {
+                               Color backgroundCol,
+                               Color borderCol,
+                               Image img) {
         super(scene,
                 backgroundCol,
                 borderCol,
                 img);
         this.borderCol = borderCol;
+    }
+
+    public MyConnectableWidget(MoleScene scene,
+                               Color backgroundCol,
+                               Color borderCol,
+                               Image backgroundImaqe,
+                               IGenericTaskModelUI taskModelUI) {
+        this(scene, backgroundCol, borderCol, backgroundImaqe);
+        this.taskModel = taskModelUI;
+    }
+
+    public void setDetailedView() {
+        setWidthHint();
+        //  taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
     }
 
     public void addInputSlot() {
@@ -92,7 +112,7 @@ public class MyConnectableWidget extends MyWidget {
     }
 
     public Point getOutputSlotPoint(int index) {
-        return new Point(ApplicationCustomize.TASK_CONTAINER_WIDTH + 8,
+        return new Point(taskWidth + 8,
                 ApplicationCustomize.TASK_TITLE_HEIGHT + (outputDelta + 7) * (index + 1));
     }
 
@@ -105,7 +125,9 @@ public class MyConnectableWidget extends MyWidget {
         BasicStroke stroke = new BasicStroke(1.3f, 1, 1);
         graphics.draw(stroke.createStrokedShape(bodyArea));
 
+        System.out.println("--TWIDTH" + taskWidth);
         for (int i = 0; i < nbInSlot; ++i) {
+        System.out.println("---DI" );
             graphics.drawImage(ApplicationCustomize.IMAGE_INPUT_SLOT,
                     -8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + inputDelta * (i + 1) + 14 * i,
@@ -113,10 +135,36 @@ public class MyConnectableWidget extends MyWidget {
         }
 
         for (int i = 0; i < nbOutSlot; ++i) {
+        System.out.println("---DO" );
             graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
-                    ApplicationCustomize.TASK_CONTAINER_WIDTH - 8,
+                    taskWidth - 8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + outputDelta * (i + 1) + 14 * i,
                     new Container());
+        }
+
+        if (scene.isDetailedView()) {
+            graphics.setColor(new Color(0, 0, 0));
+            int x = taskWidth - 20;
+
+            FontMetrics fm = graphics.getFontMetrics(graphics.getFont());
+            int i = 0;
+            for (PrototypeUI proto : taskModel.getPrototypesIn()) {
+                graphics.drawString(proto.getName(), 20, 35 + i * 15);
+                i++;
+            }
+
+            int j = 0;
+            for (PrototypeUI proto : taskModel.getPrototypesOut()) {
+                graphics.drawString(proto.getName(), x - fm.stringWidth(proto.getName()), 35 + j * 15);
+                j++;
+            }
+
+            int newH = Math.max(i, j) * 15 + 45;
+            int delta = bodyArea.height - newH;
+            if (delta < 0) {
+                bodyArea.setSize(bodyArea.width, newH);
+                enlargeWidgetArea(0, -delta);
+            }
         }
     }
 }

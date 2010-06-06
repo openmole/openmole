@@ -5,23 +5,24 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.swing.*;
+import org.openmole.ui.workflow.action.EnableTaskDetailedView;
 import org.openmole.ui.workflow.action.MoveOrDrawTransitionAction;
+import org.openmole.ui.workflow.implementation.MoleScene;
 
 /**
  *
  * @author mathieu
  */
 public class ControlPanel extends JPanel{
-
-    private static ControlPanel instance = null;
     JTabbedPane moleTabbedPane;
     JSplitPane splitPaneV;
     JTabbedPane tableTabbedPane;
     JPanel controlPane;
 
      JToggleButton moveButton = new JToggleButton();
+     JToggleButton detailedViewButton = new JToggleButton();
 
-    public ControlPanel() throws IllegalArgumentException, IllegalAccessException {
+    public ControlPanel(MoleScene moleScene) throws IllegalArgumentException, IllegalAccessException {
         super();
 
         BorderLayout layout = new BorderLayout();
@@ -43,9 +44,14 @@ public class ControlPanel extends JPanel{
         moveButton.addActionListener(new MoveOrDrawTransitionAction());
         moveButton.setSelected(true);
         moveButton.setText("Draw connections");
+
+        detailedViewButton.addActionListener(new EnableTaskDetailedView(moleScene));
+        detailedViewButton.setText("Detailed view");
+        
         MoleScenesManager.getInstance().setScenesMovable(true);
 
         controlPane.add(moveButton);
+        controlPane.add(detailedViewButton);
 
         
         add(controlPane, BorderLayout.WEST);
@@ -60,12 +66,5 @@ public class ControlPanel extends JPanel{
     public void switchTableTabbedPane(JTabbedPane tTPane){
         splitPaneV.setBottomComponent(tTPane);
         splitPaneV.setDividerLocation(0.2);
-    }
-
-    public static ControlPanel getInstance() throws IllegalArgumentException, IllegalAccessException {
-        if (instance == null) {
-            instance = new ControlPanel();
-        }
-        return instance;
     }
 }

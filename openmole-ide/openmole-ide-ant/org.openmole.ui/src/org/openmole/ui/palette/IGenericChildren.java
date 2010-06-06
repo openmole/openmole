@@ -22,4 +22,5 @@ package org.openmole.ui.palette;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface IGenericChildren {
+    void refreshNodes();
 }

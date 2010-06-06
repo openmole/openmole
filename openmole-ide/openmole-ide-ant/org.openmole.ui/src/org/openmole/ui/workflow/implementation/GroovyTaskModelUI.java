@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.control.TableType.Name;
-import org.openmole.core.model.task.IGenericTask;
-import org.openmole.plugin.task.groovy.GroovyTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
 
 /**
  *
@@ -16,7 +15,7 @@ public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModel
 
     @Override
     public void updateData() {
-        throw new UnsupportedOperationException("Not supported yet.");
+       // throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

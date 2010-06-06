@@ -44,6 +44,7 @@ import org.openide.util.ImageUtilities;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
 import org.openmole.ui.workflow.model.IMoleScene;
+<<<<<<< HEAD
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitor;
@@ -51,6 +52,15 @@ import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.transition.ITransition;
 import org.openmole.core.model.transition.ITransitionSlot;
+=======
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.misc.tools.pattern.IVisitor;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.model.mole.IMole;
+import org.openmole.core.workflow.model.transition.ITransition;
+import org.openmole.core.workflow.model.transition.ITransitionSlot;
+>>>>>>> ide update
 import org.openmole.ui.control.MoleScenesManager;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.workflow.provider.DnDNewTaskCapsuleProvider;
@@ -75,6 +85,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     private WidgetAction connectAction = ActionFactory.createConnectAction(connectLayer, new MoleSceneConnectProvider());
     private WidgetAction reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider());
     private WidgetAction moveAction = ActionFactory.createMoveAction();
+    private boolean detailedView = false;
 
     public MoleScene() {
         super();
@@ -84,12 +95,12 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         addChild(connectLayer);
 
         setPreferredSize(new Dimension((int) (ApplicationCustomize.SCREEN_WIDTH * 0.8), (int) (ApplicationCustomize.SCREEN_HEIGHT * 0.8)));
-       // view = createView();
+        // view = createView();
         getActions().addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)));
         //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskLayer));
         //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskCapsuleLayer));
-       // getActions().addAction(ActionFactory.createZoomAction());
-      //  getActions().addAction(ActionFactory.createPanAction());
+        // getActions().addAction(ActionFactory.createZoomAction());
+        //  getActions().addAction(ActionFactory.createPanAction());
 
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskCapsuleProvider(this)));
 
@@ -99,21 +110,29 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         MoleScenesManager.getInstance().addMoleScene(this);
     }
 
+    public void setDetailedView(boolean detailedView) {
+        this.detailedView = detailedView;
+    }
+
+    public boolean isDetailedView() {
+        return detailedView;
+    }
+
     @Override
     public MoleSceneManager getManager() {
         return manager;
     }
 
     public void createEdge(String sourceNodeID, String targetNodeID) {
-            String ed = "edge" + String.valueOf(nbEdges++);
-            addEdge(ed);
-            setEdgeSource(ed, sourceNodeID);
-            setEdgeTarget(ed, targetNodeID);
-        }
+        String ed = "edge" + String.valueOf(nbEdges++);
+        addEdge(ed);
+        setEdgeSource(ed, sourceNodeID);
+        setEdgeTarget(ed, targetNodeID);
+    }
 
-    public void removeElement(ICapsuleModelUI cm){
-        removeNode(getManager().getTaskCapsuleModel(cm));
-        getManager().removeTaskCapsuleModel(cm);
+    public void removeElement(ICapsuleModelUI cm) {
+        //    removeNode(getManager().getTaskViewID(cm));
+        //    getManager().removeTaskView(cm);
     }
 
     @Override
@@ -163,7 +182,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         setLayout();
 
-     /*   mole.visit(new IVisitor<IGenericTaskCapsule>() {
+        mole.visit(new IVisitor<IGenericTaskCapsule>() {
 
             int i = 0;
 
@@ -187,7 +206,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
             }
         });
-        validate();*/
+        validate();
     }
 
     private String getConnectableName(IGenericTaskCapsule tCapsule) {
@@ -204,32 +223,31 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         if (tCapsule.getTask() != null) {
             if (!getNodes().contains(nodeID)) {
-              //  connectable = createTaskComposite(tCapsule, nodeID);
-              //  connectable = UIFactory.getInstance().createTaskComposite(this, tCapsule);
-              //  initConnectable(tCapsule, connectable);
+                //  connectable = createTaskComposite(tCapsule, nodeID);
+                //  connectable = UIFactory.getInstance().createTaskComposite(this, tCapsule);
+                //  initConnectable(tCapsule, connectable);
             }
         } else {
             if (!getNodes().contains(nodeID)) {
-               /* if (nodeID.isEmpty()) {
-                    connectable = createTaskCapsule(nodeID);
+                /* if (nodeID.isEmpty()) {
+                connectable = createTaskCapsule(nodeID);
                 } else {
-                    connectable = createTaskCapsule();
+                connectable = createTaskCapsule();
                 }*/
                 UIFactory.getInstance().createTaskCapsule(this);
-             //   initConnectable(tCapsule, connectable);
+                //   initConnectable(tCapsule, connectable);
             }
         }
     }
 
-  /*  private void initConnectable(IGenericTaskCapsule tCapsule,
-            IConnectable connectable) {
-        for (int i = 0; i < tCapsule.getIntputTransitionsSlots().size(); ++i) {
-            connectable.addInputSlot();
-            connectable.addOutputSlot();
-        }
-        connectable.setTaskCapsule(tCapsule);
+    /*  private void initConnectable(IGenericTaskCapsule tCapsule,
+    IConnectable connectable) {
+    for (int i = 0; i < tCapsule.getIntputTransitionsSlots().size(); ++i) {
+    connectable.addInputSlot();
+    connectable.addOutputSlot();
+    }
+    connectable.setTaskCapsule(tCapsule);
     }*/
-
     @Override
     public void refresh() {
         validate();
@@ -361,14 +379,14 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     }
 
     public Image getImageFromTransferable(Transferable transferable) {
-    Object o = null;
-    try {
-        o = transferable.getTransferData(DataFlavor.imageFlavor);
-    } catch (IOException ex) {
-        ex.printStackTrace();
-    } catch (UnsupportedFlavorException ex) {
-        ex.printStackTrace();
+        Object o = null;
+        try {
+            o = transferable.getTransferData(DataFlavor.imageFlavor);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (UnsupportedFlavorException ex) {
+            ex.printStackTrace();
+        }
+        return o instanceof Image ? (Image) o : ImageUtilities.loadImage("ressources/shape1.png");
     }
-    return o instanceof Image ? (Image) o : ImageUtilities.loadImage("ressources/shape1.png");
-}
 }

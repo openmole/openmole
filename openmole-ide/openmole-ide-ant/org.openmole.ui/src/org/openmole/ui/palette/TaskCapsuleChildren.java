@@ -32,4 +32,9 @@ public class TaskCapsuleChildren extends GenericChildren {
             childrenNodes.add(new TaskCapsuleNode(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR));
     return childrenNodes;
     }
+
+    @Override
+    public void refreshNodes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

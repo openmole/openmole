@@ -19,6 +19,9 @@ package org.openmole.ui.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.openmole.ui.commons.IOType;
+import org.openmole.ui.workflow.implementation.PrototypeUI;
+import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
 
 /**
  *
@@ -26,15 +29,22 @@ import java.awt.event.ActionListener;
  */
 public class AddExistingPrototype implements ActionListener {
 
-    private String prototype;
+    private PrototypeUI prototype;
+    private TaskCapsuleViewUI capsuleViewUI;
+    private IOType type;
 
-    public AddExistingPrototype(String prototype) {
+    public AddExistingPrototype(PrototypeUI prototype,
+                                TaskCapsuleViewUI capsuleViewUI,
+                                IOType type) {
         this.prototype = prototype;
+        this.capsuleViewUI = capsuleViewUI;
+        this.type = type;
     }
     
     @Override
     public void actionPerformed(ActionEvent ae) {
-        System.out.println("Add " + prototype);
+        capsuleViewUI.getTaskModel().addPrototype(prototype, type);
+        capsuleViewUI.repaint();
     }
 
 }

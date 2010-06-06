@@ -21,7 +21,7 @@ import org.openmole.ui.commons.IOType;
 import java.util.HashMap;
 import java.util.Map;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.commons.ApplicationCustomize;
 
 /**

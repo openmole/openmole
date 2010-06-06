@@ -2,9 +2,7 @@
  *  Copyright (C) 2010 Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  * 
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as pumodify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the Liceblished by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
@@ -18,8 +16,10 @@
  */
 package org.openmole.ui.palette;
 
+import java.util.HashMap;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openmole.ui.palette.Category.CategoryName;
 
 /**
  *
@@ -27,9 +27,14 @@ import org.openide.nodes.Node;
  */
 public class CategoryBuilder extends Children.Keys {
 
-    private ICategory[] categories = new ICategory[]{new TaskCapsuleCategory(),new TaskCategory(), new PrototypeCategory()};
+    private static CategoryBuilder instance = null;
+    private HashMap<CategoryName, ICategory> categories = new HashMap<CategoryName, ICategory>();
 
     public CategoryBuilder() {
+        categories.put(CategoryName.TASK, new TaskCategory());
+        categories.put(CategoryName.TASK_CAPSULE, new TaskCapsuleCategory());
+        categories.put(CategoryName.PROTOTYPE, new PrototypeCategory());
+        categories.put(CategoryName.PROTOTYPE_INSTANCE, new PrototypeInstanceCategory());
     }
 
     @Override
@@ -41,6 +46,17 @@ public class CategoryBuilder extends Children.Keys {
     @Override
     protected void addNotify() {
         super.addNotify();
-        setKeys(categories);
+        setKeys(categories.values());
+    }
+
+    public ICategory getPrototypeInstanceCategory(CategoryName cname) {
+        return categories.get(cname);
+    }
+
+    public static CategoryBuilder getInstance() {
+        if (instance == null) {
+            instance = new CategoryBuilder();
+        }
+        return instance;
     }
 }

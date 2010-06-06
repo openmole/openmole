@@ -31,7 +31,7 @@ public class PrototypeChildren extends GenericChildren {
 
     @Override
     protected List<Node> initCollection() {
-        Collection<Class> protos = Preferences.getInstance().getPrototypes();
+        Collection<Class> protos = Preferences.getInstance().getPrototypeTypes();
 
         ArrayList childrenNodes = new ArrayList(protos.size());
         for (Class proto : protos) {
@@ -39,5 +39,10 @@ public class PrototypeChildren extends GenericChildren {
                                                 proto));
         }
         return childrenNodes;
+    }
+
+    @Override
+    public void refreshNodes() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

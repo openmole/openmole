@@ -21,6 +21,9 @@ import java.awt.datatransfer.DataFlavor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
+import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.ui.exception.MoleExceptionManagement;
+import org.openmole.ui.palette.Category.CategoryName;
 import org.openmole.ui.workflow.implementation.Preferences;
 import org.openmole.ui.workflow.implementation.PropertyManager;
 
@@ -33,16 +36,15 @@ public class GenericNode extends AbstractNode {
     protected  DataFlavor dataFlavor;
 
     public GenericNode(DataFlavor key,
-                       String type,
+                       CategoryName type,
                        Class coreClass) {
         super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-        this.dataFlavor = key;
-
-        System.out.println("-----------------------------------------------");
-        System.out.println("type "+type);
-        System.out.println("coreC "+coreClass);
-        System.out.println("Preferences.getInstance().getProperties(type,coreClass) " + Preferences.getInstance().getProperties(type,coreClass));
-        setIconBaseWithExtension(Preferences.getInstance().getProperties(type,coreClass).getProperty(PropertyManager.THUMB_IMG));
-        setName(Preferences.getInstance().getProperties(type, coreClass).getProperty(PropertyManager.NAME));
+        try {
+            this.dataFlavor = key;
+            setIconBaseWithExtension(Preferences.getInstance().getProperties(type, coreClass).getProperty(PropertyManager.THUMB_IMG));
+            setName(Preferences.getInstance().getProperties(type, coreClass).getProperty(PropertyManager.NAME));
+        } catch (UserBadDataError ex) {
+            MoleExceptionManagement.showException(ex);
+        }
     }
 }

@@ -17,20 +17,26 @@
 
 package org.openmole.ui.workflow.provider;
 
+import java.awt.Dialog;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.core.implementation.data.Prototype;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.commons.IOType;
 import org.openmole.ui.exception.MoleExceptionManagement;
+import org.openmole.ui.palette.Category.CategoryName;
+import org.openmole.ui.palette.CategoryBuilder;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.MoleSceneManager;
+import org.openmole.ui.workflow.implementation.Preferences;
+import org.openmole.ui.workflow.implementation.PrototypeUI;
 import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
 
 /**
@@ -67,15 +73,20 @@ public class DnDAddPrototypeProvider extends DnDProvider{
     @Override
     public void accept(Widget widget, Point point, Transferable t) {
         try {
+
+
             String inputValue = JOptionPane.showInputDialog("Create a new "+((Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)).getSimpleName()+" prototype");
 
             MoleSceneManager manager = moleScene.getManager();
             if (inputValue != null){
-            manager.registerPrototype(new Prototype(inputValue,
-                                                    (Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)));
+                Preferences.getInstance().registerPrototype(new PrototypeUI(inputValue,
+                                                                            (Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)));
 
-            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH/2) view.getTaskModel().addPrototype(manager.getPrototype(inputValue), IOType.INPUT);
-            else view.getTaskModel().addPrototype(manager.getPrototype(inputValue), IOType.OUTPUT);
+            //CategoryBuilder.getInstance().getPrototypeInstanceCategory(CategoryName.PROTOTYPE_INSTANCE).getChildren().refreshNodes();
+            //MoleSceneTopComponentTopComponent.getDefault().refreshPalette();
+
+            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH/2) view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
+            else view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
             }
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);

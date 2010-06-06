@@ -5,14 +5,17 @@
 
 package org.openmole.ui.workflow.model;
 
-import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedAsynchronousListener;
+import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.misc.eventdispatcher.IObjectConstructedAsynchronousListener;
+import org.openmole.misc.exception.UserBadDataError;
+
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface IUIFactory<T> extends IObjectConstructedAsynchronousListener<T> {
-    //ICapsuleModelUI createTaskCapsuleModel(IGenericTaskCapsule gtc);
-    IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass);
+    IGenericTask createCoreTaskInstance(Class<? extends IGenericTask> taskClass) throws UserBadDataError;
+    IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass) throws UserBadDataError ;
 
     
 }

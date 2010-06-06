@@ -23,7 +23,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.workflow.model.ITaskCapsuleModelUI;
 
 /**
@@ -48,14 +48,15 @@ public class ApplicationCustomize {
     public static final int PANEL_WIDTH =  (int) (SCREEN_WIDTH * 0.8);
     public static final int PANEL_HEIGHT = (int) (SCREEN_HEIGHT * 0.8);
 
+    public static final int EXPANDED_TASK_CONTAINER_WIDTH = 200;
     public static final int TASK_CONTAINER_WIDTH = 80;
     public static final int TASK_CONTAINER_HEIGHT = 100;
     public static final int TASK_TITLE_WIDTH = TASK_CONTAINER_WIDTH;
     public static final int TASK_TITLE_HEIGHT = 20;
     public static final int TASK_IMAGE_HEIGHT = TASK_CONTAINER_HEIGHT - TASK_TITLE_HEIGHT -20;
-    public static final int TASK_IMAGE_WIDTH = TASK_CONTAINER_WIDTH - 10;
+    public static final int TASK_IMAGE_WIDTH = 70;
     public static final int TASK_IMAGE_HEIGHT_OFFSET = TASK_TITLE_HEIGHT + 10;
-    public static final int TASK_IMAGE_WIDTH_OFFSET = 5;
+    public static final int TASK_IMAGE_WIDTH_OFFSET = (TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2;
     public static final int DATA_TABLE_X_OFFSET = (int) (2 + TASK_CONTAINER_WIDTH * 0.1);
     public static final int DATA_TABLE_Y_OFFSET = (int) (TASK_CONTAINER_HEIGHT * 0.1 - 2);
 
@@ -68,6 +69,7 @@ public class ApplicationCustomize {
 
     public static final int NB_MAX_SLOTS = 5;
 
+    public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor();
     public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );

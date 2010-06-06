@@ -17,12 +17,9 @@
 package org.openmole.ui.workflow.implementation;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.commons.IOType;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
@@ -34,25 +31,37 @@ import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI<T> {
 
     protected transient Collection<TableType.Name> fields;
-    private Set<IPrototype> prototypesIn;
-    private Set<IPrototype> prototypesOut;
+    private Set<PrototypeUI> prototypesIn;
+    private Set<PrototypeUI> prototypesOut;
     private final static String category = "Tasks";
-    protected IGenericTask coreTask;
+    protected Class<? extends IGenericTask> coreTask;
 
     @Override
-    public void addPrototype(IPrototype p,
+    public Set<PrototypeUI> getPrototypesIn() {
+        if (prototypesIn == null) prototypesIn = new HashSet<PrototypeUI>();
+        return prototypesIn;
+    }
+
+    @Override
+    public Set<PrototypeUI> getPrototypesOut() {
+        if (prototypesOut == null) prototypesOut = new HashSet<PrototypeUI>();
+        return prototypesOut;
+    }
+
+    @Override
+    public void addPrototype(PrototypeUI p,
                              IOType ioType){
         if (ioType == IOType.INPUT) addPrototypeIn(p);
         else addPrototypeOut(p);
     }
 
-    private void addPrototypeIn(IPrototype p){
-        if (prototypesIn == null) prototypesIn = new HashSet<IPrototype>();
+    private void addPrototypeIn(PrototypeUI p){
+        if (prototypesIn == null) prototypesIn = new HashSet<PrototypeUI>();
         prototypesIn.add(p);
     }
 
-     private void addPrototypeOut(IPrototype p){
-        if (prototypesOut == null) prototypesOut = new HashSet<IPrototype>();
+     private void addPrototypeOut(PrototypeUI p){
+        if (prototypesOut == null) prototypesOut = new HashSet<PrototypeUI>();
         prototypesOut.add(p);
     }
 
@@ -62,12 +71,12 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     }
 
     @Override
-    public IGenericTask getTask() {
+    public Class <? extends IGenericTask> getCoreTaskClass() {
         return this.coreTask;
     }
 
     @Override
-    public void setTask(IGenericTask coreTask) {
+    public void setCoreTaskClass(Class <? extends IGenericTask> coreTask) {
         this.coreTask = coreTask;
     }
 

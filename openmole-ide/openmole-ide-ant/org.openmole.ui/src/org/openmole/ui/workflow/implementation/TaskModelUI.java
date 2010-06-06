@@ -20,12 +20,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.control.TableType.Name;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI<T> {
+
+    public static IGenericTaskModelUI<IGenericTask> EMPTY_TASK_MODEL = new TaskModelUI();
     
     @Override
     public synchronized void setFields() {

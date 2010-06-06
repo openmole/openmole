@@ -25,6 +25,7 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
+import sun.java2d.loops.DrawRect;
 
 /**
  *
@@ -33,45 +34,42 @@ import org.openmole.ui.workflow.implementation.MoleScene;
 public class MyWidget extends Widget {
 
     private Color backgroundCol;
-    protected  Color borderCol;
+    protected Color borderCol;
     private Image backgroundImaqe;
     protected Rectangle bodyArea = new Rectangle();
-    private Rectangle widgetArea = new Rectangle();
+    protected Rectangle widgetArea = new Rectangle();
     private Rectangle titleArea;
     private boolean title = false;
     private boolean image = false;
     private String titleString;
-    private Container dataTableContainer = new Container();
-    MoleScene scene;
+  //  private Container dataTableContainer = new Container();
+    protected int taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
+    protected MoleScene scene;
 
     public MyWidget(MoleScene scene,
-            Color col) {
+                    Color col) {
         super(scene);
         this.backgroundCol = col;
+        this.scene = scene;
+        setWidthHint();
+     //   dataTableContainer.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    public void setWidthHint() {
+        if (scene.isDetailedView()) taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
+        else taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
+
         Rectangle bodyrect = new Rectangle(0, 0,
-                ApplicationCustomize.TASK_CONTAINER_WIDTH,
+                taskWidth,
                 ApplicationCustomize.TASK_CONTAINER_HEIGHT);
 
         Rectangle widgetrect = new Rectangle(-8, -1,
-                ApplicationCustomize.TASK_CONTAINER_WIDTH + 16,
+                taskWidth + 16,
                 ApplicationCustomize.TASK_CONTAINER_HEIGHT + 2);
         bodyArea.setBounds(bodyrect);
         widgetArea.setBounds(widgetrect);
-
-        dataTableContainer.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setPreferredBounds(widgetArea);
-    }
-
-    public void setBackgroundCol(Color backgroundCol) {
-        this.backgroundCol = backgroundCol;
-    }
-
-    public void setBorderCol(Color borderCol) {
-        this.borderCol = borderCol;
-    }
-
-    public void setBackgroundImaqe(Image backgroundImaqe) {
-        this.backgroundImaqe = backgroundImaqe;
+        repaint();
     }
 
     public MyWidget(MoleScene scene,
@@ -90,24 +88,40 @@ public class MyWidget extends Widget {
         this.backgroundImaqe = backgroundImaqe;
     }
 
-    private void enlargeWidgetArea(Rectangle addedArea) {
-        widgetArea.height += addedArea.height;
-        widgetArea.y -= addedArea.y;
+    //private void enlargeWidgetArea(Rectangle addedArea) {
+    protected void enlargeWidgetArea(int y,
+            int height) {
+        //widgetArea.height += addedArea.height;
+        //widgetArea.y -= addedArea.y;
+        widgetArea.height += height;
+        widgetArea.y -= y;
     }
 
-    public void setTitle(String title){
+    protected void setBackgroundCol(Color backgroundCol) {
+        this.backgroundCol = backgroundCol;
+    }
+
+    protected void setBackgroundImaqe(Image backgroundImaqe) {
+        this.backgroundImaqe = backgroundImaqe;
+    }
+
+    protected void setBorderCol(Color borderCol) {
+        this.borderCol = borderCol;
+    }
+    
+
+    public void setTitle(String title) {
         this.titleString = title;
     }
 
     public void addTitle(String titleString) {
         titleArea = new Rectangle(0, 0,
-                ApplicationCustomize.TASK_CONTAINER_WIDTH,
+                taskWidth,
                 ApplicationCustomize.TASK_TITLE_HEIGHT);
 
         this.title = true;
         this.titleString = titleString;
 
-        enlargeWidgetArea(titleArea);
         setPreferredBounds(widgetArea);
     }
 
@@ -125,14 +139,14 @@ public class MyWidget extends Widget {
             graphics.drawString(titleString, 10, 15);
         }
 
-        if (image){
-        graphics.drawImage(backgroundImaqe,
-                           ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET,
-                           ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
-                           ApplicationCustomize.TASK_IMAGE_WIDTH,
-                           ApplicationCustomize.TASK_IMAGE_HEIGHT,
-                           backgroundCol,
-                           new Container());
+        if (image) {
+            graphics.drawImage(backgroundImaqe,
+                    ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET,
+                    ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
+                    ApplicationCustomize.TASK_IMAGE_WIDTH,
+                    ApplicationCustomize.TASK_IMAGE_HEIGHT,
+                    backgroundCol,
+                    new Container());
         }
     }
 }

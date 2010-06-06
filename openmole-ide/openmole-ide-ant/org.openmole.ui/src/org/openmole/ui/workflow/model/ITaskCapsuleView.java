@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.workflow.model;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;
 
 /**
@@ -26,8 +26,9 @@ import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;
 public interface ITaskCapsuleView {
 
     ICapsuleModelUI getTaskCapsuleModel();
-    void setTaskCapsule(IGenericTaskCapsule tc);
+ //   void setTaskCapsule(IGenericTaskCapsule tc);
     void  addInputSlot();
     void  addOutputSlot();
     MyConnectableWidget getConnectableWidget();
+    void changeConnectableWidget();
 }

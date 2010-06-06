@@ -19,11 +19,13 @@ package org.openmole.ui;
 import java.awt.BorderLayout;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
-import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
+//import org.openide.util.ImageUtilities;
+import org.netbeans.api.settings.ConvertAsProperties;
+import org.netbeans.spi.palette.PaletteController;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.control.ControlPanel;
 import org.openmole.ui.workflow.implementation.MoleScene;
@@ -37,7 +39,9 @@ autostore = false)
 public final class MoleSceneTopComponentTopComponent extends TopComponent {
 
     private static MoleSceneTopComponentTopComponent instance;
+    private PaletteController palette;
     private JComponent myView;
+
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
     private static final String PREFERRED_ID = "MoleSceneTopComponentTopComponent";
@@ -58,16 +62,23 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         moleSceneScrollPane.setViewportView(myView);
         try {
             // add(scene.createSatelliteView(), BorderLayout.WEST);
-            add(new ControlPanel(), BorderLayout.WEST);
+            add(new ControlPanel(scene), BorderLayout.WEST);
         } catch (IllegalArgumentException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IllegalAccessException ex) {
             Exceptions.printStackTrace(ex);
         }
-        associateLookup(Lookups.fixed(new Object[]{PaletteSupport.createPalette()}));
-     //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
+        refreshPalette();
+        associateLookup(Lookups.fixed(new Object[]{palette}));
 
+     //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
+    
+    public void refreshPalette(){
+        palette = PaletteSupport.createPalette();
+        repaint();
+    }
+
 
     /** This method is called from within the constructor to
      * initialize the form.

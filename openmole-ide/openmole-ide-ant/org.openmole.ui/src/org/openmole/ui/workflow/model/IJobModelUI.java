@@ -5,7 +5,7 @@
 
 package org.openmole.ui.workflow.model;
 
-import org.openmole.core.model.job.IJob;
+import org.openmole.core.workflow.model.job.IJob;
 
 /**
  *

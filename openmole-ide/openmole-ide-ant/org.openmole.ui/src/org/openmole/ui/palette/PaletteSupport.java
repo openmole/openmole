@@ -41,6 +41,7 @@ public class PaletteSupport {
     public static PaletteController createPalette() {
         AbstractNode paletteRoot = new AbstractNode(new CategoryBuilder());
         paletteRoot.setName("Palette Root");
+        
         return PaletteFactory.createPalette(paletteRoot, new MyActions(), null, new MyDnDHandler());
     }
 

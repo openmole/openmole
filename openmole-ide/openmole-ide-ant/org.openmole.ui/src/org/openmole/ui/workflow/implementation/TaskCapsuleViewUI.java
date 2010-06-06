@@ -17,14 +17,15 @@
 package org.openmole.ui.workflow.implementation;
 
 import java.util.Properties;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.workflow.provider.TaskCapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.workflow.model.IObjectModelUI;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
+import org.openmole.ui.palette.Category.CategoryName;
 import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;
 import org.openmole.ui.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
@@ -38,20 +39,20 @@ import org.openmole.ui.workflow.provider.DnDNewTaskProvider;
  */
 public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView {
 
-    private IGenericTaskModelUI<IGenericTask> taskModel = null;
+    private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
     protected MyConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeProvider dnDAddPrototypeProvider;
     private TaskCapsuleMenuProvider taskCapsuleMenuProvider;
 
     public TaskCapsuleViewUI(MoleScene scene,
-                             ICapsuleModelUI tcm,
-                             Properties properties) {
+            ICapsuleModelUI tcm,
+            Properties properties) {
 
-       /* super(scene,
-                Preferences.getInstance().getCapsuleModelSettings().getDefaultBackgroundColor(),
-                Preferences.getInstance().getCapsuleModelSettings().getDefaultBorderColor());*/
-        super(scene,properties);
+        /* super(scene,
+        Preferences.getInstance().getCapsuleModelSettings().getDefaultBackgroundColor(),
+        Preferences.getInstance().getCapsuleModelSettings().getDefaultBorderColor());*/
+        super(scene, properties);
         capsuleModel = tcm;
 
         ApplicationCustomize colorCustomize = ApplicationCustomize.getInstance();
@@ -79,38 +80,40 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         return taskModel;
     }
 
-    public void encapsule(Class<? extends IGenericTask> coreTaskClass) {
-        this.taskModel = UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(PropertyManager.TASK,coreTaskClass));
-        this.taskModel.setTask(UIFactory.getInstance().createCoreTaskInstance(coreTaskClass));
+    public void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError {
+        this.taskModel = UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass));
+        this.taskModel.setCoreTaskClass(coreTaskClass);
 
-     //   Settings sets = Preferences.getInstance().getModelSettings((Class<? extends IObjectModelUI>) taskModel.getClass());
+        properties = Preferences.getInstance().getProperties(CategoryName.TASK, coreTaskClass);
 
-        //properties = PropertyManager.read("src/resources/task/"+coreTaskClass.getName());
-        properties = Preferences.getInstance().getProperties(PropertyManager.TASK, coreTaskClass);
-        connectableWidget.setBackgroundCol(getBackgroundColor());
-        connectableWidget.setBorderCol(getBorderColor());
-        connectableWidget.setBackgroundImaqe(getBackgroundImage());
+        changeConnectableWidget();
 
         dnDAddPrototypeProvider.setEncapsulated(true);
 
-        System.out.println("scene " +scene );
-        System.out.println("sceneM" +scene.getManager() );
         scene.getManager().incrementNodeName();
         connectableWidget.addTitle(scene.getManager().getNodeName());
 
-       // getActions().removeAction(taskCapsuleWidgetAction);
-       // getActions().addAction(ActionFactory.createPopupMenuAction(gmp));
-       // getActions().addAction(ActionFactory.createPopupMenuAction(new TaskCapsuleMenuProvider(scene, this)));
+        // getActions().removeAction(taskCapsuleWidgetAction);
+        // getActions().addAction(ActionFactory.createPopupMenuAction(gmp));
+        // getActions().addAction(ActionFactory.createPopupMenuAction(new TaskCapsuleMenuProvider(scene, this)));
 
         taskCapsuleMenuProvider.addTaskMenus();
         getActions().addAction(new TaskActions(taskModel, this));
     }
 
     @Override
-    public void setTaskCapsule(IGenericTaskCapsule tc) {
-        capsuleModel.setTaskCapsule(tc);
+    public void changeConnectableWidget(){
+        connectableWidget = new MyConnectableWidget(scene,
+                getBackgroundColor(),
+                getBorderColor(),
+                getBackgroundImage(),
+                taskModel);
+        connectableWidget.setBackground(getBackgroundColor());
     }
-
+    /*  @Override
+    public void setTaskCapsule(IGenericTaskCapsule tc) {
+    capsuleModel.setTaskCapsule(tc);
+    }*/
     @Override
     public void addInputSlot() {
         capsuleModel.addInputSlot();

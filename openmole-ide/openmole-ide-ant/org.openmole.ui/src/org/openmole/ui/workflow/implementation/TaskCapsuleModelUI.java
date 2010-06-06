@@ -16,9 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import org.openmole.core.implementation.capsule.TaskCapsule;
-import org.openmole.core.implementation.transition.SingleTransition;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 
 /**
  *
@@ -26,13 +24,13 @@ import org.openmole.core.model.capsule.IGenericTaskCapsule;
  */
 public class TaskCapsuleModelUI extends CapsuleModelUI<IGenericTaskCapsule> {
 
-    TaskCapsule taskCapsule;
+  //  TaskCapsule taskCapsule;
 
     public TaskCapsuleModelUI() {
-        setTaskCapsule(new TaskCapsule());
+     //   setTaskCapsule(new TaskCapsule());
     }
 
-    @Override
+    /*@Override
     public IGenericTaskCapsule getTaskCapsule() {
         if (taskCapsule == null) {
             setTaskCapsule();
@@ -52,5 +50,5 @@ public class TaskCapsuleModelUI extends CapsuleModelUI<IGenericTaskCapsule> {
 
     private void setTaskCapsule() {
         taskCapsule = new TaskCapsule();
-    }
+    }*/
 }

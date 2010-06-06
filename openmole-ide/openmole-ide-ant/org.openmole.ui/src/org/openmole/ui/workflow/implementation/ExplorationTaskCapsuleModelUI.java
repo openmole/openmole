@@ -16,10 +16,10 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
-import org.openmole.core.implementation.transition.ExplorationTransition;
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.workflow.implementation.capsule.ExplorationTaskCapsule;
+import org.openmole.core.workflow.implementation.transition.ExplorationTransition;
+import org.openmole.core.workflow.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
 
 /**
  *
@@ -34,7 +34,7 @@ public class ExplorationTaskCapsuleModelUI extends CapsuleModelUI<IExplorationTa
         super();
     }
 
-    @Override
+ /*   @Override
     public IExplorationTaskCapsule getTaskCapsule() {
         if (explorationTaskCapsule == null) {
             setTaskCapsule();
@@ -51,7 +51,7 @@ public class ExplorationTaskCapsuleModelUI extends CapsuleModelUI<IExplorationTa
     @Override
     public void setTaskCapsule(IGenericTaskCapsule taskCapsule) {
         this.explorationTaskCapsule = (ExplorationTaskCapsule) taskCapsule;
-    }
+    }*/
 
     private void setTaskCapsule() {
         explorationTaskCapsule = new ExplorationTaskCapsule();

@@ -18,7 +18,7 @@
 package org.openmole.ui.workflow.implementation;
 
 import java.util.Collection;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.core.workflow.model.task.IGenericTask;
 import org.openmole.ui.control.TableType.Name;
 
 /**

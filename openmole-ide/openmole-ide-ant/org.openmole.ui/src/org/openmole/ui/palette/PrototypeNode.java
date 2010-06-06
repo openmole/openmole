@@ -33,14 +33,11 @@ import org.openmole.ui.commons.ApplicationCustomize;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class PrototypeNode extends AbstractNode {
-
-    private DataFlavor dataFlavor;
     private Class prototypeClass;
 
     public PrototypeNode(DataFlavor key,
                          Class prototypeClass) {
         super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-        this.dataFlavor = key;
         this.prototypeClass = prototypeClass;
         setName(prototypeClass.getSimpleName());
       //  setIconBaseWithExtension(Preferences.getInstance().getModelSettings(Preferences.getInstance().getModelClass(coreTask)).getThumbImagePath());

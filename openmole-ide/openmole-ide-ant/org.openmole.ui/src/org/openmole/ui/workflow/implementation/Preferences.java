@@ -25,9 +25,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.openmole.core.workflow.implementation.data.Prototype;
+import org.openmole.core.workflow.model.data.IPrototype;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.IObjectModelUI;
+<<<<<<< HEAD
 import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.ui.exception.MoleExceptionManagement;
+=======
+import org.openmole.misc.tools.service.HierarchicalRegistry;
+import org.openmole.ui.palette.Category.CategoryName;
+>>>>>>> ide update
 
 /**
  *
@@ -37,94 +45,113 @@ public class Preferences {
 
     private static Preferences instance = null;
 
-    private String[] propertyTypes = {PropertyManager.TASK, PropertyManager.TASK_CAPSULE};
-    private Map<String, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<String, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
-    private Map<String, Map<Class, Properties>> properties = new HashMap<String, Map<Class, Properties>>();
-    private Collection<Class> prototypes = new ArrayList<Class>();
+    private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.TASK_CAPSULE};
+    private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
+    private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
+    private Collection<Class> prototypeTypes = new ArrayList<Class>();
+
+
+    private Map<String, PrototypeUI> prototypes = new HashMap<String, PrototypeUI>();
 
     public void register() {
         if (models.isEmpty()) {
-            for (String t : propertyTypes) {
-                PropertyManager.buildLookup(t);
+            for (CategoryName c : propertyTypes) {
+                PropertyManager.buildLookup(c);
             }
         }
     }
 
-    public void register(String type,
+    public void register(CategoryName cat,
             Class coreClass,
             Properties prop) throws ClassNotFoundException {
-        registerModel(type,
+        registerModel(cat,
                 coreClass,
                 (Class<? extends IObjectModelUI>) Class.forName(prop.getProperty(PropertyManager.IMPL)));
-        registerProperties(type,
+        registerProperties(cat,
                 coreClass,
                 prop);
     }
 
-    private void registerModel(String type,
+    private void registerModel(CategoryName cat,
             Class coreClass,
             Class<? extends IObjectModelUI> modelClass) {
         if (models.isEmpty()) {
-            for (String t : propertyTypes) {
-                models.put(t, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
+            for (CategoryName c : propertyTypes) {
+                models.put(c, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
             }
         }
-        models.get(type).register(coreClass, modelClass);
+        models.get(cat).register(coreClass, modelClass);
     }
 
-    private void registerProperties(String type,
+    private void registerProperties(CategoryName cat,
             Class coreClass,
             Properties prop) {
         if (properties.isEmpty()) {
-            for (String t : propertyTypes) {
-                properties.put(t, new HashMap<Class, Properties>());
+            for (CategoryName c : propertyTypes) {
+                properties.put(c, new HashMap<Class, Properties>());
             }
         }
-        properties.get(type).put(coreClass, prop);
+        properties.get(cat).put(coreClass, prop);
     }
 
-    public Properties getProperties(String type,
-            Class coreClass) {
+    public Properties getProperties(CategoryName cat,
+            Class coreClass) throws UserBadDataError{
         register();
         try {
-            return properties.get(type).get(coreClass);
+            return properties.get(cat).get(coreClass);
         } catch (ClassCastException ex) {
-            MoleExceptionManagement.showException(ex);
+            throw new UserBadDataError(ex);
         } catch (NullPointerException ex) {
-            MoleExceptionManagement.showException(ex);
+            throw new UserBadDataError(ex);
         }
-        return null;
     }
 
-    public Class<? extends IObjectModelUI> getModel(String type,
-            Class coreClass) {
+    public Class<? extends IObjectModelUI> getModel(CategoryName cat,
+            Class coreClass) throws UserBadDataError {
         register();
         try {
-            return models.get(type).getClosestRegistred(coreClass).iterator().next();
+            return models.get(cat).getClosestRegistred(coreClass).iterator().next();
         } catch (ClassCastException ex) {
-            MoleExceptionManagement.showException(ex);
+            throw new UserBadDataError(ex);
         } catch (NullPointerException ex) {
-            MoleExceptionManagement.showException(ex);
+            throw new UserBadDataError(ex);
         }
-        return null;
     }
 
-    private void setPrototypes() {
-        prototypes.add(BigInteger.class);
-        prototypes.add(BigDecimal.class);
-        prototypes.add(File.class);
+    private void setPrototypeTypes() {
+        prototypeTypes.add(BigInteger.class);
+        prototypeTypes.add(BigDecimal.class);
+        prototypeTypes.add(File.class);
     }
 
-    public Collection getPrototypes() {
-        if (prototypes.isEmpty()) {
-            setPrototypes();
+    public Collection getPrototypeTypes() {
+        if (prototypeTypes.isEmpty()) {
+            setPrototypeTypes();
         }
-        return prototypes;
+        return prototypeTypes;
     }
+
+     public void registerPrototype(PrototypeUI p) {
+        prototypes.put(p.getName(), p);
+    }
+
+    public PrototypeUI getPrototype(String st) throws UserBadDataError {
+        if (prototypes.containsKey(st)) {
+            return prototypes.get(st);
+        } else {
+            throw new UserBadDataError("The prototype " + st + " doest not exist.");
+        }
+    }
+
+    public Collection<PrototypeUI> getPrototypes(){
+        prototypes.put("eieie", new PrototypeUI("eieie",BigInteger.class));
+        return prototypes.values();
+    }
+
 
     public Set<Class> getCoreTaskClasses() {
         register();
-        return models.get(PropertyManager.TASK).getAllRegistred();
+        return models.get(CategoryName.TASK).getAllRegistred();
     }
 
     public static Preferences getInstance() {

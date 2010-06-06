@@ -40,4 +40,9 @@ public class TaskChildren extends GenericChildren{
         }
         return childrenNodes;
     }
+
+    @Override
+    public void refreshNodes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
