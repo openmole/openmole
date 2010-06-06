@@ -174,6 +174,7 @@ public class VirtualMachineResource extends ComposedResource {
             try {
                 FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
                 qemu.setExecutable(true);
+                qemu.deleteOnExit();
             } finally {
                 outputStream.close();
             }
@@ -184,6 +185,7 @@ public class VirtualMachineResource extends ComposedResource {
 
             try {
                 FileUtil.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
+                dest.deleteOnExit();
             } finally {
                 outputStream.close();
             }
