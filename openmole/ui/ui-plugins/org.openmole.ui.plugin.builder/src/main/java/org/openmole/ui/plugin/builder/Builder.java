@@ -41,6 +41,9 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.ExplorationTask;
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
+import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
+
+
 
 public class Builder {
 
@@ -62,6 +65,10 @@ public class Builder {
 
     public Mole buildMole(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new Mole(taskCapsule);
+    }
+
+    public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError{
+        return new FixedEnvironmentStrategy();
     }
 
     public final ExplorationBuilder exploration = new ExplorationBuilder();
