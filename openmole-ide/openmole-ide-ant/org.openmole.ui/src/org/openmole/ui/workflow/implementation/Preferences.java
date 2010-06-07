@@ -25,9 +25,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.openide.util.Lookup;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.IObjectModelUI;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
+import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.ui.palette.Category.CategoryName;
 
 /**
@@ -49,34 +51,39 @@ public class Preferences {
     public void register() {
         if (models.isEmpty()) {
             for (CategoryName c : propertyTypes) {
-                PropertyManager.buildLookup(c);
+                PropertyManager.readProperties(c);
             }
         }
+        registerModel();
     }
 
     public void register(CategoryName cat,
             Class coreClass,
             Properties prop) throws ClassNotFoundException {
-        registerModel(cat,
+      /*  registerModel(cat,
                 coreClass,
-                (Class<? extends IObjectModelUI>) Class.forName(prop.getProperty(PropertyManager.IMPL)));
+                (Class<? extends IObjectModelUI>) Class.forName(prop.getProperty(PropertyManager.IMPL)));*/
         registerProperties(cat,
                 coreClass,
                 prop);
     }
 
-    private void registerModel(CategoryName cat,
-            Class coreClass,
-            Class<? extends IObjectModelUI> modelClass) {
-        if (models.isEmpty()) {
+  //  private void registerModel(CategoryName cat,
+  //          Class coreClass,
+  //          Class<? extends IObjectModelUI> modelClass) {
+    private void registerModel(){
+
+        System.out.println("-----Exploration :: "+Lookup.getDefault().lookup(ExplorationTask.class));
+        System.out.println("-----Capsule :: "+Lookup.getDefault().lookup(CapsuleModelUI.class));
+      /*  if (models.isEmpty()) {
             for (CategoryName c : propertyTypes) {
                 models.put(c, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
             }
         }
-        models.get(cat).register(coreClass, modelClass);
+        models.get(cat).register(coreClass, modelClass);*/
     }
 
-    private void registerProperties(CategoryName cat,
+    public void registerProperties(CategoryName cat,
             Class coreClass,
             Properties prop) {
         if (properties.isEmpty()) {

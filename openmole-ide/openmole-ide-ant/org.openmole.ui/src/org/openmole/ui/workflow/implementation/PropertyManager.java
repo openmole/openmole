@@ -38,15 +38,15 @@ public class PropertyManager {
     public static final String BG_IMG = "bg-img";
     public static final String THUMB_IMG = "thumb-img";
 
-    public static void buildLookup(CategoryName cat) {
+    public static void readProperties(CategoryName cat) {
 
         File actual = new File("src/resources/" + Category.toString(cat) + "/");
         for (File f : actual.listFiles()) {
             Properties props = read(f.getPath());
             try {
-                Preferences.getInstance().register(cat,
-                                                   Class.forName(f.getName()),
-                                                   props);
+                Preferences.getInstance().registerProperties(cat,
+                                                             Class.forName(f.getName()),
+                                                             props);
             } catch (ClassNotFoundException ex) {
                 MoleExceptionManagement.showException(ex);
             }
