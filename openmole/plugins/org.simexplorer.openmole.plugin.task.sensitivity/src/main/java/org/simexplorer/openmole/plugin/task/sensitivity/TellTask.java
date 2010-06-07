@@ -41,12 +41,12 @@ public class TellTask extends Task {
     private transient final static String COMMAND_FOR_IT = new StringBuilder().append("1 - ").append(RVariableName).append("[['Dt']] / ").append(RVariableName).append("[['V']] ").toString();
     private transient final static String COMMAND_FOR_DT = new StringBuilder().append(RVariableName).append("[['Dt']]").toString();
     private transient final static String ModelOutputVariableName = "y";
-    private Prototype<Double> modelOutputPrototype = new Prototype("y", Double.class);
-    private Prototype analysisVPrototype = new Prototype("V", Object.class);
-    private Prototype analysisD1Prototype = new Prototype("D1", Object.class);
-    private Prototype analysisDtPrototype = new Prototype("Dt", Object.class);
-    private Prototype analysisI1Prototype = new Prototype("I1", Object.class);
-    private Prototype analysisItPrototype = new Prototype("It", Object.class);
+    private transient final static Prototype<Double> modelOutputPrototype = new Prototype("y", Double.class);
+    private transient final static Prototype analysisVPrototype = new Prototype("V", Object.class);
+    private transient final static Prototype analysisD1Prototype = new Prototype("D1", Object.class);
+    private transient final static Prototype analysisDtPrototype = new Prototype("Dt", Object.class);
+    private transient final static Prototype analysisI1Prototype = new Prototype("I1", Object.class);
+    private transient final static Prototype analysisItPrototype = new Prototype("It", Object.class);
 
     public TellTask(String name) throws UserBadDataError, InternalProcessingError {
         super(name);
@@ -58,27 +58,27 @@ public class TellTask extends Task {
         this.addOutput(analysisItPrototype);
     }
 
-    public Prototype getAnalysisVPrototype() {
+    public static Prototype getAnalysisVPrototype() {
         return analysisVPrototype;
     }
 
-    public Prototype getAnalysisD1Prototype() {
+    public static Prototype getAnalysisD1Prototype() {
         return analysisD1Prototype;
     }
 
-    public Prototype getAnalysisDtPrototype() {
+    public static Prototype getAnalysisDtPrototype() {
         return analysisDtPrototype;
     }
 
-    public Prototype getAnalysisI1Prototype() {
+    public static Prototype getAnalysisI1Prototype() {
         return analysisI1Prototype;
     }
 
-    public Prototype getAnalysisItPrototype() {
+    public static Prototype getAnalysisItPrototype() {
         return analysisItPrototype;
     }
 
-    public Prototype<Double> getModelOutputPrototype() {
+    public static Prototype<Double> getModelOutputPrototype() {
         return modelOutputPrototype;
     }
 
@@ -106,10 +106,10 @@ public class TellTask extends Task {
             command.append("tell(").append(RVariableName).append(",");
             command.append(ModelOutputVariableName).append(")");
             R.voidEval(command.toString());
-            // Get result
-            V = (Double[]) R.eval(COMMAND_FOR_V);
+            // Get result FIXME
+            /*V = (Double[]) R.eval(COMMAND_FOR_V);
             D1 = (Double[]) R.eval(COMMAND_FOR_D1);
-            Dt = (Double[]) R.eval(COMMAND_FOR_DT);
+            Dt = (Double[]) R.eval(COMMAND_FOR_DT);*/
             // compute indices
             I1 = (Double[]) R.eval(COMMAND_FOR_I1);
             It = (Double[]) R.eval(COMMAND_FOR_IT);
@@ -117,9 +117,10 @@ public class TellTask extends Task {
             Logger.getLogger(FastPlan.class.getName()).log(Level.SEVERE, null, ex);
             throw new InternalProcessingError(ex, "Problem during the communication with R");
         }
+        /* FIXME variables non fetched
         context.putVariable(analysisVPrototype, V);
         context.putVariable(analysisD1Prototype, D1);
-        context.putVariable(analysisDtPrototype, Dt);
+        context.putVariable(analysisDtPrototype, Dt);*/
         context.putVariable(analysisI1Prototype, I1);
         context.putVariable(analysisItPrototype, It);
     }

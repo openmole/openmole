@@ -24,6 +24,7 @@ import org.openmole.ui.console.IConsole;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.simexplorer.openmole.plugin.task.sensitivity.Sensitivity;
 
 /**
  *
@@ -36,6 +37,7 @@ public class Activator implements BundleActivator {
         ServiceReference serviceReference = bc.getServiceReference(IConsole.class.getName());
         if (serviceReference != null) {
             ((IConsole) bc.getService(serviceReference)).setVariable("R", R.getInstance());
+            ((IConsole) bc.getService(serviceReference)).setVariable("sensitivity", new Sensitivity());
         } else {
             System.out.println("No service found for IConsole");
         }

@@ -88,11 +88,11 @@ public class FastPlan extends Plan<IFactor<Object, ?>> {
             command.append(TellTask.RVariableName);
             command.append("[['X']]");
             RDataFrame result = (RDataFrame) R.eval(command.toString());
-            for (int i = 0; i < samplingNumber; i++) {
+            for (int i = 0; i < samplingNumber * getFactors().size(); i++) {
                 FactorsValues factorValues = new FactorsValues();
                 for (int j = 0; j < getFactors().size(); j++) {
                     IFactor<Object, ?> factor = getFactors().get(j);
-                    factorValues.setValue(factor.getPrototype(), result.getData().get(j).get(i + samplingNumber * j));
+                    factorValues.setValue(factor.getPrototype(), result.getData().get(j).get(i));
                 }
                 listOfListOfValues.add(factorValues);
             }
