@@ -179,7 +179,7 @@ public class VirtualMachineResource extends ComposedResource {
     @Cachable
     private File getQEmuDir() throws IOException, InternalProcessingError {
         final String os = System.getProperty("os.name");
-        final File qemuDir = Activator.getWorkspace().newTmpDir();
+        final File qemuDir = workspace().newTmpDir();
         final String qemuJarPath;
         final String[] toCopy;
 
