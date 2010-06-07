@@ -127,6 +127,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
                 state = getState();
             }
+            
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.INFO, "State " + state);
 
             switch (state) {
                 case READY:
