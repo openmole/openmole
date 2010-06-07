@@ -16,11 +16,16 @@
  */
 package org.openmole.plugin.resource.virtual;
 
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.ServerHostKeyVerifier;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.apache.commons.exec.launcher.CommandLauncher;
@@ -32,7 +37,9 @@ import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.implementation.resource.ComposedResource;
 import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.core.model.task.annotations.Resource;
-import org.openmole.plugin.resource.virtual.internal.Activator;
+import org.openmole.misc.executorservice.ExecutorType;
+import org.openmole.misc.workspace.ConfigurationLocation;
+import static org.openmole.plugin.resource.virtual.internal.Activator.*;
 import static org.openmole.commons.tools.io.Network.*;
 
 /**
@@ -40,6 +47,12 @@ import static org.openmole.commons.tools.io.Network.*;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public class VirtualMachineResource extends ComposedResource {
+
+    final static ConfigurationLocation VMBootTime = new ConfigurationLocation(VirtualMachineResource.class.getSimpleName(), "VMBootTime");
+
+    static {
+        workspace().addToConfigurations(VMBootTime, "5M");
+    }
 
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
@@ -85,7 +98,7 @@ public class VirtualMachineResource extends ComposedResource {
 
         final File vmImage;
         try {
-            vmImage = Activator.getWorkspace().newTmpFile();
+            vmImage = workspace().newTmpFile();
             FileUtil.copy(systemResource.getDeployedFile(), vmImage);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
@@ -106,8 +119,6 @@ public class VirtualMachineResource extends ComposedResource {
                 commandLine.addArgument(qemuDir.getAbsolutePath());
                 commandLine.addArguments("-monitor null -serial none");
 
-               // Logger.getLogger(VirtualMachineResource.class.getName()).info(commandLine.toString());
-
                 Process process = Runtime.getRuntime().exec(commandLine.toString());
                 //Prevent qemu network from working on Windoze?
                 //Process process = commandLauncher().exec(commandLine, new HashMap());
@@ -124,15 +135,32 @@ public class VirtualMachineResource extends ComposedResource {
         } catch (Exception e) {
             throw new InternalProcessingError(e);
         }
+        final IVirtualMachine ret = connector.virtualMachine;
+        //First connection
+        final Connection connection = new Connection(ret.host(), ret.port());
+
+        Long timeOut = workspace().getPreferenceAsDurationInMs(VMBootTime);
+
+        try {
+            connection.connect(null, timeOut.intValue(), timeOut.intValue());
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex, "Connection to the VM timeout the boot taked too long.");
+        }
+        connection.close();
+
+    //Not supossed to fail but sometimes it does
+       /*executorService().getExecutorService(ExecutorType.OWN).submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                connection.connect(null, ,);
+                return null;
+            }
+      });*/
+
 
         return connector.virtualMachine;
     }
-
-    @Cachable
-    private CommandLauncher commandLauncher() {
-        return CommandLauncherFactory.createVMLauncher();
-    }
-
+    
     @Cachable
     private ShutdownHookProcessDestroyer processDestroyer() {
         return new ShutdownHookProcessDestroyer();

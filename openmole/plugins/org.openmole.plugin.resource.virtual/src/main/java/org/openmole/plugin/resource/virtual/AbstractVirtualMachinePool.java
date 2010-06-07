@@ -19,7 +19,8 @@ package org.openmole.plugin.resource.virtual;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.plugin.resource.virtual.internal.Activator;
+import static org.openmole.plugin.resource.virtual.internal.Activator.*;
+
 
 /**
  *
@@ -31,11 +32,11 @@ public abstract class AbstractVirtualMachinePool implements IVirtualMachinePool 
   final static ConfigurationLocation unusedVMKeepOn = new ConfigurationLocation(Group, "UnusedVMKeepOn");
 
   static {
-    Activator.getWorkspace().addToConfigurations(unusedVMKeepOn, "PT2M");
+    workspace().addToConfigurations(unusedVMKeepOn, "PT2M");
   }
 
   long delay() throws InternalProcessingError {
-      return Activator.getWorkspace().getPreferenceAsDurationInMs(unusedVMKeepOn);
+      return workspace().getPreferenceAsDurationInMs(unusedVMKeepOn);
   }
 
   private final VirtualMachineResource resource;

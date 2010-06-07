@@ -22,7 +22,6 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import ch.ethz.ssh2._
 import org.openmole.plugin.task.external.internal.SSHUtils._
-import com.jcraft.jsch._
 import java.io.File
 import java.io.PrintStream
 import java.io.FileInputStream
@@ -46,8 +45,8 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
     workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
     val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
     workspace.addToConfigurations(CommandWait, "PT1S")
-    val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
-    workspace.addToConfigurations(SSHConnectionRetry, "3")
+   // val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
+    //workspace.addToConfigurations(SSHConnectionRetry, "3")
   }
 
   def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
@@ -99,18 +98,14 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
   def getSSHConnection(virtualMachine: IVirtualMachine, user: String, password: String, timeOut: Int): Connection = {
     val connection = new Connection(virtualMachine.host, virtualMachine.port)
 
-    val verifier = new ServerHostKeyVerifier() {
-      override def verifyServerHostKey(hostname: String, port: Int, serverHostKeyAlgorithm: String, serverHostKey: Array[Byte]): Boolean = true
-    }
-
     //Not supossed to fail but sometimes it does
-    retry( () => {
-        try{
-          connection.connect(verifier, timeOut, timeOut)
-        } catch {
-          case e: Exception => throw e
-        }
-      } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
+ //   retry( () => {
+  //      try{
+    connection.connect(null, timeOut, timeOut)
+   //     } catch {
+    //      case e: Exception => throw e
+     //   }
+     // } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
     
     val isAuthenticated = connection.authenticateWithPassword(user, password)
 

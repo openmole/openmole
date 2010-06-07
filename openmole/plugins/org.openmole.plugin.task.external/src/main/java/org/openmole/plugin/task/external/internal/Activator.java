@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.external.internal;
 
 import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -43,6 +44,7 @@ public class Activator implements BundleActivator {
       ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
       return (IWorkspace) context.getService(ref);
     }
+
 
     @Override
     public void start(BundleContext bc) throws Exception {

@@ -16,7 +16,8 @@
  */
 package org.openmole.plugin.resource.virtual.internal;
 
-import org.openmole.core.jsagasession.IJSagaSessionService;
+import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -28,43 +29,38 @@ import org.osgi.framework.ServiceReference;
  */
 public class Activator implements BundleActivator {
 
-    static BundleContext context;
-    private static IWorkspace workspace;
-    private static IJSagaSessionService jSagaSessionService;
+    static Activator instance = new Activator();
+    BundleContext context;
 
     @Override
     public void start(BundleContext context) throws Exception {
-        this.context = context;
+        instance.context = context;
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        context = null;
+        instance.context = null;
     }
 
-    public synchronized static IWorkspace getWorkspace() {
-        if (workspace == null) {
-            ServiceReference ref = getContext().getServiceReference(IWorkspace.class.getName());
-            workspace = (IWorkspace) getContext().getService(ref);
-        }
-        return workspace;
+    public static IExecutorService executorService() {
+        return instance.getExecutorService();
     }
 
-    public static IJSagaSessionService getJSagaSessionService() {
-        if (jSagaSessionService != null) {
-            return jSagaSessionService;
-        }
-
-        synchronized (Activator.class) {
-            if (jSagaSessionService == null) {
-                ServiceReference ref = getContext().getServiceReference(IJSagaSessionService.class.getName());
-                jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
-            }
-            return jSagaSessionService;
-        }
+    public static IWorkspace workspace() {
+        return instance.getWorkspace();
     }
 
-    private static BundleContext getContext() {
-        return context;
+    @SoftCachable
+    private IExecutorService getExecutorService() {
+        ServiceReference ref = context.getServiceReference(IExecutorService.class.getName());
+        return (IExecutorService) context.getService(ref);
     }
+
+    @SoftCachable
+    private IWorkspace getWorkspace() {
+        ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
+        return (IWorkspace) context.getService(ref);
+    }
+
+ 
 }

@@ -23,6 +23,11 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.resource.virtual</artifactId>
             <version>${project.version}</version>
         </dependency>

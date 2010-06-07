@@ -23,6 +23,16 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+                <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.executorservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
