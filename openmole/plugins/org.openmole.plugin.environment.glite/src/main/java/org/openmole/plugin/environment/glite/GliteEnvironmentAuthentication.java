@@ -165,7 +165,7 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
                 ctx.setAttribute(Context.USERCERT, getCertPath());
                 ctx.setAttribute(Context.USERKEY, getKeyPath());
             } else {
-                throw new UserBadDataError("Unknown cert type " + getCertType());
+                throw new UserBadDataError("Unknown certificate type " + getCertType());
             }
 
             ctx.setAttribute(Context.SERVER, getVomsURL());
