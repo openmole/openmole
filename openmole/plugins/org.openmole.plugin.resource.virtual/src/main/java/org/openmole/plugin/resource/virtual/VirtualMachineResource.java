@@ -122,9 +122,10 @@ public class VirtualMachineResource extends ComposedResource {
                 Process process = Runtime.getRuntime().exec(commandLine.toString());
                 //Prevent qemu network from working on Windoze?
                 //Process process = commandLauncher().exec(commandLine, new HashMap());
-                processDestroyer().add(process);
+                ShutdownHookProcessDestroyer destroyer = processDestroyer();
+                destroyer.add(process);
 
-                virtualMachine = new VirtualMachine("localhost", port, process);
+                virtualMachine = new VirtualMachine("localhost", port, process, destroyer);
             }
         }
 

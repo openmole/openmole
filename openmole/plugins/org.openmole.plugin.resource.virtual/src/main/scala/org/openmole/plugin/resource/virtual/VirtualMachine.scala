@@ -17,8 +17,11 @@
 
 package org.openmole.plugin.resource.virtual
 
-class VirtualMachine(val host: String, val port: Int, process: Process) extends IVirtualMachine {
+import org.apache.commons.exec.ShutdownHookProcessDestroyer
+
+class VirtualMachine(val host: String, val port: Int, process: Process, processDestroyer: ShutdownHookProcessDestroyer) extends IVirtualMachine {
     override def shutdown = {
         process.destroy
+        processDestroyer.remove(process)
     }
 }

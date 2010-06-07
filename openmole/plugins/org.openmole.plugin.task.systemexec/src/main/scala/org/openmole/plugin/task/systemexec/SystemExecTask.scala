@@ -73,19 +73,25 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       try {
         val process = Runtime.getRuntime().exec(commandLine.toString, null, tmpDir)
         //executor.setWorkingDirectory(tmpDir)
-       // executor.setProcessDestroyer(getProccessDestroyer)
+        // executor.setProcessDestroyer(getProccessDestroyer)
         val pump = new PumpStreamHandler(System.out, System.err)
 
         pump.setProcessOutputStream(process.getInputStream)
         pump.setProcessErrorStream(process.getErrorStream)
         //val process = executor.execute(commandLine)
-        getProccessDestroyer.add(process)
-        
-        pump.start
+        val processDestroyer = getProccessDestroyer
+        processDestroyer.add(process)
         try {
-          process.waitFor
+          pump.start
+          try {
+            process.waitFor
+          } catch {
+            case e: InterruptedException => process.destroy; throw e
+          } finally {
+            pump.stop
+          }
         } finally {
-          pump.stop
+          processDestroyer.remove(process)
         }
         val ret: Integer = process.exitValue
         //val ret: Integer = executor.execute(commandLine)
