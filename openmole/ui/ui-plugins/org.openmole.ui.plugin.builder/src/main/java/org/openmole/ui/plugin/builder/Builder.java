@@ -20,6 +20,7 @@
 
 package org.openmole.ui.plugin.builder;
 
+import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
@@ -38,11 +39,12 @@ import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.task.ExplorationTask;
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
 
 public class Builder {
 
-    public Prototype buildPrototype(String name, Class type) {
+    public IPrototype buildPrototype(String name, Class type) {
         return new Prototype(name, type);
     }
 
@@ -69,7 +71,11 @@ public class Builder {
         public IFactor buildFactor(IPrototype prototype, IDomain domain) {
             return new Factor(prototype, domain);
         }
-        
+
+        public IExplorationTask buildExplorationTask(String name,IPlan plan) throws UserBadDataError, InternalProcessingError{
+            return new ExplorationTask(name,plan);
+        }
+
         public ExplorationTaskCapsule buildExplorationTaskCapsule(IExplorationTask task) {
             return new ExplorationTaskCapsule(task);
         }
