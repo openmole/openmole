@@ -51,7 +51,7 @@ public class VirtualMachineResource extends ComposedResource {
     final static ConfigurationLocation VMBootTime = new ConfigurationLocation(VirtualMachineResource.class.getSimpleName(), "VMBootTime");
 
     static {
-        workspace().addToConfigurations(VMBootTime, "5M");
+        workspace().addToConfigurations(VMBootTime, "PT5M");
     }
 
     final static String[] CommonFiles = {"bios.bin"};
