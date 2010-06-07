@@ -37,7 +37,7 @@ import org.openmole.core.model.plan.IExploredPlan;
 
 public class CompletePlan extends Plan<IFactor<Object, ?>> {
 
-    public CompletePlan(IFactor<Object, ?>[] factors) {
+    public CompletePlan(IFactor<Object, ?>...factors) {
         super(factors);
     }
 
