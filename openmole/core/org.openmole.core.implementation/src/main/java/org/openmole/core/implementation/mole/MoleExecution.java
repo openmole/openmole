@@ -179,7 +179,7 @@ public class MoleExecution implements IMoleExecution {
     synchronized void submitGroups(ISubMoleExecution subMoleExecution) {
         Iterable<Job> jobs = jobsGrouping.remove(subMoleExecution);
 
-LOGGER.info("Submit a group");
+        LOGGER.finer("Submit a group");
         for (Job job : jobs) {
             Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
             subMoleExecution.decNbJobWaitingInGroup(job.getNbMoleJob());

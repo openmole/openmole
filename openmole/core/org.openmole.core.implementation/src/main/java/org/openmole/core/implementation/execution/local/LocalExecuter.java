@@ -27,6 +27,7 @@ import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.IMoleTask;
 import org.openmole.commons.tools.structure.Trio;
+import org.openmole.core.model.job.State;
 
 public class LocalExecuter implements Runnable {
 
@@ -47,29 +48,26 @@ public class LocalExecuter implements Runnable {
                 Trio<IExecutionContext, IJobStatisticCategory, LocalExecutionJob> trio = localEnvironment.takeNextjob();
                 LocalExecutionJob executionJob = trio.getRight();
                 IJob job = executionJob.getJob();
+
                 IExecutionContext executionContext = trio.getLeft();
                 IJobStatisticCategory taskCapsule = trio.getCenter();
 
                 try {
                     executionJob.setState(ExecutionState.RUNNING);
                     Long running = System.currentTimeMillis();
-                    executionJob.getEnvironment().sample(SampleType.WAITING, running - executionJob.getCreationTime() , executionContext, taskCapsule);
+                    executionJob.getEnvironment().sample(SampleType.WAITING, running - executionJob.getCreationTime(), executionContext, taskCapsule);
 
                     for (IMoleJob moleJob : job.getMoleJobs()) {
-                        LOGGER.finer("New job group taken for execution: " + moleJob);
-        
-                        if(IMoleTask.class.isAssignableFrom(moleJob.getTask().getClass())) {
-                            jobGoneIdle();
-                        }
-                        moleJob.perform(executionContext);
+                        if (moleJob.getState() != State.CANCELED) {
+                            LOGGER.finer("New job group taken for execution: " + moleJob);
 
-                        /*try {
-                            moleJob.rethrowException(moleJob.getContext());
-                        } catch (ExecutionException e) {
-                            LOGGER.log(Level.SEVERE, "Error in user job execution, trying to keep going...", e);
-                        }*/
-                        moleJob.finished(moleJob.getContext());
-                        LOGGER.finer("End of job group execution: " + moleJob);
+                            if (IMoleTask.class.isAssignableFrom(moleJob.getTask().getClass())) {
+                                jobGoneIdle();
+                            }
+                            moleJob.perform(executionContext);
+                            moleJob.finished(moleJob.getContext());
+                            LOGGER.finer("End of job group execution: " + moleJob);
+                        }
                     }
                     executionJob.setState(ExecutionState.DONE);
                     executionJob.getEnvironment().sample(SampleType.RUNNING, System.currentTimeMillis() - running, executionContext, taskCapsule);
