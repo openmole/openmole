@@ -37,7 +37,10 @@ import org.openmole.core.model.plan.IExploredPlan;
 
 public class CompletePlan extends Plan<IFactor<Object, ?>> {
 
-  
+    public CompletePlan(IFactor<Object, ?>[] factors) {
+        super(factors);
+    }
+
     @Override
     public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError {
 
