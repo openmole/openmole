@@ -19,12 +19,6 @@ package org.openmole.ui.workflow.implementation;
 import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
-<<<<<<< HEAD
-import org.openmole.core.model.data.IPrototype;
-import org.openmole.commons.exception.UserBadDataError;
-=======
->>>>>>> ide update
-import org.openmole.ui.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
 
 /**

@@ -21,7 +21,7 @@ import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.UIFactory;

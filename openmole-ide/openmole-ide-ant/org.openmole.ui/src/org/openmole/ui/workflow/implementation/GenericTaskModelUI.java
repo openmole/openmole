@@ -19,7 +19,7 @@ package org.openmole.ui.workflow.implementation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.commons.IOType;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;

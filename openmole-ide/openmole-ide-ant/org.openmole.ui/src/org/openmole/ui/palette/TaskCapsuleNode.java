@@ -35,7 +35,7 @@ public class TaskCapsuleNode extends GenericNode{
     public TaskCapsuleNode(DataFlavor key) {
         super(key,
               CategoryName.TASK_CAPSULE,
-              org.openmole.core.workflow.implementation.capsule.TaskCapsule.class);
+              org.openmole.core.implementation.capsule.TaskCapsule.class);
     }
 
      //DND start

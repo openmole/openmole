@@ -18,14 +18,11 @@ package org.openmole.ui.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openide.util.Exceptions;
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.exception.MoleExceptionManagement;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.TaskCapsuleViewUI;
-import org.openmole.ui.workflow.implementation.UIFactory;
-import org.openmole.ui.workflow.model.IGenericTaskModelUI;
 
 /**
  *

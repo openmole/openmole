@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.control.TableType.Name;
-import org.openmole.core.workflow.model.task.IExplorationTask;
+import org.openmole.core.model.task.IExplorationTask;
 
 /**
  *

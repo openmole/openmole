@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation;
 
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericTaskCapsule;
 
 /**
  *

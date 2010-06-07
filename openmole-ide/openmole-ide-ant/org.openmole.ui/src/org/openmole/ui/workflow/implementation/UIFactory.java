@@ -19,8 +19,8 @@ package org.openmole.ui.workflow.implementation;
 import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.workflow.model.IUIFactory;
 import org.openmole.commons.tools.object.Instanciator;
 import org.openmole.ui.exception.MoleExceptionManagement;
@@ -83,7 +83,7 @@ public class UIFactory implements IUIFactory<Object> {
         TaskCapsuleModelUI tcm = new TaskCapsuleModelUI();
         Widget obUI= null;
         try {
-            obUI = new TaskCapsuleViewUI(scene, tcm, Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE, org.openmole.core.workflow.implementation.capsule.TaskCapsule.class));
+            obUI = new TaskCapsuleViewUI(scene, tcm, Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE, org.openmole.core.implementation.capsule.TaskCapsule.class));
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);
         }

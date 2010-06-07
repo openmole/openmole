@@ -22,7 +22,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import org.openide.util.datatransfer.ExTransferable;
 
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.palette.Category.CategoryName;
 

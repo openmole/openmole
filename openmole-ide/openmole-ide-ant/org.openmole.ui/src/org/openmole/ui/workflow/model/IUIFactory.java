@@ -5,9 +5,9 @@
 
 package org.openmole.ui.workflow.model;
 
-import org.openmole.core.workflow.model.task.IGenericTask;
-import org.openmole.misc.eventdispatcher.IObjectConstructedAsynchronousListener;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedAsynchronousListener;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.task.IGenericTask;
 
 /**
  *

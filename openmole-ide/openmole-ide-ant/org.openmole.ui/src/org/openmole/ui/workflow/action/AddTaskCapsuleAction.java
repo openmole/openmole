@@ -19,7 +19,6 @@ package org.openmole.ui.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openmole.core.workflow.implementation.capsule.TaskCapsule;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.UIFactory;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
@@ -38,14 +37,8 @@ public class AddTaskCapsuleAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-
-
-            System.out.println("-----------------------SOUSCE " + moleScene.getLocation().x);
-
-       // IConnectable c = moleScene.createTaskCapsule();
         ITaskCapsuleView c = UIFactory.getInstance().createTaskCapsule(moleScene,
                                                                       moleScene.getLocation());
-     //   c.setTaskCapsule(new TaskCapsule());
         moleScene.refresh();
     }
 

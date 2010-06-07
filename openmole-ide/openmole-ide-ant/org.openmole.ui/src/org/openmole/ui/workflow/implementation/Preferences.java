@@ -25,17 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.openmole.core.workflow.implementation.data.Prototype;
-import org.openmole.core.workflow.model.data.IPrototype;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.IObjectModelUI;
-<<<<<<< HEAD
 import org.openmole.commons.tools.service.HierarchicalRegistry;
-import org.openmole.ui.exception.MoleExceptionManagement;
-=======
-import org.openmole.misc.tools.service.HierarchicalRegistry;
 import org.openmole.ui.palette.Category.CategoryName;
->>>>>>> ide update
 
 /**
  *

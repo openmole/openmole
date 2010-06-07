@@ -16,8 +16,7 @@
  */
 package org.openmole.ui.workflow.model;
 
-import java.awt.Image;
-import org.openmole.misc.eventdispatcher.IObjectChangedAsynchronousListener;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedAsynchronousListener;
 
 /**
  *

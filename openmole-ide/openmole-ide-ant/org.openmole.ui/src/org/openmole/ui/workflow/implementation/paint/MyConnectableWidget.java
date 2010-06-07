@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.workflow.implementation.paint;
 
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.commons.IOType;
 import java.awt.BasicStroke;
 import java.awt.Color;

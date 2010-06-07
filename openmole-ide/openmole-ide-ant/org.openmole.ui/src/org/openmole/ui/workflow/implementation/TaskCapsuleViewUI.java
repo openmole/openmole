@@ -17,13 +17,13 @@
 package org.openmole.ui.workflow.implementation;
 
 import java.util.Properties;
-import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.ui.workflow.provider.TaskCapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.workflow.model.IObjectModelUI;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;
-import org.openmole.core.workflow.model.task.IGenericTask;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.palette.Category.CategoryName;
 import org.openmole.ui.workflow.implementation.paint.MyConnectableWidget;

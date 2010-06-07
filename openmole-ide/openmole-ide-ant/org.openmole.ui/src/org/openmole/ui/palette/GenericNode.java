@@ -21,7 +21,7 @@ import java.awt.datatransfer.DataFlavor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
-import org.openmole.misc.exception.UserBadDataError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.exception.MoleExceptionManagement;
 import org.openmole.ui.palette.Category.CategoryName;
 import org.openmole.ui.workflow.implementation.Preferences;

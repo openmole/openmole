@@ -18,14 +18,12 @@ package org.openmole.ui.workflow.implementation.paint;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Cursor;
 import org.netbeans.api.visual.widget.*;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.implementation.MoleScene;
-import sun.java2d.loops.DrawRect;
 
 /**
  *

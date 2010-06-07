@@ -44,7 +44,6 @@ import org.openide.util.ImageUtilities;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.workflow.model.ITaskCapsuleView;
 import org.openmole.ui.workflow.model.IMoleScene;
-<<<<<<< HEAD
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitor;
@@ -52,15 +51,6 @@ import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.transition.ITransition;
 import org.openmole.core.model.transition.ITransitionSlot;
-=======
-import org.openmole.misc.exception.InternalProcessingError;
-import org.openmole.misc.exception.UserBadDataError;
-import org.openmole.misc.tools.pattern.IVisitor;
-import org.openmole.core.workflow.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.workflow.model.mole.IMole;
-import org.openmole.core.workflow.model.transition.ITransition;
-import org.openmole.core.workflow.model.transition.ITransitionSlot;
->>>>>>> ide update
 import org.openmole.ui.control.MoleScenesManager;
 import org.openmole.ui.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.workflow.provider.DnDNewTaskCapsuleProvider;

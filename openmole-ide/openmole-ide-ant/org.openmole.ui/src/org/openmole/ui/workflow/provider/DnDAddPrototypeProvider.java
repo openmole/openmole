@@ -17,22 +17,17 @@
 
 package org.openmole.ui.workflow.provider;
 
-import java.awt.Dialog;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.commons.IOType;
 import org.openmole.ui.exception.MoleExceptionManagement;
-import org.openmole.ui.palette.Category.CategoryName;
-import org.openmole.ui.palette.CategoryBuilder;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.workflow.implementation.MoleSceneManager;
 import org.openmole.ui.workflow.implementation.Preferences;
