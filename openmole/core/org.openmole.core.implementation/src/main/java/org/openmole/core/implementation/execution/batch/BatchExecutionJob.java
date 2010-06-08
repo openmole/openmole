@@ -128,7 +128,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 state = getState();
             }
             
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.INFO, "State " + state);
+           // Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.INFO, "State " + state);
 
             switch (state) {
                 case READY:
