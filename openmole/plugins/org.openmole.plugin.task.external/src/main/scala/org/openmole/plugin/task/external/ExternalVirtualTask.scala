@@ -43,8 +43,8 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
   object Configuration {
     val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
     workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
-    val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
-    workspace.addToConfigurations(CommandWait, "PT1S")
+    //val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
+    //workspace.addToConfigurations(CommandWait, "PT1S")
    // val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
     //workspace.addToConfigurations(SSHConnectionRetry, "3")
   }
@@ -80,7 +80,7 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
         try {
           session.execCommand("cd " + workDir + " ; " + expandData(context, cmd))
-          waitForCommandToEnd(session, workspace.getPreferenceAsDurationInMs(Configuration.CommandWait).intValue)
+          waitForCommandToEnd(session, 0)
         } finally {
           session.close
         }
