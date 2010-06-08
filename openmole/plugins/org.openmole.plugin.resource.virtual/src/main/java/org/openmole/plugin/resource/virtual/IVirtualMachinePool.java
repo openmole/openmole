@@ -26,6 +26,6 @@ import org.openmole.commons.exception.UserBadDataError;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public interface IVirtualMachinePool {
-  IVirtualMachine borrowAVirtualMachine() throws InternalProcessingError, UserBadDataError;
+  IVirtualMachine borrowAVirtualMachine() throws InternalProcessingError, UserBadDataError, InterruptedException;
   void returnVirtualMachine(IVirtualMachine virtualMachine) throws InternalProcessingError;
 }

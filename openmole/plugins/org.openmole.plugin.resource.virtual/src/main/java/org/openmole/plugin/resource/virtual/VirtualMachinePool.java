@@ -70,7 +70,7 @@ public class VirtualMachinePool extends AbstractVirtualMachinePool {
     }
 
     @Override
-    public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError {
+    public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
 
         synchronized (pool) {
             if (!pool.isEmpty()) {

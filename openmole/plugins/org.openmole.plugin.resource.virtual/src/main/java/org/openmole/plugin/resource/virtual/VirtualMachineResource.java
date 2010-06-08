@@ -17,19 +17,21 @@
 package org.openmole.plugin.resource.virtual;
 
 import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.ServerHostKeyVerifier;
+import com.db4o.ta.Activatable;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
-import org.apache.commons.exec.launcher.CommandLauncher;
-import org.apache.commons.exec.launcher.CommandLauncherFactory;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -39,6 +41,7 @@ import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;
+import org.openmole.plugin.resource.virtual.internal.Activator;
 import static org.openmole.plugin.resource.virtual.internal.Activator.*;
 import static org.openmole.commons.tools.io.Network.*;
 
@@ -53,7 +56,6 @@ public class VirtualMachineResource extends ComposedResource {
     static {
         workspace().addToConfigurations(VMBootTime, "PT5M");
     }
-
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
     @Resource
@@ -91,7 +93,7 @@ public class VirtualMachineResource extends ComposedResource {
         this.vcore = vcore;
     }
 
-    public IVirtualMachine launchAVirtualMachine() throws UserBadDataError, InternalProcessingError {
+    public IVirtualMachine launchAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
         if (!systemResource.getDeployedFile().isFile()) {
             throw new UserBadDataError("Image " + systemResource.getDeployedFile().getAbsolutePath() + " doesn't exist or is not a file.");
         }
@@ -110,10 +112,10 @@ public class VirtualMachineResource extends ComposedResource {
 
             @Override
             public void connect(int port) throws IOException, InternalProcessingError {
-                File qemuDir = getQEmuDir();  
+                File qemuDir = getQEmuDir();
 
                 CommandLine commandLine = new CommandLine(new File(qemuDir, Executable));
-                commandLine.addArguments("-m " + memory + " -smp " + vcore +  " -redir tcp:" + port + "::22 -nographic -hda ");
+                commandLine.addArguments("-m " + memory + " -smp " + vcore + " -redir tcp:" + port + "::22 -nographic -hda ");
                 commandLine.addArgument(systemResource.getDeployedFile().getAbsolutePath());
                 commandLine.addArguments("-L");
                 commandLine.addArgument(qemuDir.getAbsolutePath());
@@ -140,28 +142,42 @@ public class VirtualMachineResource extends ComposedResource {
         //First connection
         final Connection connection = new Connection(ret.host(), ret.port());
 
-        Long timeOut = workspace().getPreferenceAsDurationInMs(VMBootTime);
+        final Long timeOut = workspace().getPreferenceAsDurationInMs(VMBootTime);
 
-        try {
-            connection.connect(null, timeOut.intValue(), timeOut.intValue());
-        } catch (IOException ex) {
-            throw new InternalProcessingError(ex, "Connection to the VM timeout the boot taked too long.");
-        }
-        connection.close();
+        Future connectionFuture = Activator.executorService().getExecutorService(ExecutorType.OWN).submit(new Callable<Void>() {
 
-    //Not supossed to fail but sometimes it does
-       /*executorService().getExecutorService(ExecutorType.OWN).submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                connection.connect(null, ,);
+                while (true) {
+                    try {
+                        connection.connect(null, timeOut.intValue(), timeOut.intValue());
+                        connection.close();
+                        break;
+                    } catch (IOException ex) {
+                        Logger.getLogger(VirtualMachineResource.class.getName()).log(Level.WARNING, "Connection to the VM timeout the boot taked too long.", ex);
+                    }
+                }
                 return null;
             }
-      });*/
-
+        });
+        
+        try {
+            connectionFuture.get(timeOut, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            connector.virtualMachine.shutdown();
+            throw e;
+        } catch (ExecutionException ex) {
+            connector.virtualMachine.shutdown();
+            throw new InternalProcessingError(ex, "Connection to the VM has raised an error.");
+        } catch (TimeoutException ex) {
+            connectionFuture.cancel(true);
+            connector.virtualMachine.shutdown();
+            throw new InternalProcessingError(ex, "Connection to the VM timeout the boot taked too long.");
+        }
 
         return connector.virtualMachine;
     }
-    
+
     @Cachable
     private ShutdownHookProcessDestroyer processDestroyer() {
         return new ShutdownHookProcessDestroyer();

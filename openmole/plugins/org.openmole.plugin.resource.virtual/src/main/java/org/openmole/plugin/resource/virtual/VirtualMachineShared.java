@@ -45,7 +45,7 @@ public class VirtualMachineShared extends AbstractVirtualMachinePool {
     }
 
     @Override
-    public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError {
+    public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
         synchronized (this) {
             if (!running.get()) {
                 vm = resource().launchAVirtualMachine();
