@@ -36,6 +36,12 @@ import org.openmole.commons.tools.pattern.BufferFactory;
  */
 public class SSHUtils {
 
+    static SFTPv3FileAttributes Executable = new SFTPv3FileAttributes();
+
+    static {
+        Executable.permissions = 0x777;
+    }
+
     public static void copyTo(SFTPv3Client client, File local, String remote) throws IOException {
 
         if (local.isFile()) {
@@ -44,6 +50,7 @@ public class SSHUtils {
                 SFTPv3FileHandle fileHandle = client.createFileTruncate(remote);
                 try {
                     copyTo(client, fis, fileHandle);
+                    client.fsetstat(fileHandle, Executable);
                 } finally {
                     client.closeFile(fileHandle);
                 }

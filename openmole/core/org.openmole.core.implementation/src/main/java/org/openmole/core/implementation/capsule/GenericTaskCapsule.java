@@ -40,7 +40,6 @@ import org.openmole.core.implementation.transition.MultiOut;
 
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.data.IDataChannel;
-import org.openmole.core.model.job.State;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ISubMoleExecution;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
@@ -178,7 +177,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
         } catch (UserBadDataError e) {
             throw new UserBadDataError(e, "Error at the end of a MoleJob for task " + getAssignedTask());
         } finally {
-            job.setState(State.TRANSITION_PERFORMED);
+            Activator.getEventDispatcher().objectChanged(job, MoleJob.TransitionPerformed);
+           // job.setState(State.TRANSITION_PERFORMED);
         }
     }
 

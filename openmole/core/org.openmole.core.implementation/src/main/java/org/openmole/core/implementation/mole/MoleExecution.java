@@ -65,15 +65,24 @@ public class MoleExecution implements IMoleExecution {
 
     final static public IPrototype<Collection> Exceptions = new Prototype<Collection>("Exceptions", Collection.class);
 
+
+    class MoleExecutionAdapterForMoleJobOutputTransitionPerformed implements IObjectChangedSynchronousListener<IMoleJob> {
+
+        @Override
+        public void objectChanged(IMoleJob job) throws InternalProcessingError, UserBadDataError {
+            jobOutputTransitionsPerformed(job);
+        }
+
+    }
+
     class MoleExecutionAdapterForMoleJob implements IObjectChangedSynchronousListener<IMoleJob> {
 
         @Override
         public void objectChanged(IMoleJob job) throws InternalProcessingError, UserBadDataError {
             switch (job.getState()) {
-                case FAILED:
-                case TRANSITION_PERFORMED:
-                    jobOutputTransitionsPerformed(job);
-                    break;
+  //              case FAILED:
+  //                  jobFailed(job);
+  //                  break;
                 case COMPLETED:
                     jobFinished(job);
                     break;
@@ -99,8 +108,11 @@ public class MoleExecution implements IMoleExecution {
     IExecutionContext executionContext;
     BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
     MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
-    MoleExecutionAdapterForMoleJob moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob();
+
+    final MoleExecutionAdapterForMoleJob moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob();
     final MoleExecutionAdapterForSubMoleExecution moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution();
+    final MoleExecutionAdapterForMoleJobOutputTransitionPerformed moleJobOutputTransitionPerformed = new MoleExecutionAdapterForMoleJobOutputTransitionPerformed();
+
     transient Thread submiter;
 
     public MoleExecution(Mole mole, IContext context, IExecutionContext executionContext) throws InternalProcessingError, UserBadDataError {
@@ -131,7 +143,8 @@ public class MoleExecution implements IMoleExecution {
     @Override
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         ExecutionInfoRegistry.GetInstance().register(moleJob, this);
-        Activator.getEventDispatcher().registerListener(moleJob, Priority.LOW.getValue(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGH.getValue(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(moleJob, Priority.NORMAL.getValue(), moleJobOutputTransitionPerformed, MoleJob.TransitionPerformed);
 
         inProgress.put(moleJob, subMole);
         subMole.incNbJobInProgress();
@@ -272,6 +285,9 @@ public class MoleExecution implements IMoleExecution {
         getSubmiter().join();
     }
 
+    public void jobFailed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
+        jobOutputTransitionsPerformed(job);
+    }
 
     public synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobJinished, new IMoleJob[]{job});

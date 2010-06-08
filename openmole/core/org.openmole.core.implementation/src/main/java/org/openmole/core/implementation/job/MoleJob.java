@@ -45,6 +45,8 @@ import org.openmole.core.model.resource.IResource;
 
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
+    final public static String TransitionPerformed = "TransitionPerformed";
+
     private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
 
 
