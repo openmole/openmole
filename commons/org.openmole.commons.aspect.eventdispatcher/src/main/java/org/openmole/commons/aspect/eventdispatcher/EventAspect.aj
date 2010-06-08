@@ -12,6 +12,17 @@ import java.lang.annotation.Annotation;
 
 public aspect EventAspect {
 
+	before() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified) {
+
+		Object object = thisJoinPoint.getThis();
+
+                Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
+                ObjectModified annotation = method.getAnnotation(ObjectModified.class);
+
+                Activator.getEventDispatcher().objectChanged(object,annotation.type(), thisJoinPoint.getArgs());
+	}
+
+
 	after() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectModified) {
 		
 		Object object = thisJoinPoint.getThis();

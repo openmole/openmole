@@ -41,25 +41,36 @@ public abstract class MoleExecutionProfiler {
 
     }
 
+    class MoleExecutionProfilerExecutionStartingAdapter implements IObjectChangedSynchronousListener<IMoleExecution>  {
+
+        @Override
+        public void objectChanged(IMoleExecution obj) throws InternalProcessingError, UserBadDataError {
+            moleExecutionStarting();
+        }
+
+    }
+
+
     class MoleExecutionProfilerExecutionFinishedAdapter implements IObjectChangedSynchronousListener<IMoleExecution>  {
 
         @Override
         public void objectChanged(IMoleExecution obj) throws InternalProcessingError, UserBadDataError {
             moleExecutionFinished();
         }
-        
+     
     }
-
 
     final IMoleExecution moleExecution;
 
     public MoleExecutionProfiler(IMoleExecution moleExecution) {
         this.moleExecution = moleExecution;
+        Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerExecutionStartingAdapter(), IMoleExecution.starting);
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerOneJobFinishedAdapter(), IMoleExecution.oneJobJinished);
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.LOW.getValue(), new MoleExecutionProfilerExecutionFinishedAdapter(), IMoleExecution.finished);
     }
 
     protected abstract void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError;
+    protected abstract void moleExecutionStarting() throws InternalProcessingError, UserBadDataError;
     protected abstract void moleExecutionFinished() throws InternalProcessingError, UserBadDataError;
 
 }

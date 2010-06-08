@@ -14,17 +14,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.plugin.executionprofiler.csv;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.mole.MoleExecutionProfiler;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 
 import static org.openmole.plugin.executionprofiler.csv.internal.MoleJobInfoToColumns.toColumns;
 
@@ -32,40 +36,45 @@ import static org.openmole.plugin.executionprofiler.csv.internal.MoleJobInfoToCo
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class CSVProfiler extends MoleExecutionProfiler {
+public class CSVFileProfiler extends MoleExecutionProfiler {
 
-    final CSVWriter writer;
 
-    public CSVProfiler(IMoleExecution moleExecution) {
-        this(moleExecution, new OutputStreamWriter(System.out));
-    }
+    transient CSVWriter writer;
+    final File file;
 
-    public CSVProfiler(IMoleExecution moleExecution, Writer out) {
+    public CSVFileProfiler(IMoleExecution moleExecution, File file) {
         super(moleExecution);
-        writer = new CSVWriter(out);
+        this.file = file;
     }
+
+    public CSVFileProfiler(IMoleExecution moleExecution, String file) {
+        this(moleExecution, new File(file));
+    }
+
 
     @Override
     protected void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
         writer.writeNext(toColumns(moleJob));
-        try {
-            writer.flush();
-        } catch (IOException ex) {
-            throw new InternalProcessingError(ex);
-        }
     }
 
     @Override
     protected void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
         try {
-            writer.flush();
+            writer.close();
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
+        } finally {
+            writer = null;
         }
     }
 
     @Override
     protected void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
-        
+        try {
+            writer = new CSVWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
     }
+
 }

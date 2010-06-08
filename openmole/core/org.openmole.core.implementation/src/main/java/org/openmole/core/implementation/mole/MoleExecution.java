@@ -31,6 +31,7 @@ import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified;
 import org.openmole.core.implementation.data.Prototype;
 
 import org.openmole.commons.exception.InternalProcessingError;
@@ -87,6 +88,7 @@ public class MoleExecution implements IMoleExecution {
             submitGroups(obj);
         }
     }
+
     private static final Logger LOGGER = Logger.getLogger(MoleExecution.class.getName());
     Mole mole;
     BlockingQueue<Trio<IJob, IEnvironment, IJobStatisticCategory>> jobs = new LinkedBlockingQueue<Trio<IJob, IEnvironment, IJobStatisticCategory>>();
@@ -129,7 +131,7 @@ public class MoleExecution implements IMoleExecution {
     @Override
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         ExecutionInfoRegistry.GetInstance().register(moleJob, this);
-        Activator.getEventDispatcher().registerListener(moleJob, getLevel(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(moleJob, Priority.LOW.getValue(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
 
         inProgress.put(moleJob, subMole);
         subMole.incNbJobInProgress();
@@ -187,10 +189,10 @@ public class MoleExecution implements IMoleExecution {
         }
     }
 
-    @Override
+  /*  @Override
     public int getLevel() {
         return 0;
-    }
+    }*/
 
     class Submiter implements Runnable {
 
@@ -223,7 +225,8 @@ public class MoleExecution implements IMoleExecution {
     }
 
     @Override
-    public void start() {
+    @BeforeObjectModified(type=starting)
+    public void start() throws InternalProcessingError, UserBadDataError {
         if (getSubmiter().getState().equals(Thread.State.NEW)) {
             getSubmiter().start();
         } else {
@@ -238,7 +241,6 @@ public class MoleExecution implements IMoleExecution {
         for (IMoleJob moleJob : getAllMoleJobsInternal()) {
             moleJob.cancel();
         }
-
     }
 
     private synchronized Thread getSubmiter() {
@@ -269,15 +271,6 @@ public class MoleExecution implements IMoleExecution {
     public void waitUntilEnded() throws InterruptedException {
         getSubmiter().join();
     }
-
-
-    /*public synchronized void jobFailed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
-        Activator.getEventDispatcher().objectChanged(this, oneJobJinished, new IMoleJob[]{job});
-        ISubMoleExecution subMole = inProgress.get(job);
-        subMole.decNbJobInProgress();
-
-
-    }*/
 
 
     public synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {

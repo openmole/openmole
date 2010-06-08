@@ -24,14 +24,15 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.job.ITicket;
-import org.openmole.core.model.mole.IMole;
 
 public interface IMoleExecution {
+
+    final public static String starting = "starting";
 
     final public static String finished = "finished";
     final public static String oneJobJinished = "oneJobJinished";
 
-    void start();
+    void start() throws InternalProcessingError, UserBadDataError;
     void cancel() throws InternalProcessingError, UserBadDataError;
 
     void waitUntilEnded() throws InterruptedException;
@@ -40,7 +41,7 @@ public interface IMoleExecution {
     void submit(IGenericTaskCapsule<?, ?> capsule, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
     void submit(IMoleJob job, IGenericTaskCapsule<?, ?> capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
 
-    int getLevel();
+  //  int getLevel();
     IMole getMole();
 
     ITicket createRootTicket();
