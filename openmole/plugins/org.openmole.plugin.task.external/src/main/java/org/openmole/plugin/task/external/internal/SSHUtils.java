@@ -58,9 +58,11 @@ public class SSHUtils {
                 fis.close();
             }
         } else if (local.isDirectory()) {
-            String nextLevel = remote + '/' + local.getName();
-            client.mkdir(nextLevel, 0x777);
+           // String nextLevel = remote + '/' + local.getName();
+            //System.out.println("MkDir " + remote);
+            client.mkdir(remote, 0x777);
             for (File f : local.listFiles()) {
+                String nextLevel = remote + '/' + f.getName();
                 copyTo(client, f, nextLevel);
             }
         }
@@ -111,13 +113,13 @@ public class SSHUtils {
                 fos.close();
             }
         } else if (fileAttribute.isDirectory()) {
-            String name = remote.substring(remote.lastIndexOf("/"));
-            File nextLevel = new File(local, name);
-            nextLevel.mkdir();
+           // String name = remote.substring(remote.lastIndexOf("/"));
+            //File nextLevel = new File(local, name);
+            local.mkdir();
             for (Object entry : client.ls(remote)) {
                 String entryStr = ((SFTPv3DirectoryEntry) entry).filename;
                 if (!entryStr.equals("..") && !entryStr.equals(".")) {
-                    copyFrom(client, name + "/" + entryStr, nextLevel);
+                    copyFrom(client, remote + "/" + entryStr, new File(local, entryStr));
                 }
             }
         }
