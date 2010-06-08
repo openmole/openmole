@@ -17,8 +17,14 @@
 package org.openmole.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Graphics;
 import java.util.logging.Logger;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -27,9 +33,12 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.util.lookup.Lookups;
+import org.openmole.ui.commons.ApplicationCustomize;
 import org.openmole.ui.control.ControlPanel;
 import org.openmole.ui.workflow.implementation.MoleScene;
 import org.openmole.ui.palette.PaletteSupport;
+import org.openmole.ui.workflow.action.EnableTaskDetailedView;
+import org.openmole.ui.workflow.action.MoveOrDrawTransitionAction;
 
 /**
  * Top component which displays something.
@@ -41,6 +50,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
     private static MoleSceneTopComponentTopComponent instance;
     private PaletteController palette;
     private JComponent myView;
+    private JToolBar toolBar = new JToolBar("SSSE");
 
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -60,16 +70,20 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         myView = scene.createView();
 
         moleSceneScrollPane.setViewportView(myView);
-        try {
-            // add(scene.createSatelliteView(), BorderLayout.WEST);
-            add(new ControlPanel(scene), BorderLayout.WEST);
-        } catch (IllegalArgumentException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IllegalAccessException ex) {
-            Exceptions.printStackTrace(ex);
-        }
         refreshPalette();
         associateLookup(Lookups.fixed(new Object[]{palette}));
+
+        JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
+        moveButton.addActionListener(new MoveOrDrawTransitionAction());
+        moveButton.setSelected(false);
+
+        JToggleButton detailedViewButton  = new JToggleButton("Detailed view");
+        detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
+
+        toolBar.add(moveButton);
+        toolBar.add(detailedViewButton);
+        add(toolBar, java.awt.BorderLayout.NORTH);   
+
 
      //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }

@@ -32,8 +32,8 @@ public class MoveOrDrawTransitionAction implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent ae) {
         AbstractButton button = (AbstractButton)ae.getSource();
-        MoleScenesManager.getInstance().setScenesMovable(((AbstractButton)ae.getSource()).isSelected());
-        button.setText(button.isSelected() ? "Draw connections":"Movable");
+        MoleScenesManager.getInstance().setScenesMovable(!((AbstractButton)ae.getSource()).isSelected());
+       // button.setText(button.isSelected() ? "Draw connections":"Movable");
     }
 
 }

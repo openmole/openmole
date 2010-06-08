@@ -67,6 +67,7 @@ public class ApplicationCustomize {
     public static final Image IMAGE_OUTPUT_ARROW = ImageUtilities.loadImage("resources/img/outputArrow.png");
     public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/img/inputSlot.png");
     public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/img/outputSlot.png");
+    public static final Image IMAGE_TRANSITIONS = ImageUtilities.loadImage("resources/img/transitions.png");
 
     public static final int NB_MAX_SLOTS = 5;
 
