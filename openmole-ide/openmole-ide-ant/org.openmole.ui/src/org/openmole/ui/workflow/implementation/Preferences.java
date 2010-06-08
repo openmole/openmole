@@ -54,33 +54,28 @@ public class Preferences {
                 PropertyManager.readProperties(c);
             }
         }
-        registerModel();
     }
 
     public void register(CategoryName cat,
             Class coreClass,
             Properties prop) throws ClassNotFoundException {
-      /*  registerModel(cat,
+        registerModel(cat,
                 coreClass,
-                (Class<? extends IObjectModelUI>) Class.forName(prop.getProperty(PropertyManager.IMPL)));*/
+                (Class<? extends IObjectModelUI>) Class.forName(prop.getProperty(PropertyManager.IMPL)));
         registerProperties(cat,
                 coreClass,
                 prop);
     }
 
-  //  private void registerModel(CategoryName cat,
-  //          Class coreClass,
-  //          Class<? extends IObjectModelUI> modelClass) {
-    private void registerModel(){
-
-        System.out.println("-----Exploration :: "+Lookup.getDefault().lookup(ExplorationTask.class));
-        System.out.println("-----Capsule :: "+Lookup.getDefault().lookup(CapsuleModelUI.class));
-      /*  if (models.isEmpty()) {
+    private void registerModel(CategoryName cat,
+            Class coreClass,
+            Class<? extends IObjectModelUI> modelClass) {
+        if (models.isEmpty()) {
             for (CategoryName c : propertyTypes) {
                 models.put(c, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
             }
         }
-        models.get(cat).register(coreClass, modelClass);*/
+        models.get(cat).register(coreClass, modelClass);
     }
 
     public void registerProperties(CategoryName cat,

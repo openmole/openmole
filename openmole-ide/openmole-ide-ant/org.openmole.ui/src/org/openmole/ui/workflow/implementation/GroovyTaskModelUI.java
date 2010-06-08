@@ -3,15 +3,17 @@ package org.openmole.ui.workflow.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.openide.util.lookup.ServiceProvider;
 import org.openmole.ui.control.TableType;
 import org.openmole.ui.control.TableType.Name;
 import org.openmole.core.model.task.IGenericTask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 /**
  *
  * @author mathieu
  */
-public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI<T> {
+public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI<T>{
 
     @Override
     public void updateData() {

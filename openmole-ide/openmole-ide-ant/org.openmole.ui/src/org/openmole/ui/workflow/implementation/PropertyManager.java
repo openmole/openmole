@@ -47,6 +47,10 @@ public class PropertyManager {
                 Preferences.getInstance().registerProperties(cat,
                                                              Class.forName(f.getName()),
                                                              props);
+                
+                Preferences.getInstance().register(cat,
+ 		                                             Class.forName(f.getName()),
+ 		                                             props);
             } catch (ClassNotFoundException ex) {
                 MoleExceptionManagement.showException(ex);
             }
