@@ -17,7 +17,7 @@ public aspect EventAspect {
 		Object object = thisJoinPoint.getThis();
 
                 Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
-                ObjectModified annotation = method.getAnnotation(BeforeObjectModified.class);
+                BeforeObjectModified annotation = method.getAnnotation(BeforeObjectModified.class);
 
                 String type = annotation.type();
                 Object[] args = thisJoinPoint.getArgs();
