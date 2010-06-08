@@ -103,12 +103,18 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
 
     @Override
     public void changeConnectableWidget(){
-        connectableWidget = new MyConnectableWidget(scene,
+        /*connectableWidget = new MyConnectableWidget(scene,
                 getBackgroundColor(),
                 getBorderColor(),
                 getBackgroundImage(),
-                taskModel);
-        connectableWidget.setBackground(getBackgroundColor());
+                taskModel);*/
+
+        connectableWidget.setBackgroundCol(getBackgroundColor());
+        connectableWidget.setBorderCol(getBorderColor());
+        connectableWidget.setBackgroundImaqe(getBackgroundImage());
+        connectableWidget.setTaskModel(taskModel);
+
+
     }
     /*  @Override
     public void setTaskCapsule(IGenericTaskCapsule tc) {

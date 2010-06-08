@@ -36,12 +36,13 @@ public class MyWidget extends Widget {
     private Image backgroundImaqe;
     protected Rectangle bodyArea = new Rectangle();
     protected Rectangle widgetArea = new Rectangle();
-    private Rectangle titleArea;
+    private Rectangle titleArea = new Rectangle();
     private boolean title = false;
     private boolean image = false;
     private String titleString;
   //  private Container dataTableContainer = new Container();
     protected int taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
+    protected int taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET;
     protected MoleScene scene;
 
     public MyWidget(MoleScene scene,
@@ -54,8 +55,14 @@ public class MyWidget extends Widget {
     }
 
     public void setWidthHint() {
-        if (scene.isDetailedView()) taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
-        else taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
+        if (scene.isDetailedView()) {
+            taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
+            taskImageOffset = ApplicationCustomize.EXPANDED_TASK_IMAGE_WIDTH_OFFSET;
+        }
+        else {
+            taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
+            taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET;
+        }
 
         Rectangle bodyrect = new Rectangle(0, 0,
                 taskWidth,
@@ -66,7 +73,11 @@ public class MyWidget extends Widget {
                 ApplicationCustomize.TASK_CONTAINER_HEIGHT + 2);
         bodyArea.setBounds(bodyrect);
         widgetArea.setBounds(widgetrect);
+        titleArea.setBounds(new Rectangle(0, 0,
+                            taskWidth,
+                            ApplicationCustomize.TASK_TITLE_HEIGHT));
         setPreferredBounds(widgetArea);
+        revalidate();
         repaint();
     }
 
@@ -95,18 +106,17 @@ public class MyWidget extends Widget {
         widgetArea.y -= y;
     }
 
-    protected void setBackgroundCol(Color backgroundCol) {
+    public void setBackgroundCol(Color backgroundCol) {
         this.backgroundCol = backgroundCol;
     }
 
-    protected void setBackgroundImaqe(Image backgroundImaqe) {
+    public void setBackgroundImaqe(Image backgroundImaqe) {
         this.backgroundImaqe = backgroundImaqe;
     }
 
-    protected void setBorderCol(Color borderCol) {
+    public void setBorderCol(Color borderCol) {
         this.borderCol = borderCol;
     }
-    
 
     public void setTitle(String title) {
         this.titleString = title;
@@ -139,7 +149,7 @@ public class MyWidget extends Widget {
 
         if (image) {
             graphics.drawImage(backgroundImaqe,
-                    ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET,
+                    taskImageOffset,
                     ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
                     ApplicationCustomize.TASK_IMAGE_WIDTH,
                     ApplicationCustomize.TASK_IMAGE_HEIGHT,

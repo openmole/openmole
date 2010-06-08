@@ -77,6 +77,10 @@ public class MyConnectableWidget extends MyWidget {
         this.taskModel = taskModelUI;
     }
 
+    public void setTaskModel(IGenericTaskModelUI<IGenericTask> taskModelUI){
+        this.taskModel = taskModelUI;
+    }
+
     public void setDetailedView() {
         setWidthHint();
         //  taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
@@ -125,9 +129,7 @@ public class MyConnectableWidget extends MyWidget {
         BasicStroke stroke = new BasicStroke(1.3f, 1, 1);
         graphics.draw(stroke.createStrokedShape(bodyArea));
 
-        System.out.println("--TWIDTH" + taskWidth);
         for (int i = 0; i < nbInSlot; ++i) {
-        System.out.println("---DI" );
             graphics.drawImage(ApplicationCustomize.IMAGE_INPUT_SLOT,
                     -8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + inputDelta * (i + 1) + 14 * i,
@@ -135,7 +137,6 @@ public class MyConnectableWidget extends MyWidget {
         }
 
         for (int i = 0; i < nbOutSlot; ++i) {
-        System.out.println("---DO" );
             graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
                     taskWidth - 8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + outputDelta * (i + 1) + 14 * i,
@@ -166,5 +167,6 @@ public class MyConnectableWidget extends MyWidget {
                 enlargeWidgetArea(0, -delta);
             }
         }
+        revalidate();
     }
 }

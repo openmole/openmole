@@ -57,6 +57,7 @@ public class ApplicationCustomize {
     public static final int TASK_IMAGE_WIDTH = 70;
     public static final int TASK_IMAGE_HEIGHT_OFFSET = TASK_TITLE_HEIGHT + 10;
     public static final int TASK_IMAGE_WIDTH_OFFSET = (TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2;
+    public static final int EXPANDED_TASK_IMAGE_WIDTH_OFFSET = (EXPANDED_TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2;
     public static final int DATA_TABLE_X_OFFSET = (int) (2 + TASK_CONTAINER_WIDTH * 0.1);
     public static final int DATA_TABLE_Y_OFFSET = (int) (TASK_CONTAINER_HEIGHT * 0.1 - 2);
 
