@@ -22,6 +22,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.implementation.capsule.TaskCapsule;
+import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.plan.Factor;
 import org.openmole.core.implementation.task.ExplorationTask;
@@ -30,6 +31,8 @@ import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.implementation.transition.SingleTransition;
 import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.domain.IDomain;
+import org.openmole.core.model.execution.IEnvironment;
+import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.ITask;
 
@@ -43,6 +46,7 @@ public final class Sensitivity {
     private ITask modelTask;
     private ITask reportTask;
     private ITaskCapsule modelCapsule;
+    private FixedEnvironmentStrategy modelStrategy;
     private List<IFactor> factors;
 
     public Sensitivity() throws UserBadDataError, InternalProcessingError {
@@ -52,6 +56,8 @@ public final class Sensitivity {
     public final Sensitivity clear() throws UserBadDataError, InternalProcessingError {
         askTask = new ExplorationTask("ask");
         factors = new ArrayList<IFactor>();
+        this.modelCapsule = new TaskCapsule();
+        modelStrategy = new FixedEnvironmentStrategy();
         return this;
     }
 
@@ -62,7 +68,7 @@ public final class Sensitivity {
 
     public Sensitivity setModelTask(ITask task) {
         this.modelTask = task;
-        this.modelCapsule = new TaskCapsule(modelTask);
+        this.modelCapsule.setTask(modelTask);
         return this;
     }
 
@@ -71,11 +77,12 @@ public final class Sensitivity {
         return this;
     }
 
-    public ITaskCapsule getModelCapsule() {
-        return modelCapsule;
+    public Sensitivity setModelEnvironment(IEnvironment env) {
+        modelStrategy.setEnvironment(modelCapsule, env);
+        return this;
     }
 
-    public void fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public IMoleExecution fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
         FastPlan fastPlan = new FastPlan(samplingNumber);
         // Ask
         askTask.setPlan(fastPlan);
@@ -97,6 +104,6 @@ public final class Sensitivity {
         new ExplorationTransition(explorationCapsule, modelCapsule);
         new AggregationTransition(modelCapsule, tellCapsule);
         new SingleTransition(tellCapsule, reportCapsule);
-        new Mole(explorationCapsule).start();
+        return new Mole(explorationCapsule).createExecution(modelStrategy);
     }
 }
