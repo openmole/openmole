@@ -76,12 +76,14 @@ public final class Sensitivity {
     }
 
     public void fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        FastPlan fastPlan = new FastPlan(samplingNumber);
         // Ask
-        askTask.setPlan(new FastPlan(samplingNumber));
+        askTask.setPlan(fastPlan);
         ExplorationTaskCapsule explorationCapsule = new ExplorationTaskCapsule(askTask);
         // Model
         for (IFactor factor : factors) {
             modelTask.addInput(factor.getPrototype());
+            fastPlan.addFactor(factor);
         }
         modelTask.addOutput(TellTask.getModelOutputPrototype());
         // Tell

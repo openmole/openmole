@@ -1,16 +1,5 @@
 import org.openmole.plugin.task.groovy.GroovyTask
-
-// optional: plugin reloading if needed
-loaded=true;try { Class.forName("org.simexplorer.openmole.plugin.task.sensitivity.TellTask") } catch(Exception e) { loaded=false}
-if (loaded) {
-  plugin.unload('../../../../plugins/org.simexplorer.openmole.plugin.task.sensitivity/target/org.simexplorer.openmole.plugin.task.sensitivity-0.3.jar')
-}
-plugin.load('../../../../plugins/org.simexplorer.openmole.plugin.task.sensitivity/target/org.simexplorer.openmole.plugin.task.sensitivity-0.3.jar')
-
-// regular import for the plugin
 import org.simexplorer.openmole.plugin.task.sensitivity.*
-
-// FIXME fails
 
 sensitivity.addFactor("f1", Double, new RFunctionDomain("qunif","-pi","pi"))
 sensitivity.addFactor("f2", Double, new RFunctionDomain("qunif","-pi","pi"))
@@ -24,4 +13,4 @@ reportTask = new GroovyTask("report")
 reportTask.setCode('println "First order = ${ ' + TellTask.getAnalysisI1Prototype().getName() + '}"\nprintln "Total order = ${ ' + TellTask.getAnalysisItPrototype().getName() + '}"')
 sensitivity.setReportTask(reportTask)
 
-sensitivity.fast99(100)
+sensitivity.fast99(1000)
