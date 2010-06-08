@@ -40,14 +40,10 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
   implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
 
-  object Configuration {
-    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
-    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
-    //val CommandWait = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "CommandWait")
-    //workspace.addToConfigurations(CommandWait, "PT1S")
-   // val SSHConnectionRetry = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "SSHConnectionRetry")
-    //workspace.addToConfigurations(SSHConnectionRetry, "3")
-  }
+//  object Configuration {
+//    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
+//    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
+//  }
 
   def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
     listInputFiles(context, progress).foreach( f => {
@@ -66,7 +62,7 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
 
   protected def execute(context: IContext, progress: IProgress, cmd: String, vm: IVirtualMachine, user: String, password: String) = {
-    val connection = getSSHConnection(vm, user, password, workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
+    val connection = getSSHConnection(vm, user, password, 0) //workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
     try {
       val sftp = new SFTPv3Client(connection)
 
