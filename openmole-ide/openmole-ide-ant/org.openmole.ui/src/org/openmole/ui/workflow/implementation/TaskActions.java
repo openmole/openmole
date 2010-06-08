@@ -2,9 +2,6 @@ package org.openmole.ui.workflow.implementation;
 
 import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.widget.Widget;
-import org.openide.util.Exceptions;
-import org.openmole.ui.control.ControlPanel;
-import org.openmole.ui.control.TableModelMapping;
 import org.openmole.ui.workflow.implementation.paint.SelectionManager;
 import org.openmole.ui.workflow.model.IObjectViewUI;
 import org.openmole.ui.workflow.model.IGenericTaskModelUI;

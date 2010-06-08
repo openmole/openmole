@@ -44,7 +44,6 @@ public class EnableTaskDetailedView implements ActionListener{
         }
         scene.validate();
         scene.refresh();
-        button.setText(button.isSelected() ? "Show detailed view":"Hide detailed view");
     }
 
 }
