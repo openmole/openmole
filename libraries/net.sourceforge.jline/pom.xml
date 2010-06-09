@@ -21,6 +21,7 @@
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
+	    <version>${lib.net.sourceforge.jline.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

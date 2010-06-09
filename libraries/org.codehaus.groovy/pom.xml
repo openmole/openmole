@@ -21,38 +21,13 @@
 	<dependency>
     	   <groupId>org.codehaus.groovy</groupId>
     	   <artifactId>groovy-all</artifactId>
+           <version>${lib.org.codehaus.groovy.version}</version>
 	   <scope>provided</scope>
         </dependency>
 	<dependency>
 	   <groupId>org.fusesource.jansi</groupId>
 	   <artifactId>jansi</artifactId>
 	</dependency>
-<!--
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <scope>provided</scope>
-        </dependency>
-	<dependency>
-    	    <groupId>org.apache.ant</groupId>
-    	    <artifactId>ant-launcher</artifactId>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.fusesource.jansi</groupId>
-	    <artifactId>jansi</artifactId>
-	    <scope>provided</scope>
-	</dependency>
-    	<dependency>
-            <groupId>asm</groupId>
-            <artifactId>asm</artifactId>
-            <scope>provided</scope>
-        </dependency>-->
     </dependencies>
 
     <!-- ************************************************************* -->

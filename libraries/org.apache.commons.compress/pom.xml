@@ -21,6 +21,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
+            <version>${lib.org.apache.commons.compress.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

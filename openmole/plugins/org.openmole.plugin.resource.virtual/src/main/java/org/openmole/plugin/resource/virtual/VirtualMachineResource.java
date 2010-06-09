@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -140,7 +141,7 @@ public class VirtualMachineResource extends ComposedResource {
         }
         final IVirtualMachine ret = connector.virtualMachine;
         //First connection
-        final Connection connection = new Connection(ret.host(), ret.port());
+        //final Connection connection = new Connection(ret.host(), ret.port());
 
         final Long timeOut = workspace().getPreferenceAsDurationInMs(VMBootTime);
 
@@ -150,11 +151,14 @@ public class VirtualMachineResource extends ComposedResource {
             public Void call() throws Exception {
                 while (true) {
                     try {
-                        connection.connect(null, timeOut.intValue(), timeOut.intValue());
-                        connection.close();
+                        Socket socket = new Socket(ret.host(), ret.port());
+                        //Connection connection = new Connection(ret.host(), ret.port());
+                        //connection.connect(null, timeOut.intValue(), timeOut.intValue());
+                        //connection.close();
+                        socket.close();
                         break;
                     } catch (IOException ex) {
-                        Logger.getLogger(VirtualMachineResource.class.getName()).log(Level.WARNING, "Connection to the VM timeout the boot taked too long.", ex);
+                        Logger.getLogger(VirtualMachineResource.class.getName()).log(Level.WARNING, "Problem durring the connection, retrying...", ex);
                     }
                 }
                 return null;

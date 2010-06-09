@@ -21,6 +21,7 @@
 	<dependency>
     	   <groupId>org.scala-lang</groupId>
     	   <artifactId>scala-library</artifactId>
+	   <version>${lib.org.scala-lang.scala.version}</version>
 	   <scope>provided</scope>
         </dependency>
     </dependencies>

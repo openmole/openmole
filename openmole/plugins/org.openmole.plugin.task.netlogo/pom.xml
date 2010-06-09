@@ -31,10 +31,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ccl.northwestern.edu.netlogo</groupId>
-            <artifactId>netlogo-runtime</artifactId>
-            <version>4.1-openmole3</version>
-            <scope>provided</scope>
+            <groupId>org.openmole</groupId>
+            <artifactId>ccl.northwestern.edu.netlogo</artifactId>
+            <version>${lib.ccl.northwestern.edu.netlogo.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -62,8 +61,6 @@
         <import.packages>*;resolution:=optional</import.packages>
         <export.packages>${bundle.namespace}.*;version="${pom.version}",org.nlogo.api.*</export.packages>
         <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
-        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
-        <embed-transitive>true</embed-transitive>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>

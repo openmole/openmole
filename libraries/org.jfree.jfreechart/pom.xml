@@ -22,10 +22,12 @@
           <groupId>jfree</groupId>
           <artifactId>jcommon</artifactId>
           <scope>provided</scope>
+	  <version>${lib.org.jfree.jcommon.version}</version>
        </dependency>
        <dependency>
           <groupId>jfree</groupId>
           <artifactId>jfreechart</artifactId>
+	  <version>${lib.org.jfree.jfreechart.version}</version>
           <scope>provided</scope>
        </dependency>
     </dependencies>

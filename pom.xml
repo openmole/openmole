@@ -140,29 +140,9 @@
                 <version>${lib.com.ice.tar.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.sourceforge.collections</groupId>
-                <artifactId>collections-generic</artifactId>
-                <version>${lib.org.apache.commons.collections15.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${lib.org.apache.commons.compress.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.groovy</groupId>
-                <artifactId>groovy-all</artifactId>
-                <version>${lib.org.codehaus.groovy.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.fusesource.jansi</groupId>
                 <artifactId>jansi</artifactId>
                 <version>1.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>${lib.au.com.bytecode.opencsv.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.nuiton</groupId>
@@ -275,39 +255,9 @@
                 <version>${lib.org.aspectj.version}</version>
             </dependency>
             <dependency>
-                <groupId>jline</groupId>
-                <artifactId>jline</artifactId>
-                <version>${lib.net.sourceforge.jline.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${lib.org.objectweb.asm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jfree</groupId>
-                <artifactId>jcommon</artifactId>
-                <version>${lib.org.jfree.jcommon.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jfree</groupId>
-                <artifactId>jfreechart</artifactId>
-                <version>${lib.org.jfree.jfreechart.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-library</artifactId>
-                <version>${lib.org.scala-lang.scala.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.ethz.ganymed</groupId>
-                <artifactId>ganymed-ssh2</artifactId>
-                <version>${lib.ch.ethz.ssh2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-exec</artifactId>
-                <version>${lib.org.apache.commons.exec.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -364,7 +314,7 @@
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
         <lib.ch.ethz.ssh2.version>build250</lib.ch.ethz.ssh2.version>
-
+	<lib.ccl.northwestern.edu.netlogo.version>4.1-openmole3</lib.ccl.northwestern.edu.netlogo.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
         <import.packages>*</import.packages>
@@ -557,6 +507,7 @@
                         <Import-Package>${import.packages},org.aspectj.lang,org.aspectj.runtime.internal,org.aspectj.runtime.reflect</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
+			<!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
                         <Bundle-Activator>${bundle.activator}</Bundle-Activator>
                         <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>

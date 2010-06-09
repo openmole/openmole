@@ -21,6 +21,7 @@
         <dependency>
 	    <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
+            <version>${lib.au.com.bytecode.opencsv.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

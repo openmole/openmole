@@ -17,12 +17,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -30,10 +30,11 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
-   	<dependency>
-            <groupId>net.sourceforge.collections</groupId>
-            <artifactId>collections-generic</artifactId>
-   	</dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.collections15</artifactId>
+            <version>${lib.org.apache.commons.collections15.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

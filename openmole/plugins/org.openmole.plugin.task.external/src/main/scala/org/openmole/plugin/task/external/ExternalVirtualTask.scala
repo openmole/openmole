@@ -29,6 +29,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.Callable
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.openmole.plugin.resource.virtual.IVirtualMachine
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.plugin.task.external.internal.Activator._
@@ -97,7 +99,16 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
     //Not supossed to fail but sometimes it does
  //   retry( () => {
   //      try{
-    connection.connect(null, timeOut, timeOut)
+    var connected = false
+    while(!connected) {
+      try {
+        connection.connect(null, timeOut, timeOut)
+        connected = true
+      } catch {
+        case e: IOException => Logger.getLogger(classOf[ExternalVirtualTask].getName).log(Level.WARNING, "Error durring SSH connexion, retrying...", e)
+      }
+    }
+    
    //     } catch {
     //      case e: Exception => throw e
      //   }
