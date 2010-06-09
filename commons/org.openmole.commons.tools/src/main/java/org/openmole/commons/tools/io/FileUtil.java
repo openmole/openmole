@@ -77,7 +77,6 @@ public class FileUtil {
         while (!toProceed.isEmpty()) {
             File f = toProceed.poll();
             if (!stopPath.contains(f)) {
-
                 operation.execute(f);
                 if (f.isDirectory()) {
                     for (File child : f.listFiles()) {
@@ -90,18 +89,18 @@ public class FileUtil {
 
     public static boolean dirContainsNoFileRecursive(File dir) {
         Queue<File> toProceed = new LinkedList<File>();
+        toProceed.add(dir);
 
         while (!toProceed.isEmpty()) {
             File f = toProceed.poll();
             for (File sub : f.listFiles()) {
-                if (sub.isDirectory()) {
+                if (sub.isFile()) {
                     return false;
-                } else {
+                } else if(sub.isDirectory()) {
                     toProceed.offer(sub);
                 }
             }
         }
-
         return true;
     }
 

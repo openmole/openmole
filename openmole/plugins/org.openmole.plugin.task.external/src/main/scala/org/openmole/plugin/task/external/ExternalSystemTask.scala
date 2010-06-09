@@ -28,7 +28,6 @@ import org.openmole.core.model.job.IContext
 import java.util.TreeSet
 import scala.collection.mutable.ListBuffer
 
-
 import scala.collection.JavaConversions._
 import org.openmole.plugin.task.external.internal.Activator._
 
@@ -79,10 +78,11 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
       f.delete
     })
 
+    //TODO algorithm is no optimal and may be problematic for a huge number of dirs
     unusedDirs.foreach( d => {
-      if(d.exists && dirContainsNoFileRecursive(d)) recursiveDelete(d)
-    } )
+      if(d.exists && !usedFiles contains(d) && dirContainsNoFileRecursive(d)) {
+        recursiveDelete(d)
+      }
+    })
   }
-
-
 }

@@ -18,6 +18,7 @@ package org.openmole.plugin.resource.virtual;
 
 import ch.ethz.ssh2.Connection;
 import com.db4o.ta.Activatable;
+import com.sun.servicetag.SystemEnvironment;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -200,12 +201,17 @@ public class VirtualMachineResource extends ComposedResource {
     @Cachable
     private File getQEmuDir() throws IOException, InternalProcessingError {
         final String os = System.getProperty("os.name");
+
         final File qemuDir = workspace().newTmpDir();
         final String qemuJarPath;
         final String[] toCopy;
 
         if (os.toLowerCase().contains("linux")) {
-            qemuJarPath = "/qemu_linux/";
+
+            //uname -a
+
+            //TODO test os.arch and provide a 64 bits version -mcpu -O3 (huge perf gap)
+            qemuJarPath = "/qemu_linux_32/";
             toCopy = new String[]{Executable};
         } else if (os.toLowerCase().contains("windows")) {
             qemuJarPath = "/qemu_windows/";
