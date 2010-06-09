@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.util.logging.Logger;
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -80,9 +81,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
 
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
-        add(toolBar, java.awt.BorderLayout.NORTH);   
-
-
+        add(toolBar, java.awt.BorderLayout.NORTH);
      //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
     

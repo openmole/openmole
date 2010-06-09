@@ -2,29 +2,5 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
     <folder name="Actions">
-        <folder name="Window">
-            <file name="org-openmole.ui.ide-MoleSceneTopComponentAction.instance">
-                <attr name="component" methodvalue="org.openmole.ui.ide.MoleSceneTopComponentTopComponent.findInstance"/>
-                <attr name="displayName" bundlevalue="org.openmole.ui.ide.Bundle#CTL_MoleSceneTopComponentAction"/>
-                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
-            </file>
-        </folder>
-    </folder>
-    <folder name="Menu">
-        <folder name="Window">
-            <file name="MoleSceneTopComponentAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/Window/org-openmole.ui.ide-MoleSceneTopComponentAction.instance"/>
-            </file>
-        </folder>
-    </folder>
-    <folder name="Windows2">
-        <folder name="Components">
-            <file name="MoleSceneTopComponentTopComponent.settings" url="MoleSceneTopComponentTopComponentSettings.xml"/>
-        </folder>
-        <folder name="Modes">
-            <folder name="editor">
-                <file name="MoleSceneTopComponentTopComponent.wstcref" url="MoleSceneTopComponentTopComponentWstcref.xml"/>
-            </folder>
-        </folder>
     </folder>
 </filesystem>
