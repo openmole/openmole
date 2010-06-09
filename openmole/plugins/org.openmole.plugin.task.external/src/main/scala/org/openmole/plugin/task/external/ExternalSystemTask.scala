@@ -80,7 +80,7 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
     //TODO algorithm is no optimal and may be problematic for a huge number of dirs
     unusedDirs.foreach( d => {
-      if(d.exists && !usedFiles contains(d) && dirContainsNoFileRecursive(d)) {
+      if(d.exists && !usedFiles.contains(d) && dirContainsNoFileRecursive(d)) {
         recursiveDelete(d)
       }
     })
