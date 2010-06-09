@@ -1,0 +1,6 @@
+name=Exploration
+impl= org.openmole.ui.ide.workflow.implementation.ExplorationTaskModelUI
+bg-color=255,179,128
+border-color=230,112,32
+bg-img=resources/img/groovy.png
+thumb-img=resources/img/thumb/explorationTask.png

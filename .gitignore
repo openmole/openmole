@@ -1,5 +1,6 @@
 *.log
-target
+target/
+target/*
 *.orig
 build
 build/*
