@@ -24,12 +24,11 @@ import java.util.LinkedList
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
+import org.openmole.commons.tools.io.ProcessUtils._
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 
 import org.apache.commons.exec.CommandLine
-import org.apache.commons.exec.DefaultExecutor
-import org.apache.commons.exec.ShutdownHookProcessDestroyer
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IPrototype
@@ -41,11 +40,9 @@ import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
+
 class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer] = null) extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
-
-  @transient
-  var processDestroyer: ShutdownHookProcessDestroyer = null
 
   object Prototypes {
     val PWD = new Prototype[File]("PWD", classOf[File])
@@ -65,36 +62,9 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       vals.add(new Variable(Prototypes.PWD, tmpDir))
       val commandLine = CommandLine.parse(expandData(context,vals, cmd))
 
-      //val executor = new DefaultExecutor
-      //executor.setProcessDestroyer(new ShutdownHookProcessDestroyer)
-      //executor.setWorkingDirectory(tmpDir)
-
-      //val commandLine = expandData(context,vals, cmd)
       try {
         val process = Runtime.getRuntime().exec(commandLine.toString, null, tmpDir)
-        //executor.setWorkingDirectory(tmpDir)
-        // executor.setProcessDestroyer(getProccessDestroyer)
-        val pump = new PumpStreamHandler(System.out, System.err)
-
-        pump.setProcessOutputStream(process.getInputStream)
-        pump.setProcessErrorStream(process.getErrorStream)
-        //val process = executor.execute(commandLine)
-        val processDestroyer = getProccessDestroyer
-        processDestroyer.add(process)
-        try {
-          pump.start
-          try {
-            process.waitFor
-          } catch {
-            case e: InterruptedException => process.destroy; throw e
-          } finally {
-            pump.stop
-          }
-        } finally {
-          processDestroyer.remove(process)
-        }
-        val ret: Integer = process.exitValue
-        //val ret: Integer = executor.execute(commandLine)
+        val ret = executeProcess(process, System.out, System.err)    
         if(returnValue != null) context.setValue(returnValue, ret)
       } catch {
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
@@ -104,15 +74,6 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
 
     } catch {
       case e: IOException => throw new InternalProcessingError(e)
-    }
-  }
-
-  private def getProccessDestroyer = {
-    synchronized {
-      if(processDestroyer == null) {
-        processDestroyer = new ShutdownHookProcessDestroyer;
-      }
-      processDestroyer
     }
   }
 

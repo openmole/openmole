@@ -46,6 +46,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
 import static org.openmole.plugin.resource.virtual.internal.Activator.*;
 import static org.openmole.commons.tools.io.Network.*;
+import static org.openmole.commons.tools.io.ProcessUtils.*;
 
 /**
  *
@@ -199,7 +200,7 @@ public class VirtualMachineResource extends ComposedResource {
     }
 
     @Cachable
-    private File getQEmuDir() throws IOException, InternalProcessingError {
+    private File getQEmuDir() throws IOException, InternalProcessingError, InterruptedException {
         final String os = System.getProperty("os.name");
 
         final File qemuDir = workspace().newTmpDir();
@@ -209,7 +210,8 @@ public class VirtualMachineResource extends ComposedResource {
         if (os.toLowerCase().contains("linux")) {
 
             //uname -a
-
+            Process process = Runtime.getRuntime().exec("uname -a");
+            executeProcess(process, System.out, System.err);
             //TODO test os.arch and provide a 64 bits version -mcpu -O3 (huge perf gap)
             qemuJarPath = "/qemu_linux_32/";
             toCopy = new String[]{Executable};

@@ -51,6 +51,11 @@
             <version>${lib.org.apache.commons.collections15.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.apache.commons.exec</artifactId>
+            <version>${lib.org.apache.commons.exec.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>com.springsource.org.apache.commons.pool</artifactId>
         </dependency>
