@@ -24,7 +24,7 @@ import java.util.LinkedList
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.io.ProcessUtils._
+import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 
@@ -64,8 +64,8 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
 
       try {
         val process = Runtime.getRuntime().exec(commandLine.toString, null, tmpDir)
-        val ret = executeProcess(process, System.out, System.err)    
-        if(returnValue != null) context.setValue(returnValue, ret)
+        val ret = executeProcess(process, System.out, System.err)
+        if(returnValue != null) context.setValue(returnValue, new Integer(ret))
       } catch {
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }

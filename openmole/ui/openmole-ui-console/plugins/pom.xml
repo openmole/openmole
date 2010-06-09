@@ -31,6 +31,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.tools.utils</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.environment.jsaga</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>

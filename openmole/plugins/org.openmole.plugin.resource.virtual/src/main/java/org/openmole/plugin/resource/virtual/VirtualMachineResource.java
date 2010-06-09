@@ -16,14 +16,12 @@
  */
 package org.openmole.plugin.resource.virtual;
 
-import ch.ethz.ssh2.Connection;
-import com.db4o.ta.Activatable;
-import com.sun.servicetag.SystemEnvironment;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +36,7 @@ import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.FileUtil;
+import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.implementation.resource.ComposedResource;
 import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.core.model.task.annotations.Resource;
@@ -46,7 +45,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
 import static org.openmole.plugin.resource.virtual.internal.Activator.*;
 import static org.openmole.commons.tools.io.Network.*;
-import static org.openmole.commons.tools.io.ProcessUtils.*;
+import static org.openmole.plugin.tools.utils.ProcessUtils.*;
 
 /**
  *
@@ -114,7 +113,7 @@ public class VirtualMachineResource extends ComposedResource {
             IVirtualMachine virtualMachine;
 
             @Override
-            public void connect(int port) throws IOException, InternalProcessingError {
+            public void connect(int port) throws IOException, InternalProcessingError, InterruptedException {
                 File qemuDir = getQEmuDir();
 
                 CommandLine commandLine = new CommandLine(new File(qemuDir, Executable));
@@ -130,7 +129,7 @@ public class VirtualMachineResource extends ComposedResource {
                 ShutdownHookProcessDestroyer destroyer = processDestroyer();
                 destroyer.add(process);
 
-                virtualMachine = new VirtualMachine("localhost", port, process, destroyer);
+                virtualMachine = new VirtualMachine("localhost", port, process, destroyer, vmImage);
             }
         }
 
@@ -208,12 +207,17 @@ public class VirtualMachineResource extends ComposedResource {
         final String[] toCopy;
 
         if (os.toLowerCase().contains("linux")) {
-
-            //uname -a
             Process process = Runtime.getRuntime().exec("uname -a");
-            executeProcess(process, System.out, System.err);
-            //TODO test os.arch and provide a 64 bits version -mcpu -O3 (huge perf gap)
-            qemuJarPath = "/qemu_linux_32/";
+            
+            StringBuilder builder = new StringBuilder();
+            executeProcess(process, new PrintStream(new StringBuilderOutputStream(builder)), System.err);
+            String res = builder.toString();
+
+            if(res.contains("x86_64")) {
+                qemuJarPath = "/qemu_linux_64/";
+            } else {
+                qemuJarPath = "/qemu_linux_32/";
+            }
             toCopy = new String[]{Executable};
         } else if (os.toLowerCase().contains("windows")) {
             qemuJarPath = "/qemu_windows/";

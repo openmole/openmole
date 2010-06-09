@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.task.external.internal;
+package org.openmole.plugin.tools.utils;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.SFTPv3Client;

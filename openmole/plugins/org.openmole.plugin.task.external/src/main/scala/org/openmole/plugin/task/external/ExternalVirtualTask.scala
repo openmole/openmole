@@ -21,7 +21,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import ch.ethz.ssh2._
-import org.openmole.plugin.task.external.internal.SSHUtils._
+import org.openmole.plugin.tools.utils.SSHUtils._
 import java.io.File
 import java.io.PrintStream
 import java.io.FileInputStream
