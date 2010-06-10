@@ -44,6 +44,7 @@ import org.openmole.core.model.task.annotations.Output;
 import org.openmole.commons.aspect.caching.SoftCachable;
 
 import org.openmole.core.implementation.data.Data;
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Parameter;
 import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.data.IVariable;
@@ -328,7 +329,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     @SoftCachable
     @Override
-    public List<IData<?>> getInput() throws InternalProcessingError {
+    public IDataSet getInput() throws InternalProcessingError {
         List<IData<?>> tmpInputCache;
         tmpInputCache = new LinkedList<IData<?>>();
         if (input != null) {
@@ -338,7 +339,7 @@ public abstract class GenericTask implements IGenericTask {
         addAllMarkedFields(this, Input.class, tmpInputCache);
         verifyNotDuplicate(tmpInputCache, "input");
 
-        return tmpInputCache;
+        return new DataSet(tmpInputCache);
     }
 
     /* (non-Javadoc)
@@ -346,7 +347,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     @SoftCachable
     @Override
-    public List<IData<?>> getOutput() throws InternalProcessingError {
+    public IDataSet getOutput() throws InternalProcessingError {
         List<IData<?>> tmpOutputCache;
         tmpOutputCache = new LinkedList<IData<?>>();
         if (output != null) {
@@ -356,7 +357,7 @@ public abstract class GenericTask implements IGenericTask {
 
         verifyNotDuplicate(tmpOutputCache, "output");
 
-        return tmpOutputCache;
+        return new DataSet(tmpOutputCache);
     }
 
 

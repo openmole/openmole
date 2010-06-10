@@ -22,5 +22,5 @@ package org.openmole.core.model.data;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public interface IDataSet extends Iterable<IData<?>> {
-    
+    int size();
 }

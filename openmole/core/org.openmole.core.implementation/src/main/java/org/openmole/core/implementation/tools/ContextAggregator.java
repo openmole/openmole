@@ -25,9 +25,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IContext;
 
@@ -38,14 +40,14 @@ import org.openmole.core.model.job.IContext;
 public class ContextAggregator {
 
 
-    public static Collection<IData<?>> findDataIn1WhichAreAlsoIn2(Collection<IData<?>> one, Collection<IData<?>> two) {
+    public static IDataSet findDataIn1WhichAreAlsoIn2(IDataSet one, IDataSet two) {
         Set<String> beginVarSet = new TreeSet<String>();
 
         for (IData data : two) {
             beginVarSet.add(data.getPrototype().getName());
         }
 
-        Collection<IData<?>> toAggregate = new LinkedList<IData<?>>();
+        List<IData<?>> toAggregate = new LinkedList<IData<?>>();
 
         for (IData data : one) {
             if (beginVarSet.contains(data.getPrototype().getName())) {
@@ -53,10 +55,10 @@ public class ContextAggregator {
             }
         }
 
-        return toAggregate;
+        return new DataSet(toAggregate);
     }
 
-    public static void aggregate(IContext inContext, Collection<IData<?>> aggregate, Set<String> toClone, boolean forceArrays, Collection<IContext> toAgregate) throws InternalProcessingError, UserBadDataError {
+    public static void aggregate(IContext inContext, IDataSet aggregate, Set<String> toClone, boolean forceArrays, Collection<IContext> toAgregate) throws InternalProcessingError, UserBadDataError {
         Set<String> mergingVars = new TreeSet<String>();
 
         for (IContext current : toAgregate) {

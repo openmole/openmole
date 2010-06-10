@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.mole;
 
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.execution.IJobStatisticCategorizationStrategy;
 import org.openmole.commons.exception.InternalProcessingError;

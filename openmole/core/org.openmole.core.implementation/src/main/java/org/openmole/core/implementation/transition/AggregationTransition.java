@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.mole.ExecutionInfoRegistry;
@@ -39,6 +40,7 @@ import org.openmole.core.model.tools.IRegistryWithTicket;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.job.ITicket;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
@@ -86,7 +88,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         resultContexts = registry.consult(this, newTicket);
 
 
-        Collection<IData<?>> dataToAggregate = findDataIn1WhichAreAlsoIn2(getEnd().getCapsule().getAssignedTask().getInput(), getStart().getAssignedTask().getOutput());
+        IDataSet dataToAggregate = findDataIn1WhichAreAlsoIn2(getEnd().getCapsule().getAssignedTask().getInput(), getStart().getAssignedTask().getOutput());
         
         Set<String> toClone = new TreeSet<String>();
 

@@ -625,7 +625,7 @@
     <repositories>
         <!-- all repositories IDs are prefixed with "SE-" to easily proxy them in maven configuration -->
         <!-- see also http://www.openmole.org/wiki/DevDoc/Maven -->
-        <!--Spring Repository for OSGi bundles-->
+        <!-- Spring Repository for OSGi bundles -->
         <repository>
             <id>SE-springsource-release</id>
             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>

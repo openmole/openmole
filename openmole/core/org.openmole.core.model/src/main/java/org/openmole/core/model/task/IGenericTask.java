@@ -16,7 +16,6 @@
  */
 package org.openmole.core.model.task;
 
-import java.util.Collection;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
 import org.openmole.core.model.data.IPrototype;
@@ -76,7 +75,7 @@ public interface IGenericTask extends IPortable {
      * @return the input of the task
      * @throws InternalProcessingError in case something went wrong looking for the input by reflexion for instance
      */
-    Collection<IData<?>> getInput() throws InternalProcessingError;
+    IDataSet getInput() throws InternalProcessingError;
 
     /**
      *
@@ -85,7 +84,7 @@ public interface IGenericTask extends IPortable {
      * @return the output data of the task
      * @throws InternalProcessingError in case something went wrong looking for the output by reflexion for instance
      */
-    Collection<IData<?>> getOutput() throws InternalProcessingError;
+    IDataSet getOutput() throws InternalProcessingError;
 
     /**
      *
