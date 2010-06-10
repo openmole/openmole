@@ -36,7 +36,7 @@
             <version>${lib.ccl.northwestern.edu.netlogo.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -59,7 +59,7 @@
     <properties>
         <bundle.namespace>${project.artifactId}</bundle.namespace>
         <import.packages>*;resolution:=optional</import.packages>
-        <export.packages>${bundle.namespace}.*;version="${pom.version}",org.nlogo.api.*</export.packages>
+        <export.packages>${bundle.namespace}.*;version="${pom.version}"</export.packages>
         <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>

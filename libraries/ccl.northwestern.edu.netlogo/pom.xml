@@ -40,10 +40,8 @@
 
 
     <!--optional. Use this property to tune the exported packages-->
-    <!--<properties>
-        <export.packages>
-            TODO
-        </export.packages>
-    </properties>-->
+    <properties>
+        <libraries.export.packages>org.nlogo.*</libraries.export.packages>
+    </properties>
 
 </project>
