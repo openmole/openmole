@@ -82,6 +82,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
+
      //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
     

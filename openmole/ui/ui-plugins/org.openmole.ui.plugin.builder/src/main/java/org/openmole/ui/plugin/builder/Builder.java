@@ -17,7 +17,6 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-
 package org.openmole.ui.plugin.builder;
 
 import org.openmole.core.model.plan.IPlan;
@@ -37,13 +36,15 @@ import org.openmole.core.model.domain.IDomain;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
+import org.openmole.core.implementation.task.MoleTask;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.ExplorationTask;
-import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.buildChain;
+import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;
 import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
-
-
+import org.openmole.core.implementation.task.InputToGlobalTask;
+import org.openmole.core.model.data.IData;
+import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 
 public class Builder {
 
@@ -51,12 +52,35 @@ public class Builder {
         return new Prototype(name, type);
     }
 
-    public DataSet buildDataSet(IPrototype...prototypes){
+    public DataSet buildDataSet(IPrototype... prototypes) {
         return new DataSet(prototypes);
     }
 
     public TaskCapsule buildTaskCapsule(ITask task) {
         return new TaskCapsule(task);
+    }
+
+    public MoleTask buildMoleTask(String taskName,
+                                  PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+
+        InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
+
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            inputToGlobalTask.addInput(data);
+        }
+
+        Mole mole = buildMole(buildChain(puzzle,build(inputToGlobalTask)).getFirstCapsule());
+        MoleTask moleTask = new MoleTask(taskName, mole);
+
+        for (IData data : puzzle.getFirstCapsule().getTask().getInput()) {
+            moleTask.addInput(data);
+        }
+
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            moleTask.addOutput(data);
+        }
+
+        return moleTask;
     }
 
     public Mole buildMole(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
@@ -67,10 +91,9 @@ public class Builder {
         return new Mole(taskCapsule);
     }
 
-    public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError{
+    public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError {
         return new FixedEnvironmentStrategy();
     }
-
     public final ExplorationBuilder exploration = new ExplorationBuilder();
 
     public class ExplorationBuilder {
@@ -79,8 +102,8 @@ public class Builder {
             return new Factor(prototype, domain);
         }
 
-        public IExplorationTask buildExplorationTask(String name,IPlan plan) throws UserBadDataError, InternalProcessingError{
-            return new ExplorationTask(name,plan);
+        public IExplorationTask buildExplorationTask(String name, IPlan plan) throws UserBadDataError, InternalProcessingError {
+            return new ExplorationTask(name, plan);
         }
 
         public ExplorationTaskCapsule buildExplorationTaskCapsule(IExplorationTask task) {
