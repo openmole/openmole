@@ -44,6 +44,7 @@ import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;
 import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.task.InputToGlobalTask;
 import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 
 public class Builder {
@@ -61,7 +62,35 @@ public class Builder {
     }
 
     public MoleTask buildMoleTask(String taskName,
-                                  PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+            IPlan plan,
+            IDataSet dataSet,
+            PuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        IExplorationTask explorationTask = exploration.buildExplorationTask(taskName + "ExplorationTask", plan);
+        explorationTask.addInput(dataSet);
+        explorationTask.addOutput(dataSet);
+
+        InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            inputToGlobalTask.addInput(data);
+        }
+
+        Mole mole = buildMole(buildExploration(explorationTask,
+                                               buildChain(puzzle,
+                                               build(inputToGlobalTask))).getFirstCapsule());
+        MoleTask moleTask = new MoleTask(taskName, mole);
+
+        for (IData data : dataSet) {
+            moleTask.addInput(data);
+        }
+
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            moleTask.addOutput(data);
+        }
+        return moleTask;
+    }
+
+    public MoleTask buildMoleTask(String taskName,
+            PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
 
@@ -69,7 +98,7 @@ public class Builder {
             inputToGlobalTask.addInput(data);
         }
 
-        Mole mole = buildMole(buildChain(puzzle,build(inputToGlobalTask)).getFirstCapsule());
+        Mole mole = buildMole(buildChain(puzzle, build(inputToGlobalTask)).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : puzzle.getFirstCapsule().getTask().getInput()) {
