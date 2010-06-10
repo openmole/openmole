@@ -19,6 +19,7 @@ package org.openmole.core.implementation.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
@@ -100,10 +101,6 @@ public class DataSet implements IDataSet {
         for(IData d: inData) {
             data.add(d);
         }
-        this.data = data;
-    }
-
-    public DataSet(List<IData<?>> data) {
         this.data = data;
     }
 
