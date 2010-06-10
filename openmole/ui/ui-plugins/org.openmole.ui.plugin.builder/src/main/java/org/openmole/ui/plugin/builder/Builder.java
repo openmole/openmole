@@ -75,8 +75,8 @@ public class Builder {
         }
 
         Mole mole = buildMole(buildExploration(explorationTask,
-                                               buildChain(puzzle,
-                                               build(inputToGlobalTask))).getFirstCapsule());
+                buildChain(puzzle,
+                build(inputToGlobalTask))).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : dataSet) {

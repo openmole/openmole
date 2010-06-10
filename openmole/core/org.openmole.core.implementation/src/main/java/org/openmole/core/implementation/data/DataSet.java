@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.data;
 
 import java.util.ArrayList;
@@ -33,20 +32,34 @@ public class DataSet implements IDataSet {
 
     final List<IData<?>> data;
 
+    public DataSet(DataSet... datasets) {
+        List<IData<?>> tmpdata = new ArrayList<IData<?>>();
+        for (int i = 0; i < datasets.length; i++) {
+            for (IData d : datasets[i]) {
+                tmpdata.add(d);
+            }
+        }
+        data = tmpdata;
+    }
+
+    public DataSet(List<IData<?>> data) {
+        this.data = data;
+    }
+
     public DataSet(IData<?>... data) {
         this.data = Arrays.asList(data);
     }
-    
+
     public DataSet(IPrototype<?>... prototypes) {
         data = new ArrayList<IData<?>>(prototypes.length);
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i]));
         }
     }
 
     public DataSet(DataMod dataMod, IPrototype<?>... prototypes) {
         data = new ArrayList<IData<?>>(prototypes.length);
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i], dataMod));
         }
     }
@@ -55,5 +68,4 @@ public class DataSet implements IDataSet {
     public Iterator<IData<?>> iterator() {
         return data.iterator();
     }
-
 }
