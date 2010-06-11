@@ -337,7 +337,7 @@ public abstract class GenericTask implements IGenericTask {
         }
 
         addAllMarkedFields(this, Input.class, tmpInputCache);
-        verifyNotDuplicate(tmpInputCache, "input");
+        //verifyNotDuplicate(tmpInputCache, "input");
 
         return new DataSet(tmpInputCache);
     }
@@ -355,7 +355,7 @@ public abstract class GenericTask implements IGenericTask {
         }
         addAllMarkedFields(this, Output.class, tmpOutputCache);
 
-        verifyNotDuplicate(tmpOutputCache, "output");
+        //verifyNotDuplicate(tmpOutputCache, "output");
 
         return new DataSet(tmpOutputCache);
     }
@@ -369,7 +369,7 @@ public abstract class GenericTask implements IGenericTask {
         return output.values();
     }
 
-    private void verifyNotDuplicate(Iterable<IData<?>> data, String place) {
+   /*private void verifyNotDuplicate(Iterable<IData<?>> data, String place) {
         Set<String> processed = new HashSet<String>();
 
         for (IData<?> d : data) {
@@ -379,7 +379,7 @@ public abstract class GenericTask implements IGenericTask {
                 processed.add(d.getPrototype().getName());
             }
         }
-    }
+    }*/
 
     @SoftCachable
     @Override
