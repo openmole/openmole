@@ -16,10 +16,8 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import org.openmole.ui.ide.control.TableType;
-import org.openmole.ui.ide.control.TableType.Name;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 /**
@@ -29,19 +27,23 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI<T> {
 
     public static IGenericTaskModelUI<IGenericTask> EMPTY_TASK_MODEL = new TaskModelUI();
-    
-    @Override
+
+    public TaskModelUI(Properties...properties) {
+        super(properties);
+    }
+
+   /* @Override
     public synchronized void setFields() {
         if (fields == null) {
             fields = new ArrayList<TableType.Name>();
             fields.add(Name.INPUT_PARAMETER);
             fields.add(Name.OUTPUT_PARAMETER);
         }
-    }
+    }*/
 
     @Override
     public Collection<TableType.Name> getFields() {
-        setFields();
+      //  setFields();
         return fields;
     }
 }

@@ -15,6 +15,10 @@ import org.openmole.plugin.task.groovy.GroovyTask;
  */
 public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI<T>{
 
+    public GroovyTaskModelUI(Properties...properties){
+        super(properties);
+    }
+    
     @Override
     public void updateData() {
        // throw new UnsupportedOperationException("Not supported yet.");
@@ -22,16 +26,16 @@ public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModel
 
     @Override
     public Collection<Name> getFields() {
-        setFields();
+       // setFields();
         return fields;
     }
 
-    @Override
+   /* @Override
     public void setFields() {
         if (fields == null) {
             fields = new ArrayList<TableType.Name>();
             fields.add(Name.INPUT_PARAMETER);
             fields.add(Name.OUTPUT_PARAMETER);
         }
-    }
+    }*/
 }

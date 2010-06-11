@@ -29,7 +29,7 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 
 public interface IGenericTaskModelUI<T extends IGenericTask> {
     Collection<TableType.Name> getFields();
-    void setFields();
+  //  void setFields();
     void setCoreTaskClass(Class <? extends IGenericTask> coreTaskClass);
     Class <? extends IGenericTask> getCoreTaskClass();
     void addPrototype(PrototypeUI p,IOType ioType);

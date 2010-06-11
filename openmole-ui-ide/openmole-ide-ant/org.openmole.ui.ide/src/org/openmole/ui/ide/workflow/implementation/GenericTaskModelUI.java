@@ -36,6 +36,10 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     private final static String category = "Tasks";
     protected Class<? extends IGenericTask> coreTask;
 
+    public GenericTaskModelUI(Properties...properties) {
+    }
+
+    
     @Override
     public Set<PrototypeUI> getPrototypesIn() {
         if (prototypesIn == null) prototypesIn = new HashSet<PrototypeUI>();

@@ -28,13 +28,17 @@ import org.openmole.core.model.task.IExplorationTask;
  */
 public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericTaskModelUI<T> {
 
-    @Override
-    public synchronized Collection<Name> getFields() {
-        setFields();
-        return fields;
+    public ExplorationTaskModelUI(Properties...properties) {
+        super(properties);
     }
 
     @Override
+    public synchronized Collection<Name> getFields() {
+       // setFields();
+        return fields;
+    }
+
+  /*  @Override
     public synchronized void setFields() {
         if (fields == null) {
             fields = new ArrayList<TableType.Name>();
@@ -42,5 +46,5 @@ public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericT
             fields.add(Name.OUTPUT_PARAMETER);
             fields.add(Name.DESIGN_OF_EXPERIMENT);
         }
-    }
+    }*/
 }
