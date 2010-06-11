@@ -23,4 +23,5 @@ package org.openmole.core.model.data;
  */
 public interface IDataSet extends Iterable<IData<?>> {
     int size();
+    IData<?> getData(String name);
 }

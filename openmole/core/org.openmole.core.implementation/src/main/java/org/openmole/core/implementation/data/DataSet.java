@@ -18,9 +18,11 @@ package org.openmole.core.implementation.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.data.IPrototype;
@@ -31,82 +33,94 @@ import org.openmole.core.model.data.IPrototype;
  */
 public class DataSet implements IDataSet {
 
-    final List<IData<?>> data;
+    final Map<String, IData<?>> data;
 
     public DataSet(IDataSet... datasets) {
-        List<IData<?>> tmpdata = new LinkedList<IData<?>>();
+        Map<String, IData<?>> data = new TreeMap<String, IData<?>>();
+
         for (int i = 0; i < datasets.length; i++) {
             for (IData d : datasets[i]) {
-                tmpdata.add(d);
+                data.put(d.getPrototype().getName(), d);
             }
         }
-        data = tmpdata;
+        this.data = Collections.unmodifiableMap(data);
     }
 
-    public DataSet(List<IData<?>> data) {
-        this.data = data;
+    public DataSet(List<IData<?>> dataList) {
+        this.data = initData(dataList);
     }
 
     public DataSet(IData<?>... data) {
-        this.data = Arrays.asList(data);
+        this(Arrays.asList(data));
     }
 
     public DataSet(IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i]));
         }
-        this.data = data;
+        this.data = initData(data);
     }
 
     public DataSet(DataMod dataMod, IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i], dataMod));
         }
-        this.data = data;
+        this.data = initData(data);
     }
 
     public DataSet(Iterable<IData> dataSet, IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
-        for(IData d: dataSet) {
+        for (IData d : dataSet) {
             data.add(d);
         }
 
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i]));
         }
-        this.data = data;
+        this.data = initData(data);
     }
 
     public DataSet(Iterable<IData> dataSet, DataMod dataMod, IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
-        for(IData d: dataSet) {
+        for (IData d : dataSet) {
             data.add(d);
         }
 
-        for(int i = 0; i < prototypes.length; i++) {
+        for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i], dataMod));
         }
-
-        this.data = data;
+        this.data = initData(data);
     }
 
     public DataSet(Iterable<IData> dataSet, IData... inData) {
         List<IData<?>> data = new ArrayList<IData<?>>(inData.length);
-        for(IData d: dataSet) {
+        for (IData d : dataSet) {
             data.add(d);
         }
 
-        for(IData d: inData) {
+        for (IData d : inData) {
             data.add(d);
         }
-        this.data = data;
+        this.data = initData(data);
     }
+
+
+    private Map<String, IData<?>> initData(List<IData<?>> dataList) {
+        Map<String, IData<?>> data = new TreeMap<String, IData<?>>();
+
+        for (IData d : dataList) {
+            data.put(d.getPrototype().getName(), d);
+        }
+
+        return  Collections.unmodifiableMap(data);
+    }
+
 
     @Override
     public Iterator<IData<?>> iterator() {
-        return data.iterator();
+        return data.values().iterator();
     }
 
     @Override
@@ -114,4 +128,8 @@ public class DataSet implements IDataSet {
         return data.size();
     }
 
+    @Override
+    public IData<?> getData(String name) {
+        return data.get(name);
+    }
 }
