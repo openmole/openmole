@@ -45,6 +45,7 @@ public class Application implements IApplication {
             new HelpFormatter().printHelp(" ", options);
             System.exit(1);
         }
+
         // Init Console
         Activator.getWorkspace().setPasswordProvider(new ForbidenPasswordProvider());
         Console console = Activator.getConsole();

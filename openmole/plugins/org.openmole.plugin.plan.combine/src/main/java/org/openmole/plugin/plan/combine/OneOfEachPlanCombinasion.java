@@ -30,6 +30,7 @@ import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.plan.IFactor;
 
 /**
  *
@@ -44,6 +45,18 @@ public class OneOfEachPlanCombinasion implements IPlanCombinasion {
         this.referencePlan = refPlan;
     }
 
+    public OneOfEachPlanCombinasion(IPlan refPlan, IFactor<Object,?>... factors) {
+        this.referencePlan = refPlan;
+
+        for(IFactor factor: factors) {
+            plans.add(new OneFactorPlan(factor));
+        }
+    }
+
+    public OneOfEachPlanCombinasion(IFactor<Object,?> refFactor, IFactor<Object,?>... factors) {
+        this(new OneFactorPlan(refFactor), factors);
+    }
+
     public OneOfEachPlanCombinasion(IPlan refPlan, IPlan... plans) {
         this.referencePlan = refPlan;
 
@@ -56,16 +69,13 @@ public class OneOfEachPlanCombinasion implements IPlanCombinasion {
     public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         /* Compute plans */
-
         Collection<Iterator<IFactorValues>> cachedExploredPlans = new ArrayList<Iterator<IFactorValues>>(plans.size());
 
         for(IPlan otherPlan: getPlans()) {
             cachedExploredPlans.add(otherPlan.build(context).iterator());
         }
 
-
         /* Compose plans */
-
         Collection<IFactorValues> factorValuesCollection = new LinkedList<IFactorValues>();
 
         Iterator<IFactorValues> valuesIterator = referencePlan.build(context).iterator();
@@ -96,7 +106,6 @@ public class OneOfEachPlanCombinasion implements IPlanCombinasion {
             to.setValue(name, from.getValue(name));
         }
     }
-
 
     @Override
     public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {

@@ -23,7 +23,6 @@ public class Activator implements BundleActivator {
         this.context = context;
         console = new Console();
         reg = context.registerService(IConsole.class.getName(), console, null);
-
     }
 
     @Override

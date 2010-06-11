@@ -38,6 +38,7 @@
         <module>org.openmole.plugin.domain.relativerange</module>
         <module>org.openmole.plugin.domain.uniformintegerdistribution</module>
         <module>org.openmole.plugin.domain.groovy</module>
+	<module>org.openmole.plugin.domain.collection</module>
         <module>org.openmole.plugin.plan.csv</module>
         <module>org.openmole.plugin.plan.boxbehnken</module>
         <module>org.openmole.plugin.plan.centralcomposite</module>

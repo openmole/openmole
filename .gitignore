@@ -8,3 +8,5 @@ dist
 dist/*
 private
 private/*
+release/
+release/*

@@ -75,7 +75,7 @@ public interface IGenericTask extends IPortable {
      * @return the input of the task
      * @throws InternalProcessingError in case something went wrong looking for the input by reflexion for instance
      */
-    IDataSet getInput() throws InternalProcessingError;
+    IDataSet getInput() throws InternalProcessingError, UserBadDataError;
 
     /**
      *
@@ -84,7 +84,7 @@ public interface IGenericTask extends IPortable {
      * @return the output data of the task
      * @throws InternalProcessingError in case something went wrong looking for the output by reflexion for instance
      */
-    IDataSet getOutput() throws InternalProcessingError;
+    IDataSet getOutput() throws InternalProcessingError, UserBadDataError;
 
     /**
      *

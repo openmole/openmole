@@ -329,7 +329,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     @SoftCachable
     @Override
-    public IDataSet getInput() throws InternalProcessingError {
+    public IDataSet getInput() throws InternalProcessingError, UserBadDataError {
         List<IData<?>> tmpInputCache;
         tmpInputCache = new LinkedList<IData<?>>();
         if (input != null) {
@@ -347,7 +347,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     @SoftCachable
     @Override
-    public IDataSet getOutput() throws InternalProcessingError {
+    public IDataSet getOutput() throws InternalProcessingError, UserBadDataError {
         List<IData<?>> tmpOutputCache;
         tmpOutputCache = new LinkedList<IData<?>>();
         if (output != null) {

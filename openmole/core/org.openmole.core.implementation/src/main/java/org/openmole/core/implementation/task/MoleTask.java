@@ -21,11 +21,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
@@ -81,6 +83,12 @@ public class MoleTask extends Task implements IMoleTask {
     @Override
     public IMole getMole() {
         return workflow;
+    }
+
+    @SoftCachable
+    @Override
+    public IDataSet getInput() throws InternalProcessingError, UserBadDataError {
+        return new DataSet(super.getInput(), getMole().getRoot().getAssignedTask().getInput());
     }
 
     @SoftCachable

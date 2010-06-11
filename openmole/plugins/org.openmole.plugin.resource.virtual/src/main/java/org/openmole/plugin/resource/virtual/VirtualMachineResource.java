@@ -165,7 +165,7 @@ public class VirtualMachineResource extends ComposedResource {
                 return null;
             }
         });
-        
+
         try {
             connectionFuture.get(timeOut, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -206,14 +206,17 @@ public class VirtualMachineResource extends ComposedResource {
         final String qemuJarPath;
         final String[] toCopy;
 
+        //Logger.getLogger(VirtualMachineResource.class.getSimpleName()).info(System.getProperty("os.name"));
+        //Logger.getLogger(VirtualMachineResource.class.getSimpleName()).info(System.getProperty("os.version"));
+
         if (os.toLowerCase().contains("linux")) {
             Process process = Runtime.getRuntime().exec("uname -a");
-            
+
             StringBuilder builder = new StringBuilder();
             executeProcess(process, new PrintStream(new StringBuilderOutputStream(builder)), System.err);
             String res = builder.toString();
 
-            if(res.contains("x86_64")) {
+            if (res.contains("x86_64")) {
                 qemuJarPath = "/qemu_linux_64/";
             } else {
                 qemuJarPath = "/qemu_linux_32/";
@@ -222,6 +225,13 @@ public class VirtualMachineResource extends ComposedResource {
         } else if (os.toLowerCase().contains("windows")) {
             qemuJarPath = "/qemu_windows/";
             toCopy = new String[]{Executable + ".exe", "SDL.dll"};
+        } else if (os.toLowerCase().contains("mac")) {
+            if (System.getProperty("os.version").contains("10.6")) {
+                qemuJarPath = "/OSX-10.6/";
+                toCopy = new String[]{Executable};
+            } else {
+                throw new InternalProcessingError("Unsuported OSX version " + System.getProperty("os.version"));
+            }
         } else {
             throw new InternalProcessingError("Unsuported OS " + os);
         }

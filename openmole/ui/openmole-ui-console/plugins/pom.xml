@@ -127,6 +127,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.domain.collection</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.plan.csv</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>

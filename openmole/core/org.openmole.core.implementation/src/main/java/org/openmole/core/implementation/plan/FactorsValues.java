@@ -23,7 +23,6 @@ import org.openmole.core.model.plan.IFactorValues;
 
 import java.util.Map;
 import java.util.TreeMap;
-import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.model.data.IPrototype;
 
 public class FactorsValues implements IFactorValues {

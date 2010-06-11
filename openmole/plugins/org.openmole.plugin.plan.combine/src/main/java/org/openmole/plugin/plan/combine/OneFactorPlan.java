@@ -26,6 +26,7 @@ import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.plan.FactorsValues;
 
 /**
  *
@@ -45,7 +46,27 @@ public class OneFactorPlan implements IPlan {
 
             @Override
             public Iterator<IFactorValues> iterator() throws UserBadDataError, InternalProcessingError {
-                return factor.getDomain().iterator(context);
+                return new Iterator<IFactorValues>() {
+
+                    final Iterator iterator = factor.getDomain().iterator(context);
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public IFactorValues next() {
+                        FactorsValues values = new FactorsValues();
+                        values.setValue(factor.getPrototype(), iterator.next());
+                        return values;
+                    }
+
+                    @Override
+                    public void remove() {
+                        iterator.remove();
+                    }
+                };
             }
         };
     }

@@ -15,35 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.domain;
+package org.openmole.plugin.domain.collection;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import org.openmole.core.model.job.IContext;
+import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.domain.IDomain;
+import org.openmole.core.model.job.IContext;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class IteratorDomain<T> extends Domain<T> {
+public class IterableDomain<T> implements IDomain<T>{
 
-    final Iterator<? extends T> iterator;
+    final Iterable<? extends T> iterable;
 
-    public IteratorDomain(Iterator<? extends T> iterator) {
-        this.iterator = iterator;
+    public IterableDomain(Iterable<? extends T> iterable) {
+        this.iterable = iterable;
     }
 
-    public IteratorDomain(Iterable<? extends T> iterable) {
-        this.iterator = iterable.iterator();
+    public IterableDomain(T... elements) {
+        List<T> list = new ArrayList<T>(elements.length);
+        for(T element: elements) {
+            list.add(element);
+        }
+        this.iterable = list;
     }
-
 
     @Override
     public Iterator<? extends T> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
-        return iterator;
+        return iterable.iterator();
     }
-
-
 
 }
