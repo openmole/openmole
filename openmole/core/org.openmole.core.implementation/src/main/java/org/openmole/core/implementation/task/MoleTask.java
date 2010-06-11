@@ -19,6 +19,7 @@ package org.openmole.core.implementation.task;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.IDataSet;
@@ -27,11 +28,15 @@ import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
+import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.data.DataSet;
+import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
+import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
@@ -39,6 +44,25 @@ import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.task.IMoleTask;
 
 public class MoleTask extends Task implements IMoleTask {
+
+    class ExceptionLister implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution> {
+        final Collection<Throwable> throwables = new LinkedList<Throwable>();
+
+        @Override
+        public void objectChanged(IMoleExecution t, Object[] os) throws InternalProcessingError, UserBadDataError {
+            IMoleJob moleJob = (IMoleJob) os[0];
+            Throwable exception = moleJob.getContext().getLocalValue(GenericTask.Exception.getPrototype());
+
+            if(exception != null) {
+                throwables.add(exception);
+            }
+        }
+
+        public Collection<Throwable> getThrowables() {
+            return throwables;
+        }
+    }
+
 
     IMole workflow;
 
@@ -62,6 +86,11 @@ public class MoleTask extends Task implements IMoleTask {
         }
         
         IMoleExecution execution = workflow.createExecution(firstTaskContext, executionContext);
+
+        ExceptionLister exceptionLister = new ExceptionLister();
+
+        Activator.getEventDispatcher().registerListener(execution, Priority.NORMAL.getValue(),exceptionLister, IMoleExecution.oneJobFinished);
+
         execution.start();
         execution.waitUntilEnded();
 
@@ -72,12 +101,11 @@ public class MoleTask extends Task implements IMoleTask {
             }
         }
 
-        Collection<Throwable> exceptions = rootContext.getLocalValue(MoleExecution.Exceptions);
+        Collection<Throwable> exceptions = exceptionLister.getThrowables();
 
-        if (exceptions != null && !exceptions.isEmpty()) {
+        if (!exceptions.isEmpty()) {
             context.putVariable(GenericTask.Exception.getPrototype(), new MultipleException(exceptions));
         }
-
     }
 
     @Override

@@ -28,9 +28,9 @@ import org.openmole.core.model.job.ITicket;
 public interface IMoleExecution {
 
     final public static String starting = "starting";
-
     final public static String finished = "finished";
-    final public static String oneJobJinished = "oneJobJinished";
+    final public static String oneJobSubmitted = "oneJobSubmitted";
+    final public static String oneJobFinished = "oneJobFinished";
 
     void start() throws InternalProcessingError, UserBadDataError;
     void cancel() throws InternalProcessingError, UserBadDataError;

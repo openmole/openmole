@@ -63,8 +63,7 @@ import org.openmole.commons.tools.structure.Priority;
 
 public class MoleExecution implements IMoleExecution {
 
-    final static public IPrototype<Collection> Exceptions = new Prototype<Collection>("Exceptions", Collection.class);
-
+    //final static public IPrototype<Collection> Exceptions = new Prototype<Collection>("Exceptions", Collection.class);
 
     class MoleExecutionAdapterForMoleJobOutputTransitionPerformed implements IObjectChangedSynchronousListener<IMoleJob> {
 
@@ -83,9 +82,9 @@ public class MoleExecution implements IMoleExecution {
                 case FAILED:
                     jobFailed(job);
                     break;
-                case COMPLETED:
+             /*   case COMPLETED:
                     jobFinished(job);
-                    break;
+                    break;*/
             }
         }
     }
@@ -142,6 +141,8 @@ public class MoleExecution implements IMoleExecution {
 
     @Override
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+        Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new IMoleJob[]{moleJob});
+
         ExecutionInfoRegistry.GetInstance().register(moleJob, this);
         Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGH.getValue(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
         Activator.getEventDispatcher().registerListener(moleJob, Priority.NORMAL.getValue(), moleJobOutputTransitionPerformed, MoleJob.TransitionPerformed);
@@ -290,7 +291,7 @@ public class MoleExecution implements IMoleExecution {
     }
 
     private synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
-        Activator.getEventDispatcher().objectChanged(this, oneJobJinished, new IMoleJob[]{job});
+        Activator.getEventDispatcher().objectChanged(this, oneJobFinished, new IMoleJob[]{job});
 
         ISubMoleExecution subMole = inProgress.get(job);
 
@@ -346,14 +347,14 @@ public class MoleExecution implements IMoleExecution {
         return inProgress.get(job);
     }
 
-    void jobFinished(IMoleJob job) throws InternalProcessingError, UserBadDataError {
-        if (job.getContext().contains(Exceptions)) {
+   /* void jobFinished(IMoleJob job) throws InternalProcessingError, UserBadDataError {
+        if (job.getContext().contains(GenericTask.Exception.getPrototype())) {
             IContext rootCtx = job.getContext().getRoot();
             Collection<Throwable> exceptions;
 
             synchronized (rootCtx) {
-                if (rootCtx.contains(Exceptions)) {
-                    exceptions = rootCtx.getLocalValue(Exceptions);
+                if (rootCtx.contains(GenericTask.Exception.getPrototype())) {
+                    exceptions = rootCtx.getLocalValue(GenericTask.Exception.getPrototype());
                 } else {
                     exceptions = Collections.synchronizedCollection(new ArrayList<Throwable>());
                     rootCtx.setValue(Exceptions, exceptions);
@@ -363,7 +364,7 @@ public class MoleExecution implements IMoleExecution {
             exceptions.add(job.getContext().getLocalValue(GenericTask.Exception.getPrototype()));
         }
 
-    }
+    }*/
 
     @Override
     public IExecutionContext getExecutionContext() {

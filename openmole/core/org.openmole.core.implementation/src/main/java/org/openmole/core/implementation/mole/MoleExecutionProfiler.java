@@ -65,7 +65,7 @@ public abstract class MoleExecutionProfiler {
     public MoleExecutionProfiler(IMoleExecution moleExecution) {
         this.moleExecution = moleExecution;
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerExecutionStartingAdapter(), IMoleExecution.starting);
-        Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerOneJobFinishedAdapter(), IMoleExecution.oneJobJinished);
+        Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerOneJobFinishedAdapter(), IMoleExecution.oneJobFinished);
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.LOW.getValue(), new MoleExecutionProfilerExecutionFinishedAdapter(), IMoleExecution.finished);
     }
 
