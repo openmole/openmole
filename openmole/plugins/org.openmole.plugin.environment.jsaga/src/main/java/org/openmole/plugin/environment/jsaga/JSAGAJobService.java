@@ -82,31 +82,31 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
  
 
         } catch (IncorrectStateException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (InternalProcessingError e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (NotImplementedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (AuthenticationFailedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (AuthorizationFailedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (PermissionDeniedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (BadParameterException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (TimeoutException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         } catch (NoSuccessException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
         }
         return true;

@@ -187,7 +187,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(testFile, false));
             }
         } catch (Throwable e) {
-            Logger.getLogger(BatchStorage.class.getName()).log(Level.INFO, getURI().toString(), e);
+            Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, getURI().toString(), e);
         }
 
         return false;
