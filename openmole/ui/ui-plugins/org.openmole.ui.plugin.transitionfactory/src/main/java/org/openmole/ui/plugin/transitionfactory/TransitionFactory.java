@@ -177,14 +177,14 @@ public class TransitionFactory {
          return buildExploration(new ExplorationTaskCapsule(exploreTask), puzzle, new TaskCapsule(aggregationTask));
      }
 
-     public static IPuzzleFirst<? extends ITaskCapsule> buildExploration(IExplorationTaskCapsule exploreCapsule, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
+     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTaskCapsule exploreCapsule, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
         new ExplorationTransition(exploreCapsule, puzzle.getFirstCapsule());
-        return new PuzzleFirst(exploreCapsule);
+        return new PuzzleFirstAndLast(exploreCapsule,puzzle.getLastCapsule());
     }
 
-     public static IPuzzleFirst<? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
+     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
         ExplorationTaskCapsule etc = new ExplorationTaskCapsule(exploreTask);
         new ExplorationTransition(etc, puzzle.getFirstCapsule());
-        return new PuzzleFirst(etc);
+        return new PuzzleFirstAndLast(etc,puzzle.getLastCapsule());
     }
 }
