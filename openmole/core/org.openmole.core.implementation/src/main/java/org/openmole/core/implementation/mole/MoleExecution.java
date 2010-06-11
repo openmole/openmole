@@ -80,9 +80,9 @@ public class MoleExecution implements IMoleExecution {
         @Override
         public void objectChanged(IMoleJob job) throws InternalProcessingError, UserBadDataError {
             switch (job.getState()) {
-  //              case FAILED:
-  //                  jobFailed(job);
-  //                  break;
+                case FAILED:
+                    jobFailed(job);
+                    break;
                 case COMPLETED:
                     jobFinished(job);
                     break;
@@ -285,11 +285,11 @@ public class MoleExecution implements IMoleExecution {
         getSubmiter().join();
     }
 
-    public void jobFailed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
+    private void jobFailed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
         jobOutputTransitionsPerformed(job);
     }
 
-    public synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
+    private synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobJinished, new IMoleJob[]{job});
 
         ISubMoleExecution subMole = inProgress.get(job);
