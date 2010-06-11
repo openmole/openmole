@@ -31,7 +31,7 @@ public class MoleJobInfoToColumns {
 
     public static String[] toColumns(IMoleJob moleJob) {
         Collection<ITimeStamp> timeStamps = moleJob.getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
-        String[] toWrite = new String[(timeStamps.size() - 1) * 3 + 2];
+        String[] toWrite = new String[(timeStamps.size() - 1) + 2];
 
         int cur = 0;
 
@@ -45,9 +45,7 @@ public class MoleJobInfoToColumns {
 
         while (itTimeStamps.hasNext()) {
             ITimeStamp timeStamp = itTimeStamps.next();
-            toWrite[cur++] = timeStamp.getState().toString();
-            toWrite[cur++] = timeStamp.getHostName();
-            toWrite[cur++] = new Long(timeStamp.getTime() - created).toString();
+            toWrite[cur++] = timeStamp.getState().toString() + ':' + timeStamp.getHostName() + ':' + new Long(timeStamp.getTime() - created).toString();
         }
         return toWrite;
     }
