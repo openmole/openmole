@@ -78,10 +78,6 @@ public class Builder {
         Mole mole = buildMole(buildChain(puzzle, build(inputToGlobalTask)).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
-        for (IData data : puzzle.getFirstCapsule().getTask().getInput()) {
-            moleTask.addInput(data);
-        }
-
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
             moleTask.addOutput(data);
         }
