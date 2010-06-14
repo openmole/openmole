@@ -49,9 +49,7 @@ import org.openmole.commons.tools.io.TarArchiver;
 
 import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;

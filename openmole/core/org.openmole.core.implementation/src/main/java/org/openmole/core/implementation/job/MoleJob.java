@@ -115,7 +115,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         //Init variable for output filtering
         try {
             setState(State.RUNNING);
-            
             getTask().perform(getContext(), progress);
             setState(State.ACHIEVED);
         } catch (Throwable e) {
