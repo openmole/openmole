@@ -18,9 +18,9 @@
 package org.openmole.core.model.execution;
 
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.job.IJob;
 
 public interface IEnvironmentExecutionStatistics {
-	IStatistic getStatFor(IExecutionContext executionContext, IJobStatisticCategory statisticCategory);
-	public void statusJustChanged(SampleType type, long length, IExecutionContext executionContext,  IJobStatisticCategory statisticCategory);
+	IStatistic getStatFor(IJob job);
+	public void statusJustChanged(SampleType type, long length, IJob job);
 }

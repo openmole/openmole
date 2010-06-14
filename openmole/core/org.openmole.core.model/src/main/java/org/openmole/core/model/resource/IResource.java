@@ -20,7 +20,6 @@ package org.openmole.core.model.resource;
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.execution.IEnvironment;
 
 /**
  *
@@ -36,10 +35,10 @@ public interface IResource {
      *
      * Deploy the resource on the local environment.
      *
-     * @param localFileCache            the local file cache containing the local copy of the files
      * @throws InternalProcessingError  if something goes wrong because of a system failure
      * @throws UserBadDataError         if something goes wrong because it is missconfigured
      */
-    void deploy(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
+    void deploy() throws InternalProcessingError, UserBadDataError;
     Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
+    void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
 }

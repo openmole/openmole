@@ -23,7 +23,6 @@ import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 
 public class InputToGlobalTask extends Task {
 
@@ -51,7 +50,7 @@ public class InputToGlobalTask extends Task {
 	}
 
 	@Override
-	protected void process(IContext context, IExecutionContext executionContext, IProgress progress)
+	protected void process(IContext context, IProgress progress)
 			throws UserBadDataError, InternalProcessingError {
 		for(IData data : getInput()) {
                         IPrototype p = data.getPrototype();

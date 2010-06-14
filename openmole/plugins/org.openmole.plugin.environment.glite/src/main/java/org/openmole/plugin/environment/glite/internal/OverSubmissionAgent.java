@@ -31,18 +31,17 @@ import org.openmole.core.implementation.execution.Statistic;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.model.execution.IExecutionJobRegistries;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.commons.tools.structure.Duo;
-import org.openmole.commons.tools.structure.Trio;
+import org.openmole.core.implementation.execution.JobStatisticCategory;
+import org.openmole.core.model.execution.IExecutionJobRegistry;
+import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.plugin.environment.glite.GliteEnvironment;
 
 public class OverSubmissionAgent implements IUpdatable {
@@ -60,7 +59,6 @@ public class OverSubmissionAgent implements IUpdatable {
         this.checkInterval = checkInterval;
         this.numberOfSimultaneousExecutionForAJobWhenUnderMinJob = numberOfSimultaneousExecutionForAJobWhenUnderMinJob;
         this.minNumberOfJobsByCategory = minNumberOfJobsByCategory;
-        //  this.numberOfSimultaneousExecutionForAJobWhenUnderMinJob = numberOfSimultaneousExecutionForAJobWhenUnderMinJob;
     }
 
     @Override
@@ -71,27 +69,26 @@ public class OverSubmissionAgent implements IUpdatable {
     @Override
     public void update() {
 
-        final IExecutionJobRegistries<IBatchExecutionJob> registries = checkedEnv.getJobRegistries();
-        //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Total " + registry.getNbExecutionJobs());
-
-        synchronized (registries) {
-
-
-            Map<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger> nbJobsByCategory = new HashMap<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger>();
+        final IExecutionJobRegistry<IBatchExecutionJob> registry = checkedEnv.getJobRegistry();
+  
+        synchronized (registry) {
+            Map<IJobStatisticCategory, AtomicInteger> nbJobsByCategory = new HashMap<IJobStatisticCategory, AtomicInteger>();
 
             Long curTime = System.currentTimeMillis();
-            AssociativeCache<Trio<IExecutionContext, IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Trio<IExecutionContext, IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
+            AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
 
-            for (Trio<IExecutionContext, IJobStatisticCategory, IJob> trio : registries.getAllJobs()) {
-                final IJobStatisticCategory jobStatisticCategory = trio.getCenter();
-                final IExecutionContext executionContext = trio.getLeft();
-                final IJob job = trio.getRight();
+            for (final IJob job : registry.getAllJobs()) {
+               // final IJobStatisticCategory jobStatisticCategory = trio.getCenter();
+                //final IExecutionContext executionContext = trio.getLeft();
+                //final IJob job = trio.getRight();
 
                 //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,j.toString() + " " + registry.getNbExecutionJobsForJob(j));
 
                 if (!job.allMoleJobsFinished()) {
 
-                    IBatchExecutionJob lastJob = registries.findLastExecutionJob(executionContext, jobStatisticCategory, job);
+                     final IJobStatisticCategory jobStatisticCategory = new JobStatisticCategory(job);
+
+                    IBatchExecutionJob lastJob = registry.getLastExecutionJobForJob(job);
 
                     if (lastJob == null) {
                         Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.WARNING, "Bug: last execution job should never be null.");
@@ -105,25 +102,22 @@ public class OverSubmissionAgent implements IUpdatable {
 
                         Long jobTime = curTime - lastJob.getBatchJob().getTimeStemp(executionState);
 
-
-                        Trio<IExecutionContext, IJobStatisticCategory, SampleType> key = new Trio<IExecutionContext, IJobStatisticCategory, SampleType>(executionContext, jobStatisticCategory, sampleType);
+                        Duo<IJobStatisticCategory, SampleType> key = new Duo<IJobStatisticCategory, SampleType>(jobStatisticCategory, sampleType);
                         try {
-
                             Long limitTime = timeCache.getCache(this, key, new ICachable<Long>() {
 
                                 @Override
                                 public Long compute() throws InternalProcessingError, InterruptedException {
-                                    IStatistic finishedStat = checkedEnv.getStatistics().getStatFor(executionContext, jobStatisticCategory);
-                                    IStatistic runningStat = computeStat(registries.getAllExecutionJobs(executionContext, jobStatisticCategory));
+                                    IStatistic finishedStat = checkedEnv.getStatistics().getStatFor(job);
+                                    IStatistic runningStat = computeStat(registry.getExecutionJobsForTheCategory(jobStatisticCategory));
                                     Long t = strategy.getWhenJobShouldBeResubmited(sampleType, finishedStat, runningStat);
-                                    //               Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO, sampleType + " t = "+ t + " ; nbfinishedStat = " + finishedStat.getNbSamples(sampleType) + " ; runningStat = " + runningStat.getNbSamples(sampleType));
                                     return t;
                                 }
                             });
 
 
                             if (jobTime > limitTime) {
-                                checkedEnv.submit(job, executionContext, jobStatisticCategory);
+                                checkedEnv.submit(job);
                             }
 
                         } catch (InternalProcessingError e) {
@@ -136,31 +130,27 @@ public class OverSubmissionAgent implements IUpdatable {
                     }
                     
                     // Count nb execution
-                    Duo<IExecutionContext, IJobStatisticCategory> keyCount = new Duo<IExecutionContext, IJobStatisticCategory>(executionContext, jobStatisticCategory);
-                    AtomicInteger executionJobCounter = nbJobsByCategory.get(keyCount);
+                    AtomicInteger executionJobCounter = nbJobsByCategory.get(jobStatisticCategory);
                     if (executionJobCounter == null) {
                         executionJobCounter = new AtomicInteger();
-                        nbJobsByCategory.put(keyCount, executionJobCounter);
+                        nbJobsByCategory.put(jobStatisticCategory, executionJobCounter);
                     }
-                    executionJobCounter.addAndGet(registries.getNbExecutionJobs(executionContext, jobStatisticCategory, job));
-
-
+                    executionJobCounter.addAndGet(registry.getNbExecutionJobsForJob(job));
                 }
             }
 
 
-            for (Map.Entry<Duo<IExecutionContext, IJobStatisticCategory>, AtomicInteger> entry : nbJobsByCategory.entrySet()) {
+            for (Map.Entry<IJobStatisticCategory, AtomicInteger> entry : nbJobsByCategory.entrySet()) {
                 int nbRessub = minNumberOfJobsByCategory - entry.getValue().get();
-                IExecutionContext executionContext = entry.getKey().getLeft();
-                IJobStatisticCategory jobStatisticCategory = entry.getKey().getRight();
+                IJobStatisticCategory jobStatisticCategory = entry.getKey();
 
                 if (nbRessub > 0) {
                     // Resubmit nbRessub jobs in a fair manner
                     MultiHashMap<Integer, IJob> order = new MultiHashMap<Integer, IJob>();
                     SortedSet<Integer> keys = new TreeSet<Integer>();
 
-                    for (IJob job : registries.getAllJobs(executionContext, jobStatisticCategory)) {
-                        Integer nb = registries.getNbExecutionJobs(executionContext, jobStatisticCategory, job);
+                    for (IJob job : registry.getJobsForTheCategory(jobStatisticCategory)) {
+                        Integer nb = registry.getNbExecutionJobsForJob(job);
                         if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
                             order.put(nb, job);
                             keys.add(nb);
@@ -179,7 +169,7 @@ public class OverSubmissionAgent implements IUpdatable {
 
                             try {
                                 // IExecutionContext executionContext = registry.getExecutionContext(job);
-                                checkedEnv.submit(job, executionContext, jobStatisticCategory);
+                                checkedEnv.submit(job);
                             } catch (InternalProcessingError e) {
                                 Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
                             } catch (UserBadDataError e) {

@@ -34,7 +34,6 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
-import org.openmole.core.model.mole.IExecutionContext
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.structure.Duo
@@ -68,7 +67,7 @@ class DatasetDistributionTask (name: String, outputDirectoryPath: String, minBou
     chart
   }
 
-  override def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) = {
+  override def process(context: IContext, progress: IProgress) = {
     try {
       charts foreach ( chart => {
         val data = context getLocalValue(chart._1)

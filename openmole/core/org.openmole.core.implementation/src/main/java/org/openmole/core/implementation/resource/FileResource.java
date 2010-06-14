@@ -29,9 +29,7 @@ import org.openmole.core.model.resource.IResource;
 
 public class FileResource implements IResource {
 
-    final File file;
-
-    transient File deployedFile;
+    File file;
 
     public FileResource(File file) {
         super();
@@ -43,9 +41,12 @@ public class FileResource implements IResource {
     }
 
     @Override
-    public void deploy(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        deployedFile = fileCache.getLocalFileCache(file);
+    public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
+        file = fileCache.getLocalFileCache(file);
     }
+
+    @Override
+    public void deploy() throws InternalProcessingError, UserBadDataError {}
 
     @Override
     public Collection<File> getFiles() {
@@ -54,8 +55,10 @@ public class FileResource implements IResource {
         return ret;
     }
 
-    public File getDeployedFile() {
-        return deployedFile;
+    public File getFile() {
+        return file;
     }
+
+
     
 }

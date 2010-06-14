@@ -20,11 +20,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.IMoleTask;
 import org.openmole.commons.tools.structure.Trio;
 import org.openmole.core.model.job.State;
@@ -45,17 +43,13 @@ public class LocalExecuter implements Runnable {
 
         while (!stop) {
             try {
-                Trio<IExecutionContext, IJobStatisticCategory, LocalExecutionJob> trio = localEnvironment.takeNextjob();
-                LocalExecutionJob executionJob = trio.getRight();
+                LocalExecutionJob executionJob = localEnvironment.takeNextjob();
                 IJob job = executionJob.getJob();
-
-                IExecutionContext executionContext = trio.getLeft();
-                IJobStatisticCategory taskCapsule = trio.getCenter();
 
                 try {
                     executionJob.setState(ExecutionState.RUNNING);
                     Long running = System.currentTimeMillis();
-                    executionJob.getEnvironment().sample(SampleType.WAITING, running - executionJob.getCreationTime(), executionContext, taskCapsule);
+                    executionJob.getEnvironment().sample(SampleType.WAITING, running - executionJob.getCreationTime(), job);
 
                     for (IMoleJob moleJob : job.getMoleJobs()) {
                         if (moleJob.getState() != State.CANCELED) {
@@ -64,15 +58,15 @@ public class LocalExecuter implements Runnable {
                             if (IMoleTask.class.isAssignableFrom(moleJob.getTask().getClass())) {
                                 jobGoneIdle();
                             }
-                            moleJob.perform(executionContext);
+                            moleJob.perform();
                             moleJob.finished(moleJob.getContext());
                             LOGGER.finer("End of job group execution: " + moleJob);
                         }
                     }
                     executionJob.setState(ExecutionState.DONE);
-                    executionJob.getEnvironment().sample(SampleType.RUNNING, System.currentTimeMillis() - running, executionContext, taskCapsule);
+                    executionJob.getEnvironment().sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
                 } finally {
-                    localEnvironment.getJobRegistries().remove(executionContext, taskCapsule, job);
+                    localEnvironment.getJobRegistry().remove(executionJob);
                 }
             } catch (InterruptedException e) {
                 if (!stop) {

@@ -33,7 +33,6 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.mole.IExecutionContext
 import org.apache.commons.exec.PumpStreamHandler
 import org.openmole.plugin.task.external.ExternalSystemTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
@@ -52,7 +51,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
     this(name, cmd, null)
   }
 
-  override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) = {
+  override protected def process(context: IContext, progress: IProgress) = {
     try {
       val tmpDir = workspace.newTmpDir("systemExecTask")
 

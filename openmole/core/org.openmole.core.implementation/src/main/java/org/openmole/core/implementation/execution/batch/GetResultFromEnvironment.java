@@ -24,7 +24,6 @@ import org.openmole.commons.tools.io.TarArchiver;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -33,7 +32,6 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.core.model.mole.IExecutionContext;
 
 /**
  *
@@ -45,22 +43,18 @@ public class GetResultFromEnvironment implements Callable<Void> {
     final IURIFile outputFile;
     final IJob job;
     final BatchEnvironment environment;
-    final IJobStatisticCategory jobStatisticCategory;
-    final IExecutionContext executionContext;
     final Long lastStatusChangeInterval;
 
-    public GetResultFromEnvironment(IBatchStorage communicationStorage, IURIFile outputFile, IJob job, BatchEnvironment environment,IJobStatisticCategory jobStatisticCategory, IExecutionContext executionContext,Long lastStatusChangeInterval) {
+    public GetResultFromEnvironment(IBatchStorage communicationStorage, IURIFile outputFile, IJob job, BatchEnvironment environment, Long lastStatusChangeInterval) {
         this.communicationStorage = communicationStorage;
         this.outputFile = outputFile;
         this.job = job;
         this.environment = environment;
-        this.jobStatisticCategory = jobStatisticCategory;
-        this.executionContext = executionContext;
         this.lastStatusChangeInterval = lastStatusChangeInterval;
     }
 
      protected void successFullFinish() {
-        environment.sample(SampleType.RUNNING, lastStatusChangeInterval, executionContext, jobStatisticCategory);
+        environment.sample(SampleType.RUNNING, lastStatusChangeInterval, job);
      }
 
     @Override
@@ -221,7 +215,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
            // Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.INFO, successfull + " / " + job.getNbMoleJob());
 
             //If sucessfull for full group update stats
-            if (successfull == job.getNbMoleJob()) {
+            if (successfull == job.size()) {
                    successFullFinish();
             }
 

@@ -62,7 +62,7 @@ public class Job implements IJob {
     }
 
     @Override
-    public int getNbMoleJob() {
+    public int size() {
         return moleJobs.size();
     }
 

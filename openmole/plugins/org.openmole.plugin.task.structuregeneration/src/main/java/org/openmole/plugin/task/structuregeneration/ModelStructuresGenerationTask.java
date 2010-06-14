@@ -23,7 +23,6 @@ import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.annotations.Output;
 
 /**
@@ -62,7 +61,7 @@ public class ModelStructuresGenerationTask extends Task {
     }
 
     @Override
-    protected void process(IContext context, IExecutionContext localFileCache, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
             context.putVariable(InputData.getPrototype(), getInputDataStructureClass().newInstance());
             context.putVariable(OutputData.getPrototype(), getOutputDataStructureClass().newInstance());

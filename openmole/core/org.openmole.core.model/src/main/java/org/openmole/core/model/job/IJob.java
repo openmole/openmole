@@ -27,7 +27,7 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public interface IJob {
     Iterable<IMoleJob> getMoleJobs();
-    int getNbMoleJob();
+    int size();
     void rethrowException(IMoleJobId moleJob, IContext context) throws ExecutionException;
     void finished(IMoleJobId moleJob, IContext context) throws UserBadDataError, InternalProcessingError;
     boolean isFinished(IMoleJobId moleJob);

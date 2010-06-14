@@ -31,7 +31,7 @@ import org.openmole.commons.exception.UserBadDataError;
 public abstract class BatchJob implements IBatchJob {
 
     ExecutionState state;
-
+    
     Long lastStatusChanged;
     Long lastStatusChangeInterval;
     IBatchServiceDescription jobServiceDescription;

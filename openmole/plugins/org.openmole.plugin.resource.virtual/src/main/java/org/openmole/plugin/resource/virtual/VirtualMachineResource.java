@@ -60,8 +60,10 @@ public class VirtualMachineResource extends ComposedResource {
     }
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
+
     @Resource
     final FileResource systemResource;
+
     final String user;
     final String password;
     final int memory;
@@ -96,14 +98,14 @@ public class VirtualMachineResource extends ComposedResource {
     }
 
     public IVirtualMachine launchAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        if (!systemResource.getDeployedFile().isFile()) {
-            throw new UserBadDataError("Image " + systemResource.getDeployedFile().getAbsolutePath() + " doesn't exist or is not a file.");
+        if (!systemResource.getFile().isFile()) {
+            throw new UserBadDataError("Image " + systemResource.getFile().getAbsolutePath() + " doesn't exist or is not a file.");
         }
 
         final File vmImage;
         try {
             vmImage = workspace().newTmpFile();
-            FileUtil.copy(systemResource.getDeployedFile(), vmImage);
+            FileUtil.copy(systemResource.getFile(), vmImage);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
         }
@@ -118,7 +120,7 @@ public class VirtualMachineResource extends ComposedResource {
 
                 CommandLine commandLine = new CommandLine(new File(qemuDir, Executable));
                 commandLine.addArguments("-m " + memory + " -smp " + vcore + " -redir tcp:" + port + "::22 -nographic -hda ");
-                commandLine.addArgument(systemResource.getDeployedFile().getAbsolutePath());
+                commandLine.addArgument(systemResource.getFile().getAbsolutePath());
                 commandLine.addArguments("-L");
                 commandLine.addArgument(qemuDir.getAbsolutePath());
                 commandLine.addArguments("-monitor null -serial none");

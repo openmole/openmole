@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.job;
 
-import org.openmole.core.model.mole.IExecutionContext;
 import java.io.File;
 import org.openmole.commons.exception.ExecutionException;
 
@@ -40,7 +39,7 @@ public interface IMoleJob {
 
     IContext getContext();
     
-    void perform(IExecutionContext executionContext) throws InterruptedException;
+    void perform() throws InterruptedException;
     void finished(IContext executionJob) throws UserBadDataError, InternalProcessingError;
 
     void rethrowException(IContext context) throws ExecutionException;

@@ -20,11 +20,10 @@ import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.model.execution.IExecutionJob;
-import org.openmole.core.model.execution.IExecutionJobRegistries;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.core.model.execution.IExecutionJobRegistry;
+import org.openmole.core.model.job.IJob;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
 public abstract class Environment<EXECUTIONJOB extends IExecutionJob> implements IEnvironment<EXECUTIONJOB> {
@@ -33,20 +32,25 @@ public abstract class Environment<EXECUTIONJOB extends IExecutionJob> implements
     final static ConfigurationLocation StatisticsHistorySize = new ConfigurationLocation(ConfigGroup, "StatisticsHistorySize");
 
     static {
-            Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "1000");
+        Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "1000");
     }
 
-    IEnvironmentExecutionStatistics statistics;
-    IExecutionJobRegistries<EXECUTIONJOB> jobRegistries = new ExecutionJobRegistries<EXECUTIONJOB>();
+    final IEnvironmentExecutionStatistics statistics;
+    final IExecutionJobRegistry<EXECUTIONJOB> executionJobRegistry;
 
     public Environment() throws InternalProcessingError {
         super();
+        executionJobRegistry = new ExecutionJobRegistry<EXECUTIONJOB>();
         statistics = new EnvironmentExecutionStatistics(Activator.getWorkspace().getPreferenceAsInt(StatisticsHistorySize));
     }
 
+    public void sample(SampleType type, Long value, IJob job) {
+         statistics.statusJustChanged(type, value, job);
+    }
+
     @Override
-    public IExecutionJobRegistries<EXECUTIONJOB> getJobRegistries() {
-        return jobRegistries;
+    public IExecutionJobRegistry<EXECUTIONJOB> getJobRegistry() {
+        return executionJobRegistry;
     }
 
     @Override
@@ -54,7 +58,5 @@ public abstract class Environment<EXECUTIONJOB extends IExecutionJob> implements
         return statistics;
     }
 
-    public void sample(SampleType type, Long value, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) {
-         getStatistics().statusJustChanged(type, value, executionContext, statisticCategory);
-    }
+    
 }

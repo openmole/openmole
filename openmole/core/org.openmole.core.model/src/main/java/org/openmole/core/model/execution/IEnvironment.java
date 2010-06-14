@@ -14,18 +14,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.model.execution;
-
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.model.mole.IExecutionContext;
 
 public interface IEnvironment<EXECUTIONJOB extends IExecutionJob> {
-        void submit(IJob job, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError;
-        IExecutionJobRegistries<EXECUTIONJOB> getJobRegistries();
-        IEnvironmentExecutionStatistics getStatistics();
+
+    void submit(IJob job) throws InternalProcessingError, UserBadDataError;
+
+    IExecutionJobRegistry<EXECUTIONJOB> getJobRegistry();
+
+    IEnvironmentExecutionStatistics getStatistics();
 }

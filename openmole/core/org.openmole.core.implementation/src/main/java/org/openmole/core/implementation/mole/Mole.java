@@ -37,12 +37,9 @@ import org.openmole.core.implementation.job.Context;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.commons.tools.pattern.IVisitor;
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.model.execution.IJobStatisticCategorizationStrategy;
 import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.task.IGenericTask;
@@ -56,7 +53,6 @@ public class Mole implements IMole {
 
     private IGenericTaskCapsule<?, ?> root;
     private Map<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy> groupers = new HashMap<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy>();
-    private IJobStatisticCategorizationStrategy jobStatisticCategorizationStrategy = new CapsuleJobStatisticCategorisationStrategy();
 
     public Mole(IGenericTaskCapsule<?, ?> root) {
         this.root = root;
@@ -108,15 +104,12 @@ public class Mole implements IMole {
 
         IContext rootContext = new Context();
 
-        IExecutionContext exec = new ExecutionContext(fileCache, strategy);
-
-        return createExecution(rootContext, exec);
-       
+        return new MoleExecution(this, rootContext, strategy);
     }
 
     @Override
-    public IMoleExecution createExecution(IContext context, IExecutionContext executionContext) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return new MoleExecution(this, context, executionContext);
+    public IMoleExecution createExecution(IContext context) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return new MoleExecution(this, context);
     }
 
     @Override
@@ -222,16 +215,5 @@ public class Mole implements IMole {
     public void setMoleJobGroupingStrategy(IGenericTaskCapsule forCapsule, IMoleJobGroupingStrategy strategy) {
         groupers.put(forCapsule, strategy);
     }
-
-    @Override
-    public void setJobStatisticCategorizationStrategy(IJobStatisticCategorizationStrategy jobStatisticCategorizationStrategy) {
-        this.jobStatisticCategorizationStrategy = jobStatisticCategorizationStrategy;
-    }
-
-    public IJobStatisticCategorizationStrategy getJobStatisticCategorizationStrategy() {
-        return jobStatisticCategorizationStrategy;
-    }
-
-
 
 }

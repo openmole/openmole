@@ -44,14 +44,12 @@ import org.openmole.commons.tools.structure.Duo;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.misc.workspace.InteractiveConfiguration;
 
 public abstract class BatchEnvironment<JS extends IBatchJobService> extends Environment<IBatchExecutionJob> implements IBatchEnvironment<JS> {
@@ -96,13 +94,13 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Override
-    public void submit(IJob job, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError {
-        final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job, executionContext);
+    public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
+        final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job);
 
         IUpdatableFuture future = Activator.getUpdater().registerForUpdate(bej, ExecutorType.UPDATE);
         bej.setFuture(future);
 
-        getJobRegistries().register(executionContext, statisticCategory, bej);
+        getJobRegistry().register(bej);
     }
 
     @Override

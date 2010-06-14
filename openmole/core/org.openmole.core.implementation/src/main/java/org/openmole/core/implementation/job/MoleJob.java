@@ -40,7 +40,6 @@ import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.implementation.tools.LocalHostName;
 import org.openmole.core.model.job.ITimeStamp;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.resource.IResource;
 
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
@@ -112,12 +111,12 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     }
 
     @Override
-    public void perform(IExecutionContext executionContext) throws InterruptedException {
+    public void perform() throws InterruptedException {
         //Init variable for output filtering
         try {
             setState(State.RUNNING);
-            deployRessources(executionContext);
-            getTask().perform(getContext(), executionContext, progress);
+            
+            getTask().perform(getContext(), progress);
             setState(State.ACHIEVED);
         } catch (Throwable e) {
             getContext().putVariable(GenericTask.Exception.getPrototype(), e);
@@ -150,11 +149,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     @Override
     public boolean isFinished() {
         return getState().isFinal();
-    }
-
-    //@Override
-    public void deployRessources(IExecutionContext executionContext) throws InternalProcessingError, UserBadDataError {
-        getTask().deployResources(executionContext.getLocalFileCache());
     }
 
     @Override

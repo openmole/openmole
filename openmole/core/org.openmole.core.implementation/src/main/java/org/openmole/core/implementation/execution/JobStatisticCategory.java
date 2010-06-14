@@ -14,16 +14,41 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.implementation.execution;
 
-package org.openmole.core.model.execution;
-
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.apache.commons.collections.keyvalue.MultiKey;
+import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.job.IMoleJob;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface IJobStatisticCategorizationStrategy {
-    IJobStatisticCategory getCategory(IJob job, IGenericTaskCapsule capsule);
+public class JobStatisticCategory implements IJobStatisticCategory {
+
+    final MultiKey key;
+
+    public JobStatisticCategory(IJob job) {
+        Object[] tasks = new Object[job.size() + 1];
+        int i = 0;
+
+        for (IMoleJob moleJob : job.getMoleJobs()) {
+            tasks[i++] = moleJob.getTask();
+        }
+
+        tasks[i++] = JobRegistry.getInstance().getMoleExecutionForJob(job);
+
+        this.key = new MultiKey(tasks);
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return key.equals(other);
+    }
 }

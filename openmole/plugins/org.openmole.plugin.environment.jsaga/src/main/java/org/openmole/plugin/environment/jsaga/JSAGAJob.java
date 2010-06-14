@@ -49,25 +49,18 @@ import org.openmole.plugin.environment.jsaga.internal.Activator;
 public class JSAGAJob extends BatchJob {
 
     static final Pattern pattern = Pattern.compile("\\[(.*)\\]-\\[(.*)\\]");
-    //State JSAGAState;
+
     String jobId;
 
     transient Job job;
     transient File script;
-    //TODO remove
-    //static File tmpLog = new File("/iscpif/users/reuillon/tmp/laws/jsagajob.txt");
-    //long lastChange = System.currentTimeMillis();
-
+ 
     public JSAGAJob(Job job, IBatchJobService<?> jobService, File script) throws InternalProcessingError {
         super(jobService);
         this.job = job;
         this.script = script;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmole.jobmanager.impl.IJob#getID()
-     */
-    //@Cachable
     public synchronized Job getJob() throws InternalProcessingError {
         if (job != null) {
             return job;
@@ -130,7 +123,6 @@ public class JSAGAJob extends BatchJob {
         switch (state) {
             case NEW:
                 return ExecutionState.SUBMITED;
-            //break;
             case RUNNING:
                 try {
                     subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
@@ -163,26 +155,6 @@ public class JSAGAJob extends BatchJob {
             case CANCELED:
             case SUSPENDED:
             default:
-             /*   try {
-                    Logger.getLogger(JSAGAJob.class.getName()).info("Detail of job failure: " + state + " " + job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE));
-                } catch (NotImplementedException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (AuthenticationFailedException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (AuthorizationFailedException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (PermissionDeniedException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IncorrectStateException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DoesNotExistException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (TimeoutException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuccessException ex) {
-                    Logger.getLogger(JSAGAJob.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
-
                 return ExecutionState.FAILED;
         }
 
@@ -222,7 +194,6 @@ public class JSAGAJob extends BatchJob {
             script = null;
 
             this.jobId = job.getAttribute(Job.JOBID);
-            //this.job = null;
         } catch (NotImplementedException e) {
             throw new InternalProcessingError(e);
         } catch (IncorrectStateException e) {

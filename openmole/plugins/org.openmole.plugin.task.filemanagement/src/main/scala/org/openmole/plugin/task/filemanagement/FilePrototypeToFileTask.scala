@@ -30,7 +30,6 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.IExecutionContext
 import scala.collection.mutable.ListBuffer
 
 import org.openmole.commons.tools.io.FileUtil.copy
@@ -43,7 +42,7 @@ class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Tas
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[List[File]],IPrototype[List[String]],String)]()
 
 
-  override def process(context: IContext, executionContext: IExecutionContext, progress: IProgress)  {
+  override def process(context: IContext, progress: IProgress)  {
     try{
       toCopy foreach( p => {
           val from = context.getLocalValue(p._1)

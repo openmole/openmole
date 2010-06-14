@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IExecutionJob;
-import org.openmole.core.model.execution.IExecutionJobRegistries;
+import org.openmole.core.model.execution.IExecutionJobRegistry;
 
 
 /**
@@ -41,9 +41,9 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
             accounting.put(state, new AtomicInteger());
         }
 
-        IExecutionJobRegistries<IExecutionJob> executionJobRegistries = object.getJobRegistries();
+        IExecutionJobRegistry<IExecutionJob> executionJobRegistry = object.getJobRegistry();
 
-        for(IExecutionJob executionJob: executionJobRegistries.allExecutionjobs()) {
+        for(IExecutionJob executionJob: executionJobRegistry.getAllExecutionJobs()) {
             accounting.get(executionJob.getState()).incrementAndGet();
         }
 

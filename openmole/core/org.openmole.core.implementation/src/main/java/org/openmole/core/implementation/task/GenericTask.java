@@ -19,6 +19,7 @@
  */
 package org.openmole.core.implementation.task;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,12 +47,12 @@ import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Parameter;
+import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.mole.IExecutionContext;
 
 import static org.openmole.core.model.data.DataModMask.*;
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
@@ -72,7 +73,6 @@ public abstract class GenericTask implements IGenericTask {
     private Set<IResource> resources;
 
     private Parameters parameters = new Parameters();
-
 
     public GenericTask(String name) {
         setName(name);
@@ -139,16 +139,17 @@ public abstract class GenericTask implements IGenericTask {
      * @throws org.openmole.core.InternalProcessingError
      * @throws InterruptedException
      */
-    protected abstract void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException;
+    protected abstract void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException;
 
     /* (non-Javadoc)
      * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
      */
     @Override
-    public void perform(IContext context, IExecutionContext executionContext, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public void perform(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException {
         try {
+            deploy();
             init(context);
-            process(context, executionContext, progress);
+            process(context, progress);
             end(context);
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e, "Error in task " + getName());
@@ -355,8 +356,6 @@ public abstract class GenericTask implements IGenericTask {
         }
         addAllMarkedFields(this, Output.class, tmpOutputCache);
 
-        //verifyNotDuplicate(tmpOutputCache, "output");
-
         return new DataSet(tmpOutputCache);
     }
 
@@ -369,18 +368,6 @@ public abstract class GenericTask implements IGenericTask {
         return output.values();
     }
 
-   /*private void verifyNotDuplicate(Iterable<IData<?>> data, String place) {
-        Set<String> processed = new HashSet<String>();
-
-        for (IData<?> d : data) {
-            if (processed.contains(d.getPrototype().getName())) {
-                Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable with name " + d.getPrototype().getName() + " is mentioned twice in " + place + " of task " + getName() + ".");
-            } else {
-                processed.add(d.getPrototype().getName());
-            }
-        }
-    }*/
-
     @SoftCachable
     @Override
     public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
@@ -391,25 +378,50 @@ public abstract class GenericTask implements IGenericTask {
         
         addAllMarkedFields(this, Resource.class, resourcesCache);
         
-        for(IResource resource: getParameters().getResources()) {
-            resourcesCache.add(resource);
-        }
-
         return resourcesCache;
     }
 
 
     @Override
-    public void deployResources(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
+    public void deploy() throws InternalProcessingError, UserBadDataError {
         for (IResource resource : getResources()) {
-            resource.deploy(fileCache);
+            resource.deploy();
         }
     }
 
+    @Override
+    public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
+        for (IResource resource : getResources()) {
+            resource.relocate(fileCache);
+        }
+
+        FileMigrator.initFilesInVariables(parameters.getVariables(), fileCache);
+    }
+
+    @SoftCachable
+    @Override
+    public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError {
+        List<File> files = new LinkedList<File>();
+
+        for(IResource resource: getResources()) {
+            for(File file: resource.getFiles()) {
+                files.add(file);
+            }
+        }
+
+        for(File file: FileMigrator.extractFilesFromVariables(parameters.getVariables())) {
+            files.add(file);
+        }
+
+        return files;
+    }
+
+
+    
     @ChangeState
     @Override
     public void addParameter(IParameter<?> parameter) {
-        parameters.put(parameter.getVariable().getPrototype().getName(),parameter);
+        parameters.put(parameter);
     }
 
     @Override

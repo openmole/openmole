@@ -35,7 +35,6 @@ import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.annotations.Output;
 import org.openmole.plugin.task.filemanagement.internal.Activator;
 
@@ -57,7 +56,7 @@ public abstract class TemplateFileGeneratorTask extends Task {
     }
 
     @Override
-    protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws InternalProcessingError, UserBadDataError {
+    protected void process(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError {
         try {
 
             File templateFile = getFile(context);

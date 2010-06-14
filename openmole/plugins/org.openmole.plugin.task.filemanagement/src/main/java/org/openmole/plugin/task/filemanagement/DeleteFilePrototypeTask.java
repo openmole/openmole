@@ -28,7 +28,6 @@ import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 
 public class DeleteFilePrototypeTask extends Task {
 
@@ -40,7 +39,7 @@ public class DeleteFilePrototypeTask extends Task {
 	}
 
 	@Override
-	protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError {
+	protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
 		for(IPrototype<File> p : toDelete) {
 			File f = context.getLocalValue(p);
 			f.delete();

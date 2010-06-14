@@ -25,13 +25,12 @@ import org.openmole.plugin.tools.code.IContextToCode;
 import org.openmole.plugin.tools.code.FileSourceCode;
 import java.io.File;
 import java.io.IOException;
-import org.openmole.core.implementation.resource.FileSetResource;
+import org.openmole.core.implementation.resource.FileResourceSet;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.code.internal.Activator;
@@ -42,7 +41,7 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
     private T contextToCode;
     
     @Resource
-    private FileSetResource libs = new FileSetResource();
+    private FileResourceSet libs = new FileResourceSet();
 
     public CodeTask(String name, T contextToCode) throws UserBadDataError, InternalProcessingError {
         super(name);
@@ -50,12 +49,12 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
     }
 
     @Override
-    protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError {
+    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
         try {
             File pwd = Activator.getWorkspace().newTmpDir();
             prepareInputFiles(context, progress, pwd.getCanonicalFile());
 
-            contextToCode.execute(context, progress, getOutput(), libs.getDeployedFiles());
+            contextToCode.execute(context, progress, getOutput(), libs.getFiles());
             
             fetchOutputFiles(context, progress, pwd.getCanonicalFile());
         } catch (IOException e) {

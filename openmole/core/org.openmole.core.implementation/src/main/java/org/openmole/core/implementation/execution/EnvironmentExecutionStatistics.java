@@ -16,19 +16,48 @@
  */
 package org.openmole.core.implementation.execution;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import org.apache.commons.collections15.keyvalue.MultiKey;
 
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.IStatistic;
-import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.task.IGenericTask;
 
 public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStatistics {
 
-    final Map<IExecutionContext, Map<IJobStatisticCategory, IStatistic>> stats = new WeakHashMap<IExecutionContext, Map<IJobStatisticCategory, IStatistic>>();
+    private class StatisticKey {
+        final MultiKey<IGenericTask> key;
+
+        StatisticKey(IJob job) {
+            IGenericTask[] tasks = new IGenericTask[job.size()];
+            int i = 0;
+
+            for (IMoleJob moleJob : job.getMoleJobs()) {
+                tasks[i++] = moleJob.getTask();
+            }
+
+            this.key = new MultiKey<IGenericTask>(tasks);
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return key.equals(other);
+        }
+    }
+    
+    final Map<IMoleExecution, Map<StatisticKey, IStatistic>> stats = Collections.synchronizedMap(new WeakHashMap<IMoleExecution, Map<StatisticKey, IStatistic>>());
     final Integer historySize;
 
     public EnvironmentExecutionStatistics(Integer historySize) {
@@ -37,16 +66,13 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     }
 
     @Override
-    public IStatistic getStatFor(IExecutionContext executionContext, IJobStatisticCategory statisticCategory) {
-        Map<IJobStatisticCategory, IStatistic> map = getMapForExecution(executionContext);
+    public IStatistic getStatFor(IJob job) {
+        Map<StatisticKey, IStatistic> map = stats.get(JobRegistry.getInstance().getMoleExecutionForJob(job));
         if (map == null) {
             return Statistic.EMPTY_STAT;
         }
 
-        IStatistic ret;
-        synchronized (map) {
-            ret = map.get(statisticCategory);
-        }
+        IStatistic ret = map.get(new StatisticKey(job));
 
         if (ret == null) {
             return Statistic.EMPTY_STAT;
@@ -55,46 +81,32 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     }
 
     @Override
-    public void statusJustChanged(SampleType type, long length, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) {
-        //ITicket statTicket = ticket.getParent().isRoot()?ticket:ticket.getParent();
-
-        IStatistic statForTask = getOrConstructStatFor(executionContext, statisticCategory);
+    public void statusJustChanged(SampleType type, long length, IJob job) {
+        IStatistic statForTask = getOrConstructStatistic(job);
         statForTask.sample(type, length);
-
-        //Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).log(Level.INFO, "New sample " + type.getLabel() + " nb samples " + statForTask.getNbSamples(type));
-
     }
 
-    private IStatistic getOrConstructStatFor(IExecutionContext executionContext, IJobStatisticCategory statisticCategory) {
-        IStatistic statForTask;
-        Map<IJobStatisticCategory, IStatistic> map = getMapForExecution(executionContext);
+    private synchronized IStatistic getOrConstructStatistic(IJob job) {
+        Map<StatisticKey, IStatistic> map = getOrConstructStatisticMap(JobRegistry.getInstance().getMoleExecutionForJob(job));
 
-
-        synchronized (map) {
-            statForTask = map.get(statisticCategory);
-
-            if (statForTask == null) {
-                statForTask = new Statistic(historySize);
-                map.put(statisticCategory, statForTask);
-            }
+        IStatistic statistic = map.get(new StatisticKey(job));
+        if (statistic == null) {
+            statistic = new Statistic(historySize);
+            map.put(new StatisticKey(job), statistic);
         }
 
-        return statForTask;
+        return statistic;
     }
 
-    private Map<IJobStatisticCategory, IStatistic> getMapForExecution(IExecutionContext executionContext) {
+    private synchronized Map<StatisticKey, IStatistic> getOrConstructStatisticMap(IMoleExecution moleExecution) {
+        Map<StatisticKey, IStatistic> map = stats.get(moleExecution);
 
-        synchronized (stats) {
-            Map<IJobStatisticCategory, IStatistic> ret = stats.get(executionContext);
-
-            if (ret == null) {
-                ret = new HashMap<IJobStatisticCategory, IStatistic>();
-                stats.put(executionContext, ret);
-            }
-
-            return ret;
+        if (map == null) {
+            map = Collections.synchronizedMap(new HashMap<StatisticKey, IStatistic>());
+            stats.put(moleExecution, map);
         }
 
+        return map;
     }
 }
 

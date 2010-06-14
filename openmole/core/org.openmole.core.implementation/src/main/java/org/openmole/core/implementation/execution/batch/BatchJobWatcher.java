@@ -26,12 +26,9 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.model.execution.IExecutionJobRegistries;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.model.mole.IExecutionContext;
-import org.openmole.commons.tools.structure.Trio;
 import org.openmole.core.implementation.internal.Activator;
+import org.openmole.core.model.execution.IExecutionJobRegistry;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
@@ -59,20 +56,16 @@ public class BatchJobWatcher implements IUpdatable {
 
     @Override
     public void update() throws InterruptedException {
-        IExecutionJobRegistries<IBatchExecutionJob> registries = watchedEnv.getJobRegistries();
+        IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
 
-        List<Trio<IExecutionContext, IJobStatisticCategory, IJob>> jobGroupsToRemove = new LinkedList<Trio<IExecutionContext, IJobStatisticCategory, IJob>>();
+        List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
 
         // Map<ExecutionState, Integer> accounting = new HashMap<ExecutionState, Integer>();
-        synchronized (registries) {
-            for (Trio<IExecutionContext, IJobStatisticCategory, IJob> jobInfo : registries.getAllJobs()) {
-
-                IJob job = jobInfo.getRight();
-                IExecutionContext executionContext = jobInfo.getLeft();
-                IJobStatisticCategory capsule = jobInfo.getCenter();
-
+        synchronized (registry) {
+            for (IJob job : registry.getAllJobs()) {
+         
                 if (job.allMoleJobsFinished()) {
-                    for (final IBatchExecutionJob ej : registries.getAllExecutionJobs(executionContext, capsule, job)) {
+                    for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
                         org.openmole.core.implementation.internal.Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new Runnable() {
 
                             @Override
@@ -91,12 +84,12 @@ public class BatchJobWatcher implements IUpdatable {
                         });
                     }
 
-                    jobGroupsToRemove.add(new Trio<IExecutionContext, IJobStatisticCategory, IJob>(executionContext, capsule, job));
+                    jobGroupsToRemove.add(job);
                 } else {
 
                     List<IBatchExecutionJob<?>> executionJobsToRemove = new LinkedList<IBatchExecutionJob<?>>();
 
-                    for (final IBatchExecutionJob<?> ej : registries.getAllExecutionJobs(executionContext, capsule, job)) {
+                    for (final IBatchExecutionJob<?> ej : registry.getExecutionJobsFor(job)) {
                         switch (ej.getState()) {
                             case FAILED:
                                 org.openmole.core.implementation.internal.Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new Runnable() {
@@ -120,12 +113,12 @@ public class BatchJobWatcher implements IUpdatable {
                     }
 
                     for (IBatchExecutionJob<?> ej : executionJobsToRemove) {
-                        registries.remove(executionContext, capsule, ej);
+                        registry.remove(ej);
                     }
 
-                    if (registries.getNbExecutionJobs(executionContext, capsule, job) == 0) {
+                    if (registry.getNbExecutionJobsForJob(job) == 0) {
                         try {
-                            watchedEnv.submit(job, jobInfo.getLeft(), jobInfo.getCenter());
+                            watchedEnv.submit(job);
                         } catch (InternalProcessingError e) {
                             Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.SEVERE, "Submission of job failed, job isn't being executed.", e);
                         } catch (UserBadDataError e) {
@@ -133,12 +126,10 @@ public class BatchJobWatcher implements IUpdatable {
                         }
                     }
                 }
-
-
             }
 
-            for (Trio<IExecutionContext, IJobStatisticCategory, IJob> j : jobGroupsToRemove) {
-                registries.remove(j.getLeft(), j.getCenter(), j.getRight());
+            for (IJob j : jobGroupsToRemove) {
+                registry.removeJob(j);
             }
 
         }

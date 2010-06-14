@@ -29,7 +29,8 @@ import java.net.URI
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.core.implementation.resource.FileSetResource
+import org.openmole.core.implementation.resource.FileResourceSet
+import org.openmole.core.implementation.resource.FileResource
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
@@ -46,11 +47,11 @@ import scala.collection.JavaConversions._
 abstract class ExternalTask(name: String) extends Task(name) {
 
   @Resource
-  val inFiles = new FileSetResource
+  val inFiles = new FileResourceSet
 
   val inContextFiles = new ListBuffer[(IPrototype[File], String)]
   val inContextFileList = new ListBuffer[(IPrototype[List[File]], IPrototype[List[String]])]
-  val inFileNames = new TreeMap[File, String]
+  val inFileNames = new TreeMap[FileResource, String]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String)]
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
@@ -64,10 +65,8 @@ abstract class ExternalTask(name: String) extends Task(name) {
       var ret = new ListBuffer[ToPut]
 
       inFileNames.entrySet().foreach(entry => {
-          val localFile = inFiles.getDeployed(entry.getKey)
-          //val correctName = new File(tmpDir,expandData(context, entry.getValue))
+          val localFile = entry.getKey.getFile
           ret += (new ToPut(localFile, expandData(context, entry.getValue)))
-          //   copyTo(localFile, correctName)
         })
 
       inContextFiles.foreach( p => {
@@ -179,8 +178,9 @@ abstract class ExternalTask(name: String) extends Task(name) {
   }
 
   def addInFile(file: File, name: String): Unit = {
-    inFiles.addFile(file)
-    inFileNames.put(file, name)
+    var fileResource = new FileResource(file)
+    inFiles.addFileResource(fileResource)
+    inFileNames.put(fileResource, name)
   }
 
   def addInFile(file: File): Unit = {

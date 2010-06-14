@@ -34,7 +34,7 @@ public class TemplateFileGeneratorFromLocalFileTask extends TemplateFileGenerato
 
     @Override
     File getFile(IContext context) {
-        return fileResource.getDeployedFile();
+        return fileResource.getFile();
     }
 
 }

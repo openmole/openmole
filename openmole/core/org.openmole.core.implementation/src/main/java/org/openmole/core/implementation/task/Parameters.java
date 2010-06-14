@@ -16,73 +16,45 @@
  */
 package org.openmole.core.implementation.task;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.openmole.core.implementation.data.Parameter;
-import org.openmole.core.implementation.resource.FileSetResource;
 import org.openmole.core.model.data.IParameter;
-import org.openmole.core.model.resource.IPortable;
-import org.openmole.core.model.resource.IResource;
-import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.core.model.data.IVariable;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class Parameters implements Iterable<IParameter>, IPortable {
+public class Parameters implements Iterable<IParameter> {
 
     private Map<String, IParameter> parameters = new TreeMap<String, IParameter>();
-    private FileSetResource fileSet = new FileSetResource();
 
     @Override
     public Iterator<IParameter> iterator() {
-
-        return new Iterator<IParameter>() {
-
-            Iterator<IParameter> itParam = parameters.values().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return itParam.hasNext();
-            }
-
-            @Override
-            public IParameter next() {
-                IParameter ret = itParam.next();
-                if (File.class.isAssignableFrom(ret.getVariable().getPrototype().getType())) {
-                    ret = new Parameter(ret.getVariable().getPrototype(), fileSet.getDeployed((File) ret.getVariable().getValue()), ret.getOverride());
-                }
-                return ret;
-            }
-
-            @Override
-            public void remove() {
-                itParam.remove();
-            }
-        };
+        return parameters.values().iterator();
     }
 
-    public IParameter put(String k, IParameter v) {
-        if (File.class.isAssignableFrom(v.getVariable().getPrototype().getType())) {
-            fileSet.addFile((File) v.getVariable().getValue());
+    public void put(IParameter parameter) {
+        parameters.put(parameter.getVariable().getPrototype().getName(), parameter);
+    }
+
+    public void remove(String name) {
+        parameters.remove(name);
+    }
+
+    Iterable<IVariable> getVariables(){
+        List<IVariable> variables = new ArrayList<IVariable>(parameters.size());
+
+        for(IParameter parameter: parameters.values()) {
+            variables.add(parameter.getVariable());
         }
-        return parameters.put(k, v);
+
+        return variables;
     }
 
-    public IParameter remove(String o) {
-        return parameters.remove(o);
-    }
-
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError {
-        List<IResource> ret = new ArrayList<IResource>(1);
-        ret.add(fileSet);
-        return ret;
-    }
 }
 
 

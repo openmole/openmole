@@ -15,37 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole;
+package org.openmole.core.model.execution;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.execution.IJobStatisticCategory;
+import java.util.Collection;
+import org.openmole.core.model.job.IJob;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class CapsuleJobStatisticCategory implements IJobStatisticCategory {
+public interface IExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
 
-    final IGenericTaskCapsule capsule;
+    Collection<EXECUTIONJOB> getExecutionJobsForTheCategory(IJobStatisticCategory category);
+    
+    Collection<IJob> getJobsForTheCategory(IJobStatisticCategory category);
 
-    public CapsuleJobStatisticCategory(IGenericTaskCapsule capsule) {
-        this.capsule = capsule;
-    }
+    Collection<EXECUTIONJOB> getAllExecutionJobs();
 
-    @Override
-    public int hashCode() {
-        return capsule.hashCode();
-    }
+    Collection<IJob> getAllJobs();
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == null) return false;
+    Collection<EXECUTIONJOB> getExecutionJobsFor(IJob job);
 
-        if(obj.getClass() != CapsuleJobStatisticCategory.class) return false;
+    EXECUTIONJOB getLastExecutionJobForJob(IJob job);
 
-        CapsuleJobStatisticCategory second = (CapsuleJobStatisticCategory) obj;
+    Integer getNbExecutionJobsForJob(IJob job);
 
-        return capsule.equals(second.capsule);
-    }
+    boolean isEmpty();
+
+    void register(EXECUTIONJOB executionJob);
+
+    void remove(EXECUTIONJOB job);
+
+    Collection<EXECUTIONJOB> removeJob(IJob job);
 
 }

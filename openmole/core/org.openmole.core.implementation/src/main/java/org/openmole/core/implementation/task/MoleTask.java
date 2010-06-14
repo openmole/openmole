@@ -24,7 +24,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.aspect.caching.SoftCachable;
@@ -33,12 +32,10 @@ import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
-import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.task.IMoleTask;
@@ -73,7 +70,7 @@ public class MoleTask extends Task implements IMoleTask {
     }
 
     @Override
-    protected void process(IContext context, IExecutionContext executionContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
         IContext rootContext = new Context();
         IContext firstTaskContext = new Context(rootContext);
@@ -85,7 +82,7 @@ public class MoleTask extends Task implements IMoleTask {
             }
         }
         
-        IMoleExecution execution = workflow.createExecution(firstTaskContext, executionContext);
+        IMoleExecution execution = workflow.createExecution(firstTaskContext);
 
         ExceptionLister exceptionLister = new ExceptionLister();
 
@@ -137,11 +134,10 @@ public class MoleTask extends Task implements IMoleTask {
 
     //The resources of the task of the inner workflow will be deployer durring it's execution
     @Override
-    public void deployResources(ILocalFileCache fileCache)
-            throws InternalProcessingError, UserBadDataError {
-
+    public void deploy() throws InternalProcessingError, UserBadDataError {
         for (IResource resource : super.getResources()) {
-            resource.deploy(fileCache);
+            resource.deploy();
         }
     }
+
 }

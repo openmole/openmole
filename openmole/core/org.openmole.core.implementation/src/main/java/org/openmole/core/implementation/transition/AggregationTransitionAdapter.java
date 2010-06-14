@@ -21,8 +21,6 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.mole.IExecutionContext;
-import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ISubMoleExecution;
 
 /**
@@ -39,13 +37,12 @@ public class AggregationTransitionAdapter implements IObjectChangedSynchronousLi
 
     @Override
     public void objectChanged(ISubMoleExecution subMole, Object[] args) throws InternalProcessingError, UserBadDataError {
-        if(!IMoleJob.class.isAssignableFrom(args[0].getClass()) || !IExecutionContext.class.isAssignableFrom(args[1].getClass())) {
+        if(!IMoleJob.class.isAssignableFrom(args[0].getClass())) {
             throw new InternalProcessingError("BUG: argument of the event has the wrong type.");
         }
 
         IMoleJob lastJob = (IMoleJob) args[0];
-        IExecutionContext execution = (IExecutionContext) args[1];
-        transition.subMoleFinished(subMole, lastJob, execution);
+        transition.subMoleFinished(subMole, lastJob);
     }
 
 }

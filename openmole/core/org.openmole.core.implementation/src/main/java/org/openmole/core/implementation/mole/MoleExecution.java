@@ -16,7 +16,6 @@
  */
 package org.openmole.core.implementation.mole;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -32,7 +31,6 @@ import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified;
-import org.openmole.core.implementation.data.Prototype;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -45,9 +43,6 @@ import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.job.Job;
 import org.openmole.core.implementation.job.MoleJob;
 import org.openmole.core.implementation.job.MoleJobId;
-import org.openmole.core.implementation.task.GenericTask;
-import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.execution.IMoleJobCategory;
 import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
 import org.openmole.core.model.mole.ISubMoleExecution;
@@ -55,15 +50,15 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.job.ITicket;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ILocalCommunication;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.implementation.execution.JobRegistry;
+import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
 
 public class MoleExecution implements IMoleExecution {
-
-    //final static public IPrototype<Collection> Exceptions = new Prototype<Collection>("Exceptions", Collection.class);
 
     class MoleExecutionAdapterForMoleJobOutputTransitionPerformed implements IObjectChangedSynchronousListener<IMoleJob> {
 
@@ -82,9 +77,6 @@ public class MoleExecution implements IMoleExecution {
                 case FAILED:
                     jobFailed(job);
                     break;
-             /*   case COMPLETED:
-                    jobFinished(job);
-                    break;*/
             }
         }
     }
@@ -98,13 +90,18 @@ public class MoleExecution implements IMoleExecution {
     }
 
     private static final Logger LOGGER = Logger.getLogger(MoleExecution.class.getName());
-    Mole mole;
-    BlockingQueue<Trio<IJob, IEnvironment, IJobStatisticCategory>> jobs = new LinkedBlockingQueue<Trio<IJob, IEnvironment, IJobStatisticCategory>>();
+    
+    final Mole mole;
+
+    BlockingQueue<Duo<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Duo<IJob, IEnvironment>>();
     Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
+
     Long ticketNumber = 0L;
     Long currentJobId = 0L;
+
     ILocalCommunication localCommunication;
-    IExecutionContext executionContext;
+    IEnvironmentSelectionStrategy environmentSelectionStrategy;
+    
     BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
     MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
 
@@ -114,10 +111,14 @@ public class MoleExecution implements IMoleExecution {
 
     transient Thread submiter;
 
-    public MoleExecution(Mole mole, IContext context, IExecutionContext executionContext) throws InternalProcessingError, UserBadDataError {
+    public MoleExecution(Mole mole, IContext context) throws InternalProcessingError, UserBadDataError {
+        this(mole, context, new FixedEnvironmentStrategy());
+    }
+
+    public MoleExecution(Mole mole, IContext context, IEnvironmentSelectionStrategy environmentSelectionStrategy) throws InternalProcessingError, UserBadDataError {
         this.mole = mole;
         this.localCommunication = new LocalCommunication();
-        this.executionContext = executionContext;
+        this.environmentSelectionStrategy = environmentSelectionStrategy;
 
         ITicket ticket = nextTicket(createRootTicket());
 
@@ -139,7 +140,7 @@ public class MoleExecution implements IMoleExecution {
         submit(job, capsule, subMole);
     }
 
-    @Override
+   
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new IMoleJob[]{moleJob});
 
@@ -152,18 +153,14 @@ public class MoleExecution implements IMoleExecution {
 
         IMoleJobGroupingStrategy strategy = mole.getMoleJobGroupingStrategy(capsule);
 
-        //LOGGER.info("Job in mole execution");
-
-
         if (strategy != null) {
-          //  LOGGER.info("Grouping job");
-
             IMoleJobCategory category = strategy.getCategory(moleJob.getContext());
 
             Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> key = new Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>(subMole, capsule, category);
             Job job = categorizer.get(key);
             if (job == null) {
                 job = new Job();
+
                 categorizer.put(key, job);
                 jobsGrouping.put(subMole, job);
 
@@ -173,8 +170,6 @@ public class MoleExecution implements IMoleExecution {
             }
 
             job.addMoleJob(moleJob);
-
-           // LOGGER.info("Inwating jobs");
             subMole.incNbJobWaitingInGroup();
         } else {
             Job job = new Job();
@@ -186,10 +181,11 @@ public class MoleExecution implements IMoleExecution {
     }
 
     private void submit(Job job, IGenericTaskCapsule capsule) {
-        IJobStatisticCategory jobStatisticCategory = getMole().getJobStatisticCategorizationStrategy().getCategory(job, capsule);
-        IEnvironment environment = executionContext.getEnvironmentSelectionStrategy().selectEnvironment(capsule);
+        JobRegistry.getInstance().register(job, this);
 
-        jobs.add(new Trio<IJob, IEnvironment, IJobStatisticCategory>(job, environment, jobStatisticCategory));
+        IEnvironment environment = environmentSelectionStrategy.selectEnvironment(capsule);
+
+        jobs.add(new Duo<IJob, IEnvironment>(job, environment));
     }
 
     synchronized void submitGroups(ISubMoleExecution subMoleExecution) {
@@ -198,15 +194,11 @@ public class MoleExecution implements IMoleExecution {
         LOGGER.finer("Submit a group");
         for (Job job : jobs) {
             Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
-            subMoleExecution.decNbJobWaitingInGroup(job.getNbMoleJob());
+            subMoleExecution.decNbJobWaitingInGroup(job.size());
             submit(job, info.getCenter());
         }
     }
 
-  /*  @Override
-    public int getLevel() {
-        return 0;
-    }*/
 
     class Submiter implements Runnable {
 
@@ -215,7 +207,7 @@ public class MoleExecution implements IMoleExecution {
         @Override
         public void run() {
             while (!stop) {
-                Trio<IJob, IEnvironment, IJobStatisticCategory> p;
+                Duo<IJob, IEnvironment> p;
                 try {
                     p = jobs.take();
                 } catch (InterruptedException e) {
@@ -224,7 +216,7 @@ public class MoleExecution implements IMoleExecution {
                 }
                 LOGGER.finer("New job taken:" + p.getLeft());
                 try {
-                    p.getCenter().submit(p.getLeft(), executionContext, p.getRight());
+                    p.getRight().submit(p.getLeft());
                 } catch (UserBadDataError e) {
                     LOGGER.log(Level.SEVERE, "Error durring scheduling", e);
                 } catch (InternalProcessingError e) {
@@ -298,7 +290,7 @@ public class MoleExecution implements IMoleExecution {
         subMole.decNbJobInProgress();
 
         if (subMole.getNbJobInProgess() == 0) {
-            Object[] args = {job, executionContext};
+            Object[] args = {job};
             Activator.getEventDispatcher().objectChanged(subMole, ISubMoleExecution.finished, args);
         }
 
@@ -347,27 +339,4 @@ public class MoleExecution implements IMoleExecution {
         return inProgress.get(job);
     }
 
-   /* void jobFinished(IMoleJob job) throws InternalProcessingError, UserBadDataError {
-        if (job.getContext().contains(GenericTask.Exception.getPrototype())) {
-            IContext rootCtx = job.getContext().getRoot();
-            Collection<Throwable> exceptions;
-
-            synchronized (rootCtx) {
-                if (rootCtx.contains(GenericTask.Exception.getPrototype())) {
-                    exceptions = rootCtx.getLocalValue(GenericTask.Exception.getPrototype());
-                } else {
-                    exceptions = Collections.synchronizedCollection(new ArrayList<Throwable>());
-                    rootCtx.setValue(Exceptions, exceptions);
-                }
-            }
-
-            exceptions.add(job.getContext().getLocalValue(GenericTask.Exception.getPrototype()));
-        }
-
-    }*/
-
-    @Override
-    public IExecutionContext getExecutionContext() {
-        return executionContext;
-    }
 }

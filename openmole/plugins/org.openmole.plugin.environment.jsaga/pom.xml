@@ -70,11 +70,11 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
-	<dependency>
+<!--	<dependency>
             <groupId>fr.in2p3.jsaga</groupId>
             <artifactId>jsaga-engine</artifactId>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.executorservice</artifactId>

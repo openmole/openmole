@@ -19,7 +19,6 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
-import org.openmole.core.model.mole.IExecutionContext
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.model.task.annotations.Resource
@@ -39,7 +38,7 @@ class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMach
   @Resource
   val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 
-  override protected def process(context: IContext, executionContext: IExecutionContext, progress: IProgress) {
+  override protected def process(context: IContext, progress: IProgress) {
     val pool = virtualMachineResource.getVirtualMachineShared
     val virtualMachine = pool.borrowAVirtualMachine
    

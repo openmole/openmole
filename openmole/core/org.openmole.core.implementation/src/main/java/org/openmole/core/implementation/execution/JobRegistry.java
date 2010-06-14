@@ -15,22 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole;
+package org.openmole.core.implementation.execution;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.execution.IJobStatisticCategorizationStrategy;
-import org.openmole.core.model.execution.IJobStatisticCategory;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
 import org.openmole.core.model.job.IJob;
+import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class CapsuleJobStatisticCategorisationStrategy implements IJobStatisticCategorizationStrategy {
+public class JobRegistry {
 
-    @Override
-    public IJobStatisticCategory getCategory(IJob job, IGenericTaskCapsule capsule) {
-        return new CapsuleJobStatisticCategory(capsule);
+    private JobRegistry(){}
+
+    static JobRegistry instance = new JobRegistry();
+
+    Map<IJob, IMoleExecution> registry = Collections.synchronizedMap(new WeakHashMap<IJob, IMoleExecution>());
+
+    public static JobRegistry getInstance() {
+        return instance;
+    }
+    
+    public void register(IJob job, IMoleExecution moleExecution) {
+        registry.put(job, moleExecution);
     }
 
+    public IMoleExecution getMoleExecutionForJob(IJob job) {
+        return registry.get(job);
+    }
 }

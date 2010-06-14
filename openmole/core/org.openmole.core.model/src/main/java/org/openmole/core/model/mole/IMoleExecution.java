@@ -39,7 +39,6 @@ public interface IMoleExecution {
     boolean isFinished();
 
     void submit(IGenericTaskCapsule<?, ?> capsule, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
-    void submit(IMoleJob job, IGenericTaskCapsule<?, ?> capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
 
   //  int getLevel();
     IMole getMole();
@@ -53,8 +52,6 @@ public interface IMoleExecution {
     ILocalCommunication getLocalCommunication();
 
     ISubMoleExecution getSubMoleExecution(IMoleJob job);
-
-    IExecutionContext getExecutionContext();
 
     Iterable<IMoleJob> getAllMoleJobs();
 }

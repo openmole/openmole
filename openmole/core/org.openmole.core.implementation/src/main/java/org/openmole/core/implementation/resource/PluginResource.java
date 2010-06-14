@@ -42,9 +42,14 @@ public class PluginResource implements IResource {
     }
 
     @Override
-    public void deploy(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        plugin.deploy(fileCache);
-        Activator.getPluginManager().load(plugin.getDeployedFile());
+    public void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError {
+        plugin.relocate(localFileCache);
+    }
+
+    @Override
+    public void deploy() throws InternalProcessingError, UserBadDataError {
+        plugin.deploy();
+        Activator.getPluginManager().load(plugin.getFile());
     }
 
     @Override

@@ -16,6 +16,7 @@
  */
 package org.openmole.core.model.task;
 
+import java.io.File;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
 import org.openmole.core.model.data.IPrototype;
@@ -26,7 +27,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.resource.IPortable;
 import org.openmole.core.model.resource.IResource;
@@ -44,13 +44,12 @@ public interface IGenericTask extends IPortable {
      * Perform this task.
      *
      * @param context the context in which it is executed
-     * @param executionContext the execution context in which it is executed
      * @param progress the progress reporting structure of the task
      * @throws InternalProcessingError something went wrong for a reason that can't be directly related to a user defined parameter
      * @throws UserBadDataError something went wrong for a reason that can be directly related to a user defined parameter
      * @throws InterruptedException the thread has been interupted
      */
-    void perform(IContext context, IExecutionContext executionContext, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException;
+    void perform(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException;
 
     /**
      *
@@ -106,12 +105,14 @@ public interface IGenericTask extends IPortable {
      *
      * Deploy the resource locally.
      *
-     * @param environment the environment for polymorphous resources having different beaviour depending on the environment
-     * @param localFileCache the local file cache containing the local copies of the files
      * @throws InternalProcessingError something went wrong for a reason that can't be directly related to a user defined parameter
      * @throws UserBadDataError something went wrong for a reason that can be directly related to a user defined parameter
      */
-    void deployResources(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
+    void deploy() throws InternalProcessingError, UserBadDataError;
+
+    void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
+
+    Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
 
     /**
      *

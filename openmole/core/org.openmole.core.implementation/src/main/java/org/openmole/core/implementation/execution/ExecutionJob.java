@@ -34,14 +34,6 @@ public abstract class ExecutionJob<ENV extends IEnvironment<?>>  implements IExe
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-       // Logger.getLogger(ExecutionJob.class.getName()).log(Level.INFO, "Execution job garbage collected.");
-    }
-
-
-
-    @Override
     public ENV getEnvironment() {
         return executionEnvironment;
     }

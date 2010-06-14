@@ -18,7 +18,6 @@
 package org.openmole.core.model.mole;
 
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.execution.IJobStatisticCategorizationStrategy;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IContext;
@@ -36,7 +35,7 @@ public interface IMole extends IVisitable<IGenericTaskCapsule> {
 
     IMoleExecution start(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException;
 
-    IMoleExecution createExecution(IContext rootContext, IExecutionContext executionContext) throws UserBadDataError, InternalProcessingError, InterruptedException;
+    IMoleExecution createExecution(IContext rootContext) throws UserBadDataError, InternalProcessingError, InterruptedException;
 
     IMoleExecution createExecution(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException;
 
@@ -49,6 +48,4 @@ public interface IMole extends IVisitable<IGenericTaskCapsule> {
     void setRoot(IGenericTaskCapsule<?, ?> root);
 
     public void setMoleJobGroupingStrategy(IGenericTaskCapsule forCapsule, IMoleJobGroupingStrategy strategy);
-
-    public void setJobStatisticCategorizationStrategy(IJobStatisticCategorizationStrategy jobStatisticCategorizationStrategy);
 }

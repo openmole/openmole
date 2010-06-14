@@ -33,10 +33,8 @@ import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Job;
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
@@ -52,7 +50,7 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
     private static final Logger LOGGER = Logger.getLogger(LocalExecutionEnvironment.class.getName());
     private static LocalExecutionEnvironment instance;
 
-    BlockingQueue<Trio<IExecutionContext,IJobStatisticCategory,LocalExecutionJob>> jobs = new LinkedBlockingQueue<Trio<IExecutionContext,IJobStatisticCategory,LocalExecutionJob>>();
+    BlockingQueue<LocalExecutionJob> jobs = new LinkedBlockingQueue<LocalExecutionJob>();
     final Map<LocalExecuter, Future<?>> executers = new HashMap<LocalExecuter, Future<?>>();
     int nbThread;
 
@@ -105,25 +103,25 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
 
     @Override
-    public void submit(IJob job, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError {
+    public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
          LocalExecutionJob ejob = new LocalExecutionJob(this, job);
-         submit(ejob,executionContext, statisticCategory);
-         getJobRegistries().register(executionContext, statisticCategory, ejob);
+         submit(ejob);
+         getJobRegistry().register(ejob);
     }
 
-    public void submit(IMoleJob moleJob, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) throws InternalProcessingError, UserBadDataError {
+    public void submit(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
         Job job = new Job();
         job.addMoleJob(moleJob);
-        submit(job, executionContext, statisticCategory);
+        submit(job);
     }
 
-    public void submit(LocalExecutionJob ejob, IExecutionContext executionContext, IJobStatisticCategory statisticCategory) {
+    public void submit(LocalExecutionJob ejob) {
         ejob.setState(ExecutionState.SUBMITED);
         LOGGER.finer("New job submitted: " + ejob.getJob());
-        jobs.add(new Trio<IExecutionContext,IJobStatisticCategory, LocalExecutionJob>(executionContext, statisticCategory, ejob));
+        jobs.add(ejob);
     }
 
-    Trio<IExecutionContext,IJobStatisticCategory, LocalExecutionJob> takeNextjob() throws InterruptedException {
+    LocalExecutionJob takeNextjob() throws InterruptedException {
         return jobs.take();
     }
 

@@ -16,6 +16,7 @@
  */
 package org.openmole.core.implementation.execution;
 
+import org.openmole.core.model.execution.IExecutionJobRegistry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,13 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openmole.core.model.execution.IExecutionJob;
+import org.openmole.core.model.execution.IJobStatisticCategory;
 
 import org.openmole.core.model.job.IJob;
 
-public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
+public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements IExecutionJobRegistry<EXECUTIONJOB> {
 
     Map<IJob, Set<EXECUTIONJOB>> jobs = new HashMap<IJob, Set<EXECUTIONJOB>>();
     Map<IJob, EXECUTIONJOB> lastExecutionJob = new HashMap<IJob, EXECUTIONJOB>();
+    Map<IJobStatisticCategory, Set<IJob>> jobCategories = new HashMap<IJobStatisticCategory, Set<IJob>>();
+
 
     public synchronized Collection<IJob> getAllJobs() {
         return jobs.keySet();
@@ -43,6 +47,16 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
         if (ret == null) {
             ret = Collections.synchronizedSet(new HashSet<EXECUTIONJOB>());
             jobs.put(job, ret);
+            IJobStatisticCategory category = new JobStatisticCategory(job);
+
+            Set<IJob> jobsOfTheCategory = jobCategories.get(category);
+            
+            if(jobsOfTheCategory == null) {
+                jobsOfTheCategory = new HashSet<IJob>();
+                jobCategories.put(category, jobsOfTheCategory);
+            }
+
+            jobsOfTheCategory.add(job);
         }
         return ret;
     }
@@ -86,6 +100,16 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
         Collection<EXECUTIONJOB> ret = getExecutionJobsFor(job);
         lastExecutionJob.remove(job);
         jobs.remove(job);
+
+        IJobStatisticCategory category = new JobStatisticCategory(job);
+
+        Set<IJob> jobs = jobCategories.get(category);
+        jobs.remove(job);
+
+        if(jobs.isEmpty()) {
+            jobCategories.remove(category);
+        }
+
         return ret;
     }
 
@@ -99,32 +123,11 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
         return ret;
     }
 
-    public synchronized Collection<EXECUTIONJOB> getAllLastExecutionJobs() {
-        List<EXECUTIONJOB> ret = new LinkedList<EXECUTIONJOB>();
-        ret.addAll(lastExecutionJob.values());
-        return ret;
-    }
-
-    public synchronized void purgeAll() {
-        lastExecutionJob.clear();
-        jobs.clear();
-    }
-
-    public synchronized Integer getNbExecutionJobs() {
-        Integer total = 0;
-
-        for (IJob group : getAllJobs()) {
-            total += getNbExecutionJobsForJob(group);
-        }
-
-        return total;
-    }
 
     private synchronized EXECUTIONJOB findLastExecutionJob(IJob job) {
         Set<EXECUTIONJOB> eJobs = getExecutionJobsFor(job);
 
         EXECUTIONJOB last;
-        //synchronized (eJobs) {
 
         if (eJobs == null || eJobs.isEmpty()) {
             return null;
@@ -140,13 +143,29 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
                 last = cur;
             }
         }
-        //		}
 
         return last;
     }
 
-    public EXECUTIONJOB getLastExecutionJobForJob(IJob job) {
+    public synchronized EXECUTIONJOB getLastExecutionJobForJob(IJob job) {
         return lastExecutionJob.get(job);
+    }
+
+    @Override
+    public synchronized Collection<EXECUTIONJOB> getExecutionJobsForTheCategory(IJobStatisticCategory category) {
+        List<EXECUTIONJOB> ret = new LinkedList<EXECUTIONJOB>();
+
+        for(IJob job: getJobsForTheCategory(category)) {
+            ret.addAll(getExecutionJobsFor(job));
+        }
+        return ret;
+    }
+
+    @Override
+    public Collection<IJob> getJobsForTheCategory(IJobStatisticCategory category) {
+        Set<IJob> jobs = jobCategories.get(category);
+        if(jobs == null) return Collections.EMPTY_LIST;
+        return jobs;
     }
 
 

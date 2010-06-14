@@ -24,7 +24,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.model.task.IExplorationTask;
@@ -50,7 +49,7 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
 
     //If input prototype as the same name as the output it is erased
     @Override
-    protected void process(IContext context, IExecutionContext localFileCache, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         context.putVariable(ExploredPlan.getPrototype(), plan.build(context));
     }
 

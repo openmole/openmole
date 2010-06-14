@@ -31,6 +31,7 @@ import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
+import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.message.ExecutionMessage;
 import org.openmole.core.implementation.message.JobForRuntime;
@@ -45,7 +46,7 @@ import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IReplicatedFile;
-import org.openmole.core.model.mole.IExecutionContext;
+import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.core.replicacatalog.IReplica;
 
@@ -61,14 +62,12 @@ class CopyToEnvironment implements Callable<Void> {
     private IURIFile outputFile;
     private IRuntime runtime;
     private boolean finished = false;
-    final BatchEnvironment environment;
-    final IJob job;
-    final IExecutionContext executionContext;
+    private final BatchEnvironment environment;
+    private final IJob job;
 
-    public CopyToEnvironment(BatchEnvironment environment, IJob job, IExecutionContext executionContext) {
+    public CopyToEnvironment(BatchEnvironment environment, IJob job) {
         this.environment = environment;
         this.job = job;
-        this.executionContext = executionContext;
     }
 
     void initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
@@ -134,13 +133,15 @@ class CopyToEnvironment implements Callable<Void> {
         return runtime;
     }
 
-    IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped, IExecutionContext executionContext) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
+    IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         boolean isDir = file.isDirectory();
         File toReplicate = file;
+        IMoleExecution moleExecution = JobRegistry.getInstance().getMoleExecutionForJob(job);
+
         if (isDir) {
-            toReplicate = Activator.getFileService().getArchiveForDir(file, executionContext);
+            toReplicate = Activator.getFileService().getArchiveForDir(file, moleExecution);
         }
-        IHash hash = Activator.getFileService().getHashForFile(toReplicate, executionContext);
+        IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);
         IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, hash, storage, zipped, token);
         return new ReplicatedFile(file, isDir, hash, replica.getDestination());
     }
@@ -165,12 +166,12 @@ class CopyToEnvironment implements Callable<Void> {
         File runtimeFile = getEnvironment().getRuntime();
 
         for (File environmentPlugin : environmentPlugins) {
-            environmentPluginReplica.add(toReplicatedFile(environmentPlugin, communicationStorage, token, true, executionContext).getReplica());
+            environmentPluginReplica.add(toReplicatedFile(environmentPlugin, communicationStorage, token, true).getReplica());
         }
 
-        runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token, false, executionContext).getReplica();
+        runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token, false).getReplica();
 
-        IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token, true, executionContext).getReplica();
+        IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token, true).getReplica();
         return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);
     }
 
@@ -197,7 +198,7 @@ class CopyToEnvironment implements Callable<Void> {
         }
 
         for (File f : plugins) {
-            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true, executionContext);
+            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true);
             pluginReplicas.add(replicatedPlugin);
         }
 
@@ -226,7 +227,7 @@ class CopyToEnvironment implements Callable<Void> {
         }
 
         for (File file : inputFiles) {
-            jobForRuntime.addConsumedFile(toReplicatedFile(file, communicationStorage, token, true, executionContext));
+            jobForRuntime.addConsumedFile(toReplicatedFile(file, communicationStorage, token, true));
         }
 
         return jobForRuntime;

@@ -40,10 +40,8 @@ import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
-import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.model.mole.IExecutionContext;
 
 public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatable {
 
@@ -67,10 +65,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     transient IURIFile outputFile;
     transient Lock killLock;
 
-    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job, IExecutionContext executionContext) throws InternalProcessingError {
+    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError {
         super(executionEnvironment, job);
         this.updateInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(UpdateInterval);
-        this.initStorage = new CopyToEnvironment(executionEnvironment, job, executionContext);
+        this.initStorage = new CopyToEnvironment(executionEnvironment, job);
     }
 
     public void setFuture(IUpdatableFuture future) {
@@ -93,9 +91,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             ExecutionState newState = getBatchJob().getUpdatedState();
 
             if (oldState == ExecutionState.SUBMITED && newState == ExecutionState.RUNNING) {
-                IJobStatisticCategory capsule = getEnvironment().getJobRegistries().getJobStatisticCategory(this);
-                IExecutionContext executionContext = getEnvironment().getJobRegistries().getExecutionContext(this);
-                getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusChangeInterval(), executionContext, capsule);
+                getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusChangeInterval(), getJob());
             }
         }
 
@@ -175,9 +171,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     private GetResultFromEnvironment getGetResult() {
         if (getResult == null) {
-            IJobStatisticCategory jobStatisticCategory = getEnvironment().getJobRegistries().getJobStatisticCategory(this);
-            IExecutionContext executionContext = getEnvironment().getJobRegistries().getExecutionContext(this);
-            getResult = new GetResultFromEnvironment(getInitStorage().getCommunicationStorage(), getInitStorage().getOutputFile(), getJob(), getEnvironment(), jobStatisticCategory, executionContext, getBatchJob().getLastStatusChangeInterval());
+            getResult = new GetResultFromEnvironment(getInitStorage().getCommunicationStorage(), getInitStorage().getOutputFile(), getJob(), getEnvironment(), getBatchJob().getLastStatusChangeInterval());
         }
         return getResult;
     }

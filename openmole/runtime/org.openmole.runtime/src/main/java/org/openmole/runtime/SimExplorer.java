@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -50,15 +49,12 @@ import org.openmole.commons.tools.io.TarArchiver;
 
 import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.implementation.mole.ExecutionContext;
 import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
@@ -190,20 +186,19 @@ public class SimExplorer implements IApplication {
 
                 /* --- Submit all jobs to the local environment --*/
 
-                IExecutionContext executionContext = new ExecutionContext(fileCache, new FixedEnvironmentStrategy());
                 AllFinished allFinished = new AllFinished();
                 ContextSaver saver = new ContextSaver();
 
-                IJobStatisticCategory jobStatisticCategory = new IJobStatisticCategory() {
-                };
+                
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
 
                     FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
+                    toProcess.getTask().relocate(fileCache);
 
                     Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.stateChanged);
                     allFinished.registerJob(toProcess);
 
-                    LocalExecutionEnvironment.getInstance().submit(toProcess, executionContext, jobStatisticCategory);
+                    LocalExecutionEnvironment.getInstance().submit(toProcess);
                 }
 
                 allFinished.waitAllFinished();

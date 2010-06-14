@@ -39,10 +39,8 @@ import org.openmole.core.model.transition.IAggregationTransition;
 import org.openmole.core.model.tools.IRegistryWithTicket;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.capsule.ITaskCapsule;
-import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.job.ITicket;
-import org.openmole.core.model.mole.IExecutionContext;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ISubMoleExecution;
 
@@ -76,7 +74,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         resultContexts.add(context);
     }
 
-    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job, IExecutionContext executionContext) throws InternalProcessingError, UserBadDataError {
+    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job) throws InternalProcessingError, UserBadDataError {
 
         IMoleExecution moleExecution  = ExecutionInfoRegistry.GetInstance().getMoleExecution(job);
         IRegistryWithTicket<IAggregationTransition, Collection<IContext>> registry = moleExecution.getLocalCommunication().getAggregationTransitionRegistry();

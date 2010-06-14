@@ -36,11 +36,22 @@ import org.openmole.commons.exception.UserBadDataError;
 public abstract class ComposedResource implements IResource {
 
     @Override
-    public void deploy(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError {
+    public void deploy() throws InternalProcessingError, UserBadDataError {
         for(IResource resourse: getComposedResources()) {
-            resourse.deploy(localFileCache);
+            resourse.deploy();
         }
     }
+
+    @Override
+    public void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError {
+        for(IResource resourse: getComposedResources()) {
+            resourse.relocate(localFileCache);
+        }
+    }
+
+
+
+
 
     @Override
     public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError  {
