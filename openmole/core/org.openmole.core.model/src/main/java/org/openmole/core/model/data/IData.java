@@ -13,15 +13,21 @@ package org.openmole.core.model.data;
  */
 public interface IData<T> {
 
- 
+
+    /**
+     *
+     * Get the mod of the data
+     *
+     * @return mod of the data
+     */
     IDataMod getMod();
 
 
     /**
      *
-     * Get the prototype of this data.
+     * Get the prototype of the data.
      *
-     * @return the prototype of this data
+     * @return the prototype of the data
      */
     IPrototype<T> getPrototype();
 }

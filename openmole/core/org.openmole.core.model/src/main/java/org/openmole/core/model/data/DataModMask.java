@@ -22,7 +22,19 @@ package org.openmole.core.model.data;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public enum DataModMask {
+
+    /**
+     *
+     * Data is optionnal
+     *
+     */
     OPTIONAL(0x0001),
+
+    /**
+     *
+     * State that the data value of a variable will not be modified
+     *
+     */
     IMMUTABLE(0x0002);
 
     private int mask;
@@ -31,6 +43,12 @@ public enum DataModMask {
         this.mask = mask;
     }
 
+    /**
+     *
+     * Get the value of the mask
+     *
+     * @return the value of the mask
+     */
     public int getMask() {
         return mask;
     }

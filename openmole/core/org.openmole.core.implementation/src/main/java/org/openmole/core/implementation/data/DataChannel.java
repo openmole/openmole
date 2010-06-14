@@ -185,61 +185,6 @@ public class DataChannel implements IDataChannel {
                 }
             }
 
-
-         /*   for (IData<?> data : getData()) {
-                if (context.containsVariableWithName(data.getPrototype().getName())) {
-                    IVariable var = context.getLocalVariable(data.getPrototype());
-
-                    if (!curentContext.containsVariableWithName(data.getPrototype().getName())) {
-                        IVariable tmp;
-
-                        if (toClone.contains(data.getPrototype().getName())) {
-                            tmp = new Variable(var.getPrototype(), Activator.getClonningService().clone(var.getValue()));
-                        } else {
-                            tmp = var;
-                        }
-
-                        if (toArray) {
-                            List array = new ArrayList();
-                            array.add(tmp);
-                            tmp = new Variable(var.getPrototype().array(), array);
-                        }
-
-                        curentContext.putVariable(tmp);
-                    } else {
-                        IVariable currentVar = curentContext.getLocalVariable(data.getPrototype());
-
-                        if (List.class.isAssignableFrom(currentVar.getPrototype().getType())) {
-                            List curVal = (List) currentVar.getValue();
-                            curVal.add(var.getValue());
-                        } else {
-                            Object curVal = currentVar.getValue();
-                            List newVal = new ArrayList();
-                            newVal.add(curVal);
-                            IVariable tmp = new Variable(var.getPrototype().array(), newVal);
-                            curentContext.putVariable(tmp);
-                        }
-                    }
-                }
-            }*/
-
-            /*  } else {
-            for (IData<?> data : getData()) {
-            if (context.containsVariableWithName(data.getPrototype().getName())) {
-            List currentVar = curentContext.<List>getLocalValue(data.getPrototype().getName());
-            IVariable<?> var = context.getLocalVariable(data.getPrototype());
-            IVariable tmp;
-
-            if (toClone.contains(data.getPrototype().getName())) {
-            tmp = new Variable(var.getPrototype(), Activator.getClonningService().clone(var.getValue()));
-            } else {
-            tmp = var;
-            }
-            currentVar.add(tmp);
-            }
-            }
-            }*/
-
         }
     }
 
@@ -273,14 +218,25 @@ public class DataChannel implements IDataChannel {
         return ret;
     }
 
-    @ChangeState
     @Override
     public void setStart(IGenericTaskCapsule start) {
         this.start = start;
     }
 
+    @ChangeState
     @Override
     public void setEnd(IGenericTaskCapsule end) {
         this.end = end;
+    }
+
+    @Override
+    public void remove(IPrototype prototype) {
+        remove(prototype.getName());
+    }
+
+    @ChangeState
+    @Override
+    public void remove(String name) {
+        variblesNames.remove(name);
     }
 }
