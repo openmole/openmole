@@ -190,4 +190,8 @@ abstract class ExternalTask(name: String) extends Task(name) {
   def addInFile(location: String): Unit = {
     addInFile(new File(location))
   }
+
+  def addInFile(location: String, name: String): Unit = {
+    addInFile(new File(location), name)
+  }
 }
