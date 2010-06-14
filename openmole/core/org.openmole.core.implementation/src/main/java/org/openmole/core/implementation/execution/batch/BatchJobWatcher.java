@@ -57,10 +57,8 @@ public class BatchJobWatcher implements IUpdatable {
     @Override
     public void update() throws InterruptedException {
         IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
-
         List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
-
-        // Map<ExecutionState, Integer> accounting = new HashMap<ExecutionState, Integer>();
+        
         synchronized (registry) {
             for (IJob job : registry.getAllJobs()) {
          
