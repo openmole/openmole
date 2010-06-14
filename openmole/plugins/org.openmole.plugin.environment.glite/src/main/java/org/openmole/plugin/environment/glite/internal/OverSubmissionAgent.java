@@ -82,7 +82,7 @@ public class OverSubmissionAgent implements IUpdatable {
                 //final IExecutionContext executionContext = trio.getLeft();
                 //final IJob job = trio.getRight();
 
-                //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,j.toString() + " " + registry.getNbExecutionJobsForJob(j));
+               // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " " + registry.getNbExecutionJobsForJob(job));
 
                 if (!job.allMoleJobsFinished()) {
 
@@ -132,6 +132,8 @@ public class OverSubmissionAgent implements IUpdatable {
                     // Count nb execution
                     AtomicInteger executionJobCounter = nbJobsByCategory.get(jobStatisticCategory);
                     if (executionJobCounter == null) {
+                           Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " mew counter.");
+
                         executionJobCounter = new AtomicInteger();
                         nbJobsByCategory.put(jobStatisticCategory, executionJobCounter);
                     }
@@ -143,6 +145,7 @@ public class OverSubmissionAgent implements IUpdatable {
             for (Map.Entry<IJobStatisticCategory, AtomicInteger> entry : nbJobsByCategory.entrySet()) {
                 int nbRessub = minNumberOfJobsByCategory - entry.getValue().get();
                 IJobStatisticCategory jobStatisticCategory = entry.getKey();
+   //Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,nbRessub + " " + entry.getValue().get());
 
                 if (nbRessub > 0) {
                     // Resubmit nbRessub jobs in a fair manner
