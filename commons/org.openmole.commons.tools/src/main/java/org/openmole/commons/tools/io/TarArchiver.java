@@ -35,9 +35,31 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  */
 public class TarArchiver implements IArchiver {
 
+
+    private interface IAdditionnalCommand {
+        void apply(TarArchiveEntry e);
+    }
+
+    @Override
+    public void createDirArchiveWithRelativePathNoVariableContent(final File baseDir, final OutputStream archive) throws IOException {
+        createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, new IAdditionnalCommand() {
+            @Override
+            public void apply(TarArchiveEntry e) {
+                e.setModTime(0);
+            }
+        });
+    }
+
     @Override
     public void createDirArchiveWithRelativePath(final File baseDir, final OutputStream archive) throws IOException {
+        createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, new IAdditionnalCommand() {
+            @Override
+            public void apply(TarArchiveEntry e) {}
+        });
 
+    }
+
+    private void createDirArchiveWithRelativePathWithAdditionnalCommand(final File baseDir, final OutputStream archive, final IAdditionnalCommand additionnalCommand) throws IOException {
         if (!baseDir.isDirectory()) {
             throw new IOException(baseDir.getAbsolutePath() + " is not a directory.");
         }
@@ -58,6 +80,7 @@ public class TarArchiver implements IArchiver {
                 } else {
                     TarArchiveEntry e = new TarArchiveEntry(cur.getRight());
                     e.setSize(cur.getLeft().length());
+                    additionnalCommand.apply(e);
                     tos.putArchiveEntry(e);
                     try {
                         FileUtil.copy(new FileInputStream(cur.getLeft()), tos);
@@ -70,6 +93,7 @@ public class TarArchiver implements IArchiver {
             tos.close();
         }
     }
+
 
     @Override
     public void extractDirArchiveWithRelativePath(final File baseDir, final InputStream archive) throws IOException {

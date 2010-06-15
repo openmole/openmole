@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.fileservice.IFileService;
 import org.openmole.commons.tools.cache.AssociativeCache;
@@ -123,7 +122,7 @@ public class FileService implements IFileService {
                     OutputStream os = new FileOutputStream(ret);
 
                     try {
-                        new TarArchiver().createDirArchiveWithRelativePath(file, os);
+                        new TarArchiver().createDirArchiveWithRelativePathNoVariableContent(file, os);
                     } finally {
                         os.close();
                     }

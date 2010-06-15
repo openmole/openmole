@@ -181,7 +181,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                         replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);
 
-                       // Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Uploaded replica " + replica.toString());
+                        Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Uploaded replica " + replica.toString());
 
 
                     } catch (IOException e) {

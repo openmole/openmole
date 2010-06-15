@@ -28,5 +28,6 @@ import java.io.OutputStream;
  */
 public interface IArchiver {
     public void createDirArchiveWithRelativePath(final File baseDir, final OutputStream archive) throws IOException;
+    public void createDirArchiveWithRelativePathNoVariableContent(final File baseDir, final OutputStream archive) throws IOException;
     public void extractDirArchiveWithRelativePath(final File baseDir, final InputStream archive) throws IOException;
 }
