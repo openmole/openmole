@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.implementation.resource;
 
 import java.io.File;
@@ -25,38 +23,36 @@ import java.util.TreeMap;
 import org.openmole.core.model.resource.ILocalFileCache;
 
 public class LocalFileCache implements ILocalFileCache {
-	Map<File, File> localFileCache;
 
+    Map<File, File> localFileCache;
 
-	@Override
-	public File getLocalFileCache(File src) {
-		return getLocalFileCache().get(src);
-	}
+    @Override
+    public File getLocalFileCache(File src) {
+        return getLocalFileCache().get(src);
+    }
 
-        @Override
-        public boolean containsCacheFor(File src) {
-            return localFileCache.containsKey(src);
+    @Override
+    public boolean containsCacheFor(File src) {
+        return localFileCache.containsKey(src);
+    }
+
+    private Map<File, File> getLocalFileCache() {
+        if (localFileCache != null) {
+            return localFileCache;
         }
 
+        synchronized (this) {
+            if (localFileCache == null) {
+                localFileCache = new TreeMap<File, File>();
+            }
+            return localFileCache;
+        }
+    }
 
-	private Map<File, File> getLocalFileCache() {
-		if(localFileCache != null) return localFileCache;
+    public void fillInLocalFileCache(File src, File file) {
 
-		synchronized (this) {
-			if(localFileCache == null) {
-				localFileCache = new TreeMap<File, File>();
-			}
-			return localFileCache;
-		}
-	}
-	
-
-	public void fillInLocalFileCache(File src, File file) {
-
-		synchronized (getLocalFileCache()) {
-			getLocalFileCache().put(src, file);		
-		}
-	}
-
-	
+        synchronized (getLocalFileCache()) {
+            getLocalFileCache().put(src, file);
+        }
+    }
 }

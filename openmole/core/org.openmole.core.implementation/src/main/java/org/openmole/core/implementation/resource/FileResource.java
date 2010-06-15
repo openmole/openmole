@@ -17,6 +17,7 @@
 package org.openmole.core.implementation.resource;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,15 +43,17 @@ public class FileResource implements IResource {
 
     @Override
     public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        file = fileCache.getLocalFileCache(file);
+        if(fileCache.containsCacheFor(file)) {
+            file = fileCache.getLocalFileCache(file);
+        }
     }
 
     @Override
     public void deploy() throws InternalProcessingError, UserBadDataError {}
 
     @Override
-    public Collection<File> getFiles() {
-        List<File> ret = new LinkedList<File>();
+    public Iterable<File> getFiles() {
+        List<File> ret = new ArrayList<File>(1);
         ret.add(file);
         return ret;
     }
@@ -58,7 +61,5 @@ public class FileResource implements IResource {
     public File getFile() {
         return file;
     }
-
-
     
 }

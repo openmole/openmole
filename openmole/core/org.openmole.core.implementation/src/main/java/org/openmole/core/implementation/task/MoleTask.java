@@ -155,7 +155,7 @@ public class MoleTask extends Task implements IMoleTask {
     public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
         super.relocate(fileCache);
 
-        for (IGenericTask task : getMole().getAllTasks()) {
+        for (IGenericTask task: getMole().getAllTasks()) {
             task.relocate(fileCache);
         }
     }
