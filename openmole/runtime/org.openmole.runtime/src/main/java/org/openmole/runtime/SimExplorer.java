@@ -189,7 +189,6 @@ public class SimExplorer implements IApplication {
 
                 
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
-
                     FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
                     toProcess.getTask().relocate(fileCache);
 

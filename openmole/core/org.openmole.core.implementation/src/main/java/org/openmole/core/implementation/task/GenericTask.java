@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -370,7 +371,7 @@ public abstract class GenericTask implements IGenericTask {
 
     @SoftCachable
     @Override
-    public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
+    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
         Collection<IResource> resourcesCache = new LinkedList<IResource>();
         if (resources != null) {
             resourcesCache.addAll(resources);
@@ -401,7 +402,7 @@ public abstract class GenericTask implements IGenericTask {
     @SoftCachable
     @Override
     public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError {
-        List<File> files = new LinkedList<File>();
+        Set<File> files = new TreeSet<File>();
 
         for(IResource resource: getResources()) {
             for(File file: resource.getFiles()) {

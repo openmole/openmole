@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.task;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.IDataSet;
@@ -37,12 +39,15 @@ import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.task.IMoleTask;
 
 public class MoleTask extends Task implements IMoleTask {
 
     class ExceptionLister implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution> {
+
         final Collection<Throwable> throwables = new LinkedList<Throwable>();
 
         @Override
@@ -50,7 +55,7 @@ public class MoleTask extends Task implements IMoleTask {
             IMoleJob moleJob = (IMoleJob) os[0];
             Throwable exception = moleJob.getContext().getLocalValue(GenericTask.Exception.getPrototype());
 
-            if(exception != null) {
+            if (exception != null) {
                 throwables.add(exception);
             }
         }
@@ -59,14 +64,12 @@ public class MoleTask extends Task implements IMoleTask {
             return throwables;
         }
     }
-
-
-    IMole workflow;
+    IMole mole;
 
     public MoleTask(String name, IMole workflow)
             throws UserBadDataError, InternalProcessingError {
         super(name);
-        this.workflow = workflow;
+        this.mole = workflow;
     }
 
     @Override
@@ -81,12 +84,12 @@ public class MoleTask extends Task implements IMoleTask {
                 firstTaskContext.putVariable(p, context.getLocalValue(p));
             }
         }
-        
-        IMoleExecution execution = workflow.createExecution(firstTaskContext);
+
+        IMoleExecution execution = mole.createExecution(firstTaskContext);
 
         ExceptionLister exceptionLister = new ExceptionLister();
 
-        Activator.getEventDispatcher().registerListener(execution, Priority.NORMAL.getValue(),exceptionLister, IMoleExecution.oneJobFinished);
+        Activator.getEventDispatcher().registerListener(execution, Priority.NORMAL.getValue(), exceptionLister, IMoleExecution.oneJobFinished);
 
         execution.start();
         execution.waitUntilEnded();
@@ -107,7 +110,7 @@ public class MoleTask extends Task implements IMoleTask {
 
     @Override
     public IMole getMole() {
-        return workflow;
+        return mole;
     }
 
     @SoftCachable
@@ -116,20 +119,45 @@ public class MoleTask extends Task implements IMoleTask {
         return new DataSet(super.getInput(), getMole().getRoot().getAssignedTask().getInput());
     }
 
-    @SoftCachable
     @Override
     public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
         Collection<IResource> resources = new HashSet<IResource>();
-
-        for (IResource res : super.getResources()) {
-            resources.add(res);
+        for (IResource resource : super.getResources()) {
+            resources.add(resource);
         }
 
-        for (IResource res : getMole().getAllRessources()) {
-            resources.add(res);
+        for (IGenericTask task : getMole().getAllTasks()) {
+            for (IResource resource : task.getResources()) {
+                resources.add(resource);
+            }
         }
 
         return resources;
+    }
+
+    @Override
+    public Set<File> getFiles() throws InternalProcessingError, UserBadDataError {
+        Set<File> files = new TreeSet<File>();
+        for (File file : super.getFiles()) {
+            files.add(file);
+        }
+
+        for (IGenericTask task : getMole().getAllTasks()) {
+            for (File file : task.getFiles()) {
+                files.add(file);
+            }
+        }
+
+        return files;
+    }
+
+    @Override
+    public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
+        super.relocate(fileCache);
+
+        for (IGenericTask task : getMole().getAllTasks()) {
+            task.relocate(fileCache);
+        }
     }
 
     //The resources of the task of the inner workflow will be deployer durring it's execution
@@ -139,5 +167,4 @@ public class MoleTask extends Task implements IMoleTask {
             resource.deploy();
         }
     }
-
 }

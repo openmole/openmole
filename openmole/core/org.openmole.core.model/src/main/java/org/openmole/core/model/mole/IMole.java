@@ -24,6 +24,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
 import org.openmole.commons.tools.pattern.IVisitable;
 import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.IGenericTask;
 
 public interface IMole extends IVisitable<IGenericTaskCapsule> {
 
@@ -43,7 +44,9 @@ public interface IMole extends IVisitable<IGenericTaskCapsule> {
 
     IGenericTaskCapsule<?, ?> getRoot();
 
-    Iterable<IResource> getAllRessources() throws InternalProcessingError, UserBadDataError;
+    Iterable<IGenericTaskCapsule> getAllTaskCapsules() throws InternalProcessingError, UserBadDataError;
+
+    Iterable<IGenericTask> getAllTasks() throws InternalProcessingError, UserBadDataError;
 
     void setRoot(IGenericTaskCapsule<?, ?> root);
 

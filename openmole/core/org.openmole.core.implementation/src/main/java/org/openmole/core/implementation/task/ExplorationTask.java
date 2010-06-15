@@ -17,6 +17,7 @@
 package org.openmole.core.implementation.task;
 
 import java.util.Collection;
+import java.util.HashSet;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.resource.IResource;
@@ -71,14 +72,18 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
 
     @SoftCachable
     @Override
-    public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> resourcesCache = super.getResources();
-
-        for(IResource resource: getPlan().getResources()) {
-            resourcesCache.add(resource);
+    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
+        Collection<IResource> resources = new HashSet<IResource>();
+        
+        for(IResource resource: super.getResources()) {
+            resources.add(resource);
         }
 
-        return resourcesCache;
+        for(IResource resource: getPlan().getResources()) {
+            resources.add(resource);
+        }
+
+        return resources;
     }
 
 }

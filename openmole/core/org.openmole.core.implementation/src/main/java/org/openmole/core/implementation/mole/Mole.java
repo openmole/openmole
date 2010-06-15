@@ -17,7 +17,6 @@
  *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
-
 package org.openmole.core.implementation.mole;
 
 import java.io.File;
@@ -91,19 +90,9 @@ public class Mole implements IMole {
         return createExecution(new FixedEnvironmentStrategy());
     }
 
-
     @Override
     public IMoleExecution createExecution(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        LocalFileCache fileCache = new LocalFileCache();
-
-        for (IResource resource : getAllRessources()) {
-            for (File file : resource.getFiles()) {
-                 fileCache.fillInLocalFileCache(file, file);
-            }
-        }
-
         IContext rootContext = new Context();
-
         return new MoleExecution(this, rootContext, strategy);
     }
 
@@ -117,7 +106,7 @@ public class Mole implements IMole {
         Set<IGenericTaskCapsule<?, ?>> tasks = new HashSet<IGenericTaskCapsule<?, ?>>();
         Queue<IGenericTaskCapsule<?, ?>> toExplore = new LinkedList<IGenericTaskCapsule<?, ?>>();
 
-        IGenericTaskCapsule<?,?> root = getRoot();
+        IGenericTaskCapsule<?, ?> root = getRoot();
 
         if (root != null) {
             toExplore.add(root);
@@ -137,14 +126,6 @@ public class Mole implements IMole {
 
         for (IGenericTaskCapsule t : tasks) {
             visitor.action(t);
-           /* IGenericTask task = t.getTask();
-
-            if (task != null) {
-                if (IMoleTask.class.isAssignableFrom(task.getClass())) {
-                    IMoleTask wft = (IMoleTask) t.getTask();
-                    wft.getMole().visit(visitor);
-                }
-            }*/
         }
 
     }
@@ -160,8 +141,8 @@ public class Mole implements IMole {
     }
 
     @Override
-    public Iterable<IResource> getAllRessources() throws InternalProcessingError, UserBadDataError {
-        final Collection<IResource> ressources = new HashSet<IResource>();
+    public Iterable<IGenericTask> getAllTasks() throws InternalProcessingError, UserBadDataError {
+        final Collection<IGenericTask> tasks = new HashSet<IGenericTask>();
 
         visit(new IVisitor<IGenericTaskCapsule>() {
 
@@ -170,42 +151,29 @@ public class Mole implements IMole {
                 IGenericTask task = visited.getTask();
 
                 if (task != null) {
-                    for (IResource resource : task.getResources()) {
-                        ressources.add(resource);
-                    }
+                    tasks.add(task);
+
                 }
             }
         });
 
-        return ressources;
+        return tasks;
     }
 
- /*  private void firstLevelVisit(IVisitor<IGenericTaskCapsule<?, ?>> visitor) throws InternalProcessingError, UserBadDataError {
-        Set<IGenericTaskCapsule<?, ?>> tasks = new HashSet<IGenericTaskCapsule<?, ?>>();
-        Queue<IGenericTaskCapsule<?, ?>> toExplore = new LinkedList<IGenericTaskCapsule<?, ?>>();
+    @Override
+    public Iterable<IGenericTaskCapsule> getAllTaskCapsules() throws InternalProcessingError, UserBadDataError {
+        final Collection<IGenericTaskCapsule> capsules = new HashSet<IGenericTaskCapsule>();
 
-        IGenericTaskCapsule<?,?> root = getRoot();
-        if (root != null) {
-            toExplore.add(root);
-        }
+        visit(new IVisitor<IGenericTaskCapsule>() {
 
-        while (!(toExplore.isEmpty())) {
-            IGenericTaskCapsule<?, ?> current = toExplore.poll();
-
-            if (!tasks.contains(current)) {
-                for (ITransition transition : current.getOutputTransitions()) {
-                    toExplore.add(transition.getEnd().getCapsule());
-                }
-                tasks.add(current);
+            @Override
+            public void action(IGenericTaskCapsule visited) throws InternalProcessingError, UserBadDataError {
+                capsules.add(visited);
             }
+        });
 
-        }
-
-        for (IGenericTaskCapsule<?, ?> t : tasks) {
-            visitor.action(t);
-        }
-
-    }*/
+        return capsules;
+    }
 
     public IMoleJobGroupingStrategy getMoleJobGroupingStrategy(IGenericTaskCapsule key) {
         return groupers.get(key);
