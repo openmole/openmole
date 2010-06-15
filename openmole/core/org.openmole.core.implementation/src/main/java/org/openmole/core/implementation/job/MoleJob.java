@@ -19,6 +19,8 @@ package org.openmole.core.implementation.job;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.Progress;
@@ -45,10 +47,7 @@ import org.openmole.core.model.resource.IResource;
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     final public static String TransitionPerformed = "TransitionPerformed";
-
     private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
-
-
     final private ITicket ticket;
     final private IProgress progress;
     final private IGenericTask task;
@@ -150,15 +149,19 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         return getState().isFinal();
     }
 
-    @Override
-    public Iterable<IResource> getConsumedRessources() throws InternalProcessingError, UserBadDataError {
-        return getTask().getResources();
-    }
-
     @SoftCachable
     @Override
-    public Iterable<File> getInputFiles() throws InternalProcessingError {
-        return FileMigrator.extractFilesFromVariables(getContext());
+    public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError {
+        Set<File> files = new TreeSet<File>();
+        for (File file : getTask().getFiles()) {
+            files.add(file);
+        }
+
+        for (File file : FileMigrator.extractFilesFromVariables(getContext())) {
+            files.add(file);
+        }
+
+        return files;
     }
 
     @Override
@@ -175,6 +178,4 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     public IProgress getProgress() {
         return progress;
     }
-
-
 }

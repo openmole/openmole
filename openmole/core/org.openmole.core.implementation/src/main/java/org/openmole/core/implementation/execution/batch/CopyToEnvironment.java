@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Duo;
@@ -213,12 +214,7 @@ class CopyToEnvironment implements Callable<Void> {
         for (IMoleJob job : getJob().getMoleJobs()) {
             synchronized (job) {
                 if (!job.isFinished()) {
-                    for (IResource resource : job.getConsumedRessources()) {
-                        for (File file : resource.getFiles()) {
-                            inputFiles.add(file);
-                        }
-                    }
-                    for (File f : job.getInputFiles()) {
+                    for (File f : job.getFiles()) {
                         inputFiles.add(f);
                     }
                     jobForRuntime.addMoleJob(job);

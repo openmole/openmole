@@ -25,7 +25,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.core.model.resource.IResource;
 
 public interface IMoleJob {
 
@@ -48,9 +47,7 @@ public interface IMoleJob {
 
     IProgress getProgress();
 
-    Iterable<IResource> getConsumedRessources() throws InternalProcessingError, UserBadDataError;
-
-    Iterable<File> getInputFiles() throws InternalProcessingError;
+    Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
 
     IMoleJobId getId();
 
