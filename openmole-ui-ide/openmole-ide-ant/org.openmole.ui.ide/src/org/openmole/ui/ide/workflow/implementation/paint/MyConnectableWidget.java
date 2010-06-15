@@ -27,6 +27,7 @@ import java.awt.Image;
 import java.awt.Point;
 import org.netbeans.api.visual.anchor.Anchor;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.workflow.implementation.GenericTaskModelUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskModelUI;
@@ -42,7 +43,7 @@ public class MyConnectableWidget extends MyWidget {
     private int nbOutSlot = 0;
     private int inputDelta = 0;
     private int outputDelta = 0;
-    private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
+    private IGenericTaskModelUI<IGenericTask>  taskModel = TaskModelUI.EMPTY_TASK_MODEL;
 
     public MyConnectableWidget(MoleScene scene,
                                Color backgroundCol,

@@ -28,6 +28,7 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 public interface IGenericTaskModelUI<T extends IGenericTask> {
     public void proceed();
     Class <? extends IGenericTask> getCoreTaskClass();
+    void setCoreTaskClass(Class <? extends IGenericTask> coreTask);
     void addPrototype(PrototypeUI p,IOType ioType);
     Set<PrototypeUI> getPrototypesIn();
     Set<PrototypeUI> getPrototypesOut();

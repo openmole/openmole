@@ -25,11 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.openide.util.Lookup;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
-import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 
 /**

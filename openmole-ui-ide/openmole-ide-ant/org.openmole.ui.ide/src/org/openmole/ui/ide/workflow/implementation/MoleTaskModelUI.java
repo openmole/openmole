@@ -17,30 +17,17 @@
 
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.util.Collection;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.ui.ide.control.TableType.Name;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class MoleTaskModelUI  <T extends IGenericTask> extends GenericTaskModelUI<T> {
-
-    public MoleTaskModelUI(Properties...properties) {
-        super(properties);
-    }
-
-
+public class MoleTaskModelUI   <T extends IGenericTask> extends GenericTaskModelUI<T> {
 
     @Override
-    public Collection<Name> getFields() {
+    public void proceed() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
- /*   @Override
-    public void setFields() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }*/
 
 }

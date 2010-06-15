@@ -23,7 +23,7 @@ import org.openmole.ui.ide.workflow.implementation.paint.MyConnectableWidget;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface ITaskCapsuleView {
-
+    String getName();
     ICapsuleModelUI getTaskCapsuleModel();
  //   void setTaskCapsule(IGenericTaskCapsule tc);
     void  addInputSlot();

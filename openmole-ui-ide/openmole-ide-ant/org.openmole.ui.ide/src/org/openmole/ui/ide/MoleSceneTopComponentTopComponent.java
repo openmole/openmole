@@ -34,6 +34,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.control.task.TaskSettingTabManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.palette.PaletteSupport;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
@@ -64,11 +65,14 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         //FIXME un meilleur endroit pour les inits??
        // TableMapping.getInstance().initialize();
        // Preferences.getInstance().initialize();
+       TaskSettingTabManager.getInstance().setTabbedPane(jTabbedPane1);
+
 
         MoleScene scene = new MoleScene();
         myView = scene.createView();
 
         moleSceneScrollPane.setViewportView(myView);
+        jTabbedPane1.add("Workflow",moleSceneScrollPane);
         refreshPalette();
         associateLookup(Lookups.fixed(new Object[]{palette}));
 
@@ -82,6 +86,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
+        add(jTabbedPane1, java.awt.BorderLayout.CENTER);
 
      //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
@@ -101,12 +106,17 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
     private void initComponents() {
 
         moleSceneScrollPane = new javax.swing.JScrollPane();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
 
         setLayout(new java.awt.BorderLayout());
+
+        moleSceneScrollPane.setViewportView(jTabbedPane1);
+
         add(moleSceneScrollPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JScrollPane moleSceneScrollPane;
     // End of variables declaration//GEN-END:variables
 

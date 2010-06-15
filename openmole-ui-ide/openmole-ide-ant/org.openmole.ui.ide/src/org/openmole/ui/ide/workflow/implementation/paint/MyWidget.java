@@ -122,6 +122,10 @@ public class MyWidget extends Widget {
         this.titleString = title;
     }
 
+    public String getTitleString() {
+        return titleString;
+    }
+
     public void addTitle(String titleString) {
         titleArea = new Rectangle(0, 0,
                 taskWidth,

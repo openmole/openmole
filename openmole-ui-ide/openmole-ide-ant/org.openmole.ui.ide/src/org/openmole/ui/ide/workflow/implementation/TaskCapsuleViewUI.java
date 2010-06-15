@@ -76,6 +76,11 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
 
     }
 
+    @Override
+    public String getName() {
+        return connectableWidget.getTitleString();
+    }
+    
     public IGenericTaskModelUI<IGenericTask> getTaskModel() {
         return taskModel;
     }

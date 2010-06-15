@@ -2,9 +2,9 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.ui.ide.workflow.implementation.paint.SelectionManager;
-import org.openmole.ui.ide.workflow.model.IObjectViewUI;
+import org.openmole.ui.ide.control.task.TaskSettingTabManager;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
+import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
 
 /**
  *
@@ -13,10 +13,10 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class TaskActions extends WidgetAction.Adapter {
 
     private IGenericTaskModelUI model;
-    private IObjectViewUI view;
+    private ITaskCapsuleView view;
 
     public TaskActions(IGenericTaskModelUI m,
-            IObjectViewUI v) {
+                       ITaskCapsuleView v) {
         model = m;
         view = v;
     }
@@ -59,7 +59,11 @@ public class TaskActions extends WidgetAction.Adapter {
     @Override
     public State mouseClicked(Widget widget,
             WidgetMouseEvent event) {
-        SelectionManager.getInstance().setSelected(view);
+     //   SelectionManager.getInstance().setSelected(view);
+        if (event.getClickCount() == 2) {
+            TaskSettingTabManager.getInstance().display(view);
+        }
+
      /*   try {
             if (event.getClickCount() == 2) {
                 ControlPanel.getInstance().switchTableTabbedPane(TableModelMapping.getInstance().getTabbedPane(model));

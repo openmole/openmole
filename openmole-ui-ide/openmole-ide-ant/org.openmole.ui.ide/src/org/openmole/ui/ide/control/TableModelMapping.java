@@ -28,21 +28,21 @@ public class TableModelMapping {
 
     private void buildTabbedPane(IGenericTaskModelUI tm) {
 
-        JTabbedPane tabbedPane = new JTabbedPane();
-        Iterator<TableType.Name> it = tm.getFields().iterator();
-        while (it.hasNext()) {
-            Name n = it.next();
-            GenericTableModel model = new GenericTableModel(n);
-            GenericTableView gtv = new GenericTableView(model);
-            tabbedPane.add(model.getHeader(), new TableScrollPane(gtv));
-        }
-        tableModelMap.put(tm, tabbedPane);
-    }
-
-    public static TableModelMapping getInstance() {
-        if (instance == null) {
-            instance = new TableModelMapping();
-        }
-        return instance;
+//        JTabbedPane tabbedPane = new JTabbedPane();
+//        Iterator<TableType.Name> it = tm.getFields().iterator();
+//        while (it.hasNext()) {
+//            Name n = it.next();
+//            GenericTableModel model = new GenericTableModel(n);
+//            GenericTableView gtv = new GenericTableView(model);
+//            tabbedPane.add(model.getHeader(), new TableScrollPane(gtv));
+//        }
+//        tableModelMap.put(tm, tabbedPane);
+//    }
+//
+//    public static TableModelMapping getInstance() {
+//        if (instance == null) {
+//            instance = new TableModelMapping();
+//        }
+//        return instance;
     }
 }

@@ -17,9 +17,7 @@
 package org.openmole.ui.ide.workflow.implementation;
 
 import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
-import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
 
 /**
  *
