@@ -70,7 +70,7 @@ public class OverSubmissionAgent implements IUpdatable {
     public void update() {
 
         final IExecutionJobRegistry<IBatchExecutionJob> registry = checkedEnv.getJobRegistry();
-  
+
         synchronized (registry) {
             Map<IJobStatisticCategory, AtomicInteger> nbJobsByCategory = new HashMap<IJobStatisticCategory, AtomicInteger>();
 
@@ -78,15 +78,11 @@ public class OverSubmissionAgent implements IUpdatable {
             AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
 
             for (final IJob job : registry.getAllJobs()) {
-               // final IJobStatisticCategory jobStatisticCategory = trio.getCenter();
-                //final IExecutionContext executionContext = trio.getLeft();
-                //final IJob job = trio.getRight();
-
-               // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " " + registry.getNbExecutionJobsForJob(job));
+                // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " " + registry.getNbExecutionJobsForJob(job));
 
                 if (!job.allMoleJobsFinished()) {
 
-                     final IJobStatisticCategory jobStatisticCategory = new JobStatisticCategory(job);
+                    final IJobStatisticCategory jobStatisticCategory = new JobStatisticCategory(job);
 
                     IBatchExecutionJob lastJob = registry.getLastExecutionJobForJob(job);
 
@@ -128,11 +124,11 @@ public class OverSubmissionAgent implements IUpdatable {
                             Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
                         }
                     }
-                    
+
                     // Count nb execution
                     AtomicInteger executionJobCounter = nbJobsByCategory.get(jobStatisticCategory);
                     if (executionJobCounter == null) {
-                           Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " mew counter.");
+                        // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " mew counter.");
 
                         executionJobCounter = new AtomicInteger();
                         nbJobsByCategory.put(jobStatisticCategory, executionJobCounter);
@@ -145,7 +141,7 @@ public class OverSubmissionAgent implements IUpdatable {
             for (Map.Entry<IJobStatisticCategory, AtomicInteger> entry : nbJobsByCategory.entrySet()) {
                 int nbRessub = minNumberOfJobsByCategory - entry.getValue().get();
                 IJobStatisticCategory jobStatisticCategory = entry.getKey();
-   //Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,nbRessub + " " + entry.getValue().get());
+                //Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,nbRessub + " " + entry.getValue().get());
 
                 if (nbRessub > 0) {
                     // Resubmit nbRessub jobs in a fair manner
@@ -160,7 +156,6 @@ public class OverSubmissionAgent implements IUpdatable {
                         }
                     }
 
-
                     if (!keys.isEmpty()) {
                         while (nbRessub > 0 & keys.first() < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
                             Integer key = keys.first();
@@ -171,7 +166,6 @@ public class OverSubmissionAgent implements IUpdatable {
                             //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
 
                             try {
-                                // IExecutionContext executionContext = registry.getExecutionContext(job);
                                 checkedEnv.submit(job);
                             } catch (InternalProcessingError e) {
                                 Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
@@ -191,18 +185,8 @@ public class OverSubmissionAgent implements IUpdatable {
                         }
                     }
                 }
-
-
-
-
-
-                //		}
             }
-
-
         }
-        //	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "End update oversubmission");
-
     }
 
     private IStatistic computeStat(Collection<IBatchExecutionJob> allExecutionjobs) {
