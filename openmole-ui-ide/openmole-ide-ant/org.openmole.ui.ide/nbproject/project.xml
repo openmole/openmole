@@ -7,45 +7,12 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>com.thoughtworks.xstream</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.3.1</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.apache.commons.collections15</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>4.1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.netbeans.api.visual</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>2.24</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.netbeans.modules.settings</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <release-version>1</release-version>
-                        <specification-version>1.27</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.spi.palette</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
                         <release-version>1</release-version>
-                        <specification-version>1.21.1</specification-version>
+                        <specification-version>1.22.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -53,7 +20,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>7.18</specification-version>
+                        <specification-version>7.17.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -61,7 +28,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>7.17</specification-version>
+                        <specification-version>7.16.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -69,7 +36,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>8.7</specification-version>
+                        <specification-version>8.6.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -77,15 +44,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>8.4</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openide.windows</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>6.34</specification-version>
+                        <specification-version>8.3.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
