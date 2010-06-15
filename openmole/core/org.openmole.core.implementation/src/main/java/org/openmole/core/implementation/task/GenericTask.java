@@ -372,7 +372,7 @@ public abstract class GenericTask implements IGenericTask {
     @SoftCachable
     @Override
     public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> resourcesCache = new LinkedList<IResource>();
+        Collection<IResource> resourcesCache = new HashSet<IResource>();
         if (resources != null) {
             resourcesCache.addAll(resources);
         }
@@ -392,11 +392,11 @@ public abstract class GenericTask implements IGenericTask {
 
     @Override
     public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        for (IResource resource : getResources()) {
+        for (IResource resource: getResources()) {
             resource.relocate(fileCache);
         }
 
-        FileMigrator.initFilesInVariables(parameters.getVariables(), fileCache);
+        FileMigrator.initFilesInVariables(getParameters().getVariables(), fileCache);
     }
 
     @SoftCachable
@@ -410,7 +410,7 @@ public abstract class GenericTask implements IGenericTask {
             }
         }
 
-        for(File file: FileMigrator.extractFilesFromVariables(parameters.getVariables())) {
+        for(File file: FileMigrator.extractFilesFromVariables(getParameters().getVariables())) {
             files.add(file);
         }
 

@@ -18,7 +18,6 @@ package org.openmole.core.implementation.task;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,7 +39,6 @@ import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.resource.ILocalFileCache;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.task.IMoleTask;
 
@@ -119,7 +117,7 @@ public class MoleTask extends Task implements IMoleTask {
         return new DataSet(super.getInput(), getMole().getRoot().getAssignedTask().getInput());
     }
 
-    @Override
+   /* @Override
     public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
         Collection<IResource> resources = new HashSet<IResource>();
         for (IResource resource : super.getResources()) {
@@ -133,7 +131,7 @@ public class MoleTask extends Task implements IMoleTask {
         }
 
         return resources;
-    }
+    }*/
 
     @Override
     public Set<File> getFiles() throws InternalProcessingError, UserBadDataError {
@@ -151,6 +149,7 @@ public class MoleTask extends Task implements IMoleTask {
         return files;
     }
 
+
     @Override
     public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
         super.relocate(fileCache);
@@ -161,10 +160,10 @@ public class MoleTask extends Task implements IMoleTask {
     }
 
     //The resources of the task of the inner workflow will be deployer durring it's execution
-    @Override
+   /* @Override
     public void deploy() throws InternalProcessingError, UserBadDataError {
         for (IResource resource : super.getResources()) {
             resource.deploy();
         }
-    }
+    }*/
 }

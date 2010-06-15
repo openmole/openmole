@@ -53,7 +53,6 @@ import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
-import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
@@ -104,7 +103,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
     }
 
-    private synchronized  Replica getReplica(final File src, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription, final boolean zipped)  {
+    private synchronized  Replica getReplica(final File srcPath, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription, final boolean zipped)  {
 
         ObjectSet<Replica> set;
 
@@ -112,7 +111,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
         try {
 
-            set = objectContainer.queryByExample(new Replica(src, hash, storageDescription, environmentDescription, zipped, null));
+            set = objectContainer.queryByExample(new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, null));
 
             Replica replica = null;
 
@@ -147,7 +146,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
     //Synchronization should be achieved outiside the replica for database caching and isolation purposes
     @Override
-    public IReplica uploadAndGet(final File src, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
+    public IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription());
 
@@ -158,15 +157,15 @@ public class ReplicaCatalog implements IReplicaCatalog {
             IBatchServiceDescription storageDescription = storage.getDescription();
             IBatchEnvironmentDescription environmentDescription = storage.getBatchExecutionEnvironmentDescription();
 
-            replica = getReplica(src, hash, storageDescription, environmentDescription, zipped);
+            replica = getReplica(srcPath, hash, storageDescription, environmentDescription, zipped);
             if (replica == null) {
-                for (Replica toClean : getReplica(src, storageDescription, environmentDescription, zipped)) {
+                for (Replica toClean : getReplica(srcPath, storageDescription, environmentDescription, zipped)) {
                     clean(toClean);
                 }
 
                 IReplica sameContent = getReplica(hash, storageDescription, environmentDescription, zipped);
                 if (sameContent != null) {
-                    replica = new Replica(src, hash, storageDescription, environmentDescription, zipped, sameContent.getDestination());
+                    replica = new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, sameContent.getDestination());
                     insert(replica);
                 } else {
 
@@ -179,10 +178,10 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                         URIFile.copy(new URIFile(src), newFile, token);
 
-                        replica = new Replica(src, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
+                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);
 
-                       // Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Upload replica " + replica.toString());
+                       // Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Uploaded replica " + replica.toString());
 
 
                     } catch (IOException e) {

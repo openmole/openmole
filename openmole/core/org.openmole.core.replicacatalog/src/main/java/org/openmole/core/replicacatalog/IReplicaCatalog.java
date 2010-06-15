@@ -23,14 +23,13 @@ import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 
 public interface IReplicaCatalog {
 
-    IReplica uploadAndGet(final File src, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException;
+    IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException;
 
     void close();
 

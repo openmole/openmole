@@ -137,13 +137,14 @@ class CopyToEnvironment implements Callable<Void> {
     IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         boolean isDir = file.isDirectory();
         File toReplicate = file;
+        File toReplicatePath = file;
         IMoleExecution moleExecution = JobRegistry.getInstance().getMoleExecutionForJob(job);
 
         if (isDir) {
             toReplicate = Activator.getFileService().getArchiveForDir(file, moleExecution);
         }
         IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);
-        IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, hash, storage, zipped, token);
+        IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, toReplicatePath, hash, storage, zipped, token);
         return new ReplicatedFile(file, isDir, hash, replica.getDestination());
     }
 
