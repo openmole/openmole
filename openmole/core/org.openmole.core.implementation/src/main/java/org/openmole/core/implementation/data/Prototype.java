@@ -18,7 +18,6 @@
  */
 package org.openmole.core.implementation.data;
 
-import java.util.Collection;
 import org.openmole.core.model.data.IPrototype;
 
 public class Prototype<T> implements IPrototype<T> {
@@ -27,7 +26,7 @@ public class Prototype<T> implements IPrototype<T> {
     final private Class<? extends T> type;
 
     //Dirty private constructor for building list prototypes
-    private Prototype(String name, Class type, boolean unchecked) {
+    Prototype(String name, Class type, boolean unchecked) {
         this.name = name;
         this.type = type;
     }
@@ -58,11 +57,6 @@ public class Prototype<T> implements IPrototype<T> {
     @Override
     public boolean isAssignableFrom(IPrototype<?> p) {
     	return getType().isAssignableFrom(p.getType());
-    }
-
-    @Override
-    public IPrototype<Collection<T>> array() {
-    	return new Prototype<Collection<T>>( name, Collection.class, true);
     }
 
     @Override

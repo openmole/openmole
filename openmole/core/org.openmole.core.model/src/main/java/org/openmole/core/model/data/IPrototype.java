@@ -40,11 +40,4 @@ public interface IPrototype<T> {
      */
     boolean isAssignableFrom(IPrototype<?> prototype);
 
-    /**
-     *
-     * Return the array version of this prototype.
-     *
-     * @return the array version of this prototype
-     */
-    IPrototype<Collection<T>> array();
 }
