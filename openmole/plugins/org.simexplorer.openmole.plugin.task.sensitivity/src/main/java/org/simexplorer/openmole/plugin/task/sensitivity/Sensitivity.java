@@ -82,6 +82,15 @@ public final class Sensitivity {
         return this;
     }
 
+    /**
+     * Run the fast99 method, and clear the built workflow (by invoking the
+     * <code>clear()</code> method).
+     * @param samplingNumber
+     * @return an handler on the execution process.
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMoleExecution fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
         FastPlan fastPlan = new FastPlan(samplingNumber);
         // Ask
@@ -104,6 +113,8 @@ public final class Sensitivity {
         new ExplorationTransition(explorationCapsule, modelCapsule);
         new AggregationTransition(modelCapsule, tellCapsule);
         new SingleTransition(tellCapsule, reportCapsule);
-        return new Mole(explorationCapsule).createExecution(modelStrategy);
+        IMoleExecution execution = new Mole(explorationCapsule).createExecution(modelStrategy);
+        this.clear();
+        return execution;
     }
 }
