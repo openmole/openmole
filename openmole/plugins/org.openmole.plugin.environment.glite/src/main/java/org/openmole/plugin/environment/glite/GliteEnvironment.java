@@ -139,53 +139,53 @@ public class GliteEnvironment extends JSAGAEnvironment {
         init(description, bdii);
     }
 
-    public GliteEnvironment(GliteEnvironmentDescription description, String requieredCPUTime, String bdii) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, String requieredCPUTime) throws InternalProcessingError {
         super(description, requieredCPUTime);
         init(description, bdii);
     }
 
-    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String bdii) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii , int requieredMemory) throws InternalProcessingError {
         super(description, requieredMemory);
         init(description, bdii);
     }
 
-    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, String requieredCPUTime, String bdii) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
         super(description, requieredMemory, requieredCPUTime);
         init(description, bdii);
     }
 
-    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, int memoryForRuntime, String bdii) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
         super(description, requieredMemory, memoryForRuntime);
         init(description, bdii);
     }
 
-    public GliteEnvironment(GliteEnvironmentDescription description, int requieredMemory, int memoryForRuntime , String requieredCPUTime, String bdii) throws InternalProcessingError {
+    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, int memoryForRuntime , String requieredCPUTime) throws InternalProcessingError {
         super(description, requieredMemory, memoryForRuntime, requieredCPUTime);
         init(description, bdii);
     }
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL),bdii);
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii);
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String requieredCPUTime, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), requieredCPUTime, bdii);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String requieredCPUTime) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredCPUTime);
     }
 
-    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, bdii);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory);
     }
 
-    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, String requieredCPUTime, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, requieredCPUTime, bdii);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory, requieredCPUTime);
     }
 
-    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, int memoryForRuntime, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory, memoryForRuntime, bdii);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory, memoryForRuntime);
     }
 
-    public GliteEnvironment(String voName, String vomsURL, int requieredMemory, int memoryForRuntime, String requieredCPUTime, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), requieredMemory,memoryForRuntime, requieredCPUTime, bdii);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
+        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory,memoryForRuntime, requieredCPUTime);
     }
 
     private void init(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError{
