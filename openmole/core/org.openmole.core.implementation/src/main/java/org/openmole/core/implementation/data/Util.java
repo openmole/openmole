@@ -25,7 +25,7 @@ import org.openmole.core.model.data.IPrototype;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class Utils {
+public class Util {
     public static <T> IPrototype<Collection<T>> toArray(IPrototype<T> prototype) {
     	return new Prototype<Collection<T>>(prototype.getName(), Collection.class, true);
     }
