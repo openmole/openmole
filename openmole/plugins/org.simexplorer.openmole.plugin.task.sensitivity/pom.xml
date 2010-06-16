@@ -50,7 +50,7 @@
     <!-- ************************************************************* -->
 
     <name>${project.artifactId} ${project.version}</name>
-    <description></description>
+    <description>Plugin for sensitivity analysis using R</description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
