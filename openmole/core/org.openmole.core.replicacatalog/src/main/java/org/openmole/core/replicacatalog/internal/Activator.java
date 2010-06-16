@@ -45,7 +45,6 @@ public class Activator implements BundleActivator {
 
         catalog = new ReplicaCatalog();
         reg = context.registerService(IReplicaCatalog.class.getName(), catalog, null);
-
     }
 
     @Override

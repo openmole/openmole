@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.task;
 
 import org.openmole.commons.exception.InternalProcessingError;
@@ -26,39 +25,37 @@ import org.openmole.core.model.job.IContext;
 
 public class InputToGlobalTask extends Task {
 
-	public InputToGlobalTask(String name) throws UserBadDataError,
-			InternalProcessingError {
-		super(name);
-	}
+    public InputToGlobalTask(String name) throws UserBadDataError,
+            InternalProcessingError {
+        super(name);
+    }
 
-	public InputToGlobalTask(String name, IData... data) throws UserBadDataError,
-			InternalProcessingError {
-		super(name);
-                
-                for(IData d: data) {
-                    addInput(d);
-                }
-	}
+    public InputToGlobalTask(String name, IData... data) throws UserBadDataError,
+            InternalProcessingError {
+        super(name);
 
-        public InputToGlobalTask(String name, IPrototype... prototypes) throws UserBadDataError,
-			InternalProcessingError {
-		super(name);
+        for (IData d : data) {
+            addInput(d);
+        }
+    }
 
-                for(IPrototype prototype: prototypes) {
-                    addInput(prototype);
-                }
-	}
+    public InputToGlobalTask(String name, IPrototype... prototypes) throws UserBadDataError,
+            InternalProcessingError {
+        super(name);
 
-	@Override
-	protected void process(IContext context, IProgress progress)
-			throws UserBadDataError, InternalProcessingError {
-		for(IData data : getInput()) {
-                        IPrototype p = data.getPrototype();
-			if(!data.getMod().isOptional() || data.getMod().isOptional() && context.contains(p)) {
-				context.putGlobalVariable(p, context.getLocalValue(p));
-			}
-		}
-		
-	}
+        for (IPrototype prototype : prototypes) {
+            addInput(prototype);
+        }
+    }
 
+    @Override
+    protected void process(IContext context, IProgress progress)
+            throws UserBadDataError, InternalProcessingError {
+        for (IData data : getUserInput()) {
+            IPrototype p = data.getPrototype();
+            if (!data.getMod().isOptional() || data.getMod().isOptional() && context.contains(p)) {
+                context.putGlobalVariable(p, context.getLocalValue(p));
+            }
+        }
+    }
 }

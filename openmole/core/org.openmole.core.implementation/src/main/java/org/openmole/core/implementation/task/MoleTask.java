@@ -92,7 +92,7 @@ public class MoleTask extends Task implements IMoleTask {
         execution.start();
         execution.waitUntilEnded();
 
-        for (IData<?> output : getOutput()) {
+        for (IData<?> output : getUserOutput()) {
             IPrototype p = output.getPrototype();
             if (rootContext.contains(p)) {
                 context.putVariable(p, rootContext.getGlobalValue(p));
