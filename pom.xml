@@ -561,6 +561,7 @@
                     <quiet>true</quiet>             <!-- Shuts off non-error and non-warning messages.                      -->
                     <encoding>UTF-8</encoding>      <!-- Specifies the encoding name of the source files.                   -->
                     <charset>UTF-8</charset>        <!-- Specifies the HTML character set for this document.                -->
+                    <docfilessubdirs>true</docfilessubdirs> <!-- Enables deep copying of the **/doc-files directories that are places for storing images -->
                 </configuration>
                 <reportSets>
                     <reportSet>
