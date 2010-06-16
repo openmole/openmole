@@ -49,6 +49,7 @@ import org.openmole.core.implementation.task.InputToGlobalTask;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
+import org.openmole.core.implementation.data.Util;
 
 public class Builder {
 
@@ -73,13 +74,13 @@ public class Builder {
                                             PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
         InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
-            //ARRAY inputToGlobalTask.addInput(data);
+            inputToGlobalTask.addInput(Util.toArray(data));
         }
         Mole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
-            //ARRAY moleTask.addOutput(data);
+            moleTask.addOutput(Util.toArray(data));
         }
         return moleTask;
     }

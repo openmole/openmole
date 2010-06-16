@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.tools.ILevelComputing;
 import org.openmole.core.implementation.job.Context;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.tools.LevelComputing;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.job.IContext;
@@ -175,10 +174,10 @@ public class DataChannel implements IDataChannel {
                         IVariable var = context.getLocalVariable(data.getPrototype());
                         Collection curVal;
                         if(curentContext.containsVariableWithName(data.getPrototype())) {
-                            curVal = curentContext.getLocalValue(data.getPrototype().array());
+                            curVal = curentContext.getLocalValue(Util.toArray(data.getPrototype()));
                         } else {
                             curVal = new ArrayList();
-                            curentContext.putVariable(new Variable(data.getPrototype().array(), curVal));
+                            curentContext.putVariable(new Variable(Util.toArray(data.getPrototype()), curVal));
                         }
                         curVal.add(var.getValue());
                     }

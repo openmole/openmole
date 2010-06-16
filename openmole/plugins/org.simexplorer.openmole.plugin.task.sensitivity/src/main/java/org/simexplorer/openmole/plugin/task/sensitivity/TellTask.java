@@ -26,6 +26,7 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.data.Util;
 
 /**
  *
@@ -49,7 +50,7 @@ public class TellTask extends Task {
 
     public TellTask(String name) throws UserBadDataError, InternalProcessingError {
         super(name);
-        this.addInput(modelOutputPrototype.array());
+        this.addInput(Util.toArray(modelOutputPrototype));
         this.addOutput(analysisVPrototype);
         this.addOutput(analysisD1Prototype);
         this.addOutput(analysisDtPrototype);
@@ -86,7 +87,7 @@ public class TellTask extends Task {
         Double[] V, D1, Dt, I1, It;
         StringBuilder command = new StringBuilder(200);
         // put the model output into R
-        Collection values = context.getLocalValue(modelOutputPrototype.array());
+        Collection values = context.getLocalValue(Util.toArray(modelOutputPrototype));
         boolean first = true;
         command.append(ModelOutputVariableName).append(" <- c(");
         for (Object value : values) {
