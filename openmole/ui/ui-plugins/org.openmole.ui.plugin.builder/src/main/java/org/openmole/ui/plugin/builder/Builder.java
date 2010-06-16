@@ -19,6 +19,7 @@
  */
 package org.openmole.ui.plugin.builder;
 
+import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.structuregenerator.ComplexNode;
@@ -41,6 +42,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.task.ExplorationTask;
+import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast;
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;
 import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.task.InputToGlobalTask;
@@ -64,6 +66,22 @@ public class Builder {
 
     public TaskCapsule buildTaskCapsule(ITask task) {
         return new TaskCapsule(task);
+    }
+
+    public MoleTask buildExplorationMoleTask(String taskName,
+                                            IExplorationTask explo,
+                                            PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            //ARRAY inputToGlobalTask.addInput(data);
+        }
+        Mole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
+        MoleTask moleTask = new MoleTask(taskName, mole);
+
+        for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
+            //ARRAY moleTask.addOutput(data);
+        }
+        return moleTask;
     }
 
     public MoleTask buildMoleTask(String taskName,
