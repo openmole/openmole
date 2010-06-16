@@ -16,12 +16,7 @@
  */
 package org.openmole.ui.ide;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Graphics;
 import java.util.logging.Logger;
-import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;

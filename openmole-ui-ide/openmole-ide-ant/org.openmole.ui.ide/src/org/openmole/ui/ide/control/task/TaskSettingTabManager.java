@@ -45,7 +45,7 @@ public class TaskSettingTabManager {
     }
 
     private void addTaskSettingTab(ITaskCapsuleView tcv){
-        taskSettingMap.put(tcv,new JScrollPane());
+        taskSettingMap.put(tcv,new ContainerComposer());
         tabbedPane.add(tcv.getName(),taskSettingMap.get(tcv));
 
     }
