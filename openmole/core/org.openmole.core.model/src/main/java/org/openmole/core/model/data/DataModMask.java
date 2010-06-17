@@ -35,7 +35,16 @@ public enum DataModMask {
      * State that the data value of a variable will not be modified
      *
      */
-    IMMUTABLE(0x0002);
+    IMMUTABLE(0x0002),
+
+    /**
+     *
+     * State that the data value of a variable that is used for system level information
+     * as oposed to buisiness level informations
+     *
+     */
+    SYSTEM(0x0004);
+
 
     private int mask;
 

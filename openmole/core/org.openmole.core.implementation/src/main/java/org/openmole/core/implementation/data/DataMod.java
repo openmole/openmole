@@ -19,7 +19,6 @@ package org.openmole.core.implementation.data;
 
 import org.openmole.core.model.data.DataModMask;
 import org.openmole.core.model.data.IDataMod;
-import org.openmole.core.model.data.IDataMod;
 import static org.openmole.core.model.data.DataModMask.*;
 
 /**
@@ -52,6 +51,11 @@ public class DataMod implements IDataMod {
     @Override
     public boolean isImmutable() {
         return (mask & IMMUTABLE.getMask()) != 0;
+    }
+
+    @Override
+    public boolean isSystem() {
+       return (mask & SYSTEM.getMask()) != 0;
     }
 
 }

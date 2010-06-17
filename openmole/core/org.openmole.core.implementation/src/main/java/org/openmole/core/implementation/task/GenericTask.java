@@ -61,10 +61,10 @@ import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
 public abstract class GenericTask implements IGenericTask {
 
     @Output
-    final static public IData<Collection> Timestamps = new Data<Collection>("Timestamps", Collection.class);
+    final static public IData<Collection> Timestamps = new Data<Collection>("Timestamps", Collection.class, SYSTEM);
 
     @Output
-    final static public IData<Throwable> Exception = new Data<Throwable>("Exception", Throwable.class, OPTIONAL);
+    final static public IData<Throwable> Exception = new Data<Throwable>("Exception", Throwable.class, OPTIONAL, SYSTEM);
 
     private String name;
 

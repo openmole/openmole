@@ -27,4 +27,6 @@ public interface IDataMod {
 
     boolean isOptional();
 
+    boolean isSystem();
+
 }
