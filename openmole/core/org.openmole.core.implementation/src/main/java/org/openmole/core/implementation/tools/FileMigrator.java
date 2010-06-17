@@ -17,6 +17,8 @@
 package org.openmole.core.implementation.tools;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -32,11 +34,14 @@ import org.openmole.core.model.resource.ILocalFileCache;
 public class FileMigrator {
 
     public static void initFilesInVariable(IVariable variable, ILocalFileCache fileCache) {
-        if (File.class.isAssignableFrom(variable.getPrototype().getType())) {
+        Object variableContent = variable.getValue();
+        if(variableContent == null) return;
+
+        if (File.class.isAssignableFrom(variableContent.getClass())) {
             initFile((IVariable<File>) variable, fileCache);
         } else {
-            if (List.class.isAssignableFrom(variable.getPrototype().getType())) {
-                initFilesInList(((IVariable<List>) variable).getValue(), fileCache);
+            if (List.class.isAssignableFrom(variableContent.getClass())) {
+                initFilesInList((List) variable, fileCache);
             }
         }
     }
@@ -71,12 +76,16 @@ public class FileMigrator {
     }
 
     public static Set<File> extractFilesFromVariable(IVariable variable) {
+        Object variableContent = variable.getValue();
+        if(variableContent == null) return Collections.EMPTY_SET;
+
         Set<File> fileMap = new TreeSet<File>();
-        if (File.class.isAssignableFrom(variable.getPrototype().getType())) {
-            fileMap.add(((IVariable<File>) variable).getValue());
+
+        if (File.class.isAssignableFrom(variableContent.getClass())) {
+            fileMap.add((File) variable);
         } else {
-            if (List.class.isAssignableFrom(variable.getPrototype().getType())) {
-                extractFilesFromList(((IVariable<List>) variable).getValue(), fileMap);
+            if (List.class.isAssignableFrom(variableContent.getClass())) {
+                extractFilesFromList((List) variableContent, fileMap);
             }
         }
         return fileMap;
@@ -100,7 +109,6 @@ public class FileMigrator {
                     extractFilesFromList((List) o, fileMap);
                 }
             }
-
         }
     }
 }
