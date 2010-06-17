@@ -18,6 +18,7 @@ package org.openmole.core.implementation.tools;
 
 import java.io.File;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,19 +48,18 @@ public class FileMigrator {
     }
 
     private static void initFilesInList(List list, ILocalFileCache fileCache) {
-        int i = 0;
-        for (Object o : list) {
-            //Object o = list.get(i);
+        ListIterator iterator = list.listIterator();
+
+        while (iterator.hasNext()) {
+            Object o = iterator.next();
             if (File.class.isAssignableFrom(o.getClass())) {
                 File src = (File) o;
                 File local = fileCache.getLocalFileCache(src);
 
-                list.set(i, local);
-
+                iterator.set(local);
             } else if (List.class.isAssignableFrom(o.getClass())) {
                 initFilesInList((List) o, fileCache);
             }
-            i++;
         }
 
     }
@@ -93,7 +93,6 @@ public class FileMigrator {
 
     private static void extractFilesFromList(List list, Set<File> fileMap) {
         for (Object o : list) {
-
             if (File.class.isAssignableFrom(o.getClass())) {
                 fileMap.add((File) o);
             } else {
