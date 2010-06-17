@@ -17,7 +17,6 @@
 package org.openmole.core.implementation.tools;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -41,7 +40,7 @@ public class FileMigrator {
             initFile((IVariable<File>) variable, fileCache);
         } else {
             if (List.class.isAssignableFrom(variableContent.getClass())) {
-                initFilesInList((List) variable, fileCache);
+                initFilesInList((List) variableContent, fileCache);
             }
         }
     }
@@ -82,7 +81,7 @@ public class FileMigrator {
         Set<File> fileMap = new TreeSet<File>();
 
         if (File.class.isAssignableFrom(variableContent.getClass())) {
-            fileMap.add((File) variable);
+            fileMap.add((File) variableContent);
         } else {
             if (List.class.isAssignableFrom(variableContent.getClass())) {
                 extractFilesFromList((List) variableContent, fileMap);
