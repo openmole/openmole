@@ -19,6 +19,8 @@ package org.openmole.plugin.environment.glite.internal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -43,6 +45,8 @@ public class DicotomicWorkloadStrategy implements IWorkloadManagmentStrategy {
 
         Long[] finished = finishedStat.getOrderedSamples(type);
         Long[] running = runningStat.getOrderedSamples(type);
+
+      //  Logger.getLogger(DicotomicWorkloadStrategy.class.getName()).log(Level.INFO,"finished" + finished.length+" running " + running.length);
 
         if (finished.length == 0) {
             return Long.MAX_VALUE;
@@ -77,11 +81,11 @@ public class DicotomicWorkloadStrategy implements IWorkloadManagmentStrategy {
                 n4bis += ((double)n1) / overS;
 
 
-               // Logger.getLogger(DicotomicWorkloadStrategy.class.getName()).log(Level.INFO,"running[indice]" + running[indice] +" t " + t +" overS = " + overS + " n1 = " + n1 + " n4bis = " + n4bis);
+            //    Logger.getLogger(DicotomicWorkloadStrategy.class.getName()).log(Level.INFO,"running[indice]" + running[indice] +" t " + t +" overS = " + overS + " n1 = " + n1 + " n4bis = " + n4bis);
 
                 indice++;
             }
-            //Logger.getLogger(DicotomicWorkloadStrategy.class.getName()).log(Level.INFO," n1 = " + n1 + " n4bis = " + n4bis + " n2 = "+ n2 + " n4 = " + n4) ;
+          //  Logger.getLogger(DicotomicWorkloadStrategy.class.getName()).log(Level.INFO," n1 = " + n1 + " n4bis = " + n4bis + " n2 = "+ n2 + " n4 = " + n4) ;
 
             p = (n1 + n4bis) / (n2 + n4);
 

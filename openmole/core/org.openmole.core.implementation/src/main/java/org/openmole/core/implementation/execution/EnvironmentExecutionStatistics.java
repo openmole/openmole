@@ -16,11 +16,11 @@
  */
 package org.openmole.core.implementation.execution;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.apache.commons.collections15.keyvalue.MultiKey;
 
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -33,7 +33,7 @@ import org.openmole.core.model.task.IGenericTask;
 public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStatistics {
 
     private class StatisticKey {
-        final MultiKey<IGenericTask> key;
+        final IGenericTask[] key;
 
         StatisticKey(IJob job) {
             IGenericTask[] tasks = new IGenericTask[job.size()];
@@ -43,18 +43,30 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
                 tasks[i++] = moleJob.getTask();
             }
 
-            this.key = new MultiKey<IGenericTask>(tasks);
+            this.key = tasks;
         }
 
         @Override
         public int hashCode() {
-            return key.hashCode();
+            return Arrays.deepHashCode(key);
         }
 
         @Override
-        public boolean equals(Object other) {
-            return key.equals(other);
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final StatisticKey other = (StatisticKey) obj;
+            if (!Arrays.deepEquals(this.key, other.key)) {
+                return false;
+            }
+            return true;
         }
+
+      
     }
     
     final Map<IMoleExecution, Map<StatisticKey, IStatistic>> stats = Collections.synchronizedMap(new WeakHashMap<IMoleExecution, Map<StatisticKey, IStatistic>>());
@@ -68,6 +80,9 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     @Override
     public IStatistic getStatFor(IJob job) {
         Map<StatisticKey, IStatistic> map = stats.get(JobRegistry.getInstance().getMoleExecutionForJob(job));
+        
+       // Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).info(map);
+
         if (map == null) {
             return Statistic.EMPTY_STAT;
         }
