@@ -61,7 +61,7 @@ public class Builder {
         return new DataSet(prototypes);
     }
 
-    public IDataSet buildDataSet(DataSet...dataSets) {
+    public IDataSet buildDataSet(DataSet... dataSets) {
         return new DataSet(dataSets);
     }
 
@@ -70,23 +70,28 @@ public class Builder {
     }
 
     public MoleTask buildExplorationMoleTask(String taskName,
-                                            IExplorationTask explo,
-                                            PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+            IExplorationTask explo,
+            PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
         InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
-            inputToGlobalTask.addInput(Util.toArray(data));
+            if (!data.getMode().isSystem()) {
+                inputToGlobalTask.addInput(Util.toArray(data));
+            }
         }
+
         Mole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
-            moleTask.addOutput(Util.toArray(data));
+            if (!data.getMode().isSystem()) {
+                moleTask.addOutput(Util.toArray(data));
+            }
         }
         return moleTask;
     }
 
     public MoleTask buildMoleTask(String taskName,
-                                  PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+            PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
 
@@ -127,8 +132,8 @@ public class Builder {
         }
 
         public IExplorationTask buildExplorationTask(String name,
-                                                     IPlan plan,
-                                                     IDataSet input) throws UserBadDataError, InternalProcessingError {
+                IPlan plan,
+                IDataSet input) throws UserBadDataError, InternalProcessingError {
             ExplorationTask explo = new ExplorationTask(name, plan);
             explo.addInput(input);
             return explo;
