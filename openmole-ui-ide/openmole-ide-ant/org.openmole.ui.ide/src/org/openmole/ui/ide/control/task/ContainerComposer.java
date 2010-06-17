@@ -19,21 +19,32 @@ package org.openmole.ui.ide.control.task;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class ContainerComposer extends JPanel{
+    JSplitPane splitpane;
+
 
     public ContainerComposer(Component...cmps) {
-        setLayout(new BorderLayout());
+        splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+       // setLayout(new BorderLayout());
+        int divider = 0;
         for(Component co : cmps){
-            add(co,BorderLayout.WEST);
+            splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				      splitpane,
+                                      co);
+            splitpane.setOneTouchExpandable(true);
+        splitpane.setDividerLocation(divider);
+        divider += 150;
         }
+        add(splitpane,BorderLayout.EAST);
     }
 
-
-
+    
 }

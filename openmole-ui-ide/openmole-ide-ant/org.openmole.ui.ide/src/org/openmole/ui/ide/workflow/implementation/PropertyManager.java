@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.palette.Category;
 import org.openmole.ui.ide.palette.Category.CategoryName;
@@ -49,8 +50,8 @@ public class PropertyManager {
                                                              props);
                 
                 Preferences.getInstance().register(cat,
- 		                                             Class.forName(f.getName()),
- 		                                             props);
+ 		                                   Class.forName(f.getName()),
+ 		                                   props);
             } catch (ClassNotFoundException ex) {
                 MoleExceptionManagement.showException(ex);
             }
@@ -59,7 +60,7 @@ public class PropertyManager {
 
     public static Properties read(String path) {
         try {
-            Properties props = new Properties();
+            Properties props = new Properties(readDefault());
             FileReader reader = new FileReader(path);
             props.load(reader);
             reader.close();
@@ -70,5 +71,13 @@ public class PropertyManager {
             MoleExceptionManagement.showException(ex);
         }
         return null;
+    }
+
+    private static Properties readDefault() throws FileNotFoundException, IOException{
+            Properties props = new Properties();
+            FileReader reader = new FileReader(ApplicationCustomize.TASK_DEFAULT_PROPERTIES);
+            props.load(reader);
+            reader.close();
+            return props;
     }
 }

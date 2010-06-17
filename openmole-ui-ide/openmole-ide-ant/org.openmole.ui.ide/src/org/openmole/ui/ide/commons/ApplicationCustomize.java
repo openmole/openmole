@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.io.FileReader;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
@@ -76,6 +77,8 @@ public class ApplicationCustomize {
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );
 
+    public static final String TASK_DEFAULT_PROPERTIES = "src/resources/task/default";
+    
     public ApplicationCustomize() {
         setDefaultColors();
     }

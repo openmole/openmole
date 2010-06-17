@@ -17,12 +17,53 @@
 
 package org.openmole.ui.ide.control.task;
 
-import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.ScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class IOContainer extends JFrame implements ITaskSettingContainer{
+public class IOContainer extends JPanel implements ITaskSettingContainer{
+    private JScrollPane listScrollPane;
+
+    private String[] imageNames = { "Bird", "Cat"};
+    private JList list = new JList(imageNames);
+
+
+    public IOContainer() {
+        super(new BorderLayout());
+        list.addListSelectionListener(this);
+
+
+        listScrollPane = new JScrollPane(list);
+
+        add(new JLabel("Task input"),BorderLayout.NORTH);
+        add(list,BorderLayout.CENTER);
+
+        setMinimumSize(new Dimension(100,50));
+        addItem();
+    }
+
+    public void addItem(){
+        String[] uu = { "Birdee", "Cateiei"};
+        list.add(new JList(uu));
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent lse) {
+        System.out.println("selected ");
+    }
+
+
+
+
 
 }

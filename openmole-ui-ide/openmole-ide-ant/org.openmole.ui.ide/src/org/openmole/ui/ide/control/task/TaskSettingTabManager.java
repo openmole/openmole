@@ -17,9 +17,11 @@
 
 package org.openmole.ui.ide.control.task;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Map;
 import java.util.WeakHashMap;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
@@ -45,7 +47,9 @@ public class TaskSettingTabManager {
     }
 
     private void addTaskSettingTab(ITaskCapsuleView tcv){
-        taskSettingMap.put(tcv,new ContainerComposer());
+        taskSettingMap.put(tcv,new ContainerComposer( new IOContainer(),
+                                                      new IOContainer())) ;
+        System.out.println("ADD " + taskSettingMap.get(tcv));
         tabbedPane.add(tcv.getName(),taskSettingMap.get(tcv));
 
     }

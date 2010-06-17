@@ -17,10 +17,12 @@
 
 package org.openmole.ui.ide.control.task;
 
+import javax.swing.event.ListSelectionListener;
+
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public interface ITaskSettingContainer {
+public interface ITaskSettingContainer extends ListSelectionListener {
 
 }
