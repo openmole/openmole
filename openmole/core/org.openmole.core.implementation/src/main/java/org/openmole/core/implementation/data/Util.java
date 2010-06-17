@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.data;
 
 import java.util.Collection;
+import java.util.List;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 
@@ -27,7 +28,7 @@ import org.openmole.core.model.data.IPrototype;
  */
 public class Util {
     public static <T> IPrototype<Collection<T>> toArray(IPrototype<T> prototype) {
-    	return new Prototype<Collection<T>>(prototype.getName(), Collection.class, true);
+    	return new Prototype<Collection<T>>(prototype.getName(), List.class, true);
     }
 
     public static <T> IData<Collection<T>> toArray(IData<T> data) {
