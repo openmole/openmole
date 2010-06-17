@@ -25,7 +25,7 @@ import org.openmole.core.model.data.IPrototype;
 public class Data<T> implements IData<T> {
 
     IPrototype<T> prototype;
-    IDataMode mod;
+    IDataMode mode;
 
     public Data(IPrototype<T> prototype) {
         this(prototype, DataMode.NONE);
@@ -38,7 +38,7 @@ public class Data<T> implements IData<T> {
     public Data(IPrototype<T> prototype, IDataMode mod) {
         super();
         this.prototype = prototype;
-        this.mod = mod;
+        this.mode = mod;
     }
 
     public Data(String name, Class<? extends T> type) {
@@ -56,7 +56,7 @@ public class Data<T> implements IData<T> {
 
     @Override
     public IDataMode getMode() {
-        return mod;
+        return mode;
     }
 
 }

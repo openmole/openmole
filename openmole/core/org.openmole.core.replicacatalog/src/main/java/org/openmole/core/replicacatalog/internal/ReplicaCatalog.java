@@ -82,7 +82,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         } catch (Db4oIOException e) {
             throw new InternalProcessingError(e);
         } catch (DatabaseFileLockedException e) {
-            throw new InternalProcessingError(e);
+            throw new InternalProcessingError(e, "You probably have another instance of OpenMOLE running.");
         } catch (IncompatibleFileFormatException e) {
             throw new InternalProcessingError(e);
         } catch (OldFormatException e) {
