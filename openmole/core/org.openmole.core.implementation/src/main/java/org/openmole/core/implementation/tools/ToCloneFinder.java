@@ -60,7 +60,7 @@ public class ToCloneFinder {
                     }
 
                     info.nbUsage.incrementAndGet();
-                    if (!data.getMod().isImmutable()) {
+                    if (!data.getMode().isImmutable()) {
                         info.nbMutable.incrementAndGet();
                     }
                 }
@@ -79,7 +79,7 @@ public class ToCloneFinder {
                 }
 
                 info.nbUsage.incrementAndGet();
-                if (!data.getMod().isImmutable()) {
+                if (!data.getMode().isImmutable()) {
                     info.nbMutable.incrementAndGet();
                 }
             }

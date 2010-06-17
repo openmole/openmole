@@ -16,11 +16,11 @@ public interface IData<T> {
 
     /**
      *
-     * Get the mod of the data
+     * Get the mode of the data
      *
-     * @return mod of the data
+     * @return mode of the data
      */
-    IDataMod getMod();
+    IDataMode getMode();
 
 
     /**

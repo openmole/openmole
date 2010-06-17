@@ -17,25 +17,25 @@
 
 package org.openmole.core.implementation.data;
 
-import org.openmole.core.model.data.DataModMask;
+import org.openmole.core.model.data.DataModeMask;
 import org.openmole.core.model.data.IData;
-import org.openmole.core.model.data.IDataMod;
+import org.openmole.core.model.data.IDataMode;
 import org.openmole.core.model.data.IPrototype;
 
 public class Data<T> implements IData<T> {
 
     IPrototype<T> prototype;
-    IDataMod mod;
+    IDataMode mod;
 
     public Data(IPrototype<T> prototype) {
-        this(prototype, DataMod.NONE);
+        this(prototype, DataMode.NONE);
     }
 
-    public Data(IPrototype<T> prototype, DataModMask... masks) {
-        this(prototype, new DataMod(masks));
+    public Data(IPrototype<T> prototype, DataModeMask... masks) {
+        this(prototype, new DataMode(masks));
     }
 
-    public Data(IPrototype<T> prototype, IDataMod mod) {
+    public Data(IPrototype<T> prototype, IDataMode mod) {
         super();
         this.prototype = prototype;
         this.mod = mod;
@@ -45,7 +45,7 @@ public class Data<T> implements IData<T> {
         this(new Prototype<T>(name, type));
     }
 
-    public Data(String name, Class<? extends T> type, DataModMask... masks) {
+    public Data(String name, Class<? extends T> type, DataModeMask... masks) {
         this(new Prototype<T>(name, type), masks);
     }
 
@@ -55,7 +55,7 @@ public class Data<T> implements IData<T> {
     }
 
     @Override
-    public IDataMod getMod() {
+    public IDataMode getMode() {
         return mod;
     }
 

@@ -21,44 +21,12 @@ package org.openmole.core.model.data;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public enum DataModMask {
+public interface IDataMode {
 
-    /**
-     *
-     * Data is optionnal
-     *
-     */
-    OPTIONAL(0x0001),
+    boolean isImmutable();
 
-    /**
-     *
-     * State that the data value of a variable will not be modified
-     *
-     */
-    IMMUTABLE(0x0002),
+    boolean isOptional();
 
-    /**
-     *
-     * State that the data value of a variable that is used for system level information
-     * as oposed to buisiness level informations
-     *
-     */
-    SYSTEM(0x0004);
+    boolean isSystem();
 
-
-    private int mask;
-
-    private DataModMask(int mask) {
-        this.mask = mask;
-    }
-
-    /**
-     *
-     * Get the value of the mask
-     *
-     * @return the value of the mask
-     */
-    public int getMask() {
-        return mask;
-    }
 }

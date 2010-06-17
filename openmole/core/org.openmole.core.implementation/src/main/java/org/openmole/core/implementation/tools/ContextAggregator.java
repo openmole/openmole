@@ -26,7 +26,6 @@ import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.DataSet;
-import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
@@ -65,7 +64,7 @@ public class ContextAggregator {
             for (IData<?> data : aggregate) {
                 IPrototype<?> inProt = data.getPrototype();
 
-                if ((!data.getMod().isOptional() || data.getMod().isOptional()) && current.containsVariableWithName(inProt.getName())) {
+                if ((!data.getMode().isOptional() || data.getMode().isOptional()) && current.containsVariableWithName(inProt.getName())) {
                     // if (current.exist(inProt.getName())) {
                     IVariable<?> tmp;
 

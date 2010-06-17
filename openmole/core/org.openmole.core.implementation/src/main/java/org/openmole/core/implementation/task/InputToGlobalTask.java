@@ -53,7 +53,7 @@ public class InputToGlobalTask extends Task {
             throws UserBadDataError, InternalProcessingError {
         for (IData data : getUserInput()) {
             IPrototype p = data.getPrototype();
-            if (!data.getMod().isOptional() || data.getMod().isOptional() && context.contains(p)) {
+            if (!data.getMode().isOptional() || data.getMode().isOptional() && context.contains(p)) {
                 context.putGlobalVariable(p, context.getLocalValue(p));
             }
         }

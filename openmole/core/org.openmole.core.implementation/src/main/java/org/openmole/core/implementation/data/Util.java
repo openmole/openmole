@@ -32,6 +32,6 @@ public class Util {
     }
 
     public static <T> IData<Collection<T>> toArray(IData<T> data) {
-    	return new Data<Collection<T>>(toArray(data.getPrototype()), data.getMod());
+    	return new Data<Collection<T>>(toArray(data.getPrototype()), data.getMode());
     }
 }

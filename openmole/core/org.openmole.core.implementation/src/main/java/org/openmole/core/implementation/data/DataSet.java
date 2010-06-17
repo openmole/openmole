@@ -62,7 +62,7 @@ public class DataSet implements IDataSet {
         this.data = initData(data);
     }
 
-    public DataSet(DataMod dataMod, IPrototype<?>... prototypes) {
+    public DataSet(DataMode dataMod, IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
         for (int i = 0; i < prototypes.length; i++) {
             data.add(new Data(prototypes[i], dataMod));
@@ -82,7 +82,7 @@ public class DataSet implements IDataSet {
         this.data = initData(data);
     }
 
-    public DataSet(Iterable<IData> dataSet, DataMod dataMod, IPrototype<?>... prototypes) {
+    public DataSet(Iterable<IData> dataSet, DataMode dataMod, IPrototype<?>... prototypes) {
         List<IData<?>> data = new ArrayList<IData<?>>(prototypes.length);
         for (IData d : dataSet) {
             data.add(d);

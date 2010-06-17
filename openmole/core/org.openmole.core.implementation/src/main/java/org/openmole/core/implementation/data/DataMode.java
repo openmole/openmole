@@ -17,29 +17,29 @@
 
 package org.openmole.core.implementation.data;
 
-import org.openmole.core.model.data.DataModMask;
-import org.openmole.core.model.data.IDataMod;
-import static org.openmole.core.model.data.DataModMask.*;
+import org.openmole.core.model.data.DataModeMask;
+import org.openmole.core.model.data.IDataMode;
+import static org.openmole.core.model.data.DataModeMask.*;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class DataMod implements IDataMod {
+public class DataMode implements IDataMode {
 
-    final static public DataMod NONE = new DataMod(0);
+    final static public DataMode NONE = new DataMode(0);
 
     int mask;
 
-    public DataMod(DataModMask... masks) {
+    public DataMode(DataModeMask... masks) {
         mask = 0;
-        for(DataModMask m: masks) {
+        for(DataModeMask m: masks) {
             mask |= m.getMask();
         }
     }
 
 
-    public DataMod(int mask) {
+    public DataMode(int mask) {
         this.mask = mask;
     }
 

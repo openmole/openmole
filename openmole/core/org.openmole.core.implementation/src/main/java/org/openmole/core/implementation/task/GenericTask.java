@@ -49,13 +49,13 @@ import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Parameter;
 import org.openmole.core.implementation.tools.FileMigrator;
-import org.openmole.core.model.data.DataModMask;
+import org.openmole.core.model.data.DataModeMask;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
 import org.openmole.core.model.data.IPrototype;
 
-import static org.openmole.core.model.data.DataModMask.*;
+import static org.openmole.core.model.data.DataModeMask.*;
 import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
 
 public abstract class GenericTask implements IGenericTask {
@@ -87,7 +87,7 @@ public abstract class GenericTask implements IGenericTask {
      */
     protected void verifyInput(IContext context) throws UserBadDataError, InternalProcessingError {
         for (IData<?> d : getInput()) {
-            if (!d.getMod().isOptional()) {
+            if (!d.getMode().isOptional()) {
                 IPrototype<?> p = d.getPrototype();
 
                 IVariable<?> v = context.getVariable(p.getName());
@@ -112,7 +112,7 @@ public abstract class GenericTask implements IGenericTask {
                     Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " has been found but type doesn't match : " + var.getPrototype().getType().getName() + " in task " + getName() + ".");
                 }
             } else {
-                if (!d.getMod().isOptional()) {
+                if (!d.getMode().isOptional()) {
                     Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " not found in output of task " + getName() + ".");
                 }
             }
@@ -172,7 +172,7 @@ public abstract class GenericTask implements IGenericTask {
     }
 
     @Override
-    public void addOutput(IPrototype prototype, DataModMask... masks) {
+    public void addOutput(IPrototype prototype, DataModeMask... masks) {
         addOutput(new Data(prototype, masks));
     }
 
@@ -212,7 +212,7 @@ public abstract class GenericTask implements IGenericTask {
     }
 
     @Override
-    public void addInput(IPrototype prototype, DataModMask... masks) {
+    public void addInput(IPrototype prototype, DataModeMask... masks) {
         addInput(new Data(prototype, masks));
     }
 

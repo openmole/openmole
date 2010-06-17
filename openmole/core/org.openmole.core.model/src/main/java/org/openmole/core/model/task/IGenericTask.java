@@ -24,7 +24,7 @@ import org.openmole.core.model.job.IContext;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.data.DataModMask;
+import org.openmole.core.model.data.DataModeMask;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.resource.ILocalFileCache;
@@ -124,7 +124,7 @@ public interface IGenericTask extends IPortable {
 
     void addInput(IDataSet dataSet);
 
-    void addInput(IPrototype prototype, DataModMask... masks);
+    void addInput(IPrototype prototype, DataModeMask... masks);
 
     /**
      *
@@ -175,7 +175,7 @@ public interface IGenericTask extends IPortable {
     void addOutput(IData data);
     void addOutput(IDataSet dataSet);
 
-    void addOutput(IPrototype prototype, DataModMask... masks);
+    void addOutput(IPrototype prototype, DataModeMask... masks);
 
     /**
      *
