@@ -41,6 +41,7 @@ import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.tools.ClonningService;
 
+import static org.openmole.core.implementation.data.Util.*;
 /**
  *
  * @author reuillon
@@ -174,10 +175,10 @@ public class DataChannel implements IDataChannel {
                         IVariable var = context.getLocalVariable(data.getPrototype());
                         Collection curVal;
                         if(curentContext.containsVariableWithName(data.getPrototype())) {
-                            curVal = curentContext.getLocalValue(Util.toArray(data.getPrototype()));
+                            curVal = curentContext.getLocalValue(toArray(data.getPrototype()));
                         } else {
                             curVal = new ArrayList();
-                            curentContext.putVariable(new Variable(Util.toArray(data.getPrototype()), curVal));
+                            curentContext.putVariable(new Variable(toArray(data.getPrototype()), curVal));
                         }
                         curVal.add(var.getValue());
                     }
