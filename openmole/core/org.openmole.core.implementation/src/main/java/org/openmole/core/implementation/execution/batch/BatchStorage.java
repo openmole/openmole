@@ -79,7 +79,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 persistentSpace = getBaseDir().mkdirIfNotExist(persistent);
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
-            } 
+            }
         }
         return persistentSpace;
     }
@@ -110,13 +110,18 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                     Long removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
 
                     for (String dir : tmpNoTime.list(token)) {
-                        try {
-                            Long timeOfDir = Long.parseLong(dir);
-                            if (timeOfDir < removalDate) {
-                                service.submit(new URIFileCleaner(new URIFile(tmpNoTime, dir), true));
+                        IURIFile child = new URIFile(tmpNoTime, dir);
+                        if (child.URLRepresentsADirectory()) {
+                            try {
+                                Long timeOfDir = Long.parseLong(dir);
+                                if (timeOfDir < removalDate) {
+                                    service.submit(new URIFileCleaner(child, true));
+                                }
+                            } catch (NumberFormatException ex) {
+                                service.submit(new URIFileCleaner(child, true));
                             }
-                        } catch (NumberFormatException ex) {
-                            service.submit(new URIFileCleaner(new URIFile(tmpNoTime, dir), true));
+                        } else {
+                            service.submit(new URIFileCleaner(child, false));
                         }
                     }
                 } catch (IOException ex) {
