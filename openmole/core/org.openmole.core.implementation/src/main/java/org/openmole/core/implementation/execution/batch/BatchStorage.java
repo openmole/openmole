@@ -47,8 +47,8 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     final static ConfigurationLocation TmpDirRegenerate = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRegenerate");
 
     static {
-        Activator.getWorkspace().addToConfigurations(TmpDirRemoval, "P7J");
-        Activator.getWorkspace().addToConfigurations(TmpDirRegenerate, "P1J");
+        Activator.getWorkspace().addToConfigurations(TmpDirRemoval, "P7D");
+        Activator.getWorkspace().addToConfigurations(TmpDirRegenerate, "P1D");
     }
     public final static String persistent = "persistent/";
     public final static String tmp = "tmp/";
@@ -79,7 +79,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 persistentSpace = getBaseDir().mkdirIfNotExist(persistent);
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
-            }
+            } 
         }
         return persistentSpace;
     }
@@ -99,7 +99,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     public synchronized IURIFile getTmpSpace() throws InternalProcessingError, UserBadDataError, InterruptedException {
         if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) > System.currentTimeMillis()) {
             time = System.currentTimeMillis();
-            IAccessToken token = Activator.getBatchRessourceControl().getAccessTokenInterruptly(getBaseDir().getStorageDescription());
+            IAccessToken token = Activator.getBatchRessourceControl().waitAToken(getBaseDir().getStorageDescription());
 
             try {
                 IURIFile tmpNoTime = getBaseDir().mkdirIfNotExist(tmp, token);
@@ -120,14 +120,13 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                         }
                     }
                 } catch (IOException ex) {
-                    Logger.getLogger(BatchStorage.class.getName()).log(Level.WARNING, "Error durring tmp dir cleanning", ex);
+                    Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, "Error durring tmp dir cleanning", ex);
                 }
 
                 IURIFile tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token);
                 tmpSpace = tmpTmpDir;
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
-
             } finally {
                 Activator.getBatchRessourceControl().releaseToken(getBaseDir().getStorageDescription(), token);
             }
