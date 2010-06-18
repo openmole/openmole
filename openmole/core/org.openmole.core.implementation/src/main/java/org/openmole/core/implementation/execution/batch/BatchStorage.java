@@ -73,10 +73,10 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     }
 
     @Override
-    public synchronized IURIFile getPersistentSpace() throws InternalProcessingError, InterruptedException {
+    public synchronized IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
         if (persistentSpace == null) {
             try {
-                persistentSpace = getBaseDir().mkdirIfNotExist(persistent);
+                persistentSpace = getBaseDir(token).mkdirIfNotExist(persistent, token);
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
             }
@@ -96,13 +96,12 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     return persistentSpace;
     }*/
     @Override
-    public synchronized IURIFile getTmpSpace() throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public synchronized IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
         if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) > System.currentTimeMillis()) {
             time = System.currentTimeMillis();
-            IAccessToken token = Activator.getBatchRessourceControl().waitAToken(getBaseDir().getStorageDescription());
 
             try {
-                IURIFile tmpNoTime = getBaseDir().mkdirIfNotExist(tmp, token);
+                IURIFile tmpNoTime = getBaseDir(token).mkdirIfNotExist(tmp, token);
 
                 /* Cleanning old stuff */
                 try {
@@ -132,8 +131,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 tmpSpace = tmpTmpDir;
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
-            } finally {
-                Activator.getBatchRessourceControl().releaseToken(getBaseDir().getStorageDescription(), token);
             }
         }
         return tmpSpace;
@@ -151,11 +148,11 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     return tmpSpace;
     }*/
     @Override
-    public IURIFile getBaseDir() throws InternalProcessingError, InterruptedException {
+    public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException {
         if (baseSpace == null) {
             try {
                 IURIFile storeFile = new URIFile(getURI().toString());
-                baseSpace = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/');
+                baseSpace = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/', token);
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
             }
@@ -179,53 +176,60 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     public boolean test() {
 
         try {
-            final int lenght = 10;
 
-            byte[] rdm = new byte[lenght];
-
-            RNG.getRng().nextBytes(rdm);
-
-
-            IURIFile testFile = getTmpSpace().newFileInDir("test", ".bin");
-            File tmpFile = Activator.getWorkspace().newFile("test", ".bin");
+            IAccessToken token = Activator.getBatchRessourceControl().waitAToken(getDescription());
 
             try {
-                //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
-                FileOutputStream output = new FileOutputStream(tmpFile);
-                try {
-                    output.write(rdm);
-                } finally {
-                    output.close();
-                }
+                final int lenght = 10;
 
-                IURIFile tmpEfsFile = new URIFile(tmpFile);
-                tmpEfsFile.copy(testFile);
-            } finally {
-                tmpFile.delete();
-            }
+                byte[] rdm = new byte[lenght];
 
-            try {
-                File local = testFile.getFile();
-                FileInputStream input = new FileInputStream(local);
-                byte[] resRdm = new byte[lenght];
-                int nb;
+                RNG.getRng().nextBytes(rdm);
+
+
+                IURIFile testFile = getTmpSpace(token).newFileInDir("test", ".bin");
+                File tmpFile = Activator.getWorkspace().newFile("test", ".bin");
 
                 try {
-                    nb = input.read(resRdm);
+                    //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
+                    FileOutputStream output = new FileOutputStream(tmpFile);
+                    try {
+                        output.write(rdm);
+                    } finally {
+                        output.close();
+                    }
+
+                    URIFile.copy(tmpFile, testFile, token);
+
                 } finally {
-                    input.close();
+                    tmpFile.delete();
                 }
-                //String tmp = read.readLine();
-                if (nb == lenght && Arrays.equals(rdm, resRdm)) {
-                    return true;
+
+                try {
+                    File local = testFile.getFile(token);
+                    FileInputStream input = new FileInputStream(local);
+                    byte[] resRdm = new byte[lenght];
+                    int nb;
+
+                    try {
+                        nb = input.read(resRdm);
+                    } finally {
+                        input.close();
+                    }
+                    //String tmp = read.readLine();
+                    if (nb == lenght && Arrays.equals(rdm, resRdm)) {
+                        return true;
+                    }
+                } finally {
+                    Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(testFile, false));
                 }
             } finally {
-                Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(testFile, false));
+                Activator.getBatchRessourceControl().releaseToken(getDescription(), token);
+
             }
         } catch (Throwable e) {
             Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, getURI().toString(), e);
         }
-
         return false;
     }
 

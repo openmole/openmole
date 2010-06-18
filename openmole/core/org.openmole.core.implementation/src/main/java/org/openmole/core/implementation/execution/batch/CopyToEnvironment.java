@@ -78,7 +78,7 @@ class CopyToEnvironment implements Callable<Void> {
         IAccessToken token = duo.getRight();
 
         try {
-            communicationDir = communicationStorage.getTmpSpace().mkdir(UUID.randomUUID().toString() + '/', token);
+            communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
 
             inputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".in"));
             outputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".out"));

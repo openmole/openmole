@@ -583,22 +583,7 @@ public class URIFile implements IURIFile {
         IAccessToken token = Activator.getBatchRessourceControl().waitAToken(dest.getStorageDescription());
 
         try {
-            InputStream is = new java.io.FileInputStream(src);
-            try {
-                OutputStream os = dest.openOutputStream(token);
-
-                try {
-                    FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
-                    Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());
-                } catch (IOException t) {
-                    Activator.getBatchRessourceControl().failed(dest.getStorageDescription());
-                    throw t;
-                } finally {
-                    os.close();
-                }
-            } finally {
-                is.close();
-            }
+            copy(src, dest, token);
         } finally {
             try {
                 Activator.getBatchRessourceControl().releaseToken(dest.getStorageDescription(), token);
@@ -608,6 +593,27 @@ public class URIFile implements IURIFile {
                 throw new IOException(e);
             }
         }
+    }
+
+    public static void copy(final File src, final IURIFile dest, final IAccessToken token) throws IOException, InterruptedException {
+
+        InputStream is = new java.io.FileInputStream(src);
+        try {
+            OutputStream os = dest.openOutputStream(token);
+
+            try {
+                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());
+            } catch (IOException t) {
+                Activator.getBatchRessourceControl().failed(dest.getStorageDescription());
+                throw t;
+            } finally {
+                os.close();
+            }
+        } finally {
+            is.close();
+        }
+
     }
 
     public static void copy(final IURIFile src, final IURIFile dest) throws IOException, InterruptedException {
@@ -708,15 +714,15 @@ public class URIFile implements IURIFile {
     public void remove(boolean timeOut, final boolean recursive, final IAccessToken token) throws IOException, InterruptedException {
         final NSEntry entry = fetchEntry();
         try {
-           /* boolean directory = isDirectory(entry);
-
+            /* boolean directory = isDirectory(entry);
+            
             if (recursive && directory) {
-                List<String> chlids = list(token);
-
-                for (String child : chlids) {
-                    getChild(child).remove(timeOut, recursive, token);
-                }
-
+            List<String> chlids = list(token);
+            
+            for (String child : chlids) {
+            getChild(child).remove(timeOut, recursive, token);
+            }
+            
             }*/
 
             Task<?, ?> task;
@@ -826,7 +832,6 @@ public class URIFile implements IURIFile {
         }
     }
 
-
     @SoftCachable
     @Override
     public IBatchServiceDescription getStorageDescription() {
@@ -928,4 +933,3 @@ public class URIFile implements IURIFile {
         return hash;
     }
 }
-

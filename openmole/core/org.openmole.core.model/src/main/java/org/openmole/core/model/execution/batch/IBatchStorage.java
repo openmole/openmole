@@ -31,11 +31,11 @@ public interface IBatchStorage extends IBatchService {
 	
 	static final int waitStorageTimeOut = 5 * 60 * 1000;
 
-	IURIFile getTmpSpace() throws InternalProcessingError, UserBadDataError, InterruptedException;
+	IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
        // IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-	IURIFile getPersistentSpace() throws InternalProcessingError,UserBadDataError, InterruptedException;
+	IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
       //  IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-	IURIFile getBaseDir() throws InternalProcessingError,UserBadDataError, InterruptedException;
+	IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
        // IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
 		
 	//IBatchStorageDescription getDescription();

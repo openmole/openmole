@@ -171,7 +171,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                     IURIFile newFile;
                     try {
-                        newFile = storage.getPersistentSpace().newFileInDir("replica", ".rep");
+                        newFile = storage.getPersistentSpace(token).newFileInDir("replica", ".rep");
                         if (zipped) {
                             newFile = new GZipedURIFile(newFile);
                         }
