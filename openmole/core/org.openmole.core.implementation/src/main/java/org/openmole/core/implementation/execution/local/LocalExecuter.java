@@ -66,7 +66,7 @@ public class LocalExecuter implements Runnable {
                     executionJob.setState(ExecutionState.DONE);
                     executionJob.getEnvironment().sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
                 } finally {
-                    localEnvironment.getJobRegistry().remove(executionJob);
+                    localEnvironment.getJobRegistry().removeJob(job);
                 }
             } catch (InterruptedException e) {
                 if (!stop) {
