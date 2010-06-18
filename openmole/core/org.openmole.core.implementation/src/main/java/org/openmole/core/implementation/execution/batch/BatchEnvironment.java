@@ -29,9 +29,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openmole.commons.aspect.caching.Cachable;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.structure.Duo;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.internal.Activator;
@@ -39,14 +41,13 @@ import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.commons.aspect.caching.Cachable;
-import org.openmole.commons.tools.structure.Duo;
+import org.openmole.core.file.URIFileCleaner;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
+import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.job.IJob;
@@ -142,9 +143,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     private Future clean(final IURIFile file) {
-      // Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Clean " + file.toString());
-
-        Future future = Activator.getExecutorService().getExecutorService(file.getStorageDescription().toString()).submit(new Runnable() {
+        
+      Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Cleaning " + file.toString());
+      return Activator.getExecutorService().getExecutorService(file.getStorageDescription().toString()).submit(new URIFileCleaner(file, true, false));
+    /*    Future future = Activator.getExecutorService().getExecutorService(file.getStorageDescription().toString()).submit(new Runnable() {
 
             @Override
             public void run() {
@@ -172,7 +174,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
                 }
             }
         });
-        return future;
+        return future;*/
     }
 
 
@@ -311,8 +313,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         } finally {
             getInitST().unlock();
         }
-
-
     }
 
     @Override
