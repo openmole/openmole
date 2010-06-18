@@ -97,34 +97,29 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     }*/
     @Override
     public synchronized IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) > System.currentTimeMillis()) {
+        if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
             time = System.currentTimeMillis();
 
             try {
                 IURIFile tmpNoTime = getBaseDir(token).mkdirIfNotExist(tmp, token);
 
-                /* Cleanning old stuff */
-                try {
-                    ExecutorService service = Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE);
-                    Long removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
+                ExecutorService service = Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE);
+                Long removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
 
-                    for (String dir : tmpNoTime.list(token)) {
-                        IURIFile child = new URIFile(tmpNoTime, dir);
-                        if (child.URLRepresentsADirectory()) {
-                            try {
-                                Long timeOfDir = Long.parseLong(dir);
-                                if (timeOfDir < removalDate) {
-                                    service.submit(new URIFileCleaner(child, true));
-                                }
-                            } catch (NumberFormatException ex) {
+                for (String dir : tmpNoTime.list(token)) {
+                    IURIFile child = new URIFile(tmpNoTime, dir);
+                    if (child.URLRepresentsADirectory()) {
+                        try {
+                            Long timeOfDir = Long.parseLong(dir);
+                            if (timeOfDir < removalDate) {
                                 service.submit(new URIFileCleaner(child, true));
                             }
-                        } else {
-                            service.submit(new URIFileCleaner(child, false));
+                        } catch (NumberFormatException ex) {
+                            service.submit(new URIFileCleaner(child, true));
                         }
+                    } else {
+                        service.submit(new URIFileCleaner(child, false));
                     }
-                } catch (IOException ex) {
-                    Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, "Error durring tmp dir cleanning", ex);
                 }
 
                 IURIFile tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token);
@@ -186,7 +181,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
 
                 RNG.getRng().nextBytes(rdm);
 
-
                 IURIFile testFile = getTmpSpace(token).newFileInDir("test", ".bin");
                 File tmpFile = Activator.getWorkspace().newFile("test", ".bin");
 
@@ -200,7 +194,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                     }
 
                     URIFile.copy(tmpFile, testFile, token);
-
                 } finally {
                     tmpFile.delete();
                 }

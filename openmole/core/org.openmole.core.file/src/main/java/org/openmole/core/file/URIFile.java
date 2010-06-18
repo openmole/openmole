@@ -147,7 +147,6 @@ public class URIFile implements IURIFile {
         }
 
         try {
-
             return task.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new IOException(getLocationString(), e);

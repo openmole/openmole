@@ -142,10 +142,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
         } catch (InternalProcessingError e) {
             tryKill();
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
         } catch (UserBadDataError e) {
             tryKill();
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
         }
 
     }
