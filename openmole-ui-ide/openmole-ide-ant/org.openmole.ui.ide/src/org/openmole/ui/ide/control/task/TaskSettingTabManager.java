@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
 
@@ -47,9 +48,16 @@ public class TaskSettingTabManager {
     }
 
     private void addTaskSettingTab(ITaskCapsuleView tcv){
-        taskSettingMap.put(tcv,new ContainerComposer( new IOContainer(),
-                                                      new IOContainer())) ;
-        System.out.println("ADD " + taskSettingMap.get(tcv));
+        taskSettingMap.put(tcv,new ContainerComposerBuilder(tabbedPane.getWidth(),
+                                                            tabbedPane.getHeight()).setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .setSplitOrientation(JSplitPane.HORIZONTAL_SPLIT)
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .addComponent(new IOContainer())
+                                                                                   .build());
         tabbedPane.add(tcv.getName(),taskSettingMap.get(tcv));
 
     }

@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.control.task;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import javax.swing.JLabel;
+import java.awt.ComponentOrientation;
+import java.awt.Dimension;
+import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
@@ -27,24 +28,31 @@ import javax.swing.JSplitPane;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class ContainerComposer extends JPanel{
-    JSplitPane splitpane;
+public class ContainerComposer extends JPanel {
 
-
-    public ContainerComposer(Component...cmps) {
-        splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-       // setLayout(new BorderLayout());
+    public ContainerComposer(Set<ContainerComposerBuilder.OrientedComponent> ocs,
+            int w,
+            int h) {
+        setMinimumSize(new Dimension(w, h));
         int divider = 0;
-        for(Component co : cmps){
-            splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				      splitpane,
-                                      co);
-            splitpane.setOneTouchExpandable(true);
-        splitpane.setDividerLocation(divider);
-        divider += 150;
-        }
-        add(splitpane,BorderLayout.EAST);
-    }
+        JSplitPane splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        for (ContainerComposerBuilder.OrientedComponent oc : ocs) {
+            if (oc.getSplitOrientation() == splitpane.getOrientation()) {
+                splitpane.add(oc.getComponent());
+            } else {
+                divider = 0;
+                splitpane = new JSplitPane(oc.getSplitOrientation(),
+                        splitpane,
+                        oc.getComponent());
 
-    
+            }
+            /*  splitpane = new JSplitPane(oc.getOrientation(),
+            splitpane,
+            oc.getComponent());*/
+            splitpane.setOneTouchExpandable(true);
+            splitpane.setDividerLocation(divider);
+            divider += 150;
+        }
+        add(splitpane, BorderLayout.WEST);
+    }
 }

@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.control.task;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.ScrollPane;
+import java.awt.Graphics;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -31,12 +30,18 @@ import javax.swing.event.ListSelectionEvent;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class IOContainer extends JPanel implements ITaskSettingContainer{
-    private JScrollPane listScrollPane;
+public class IOContainer extends JPanel implements ITaskSettingContainer {
 
-    private String[] imageNames = { "Bird", "Cat"};
+    private JScrollPane listScrollPane;
+    private String[] imageNames = {"Bird", "Cat"};
     private JList list = new JList(imageNames);
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);  // Ask parent to paint background.
+        g.setColor(Color.orange);
+        g.fillRect(0, 0, getWidth(),getHeight());
+    }
 
     public IOContainer() {
         super(new BorderLayout());
@@ -45,15 +50,15 @@ public class IOContainer extends JPanel implements ITaskSettingContainer{
 
         listScrollPane = new JScrollPane(list);
 
-        add(new JLabel("Task input"),BorderLayout.NORTH);
-        add(list,BorderLayout.CENTER);
+        add(new JLabel("Task input"), BorderLayout.NORTH);
+        add(list, BorderLayout.CENTER);
 
-        setMinimumSize(new Dimension(100,50));
+        setMinimumSize(new Dimension(getWidth(),200));
         addItem();
     }
 
-    public void addItem(){
-        String[] uu = { "Birdee", "Cateiei"};
+    public void addItem() {
+        String[] uu = {"Birdee", "Cateiei"};
         list.add(new JList(uu));
     }
 
@@ -61,9 +66,4 @@ public class IOContainer extends JPanel implements ITaskSettingContainer{
     public void valueChanged(ListSelectionEvent lse) {
         System.out.println("selected ");
     }
-
-
-
-
-
 }
