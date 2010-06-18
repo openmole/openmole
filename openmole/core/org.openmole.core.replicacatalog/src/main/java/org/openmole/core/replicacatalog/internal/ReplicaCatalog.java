@@ -63,7 +63,7 @@ import org.openmole.core.model.execution.batch.IBatchStorage;
 //FIXME when Equinox bug #221329 is resolved remove the synchronized
 public class ReplicaCatalog implements IReplicaCatalog {
 
-    static ConfigurationLocation GCUpdateInterval = new ConfigurationLocation(ReplicaCatalog.class.getSimpleName(), "GCUpdateInterval");
+    final static ConfigurationLocation GCUpdateInterval = new ConfigurationLocation(ReplicaCatalog.class.getSimpleName(), "GCUpdateInterval");
 
     static {
         Activator.getWorkpace().addToConfigurations(GCUpdateInterval, "PT2M");
@@ -126,7 +126,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                     StringBuilder build = new StringBuilder();
                     for (Replica rep : set) {
-                        build.append(rep.toString() + ';');
+                        build.append(rep.toString()).append(';');
                     }
                     Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.WARNING, "Replica catalog corrupted (going to be repared), " + set.size() + " records: " + build.toString());
 

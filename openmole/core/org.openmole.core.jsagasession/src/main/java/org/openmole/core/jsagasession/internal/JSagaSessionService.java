@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.jsagasession.internal;
 
 import org.ogf.saga.context.Context;
@@ -28,56 +27,53 @@ import org.ogf.saga.session.SessionFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 
-
 public class JSagaSessionService implements IJSagaSessionService {
-	
-	Session session;
-	
-	@Override
-	public void addContext(Context context) throws InternalProcessingError {
-		
-		try {
-			getSession().addContext(context);
-		} catch (NotImplementedException e) {
-			throw new InternalProcessingError(e);
-		} 
-		
-	}
 
-	@Override
-	public Context createContext() throws InternalProcessingError {
-		try {
-			return ContextFactory.createContext();
-		} catch (NotImplementedException e) {
-			throw new InternalProcessingError(e);
-		} catch (IncorrectStateException e) {
-			throw new InternalProcessingError(e);
-		} catch (TimeoutException e) {
-			throw new InternalProcessingError(e);
-		} catch (NoSuccessException e) {
-			throw new InternalProcessingError(e);
-		}
-	}
+    Session session;
 
-	@Override
-	public Session getSession() throws InternalProcessingError {
-		if(session != null) return session;
-		
-		synchronized (this) {
-			if(session == null) {
-				try {
-					session = SessionFactory.createSession(false);
-				} catch (NotImplementedException e) {
-					throw new InternalProcessingError(e);
-				} catch (NoSuccessException e) {
-					throw new InternalProcessingError(e);
-				}
-			}
-			return session;
-		}
-		// TODO Auto-generated method stub
-	}
-	
+    @Override
+    public void addContext(Context context) throws InternalProcessingError {
 
+        try {
+            getSession().addContext(context);
+        } catch (NotImplementedException e) {
+            throw new InternalProcessingError(e);
+        }
 
+    }
+
+    @Override
+    public Context createContext() throws InternalProcessingError {
+        try {
+            return ContextFactory.createContext();
+        } catch (NotImplementedException e) {
+            throw new InternalProcessingError(e);
+        } catch (IncorrectStateException e) {
+            throw new InternalProcessingError(e);
+        } catch (TimeoutException e) {
+            throw new InternalProcessingError(e);
+        } catch (NoSuccessException e) {
+            throw new InternalProcessingError(e);
+        }
+    }
+
+    @Override
+    public Session getSession() throws InternalProcessingError {
+        if (session != null) {
+            return session;
+        }
+
+        synchronized (this) {
+            if (session == null) {
+                try {
+                    session = SessionFactory.createSession(false);
+                } catch (NotImplementedException e) {
+                    throw new InternalProcessingError(e);
+                } catch (NoSuccessException e) {
+                    throw new InternalProcessingError(e);
+                }
+            }
+            return session;
+        }
+    }
 }

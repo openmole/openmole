@@ -131,36 +131,6 @@ public class PluginManager implements IPluginManager {
         return dependencies;
     }
 
-    //FIXME May not work with class in jars mentioned in Bundle-ClassPath : check it
-   /* Iterable<String> getClassNames(Bundle b) {
-    Collection<String> ret = new LinkedList<String>();
-
-    Stack<String> toExplore = new Stack<String>();
-    toExplore.add("");
-
-    while (!toExplore.isEmpty()) {
-
-    String currentDir = toExplore.pop();
-
-
-    Enumeration e = b.getEntryPaths(currentDir);
-
-    while (e.hasMoreElements()) {
-    String cur = e.nextElement().toString();
-
-    if(cur.endsWith("/")) {
-    toExplore.push(cur);
-    } else {
-    if(cur.endsWith(".class")){
-    String className = cur.substring(0, cur.length()-6).replace('/', '.');
-    ret.add(className);
-    }
-    }
-
-    }
-    }
-    return ret;
-    }*/
     public synchronized Iterable<Bundle> getResolvedDirectDependencies(Bundle b) {
         if (resolvedBundlesDirectDependencies.containsKey(b)) {
             return resolvedBundlesDirectDependencies.get(b);

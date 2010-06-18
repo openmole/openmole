@@ -29,7 +29,7 @@ import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.resource.ILocalFileCache;
 
 
-/*TODO suport arrays and set*/
+//TODO suport arrays and set
 public class FileMigrator {
 
     public static void initFilesInVariable(IVariable variable, ILocalFileCache fileCache) {

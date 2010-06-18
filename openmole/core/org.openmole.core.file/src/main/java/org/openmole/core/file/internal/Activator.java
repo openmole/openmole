@@ -36,7 +36,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        this.context = context;
+        Activator.context = context;
 
         fileCache = new URIFileCache();
 
@@ -46,7 +46,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
+        fileCache = null;
     }
 
     public static IWorkspace getWorkspace() {

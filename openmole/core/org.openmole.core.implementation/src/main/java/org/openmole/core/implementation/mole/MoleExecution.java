@@ -139,7 +139,6 @@ public class MoleExecution implements IMoleExecution {
         IMoleJob job = capsule.toJob(context, ticket, nextJobId());
         submit(job, capsule, subMole);
     }
-
    
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new IMoleJob[]{moleJob});
@@ -177,14 +176,12 @@ public class MoleExecution implements IMoleExecution {
             submit(job, capsule);
         }
 
-        LOGGER.finer("A new job has been successfully submitted:" + moleJob);
+        LOGGER.log(Level.FINER, "A new job has been successfully submitted:{0}", moleJob);
     }
 
     private void submit(Job job, IGenericTaskCapsule capsule) {
         JobRegistry.getInstance().register(job, this);
-
         IEnvironment environment = environmentSelectionStrategy.selectEnvironment(capsule);
-
         jobs.add(new Duo<IJob, IEnvironment>(job, environment));
     }
 
@@ -214,7 +211,7 @@ public class MoleExecution implements IMoleExecution {
                     LOGGER.log(Level.FINE, "Scheduling interrupted", e);
                     return;
                 }
-                LOGGER.finer("New job taken:" + p.getLeft());
+                LOGGER.log(Level.FINER, "New job taken:{0}", p.getLeft());
                 try {
                     p.getRight().submit(p.getLeft());
                 } catch (UserBadDataError e) {
@@ -318,6 +315,7 @@ public class MoleExecution implements IMoleExecution {
     public synchronized ITicket createRootTicket() {
         return new Ticket(UUID.randomUUID().toString(), ticketNumber++);
     }
+    
 
     @Override
     public synchronized ITicket nextTicket(ITicket parent) {
