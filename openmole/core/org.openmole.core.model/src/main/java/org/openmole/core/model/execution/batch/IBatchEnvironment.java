@@ -27,8 +27,6 @@ public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnviron
 
     File getRuntime() throws UserBadDataError, InternalProcessingError;
 
-    void clean() throws InterruptedException, UserBadDataError, InternalProcessingError;
-
     IBatchEnvironmentDescription getDescription();
 
     IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError;

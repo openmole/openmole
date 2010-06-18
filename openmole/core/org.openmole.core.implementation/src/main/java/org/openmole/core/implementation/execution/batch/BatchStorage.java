@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.implementation.execution.batch;
 
 import java.io.File;
@@ -24,11 +22,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openmole.core.batchservicecontrol.BatchStorageDescription;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
@@ -39,20 +39,27 @@ import org.openmole.commons.tools.service.RNG;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchStorage extends BatchService implements IBatchStorage {
 
+    final static ConfigurationLocation TmpDirRemoval = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRemoval");
+    final static ConfigurationLocation TmpDirRegenerate = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRegenerate");
+
+    static {
+        Activator.getWorkspace().addToConfigurations(TmpDirRemoval, "P7J");
+        Activator.getWorkspace().addToConfigurations(TmpDirRegenerate, "P1J");
+    }
     public final static String persistent = "persistent/";
     public final static String tmp = "tmp/";
-    public final static Long time = System.currentTimeMillis();
-    
     URI location;
     transient IURIFile baseSpace;
     transient IURIFile tmpSpace;
     transient IURIFile persistentSpace;
+    transient Long time;
 
     public BatchStorage(URI baselocation, IBatchEnvironmentDescription batchEnvironmentDescription, int nbAccess) throws InternalProcessingError {
-        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation),  new UsageControl(nbAccess), new FailureControl(Activator.getWorkspace().getPreferenceAsInt(HistorySize)));
+        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl(Activator.getWorkspace().getPreferenceAsInt(HistorySize)));
         this.location = baselocation;
     }
 
@@ -77,42 +84,68 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return persistentSpace;
     }
 
-    @Override
+    /*  @Override
     public synchronized IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
-        if (persistentSpace == null) {
-            try {
-                persistentSpace = getBaseDir().mkdirIfNotExist(persistent, token);
-            } catch (IOException e) {
-                throw new InternalProcessingError(e);
-            }
-        }
-        return persistentSpace;
+    if (persistentSpace == null) {
+    try {
+    persistentSpace = getBaseDir().mkdirIfNotExist(persistent, token);
+    } catch (IOException e) {
+    throw new InternalProcessingError(e);
     }
-
+    }     
+    return persistentSpace;
+    }*/
     @Override
-    public synchronized IURIFile getTmpSpace() throws InternalProcessingError, InterruptedException {
-        if (tmpSpace == null) {
+    public synchronized IURIFile getTmpSpace() throws InternalProcessingError, UserBadDataError, InterruptedException {
+        if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) > System.currentTimeMillis()) {
+            time = System.currentTimeMillis();
+            IAccessToken token = Activator.getBatchRessourceControl().getAccessTokenInterruptly(getBaseDir().getStorageDescription());
+
             try {
-                tmpSpace = getBaseDir().mkdirIfNotExist(tmp);
+                IURIFile tmpNoTime = getBaseDir().mkdirIfNotExist(tmp, token);
+
+                /* Cleanning old stuff */
+                try {
+                    ExecutorService service = Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE);
+                    Long removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
+
+                    for (String dir : tmpNoTime.list(token)) {
+                        try {
+                            Long timeOfDir = Long.parseLong(dir);
+                            if (timeOfDir < removalDate) {
+                                service.submit(new URIFileCleaner(new URIFile(tmpNoTime, dir), true));
+                            }
+                        } catch (NumberFormatException ex) {
+                            service.submit(new URIFileCleaner(new URIFile(tmpNoTime, dir), true));
+                        }
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(BatchStorage.class.getName()).log(Level.WARNING, "Error durring tmp dir cleanning", ex);
+                }
+
+                IURIFile tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token);
+                tmpSpace = tmpTmpDir;
             } catch (IOException e) {
                 throw new InternalProcessingError(e);
+
+            } finally {
+                Activator.getBatchRessourceControl().releaseToken(getBaseDir().getStorageDescription(), token);
             }
         }
         return tmpSpace;
     }
 
-    @Override
+    /* @Override
     public synchronized IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
-        if (tmpSpace == null) {
-            try {
-                tmpSpace = getBaseDir().mkdirIfNotExist(tmp, token);
-            } catch (IOException e) {
-                throw new InternalProcessingError(e);
-            }
-        }
-        return tmpSpace;
+    if (tmpSpace == null) {
+    try {
+    tmpSpace = getBaseDir().mkdirIfNotExist(tmp, token);
+    } catch (IOException e) {
+    throw new InternalProcessingError(e);
     }
-
+    }
+    return tmpSpace;
+    }*/
     @Override
     public IURIFile getBaseDir() throws InternalProcessingError, InterruptedException {
         if (baseSpace == null) {
@@ -126,19 +159,18 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return baseSpace;
     }
 
-    @Override
+    /* @Override
     public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException {
-        if (baseSpace == null) {
-            try {
-                IURIFile storeFile = new URIFile(getURI().toString());
-                baseSpace = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/', token);
-            } catch (IOException e) {
-                throw new InternalProcessingError(e);
-            }
-        }
-        return baseSpace;
+    if (baseSpace == null) {
+    try {
+    IURIFile storeFile = new URIFile(getURI().toString());
+    baseSpace = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/', token);
+    } catch (IOException e) {
+    throw new InternalProcessingError(e);
     }
-
+    }
+    return baseSpace;
+    }*/
     @Override
     public boolean test() {
 
@@ -193,12 +225,12 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return false;
     }
 
-  /*  @Cachable
+    /*  @Cachable
     @Override
     public IBatchStorageDescription getDescription() {
-        return ;
+    return ;
     }
-*/
+     */
     @Override
     public String toString() {
         return location.toString();

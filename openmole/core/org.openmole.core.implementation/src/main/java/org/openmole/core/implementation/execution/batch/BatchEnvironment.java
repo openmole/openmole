@@ -14,14 +14,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.execution.batch;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +31,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.log4j.helpers.QuietWriter;
 import org.openmole.commons.aspect.caching.Cachable;
 
 import org.openmole.commons.exception.InternalProcessingError;
@@ -57,10 +60,8 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     final static String ConfigGroup = BatchEnvironment.class.getSimpleName();
     final static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
-
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
-
     final static ConfigurationLocation BestStoragesRatio = new ConfigurationLocation(ConfigGroup, "BestStoragesRatio");
     final static ConfigurationLocation BestJobServiceRatio = new ConfigurationLocation(ConfigGroup, "BestJobServiceRatio");
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
@@ -71,12 +72,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         Activator.getWorkspace().addToConfigurations(BestJobServiceRatio, "1.0");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "0.5");
     }
-
     BatchServiceGroup<JS> jobServices;
     BatchServiceGroup<IBatchStorage> storages;
     Lock initJS;
     Lock initST;
-
     IBatchEnvironmentDescription description;
     Integer memorySizeForRuntime;
     File runtime;
@@ -89,7 +88,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         this.memorySizeForRuntime = memorySizeForRuntime;
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN);
     }
-    
+
     public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
         this(description, Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime));
     }
@@ -105,78 +104,13 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Override
-    public synchronized File getRuntime() throws UserBadDataError, InternalProcessingError{
+    public synchronized File getRuntime() throws UserBadDataError, InternalProcessingError {
         if (runtime == null) {
             runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
         }
 
         return runtime;
     }
-
-    @Override
-    public void clean() throws InterruptedException, InternalProcessingError, UserBadDataError {
-        getAuthentication().initializeAccessIfNeeded();
-        Activator.getReplicaCatalog().removeAllReplicaForEnvironment(this);
-
-        Collection<Future> futures = new LinkedList<Future>();
-
-        for (final IBatchStorage storage : allStorages()) {
-            try {
-                futures.add(clean(storage.getBaseDir()));
-            } catch (InternalProcessingError t) {
-                Logger.getLogger(BatchEnvironment.class.getName()).log(Level.WARNING, "", t);
-            }
-        }
-
-
-        try {
-            for (Future f : futures) {
-                f.get();
-            }
-        } catch (ExecutionException e) {
-            throw new InternalProcessingError(e);
-        }
-
-        for (final IBatchStorage storage : allStorages()) {
-            Activator.getExecutorService().removeAndShutDownExecutorService(storage.getDescription().toString(), true);
-        }
-    }
-
-    private Future clean(final IURIFile file) {
-        
-      Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Cleaning " + file.toString());
-      return Activator.getExecutorService().getExecutorService(file.getStorageDescription().toString()).submit(new URIFileCleaner(file, true, false));
-    /*    Future future = Activator.getExecutorService().getExecutorService(file.getStorageDescription().toString()).submit(new Runnable() {
-
-            @Override
-            public void run() {
-               try {
-                    if (file.URLRepresentsADirectory()) {
-                        Collection<Future> futures = new LinkedList<Future>();
-
-                        for (String child : file.list()) {
-                            futures.add(clean(new URIFile(file, child)));
-                        }
-
-                        for (Future f : futures) {
-                            f.get();
-                        }
-
-                        file.remove(false);
-                        Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Cleaned directory " + file.toString());
-
-                    } else {
-                        file.remove(false);
-                        Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Cleaned " + file.toString());
-                    }
-                } catch (Throwable t) {
-                    Logger.getLogger(BatchEnvironment.class.getName()).log(Level.WARNING, "", t);
-                }
-            }
-        });
-        return future;*/
-    }
-
 
 
     public Integer getMemorySizeForRuntime() {
@@ -233,7 +167,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         }
 
         while ((storages.isEmpty()) && nbLeftRunning.get() > 0) {
-             oneFinished.acquire();
+            oneFinished.acquire();
         }
 
         if (storages.isEmpty()) {
@@ -271,7 +205,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
 
         while (jobServices.isEmpty() && nbStillRunning.get() > 0) {
-                done.acquire();
+            done.acquire();
         }
 
         if (jobServices.isEmpty()) {
@@ -317,7 +251,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     @Override
     public Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException {
-            return getJobServices().getAService();
+        return getJobServices().getAService();
     }
 
     private Lock getInitJS() {
@@ -345,5 +279,4 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
             return initST;
         }
     }
-
 }

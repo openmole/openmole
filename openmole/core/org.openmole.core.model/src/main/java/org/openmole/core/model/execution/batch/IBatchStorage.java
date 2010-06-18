@@ -21,6 +21,7 @@ package org.openmole.core.model.execution.batch;
 import java.net.URI;
 
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.file.IURIFile;
 
 
@@ -30,12 +31,12 @@ public interface IBatchStorage extends IBatchService {
 	
 	static final int waitStorageTimeOut = 5 * 60 * 1000;
 
-	IURIFile getTmpSpace() throws InternalProcessingError, InterruptedException;
-        IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, InterruptedException;
-	IURIFile getPersistentSpace() throws InternalProcessingError, InterruptedException;
-        IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException;
-	IURIFile getBaseDir() throws InternalProcessingError, InterruptedException;
-        IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException;
+	IURIFile getTmpSpace() throws InternalProcessingError, UserBadDataError, InterruptedException;
+       // IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
+	IURIFile getPersistentSpace() throws InternalProcessingError,UserBadDataError, InterruptedException;
+      //  IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
+	IURIFile getBaseDir() throws InternalProcessingError,UserBadDataError, InterruptedException;
+       // IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
 		
 	//IBatchStorageDescription getDescription();
 }

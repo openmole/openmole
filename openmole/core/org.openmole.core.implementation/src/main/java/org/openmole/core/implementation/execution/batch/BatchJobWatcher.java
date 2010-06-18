@@ -129,7 +129,6 @@ public class BatchJobWatcher implements IUpdatable {
             for (IJob j : jobGroupsToRemove) {
                 registry.removeJob(j);
             }
-
         }
 
     }
