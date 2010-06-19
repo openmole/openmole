@@ -285,7 +285,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         remove(replica);
 
         if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getEnvironmentDescription(), replica.isZipped()) == null)
-            return Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(replica.getDestination(), false));
+            return Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(replica.getDestination(), false));
         else return null;
     }
 

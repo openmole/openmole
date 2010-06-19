@@ -18,11 +18,8 @@
 package org.openmole.core.model.execution.batch;
 
 import org.openmole.core.model.execution.IExecutionJob;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-
 
 public interface IBatchExecutionJob<ENV extends IBatchEnvironment<?>> extends IExecutionJob<ENV> {
         IBatchJob getBatchJob();
-	void kill() throws UserBadDataError, InternalProcessingError, InterruptedException;
+	void kill();
 }

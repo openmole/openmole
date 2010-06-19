@@ -27,5 +27,6 @@ public enum ExecutorType {
     DOWNLOAD,
     SUBMIT,
     UPDATE,
-    KILL_REMOVE
+    KILL,
+    REMOVE;
 }

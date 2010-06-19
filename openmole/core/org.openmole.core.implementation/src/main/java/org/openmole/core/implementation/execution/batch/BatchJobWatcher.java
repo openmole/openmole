@@ -64,22 +64,7 @@ public class BatchJobWatcher implements IUpdatable {
          
                 if (job.allMoleJobsFinished()) {
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
-                        org.openmole.core.implementation.internal.Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    ej.kill();
-                                } catch (InternalProcessingError ex) {
-                                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                } catch (UserBadDataError ex) {
-                                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                }
-
-                            }
-                        });
+                        ej.kill();
                     }
 
                     jobGroupsToRemove.add(job);
@@ -90,21 +75,7 @@ public class BatchJobWatcher implements IUpdatable {
                     for (final IBatchExecutionJob<?> ej : registry.getExecutionJobsFor(job)) {
                         switch (ej.getState()) {
                             case FAILED:
-                                org.openmole.core.implementation.internal.Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            ej.kill();
-                                        } catch (InternalProcessingError ex) {
-                                            Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                        } catch (UserBadDataError ex) {
-                                            Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                        } catch (InterruptedException ex) {
-                                            Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.INFO, "Error durring job kill.", ex);
-                                        }
-                                    }
-                                });
+                                ej.kill();
                             case KILLED:
                                 executionJobsToRemove.add(ej);
                         }

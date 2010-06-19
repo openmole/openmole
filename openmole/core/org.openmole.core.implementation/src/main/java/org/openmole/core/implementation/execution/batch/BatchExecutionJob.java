@@ -141,10 +141,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     break;
             }
         } catch (InternalProcessingError e) {
-            tryKill();
+            kill();
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
         } catch (UserBadDataError e) {
-            tryKill();
+            kill();
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
         }
 
@@ -214,22 +214,13 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     private void clean() {
         if (getInitStorage().isInitialized()) {
-             Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(getInitStorage().getCommunicationDir(),true));
+             Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(getInitStorage().getCommunicationDir(),true));
         }
     }
 
-    void tryKill() throws InterruptedException {
-        try {
-            kill();
-        } catch (InternalProcessingError ex) {
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.SEVERE, "Error durring job kill.", ex);
-        } catch (UserBadDataError ex) {
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.SEVERE, "Error durring job kill.", ex);
-        }
-    }
 
     @Override
-    public void kill() throws InterruptedException, UserBadDataError, InternalProcessingError {
+    public void kill() {
         if (!killed.getAndSet(true)) {
             try {
                 try {
@@ -243,7 +234,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 } finally {
                     IBatchJob bj = getBatchJob();
                     if (bj != null) {
-                        Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new BatchJobKiller(bj));
+                        Activator.getExecutorService().getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj));
                     }
                 }
             } finally {

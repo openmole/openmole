@@ -103,7 +103,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
             try {
                 IURIFile tmpNoTime = getBaseDir(token).mkdirIfNotExist(tmp, token);
 
-                ExecutorService service = Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE);
+                ExecutorService service = Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE);
                 Long removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
 
                 for (String dir : tmpNoTime.list(token)) {
@@ -214,7 +214,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                         return true;
                     }
                 } finally {
-                    Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(testFile, false));
+                    Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false));
                 }
             } finally {
                 Activator.getBatchRessourceControl().releaseToken(getDescription(), token);
