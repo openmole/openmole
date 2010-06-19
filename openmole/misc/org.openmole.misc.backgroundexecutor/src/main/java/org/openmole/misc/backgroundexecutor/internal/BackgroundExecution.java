@@ -34,6 +34,7 @@ public class BackgroundExecution implements IBackgroundExecution {
                     @Override
                     public void uncaughtException(Thread thread, Throwable thrwbl) {
                        exception = thrwbl;
+                       finished = true;
                     }
                 });
 

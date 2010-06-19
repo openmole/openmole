@@ -19,6 +19,7 @@ package org.openmole.core.implementation.execution.batch;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -35,6 +36,7 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.commons.tools.structure.Duo;
+import org.openmole.core.file.URIFileCleaner;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -54,8 +56,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     long updateInterval;
     IUpdatableFuture future;
-    IBatchJob batchJob;
-    Boolean killed = false;
+   IBatchJob batchJob;
+    final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment initStorage;
     GetResultFromEnvironment getResult;
 
@@ -63,7 +65,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     transient IBackgroundExecution finalizeExecution;
     transient IURIFile inputFile;
     transient IURIFile outputFile;
-    transient Lock killLock;
 
     public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError {
         super(executionEnvironment, job);
@@ -81,9 +82,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException, TimeoutException {
-        if (getBatchJob() == null) {
-            return ExecutionState.READY;
-        }
+        if (getBatchJob() == null)  return ExecutionState.READY;
+        if(killed.get()) return ExecutionState.KILLED;
 
         ExecutionState oldState = getBatchJob().getState();
 
@@ -100,7 +100,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     @Override
     public ExecutionState getState() {
-        if (killed) {
+        if (killed.get()) {
             return ExecutionState.KILLED;
         }
         if (getBatchJob() == null) {
@@ -120,7 +120,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             try {
                 state = updateAndGetState();
             } catch (TimeoutException e) {
-                Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+                Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
                 state = getState();
             }
             
@@ -212,13 +212,9 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         return updateInterval;
     }
 
-    private void clean() throws InterruptedException, InternalProcessingError {
+    private void clean() {
         if (getInitStorage().isInitialized()) {
-            try {
-                getInitStorage().getCommunicationDir().remove(true);
-            } catch (IOException ex) {
-                throw new InternalProcessingError(ex);
-            }
+             Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new URIFileCleaner(getInitStorage().getCommunicationDir(),true));
         }
     }
 
@@ -234,20 +230,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     @Override
     public void kill() throws InterruptedException, UserBadDataError, InternalProcessingError {
-        //stopUpdate();
-        boolean performKill;
-
-        Lock lock = getKillLock();
-        lock.lock();
-
-        try {
-            performKill = !killed;
-            killed = true;
-        } finally {
-            lock.unlock();
-        }
-
-        if (performKill) {
+        if (!killed.getAndSet(true)) {
             try {
                 try {
                     if (initStorageExec != null) {
@@ -258,19 +241,15 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     }
                     clean();
                 } finally {
-                    if (getBatchJob() != null) {
-                        getBatchJob().kill();
+                    IBatchJob bj = getBatchJob();
+                    if (bj != null) {
+                        Activator.getExecutorService().getExecutorService(ExecutorType.KILL_REMOVE).submit(new BatchJobKiller(bj));
                     }
                 }
             } finally {
                 stopUpdate();
             }
         }
-    }
-
-    private synchronized Lock getKillLock() {
-        if(killLock == null) killLock = new ReentrantLock();
-        return killLock;
     }
 
     @Override

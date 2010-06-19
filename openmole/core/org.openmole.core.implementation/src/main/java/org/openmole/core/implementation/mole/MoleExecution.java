@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.BidiMap;
@@ -93,17 +94,17 @@ public class MoleExecution implements IMoleExecution {
     
     final Mole mole;
 
-    BlockingQueue<Duo<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Duo<IJob, IEnvironment>>();
-    Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
+    final BlockingQueue<Duo<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Duo<IJob, IEnvironment>>();
+    final Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
 
-    Long ticketNumber = 0L;
-    Long currentJobId = 0L;
+    final AtomicLong ticketNumber = new AtomicLong();
+    final AtomicLong currentJobId = new AtomicLong();
 
-    ILocalCommunication localCommunication;
-    IEnvironmentSelectionStrategy environmentSelectionStrategy;
+    final ILocalCommunication localCommunication;
+    final IEnvironmentSelectionStrategy environmentSelectionStrategy;
     
-    BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
-    MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
+    final BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
+    final MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
 
     final MoleExecutionAdapterForMoleJob moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob();
     final MoleExecutionAdapterForSubMoleExecution moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution();
@@ -241,8 +242,10 @@ public class MoleExecution implements IMoleExecution {
     public synchronized void cancel() throws InternalProcessingError, UserBadDataError {
         getSubmiter().interrupt();
 
-        for (IMoleJob moleJob : getAllMoleJobsInternal()) {
-            moleJob.cancel();
+        synchronized(inProgress) {
+            for (IMoleJob moleJob : inProgress.keySet()) {
+                moleJob.cancel();
+            }
         }
     }
 
@@ -255,16 +258,14 @@ public class MoleExecution implements IMoleExecution {
         return submiter;
     }
 
-    private Iterable<IMoleJob> getAllMoleJobsInternal() {
-        return inProgress.keySet();
-    }
+  
 
     @Override
-    public synchronized Iterable<IMoleJob> getAllMoleJobs() {
+    public  Iterable<IMoleJob> getAllMoleJobs() {
         Collection<IMoleJob> ret = new LinkedList<IMoleJob>();
 
-        for (IMoleJob moleJob : getAllMoleJobsInternal()) {
-            ret.add(moleJob);
+        synchronized(inProgress) {
+            ret.addAll(inProgress.keySet());
         }
 
         return ret;
@@ -312,14 +313,14 @@ public class MoleExecution implements IMoleExecution {
     }
 
     @Override
-    public synchronized ITicket createRootTicket() {
-        return new Ticket(UUID.randomUUID().toString(), ticketNumber++);
+    public  ITicket createRootTicket() {
+        return new Ticket(UUID.randomUUID().toString(), ticketNumber.getAndIncrement());
     }
     
 
     @Override
-    public synchronized ITicket nextTicket(ITicket parent) {
-        return new Ticket(ticketNumber++, parent);
+    public ITicket nextTicket(ITicket parent) {
+        return new Ticket(ticketNumber.getAndIncrement(), parent);
     }
 
     @Override
@@ -328,8 +329,8 @@ public class MoleExecution implements IMoleExecution {
     }
 
     @Override
-    public synchronized IMoleJobId nextJobId() {
-        return new MoleJobId(currentJobId++);
+    public IMoleJobId nextJobId() {
+        return new MoleJobId(currentJobId.getAndIncrement());
     }
 
     @Override

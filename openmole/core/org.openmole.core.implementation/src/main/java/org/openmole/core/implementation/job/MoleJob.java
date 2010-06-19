@@ -42,12 +42,12 @@ import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.implementation.tools.LocalHostName;
 import org.openmole.core.model.job.ITimeStamp;
-import org.openmole.core.model.resource.IResource;
 
 public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     final public static String TransitionPerformed = "TransitionPerformed";
     private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
+
     final private ITicket ticket;
     final private IProgress progress;
     final private IGenericTask task;
