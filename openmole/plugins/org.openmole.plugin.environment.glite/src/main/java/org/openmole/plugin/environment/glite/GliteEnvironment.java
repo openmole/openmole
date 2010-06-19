@@ -114,8 +114,8 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Activator.getWorkspace().addToConfigurations(CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/");
         Activator.getWorkspace().addToConfigurations(FqanLocation, "");
 
-        Activator.getWorkspace().addToConfigurations(LocalThreadsBySELocation, "5");
-        Activator.getWorkspace().addToConfigurations(LocalThreadsByWMSLocation, "5");
+        Activator.getWorkspace().addToConfigurations(LocalThreadsBySELocation, "10");
+        Activator.getWorkspace().addToConfigurations(LocalThreadsByWMSLocation, "10");
 
         Activator.getWorkspace().addToConfigurations(ProxyRenewalRatio, "0.2");
 
