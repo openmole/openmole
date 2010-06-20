@@ -23,7 +23,9 @@ import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.commons.tools.structure.Duo;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.ui.console.internal.command.registry.Registry;
+import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.EnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.IViewer;
 import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer;
@@ -40,6 +42,7 @@ public class Print extends UICommand {
     public Print(Shell shell, String string, String string1) {
         super(shell, string, string1);
         viewers.register(IEnvironment.class, new EnvironmentViewer());
+        viewers.register(IBatchEnvironment.class, new BatchEnvironmentViewer());
         viewers.register(IMoleExecution.class, new MoleExecutionViewer());
         viewers.register(Registry.class, new RegistryViewer());
     }

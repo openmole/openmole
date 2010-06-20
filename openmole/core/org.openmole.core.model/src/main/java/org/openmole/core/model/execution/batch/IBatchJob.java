@@ -32,6 +32,8 @@ public interface IBatchJob {
 	ExecutionState getState();
         Long getTimeStemp(ExecutionState state);
 
+        IBatchServiceDescription getBatchJobServiceDescription();
+        
 	void kill() throws InternalProcessingError, UserBadDataError, InterruptedException;
 	void kill(IAccessToken token) throws UserBadDataError, InternalProcessingError;
 	

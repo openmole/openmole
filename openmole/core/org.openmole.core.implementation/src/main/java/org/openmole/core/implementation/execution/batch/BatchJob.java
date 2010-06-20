@@ -34,8 +34,8 @@ public abstract class BatchJob implements IBatchJob {
     
     Long lastStatusChanged;
     Long lastStatusChangeInterval;
-    IBatchServiceDescription jobServiceDescription;
-    Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new TreeMap<ExecutionState, Long>());
+    private final IBatchServiceDescription jobServiceDescription;
+    private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new TreeMap<ExecutionState, Long>());
 
     public BatchJob(IBatchJobService<?> jobService) {
         super();
@@ -62,6 +62,11 @@ public abstract class BatchJob implements IBatchJob {
             lastStatusChanged = curDate;
             this.state = state;
         }
+    }
+
+    @Override
+    public IBatchServiceDescription getBatchJobServiceDescription() {
+        return jobServiceDescription;
     }
 
     @Override

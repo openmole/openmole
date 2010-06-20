@@ -56,7 +56,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     long updateInterval;
     IUpdatableFuture future;
-   IBatchJob batchJob;
+    IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment initStorage;
     GetResultFromEnvironment getResult;
@@ -81,7 +81,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         return batchJob;
     }
 
-    private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException, TimeoutException {
+    private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException {
         if (getBatchJob() == null)  return ExecutionState.READY;
         if(killed.get()) return ExecutionState.KILLED;
 
@@ -116,15 +116,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     @Override
     public void update() throws InterruptedException {
         try {
-            ExecutionState state;
-            try {
-                state = updateAndGetState();
-            } catch (TimeoutException e) {
-                Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
-                state = getState();
-            }
-            
-           // Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.INFO, "State " + state);
+            ExecutionState state = updateAndGetState();
 
             switch (state) {
                 case READY:
@@ -145,7 +137,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
         } catch (UserBadDataError e) {
             kill();
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error in job update", e);
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.INFO, "Error in job update", e);
         }
 
     }
@@ -197,7 +189,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     bj.submit(js.getRight());
                     setBatchJob(bj);
                 } catch (InternalProcessingError e) {
-                    Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error durring job submission.", e);
+                    Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
                 } finally {
                     Activator.getBatchRessourceControl().releaseToken(js.getLeft().getDescription(), js.getRight());
                 }
@@ -243,13 +235,4 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         }
     }
 
-    @Override
-    public String toString() {
-        StringBuilder ret = new StringBuilder();
-
-        ret.append("Job ");
-        ret.append(getState().getLabel());
-
-        return ret.toString();
-    }
 }
