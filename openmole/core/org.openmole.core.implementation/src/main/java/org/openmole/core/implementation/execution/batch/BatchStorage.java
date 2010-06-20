@@ -112,13 +112,13 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                         try {
                             Long timeOfDir = Long.parseLong(dir);
                             if (timeOfDir < removalDate) {
-                                service.submit(new URIFileCleaner(child, true));
+                                service.submit(new URIFileCleaner(child, true, false));
                             }
                         } catch (NumberFormatException ex) {
-                            service.submit(new URIFileCleaner(child, true));
+                            service.submit(new URIFileCleaner(child, true, false));
                         }
                     } else {
-                        service.submit(new URIFileCleaner(child, false));
+                        service.submit(new URIFileCleaner(child, false, false));
                     }
                 }
 

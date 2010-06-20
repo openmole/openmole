@@ -78,7 +78,7 @@ public class BDII {
                 }*/
                 //System.out.println(GlueUtility.getStringAttribute( "GlueSEUniqueID", r.getAttributes()));
             } catch (NamingException ex) {
-                Logger.getLogger(BDII.class.getName()).log(Level.WARNING, "Error when quering BDII", ex);
+                Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Error when quering BDII", ex);
             }
 
 
@@ -132,15 +132,15 @@ public class BDII {
 
                     srmIds.add(httpgURI.getHost());
                 } else {
-                    Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "No path found in BDII for host " + httpgURI.getHost());
+                    Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "No path found in BDII for host " + httpgURI.getHost());
                 }
 
 
 
             } catch (NamingException ex) {
-                Logger.getLogger(BDII.class.getName()).log(Level.WARNING, "Error interrogating the BDII.", ex);
+                Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Error interrogating the BDII.", ex);
             } catch (URISyntaxException e) {
-                Logger.getLogger(BDII.class.getName()).log(Level.WARNING, "Error creating URI for a storge element.", e);
+                Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Error creating URI for a storge element.", e);
             }
         }
 
