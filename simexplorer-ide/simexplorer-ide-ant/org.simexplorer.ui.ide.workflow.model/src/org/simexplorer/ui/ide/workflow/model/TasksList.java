@@ -8,7 +8,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.mole.IExecutionContext;
 
 
 public class TasksList extends GenericTask implements Iterable<GenericTask> {
@@ -54,7 +53,7 @@ public class TasksList extends GenericTask implements Iterable<GenericTask> {
     }
 
     @Override
-    protected void process(IContext context, IExecutionContext execContext, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext ic, IProgress ip) throws UserBadDataError, InternalProcessingError, InterruptedException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -33,7 +33,7 @@ import org.openide.util.lookup.ServiceProvider;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.plugin.task.filemanagment.TemplateFileGeneratorFromLocalFileTask;
+import org.openmole.plugin.task.filemanagement.TemplateFileGeneratorFromLocalFileTask;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import org.simexplorer.ide.ui.dataexplorer.structure.InputStructureTopComponent;
 import org.simexplorer.ide.ui.tools.ActionsUtils;

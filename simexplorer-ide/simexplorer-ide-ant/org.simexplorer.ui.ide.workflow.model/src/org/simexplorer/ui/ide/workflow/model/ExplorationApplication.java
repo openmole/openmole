@@ -40,6 +40,7 @@ import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.plan.Plan;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.data.Prototype;
+import org.openmole.core.implementation.data.Util;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.ITask;
@@ -217,7 +218,7 @@ public class ExplorationApplication {
             }
             // aggregation if needed
             if (isGatheredAfterExploration(contract)) {
-                finalTask.addInput(contract.array());
+                finalTask.addInput(Util.toArray(contract));
             }
         }
         // workflow

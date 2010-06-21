@@ -18,6 +18,7 @@
  */
 package org.simexplorer.ide.ui.dataexplorer.factors;
 
+import com.rits.cloning.Cloner;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -31,16 +32,19 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Prototype;
-import org.openmole.misc.clonning.internal.ClonningService;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.core.model.data.IVariable;
 import org.simexplorer.ide.ui.PanelFactory;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
 import org.simexplorer.ide.ui.tools.SimpleWizard;
 import org.openmole.core.implementation.plan.Factor;
 import org.simexplorer.core.workflow.methods.DomainEditorPanel;
 import org.openmole.core.implementation.domain.Domain;
+import org.openmole.core.implementation.tools.ClonningService;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.domain.IDomain;
@@ -99,7 +103,7 @@ public class NewFactorPanel extends SimpleWizard {
         if (factor0 != null) {
             this.isDuplicated = isDuplicated;
             if (isDuplicated) {
-                this.factor = (Factor) new ClonningService().clone(factor0);
+                this.factor = (Factor) new Cloner().deepClone(factor0);
             } else {
                 this.factor = factor0;
                 // remove our name from the list

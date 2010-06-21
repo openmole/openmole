@@ -103,7 +103,15 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.core.structuregenerator</code-name-base>
+                    <code-name-base>org.openmole.commons.exception</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openmole.commons.tools</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -119,14 +127,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.core.workflow.methods</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.openmole.core.model</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -135,15 +135,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.commons.exception</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openmole.commons.tools</code-name-base>
+                    <code-name-base>org.openmole.core.structuregenerator</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -167,7 +159,31 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.tools.code</code-name-base>
+                    <code-name-base>org.openmole.plugin.plan.boxbehnken</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openmole.plugin.plan.centralcomposite</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openmole.plugin.plan.complete</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openmole.plugin.plan.lhs</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -191,15 +207,15 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.groovy</code-name-base>
+                    <code-name-base>org.openmole.plugin.task.filemanagement</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>0.3</specification-version>
+                        <specification-version>0.3.0</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.filemanagment</code-name-base>
+                    <code-name-base>org.openmole.plugin.task.groovy</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -215,31 +231,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.plan.boxbehnken</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openmole.plugin.plan.complete</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openmole.plugin.plan.centralcomposite</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openmole.plugin.plan.lhs</code-name-base>
+                    <code-name-base>org.openmole.plugin.tools.code</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -260,6 +252,14 @@
                     <compile-dependency/>
                     <run-dependency>
                         <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>uk.com.robustit.cloning</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.7.1</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>

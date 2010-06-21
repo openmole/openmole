@@ -121,7 +121,7 @@ public class SystemExecTaskPanel extends EditorPanel<SystemExecTask> {
     }// </editor-fold>//GEN-END:initComponents
 
     private void commandCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_commandCaretUpdate
-        getObjectEdited().setCmd(commandTextField.getText());
+        setObjectEdited(new SystemExecTask(getObjectEdited().getName(), commandTextField.getText()));
     }//GEN-LAST:event_commandCaretUpdate
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
@@ -153,7 +153,7 @@ public class SystemExecTaskPanel extends EditorPanel<SystemExecTask> {
     @Override
     public void setObjectEdited(SystemExecTask method) {
         super.setObjectEdited(method);
-        commandTextField.setText(method.getCmd());
+        commandTextField.setText(method.cmd());
         /*try {
             for (IRessourceGroup res : getObjectEdited().getConsumedRessources()) {
                 // TODO add in list
