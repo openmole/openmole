@@ -239,6 +239,14 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.scala_lang.scala</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>2.8.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.simexplorer.ui.ide.osgiinit</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
