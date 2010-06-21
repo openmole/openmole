@@ -66,7 +66,5 @@
  * builder.buildMole(exploration.getFirstCapsule()).run()
  *
  * </pre>
- * <p>This script produces such a workflow:<br/>
- * <img alt="fast workflow example" src="doc-files/wffast.png"/>
  */
 package org.openmole.plugin.plan.csv;
