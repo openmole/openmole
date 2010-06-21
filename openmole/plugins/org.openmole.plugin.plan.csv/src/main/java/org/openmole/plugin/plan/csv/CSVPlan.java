@@ -46,7 +46,7 @@ import org.openmole.core.implementation.resource.FileResourceSet;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  *
- * The CSVPlan enables to generates a design of experiment from a CSV??file.
+ * The CSVPlan enables to generates a design of experiment from a CSV file.
  * Each line of the file describes an experimentation. It is possible to restrict
  * the number of parameters to be used. Actually all the parameters to be taken into account
  * have to be specified using the method addColumn()
@@ -112,6 +112,10 @@ public class CSVPlan extends Plan {
         basePaths.addFileResource(fileResource);
     }
 
+    /**
+     * Builds the plan.
+     *
+     */
     @Override
     public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
         Collection<IFactorValues> listOfListOfValues = new ArrayList<IFactorValues>();

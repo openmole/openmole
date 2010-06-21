@@ -35,6 +35,15 @@ import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.plan.IExploredPlan;
 
+/**
+ *
+ * @author romain.reuillon@openmole.org
+ *
+ * The CompletePlan enables to generate an exhaustive design of experiment from
+ * a set of parameters. It generates all the combinations of the available factors,
+ *  which take their values in predefined ranges.
+ *
+ */
 public class CompletePlan extends Plan<IFactor<Object, ?>> {
 
     public CompletePlan(IFactor<Object, ?>...factors) {

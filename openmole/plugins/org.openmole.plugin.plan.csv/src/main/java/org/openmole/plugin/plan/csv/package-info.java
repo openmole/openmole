@@ -67,5 +67,14 @@
  *                                buildChain(displayTask))
  * builder.buildMole(exploration.getFirstCapsule()).run()}
  * </pre>
+ *
+ * gives the following output:
+ * <pre>
+ * Run 1, test, 2.4
+ * Run 2, for, 3.1
+ * Run 3, CSV, 2.004
+ * Run 4, plan., 6.2
+ * Run 5, Enjoy!, 0.4
+ * </pre>
  */
 package org.openmole.plugin.plan.csv;
