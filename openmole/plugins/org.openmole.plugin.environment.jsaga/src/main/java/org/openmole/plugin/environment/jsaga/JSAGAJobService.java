@@ -83,11 +83,10 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
             float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
             if(!job.waitFor(timeOut)) {
-          //      Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, "WMS?timed out durring test.");
+                job.cancel();
                 return false;
             }
             State state = job.getState();
-          //  Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, "Job state " + state);
             return state == State.DONE;
         } catch (IncorrectStateException e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);

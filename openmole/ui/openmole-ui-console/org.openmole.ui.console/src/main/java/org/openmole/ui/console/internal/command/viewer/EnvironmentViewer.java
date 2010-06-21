@@ -17,7 +17,6 @@
 
 package org.openmole.ui.console.internal.command.viewer;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,7 +25,6 @@ import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
-import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 
 /**
@@ -52,7 +50,6 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
         for(ExecutionState state : ExecutionState.values()) {
             System.out.println(state.getLabel() + ": " + accounting.get(state));
         }
-
     }
 
 }

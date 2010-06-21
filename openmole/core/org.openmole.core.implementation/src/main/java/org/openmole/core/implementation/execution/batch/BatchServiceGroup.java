@@ -18,8 +18,6 @@
 package org.openmole.core.implementation.execution.batch;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -46,7 +44,7 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
         public void objectChanged(IUsageControl obj) throws InternalProcessingError, UserBadDataError {
             ressourceTokenReleased();
         }
-
+        
     }
 
     final ArrayList<T> resources = new ArrayList<T>();

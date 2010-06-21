@@ -24,5 +24,6 @@ import java.util.List;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public interface IViewer<T> {
+    static final String Separator = "-----------";
     void view(T object, List<Object> args);
 }

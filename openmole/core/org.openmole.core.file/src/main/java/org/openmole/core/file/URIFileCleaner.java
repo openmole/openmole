@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.file;
 
 import java.io.IOException;
@@ -26,43 +24,34 @@ import org.openmole.core.model.file.IURIFile;
 
 public class URIFileCleaner implements Runnable {
 
-	IURIFile toClean;
-	boolean timeOut = true;
-	boolean recursive = false;
-	
-	public URIFileCleaner(IURIFile toClean,boolean recursive) {
-		super();
-		this.toClean = toClean;
-		this.recursive = recursive;
-	}
-	
-	public URIFileCleaner(IURIFile toClean, boolean recursive,boolean timeOut) {
-		super();
-		this.toClean = toClean;
-		this.timeOut = timeOut;
-		this.recursive = recursive;
-	}
+    IURIFile toClean;
+    boolean timeOut = true;
+    boolean recursive = false;
 
+    public URIFileCleaner(IURIFile toClean, boolean recursive) {
+        super();
+        this.toClean = toClean;
+        this.recursive = recursive;
+    }
 
+    public URIFileCleaner(IURIFile toClean, boolean recursive, boolean timeOut) {
+        super();
+        this.toClean = toClean;
+        this.timeOut = timeOut;
+        this.recursive = recursive;
+    }
 
-	@Override
-	public void run()  {
-		try {
-			if(toClean != null)
-				toClean.remove(timeOut, recursive);
-		} catch (IOException e) {
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Cannot delete file " + toClean.getLocation(), e);
-		} catch (InterruptedException e) {
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Cannot delete file " + toClean.getLocation(), e);
-		}
+    @Override
+    public void run() {
+        try {
+            if (toClean != null) {
+                toClean.remove(timeOut, recursive);
+            }
+        } catch (IOException e) {
+            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "Cannot delete file " + toClean.getLocation(), e);
+        } catch (InterruptedException e) {
+            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "Cannot delete file " + toClean.getLocation(), e);
+        }
 
-	}
-
-	@Override
-	public String toString() {
-		return "Cleaning " + toClean.toString();
-	}
-
-	
-	
+    }
 }

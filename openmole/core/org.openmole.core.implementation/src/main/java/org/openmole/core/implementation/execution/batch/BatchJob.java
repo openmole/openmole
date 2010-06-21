@@ -116,11 +116,11 @@ public abstract class BatchJob implements IBatchJob {
     public synchronized void submit(IAccessToken token) throws InternalProcessingError, InterruptedException {
         try {
             submitJob();
+            getFailureControl().success();
         } catch (InternalProcessingError e) {
             getFailureControl().failed();
             throw e;
         }
-        getFailureControl().success();
         setState(ExecutionState.SUBMITED);
     }
 

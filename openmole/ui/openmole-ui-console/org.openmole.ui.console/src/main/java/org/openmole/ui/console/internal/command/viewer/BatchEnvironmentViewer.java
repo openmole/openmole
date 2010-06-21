@@ -40,9 +40,10 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment>{
     @Override
     public void view(IBatchEnvironment object, List<Object> args) {
         environmentViewer.view(object, args);
-        System.out.println("-----------");
+        System.out.println(Separator);
 
         Map<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>> jobServices = new HashMap<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>>();
+ 
         IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
 
         for(IBatchExecutionJob executionJob: executionJobRegistry.getAllExecutionJobs()) {
@@ -72,6 +73,9 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment>{
             }
             System.out.println();
         }
+
+
+
     }
 
 }

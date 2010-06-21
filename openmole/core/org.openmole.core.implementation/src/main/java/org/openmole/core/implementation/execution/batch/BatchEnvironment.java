@@ -96,7 +96,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         return runtime;
     }
 
-
     public Integer getMemorySizeForRuntime() {
         return memorySizeForRuntime;
     }
@@ -224,7 +223,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
         try {
             if (storages == null || storages.isEmpty()) {
-                //Logger.getLogger(BatchEnvironment.class.getName()).log(Level.INFO, "Initializing storages for " + System.identityHashCode(this));
                 storages = selectStorages();
             }
             return storages;
