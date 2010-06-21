@@ -47,7 +47,6 @@ import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.core.replicacatalog.IReplica;
 
 /**
@@ -99,7 +98,7 @@ class CopyToEnvironment implements Callable<Void> {
             executionMessageURIFile.remove(false);
             finished = true;
         } finally {
-            Activator.getBatchRessourceControl().releaseToken(communicationStorage.getDescription(), token);
+            Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);
         }
     }
 

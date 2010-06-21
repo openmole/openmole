@@ -15,17 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution.batch;
+package org.openmole.core.batchservicecontrol;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.openmole.commons.aspect.eventdispatcher.ObjectModified;
 
-import org.openmole.core.batchservicecontrol.AccessTokenPool;
-import org.openmole.core.batchservicecontrol.BotomlessTokenPool;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IAccessTokenPool;
-import org.openmole.core.model.execution.batch.IUsageControl;
 
 public class UsageControl implements IUsageControl {
 
@@ -54,9 +53,9 @@ public class UsageControl implements IUsageControl {
 		return tokenPool.getAccessTokenInterruptly();
 	}
 	
-	
+	@ObjectModified(type = resourceReleased)
 	@Override
-	public void releaseToken(IAccessToken token) throws InternalProcessingError {
+	public void releaseToken(IAccessToken token) throws InternalProcessingError, UserBadDataError {
 		tokenPool.releaseToken(token);
 	}
 

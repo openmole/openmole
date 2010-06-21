@@ -16,6 +16,8 @@
  */
 package org.openmole.core.implementation.execution.batch;
 
+import org.openmole.core.batchservicecontrol.UsageControl;
+import org.openmole.core.batchservicecontrol.FailureControl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -59,7 +61,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     transient Long time;
 
     public BatchStorage(URI baselocation, IBatchEnvironmentDescription batchEnvironmentDescription, int nbAccess) throws InternalProcessingError {
-        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl(Activator.getWorkspace().getPreferenceAsInt(HistorySize)));
+        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl());
         this.location = baselocation;
     }
 
@@ -172,7 +174,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
 
         try {
 
-            IAccessToken token = Activator.getBatchRessourceControl().waitAToken(getDescription());
+            IAccessToken token = Activator.getBatchRessourceControl().getController(getDescription()).getUsageControl().waitAToken();
 
             try {
                 final int lenght = 10;
@@ -217,8 +219,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                     Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false));
                 }
             } finally {
-                Activator.getBatchRessourceControl().releaseToken(getDescription(), token);
-
+                Activator.getBatchRessourceControl().getController(getDescription()).getUsageControl().releaseToken(token);
             }
         } catch (Throwable e) {
             Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, getURI().toString(), e);

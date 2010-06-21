@@ -50,15 +50,11 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     final static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
-    final static ConfigurationLocation BestStoragesRatio = new ConfigurationLocation(ConfigGroup, "BestStoragesRatio");
-    final static ConfigurationLocation BestJobServiceRatio = new ConfigurationLocation(ConfigGroup, "BestJobServiceRatio");
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
 
     static {
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
-        Activator.getWorkspace().addToConfigurations(BestStoragesRatio, "1.0");
-        Activator.getWorkspace().addToConfigurations(BestJobServiceRatio, "1.0");
-        Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "0.5");
+        Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
     }
     BatchServiceGroup<JS> jobServices;
     BatchServiceGroup<IBatchStorage> storages;
@@ -128,7 +124,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     protected BatchServiceGroup<IBatchStorage> selectStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
         getAuthentication().initializeAccessIfNeeded();
-        final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsDouble(BestStoragesRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
+        final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
 
         Collection<IBatchStorage> stors = allStorages();
 
@@ -166,7 +162,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     protected BatchServiceGroup<JS> selectWorkingJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
         getAuthentication().initializeAccessIfNeeded();
-        final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsDouble(BestJobServiceRatio), Activator.getWorkspace().getPreferenceAsDouble(ResourcesExpulseThreshod));
+        final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
         Collection<JS> allJobServices = allJobServices();
         final Semaphore done = new Semaphore(0);
         final AtomicInteger nbStillRunning = new AtomicInteger(allJobServices.size());

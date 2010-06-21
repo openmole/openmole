@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.core.batchservicecontrol;
 
 import java.util.concurrent.TimeUnit;
@@ -27,35 +25,36 @@ import org.openmole.core.model.execution.batch.IAccessTokenPool;
 
 public class BotomlessTokenPool implements IAccessTokenPool {
 
-	IAccessToken token = new AccessToken();
-	
-	public BotomlessTokenPool() {
-		super();
-	}
+    IAccessToken token = new AccessToken();
 
-	@Override
-	public int getLoad() {
-		return -1;
-	}
+    public BotomlessTokenPool() {
+        super();
+    }
 
-	@Override
-	public void releaseToken(IAccessToken token) throws InternalProcessingError {
-		if(!this.token.equals(token)) throw new InternalProcessingError("The token doesn't belong to this pool");
-	}
+    @Override
+    public int getLoad() {
+        return -1;
+    }
 
-	@Override
-	public IAccessToken waitAToken() throws InterruptedException {
-		return token;
-	}
+    @Override
+    public void releaseToken(IAccessToken token) throws InternalProcessingError {
+        if (!this.token.equals(token)) {
+            throw new InternalProcessingError("The token doesn't belong to this pool");
+        }
+    }
 
-	@Override
-	public IAccessToken waitAToken(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
-		return token;
-	}
+    @Override
+    public IAccessToken waitAToken() throws InterruptedException {
+        return token;
+    }
 
-	@Override
-	public IAccessToken getAccessTokenInterruptly() {
-		return token;
-	}
+    @Override
+    public IAccessToken waitAToken(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
+        return token;
+    }
 
+    @Override
+    public IAccessToken getAccessTokenInterruptly() {
+        return token;
+    }
 }

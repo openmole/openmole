@@ -25,7 +25,7 @@ import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.resource.LocalFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IContext;
@@ -39,14 +39,14 @@ import org.openmole.core.model.message.IRuntimeResult;
  */
 public class GetResultFromEnvironment implements Callable<Void> {
 
-    final IBatchStorage communicationStorage;
+    final IBatchServiceDescription communicationStorageDescription;
     final IURIFile outputFile;
     final IJob job;
     final BatchEnvironment environment;
     final Long lastStatusChangeInterval;
 
-    public GetResultFromEnvironment(IBatchStorage communicationStorage, IURIFile outputFile, IJob job, BatchEnvironment environment, Long lastStatusChangeInterval) {
-        this.communicationStorage = communicationStorage;
+    public GetResultFromEnvironment(IBatchServiceDescription communicationStorageDescription, IURIFile outputFile, IJob job, BatchEnvironment environment, Long lastStatusChangeInterval) {
+        this.communicationStorageDescription = communicationStorageDescription;
         this.outputFile = outputFile;
         this.job = job;
         this.environment = environment;
@@ -60,7 +60,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
     @Override
     public Void call() throws Exception {
 
-        IAccessToken token = Activator.getBatchRessourceControl().waitAToken(communicationStorage.getDescription());
+        IAccessToken token = Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().waitAToken();
 
         try {
             File resultFile = outputFile.getFile(token);
@@ -212,15 +212,13 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 }
             }
 
-           // Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.INFO, successfull + " / " + job.getNbMoleJob());
-
             //If sucessfull for full group update stats
             if (successfull == job.size()) {
                    successFullFinish();
             }
 
         } finally {
-            Activator.getBatchRessourceControl().releaseToken(communicationStorage.getDescription(), token);
+            Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().releaseToken(token);
         }
         return null;
     }

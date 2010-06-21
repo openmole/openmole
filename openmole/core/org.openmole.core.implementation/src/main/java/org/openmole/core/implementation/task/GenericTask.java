@@ -68,12 +68,12 @@ public abstract class GenericTask implements IGenericTask {
 
     private String name;
 
-    private Map<String, IData<?>> input;
-    private Map<String, IData<?>> output;
+    final private Map<String, IData<?>> input = new TreeMap<String, IData<?>>();;
+    final private Map<String, IData<?>> output = new TreeMap<String, IData<?>>();;
 
-    private Set<IResource> resources;
+    final private Set<IResource> resources = new HashSet<IResource>();
 
-    private Parameters parameters = new Parameters();
+    final private Parameters parameters = new Parameters();
 
     public GenericTask(String name) {
         setName(name);
@@ -179,18 +179,12 @@ public abstract class GenericTask implements IGenericTask {
     @ChangeState
     @Override
     public synchronized void addOutput(IData data) {
-        if (output == null) {
-            output = new TreeMap<String, IData<?>>();
-        }
         output.put(data.getPrototype().getName(), data);
     }
 
     @ChangeState
     @Override
     public synchronized void addResource(IResource resource) {
-        if (resources == null) {
-            resources = new HashSet<IResource>();
-        }
         resources.add(resource);
     }
 
@@ -219,9 +213,6 @@ public abstract class GenericTask implements IGenericTask {
     @ChangeState
     @Override
     public synchronized void addInput(IData data) {
-        if (input == null) {
-            input =  new TreeMap<String, IData<?>>();
-        }
         input.put(data.getPrototype().getName(),data);
     }
 

@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.plugin.environment.jsaga;
 
 import java.io.File;
@@ -38,6 +36,7 @@ import org.ogf.saga.job.Job;
 import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.ogf.saga.job.JobService;
+import org.ogf.saga.task.State;
 import org.ogf.saga.task.Task;
 import org.ogf.saga.task.TaskMode;
 import org.ogf.saga.url.URL;
@@ -55,12 +54,13 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
-    final static ConfigurationLocation CreationTimout  = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "CreationTimout");
+    final static ConfigurationLocation CreationTimout = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "CreationTimout");
+    final static ConfigurationLocation TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "TestJobDoneTimeOut");
 
     static {
         Activator.getWorkspace().addToConfigurations(CreationTimout, "PT2M");
+        Activator.getWorkspace().addToConfigurations(CreationTimout, "PT30M");
     }
-
     URI jobServiceURI;
     JSAGAEnvironment environment;
 
@@ -77,41 +77,40 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             JobDescription hello = JSAGAJobBuilder.GetInstance().getHelloWorld();
             final Job job = getJobServiceCache().createJob(hello);
 
-                job.run();
-                job.getState();
- 
+            job.run();
 
+            float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
+            job.waitFor(timeOut);
+            return job.getState() == State.DONE;
         } catch (IncorrectStateException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (InternalProcessingError e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (NotImplementedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (AuthenticationFailedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (AuthorizationFailedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (PermissionDeniedException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (BadParameterException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (TimeoutException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         } catch (NoSuccessException e) {
-            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.WARNING, null, e);
             return false;
         }
-        return true;
     }
-
 
     @Override
     public IBatchJob createBatchJob(IJSAGAJobDescription batchJobDescription) throws InternalProcessingError {
@@ -172,7 +171,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
         } catch (BadParameterException e) {
             throw new InternalProcessingError(e);
         }
-      
+
         try {
             return task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(CreationTimout), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -183,6 +182,6 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             task.cancel(true);
             throw new InternalProcessingError(e);
         }
-        
+
     }
 }

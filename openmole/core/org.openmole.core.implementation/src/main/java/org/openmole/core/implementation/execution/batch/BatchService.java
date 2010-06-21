@@ -20,22 +20,14 @@ import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.model.execution.batch.IFailureControl;
-import org.openmole.core.model.execution.batch.IUsageControl;
-import org.openmole.misc.workspace.ConfigurationLocation;
+import org.openmole.core.batchservicecontrol.IFailureControl;
+import org.openmole.core.batchservicecontrol.IUsageControl;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public abstract class BatchService implements IBatchService {
-
-    final static ConfigurationLocation HistorySize = new ConfigurationLocation(BatchService.class.getSimpleName(), "HistorySize");
-
-    static {
-        Activator.getWorkspace().addToConfigurations(HistorySize, "100");
-    }
-
 
     private IBatchServiceDescription description;
     private IBatchEnvironmentDescription batchEnvironmentDescription;
@@ -47,7 +39,7 @@ public abstract class BatchService implements IBatchService {
         if(!Activator.getBatchRessourceControl().contains(description)) {
             Activator.getBatchRessourceControl().registerRessouce(description, usageControl, failureControl);
         } else {
-            Activator.getBatchRessourceControl().reinitFailure(description, failureControl);
+            Activator.getBatchRessourceControl().getController(description).getFailureControl().reinit();
         }
 
         this.description = description;
@@ -68,8 +60,5 @@ public abstract class BatchService implements IBatchService {
     public String toString() {
         return getDescription().toString();
     }
-   /* @Override
-    public void setGroup(IBatchServiceGroup<?> group) {
-        this.group = group;
-    }*/
+
 }

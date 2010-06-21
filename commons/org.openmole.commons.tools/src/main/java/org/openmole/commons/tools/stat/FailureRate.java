@@ -14,33 +14,29 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.commons.tools.stat;
 
-
 public class FailureRate {
-	
-	//static final int minStat = 1;
-	
-	AverageDouble avg;
-	
-	public FailureRate(int historySize) {
-		avg = new AverageDouble(historySize);
-		
-		for(int i = 0; i < avg.getHistorySize(); i++) {
-			avg.add(0.0);
-		}		
-	}
-	
-	public void success() {
-		avg.add(0.0);
-	}
-	
-	public void failed() {
-		avg.add(1.0);
-	}
-	
-	public double getFailureRate() {
-		return avg.getValue();
-	}
+
+    volatile int value;
+
+    public FailureRate() {
+        value = 0;
+    }
+
+    public void success() {
+        if(value > 0) value--;
+    }
+
+    public void failed() {
+        value++;
+    }
+
+    public int getFailureRate() {
+        return value;
+    }
+
+    public void reinit() {
+        value = 0;
+    }
 }

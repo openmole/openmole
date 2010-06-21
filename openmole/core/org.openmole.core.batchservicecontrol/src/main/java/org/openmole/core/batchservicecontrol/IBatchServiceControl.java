@@ -16,40 +16,15 @@
  */
 package org.openmole.core.batchservicecontrol;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
-import org.openmole.core.model.execution.batch.IFailureControl;
-import org.openmole.core.model.execution.batch.IUsageControl;
-import org.openmole.commons.exception.UserBadDataError;
 
 public interface IBatchServiceControl {
 
-    final static String resourceReleased = "resourceReleased";
-
-    int getLoad(IBatchServiceDescription description);
-
-    IAccessToken waitAToken(IBatchServiceDescription description) throws InterruptedException;
-
-    IAccessToken getAccessTokenInterruptly(IBatchServiceDescription description);
-
-    void releaseToken(IBatchServiceDescription description, IAccessToken token) throws InternalProcessingError, UserBadDataError;
-
-    void failed(IBatchServiceDescription description);
-
-    void sucess(IBatchServiceDescription description);
-
     void registerRessouce(IBatchServiceDescription ressource, IUsageControl usageControl, IFailureControl failureControl);
 
-    void reinitFailure(IBatchServiceDescription ressource, IFailureControl failureControl);
+    IBatchServiceController getController(IBatchServiceDescription ressource);
 
     boolean contains(IBatchServiceDescription ressource);
 
-    IAccessToken tryGetToken(IBatchServiceDescription description, long time, TimeUnit unit) throws InterruptedException, TimeoutException;
-
-    double getFailureRate(IBatchServiceDescription description);
-    //void registerForNotification(IBatchRessourceDescription ressource,IBatchRessourceUsageChangeNotification notification);
 }

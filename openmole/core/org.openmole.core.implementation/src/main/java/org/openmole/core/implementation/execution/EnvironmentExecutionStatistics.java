@@ -81,8 +81,6 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     public IStatistic getStatFor(IJob job) {
         Map<StatisticKey, IStatistic> map = stats.get(JobRegistry.getInstance().getMoleExecutionForJob(job));
         
-       // Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).info(map);
-
         if (map == null) {
             return Statistic.EMPTY_STAT;
         }

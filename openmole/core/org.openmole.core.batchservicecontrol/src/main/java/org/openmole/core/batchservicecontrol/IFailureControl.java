@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 reuillon
+ *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,37 +14,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.batchservicecontrol;
 
+public interface IFailureControl {
 
-package org.openmole.core.implementation.execution.batch;
+    void failed();
 
-import org.openmole.core.model.execution.batch.IFailureControl;
-import org.openmole.commons.tools.stat.FailureRate;
+    void success();
 
-public class FailureControl implements IFailureControl {
+    double getFailureRate();
 
-	FailureRate failureRate;
-
-	public FailureControl(int historySize) {
-		super();
-		failureRate = new FailureRate(historySize);
-	}
-
-	@Override
-	public void failed()  {
-		failureRate.failed();
-	}
-
-	@Override
-	public void success()  {
-		failureRate.success();
-	}
-	
-	@Override
-	public double getFailureRate() {
-		return failureRate.getFailureRate();
-	}
-	
-	
-
+    void reinit();
 }

@@ -27,6 +27,8 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.batchservicecontrol.IFailureControl;
+import org.openmole.core.batchservicecontrol.IUsageControl;
 
 public abstract class BatchJob implements IBatchJob {
 
@@ -86,11 +88,11 @@ public abstract class BatchJob implements IBatchJob {
 
     @Override
     public void kill() throws InternalProcessingError, InterruptedException, UserBadDataError {
-        IAccessToken token = Activator.getBatchRessourceControl().waitAToken(jobServiceDescription);
+        IAccessToken token = getUsageControl().waitAToken();
         try {
             kill(token);
         } finally {
-            Activator.getBatchRessourceControl().releaseToken(jobServiceDescription, token);
+            getUsageControl().releaseToken(token);
         }
     }
 
@@ -102,12 +104,11 @@ public abstract class BatchJob implements IBatchJob {
 
     @Override
     public void submit() throws InternalProcessingError, InterruptedException, UserBadDataError {
-        //IAccessToken token = Activator.getBatchRessourceControl().tryGetToken(jobServiceDescription, TimeOut, TimeUnit.MILLISECONDS);
-        IAccessToken token = Activator.getBatchRessourceControl().waitAToken(jobServiceDescription);
+        IAccessToken token = getUsageControl().waitAToken();
         try {
             submit(token);
         } finally {
-            Activator.getBatchRessourceControl().releaseToken(jobServiceDescription, token);
+            getUsageControl().releaseToken(token);
         }
     }
 
@@ -116,20 +117,20 @@ public abstract class BatchJob implements IBatchJob {
         try {
             submitJob();
         } catch (InternalProcessingError e) {
-            Activator.getBatchRessourceControl().failed(jobServiceDescription);
+            getFailureControl().failed();
             throw e;
         }
-        Activator.getBatchRessourceControl().sucess(jobServiceDescription);
+        getFailureControl().success();
         setState(ExecutionState.SUBMITED);
     }
 
     @Override
     public ExecutionState getUpdatedState() throws InternalProcessingError, InterruptedException, UserBadDataError {
-        IAccessToken token = Activator.getBatchRessourceControl().waitAToken(jobServiceDescription);
+        IAccessToken token = getUsageControl().waitAToken();
         try {
             return getUpdatedState(token);
         } finally {
-            Activator.getBatchRessourceControl().releaseToken(jobServiceDescription, token);
+            getUsageControl().releaseToken(token);
         }
     }
 
@@ -149,6 +150,14 @@ public abstract class BatchJob implements IBatchJob {
         return timeStemps.get(state);
     }
 
+    private IUsageControl getUsageControl() {
+        return Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();
+    }
+    
+    private IFailureControl getFailureControl() {
+        return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
+    }
+    
     public abstract void deleteJob() throws InternalProcessingError;
 
     public abstract void submitJob() throws InternalProcessingError;

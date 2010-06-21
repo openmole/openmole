@@ -61,6 +61,8 @@ import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.FileCache;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
+import org.openmole.core.batchservicecontrol.IFailureControl;
+import org.openmole.core.batchservicecontrol.IUsageControl;
 
 import static org.openmole.commons.tools.io.Network.*;
 
@@ -313,7 +315,7 @@ public class URIFile implements IURIFile {
                 }
                 return child;
             } catch (IOException e2) {
-                Activator.getBatchRessourceControl().failed(getStorageDescription());
+                getFailureControl().failed();
                 throw e2;
             }
         }
@@ -403,16 +405,16 @@ public class URIFile implements IURIFile {
 
         try {
             FileInputStream ret = task.get(timeout, TimeUnit.MILLISECONDS);
-            Activator.getBatchRessourceControl().sucess(getStorageDescription());
+            getFailureControl().success();
             return new JSAGAInputStream(ret);
         } catch (ExecutionException e) {
             if (!InternalProcessingError.class.isAssignableFrom(e.getCause().getClass()) || !DoesNotExistException.class.isAssignableFrom(e.getCause().getClass())) {
-                Activator.getBatchRessourceControl().failed(getStorageDescription());
+                getFailureControl().failed();
             }
             throw new IOException(getLocationString(), e);
         } catch (TimeoutException e) {
             task.cancel(true);
-            Activator.getBatchRessourceControl().failed(getStorageDescription());
+            getFailureControl().failed();
             throw new IOException(getLocationString(), e);
         }
     }
@@ -443,16 +445,16 @@ public class URIFile implements IURIFile {
 
         try {
             FileOutputStream ret = task.get(timeout, TimeUnit.MILLISECONDS);
-            Activator.getBatchRessourceControl().sucess(getStorageDescription());
+            getFailureControl().success();
             return new JSAGAOutputStream(ret);
         } catch (ExecutionException e) {
             if (!InternalProcessingError.class.isAssignableFrom(e.getCause().getClass())) {
-                Activator.getBatchRessourceControl().failed(getStorageDescription());
+                getFailureControl().failed();
             }
             throw new IOException(getLocationString(), e);
         } catch (TimeoutException e) {
             task.cancel(true);
-            Activator.getBatchRessourceControl().failed(getStorageDescription());
+            getFailureControl().failed();
             throw new IOException(getLocationString(), e);
         }
     }
@@ -525,11 +527,12 @@ public class URIFile implements IURIFile {
 
         boolean sameRessource = sameRessource(srcDescrption, destDescrption);
 
+        IUsageControl usageControl = Activator.getBatchRessourceControl().getController(destDescrption).getUsageControl();
         IAccessToken destToken;
         if (sameRessource) {
             destToken = srcToken;
         } else {
-            destToken = Activator.getBatchRessourceControl().waitAToken(destDescrption);
+            destToken = usageControl.waitAToken();
         }
 
         try {
@@ -537,7 +540,7 @@ public class URIFile implements IURIFile {
         } finally {
             if (!sameRessource) {
                 try {
-                    Activator.getBatchRessourceControl().releaseToken(destDescrption, destToken);
+                    usageControl.releaseToken(destToken);
                 } catch (InternalProcessingError e) {
                     throw new IOException(e);
                 } catch (UserBadDataError e) {
@@ -555,11 +558,12 @@ public class URIFile implements IURIFile {
 
         boolean sameRessource = sameRessource(srcDescrption, destDescrption);
 
+        IUsageControl usageControl = Activator.getBatchRessourceControl().getController(srcDescrption).getUsageControl();
         IAccessToken srcToken;
         if (sameRessource) {
             srcToken = destToken;
         } else {
-            srcToken = Activator.getBatchRessourceControl().waitAToken(srcDescrption);
+            srcToken = usageControl.waitAToken();
         }
 
         try {
@@ -567,7 +571,7 @@ public class URIFile implements IURIFile {
         } finally {
             if (!sameRessource) {
                 try {
-                    Activator.getBatchRessourceControl().releaseToken(srcDescrption, srcToken);
+                    usageControl.releaseToken(srcToken);
                 } catch (InternalProcessingError e) {
                     throw new IOException(e);
                 } catch (UserBadDataError e) {
@@ -579,13 +583,14 @@ public class URIFile implements IURIFile {
     }
 
     public static void copy(final File src, final IURIFile dest) throws IOException, InterruptedException {
-        IAccessToken token = Activator.getBatchRessourceControl().waitAToken(dest.getStorageDescription());
+        IUsageControl usageControl =  Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getUsageControl();
+        IAccessToken token = usageControl.waitAToken();
 
         try {
             copy(src, dest, token);
         } finally {
             try {
-                Activator.getBatchRessourceControl().releaseToken(dest.getStorageDescription(), token);
+                usageControl.releaseToken(token);
             } catch (InternalProcessingError e) {
                 throw new IOException(e);
             } catch (UserBadDataError e) {
@@ -596,15 +601,16 @@ public class URIFile implements IURIFile {
 
     public static void copy(final File src, final IURIFile dest, final IAccessToken token) throws IOException, InterruptedException {
 
+        IFailureControl failureControl = Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getFailureControl();
         InputStream is = new java.io.FileInputStream(src);
         try {
             OutputStream os = dest.openOutputStream(token);
 
             try {
                 FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
-                Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());
+                failureControl.success();
             } catch (IOException t) {
-                Activator.getBatchRessourceControl().failed(dest.getStorageDescription());
+                failureControl.failed();
                 throw t;
             } finally {
                 os.close();
@@ -622,13 +628,16 @@ public class URIFile implements IURIFile {
 
         boolean sameRessource = sameRessource(srcDescrption, destDescrption);
 
+        IUsageControl srcUsageControl = Activator.getBatchRessourceControl().getController(srcDescrption).getUsageControl();
+        IUsageControl destUsageControl = Activator.getBatchRessourceControl().getController(destDescrption).getUsageControl();
+        
         IAccessToken srcToken;
         IAccessToken destToken;
 
-        srcToken = Activator.getBatchRessourceControl().waitAToken(srcDescrption);
+        srcToken = srcUsageControl.waitAToken();
         try {
             if (!sameRessource) {
-                destToken = Activator.getBatchRessourceControl().waitAToken(destDescrption);
+                destToken = destUsageControl.waitAToken();
             } else {
                 destToken = srcToken;
             }
@@ -637,7 +646,7 @@ public class URIFile implements IURIFile {
             } finally {
                 if (!sameRessource) {
                     try {
-                        Activator.getBatchRessourceControl().releaseToken(destDescrption, destToken);
+                        destUsageControl.releaseToken(destToken);
                     } catch (InternalProcessingError e) {
                         throw new IOException(e);
                     } catch (UserBadDataError e) {
@@ -647,7 +656,7 @@ public class URIFile implements IURIFile {
             }
         } finally {
             try {
-                Activator.getBatchRessourceControl().releaseToken(srcDescrption, srcToken);
+                srcUsageControl.releaseToken(srcToken);
             } catch (InternalProcessingError e) {
                 throw new IOException(e);
             } catch (UserBadDataError e) {
@@ -660,20 +669,23 @@ public class URIFile implements IURIFile {
     private static void copy(final IURIFile src, final IURIFile dest, IAccessToken srcToken, IAccessToken destToken) throws IOException, InterruptedException {
         boolean sameRessource = sameRessource(src.getStorageDescription(), dest.getStorageDescription());
 
+        IFailureControl srcFailureControl = Activator.getBatchRessourceControl().getController(src.getStorageDescription()).getFailureControl();
+        IFailureControl destFailureControl = Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getFailureControl();
+        
         InputStream is = src.openInputStream(srcToken);
         try {
             OutputStream os = dest.openOutputStream(destToken);
 
             try {
                 FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
-                Activator.getBatchRessourceControl().sucess(src.getStorageDescription());
+                srcFailureControl.success();
                 if (!sameRessource) {
-                    Activator.getBatchRessourceControl().sucess(dest.getStorageDescription());
+                    destFailureControl.success();
                 }
             } catch (IOException t) {
-                Activator.getBatchRessourceControl().failed(src.getStorageDescription());
+                srcFailureControl.failed();
                 if (!sameRessource) {
-                    Activator.getBatchRessourceControl().failed(dest.getStorageDescription());
+                    destFailureControl.failed();
                 }
                 throw t;
             } finally {
@@ -713,16 +725,6 @@ public class URIFile implements IURIFile {
     public void remove(boolean timeOut, final boolean recursive, final IAccessToken token) throws IOException, InterruptedException {
         final NSEntry entry = fetchEntry();
         try {
-            /* boolean directory = isDirectory(entry);
-            
-            if (recursive && directory) {
-            List<String> chlids = list(token);
-            
-            for (String child : chlids) {
-            getChild(child).remove(timeOut, recursive, token);
-            }
-            
-            }*/
 
             Task<?, ?> task;
             try {
@@ -810,24 +812,16 @@ public class URIFile implements IURIFile {
     }
 
     public IAccessToken getAToken() throws InterruptedException {
-        return getAToken(this);
+        return getUsageControl().waitAToken();
     }
 
     public void releaseToken(IAccessToken token) throws IOException {
-        releaseToken(this, token);
-    }
-
-    static public IAccessToken getAToken(IURIFile file) throws InterruptedException {
-        return Activator.getBatchRessourceControl().waitAToken(file.getStorageDescription());
-    }
-
-    static public void releaseToken(IURIFile file, IAccessToken token) throws IOException {
         try {
-            Activator.getBatchRessourceControl().releaseToken(file.getStorageDescription(), token);
-        } catch (InternalProcessingError e) {
-            throw new IOException(e);
-        } catch (UserBadDataError e) {
-            throw new IOException(e);
+            getUsageControl().releaseToken(token);
+        } catch (InternalProcessingError ex) {
+            throw new IOException(ex);
+        } catch (UserBadDataError ex) {
+            throw new IOException(ex);
         }
     }
 
@@ -930,5 +924,13 @@ public class URIFile implements IURIFile {
         int hash = 3;
         hash = 97 * hash + (this.location != null ? this.location.hashCode() : 0);
         return hash;
+    }
+    
+    private IUsageControl getUsageControl() {
+        return Activator.getBatchRessourceControl().getController(getStorageDescription()).getUsageControl();
+    }
+    
+    private IFailureControl getFailureControl() {
+        return Activator.getBatchRessourceControl().getController(getStorageDescription()).getFailureControl();
     }
 }

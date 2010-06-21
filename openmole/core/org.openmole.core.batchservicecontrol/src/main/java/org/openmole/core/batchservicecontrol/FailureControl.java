@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon
+ *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,20 +14,31 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.batchservicecontrol;
 
-package org.openmole.core.model.execution.batch;
+import org.openmole.commons.tools.stat.FailureRate;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+public class FailureControl implements IFailureControl {
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
+    final FailureRate failureRate = new FailureRate();
 
-public interface IUsageControl {
-	IAccessToken tryGetToken(long milliSeconds, TimeUnit unit) throws InterruptedException, TimeoutException;
-	IAccessToken waitAToken() throws InterruptedException;
-	void releaseToken(IAccessToken token) throws InternalProcessingError;
-	IAccessToken getAccessTokenInterruptly();
-	int getLoad();
+    @Override
+    public void failed() {
+        failureRate.failed();
+    }
 
+    @Override
+    public void success() {
+        failureRate.success();
+    }
+
+    @Override
+    public double getFailureRate() {
+        return failureRate.getFailureRate();
+    }
+
+    @Override
+    public void reinit() {
+        failureRate.reinit();
+    }
 }
