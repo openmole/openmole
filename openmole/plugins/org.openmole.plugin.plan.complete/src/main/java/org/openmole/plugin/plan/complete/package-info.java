@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/** *
+/** 
  * <h3>Example</h3>
  * The following example shows how to explore in an exhaustive way the combination
  * between the parameters:
@@ -77,3 +77,4 @@
  * </pre>
  */
 package org.openmole.plugin.plan.complete;
+complete
