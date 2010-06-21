@@ -48,11 +48,11 @@ public class TaskSettingTabManager {
     }
 
     private void addTaskSettingTab(ITaskCapsuleView tcv){
-        taskSettingMap.put(tcv,new ContainerComposerBuilder(tabbedPane.getWidth(),
-                                                            tabbedPane.getHeight()).setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
+    //    taskSettingMap.put(tcv,new ContainerComposerBuilder().setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
+        taskSettingMap.put(tcv,new ContainerComposerBuilder().setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
                                                                                    .addComponent(new IOContainer())
                                                                                    .addComponent(new IOContainer())
-                                                                                   .setSplitOrientation(JSplitPane.HORIZONTAL_SPLIT)
+//                                                                                   .setSplitOrientation(JSplitPane.HORIZONTAL_SPLIT)
                                                                                    .addComponent(new IOContainer())
                                                                                    .addComponent(new IOContainer())
                                                                                    .addComponent(new IOContainer())

@@ -36,12 +36,6 @@ public class IOContainer extends JPanel implements ITaskSettingContainer {
     private String[] imageNames = {"Bird", "Cat"};
     private JList list = new JList(imageNames);
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);  // Ask parent to paint background.
-        g.setColor(Color.orange);
-        g.fillRect(0, 0, getWidth(),getHeight());
-    }
 
     public IOContainer() {
         super(new BorderLayout());
@@ -55,6 +49,13 @@ public class IOContainer extends JPanel implements ITaskSettingContainer {
 
         setMinimumSize(new Dimension(getWidth(),200));
         addItem();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);  // Ask parent to paint background.
+        g.setColor(Color.orange);
+        g.fillRect(0, 0, getWidth(),getHeight());
     }
 
     public void addItem() {

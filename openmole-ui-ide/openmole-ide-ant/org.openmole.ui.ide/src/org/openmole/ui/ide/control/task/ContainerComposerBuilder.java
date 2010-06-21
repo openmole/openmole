@@ -31,19 +31,10 @@ public class ContainerComposerBuilder {
     private int splitOrientation = JSplitPane.VERTICAL_SPLIT;
     private String orientation = BorderLayout.WEST;
     private Set<OrientedComponent> orientedComponents = new HashSet<OrientedComponent>();
-    private int width = 0;
-    private int height = 0;
 
-    public ContainerComposerBuilder(int w,
-            int h) {
-        this.width = w;
-        this.height = h;
-    }
 
     public ContainerComposer build() {
-        return new ContainerComposer(orientedComponents,
-                width,
-                height);
+        return new ContainerComposer(orientedComponents);
     }
 
     public ContainerComposerBuilder addComponent(Component c) {

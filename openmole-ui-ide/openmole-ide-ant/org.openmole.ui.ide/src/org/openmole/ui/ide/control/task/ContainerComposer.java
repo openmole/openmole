@@ -20,7 +20,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.util.Set;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
@@ -30,29 +33,42 @@ import javax.swing.JSplitPane;
  */
 public class ContainerComposer extends JPanel {
 
-    public ContainerComposer(Set<ContainerComposerBuilder.OrientedComponent> ocs,
-            int w,
-            int h) {
-        setMinimumSize(new Dimension(w, h));
+    public ContainerComposer(Set<ContainerComposerBuilder.OrientedComponent> ocs) {
         int divider = 0;
-        JSplitPane splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        for (ContainerComposerBuilder.OrientedComponent oc : ocs) {
-            if (oc.getSplitOrientation() == splitpane.getOrientation()) {
-                splitpane.add(oc.getComponent());
-            } else {
-                divider = 0;
-                splitpane = new JSplitPane(oc.getSplitOrientation(),
-                        splitpane,
-                        oc.getComponent());
+//        JSplitPane splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//        JSplitPane splitpane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//        JSplitPane splitpane3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-            }
+        JPanel settingPanel = new JPanel();
+        settingPanel.setLayout(new BoxLayout(settingPanel,BoxLayout.Y_AXIS));
+
+
+        settingPanel.setMinimumSize(new Dimension(600,400));
+
+        for (ContainerComposerBuilder.OrientedComponent oc : ocs) {
+//            if (oc.getSplitOrientation() == splitpane.getOrientation()) {
+                settingPanel.add(oc.getComponent());
+//            } else {
+//                divider = 0;
+//                splitpane = new JSplitPane(oc.getSplitOrientation(),
+//                        splitpane,
+//                        oc.getComponent());
+//
+//            }
             /*  splitpane = new JSplitPane(oc.getOrientation(),
             splitpane,
             oc.getComponent());*/
-            splitpane.setOneTouchExpandable(true);
-            splitpane.setDividerLocation(divider);
+
+
             divider += 150;
         }
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                                              settingPanel,
+                                              new JLabel("eiuieuie"));
+            splitpane.setOneTouchExpandable(true);
         add(splitpane, BorderLayout.WEST);
+//        add(splitpane, BorderLayout.CENTER);
+//        add(splitpane2, BorderLayout.CENTER);
+//        add(splitpane3, BorderLayout.CENTER);
     }
 }
