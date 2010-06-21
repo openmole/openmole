@@ -30,13 +30,14 @@
  *
  * <h3>Example</h3>
  * <p>Let us use the following CSV file as CSV plan file:
- *
+ *<pre>
  * p1,p2,p3
  * 1,test,2.4
  * 2,for,3.1
  * 3,CSV,2.004
  * 4,plan.,6.2
  * 5,Enjoy!,0.4
+ * </pre>
  *
  * <pre>{@code
 
@@ -63,8 +64,7 @@
  *
  * exploration = buildExploration(explorationTask,
  *                                buildChain(displayTask))
- * builder.buildMole(exploration.getFirstCapsule()).run()
- *
+ * builder.buildMole(exploration.getFirstCapsule()).run()}
  * </pre>
  */
 package org.openmole.plugin.plan.csv;
