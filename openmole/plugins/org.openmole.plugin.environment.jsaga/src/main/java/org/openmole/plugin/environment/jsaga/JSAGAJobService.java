@@ -59,7 +59,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
     static {
         Activator.getWorkspace().addToConfigurations(CreationTimout, "PT2M");
-        Activator.getWorkspace().addToConfigurations(CreationTimout, "PT30M");
+        Activator.getWorkspace().addToConfigurations(TestJobDoneTimeOut, "PT30M");
     }
     URI jobServiceURI;
     JSAGAEnvironment environment;
@@ -74,14 +74,21 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
     public boolean test() {
 
         try {
+           // Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO,"Testing " + getDescription().toString());
+
             JobDescription hello = JSAGAJobBuilder.GetInstance().getHelloWorld();
             final Job job = getJobServiceCache().createJob(hello);
 
             job.run();
 
             float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
-            if(!job.waitFor(timeOut)) return false;
-            return job.getState() == State.DONE;
+            if(!job.waitFor(timeOut)) {
+          //      Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, "WMS?timed out durring test.");
+                return false;
+            }
+            State state = job.getState();
+          //  Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO, "Job state " + state);
+            return state == State.DONE;
         } catch (IncorrectStateException e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
