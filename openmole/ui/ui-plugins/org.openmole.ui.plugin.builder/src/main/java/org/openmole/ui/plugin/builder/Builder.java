@@ -116,6 +116,9 @@ public class Builder {
         return new Mole(taskCapsule);
     }
 
+    public Mole buildMole(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return new Mole(puzzle.getFirstCapsule());
+    }
     public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError {
         return new FixedEnvironmentStrategy();
     }
