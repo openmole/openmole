@@ -77,4 +77,3 @@
  * </pre>
  */
 package org.openmole.plugin.plan.complete;
-complete
