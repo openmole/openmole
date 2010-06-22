@@ -18,8 +18,6 @@ package org.openmole.core.implementation.resource;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.openmole.commons.exception.InternalProcessingError;

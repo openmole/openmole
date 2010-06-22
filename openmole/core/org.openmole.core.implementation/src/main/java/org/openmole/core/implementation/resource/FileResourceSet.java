@@ -6,6 +6,7 @@
 package org.openmole.core.implementation.resource;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import org.openmole.core.model.resource.ILocalFileCache;
@@ -19,7 +20,7 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public class FileResourceSet implements IResource {
 
-    Set<FileResource> fileResourceSet = new TreeSet<FileResource>();
+    Set<FileResource> fileResourceSet = new HashSet<FileResource>();
 
     @Override
     public void deploy() throws InternalProcessingError, UserBadDataError {
