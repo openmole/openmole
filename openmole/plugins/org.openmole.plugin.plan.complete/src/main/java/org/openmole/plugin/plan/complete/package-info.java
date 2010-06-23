@@ -16,7 +16,7 @@
  */
 /** 
  * <h3>Example</h3>
- * The following example shows how to explore in an exhaustive way the combination
+ * <p>The following example shows how to explore in an exhaustive way the combination
  * between the parameters:
  * <pre>
  * p1, an integer taking its values in  [1,2]
