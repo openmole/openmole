@@ -21,9 +21,7 @@ import java.io.BufferedOutputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStream
 import java.util.Collection
-import java.util.Iterator
 
 
 import org.jfree.chart.JFreeChart
@@ -36,9 +34,7 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.structure.Duo
 import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.ArrayBuffer
 
 import org.jfree.chart.ChartUtilities._
 import org.jfree.chart.ChartFactory._

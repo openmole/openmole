@@ -19,7 +19,6 @@
  */
 package org.openmole.ui.plugin.builder;
 
-import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.structuregenerator.ComplexNode;
@@ -40,7 +39,6 @@ import org.openmole.core.model.task.ITask;
 import org.openmole.core.implementation.task.MoleTask;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast;
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;
@@ -50,6 +48,8 @@ import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 import org.openmole.core.implementation.data.Util;
+import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.model.mole.IMoleExecution;
 
 public class Builder {
 
@@ -117,8 +117,14 @@ public class Builder {
     }
 
     public Mole buildMole(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return new Mole(puzzle.getFirstCapsule());
+        return buildMole(puzzle.getFirstCapsule());
     }
+
+    public IMoleExecution buildMole(IPuzzleFirstAndLast puzzle,
+                                    IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return buildMole(puzzle).createExecution(strategy);
+    }
+
     public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError {
         return new FixedEnvironmentStrategy();
     }
