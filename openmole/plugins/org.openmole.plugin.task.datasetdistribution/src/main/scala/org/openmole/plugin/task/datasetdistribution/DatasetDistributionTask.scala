@@ -42,7 +42,7 @@ import scala.collection.JavaConversions._
 
 import org.openmole.core.implementation.tools.VariableExpansion._
 
-class DatasetDistributionTask (name: String, outputDirectoryPath: String, minBound: String, maxBound: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
+class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
 
   object Extension { 
     def image = ".png"
@@ -70,14 +70,14 @@ class DatasetDistributionTask (name: String, outputDirectoryPath: String, minBou
       charts foreach ( chart => {
         val data = context getLocalValue(chart._1)
         val array = new Array[Double](data.size)
-        
-        data foreach ( v => {var i = 0
+        var i = 0
+        data foreach ( v => {
           array(i) = v.doubleValue
           i += 1
         } )
 
         val dataset = new HistogramDataset()
-        dataset addSeries("",array,expandIntegerData(context, nbCategories),expandDoubleData(context, minBound),expandDoubleData(context, maxBound))
+        dataset addSeries("", array, expandIntegerData(context, nbCategories))
 
         val jfchart = createChart(dataset, context)
 
