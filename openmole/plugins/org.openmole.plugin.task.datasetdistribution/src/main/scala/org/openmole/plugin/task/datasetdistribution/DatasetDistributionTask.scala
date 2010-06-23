@@ -44,12 +44,14 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 
 class DatasetDistributionTask (name: String, outputDirectoryPath: String, minBound: String, maxBound: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
 
-  object Extension { ".png" }
+  object Extension { 
+    def image = ".png"
+  }
 
   private val charts = new ListBuffer[(IPrototype[Collection[Number]], String)]
 
   def addChart(prototype: IPrototype[Collection[Number]]) {
-    addChart(prototype, prototype.getName() + Extension);
+    addChart(prototype, prototype.getName() + Extension.image);
   }
 
   def addChart(prototype: IPrototype[Collection[Number]], fileName: String) {
