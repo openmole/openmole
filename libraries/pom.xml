@@ -36,6 +36,8 @@
 	<module>org.apache.commons.exec</module>
 	<module>ch.ethz.ssh2</module>
 	<module>ccl.northwestern.edu.netlogo</module>
+	<module>ca.umontreal.iro.ssj</module>
+	<module>org.apache.commons.math</module>
     </modules>
 
     <!-- ************************************************************* -->
