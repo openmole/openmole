@@ -24,6 +24,6 @@ import org.openmole.core.model.execution.IEnvironment;
  *
  * @author reuillon
  */
-public interface IEnvironmentSelectionStrategy {
+public interface IEnvironmentSelection {
     IEnvironment selectEnvironment(IGenericTaskCapsule capsule);
 }

@@ -57,7 +57,10 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.execution.JobRegistry;
-import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
+import org.openmole.core.model.mole.IEnvironmentSelection;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.mole.IMoleJobGrouping;
 
 public class MoleExecution implements IMoleExecution {
 
@@ -92,7 +95,10 @@ public class MoleExecution implements IMoleExecution {
 
     private static final Logger LOGGER = Logger.getLogger(MoleExecution.class.getName());
     
-    final Mole mole;
+    
+    
+    final IMole mole;
+    final IMoleJobGrouping moleJobGrouping;
 
     final BlockingQueue<Duo<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Duo<IJob, IEnvironment>>();
     final Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
@@ -101,7 +107,8 @@ public class MoleExecution implements IMoleExecution {
     final AtomicLong currentJobId = new AtomicLong();
 
     final ILocalCommunication localCommunication;
-    final IEnvironmentSelectionStrategy environmentSelectionStrategy;
+    final IEnvironmentSelection environmentSelectionStrategy;
+    final IEnvironment defaultEnvironment;
     
     final BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
     final MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
@@ -112,14 +119,28 @@ public class MoleExecution implements IMoleExecution {
 
     transient Thread submiter;
 
-    public MoleExecution(Mole mole, IContext context) throws InternalProcessingError, UserBadDataError {
-        this(mole, context, new FixedEnvironmentStrategy());
+    public MoleExecution(IMole mole) throws InternalProcessingError, UserBadDataError {
+        this(mole, new Context(), FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
+    }
+    
+    public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy) throws InternalProcessingError, UserBadDataError {
+        this(mole, new Context(), environmentSelectionStrategy, MoleJobGrouping.EMPTY_GROUPING);
     }
 
-    public MoleExecution(Mole mole, IContext context, IEnvironmentSelectionStrategy environmentSelectionStrategy) throws InternalProcessingError, UserBadDataError {
+    public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
+        this(mole, new Context(), environmentSelectionStrategy, moleJobGrouping);
+    }
+    
+    public MoleExecution(IMole mole, IContext context) throws InternalProcessingError, UserBadDataError {
+        this(mole, context, FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
+    }
+    
+    public MoleExecution(IMole mole, IContext context, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
         this.mole = mole;
+        this.moleJobGrouping = moleJobGrouping;
         this.localCommunication = new LocalCommunication();
         this.environmentSelectionStrategy = environmentSelectionStrategy;
+        this.defaultEnvironment = LocalExecutionEnvironment.getInstance();
 
         ITicket ticket = nextTicket(createRootTicket());
 
@@ -151,7 +172,7 @@ public class MoleExecution implements IMoleExecution {
         inProgress.put(moleJob, subMole);
         subMole.incNbJobInProgress();
 
-        IMoleJobGroupingStrategy strategy = mole.getMoleJobGroupingStrategy(capsule);
+        IMoleJobGroupingStrategy strategy = moleJobGrouping.getMoleJobGroupingStrategy(capsule);
 
         if (strategy != null) {
             IMoleJobCategory category = strategy.getCategory(moleJob.getContext());
@@ -183,6 +204,7 @@ public class MoleExecution implements IMoleExecution {
     private void submit(Job job, IGenericTaskCapsule capsule) {
         JobRegistry.getInstance().register(job, this);
         IEnvironment environment = environmentSelectionStrategy.selectEnvironment(capsule);
+        environment = environment!=null?environment:defaultEnvironment;
         jobs.add(new Duo<IJob, IEnvironment>(job, environment));
     }
 
@@ -308,7 +330,7 @@ public class MoleExecution implements IMoleExecution {
     }
 
     @Override
-    public Mole getMole() {
+    public IMole getMole() {
         return mole;
     }
 

@@ -19,7 +19,6 @@
  */
 package org.openmole.core.implementation.mole;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,16 +30,11 @@ import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.implementation.job.Context;
-import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.commons.tools.pattern.IVisitor;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.transition.ITransition;
 
@@ -51,20 +45,19 @@ import org.openmole.core.model.transition.ITransition;
 public class Mole implements IMole {
 
     private IGenericTaskCapsule<?, ?> root;
-    private Map<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy> groupers = new HashMap<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy>();
-
+ 
     public Mole(IGenericTaskCapsule<?, ?> root) {
         this.root = root;
     }
 
-    @Override
+  /*  @Override
     public void run() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        run(new FixedEnvironmentStrategy());
+        run(new FixedEnvironmentSelection());
     }
 
     @Override
-    public void run(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        IMoleExecution execution = createExecution(strategy);
+    public void run(IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        IMoleExecution execution = new MoleExecution(this, strategy);
         Logger.getLogger(Mole.class.getName()).fine("Begin of the RUN");
         execution.start();
         execution.waitUntilEnded();
@@ -73,33 +66,17 @@ public class Mole implements IMole {
 
     @Override
     public IMoleExecution start() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        IMoleExecution execution = createExecution(new FixedEnvironmentStrategy());
+        IMoleExecution execution = new MoleExecution(this, new FixedEnvironmentSelection());
         execution.start();
         return execution;
     }
 
     @Override
-    public IMoleExecution start(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        IMoleExecution execution = createExecution(strategy);
+    public IMoleExecution start(IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        IMoleExecution execution = new MoleExecution(this, strategy);
         execution.start();
         return execution;
-    }
-
-    @Override
-    public IMoleExecution createExecution() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return createExecution(new FixedEnvironmentStrategy());
-    }
-
-    @Override
-    public IMoleExecution createExecution(IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        IContext rootContext = new Context();
-        return new MoleExecution(this, rootContext, strategy);
-    }
-
-    @Override
-    public IMoleExecution createExecution(IContext context) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return new MoleExecution(this, context);
-    }
+    }*/
 
     @Override
     public void visit(IVisitor<IGenericTaskCapsule> visitor) throws InternalProcessingError, UserBadDataError {
@@ -174,14 +151,4 @@ public class Mole implements IMole {
 
         return capsules;
     }
-
-    public IMoleJobGroupingStrategy getMoleJobGroupingStrategy(IGenericTaskCapsule key) {
-        return groupers.get(key);
-    }
-
-    @Override
-    public void setMoleJobGroupingStrategy(IGenericTaskCapsule forCapsule, IMoleJobGroupingStrategy strategy) {
-        groupers.put(forCapsule, strategy);
-    }
-
 }

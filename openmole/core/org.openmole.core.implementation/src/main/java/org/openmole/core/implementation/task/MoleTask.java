@@ -33,6 +33,7 @@ import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
+import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
@@ -83,7 +84,7 @@ public class MoleTask extends Task implements IMoleTask {
             }
         }
 
-        IMoleExecution execution = mole.createExecution(firstTaskContext);
+        IMoleExecution execution = new MoleExecution(mole, firstTaskContext);
 
         ExceptionLister exceptionLister = new ExceptionLister();
 

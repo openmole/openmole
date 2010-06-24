@@ -17,33 +17,36 @@
 
 package org.openmole.core.implementation.mole;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.execution.IEnvironment;
-import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.model.mole.IEnvironmentSelection;
 
 /**
  *
  * @author reuillon
  */
-public class FixedEnvironmentStrategy implements IEnvironmentSelectionStrategy {
+public class FixedEnvironmentSelection implements IEnvironmentSelection {
+   
+    static final IEnvironmentSelection EMPTY_SELECTION = new FixedEnvironmentSelection(Collections.EMPTY_MAP);
+    
+    final Map<IGenericTaskCapsule, IEnvironment> environments;
 
-    final Map<IGenericTaskCapsule, IEnvironment> environments = new HashMap<IGenericTaskCapsule, IEnvironment>();
-    final IEnvironment defaultEnvironment;
-
-    public FixedEnvironmentStrategy() throws InternalProcessingError {
-        defaultEnvironment = LocalExecutionEnvironment.getInstance();
+    public FixedEnvironmentSelection() {
+        this(new HashMap<IGenericTaskCapsule, IEnvironment>());
+    }
+    
+    private FixedEnvironmentSelection(Map<IGenericTaskCapsule, IEnvironment> environments) {
+        this.environments = environments;
     }
 
     @Override
     public IEnvironment selectEnvironment(IGenericTaskCapsule capsule) {
-        IEnvironment env = environments.get(capsule);
-        if(env != null) return env;
-        return defaultEnvironment;
+        return environments.get(capsule);
     }
 
     public void setEnvironment(IGenericTaskCapsule capsule, IEnvironment environment) {

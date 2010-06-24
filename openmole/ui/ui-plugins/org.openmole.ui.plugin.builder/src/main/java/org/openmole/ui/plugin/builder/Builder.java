@@ -42,13 +42,15 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast;
 import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;
-import org.openmole.core.implementation.mole.FixedEnvironmentStrategy;
 import org.openmole.core.implementation.task.InputToGlobalTask;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 import org.openmole.core.implementation.data.Util;
-import org.openmole.core.model.mole.IEnvironmentSelectionStrategy;
+import org.openmole.core.implementation.mole.FixedEnvironmentSelection;
+import org.openmole.core.implementation.mole.MoleExecution;
+import org.openmole.core.model.mole.IEnvironmentSelection;
+import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
 
 public class Builder {
@@ -79,7 +81,7 @@ public class Builder {
             }
         }
 
-        Mole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
+        IMole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
@@ -99,7 +101,7 @@ public class Builder {
             inputToGlobalTask.addInput(data);
         }
 
-        Mole mole = buildMole(buildChain(puzzle, build(inputToGlobalTask)).getFirstCapsule());
+        IMole mole = buildMole(buildChain(puzzle, build(inputToGlobalTask)).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
@@ -108,25 +110,41 @@ public class Builder {
         return moleTask;
     }
 
-    public Mole buildMole(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public IMole buildMole(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new Mole(buildChain(tasks).getFirstCapsule());
     }
 
-    public Mole buildMole(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public IMole buildMole(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new Mole(taskCapsule);
     }
 
-    public Mole buildMole(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public IMole buildMole(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return buildMole(puzzle.getFirstCapsule());
     }
-
-    public IMoleExecution buildMole(IPuzzleFirstAndLast puzzle,
-                                    IEnvironmentSelectionStrategy strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return buildMole(puzzle).createExecution(strategy);
+    
+    public IMoleExecution buildMoleExecution(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return buildMoleExecution(buildMole(tasks));
     }
 
-    public FixedEnvironmentStrategy buildFixedEnvironmentStrategy() throws InternalProcessingError {
-        return new FixedEnvironmentStrategy();
+    public IMoleExecution buildMoleExecution(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return buildMoleExecution(buildMole(taskCapsule));
+    }
+    
+    public IMoleExecution buildMoleExecution(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return buildMoleExecution(buildMole(puzzle));
+    }
+    
+    public IMoleExecution buildMoleExecution(IMole mole) throws InternalProcessingError, UserBadDataError {
+        return new MoleExecution(mole);
+    }
+    
+    public IMoleExecution buildMoleExecution(IPuzzleFirstAndLast puzzle,
+                                    IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return new MoleExecution(buildMole(puzzle),strategy);
+    }
+
+    public FixedEnvironmentSelection buildFixedEnvironmentSelection() throws InternalProcessingError {
+        return new FixedEnvironmentSelection();
     }
     public final ExplorationBuilder exploration = new ExplorationBuilder();
 

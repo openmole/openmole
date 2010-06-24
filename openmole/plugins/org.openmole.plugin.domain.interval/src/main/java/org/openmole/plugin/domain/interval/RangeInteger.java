@@ -24,8 +24,8 @@ import java.util.List;
 import org.openmole.core.implementation.domain.Interval;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 public class RangeInteger extends UniformelyDiscretizedIntervalDomain<Integer> {
 
@@ -45,13 +45,11 @@ public class RangeInteger extends UniformelyDiscretizedIntervalDomain<Integer> {
         super(interval, step);
     }
 
-
-
     @Override
     public List<Integer> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
         Integer min = getInterval().getMin(context);
         Integer max = getInterval().getMax(context);
-        Integer step = new Integer(VariableExpansion.getInstance().expandData(context, getStep()));
+        Integer step = new Integer(expandData(context, getStep()));
 
         int size =  Math.abs(max - min) / step;
 

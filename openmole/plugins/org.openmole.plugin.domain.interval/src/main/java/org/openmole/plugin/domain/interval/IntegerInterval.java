@@ -31,6 +31,4 @@ public class IntegerInterval extends Interval<Integer> {
        return new Integer(expandData(context, getMin()));
     }
 
-
-
 }
