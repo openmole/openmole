@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -8,35 +8,48 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole</artifactId>
+        <artifactId>libraries</artifactId>
         <groupId>org.openmole</groupId>
         <version>0.3</version>
     </parent>
 
-    <artifactId>misc</artifactId>
+    <!--Used to build the symbolic name of the bundle-->
+    <artifactId>org.slf4j</artifactId>
+    <version>${lib.org.slf4j.version}</version>
 
-    <modules>
-        <module>org.openmole.misc.executorservice</module>
-        <module>org.openmole.misc.hashservice</module>
-        <module>org.openmole.misc.pluginmanager</module>
-        <module>org.openmole.misc.updater</module>
-        <module>org.openmole.misc.workspace</module>
-        <module>org.openmole.misc.backgroundexecutor</module>
-	<module>org.openmole.misc.math</module>
-	<module>org.openmole.misc.logging</module>
-    </modules>
+    <dependencies>
+	<dependency>
+    	    <groupId>org.slf4j</groupId>
+    	    <artifactId>jul-to-slf4j</artifactId>
+    	    <version>${lib.org.slf4j.version}</version>
+            <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>${lib.ch.qos.logback.version}</version>
+            <scope>provided</scope>
+	</dependency>
+    </dependencies>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
     <name>${project.artifactId}</name>
-    <description>Miscileanous software used by OpenMOLE</description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
 
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
+
+
+    <!--optional. Use this property to tune the exported packages-->
+    <!--<properties>
+        <export.packages>
+            TODO
+        </export.packages>
+    </properties>-->
 
 </project>

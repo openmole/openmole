@@ -318,6 +318,9 @@
 	<lib.ca.umontreal.iro.ssj.version>2.3</lib.ca.umontreal.iro.ssj.version>
 	<lib.gov.lbl.acs.colt.version>1.2</lib.gov.lbl.acs.colt.version>
 	<lib.org.apache.commons.math.version>2.1</lib.org.apache.commons.math.version>
+	<lib.org.slf4j.version>1.6.0</lib.org.slf4j.version>
+	<lib.ch.qos.logback.version>0.9.21</lib.ch.qos.logback.version>
+
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
         <import.packages>*</import.packages>

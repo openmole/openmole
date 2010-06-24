@@ -81,7 +81,11 @@
             <artifactId>org.openmole.misc.math</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>app</artifactId>

@@ -8,35 +8,42 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole</artifactId>
+        <artifactId>misc</artifactId>
         <groupId>org.openmole</groupId>
         <version>0.3</version>
     </parent>
 
-    <artifactId>misc</artifactId>
+    <artifactId>org.openmole.misc.logging</artifactId>
 
-    <modules>
-        <module>org.openmole.misc.executorservice</module>
-        <module>org.openmole.misc.hashservice</module>
-        <module>org.openmole.misc.pluginmanager</module>
-        <module>org.openmole.misc.updater</module>
-        <module>org.openmole.misc.workspace</module>
-        <module>org.openmole.misc.backgroundexecutor</module>
-	<module>org.openmole.misc.math</module>
-	<module>org.openmole.misc.logging</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.slf4j</artifactId>
+            <version>${lib.org.slf4j.version}</version>
+        </dependency>
+    </dependencies>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
-    <name>${project.artifactId}</name>
-    <description>Miscileanous software used by OpenMOLE</description>
+    <name>${project.artifactId} ${project.version}</name>
+    <description></description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
 
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
+    </properties>
 
 </project>
+

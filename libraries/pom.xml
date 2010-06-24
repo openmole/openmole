@@ -38,6 +38,7 @@
 	<module>ccl.northwestern.edu.netlogo</module>
 	<module>ca.umontreal.iro.ssj</module>
 	<module>org.apache.commons.math</module>
+	<module>org.slf4j</module>
     </modules>
 
     <!-- ************************************************************* -->

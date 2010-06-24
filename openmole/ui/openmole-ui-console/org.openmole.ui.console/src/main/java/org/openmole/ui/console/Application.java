@@ -1,5 +1,6 @@
 package org.openmole.ui.console;
 
+import java.util.logging.Logger;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -32,6 +33,7 @@ public class Application implements IApplication {
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
+        
         // Init options parsing
         String[] args = (String[]) context.getArguments().get("application.args");
         Option optionPluginsDir = OptionBuilder.withLongOpt("pluginsDir").withDescription("Add plugins directories (seperated by \",\")").hasArgs(1).withArgName("directories").isRequired(false).create("p");
@@ -60,12 +62,14 @@ public class Application implements IApplication {
         g.leftShift(new Register(g, "reg", "\\rg"));
 
         console.run("init " + workspace);
+        
         // Process CLI options
         if (cmd.hasOption(optionPluginsDir.getOpt())) {
             for (String directory : cmd.getOptionValue(optionPluginsDir.getOpt()).split(",")) {
                 Activator.getPluginManager().loadDir(directory);
             }
         }
+        
         // Run
         console.getGroovysh().run();
         return IApplication.EXIT_OK;
