@@ -43,9 +43,9 @@ public class Application implements IApplication {
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println("Error while parsing command line arguments");
+            Logger.getLogger(Application.class.getName()).severe("Error while parsing command line arguments");
             new HelpFormatter().printHelp(" ", options);
-            System.exit(1);
+            return IApplication.EXIT_OK;
         }
 
         // Init Console
