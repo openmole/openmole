@@ -31,7 +31,7 @@ import org.openmole.core.model.task.ITask;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class TransitionFactory {
 

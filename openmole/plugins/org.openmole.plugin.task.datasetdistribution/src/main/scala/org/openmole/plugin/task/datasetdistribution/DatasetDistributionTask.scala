@@ -41,7 +41,15 @@ import org.jfree.chart.ChartFactory._
 import scala.collection.JavaConversions._
 
 import org.openmole.core.implementation.tools.VariableExpansion._
-
+/**
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
+ *
+ * The DatasetDistributionTask enables to plot the distribution of a data set.
+ * It renders a set of data as an histogram, according to the occurency in each
+ * predefined range of values. The number of category, legend names, the ouput
+ * image size can be set. It is possible to add as many set as needed. These sets
+ * are displayed in separated files as PNG images.
+ */
 class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
 
   object Extension { 
@@ -50,10 +58,18 @@ class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCate
 
   private val charts = new ListBuffer[(IPrototype[Collection[Number]], String)]
 
+  /**
+   * Add a set of data to be ploted. The name of the prototype will be used to
+   * name the corresponding output file.
+   */
   def addChart(prototype: IPrototype[Collection[Number]]) {
     addChart(prototype, prototype.getName() + Extension.image);
   }
 
+  /**
+   * Add a set of data to be ploted.
+   * fileName is the name the corresponding output file.
+   */
   def addChart(prototype: IPrototype[Collection[Number]], fileName: String) {
     charts += ((prototype, fileName))
     addInput(prototype)
@@ -63,8 +79,15 @@ class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCate
     val chart = createHistogram(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
     chart setAntiAlias(true)
     chart
+    chart
   }
 
+  /**
+   * Process the task:
+   * 1- builds the categories
+   * 2- builds a HistogramDataset object
+   * 3- saves it as a PNG file
+   */
   override def process(context: IContext, progress: IProgress) = {
     try {
       charts foreach ( chart => {

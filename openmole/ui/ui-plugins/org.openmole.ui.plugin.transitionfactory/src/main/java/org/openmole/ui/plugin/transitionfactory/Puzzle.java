@@ -17,11 +17,9 @@
 
 package org.openmole.ui.plugin.transitionfactory;
 
-import org.openmole.ui.plugin.transitionfactory.IPuzzle;
-
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class Puzzle implements IPuzzle {
 
