@@ -82,6 +82,7 @@
  * }
  * ex = workflow()
  * ex.start()}
+ * </pre>
  *
  * 2 images (Ly.png and out.png) are generated in /tmp.
  */
