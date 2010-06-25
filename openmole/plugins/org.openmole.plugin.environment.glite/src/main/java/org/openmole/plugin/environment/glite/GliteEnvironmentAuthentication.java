@@ -122,7 +122,6 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
 
     private void createContextFromPreferences() throws InternalProcessingError, UserBadDataError, InterruptedException {
 
-
         Context ctx = Activator.getJSagaSessionService().createContext();
         initContext(ctx);
         String time = getTime();
@@ -178,7 +177,7 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
             }
 
             String keyPassword = Activator.getWorkspace().getPreference(GliteEnvironment.PasswordLocation);
-
+            if(keyPassword == null) keyPassword = "";
             ctx.setAttribute(Context.USERPASS, keyPassword);
 
         } catch (NoSuccessException e) {
@@ -313,7 +312,5 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
     String getVomsURL() {
         return gliteEnvironmentDescription.getVomsURL();
     }
-
-
 
 }

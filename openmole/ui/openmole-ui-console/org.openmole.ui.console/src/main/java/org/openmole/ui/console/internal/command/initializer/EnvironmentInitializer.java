@@ -85,10 +85,13 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                                         label += ": ";
                                         line = new jline.ConsoleReader().readLine(label, '*');
                                     } else {
-                                        label += " (default=" + Activator.getWorkspace().getDefaultValue(location) + "; old=" + Activator.getWorkspace().getPreference(location) + ")" + possibleValues + ": ";
+                                        String oldVal = Activator.getWorkspace().getPreference(location);
+                                        String defaultVal = Activator.getWorkspace().getDefaultValue(location);
+                                       
+                                        label += " (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ";
                                         line = new jline.ConsoleReader().readLine(label);
                                     }
-                                } while (interactiveConfiguration.choices().length != 0 && !isValueInArray(line, interactiveConfiguration.choices()));
+                                } while (!line.isEmpty() && interactiveConfiguration.choices().length != 0 && !isValueInArray(line, interactiveConfiguration.choices()));
 
                                 if (!line.isEmpty()) {
                                     Activator.getWorkspace().setPreference(location, line);

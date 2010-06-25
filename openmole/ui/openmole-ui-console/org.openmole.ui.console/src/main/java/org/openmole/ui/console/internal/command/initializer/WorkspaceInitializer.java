@@ -18,7 +18,6 @@
 package org.openmole.ui.console.internal.command.initializer;
 
 import java.io.IOException;
-import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.IWorkspace;
