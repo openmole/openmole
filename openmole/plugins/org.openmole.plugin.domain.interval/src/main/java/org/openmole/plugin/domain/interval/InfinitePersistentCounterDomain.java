@@ -26,15 +26,15 @@ import org.openmole.core.model.job.IContext;
  *
  * @author reuillon
  */
-public class InfinitePersistantCounterDomain extends Domain<Long> {
+public class InfinitePersistentCounterDomain extends Domain<Long> {
 
     final Iterator<Long> counter;
 
-    public InfinitePersistantCounterDomain() {
+    public InfinitePersistentCounterDomain() {
         this(0L, 1L);
     }
 
-    public InfinitePersistantCounterDomain(final Long start, final Long step) {
+    public InfinitePersistentCounterDomain(final Long start, final Long step) {
         counter = new Iterator<Long>() {
 
             Long value = start;
