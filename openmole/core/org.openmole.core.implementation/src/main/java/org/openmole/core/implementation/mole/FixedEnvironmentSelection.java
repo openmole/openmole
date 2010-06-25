@@ -20,8 +20,6 @@ package org.openmole.core.implementation.mole;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.mole.IEnvironmentSelection;

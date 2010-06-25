@@ -45,6 +45,8 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchStorage extends BatchService implements IBatchStorage {
 
+    final static Logger LOGGER = Logger.getLogger(BatchStorage.class.getName());
+
     final static ConfigurationLocation TmpDirRemoval = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRemoval");
     final static ConfigurationLocation TmpDirRegenerate = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRegenerate");
 
@@ -86,17 +88,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return persistentSpace;
     }
 
-    /*  @Override
-    public synchronized IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
-    if (persistentSpace == null) {
-    try {
-    persistentSpace = getBaseDir().mkdirIfNotExist(persistent, token);
-    } catch (IOException e) {
-    throw new InternalProcessingError(e);
-    }
-    }     
-    return persistentSpace;
-    }*/
     @Override
     public synchronized IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
         if (tmpSpace == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
@@ -112,11 +103,15 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                     IURIFile child = new URIFile(tmpNoTime, dir);
                     if (child.URLRepresentsADirectory()) {
                         try {
+                            dir = dir.substring(0, dir.length() - 1);
                             Long timeOfDir = Long.parseLong(dir);
+
                             if (timeOfDir < removalDate) {
+                                 LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir);
                                 service.submit(new URIFileCleaner(child, true, false));
                             }
                         } catch (NumberFormatException ex) {
+                            LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir);
                             service.submit(new URIFileCleaner(child, true, false));
                         }
                     } else {
@@ -227,12 +222,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return false;
     }
 
-    /*  @Cachable
-    @Override
-    public IBatchStorageDescription getDescription() {
-    return ;
-    }
-     */
     @Override
     public String toString() {
         return location.toString();

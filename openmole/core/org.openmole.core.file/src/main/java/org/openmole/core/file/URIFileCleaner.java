@@ -24,6 +24,8 @@ import org.openmole.core.model.file.IURIFile;
 
 public class URIFileCleaner implements Runnable {
 
+    final static Logger LOGGER = Logger.getLogger(URIFileCleaner.class.getName());
+
     IURIFile toClean;
     boolean timeOut = true;
     boolean recursive = false;
@@ -46,6 +48,7 @@ public class URIFileCleaner implements Runnable {
         try {
             if (toClean != null) {
                 toClean.remove(timeOut, recursive);
+                LOGGER.log(Level.FINE, "Cleaned {0}", toClean.toString());
             }
         } catch (IOException e) {
             Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "Cannot delete file " + toClean.getLocation(), e);

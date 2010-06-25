@@ -63,6 +63,8 @@ import org.openmole.core.model.execution.batch.IBatchStorage;
 //FIXME when Equinox bug #221329 is resolved remove the synchronized
 public class ReplicaCatalog implements IReplicaCatalog {
 
+    final static Logger LOGGER = Logger.getLogger(ReplicaCatalog.class.getName());
+
     final static ConfigurationLocation GCUpdateInterval = new ConfigurationLocation(ReplicaCatalog.class.getSimpleName(), "GCUpdateInterval");
 
     static {
@@ -282,6 +284,8 @@ public class ReplicaCatalog implements IReplicaCatalog {
     }
 
     synchronized public Future<?> clean(final IReplica replica)  {
+        LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString());
+
         remove(replica);
 
         if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getEnvironmentDescription(), replica.isZipped()) == null)
