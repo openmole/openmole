@@ -80,6 +80,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             final Job job = getJobServiceCache().createJob(hello);
 
             job.run();
+            job.getState();
 
             return true;
 
