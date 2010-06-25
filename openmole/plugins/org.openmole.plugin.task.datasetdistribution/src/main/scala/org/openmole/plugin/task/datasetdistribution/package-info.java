@@ -57,17 +57,16 @@
  * doubleTask.addInput(dataSet)
  * doubleTask.addOutput(dataSet)
  *
- * DatasetDistributionTask chartTask =
- *           new DatasetDistributionTask("chartTask",
- *                                       "/tmp/",
- *                                       "10",
- *                                       "1000",
- *                                       "1200",
- *                                       "test chart",
- *                                       "Ly",
- *                                       "Occurencies",
- *                                       800,
- *                                       800);
+ * chartTask = new DatasetDistributionTask("chartTask",
+ *                                         "/tmp/",
+ *                                         "10",
+ *                                         "1000",
+ *                                         "1200",
+ *                                         "test chart",
+ *                                         "Ly",
+ *                                         "Occurencies",
+ *                                         800,
+ *                                         800);
  *
  * chartTask.addChart(Util.toArray(out))
  * chartTask.addChart(Util.toArray(ly))

@@ -21,20 +21,17 @@ import java.io.BufferedOutputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.Collection
 
 
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.statistics.HistogramDataset
-import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import scala.collection.mutable.ListBuffer
+import Utils._
 
 import org.jfree.chart.ChartUtilities._
 import org.jfree.chart.ChartFactory._
@@ -50,35 +47,26 @@ import org.openmole.core.implementation.tools.VariableExpansion._
  * image size can be set. It is possible to add as many set as needed. These sets
  * are displayed in separated files as PNG images.
  */
-class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCategories: String, chartTitle: String, xLegend: String, yLegend: String, imageWidth: Int, imageHeight: Int) extends Task(name) {
-
-  object Extension { 
-    def image = ".png"
-  }
-
-  private val charts = new ListBuffer[(IPrototype[Collection[Number]], String)]
-
-  /**
-   * Add a set of data to be ploted. The name of the prototype will be used to
-   * name the corresponding output file.
-   */
-  def addChart(prototype: IPrototype[Collection[Number]]) {
-    addChart(prototype, prototype.getName() + Extension.image);
-  }
-
-  /**
-   * Add a set of data to be ploted.
-   * fileName is the name the corresponding output file.
-   */
-  def addChart(prototype: IPrototype[Collection[Number]], fileName: String) {
-    charts += ((prototype, fileName))
-    addInput(prototype)
-  }
+class DatasetDistributionTask (name: String, 
+                               outputDirectoryPath: String,
+                               nbCategories: String,
+                               chartTitle: String,
+                               xLegend: String,
+                               yLegend: String,
+                               imageWidth: Int,
+                               imageHeight: Int) extends GenericDatasetDistribution(name: String,
+                                                                                    outputDirectoryPath: String,
+                                                                                    nbCategories: String,
+                                                                                    chartTitle: String,
+                                                                                    xLegend: String,
+                                                                                    yLegend: String,
+                                                                                    imageWidth: Int,
+                                                                                    imageHeight: Int) {
 
   private def createChart(dataset: HistogramDataset, context: IContext): JFreeChart = {
     val chart = createHistogram(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+    chart getXYPlot() setForegroundAlpha(0.75f);
     chart setAntiAlias(true)
-    chart
     chart
   }
 
@@ -91,26 +79,25 @@ class DatasetDistributionTask (name: String, outputDirectoryPath: String, nbCate
   override def process(context: IContext, progress: IProgress) = {
     try {
       charts foreach ( chart => {
-        val data = context getLocalValue(chart._1)
-        val array = new Array[Double](data.size)
-        var i = 0
-        data foreach ( v => {
-          array(i) = v.doubleValue
-          i += 1
+          val data = context getLocalValue(chart._1)
+          val array = new Array[Double](data.size)
+          var i = 0
+          data foreach ( v => {
+              array(i) = v.doubleValue
+              i += 1
+            } )
+
+          val dataset = new HistogramDataset()
+          dataset addSeries("", array, expandIntegerData(context, nbCategories))
+
+          val jfchart = createChart(dataset, context)
+          val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + chart._2)));
+          try {
+            writeChartAsPNG(os,jfchart,imageWidth,imageHeight)
+          } finally {
+            os.close()
+          }
         } )
-
-        val dataset = new HistogramDataset()
-        dataset addSeries("", array, expandIntegerData(context, nbCategories))
-
-        val jfchart = createChart(dataset, context)
-
-        val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + chart._2)));
-        try {
-          writeChartAsPNG(os,jfchart,imageWidth,imageHeight)
-        } finally {
-          os.close()
-        }
-      } )
 
     } catch {
       case ex: FileNotFoundException => throw new UserBadDataError(ex)
