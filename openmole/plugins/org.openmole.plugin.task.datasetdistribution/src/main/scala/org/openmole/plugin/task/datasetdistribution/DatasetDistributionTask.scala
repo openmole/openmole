@@ -25,6 +25,7 @@ import java.io.IOException
 
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.data.statistics.HistogramDataset
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.execution.IProgress
@@ -33,7 +34,9 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import Utils._
 
+import org.jfree.chart.StandardChartTheme._
 import org.jfree.chart.ChartUtilities._
+import org.jfree.chart.ChartColor
 import org.jfree.chart.ChartFactory._
 import scala.collection.JavaConversions._
 
@@ -54,18 +57,25 @@ class DatasetDistributionTask (name: String,
                                xLegend: String,
                                yLegend: String,
                                imageWidth: Int,
-                               imageHeight: Int) extends GenericDatasetDistribution(name: String,
-                                                                                    outputDirectoryPath: String,
-                                                                                    nbCategories: String,
-                                                                                    chartTitle: String,
-                                                                                    xLegend: String,
-                                                                                    yLegend: String,
-                                                                                    imageWidth: Int,
-                                                                                    imageHeight: Int) {
+                               imageHeight: Int) extends GenericDatasetDistribution(name,
+                                                                                    outputDirectoryPath,
+                                                                                    nbCategories,
+                                                                                    chartTitle,
+                                                                                    xLegend,
+                                                                                    yLegend,
+                                                                                    imageWidth,
+                                                                                    imageHeight) {
 
   private def createChart(dataset: HistogramDataset, context: IContext): JFreeChart = {
+    setChartTheme (createLegacyTheme())
+
     val chart = createHistogram(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
-    chart getXYPlot() setForegroundAlpha(0.75f);
+    chart getXYPlot() getRenderer() setSeriesPaint(0, ChartColor.VERY_LIGHT_BLUE)
+
+    val plot = chart getXYPlot()
+    val renderer:XYBarRenderer = plot.getRenderer().asInstanceOf[XYBarRenderer]
+    renderer setDrawBarOutline(true)
+
     chart setAntiAlias(true)
     chart
   }

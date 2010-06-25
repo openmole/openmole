@@ -44,14 +44,14 @@ class  MultiDatasetDistributionTask(name: String,
                                     xLegend: String,
                                     yLegend: String,
                                     imageWidth: Int,
-                                    imageHeight: Int) extends GenericDatasetDistribution(name: String,
-                                                                                         outputDirectoryPath: String,
-                                                                                         nbCategories: String,
-                                                                                         chartTitle: String,
-                                                                                         xLegend: String,
-                                                                                         yLegend: String,
-                                                                                         imageWidth: Int,
-                                                                                         imageHeight: Int) {
+                                    imageHeight: Int) extends GenericDatasetDistribution(name,
+                                                                                         outputDirectoryPath,
+                                                                                         nbCategories,
+                                                                                         chartTitle,
+                                                                                         xLegend,
+                                                                                         yLegend,
+                                                                                         imageWidth,
+                                                                                         imageHeight) {
 
   private def createChart(dataset: DefaultCategoryDataset, context: IContext): JFreeChart = {
     val chart = createBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
