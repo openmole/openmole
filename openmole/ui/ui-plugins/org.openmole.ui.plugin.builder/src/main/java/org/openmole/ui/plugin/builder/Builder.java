@@ -48,7 +48,6 @@ import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 import org.openmole.core.implementation.data.Util;
 import org.openmole.core.implementation.mole.FixedEnvironmentSelection;
-import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.implementation.mole.MoleExecution;
@@ -142,10 +141,6 @@ public class Builder {
     public IMoleExecution buildMoleExecution(IPuzzleFirstAndLast puzzle,
                                     IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new MoleExecution(buildMole(puzzle),strategy);
-
-    public IMoleExecution buildMole(IPuzzleFirstAndLast puzzle,
-                                    IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return new MoleExecution(buildMole(puzzle), strategy);
     }
 
     public FixedEnvironmentSelection buildFixedEnvironmentSelection() throws InternalProcessingError {
