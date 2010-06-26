@@ -14,14 +14,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.console.internal.command.viewer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
@@ -33,49 +41,74 @@ import org.openmole.core.model.execution.batch.IBatchServiceDescription;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment>{
+public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
 
     EnvironmentViewer environmentViewer = new EnvironmentViewer();
 
     @Override
-    public void view(IBatchEnvironment object, List<Object> args) {
-        environmentViewer.view(object, args);
-        System.out.println(Separator);
+    public void view(IBatchEnvironment object, String[] args) {
+        Option verbosity = OptionBuilder.withLongOpt("verbose").withDescription("level of verbosity").hasArgs(1).withArgName("level").withType(Integer.class).isRequired(false).create("v");
+        Options options = new Options().addOption(verbosity);
 
-        Map<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>> jobServices = new HashMap<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>>();
- 
-        IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
+        try {
+            CommandLineParser parser = new BasicParser();
+            CommandLine commandLine = parser.parse(options, args);
 
-        for(IBatchExecutionJob executionJob: executionJobRegistry.getAllExecutionJobs()) {
-            IBatchJob batchJob = executionJob.getBatchJob();
-            if(batchJob != null) {
-                Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(batchJob.getBatchJobServiceDescription());
-                if(jobServiceInfo == null ) {
-                    jobServiceInfo = new TreeMap<ExecutionState, AtomicInteger>();
-                    jobServices.put(batchJob.getBatchJobServiceDescription(), jobServiceInfo);
+            Integer v = 0;
+
+            if (commandLine.hasOption(verbosity.getOpt())) {
+                v = new Integer(commandLine.getOptionValue(verbosity.getOpt()));
+            }
+
+            environmentViewer.view(object, args);
+            if (v >= 1) {
+                System.out.println(Separator);
+                Map<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>> jobServices = new HashMap<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>>();
+                IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
+                for (IBatchExecutionJob executionJob : executionJobRegistry.getAllExecutionJobs()) {
+                    IBatchJob batchJob = executionJob.getBatchJob();
+                    if (batchJob != null) {
+                        Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(batchJob.getBatchJobServiceDescription());
+                        if (jobServiceInfo == null) {
+                            jobServiceInfo = new TreeMap<ExecutionState, AtomicInteger>();
+                            jobServices.put(batchJob.getBatchJobServiceDescription(), jobServiceInfo);
+                        }
+                        AtomicInteger nb = jobServiceInfo.get(batchJob.getState());
+                        if (nb == null) {
+                            nb = new AtomicInteger();
+                            jobServiceInfo.put(batchJob.getState(), nb);
+                        }
+                        nb.incrementAndGet();
+                    }
                 }
 
-                AtomicInteger nb = jobServiceInfo.get(batchJob.getState());
-                if(nb == null) {
-                    nb = new AtomicInteger();
-                    jobServiceInfo.put(batchJob.getState(), nb);
+
+                for (IBatchServiceDescription description : jobServices.keySet()) {
+                    System.out.print(description.toString() + ":");
+                    Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(description);
+                    for (ExecutionState state : jobServiceInfo.keySet()) {
+                        System.out.print(" [" + state.getLabel() + " = " + jobServiceInfo.get(state).get() + "]");
+                    }
+                    System.out.println();
                 }
-                nb.incrementAndGet();
             }
-        }
 
-        for(IBatchServiceDescription description : jobServices.keySet()) {
-            System.out.print(description.toString() + ":");
-            Map<ExecutionState, AtomicInteger> jobServiceInfo =jobServices.get(description);
+            if (v >= 2) {
+                System.out.println(Separator);
 
-            for(ExecutionState state: jobServiceInfo.keySet()) {
-                System.out.print(" [" + state.getLabel() + " = " + jobServiceInfo.get(state).get() + "]");
+                IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
+
+                for (IBatchExecutionJob executionJob : executionJobRegistry.getAllExecutionJobs()) {
+                    IBatchJob batchJob = executionJob.getBatchJob();
+                    if (batchJob != null) {
+                        System.out.println(batchJob.toString());
+                    }
+                }
             }
-            System.out.println();
+        } catch (ParseException ex) {
+            Logger.getLogger(BatchEnvironmentViewer.class.getName()).log(Level.SEVERE, "Wrong arguments format.");
+            new HelpFormatter().printHelp(" ", options);
         }
-
-
 
     }
-
 }

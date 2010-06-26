@@ -34,7 +34,7 @@ import org.openmole.core.model.execution.IExecutionJobRegistry;
 public class EnvironmentViewer implements IViewer<IEnvironment> {
 
     @Override
-    public void view(IEnvironment object, List<Object> args) {
+    public void view(IEnvironment object, String[] args) {
         Map<ExecutionState, AtomicInteger> accounting = new TreeMap<ExecutionState, AtomicInteger>();
 
         for(ExecutionState state : ExecutionState.values()) {

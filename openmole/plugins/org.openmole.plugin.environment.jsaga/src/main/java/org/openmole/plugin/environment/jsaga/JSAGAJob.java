@@ -230,4 +230,10 @@ public class JSAGAJob extends BatchJob {
         }
 
     }
+
+    @Override
+    public String toString() {
+        return jobId;
+    }
+
 }

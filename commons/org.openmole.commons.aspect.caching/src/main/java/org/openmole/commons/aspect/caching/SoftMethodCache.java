@@ -21,7 +21,7 @@ public class SoftMethodCache {
         }
     }
 
-    Map<Object, Map<String, SoftReference<ObjectContainer>>> cache = new WeakHashMap<Object, Map<String, SoftReference<ObjectContainer>>>();
+    final Map<Object, Map<String, SoftReference<ObjectContainer>>> cache = new WeakHashMap<Object, Map<String, SoftReference<ObjectContainer>>>();
 
     void putCachedMethodResult(Object object, final String method, Object result) {
         final Map<String, SoftReference<ObjectContainer>> methodMap = getMethodMap(object);

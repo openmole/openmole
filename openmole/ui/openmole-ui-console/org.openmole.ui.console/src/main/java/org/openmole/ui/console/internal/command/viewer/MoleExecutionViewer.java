@@ -32,7 +32,7 @@ import org.openmole.core.model.mole.IMoleExecution;
 public class MoleExecutionViewer implements IViewer<IMoleExecution>{
 
     @Override
-    public void view(IMoleExecution object, List<Object> args) {
+    public void view(IMoleExecution object, String[] args) {
         Map<State,AtomicInteger> toDisplay = new TreeMap<State, AtomicInteger>();
 
         for(State state : State.values()) {

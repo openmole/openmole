@@ -24,12 +24,10 @@ import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
-import org.openmole.ui.console.internal.command.registry.Registry;
 import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.EnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.IViewer;
 import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer;
-import org.openmole.ui.console.internal.command.viewer.RegistryViewer;
 
 /**
  *
@@ -44,7 +42,6 @@ public class Print extends UICommand {
         viewers.register(IEnvironment.class, new EnvironmentViewer());
         viewers.register(IBatchEnvironment.class, new BatchEnvironmentViewer());
         viewers.register(IMoleExecution.class, new MoleExecutionViewer());
-        viewers.register(Registry.class, new RegistryViewer());
     }
 
     @Override
@@ -54,7 +51,7 @@ public class Print extends UICommand {
             return null;
         }
 
-        Duo<Object, List<Object>> args = getArgs(list);
+        Duo<Object, String[]> args = getArgs(list);
 
         for (IViewer viewer : viewers.getClosestRegistred(args.getLeft().getClass())) {
             viewer.view(args.getLeft(), args.getRight());

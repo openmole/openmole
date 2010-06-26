@@ -34,17 +34,18 @@ public abstract class UICommand extends CommandSupport  {
         super(shell, string, string1);
     }
 
-    protected Duo<Object, List<Object>> getArgs(List<Object> objs) {
-        Iterator<Object> it = objs.iterator();
+    protected Duo<Object, String[]> getArgs(List<String> objs) {
+        Iterator<String> it = objs.iterator();
+        Object obj = shell.execute(it.next());
 
-        Object obj = shell.execute((String) it.next());
-        List<Object> args = new ArrayList<Object>(objs.size() - 1);
+        String[] args = new String[objs.size() - 1];
+        int i = 0;
 
         while(it.hasNext()) {
-            args.add(shell.execute((String) it.next()));
+            args[i++] = it.next();
         }
 
-        return new Duo<Object, List<Object>>(obj, args);
+        return new Duo<Object, String[]>(obj, args);
     }
 
 }

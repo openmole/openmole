@@ -81,7 +81,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
             job.run();
             job.getState();
-
+            //job.cancel();
             return true;
 
            /* float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
