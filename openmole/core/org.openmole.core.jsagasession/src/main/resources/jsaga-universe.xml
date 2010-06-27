@@ -3,6 +3,9 @@
    <GRID contextType="VOMS">
        <job type="WMS">
            <attribute name="GlueCEStateStatus" value="Production" />
+           <attribute name="ShallowRetryCount" value="0" />
+           <attribute name="RetryCount" value="0" />
+           <attribute name="FuzzyRank" value="true" />
        </job>
    </GRID>
 </UNIVERSE> 

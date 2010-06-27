@@ -101,7 +101,7 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
                 for (IBatchExecutionJob executionJob : executionJobRegistry.getAllExecutionJobs()) {
                     IBatchJob batchJob = executionJob.getBatchJob();
                     if (batchJob != null) {
-                        System.out.println(batchJob.toString());
+                        System.out.println(batchJob.toString() + " " + batchJob.getState().toString());
                     }
                 }
             }
