@@ -143,7 +143,7 @@ class CopyToEnvironment implements Callable<Void> {
         IFileCache cache = null;
         if (isDir) {
             cache = Activator.getFileService().getArchiveForDir(file, moleExecution);
-            file = cache.getFile();
+            toReplicate = cache.getFile();
         }
 
         IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);
