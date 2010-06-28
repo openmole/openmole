@@ -37,11 +37,11 @@ import org.openmole.core.model.plan.IExploredPlan;
 
 /**
  *
- * @author romain.reuillon@openmole.org
- *
  * The CompletePlan enables to generate an exhaustive design of experiment from
  * a set of parameters. It generates all the combinations of the available factors,
  *  which take their values in predefined ranges.
+ *
+ * @author romain.reuillon@openmole.org
  *
  */
 public class CompletePlan extends Plan<IFactor<Object, ?>> {

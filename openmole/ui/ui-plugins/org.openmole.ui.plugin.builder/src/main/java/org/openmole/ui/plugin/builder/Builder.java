@@ -53,27 +53,73 @@ import org.openmole.core.model.mole.IMole;
 import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.mole.IMoleExecution;
 
+/**
+ *
+ * Builder is a class offering factories to build complex OpenMOLE objects.
+ *
+ * @author nicolas.dumoulin@openmole.org
+ */
 public class Builder {
 
+    /**
+     * Builds an OpenMOLE prototype. A prototype is composed of a name and a type.
+     *
+     * @param name, the name of the protoype,
+     * @param type, the class name of the type.
+     * @return an instance of Prototype.
+     */
     public IPrototype buildPrototype(String name, Class type) {
         return new Prototype(name, type);
     }
 
+    /**
+     * Builds a dataSet, which is a collection of prototypes.
+     *
+     * @param prototypes, the prototypes to be grouped.
+     * @return a DataSet
+     */
     public IDataSet buildDataSet(IPrototype... prototypes) {
         return new DataSet(prototypes);
     }
 
+    /**
+     * Builds a dataSet, from a collection of dataset. In other words, it composes
+     * datasets.
+     *
+     * @param dataSets, the dataSet to be composed.
+     * @return the composed dataSet.
+     */
     public IDataSet buildDataSet(DataSet... dataSets) {
         return new DataSet(dataSets);
     }
 
+    /**
+     * Builds a TaskCapsule object.
+     *
+     * @param task, the task to be encapsulated
+     * @return an instance of TaskCapsule
+     */
     public TaskCapsule buildTaskCapsule(ITask task) {
         return new TaskCapsule(task);
     }
 
+    /**
+     * Builds a MoleTask containing an exploration. The output of this task are the
+     * the puzzle output as arrays.
+     *
+     * @param taskName, the name of the task,
+     * @param explo, the exploration task,
+     * @param puzzle, the puzzle.
+     * @return a instance of MoleTask
+     * @throws InternalProcessingError
+     * @throws UserBadDataError
+     * @throws InterruptedException
+     */
     public MoleTask buildExplorationMoleTask(String taskName,
             IExplorationTask explo,
             PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
+
+        // the final task making possible the retrieving of output
         InputToGlobalTask inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask");
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
             if (!data.getMode().isSystem()) {
@@ -81,9 +127,11 @@ public class Builder {
             }
         }
 
+        // builds a mole containing a exploration, a puzzle, and an aggregation on the inputToGlobalTask
         IMole mole = buildMole(buildExploration(explo, puzzle, inputToGlobalTask).getFirstCapsule());
         MoleTask moleTask = new MoleTask(taskName, mole);
 
+        // sets output available as an array
         for (IData data : puzzle.getLastCapsule().getTask().getOutput()) {
             if (!data.getMode().isSystem()) {
                 moleTask.addOutput(Util.toArray(data));
@@ -92,6 +140,16 @@ public class Builder {
         return moleTask;
     }
 
+    /**
+     * Builds a generic MOLE Task, that is to say without any exploration.
+     *
+     * @param taskName, the task name,
+     * @param puzzle, the puzzle to be executed in the Mole task.
+     * @return a instance of MoleTask
+     * @throws InternalProcessingError
+     * @throws UserBadDataError
+     * @throws InterruptedException
+     */
     public MoleTask buildMoleTask(String taskName,
             PuzzleFirstAndLast puzzle) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
@@ -110,39 +168,115 @@ public class Builder {
         return moleTask;
     }
 
+    /**
+     * Builds a Mole.
+     *
+     * @param tasks, a list of tasks to be chained inside the Mole. Task capsules
+     * are previously generated.
+     * @return an instance of Mole.
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMole buildMole(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new Mole(buildChain(tasks).getFirstCapsule());
     }
 
+    /**
+     * Builds a Mole.
+     *
+     * @param taskCapsule, a list of task capsules to be chained inside the Mole.
+     * @return an instance of Mole.
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMole buildMole(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return new Mole(taskCapsule);
     }
 
+    /**
+     * Builds a Mole.
+     *
+     * @param puzzle, the puzzle to be executed inside the Mole.
+     * @return an instance of Mole.
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMole buildMole(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return buildMole(puzzle.getFirstCapsule());
     }
-    
+
+    /**
+     * Builds a Mole execution, that is to say a Mole ready to be run.
+     *
+     * @param tasks, a list of tasks to be chained inside the Mole.
+     * @return an instance of MoleExecution
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMoleExecution buildMoleExecution(ITask... tasks) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return buildMoleExecution(buildMole(tasks));
     }
 
+    /**
+     * Builds a Mole execution, that is to say a Mole ready to be run.
+     *
+     * @param taskCapsule, a list of task capsules to be chained inside the Mole.
+     * @return an instance of MoleExecution
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMoleExecution buildMoleExecution(IGenericTaskCapsule taskCapsule) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return buildMoleExecution(buildMole(taskCapsule));
     }
-    
+
+    /**
+     * Builds a Mole execution, that is to say a Mole ready to be run.
+     *
+     * @param puzzle,  the puzzle to be executed inside the Mole.
+     * @return an instance of MoleExecution
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
     public IMoleExecution buildMoleExecution(IPuzzleFirstAndLast puzzle) throws UserBadDataError, InternalProcessingError, InterruptedException {
         return buildMoleExecution(buildMole(puzzle));
     }
-    
+
+    /**
+     * Builds a Mole execution, that is to say a Mole ready to be run.
+     *
+     * @param mole, the mole to be executed.
+     * @return an instance of MoleExecution.
+     * @throws InternalProcessingError
+     * @throws UserBadDataError
+     */
     public IMoleExecution buildMoleExecution(IMole mole) throws InternalProcessingError, UserBadDataError {
         return new MoleExecution(mole);
     }
-    
+
+    /**
+     * Builds a Mole execution, with a specific environment strategy.
+     *
+     * @param mole, the puzzle to be executed inside the Mole.
+     * @return an instance of MoleExecution.
+     * @throws InternalProcessingError
+     * @throws UserBadDataError
+     */
     public IMoleExecution buildMoleExecution(IPuzzleFirstAndLast puzzle,
-                                    IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        return new MoleExecution(buildMole(puzzle),strategy);
+            IEnvironmentSelection strategy) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        return new MoleExecution(buildMole(puzzle), strategy);
     }
 
+    /**
+     * Builds an environment selection object.
+     * @return an instance of FixedEnvironmentSelection
+     * @throws InternalProcessingError
+     */
     public FixedEnvironmentSelection buildFixedEnvironmentSelection() throws InternalProcessingError {
         return new FixedEnvironmentSelection();
     }
@@ -150,14 +284,41 @@ public class Builder {
 
     public class ExplorationBuilder {
 
+        /**
+         * Builds a Factor according to a prototype
+         *
+         * @param prototype, the prototype to be
+         * @param domain, to domain on which making the exploration
+         * @return an instance of Factor
+         */
         public IFactor buildFactor(IPrototype prototype, IDomain domain) {
             return new Factor(prototype, domain);
         }
 
+        /**
+         * Builds an exploration task, according to a Design of Experiment.
+         *
+         * @param name, the name of the task,
+         * @param plan, the plan to be explored.
+         * @return an instance of ExplorationTask
+         * @throws UserBadDataError
+         * @throws InternalProcessingError
+         */
         public IExplorationTask buildExplorationTask(String name, IPlan plan) throws UserBadDataError, InternalProcessingError {
             return new ExplorationTask(name, plan);
         }
 
+        /**
+         * Builds an exploration task, according to a Design of Experiment and input
+         * prototypes.
+         *
+         * @param name, the name of the task,
+         * @param plan, the plan to be explored.
+         * @param input, a set of prototypes to be set as input of the task
+         * @return an instance of ExplorationTask
+         * @throws UserBadDataError
+         * @throws InternalProcessingError
+         */
         public IExplorationTask buildExplorationTask(String name,
                 IPlan plan,
                 IDataSet input) throws UserBadDataError, InternalProcessingError {
@@ -166,10 +327,24 @@ public class Builder {
             return explo;
         }
 
-        public ExplorationTaskCapsule buildExplorationTaskCapsule(IExplorationTask task) {
-            return new ExplorationTaskCapsule(task);
+        /**
+         * Builds an ExplorationTaskCapsule
+         *
+         * @param exporationTask, the exploration task to be encapsulated.
+         * @return an instace of ExplorationTaskCapsule
+         */
+        public ExplorationTaskCapsule buildExplorationTaskCapsule(IExplorationTask exporationTask) {
+            return new ExplorationTaskCapsule(exporationTask);
         }
 
+        /**
+         * Builds an transitin exploration from a exploration task capsule and a
+         * task to be explored.
+         *
+         * @param explorationCapsule, the exploration task capsule.
+         * @param exploredTask, the task to be explored.
+         * @return an instance of TaskCapsule
+         */
         public TaskCapsule buildExplorationTransition(IExplorationTaskCapsule explorationCapsule, ITask exploredTask) {
             TaskCapsule exploredCapsule = new TaskCapsule(exploredTask);
             new ExplorationTransition(explorationCapsule, exploredCapsule);
@@ -180,17 +355,36 @@ public class Builder {
 
     public class StructureBuilder {
 
+        /**
+         * Builds a prototype node.
+         *
+         * @param name, the name of the node,
+         * @param type, the type of tho node.
+         * @return an instance of PrototypeNode
+         */
         public PrototypeNode buildPrototypeNode(String name, Class type) {
             return new PrototypeNode(new Prototype(name, type));
         }
 
+        /**
+         *  Builds a complex prototype node.
+         *
+         * @param name, the name of the prototype.
+         * @return an instance of ComplexNode
+         */
         public ComplexNode buildComplexNode(String name) {
             return new ComplexNode(name);
         }
 
+        /**
+         * Builds a complex prototype node.
+         *
+         * @param name, the name of the prototype.
+         * @param parent 
+         * @return
+         */
         public ComplexNode buildComplexNode(String name, ComplexNode parent) {
             return new ComplexNode(name, parent);
         }
     }
 }
-

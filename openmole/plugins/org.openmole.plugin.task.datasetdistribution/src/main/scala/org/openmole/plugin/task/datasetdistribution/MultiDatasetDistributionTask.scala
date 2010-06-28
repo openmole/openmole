@@ -22,10 +22,11 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.ArrayList
-import java.util.Collection
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.data.KeyToGroupMap
 import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
 import org.jfree.data.statistics.HistogramDataset
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
@@ -35,6 +36,7 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 import org.jfree.chart.ChartUtilities._
 import org.jfree.chart.ChartFactory._
+import org.jfree.chart.StandardChartTheme._
 
 class  MultiDatasetDistributionTask(name: String,
                                     xLegends: ArrayList[String],
@@ -54,7 +56,21 @@ class  MultiDatasetDistributionTask(name: String,
                                                                                          imageHeight) {
 
   private def createChart(dataset: DefaultCategoryDataset, context: IContext): JFreeChart = {
-    val chart = createBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+ // private def createChart(dataset: HistogramDataset, context: IContext): JFreeChart = {
+    setChartTheme (createLegacyTheme())
+  //  dataset:HistogramDataset = dataset.asInstanceOf[HistogramDataset]
+  //  val chart = createBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+
+
+    val chart = createStackedBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+
+  /*  val plot = chart getXYPlot()
+    val renderer:GroupedStackedBarRenderer = plot.getRenderer().asInstanceOf[GroupedStackedBarRenderer]
+    val map = new KeyToGroupMap("h");
+    map.mapKeyToGroup("Product 1 (US)", "h");
+    renderer.setSeriesToGroupMap(map);*/
+
+
     chart setAntiAlias(true)
     chart
   }
@@ -64,11 +80,15 @@ class  MultiDatasetDistributionTask(name: String,
       val dataset = new DefaultCategoryDataset();
       charts foreach ( chart => {
           val data = context getLocalValue(chart._1)
-          // val array = new Array[Double](data.size)
+           val array = new Array[Double](data.size)
           var i = 0
           data foreach ( v => {
+        //  val dataset = new HistogramDataset();
               dataset.addValue(v.doubleValue,chart._2,xLegends.get(i));
+         // dataset addSeries("", array, expandIntegerData(context, nbCategories))
               //    array(i) = v.doubleValue
+          println("dataset.addValue " + v.doubleValue +", " +"h"+", "+ xLegends.get(i));
+
               i += 1
             } )
 
@@ -77,6 +97,10 @@ class  MultiDatasetDistributionTask(name: String,
           //
         } )
           val jfchart = createChart(dataset, context)
+
+
+       /* GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        KeyToGroupMap map = new KeyToGroupMap("G1");*/
 
           println("STORE: " + expandData(context, outputDirectoryPath + "/" + "chart.png"));
           val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + "chart.png")));
