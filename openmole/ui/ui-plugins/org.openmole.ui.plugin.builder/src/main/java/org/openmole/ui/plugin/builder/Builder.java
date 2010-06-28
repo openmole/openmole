@@ -55,7 +55,7 @@ import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *
- * Builder is a class offering factories to build complex OpenMOLE objects.
+ * Builder is a class offering factories to build complex OpenMOLE objects.
  *
  * @author nicolas.dumoulin@openmole.org
  */
