@@ -19,6 +19,7 @@ package org.openmole.core.fileservice;
 
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.IHash;
 
 /**
@@ -28,6 +29,6 @@ import org.openmole.commons.tools.io.IHash;
 public interface IFileService {
     IHash getHashForFile(File file) throws InternalProcessingError, InterruptedException ;
     IHash getHashForFile(File file, Object cacheLength) throws InternalProcessingError, InterruptedException ;
-    File getArchiveForDir(File file) throws InternalProcessingError, InterruptedException ;
-    File getArchiveForDir(File file, Object cacheLenght) throws InternalProcessingError, InterruptedException ;
+    IFileCache getArchiveForDir(File file) throws InternalProcessingError, InterruptedException ;
+    IFileCache getArchiveForDir(File file, Object cacheLenght) throws InternalProcessingError, InterruptedException ;
 }

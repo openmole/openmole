@@ -25,6 +25,7 @@ import org.openmole.core.fileservice.IFileService;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
@@ -73,7 +74,7 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public File getArchiveForDir(File file) throws InternalProcessingError, InterruptedException {
+    public IFileCache getArchiveForDir(File file) throws InternalProcessingError, InterruptedException {
         return getArchiveForDir(file, file);
     }
 
@@ -107,7 +108,7 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public File getArchiveForDir(final File file, Object cacheLenght) throws InternalProcessingError, InterruptedException {
+    public IFileCache getArchiveForDir(final File file, Object cacheLenght) throws InternalProcessingError, InterruptedException {
 
         invalidateDirCacheIfModified(file, cacheLenght);
 
@@ -132,7 +133,7 @@ public class FileService implements IFileService {
                     throw new InternalProcessingError(ex);
                 }
             }
-        }).getFile();
+        });
     }
 
     private void invalidateDirCacheIfModified(final File file, Object cacheLenght) {

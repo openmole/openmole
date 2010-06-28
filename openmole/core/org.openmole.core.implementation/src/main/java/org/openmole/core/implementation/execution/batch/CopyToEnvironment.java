@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.file.GZipedURIFile;
@@ -138,9 +139,13 @@ class CopyToEnvironment implements Callable<Void> {
         File toReplicatePath = file.getAbsoluteFile();
         IMoleExecution moleExecution = JobRegistry.getInstance().getMoleExecutionForJob(job);
 
+        //Hold cache to avoid gc and file deletion
+        IFileCache cache = null;
         if (isDir) {
-            toReplicate = Activator.getFileService().getArchiveForDir(file, moleExecution);
+            cache = Activator.getFileService().getArchiveForDir(file, moleExecution);
+            file = cache.getFile();
         }
+
         IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);
         IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, toReplicatePath, hash, storage, zipped, token);
         return new ReplicatedFile(file, isDir, hash, replica.getDestination());
