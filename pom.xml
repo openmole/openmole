@@ -19,11 +19,6 @@
 
     <dependencyManagement>
         <dependencies>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
             <dependency>
                 <groupId>org.apache.axis</groupId>
                 <artifactId>com.springsource.org.apache.axis</artifactId>
@@ -263,12 +258,7 @@
                 <groupId>asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${lib.org.objectweb.asm.version}</version>
-            </dependency> 	        
-	 	  <dependency> 
-	 	        <groupId>org.openmole</groupId> 
-	 	        <artifactId>org.scala-lang.scala</artifactId> 
-	 	        <version>${lib.org.scala-lang.scala.version}</version> 
-		  </dependency> 
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -566,11 +556,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
-            <plugin>
-				<groupId>org.scala-tools</groupId>
-				<artifactId>maven-scala-plugin</artifactId>	
-				<version>2.14-SNAPSHOT</version>
-			</plugin> 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
