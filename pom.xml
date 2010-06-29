@@ -263,7 +263,12 @@
                 <groupId>asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${lib.org.objectweb.asm.version}</version>
-            </dependency>
+            </dependency> 	        
+41	 	  <dependency> 
+42	 	        <groupId>org.openmole</groupId> 
+43	 	        <artifactId>org.scala-lang.scala</artifactId> 
+44	 	        <version>${lib.org.scala-lang.scala.version}</version> 
+		  </dependency> 
         </dependencies>
     </dependencyManagement>
 

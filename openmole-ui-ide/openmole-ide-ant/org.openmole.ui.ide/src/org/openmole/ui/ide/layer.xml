@@ -13,6 +13,17 @@
     <folder name="Menu">
         <file name="File_hidden"/>
         <file name="Edit_hidden"/>
+        <file name="View_hidden"/>
+        <file name="Navigate_hidden"/>
+        <file name="Source_hidden"/>
+        <file name="Refactor_hidden"/>
+        <file name="Run_hidden"/>
+        <file name="Debug_hidden"/>
+        <file name="Versioning_hidden"/>
+        <file name="Tools_hidden"/>
+        <file name="Window_hidden"/>
+        <file name="Goto_hidden"/>
+        <file name="Profile_hidden"/>
         <folder name="Window">
             <file name="MoleSceneTopComponentAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole.ui.ide-MoleSceneTopComponentAction.instance"/>
@@ -31,5 +42,7 @@
     </folder>
     <folder name="Toolbars">
         <file name="Edit_hidden"/>
+        <file name="Build_hidden"/>
+        <file name="Snapshot_hidden"/>
     </folder>
 </filesystem>
