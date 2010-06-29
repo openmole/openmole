@@ -96,9 +96,7 @@ public class SimExplorer implements IApplication {
         IFileCache envFileCache = envFile.getFileCache();
         IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(envFileCache.getFile(false));
         real.createBatchEnvironmentAuthentication().initializeAccess();
-        //real.setConfigurationMode(EnvironmentConfiguration.Remote);
-
-
+      
         PrintStream oldOut = System.out;
         PrintStream oldErr = System.err;
 

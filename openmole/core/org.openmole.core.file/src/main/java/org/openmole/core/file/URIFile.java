@@ -63,15 +63,28 @@ import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
+import org.openmole.misc.workspace.ConfigurationLocation;
 
 import static org.openmole.commons.tools.io.Network.*;
 
 public class URIFile implements IURIFile {
 
-    static final long timeout = 2 * 60 * 1000;
+    final static String Group = URIFile.class.getSimpleName();
+
+    final public static ConfigurationLocation Timeout = new ConfigurationLocation(Group, "Timeout");
+    final static ConfigurationLocation BufferSize = new ConfigurationLocation(Group, "BufferSize");
+    final static ConfigurationLocation CopyTimeout = new ConfigurationLocation(Group, "CopyTimeout");
+
+    static {
+       Activator.getWorkspace().addToConfigurations(Timeout, "PT2M");
+       Activator.getWorkspace().addToConfigurations(BufferSize, "8192");
+       Activator.getWorkspace().addToConfigurations(CopyTimeout, "PT2M");
+    }
+
+   // static final long timeout = 2 * 60 * 1000;
     //0.1 KB/S
-    static final int TransfertBuffSize = 10240;
-    static final long TimeOutForTransfert = 100 * 1000;
+   // static final int TransfertBuffSize = 10240;
+   // static final long TimeOutForTransfert = 100 * 1000;
     final String location;
 
     public URIFile(File file) throws IOException {
@@ -126,12 +139,14 @@ public class URIFile implements IURIFile {
 
 
         try {
-            return task.get(timeout, TimeUnit.MILLISECONDS);
+            return task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new IOException(getLocationString(), e);
         } catch (TimeoutException e) {
             task.cancel(true);
             throw new IOException(getLocationString(), e);
+        } catch (InternalProcessingError e) {
+            throw new IOException(e);
         }
 
     }
@@ -149,12 +164,14 @@ public class URIFile implements IURIFile {
         }
 
         try {
-            return task.get(timeout, TimeUnit.MILLISECONDS);
+            return task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new IOException(getLocationString(), e);
         } catch (TimeoutException e) {
             task.cancel(true);
             throw new IOException(getLocationString(), e);
+        } catch (InternalProcessingError e) {
+            throw new IOException(e);
         }
 
     }
@@ -169,11 +186,13 @@ public class URIFile implements IURIFile {
         }
 
         try {
-            task.get(timeout, TimeUnit.MILLISECONDS);
+            task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
         } catch (TimeoutException e) {
             task.cancel(true);
+            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
+        } catch (InternalProcessingError e) {
             Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
         }
 
@@ -231,12 +250,14 @@ public class URIFile implements IURIFile {
         }
 
         try {
-            return task.get(timeout, TimeUnit.MILLISECONDS);
+            return task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new IOException(getLocationString(), e);
         } catch (TimeoutException e) {
             task.cancel(true);
             throw new IOException(getLocationString(), e);
+        } catch (InternalProcessingError e) {
+            throw new IOException(e);
         }
     }
 
@@ -279,13 +300,15 @@ public class URIFile implements IURIFile {
 
 
             try {
-                task.get(timeout, TimeUnit.MILLISECONDS);
+                task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
                 return new URIFile(this, name);
             } catch (ExecutionException e) {
                 throw new IOException(getLocationString(), e);
             } catch (TimeoutException e) {
                 task.cancel(true);
                 throw new IOException(getLocationString(), e);
+            } catch (InternalProcessingError e) {
+                throw new IOException(e);
             }
         } finally {
             close(dir);
@@ -366,12 +389,14 @@ public class URIFile implements IURIFile {
 
 
             try {
-                return task.get(timeout, TimeUnit.MILLISECONDS);
+                return task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
                 throw new IOException("Testing if file " + name + " exist in " + getLocation().toString() + ".", e);
             } catch (TimeoutException e) {
                 task.cancel(true);
                 throw new IOException("Testing if file " + name + " exist in " + getLocation().toString() + ".", e);
+            } catch (InternalProcessingError e) {
+                throw new IOException(e);
             }
         } finally {
             close(dir);
@@ -404,7 +429,7 @@ public class URIFile implements IURIFile {
 
 
         try {
-            FileInputStream ret = task.get(timeout, TimeUnit.MILLISECONDS);
+            FileInputStream ret = task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
             getFailureControl().success();
             return new JSAGAInputStream(ret);
         } catch (ExecutionException e) {
@@ -416,7 +441,9 @@ public class URIFile implements IURIFile {
             task.cancel(true);
             getFailureControl().failed();
             throw new IOException(getLocationString(), e);
-        }
+        } catch (InternalProcessingError e) {
+                throw new IOException(e);
+            }
     }
 
     @Override
@@ -444,7 +471,7 @@ public class URIFile implements IURIFile {
         }
 
         try {
-            FileOutputStream ret = task.get(timeout, TimeUnit.MILLISECONDS);
+            FileOutputStream ret = task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
             getFailureControl().success();
             return new JSAGAOutputStream(ret);
         } catch (ExecutionException e) {
@@ -456,7 +483,9 @@ public class URIFile implements IURIFile {
             task.cancel(true);
             getFailureControl().failed();
             throw new IOException(getLocationString(), e);
-        }
+        } catch (InternalProcessingError e) {
+                throw new IOException(e);
+            }
     }
 
     @Override
@@ -468,7 +497,9 @@ public class URIFile implements IURIFile {
             OutputStream os = new StringBuilderOutputStream(ret);
 
             try {
-                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
+            } catch (InternalProcessingError e) {
+                throw new IOException(e);
             } finally {
                 os.close();
             }
@@ -603,9 +634,11 @@ public class URIFile implements IURIFile {
             OutputStream os = dest.openOutputStream(token);
 
             try {
-                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
                 failureControl.success();
-            } catch (IOException t) {
+            } catch(InternalProcessingError e){
+                throw new IOException(e);
+            }catch (IOException t) {
                 failureControl.failed();
                 throw t;
             } finally {
@@ -673,12 +706,14 @@ public class URIFile implements IURIFile {
             OutputStream os = dest.openOutputStream(destToken);
 
             try {
-                FileUtil.copy(is, os, TransfertBuffSize, TimeOutForTransfert);
+                FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
                 srcFailureControl.success();
                 if (!sameRessource) {
                     destFailureControl.success();
                 }
-            } catch (IOException t) {
+            } catch(InternalProcessingError e) {
+                throw new IOException(e);
+            }catch (IOException t) {
                 srcFailureControl.failed();
                 if (!sameRessource) {
                     destFailureControl.failed();
@@ -736,7 +771,7 @@ public class URIFile implements IURIFile {
 
             try {
                 if (timeOut) {
-                    task.get(timeout, TimeUnit.MILLISECONDS);
+                    task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
                 } else {
                     task.get();
                 }
@@ -745,6 +780,8 @@ public class URIFile implements IURIFile {
             } catch (TimeoutException e) {
                 task.cancel(true);
                 throw new IOException(getLocationString(), e);
+            } catch (InternalProcessingError e) {
+                throw new IOException(e);
             }
         } finally {
             close(entry);
@@ -778,7 +815,7 @@ public class URIFile implements IURIFile {
 
 
             try {
-                List<URL> urls = task.get(timeout, TimeUnit.MILLISECONDS);
+                List<URL> urls = task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
                 ret = new ArrayList<String>(urls.size());
 
                 for (URL url : urls) {
@@ -786,7 +823,9 @@ public class URIFile implements IURIFile {
                 }
 
                 return ret;
-            } catch (ExecutionException e) {
+            } catch (InternalProcessingError e) {
+                throw new IOException(e);
+            }catch (ExecutionException e) {
                 throw new IOException(getLocationString(), e);
             } catch (TimeoutException e) {
                 task.cancel(true);
@@ -855,10 +894,6 @@ public class URIFile implements IURIFile {
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         }
-    }
-
-    public static long getTimeout() {
-        return timeout;
     }
 
     @Override

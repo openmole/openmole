@@ -26,7 +26,7 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool;
 
 public class BufferFactory implements ObjectPool {
 
-    public final static int MAX_BUFF_SIZE = 10 * 1024;
+    public final static int MAX_BUFF_SIZE = 8 * 1024;
     
     private ObjectPool bufferPool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 

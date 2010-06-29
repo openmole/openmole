@@ -26,6 +26,7 @@ import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.file.FileOutputStream;
 import org.ogf.saga.task.Task;
 import org.ogf.saga.task.TaskMode;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.URIFile;
 
 /**
@@ -63,8 +64,10 @@ public class JSAGAOutputStream extends OutputStream{
             throw new IOException(e);
         }
         try {
-            task.get(URIFile.getTimeout(), TimeUnit.MILLISECONDS);
-        } catch (ExecutionException e) {
+            task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS);
+        } catch (InternalProcessingError e) {
+            throw new IOException(e);
+        }catch (ExecutionException e) {
             throw new IOException(e);
         } catch (TimeoutException e) {
             task.cancel(true);
