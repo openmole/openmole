@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.io;
+package org.openmole.commons.tools.filecache;
 
-import java.io.File;
 import org.openmole.commons.tools.filecache.IFileCache;
+import java.io.File;
 
 
 public class FileCache implements IFileCache {
@@ -31,7 +31,9 @@ public class FileCache implements IFileCache {
     }
 
     @Override
-    public File getFile() {
+    public File getFile(boolean persit) {
         return file;
     }
+
+    
 }

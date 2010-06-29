@@ -20,5 +20,5 @@ package org.openmole.commons.tools.filecache;
 import java.io.File;
 
 public interface IFileCache {
-	File getFile();
+	File getFile(boolean persist);
 }

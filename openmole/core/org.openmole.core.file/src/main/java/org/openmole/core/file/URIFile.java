@@ -53,13 +53,13 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.internal.Activator;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.aspect.caching.SoftCachable;
-import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.FileCache;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.FileUtil;
-import org.openmole.commons.tools.io.FileCache;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
@@ -463,7 +463,7 @@ public class URIFile implements IURIFile {
     public String getContentAsString() throws IOException, InterruptedException {
         StringBuilder ret = new StringBuilder();
 
-        InputStream is = new java.io.FileInputStream(getFile());
+        InputStream is = new java.io.FileInputStream(getFileCache().getFile(true));
         try {
             OutputStream os = new StringBuilderOutputStream(ret);
 
@@ -478,7 +478,6 @@ public class URIFile implements IURIFile {
         return ret.toString();
     }
 
-    // @Override
     public IFileCache cache() throws IOException, InterruptedException {
         IAccessToken token = getAToken();
         try {
@@ -488,9 +487,8 @@ public class URIFile implements IURIFile {
         }
     }
 
-    //  @Override
+
     public synchronized IFileCache cache(IAccessToken token) throws IOException, InterruptedException {
-        // if (cache == null) {
         if (isLocal()) {
             return new FileCache(new File(getCachedURL().getPath()));
         } else {
@@ -502,8 +500,6 @@ public class URIFile implements IURIFile {
                 throw new IOException(getLocationString(), e);
             }
         }
-        //}
-        // return cache;
     }
 
     private boolean isLocal() throws IOException {
@@ -842,54 +838,20 @@ public class URIFile implements IURIFile {
         return location;
     }
 
-    IFileCache getFileCache() throws InternalProcessingError, InterruptedException {
-        return Activator.getFileCache().getURIFileCache(this, this);
-    }
-
-    IFileCache getFileCache(IAccessToken token) throws InternalProcessingError, InterruptedException {
-        return Activator.getFileCache().getURIFileCache(this, this, token);
-    }
-
-    IFileCache getFileCache(Object mapWith) throws InternalProcessingError, InterruptedException {
-        return Activator.getFileCache().getURIFileCache(this, mapWith);
-    }
-
-    IFileCache getFileCache(Object mapWith, IAccessToken token) throws InternalProcessingError, InterruptedException {
-        return Activator.getFileCache().getURIFileCache(this, mapWith, token);
-    }
 
     @Override
-    public File getFile() throws IOException, InterruptedException {
+    public IFileCache getFileCache() throws IOException, InterruptedException {
         try {
-            return getFileCache().getFile();
+            return Activator.getFileCache().getURIFileCache(this, this);
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         }
     }
 
     @Override
-    public File getFile(IAccessToken token) throws IOException, InterruptedException {
+    public IFileCache getFileCache(IAccessToken token) throws IOException, InterruptedException {
         try {
-            return getFileCache(token).getFile();
-        } catch (InternalProcessingError ex) {
-            throw new IOException(getLocationString(), ex);
-        }
-    }
-
-    @Override
-    public File getFile(Object mapWith) throws IOException, InterruptedException {
-        try {
-            return getFileCache(mapWith).getFile();
-        } catch (InternalProcessingError ex) {
-            throw new IOException(getLocationString(), ex);
-        }
-
-    }
-
-    @Override
-    public File getFile(IAccessToken token, Object mapWith) throws IOException, InterruptedException {
-        try {
-            return getFileCache(mapWith, token).getFile();
+            return Activator.getFileCache().getURIFileCache(this, this, token);
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         }

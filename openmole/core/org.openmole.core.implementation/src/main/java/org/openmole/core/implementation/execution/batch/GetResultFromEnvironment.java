@@ -63,7 +63,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
         IAccessToken token = Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().waitAToken();
 
         try {
-            File resultFile = outputFile.getFile(token);
+            File resultFile = outputFile.getFileCache(token).getFile(false);
 
             IRuntimeResult result = Activator.getMessageSerialiser().loadJarRuntimeResult(resultFile);
 
@@ -76,7 +76,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 IURIFile stdOut = result.getStdOut().getLeft();
 
                 try {
-                    File stdOutFile = stdOut.getFile(token);
+                    File stdOutFile = stdOut.getFileCache(token).getFile(false);
                     IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
                     if (!stdOutHash.equals(result.getStdOut().getRight())) {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
@@ -98,7 +98,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
             if (result.getStdErr() != null) {
                 IURIFile stdErr = result.getStdErr().getLeft();
                 try {
-                    File stdErrFile = stdErr.getFile(token);
+                    File stdErrFile = stdErr.getFileCache(token).getFile(false);
                     IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
                     if (!stdErrHash.equals(result.getStdErr().getRight())) {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
@@ -120,7 +120,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             IURIFile tarResult = result.getTarResult().getLeft();
-            File tarResultFile = tarResult.getFile(token);
+            File tarResultFile = tarResult.getFileCache().getFile(false);
             IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
             if (!tarResulHash.equals(result.getTarResult().getRight())) {
                 throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");

@@ -196,7 +196,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 }
 
                 try {
-                    File local = testFile.getFile(token);
+                    File local = testFile.getFileCache(token).getFile(false);
                     FileInputStream input = new FileInputStream(local);
                     byte[] resRdm = new byte[lenght];
                     int nb;

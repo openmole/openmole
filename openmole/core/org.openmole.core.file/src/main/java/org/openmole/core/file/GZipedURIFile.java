@@ -25,10 +25,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.file.internal.Activator;
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
 import org.openmole.commons.tools.filecache.IFileCache;
+import org.openmole.core.file.internal.Activator;
+import org.openmole.core.model.file.IURIFile;
 
 public class GZipedURIFile extends URIFile {
 	

@@ -25,6 +25,7 @@ import java.io.OutputStream;
 
 import java.net.URI;
 import java.util.List;
+import org.openmole.commons.tools.filecache.IFileCache;
 
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
@@ -72,11 +73,11 @@ public interface IURIFile extends Comparable<IURIFile> {
         //IHash getHash(Object duration) throws IOException, InterruptedException;
         //IHash getHash(IAccessToken token, Object duration) throws IOException, InterruptedException;
         
-	File getFile() throws IOException, InterruptedException;
-        File getFile(IAccessToken token) throws IOException, InterruptedException;
+	IFileCache getFileCache() throws IOException, InterruptedException;
+        IFileCache getFileCache(IAccessToken token) throws IOException, InterruptedException;
         
-        File getFile(Object duration) throws IOException, InterruptedException;
-        File getFile(IAccessToken token, Object duration) throws IOException, InterruptedException;
+   //     File getFile(Object duration) throws IOException, InterruptedException;
+    //    File getFile(IAccessToken token, Object duration) throws IOException, InterruptedException;
 
 	IURIFile getChild(String child) throws IOException;
 

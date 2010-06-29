@@ -141,9 +141,10 @@ class CopyToEnvironment implements Callable<Void> {
 
         //Hold cache to avoid gc and file deletion
         IFileCache cache = null;
+        
         if (isDir) {
             cache = Activator.getFileService().getArchiveForDir(file, moleExecution);
-            toReplicate = cache.getFile();
+            toReplicate = cache.getFile(false);
         }
 
         IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);

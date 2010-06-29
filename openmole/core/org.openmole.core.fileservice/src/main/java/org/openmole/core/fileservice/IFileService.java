@@ -17,9 +17,9 @@
 
 package org.openmole.core.fileservice;
 
+import org.openmole.commons.tools.filecache.IFileCache;
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.IHash;
 
 /**

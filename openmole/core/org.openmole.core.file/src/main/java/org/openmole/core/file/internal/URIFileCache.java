@@ -17,11 +17,11 @@
 
 package org.openmole.core.file.internal;
 
-import org.openmole.commons.tools.filecache.IFileCache;
 import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.model.execution.batch.IAccessToken;
 
@@ -31,7 +31,7 @@ import org.openmole.core.model.execution.batch.IAccessToken;
  */
 public class URIFileCache implements IURIFileCache {
 
-    AssociativeCache<URIFile, IFileCache> associativeCache = new AssociativeCache<URIFile, IFileCache>(AssociativeCache.SOFT, AssociativeCache.SOFT);
+    AssociativeCache<URIFile, IFileCache> associativeCache = new AssociativeCache<URIFile, IFileCache>(AssociativeCache.WEAK, AssociativeCache.HARD);
 
     @Override
     public IFileCache getURIFileCache(final URIFile uri, Object cacheAssociation) throws InternalProcessingError, InterruptedException {

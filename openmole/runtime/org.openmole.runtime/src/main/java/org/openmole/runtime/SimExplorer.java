@@ -32,6 +32,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.tools.FileMigrator;
@@ -91,7 +92,9 @@ public class SimExplorer implements IApplication {
         Activator.getPluginManager().loadDir(environmentPluginDir);
 
         /* get env and init */
-        IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(new GZipedURIFile(new URIFile(new File(environmentDescription))).getFile());
+        IURIFile envFile = new GZipedURIFile(new URIFile(new File(environmentDescription)));
+        IFileCache envFileCache = envFile.getFileCache();
+        IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(envFileCache.getFile(false));
         real.createBatchEnvironmentAuthentication().initializeAccess();
         //real.setConfigurationMode(EnvironmentConfiguration.Remote);
 
@@ -110,7 +113,6 @@ public class SimExplorer implements IApplication {
 
         IRuntimeResult result = new RuntimeResult();
 
-
         try {
 
             LocalExecutionEnvironment.getInstance().setNbThread(NumberOfLocalTheads);
@@ -120,15 +122,16 @@ public class SimExplorer implements IApplication {
             LocalFileCache fileCache = new LocalFileCache();
 
             IURIFile executionMessageFile = new GZipedURIFile(new URIFile(executionMessageURI));
-            IExecutionMessage executionMessage = Activator.getMessageSerialiser().loadExecutionMessage(executionMessageFile.getFile());
+            IFileCache executionMesageFileCache = executionMessageFile.getFileCache();
+            IExecutionMessage executionMessage = Activator.getMessageSerialiser().loadExecutionMessage(executionMesageFileCache.getFile(false));
 
             File pluginDir = Activator.getWorkspace().newTmpDir();
 
             for (IReplicatedFile plugin : executionMessage.getPlugins()) {
-                File localFile = plugin.getReplica().getFile();
+                IFileCache replicaFileCache = plugin.getReplica().getFileCache();
+               
                 File inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir);
-
-                localFile.renameTo(inPluginDirLocalFile);
+                replicaFileCache.getFile(true).renameTo(inPluginDirLocalFile);
 
                 if (!Activator.getHashService().computeHash(inPluginDirLocalFile).equals(plugin.getHash())) {
                     throw new InternalProcessingError("Hash of a plugin does't match.");
@@ -139,12 +142,13 @@ public class SimExplorer implements IApplication {
             Activator.getPluginManager().loadDir(pluginDir);
 
             IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI().getLeft();
+            IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
 
-            if (!Activator.getHashService().computeHash(jobForRuntimeFile.getFile()).equals(executionMessage.getJobForRuntimeURI().getRight())) {
+            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI().getRight())) {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
-            IJobForRuntime jobForRuntime = Activator.getMessageSerialiser().loadJobForRuntime(jobForRuntimeFile.getFile());
+            IJobForRuntime jobForRuntime = Activator.getMessageSerialiser().loadJobForRuntime(jobForRuntimeFileCache.getFile(false));
 
             try {
                 /* --- Download the files for the local file cache ---*/
@@ -155,8 +159,9 @@ public class SimExplorer implements IApplication {
 
                     //To avoid getting twice the same plugin with different path
                     if (!fileCache.containsCacheFor(repliURI.getSrc())) {
+                        IFileCache replicaFileCache = repliURI.getReplica().getFileCache();
 
-                        File cache = repliURI.getReplica().getFile();
+                        File cache = replicaFileCache.getFile(false);
                         IHash cacheHash = Activator.getHashService().computeHash(cache);
 
                         if (!cacheHash.equals(repliURI.getHash())) {
