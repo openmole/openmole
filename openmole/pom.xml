@@ -38,11 +38,6 @@
             <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
-	<dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.scala-lang.scala</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

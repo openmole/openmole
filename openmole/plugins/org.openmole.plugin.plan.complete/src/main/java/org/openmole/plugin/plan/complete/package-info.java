@@ -14,7 +14,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/** 
+/**
+ * <p> The CompletePlan enables to generate an exhaustive design of experiment from
+ * a set of parameters. It generates all the combinations of the available factors,
+ *  which take their values in predefined ranges.
+ *
  * <h3>Example</h3>
  * <p>The following example shows how to explore in an exhaustive way the combination
  * between the parameters:

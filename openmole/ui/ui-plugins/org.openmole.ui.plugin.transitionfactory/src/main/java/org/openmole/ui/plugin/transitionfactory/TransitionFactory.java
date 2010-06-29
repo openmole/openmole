@@ -31,6 +31,8 @@ import org.openmole.core.model.task.ITask;
 
 /**
  *
+ * The Transition factory offers methods to builds high level transitions
+ *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class TransitionFactory {

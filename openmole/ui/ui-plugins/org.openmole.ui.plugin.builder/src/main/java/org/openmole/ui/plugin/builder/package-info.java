@@ -18,6 +18,6 @@
 package org.openmole.ui.plugin.builder;
 /**
  *
-<p> The UI builder is a OpenMole factory. It provides methods to build high level
+ * <p> The UI builder is a OpenMole factory. It provides methods to build high level
  * components
  */
