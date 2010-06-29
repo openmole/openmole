@@ -120,7 +120,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             IURIFile tarResult = result.getTarResult().getLeft();
-            File tarResultFile = tarResult.getFileCache().getFile(false);
+            File tarResultFile = tarResult.getFileCache(token).getFile(false);
             IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
             if (!tarResulHash.equals(result.getTarResult().getRight())) {
                 throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
