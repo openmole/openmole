@@ -259,6 +259,11 @@
                 <artifactId>asm</artifactId>
                 <version>${lib.org.objectweb.asm.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.openmole</groupId>
+                <artifactId>org.scala-lang.scala</artifactId>
+                <version>${lib.org.scala-lang.scala.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -314,12 +319,12 @@
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
         <lib.ch.ethz.ssh2.version>build250</lib.ch.ethz.ssh2.version>
-	<lib.ccl.northwestern.edu.netlogo.version>4.1-openmole3</lib.ccl.northwestern.edu.netlogo.version>
-	<lib.ca.umontreal.iro.ssj.version>2.3</lib.ca.umontreal.iro.ssj.version>
-	<lib.gov.lbl.acs.colt.version>1.2</lib.gov.lbl.acs.colt.version>
-	<lib.org.apache.commons.math.version>2.1</lib.org.apache.commons.math.version>
-	<lib.org.slf4j.version>1.6.0</lib.org.slf4j.version>
-	<lib.ch.qos.logback.version>0.9.21</lib.ch.qos.logback.version>
+        <lib.ccl.northwestern.edu.netlogo.version>4.1-openmole3</lib.ccl.northwestern.edu.netlogo.version>
+        <lib.ca.umontreal.iro.ssj.version>2.3</lib.ca.umontreal.iro.ssj.version>
+        <lib.gov.lbl.acs.colt.version>1.2</lib.gov.lbl.acs.colt.version>
+        <lib.org.apache.commons.math.version>2.1</lib.org.apache.commons.math.version>
+        <lib.org.slf4j.version>1.6.0</lib.org.slf4j.version>
+        <lib.ch.qos.logback.version>0.9.21</lib.ch.qos.logback.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
@@ -472,9 +477,9 @@
                         <jvmArg>-Xms64m</jvmArg>
                         <jvmArg>-Xmx512m</jvmArg>
                     </jvmArgs>
-		    <args>
+                    <args>
                         <arg>-target:jvm-1.5</arg>
-		    </args>
+                    </args>
                 </configuration>
             </plugin>
 
