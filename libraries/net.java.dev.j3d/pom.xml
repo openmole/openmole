@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>libraries</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3</version>
+    </parent>
+
+    <!--Used to build the symbolic name of the bundle-->
+    <artifactId>net.java.dev.j3d</artifactId>
+    <version>${lib.net.java.dev.j3d.version}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>java3d</groupId>
+            <artifactId>j3d-core</artifactId>
+	    <version>${lib.net.java.dev.j3d.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>java3d</groupId>
+            <artifactId>j3d-core-utils</artifactId>
+	    <version>${lib.net.java.dev.j3d.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId}</name>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>bundle</packaging>
+
+
+    <!--optional. Use this property to tune the exported packages-->
+    <!--<properties>
+        <export.packages>
+            TODO
+        </export.packages>
+    </properties>-->
+
+</project>

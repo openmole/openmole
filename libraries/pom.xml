@@ -39,6 +39,7 @@
 	<module>ca.umontreal.iro.ssj</module>
 	<module>org.apache.commons.math</module>
 	<module>org.slf4j</module>
+	<module>net.java.dev.j3d</module>
     </modules>
 
     <!-- ************************************************************* -->
