@@ -40,6 +40,7 @@
 	<module>org.apache.commons.math</module>
 	<module>org.slf4j</module>
 	<module>net.java.dev.j3d</module>
+	<module>org.processing</module>
     </modules>
 
     <!-- ************************************************************* -->

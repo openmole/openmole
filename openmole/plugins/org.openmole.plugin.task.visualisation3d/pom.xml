@@ -28,8 +28,8 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>net.java.dev.j3d</artifactId>
-            <version>${lib.net.java.dev.j3d.version}</version>
+            <artifactId>org.processing</artifactId>
+            <version>${lib.org.processing.version}</version>
         </dependency>
     </dependencies>
 
