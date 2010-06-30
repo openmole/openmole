@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.visualisation3d;
 
-import com.sun.j3d.utils.universe.SimpleUniverse;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
@@ -28,9 +27,9 @@ import org.openmole.core.model.job.IContext;
  *
  * @author reuillon
  */
-public class BarChart3D extends Task {
+public class BarChart3DTask extends Task {
 
-    public BarChart3D(String name) throws UserBadDataError, InternalProcessingError {
+    public BarChart3DTask(String name) throws UserBadDataError, InternalProcessingError {
         super(name);
     }
     
