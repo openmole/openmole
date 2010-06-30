@@ -61,14 +61,6 @@ public interface IGenericTask extends IPortable {
 
     /**
      *
-     * Set the name of the task.
-     *
-     * @param name the new name for the task
-     */
-    void setName(String name);
-
-    /**
-     *
      * Get the input data of the task.
      *
      * @return the input of the task
@@ -92,14 +84,6 @@ public interface IGenericTask extends IPortable {
      * @param ressource the resource to be added
      */
     void addResource(IResource ressource);
-
-    /**
-     *
-     * Remove <code>resource</code> from the resources of this tasks.
-     *
-     * @param ressource the resource to be removed
-     */
-    void removeResource(IResource ressource);
 
     /**
      *
@@ -140,34 +124,6 @@ public interface IGenericTask extends IPortable {
 
     /**
      *
-     * Remove the user defined input data.
-     *
-     * @param data the data to remove of the input
-     */
-    void removeInput(IData data);
-
-    void removeInput(IDataSet data);
-
-    /**
-     *
-     * Remove the user defined input data given its prototype.
-     *
-     * @param prototype the prototype of the data to remove
-     */
-    void removeInput(IPrototype prototype);
-
-    /**
-     *
-     * Remove the user defined input data given its name.
-     *
-     * @param name the name of the data to remove
-     */
-    void removeInput(String name);
-
-
-
-    /**
-     *
      * Add <code>data</code> as an output for this task.
      *
      * @param data the data to add
@@ -187,30 +143,8 @@ public interface IGenericTask extends IPortable {
 
     boolean containsOutput(String name);
     boolean containsOutput(IPrototype name);
-    /**
-     *
-     * Remove the user defined output data.
-     *
-     * @param data the data to remove
-     */
-    void removeOutput(IData dataSet);
+   
 
-    void removeOutput(IDataSet dataSet);
-    /**
-     *
-     * Remove the user defined output data given its prototype.
-     *
-     * @param prototype the prototype of the data to remove
-     */
-    void removeOutput(IPrototype prototype);
-
-    /**
-     *
-     * Remove the user defined input data given its name.
-     *
-     * @param name the name of the data to remove
-     */
-    void removeOutput(String name);
 
     /**
      *
@@ -240,22 +174,6 @@ public interface IGenericTask extends IPortable {
      * @param override      true if the parameter should override an existing value
      */
     <T> void addParameter(IPrototype<? super T> prototype, T value, boolean override);
-
-    /**
-     *
-     * Remove a parameter allready configured in this task.
-     *
-     * @param prototype     the prototype of the parameter to remove
-     */
-    void removeParameter(IPrototype<?> prototype);
-
-    /**
-     *
-     * Remove a parameter allready configured in this task.
-     *
-     * @param name          the name of the parameter to remove
-     */
-    void removeParameter(String name);
 
     /**
      *

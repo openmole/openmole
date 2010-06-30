@@ -66,7 +66,7 @@ public abstract class GenericTask implements IGenericTask {
     @Output
     final static public IData<Throwable> Exception = new Data<Throwable>("Exception", Throwable.class, OPTIONAL, SYSTEM);
 
-    private String name;
+    final private String name;
 
     final private Map<String, IData<?>> input = new TreeMap<String, IData<?>>();;
     final private Map<String, IData<?>> output = new TreeMap<String, IData<?>>();;
@@ -76,7 +76,7 @@ public abstract class GenericTask implements IGenericTask {
     final private Parameters parameters = new Parameters();
 
     public GenericTask(String name) {
-        setName(name);
+        this.name = name;
     }
 
     /**
@@ -188,15 +188,6 @@ public abstract class GenericTask implements IGenericTask {
         resources.add(resource);
     }
 
-    @ChangeState
-    @Override
-    public synchronized void removeResource(IResource resource) {
-        if (resources != null) {
-            resources.remove(resource);
-        }
-    }
-
-   
     /* (non-Javadoc)
      * @see org.openmole.core.processors.ITask#addInPrototype(org.openmole.core.data.structure.Prototype)
      */
@@ -231,55 +222,6 @@ public abstract class GenericTask implements IGenericTask {
     }
 
     @Override
-    public void removeInput(IDataSet dataSet) {
-        for(IData data: dataSet){
-            removeInput(data);
-        }
-    }
-
-    @Override
-    public void removeOutput(IDataSet dataSet) {
-        for(IData data: dataSet) {
-            removeOutput(data);
-        }
-    }
-
-    @Override
-    public  void removeInput(IData data) {
-       removeInput(data.getPrototype());
-    }
-
-    @Override
-    public synchronized void removeInput(IPrototype prototype) {
-       removeInput(prototype.getName());
-    }
-
-    @Override
-    public synchronized void removeInput(String prototype) {
-        if(input != null) {
-            input.remove(prototype);
-        }
-    }
-
-    @Override
-    public void removeOutput(IData data) {
-        removeOutput(data.getPrototype());
-    }
-
-    @Override
-    public void removeOutput(IPrototype prototype) {
-        removeOutput(prototype.getName());
-    }
-
-
-    @Override
-    public synchronized void removeOutput(String prototype) {
-        if(output != null) {
-            output.remove(prototype);
-        }
-    }
-
-    @Override
     public synchronized boolean containsInput(String name) {
         if(input == null) return false;
         return input.containsKey(name);
@@ -307,14 +249,6 @@ public abstract class GenericTask implements IGenericTask {
     @Override
     public String getName() {
         return name;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmole.core.processors.ITask#setName(java.lang.String)
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     /* (non-Javadoc)
@@ -414,17 +348,6 @@ public abstract class GenericTask implements IGenericTask {
     @Override
     public void addParameter(IParameter<?> parameter) {
         parameters.put(parameter);
-    }
-
-    @Override
-    public void removeParameter(IPrototype<?> prototype) {
-        removeParameter(prototype.getName());
-    }
-
-    @ChangeState
-    @Override
-    public void removeParameter(String name) {
-        parameters.remove(name);
     }
 
     @Override
