@@ -14,30 +14,54 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.job;
 
 public enum State {
-	
-	READY("Ready"),
-	RUNNING("Running"),
-	COMPLETED("Completed"),
-	FAILED("Failed"),
-        CANCELED("Canceled");
-	
-	private String label;
 
-	private State(String label) {
-		this.label = label;
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-        public boolean isFinal() {
-            return this == COMPLETED || this == FAILED || this == CANCELED;
-        }
-	
-
+    /**
+     * 
+     * The job as been created and is ready to be excuted.
+     * 
+     */
+    READY,
+    
+    /**
+     * 
+     * The job is being executed.
+     * 
+     */
+    RUNNING,
+    
+    /**
+     * 
+     * The job has sucessfully ended.
+     * 
+     */
+    COMPLETED,
+    
+    /**
+     * 
+     * The job has failed, an uncatched exception has been raised
+     * to the workflow engine.
+     * 
+     */
+    FAILED,
+    
+    /**
+     * 
+     * The job has been canceled.
+     * 
+     */
+    CANCELED;
+    
+    /** 
+     * 
+     * Get if the state is a final state. Meaning there is no way it the {@link IMoleJob} state
+     * can change again.
+     * 
+     * @return true if the state is final
+     */
+    public boolean isFinal() {
+        return this == COMPLETED || this == FAILED || this == CANCELED;
+    }
 }

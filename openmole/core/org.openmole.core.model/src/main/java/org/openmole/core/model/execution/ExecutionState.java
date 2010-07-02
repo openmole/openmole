@@ -19,22 +19,12 @@ package org.openmole.core.model.execution;
 
 public enum ExecutionState {
 	
-	READY("Ready"),
-	SUBMITED("Submitted"),
-	RUNNING("Running"),
-	DONE("Done"),
-        FAILED("Failed"),
-	KILLED("Killed");
-	
-	private String label;
-
-	private ExecutionState(String label) {
-		this.label = label;
-	}
-
-	public String getLabel() {
-		return label;
-	}
+	READY,
+	SUBMITED,
+	RUNNING,
+	DONE,
+        FAILED,
+	KILLED;
 	
 	public boolean isFinal() {
 		return this == DONE || this == FAILED || this == KILLED;

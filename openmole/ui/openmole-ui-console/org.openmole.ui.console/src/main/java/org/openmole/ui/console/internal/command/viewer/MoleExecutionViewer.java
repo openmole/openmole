@@ -44,7 +44,7 @@ public class MoleExecutionViewer implements IViewer<IMoleExecution>{
         }
 
         for(State state : State.values()) {
-            System.out.println(state.getLabel() + ": " + toDisplay.get(state));
+            System.out.println(state.name() + ": " + toDisplay.get(state));
         }
     }
 

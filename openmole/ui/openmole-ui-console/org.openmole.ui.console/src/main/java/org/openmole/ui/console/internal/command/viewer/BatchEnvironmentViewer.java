@@ -87,7 +87,7 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
                     System.out.print(description.toString() + ":");
                     Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(description);
                     for (ExecutionState state : jobServiceInfo.keySet()) {
-                        System.out.print(" [" + state.getLabel() + " = " + jobServiceInfo.get(state).get() + "]");
+                        System.out.print(" [" + state.name() + " = " + jobServiceInfo.get(state).get() + "]");
                     }
                     System.out.println();
                 }

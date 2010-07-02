@@ -48,7 +48,7 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
         }
 
         for(ExecutionState state : ExecutionState.values()) {
-            System.out.println(state.getLabel() + ": " + accounting.get(state));
+            System.out.println(state.name() + ": " + accounting.get(state));
         }
     }
 
