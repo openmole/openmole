@@ -21,10 +21,8 @@ public enum State {
 	
 	READY("Ready"),
 	RUNNING("Running"),
-        ACHIEVED("Achieved"),
 	COMPLETED("Completed"),
 	FAILED("Failed"),
-      //  TRANSITION_PERFORMED("Transition Performed"),
         CANCELED("Canceled");
 	
 	private String label;
@@ -38,7 +36,7 @@ public enum State {
 	}
 
         public boolean isFinal() {
-            return this == COMPLETED || this == FAILED || /*this == TRANSITION_PERFORMED || */this == CANCELED;
+            return this == COMPLETED || this == FAILED || this == CANCELED;
         }
 	
 
