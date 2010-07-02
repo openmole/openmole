@@ -84,11 +84,6 @@
                 <artifactId>icu4j</artifactId>
                 <version>${lib.com.ibm.icu.version}</version>
             </dependency>
-            <!--<dependency>
-                <groupId>com.jcraft</groupId>
-                <artifactId>jsch</artifactId>
-                <version>${lib.com.jcraft.jsch.version}</version>
-            </dependency>-->
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
