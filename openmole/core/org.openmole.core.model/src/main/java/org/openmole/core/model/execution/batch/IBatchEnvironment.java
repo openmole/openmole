@@ -25,7 +25,7 @@ import org.openmole.core.model.execution.IEnvironment;
 
 public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnvironment<IBatchExecutionJob> {
 
-    File getRuntime() throws UserBadDataError, InternalProcessingError;
+    File getRuntime();
 
     IBatchEnvironmentDescription getDescription();
 

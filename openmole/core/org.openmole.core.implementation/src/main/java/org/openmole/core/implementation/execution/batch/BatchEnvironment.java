@@ -58,13 +58,15 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
     }
+    
     BatchServiceGroup<JS> jobServices;
     BatchServiceGroup<IBatchStorage> storages;
     Lock initJS;
     Lock initST;
-    IBatchEnvironmentDescription description;
-    Integer memorySizeForRuntime;
-    File runtime;
+    
+    final IBatchEnvironmentDescription description;
+    final Integer memorySizeForRuntime;
+    final File runtime;
 
     public BatchEnvironment(IBatchEnvironmentDescription description, int memorySizeForRuntime) throws InternalProcessingError {
         super();
@@ -72,6 +74,8 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
         this.description = description;
         this.memorySizeForRuntime = memorySizeForRuntime;
+        this.runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
+        
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchJobWatcher.CheckInterval));
     }
 
@@ -90,11 +94,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Override
-    public synchronized File getRuntime() throws UserBadDataError, InternalProcessingError {
-        if (runtime == null) {
-            runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
-        }
-
+    public synchronized File getRuntime() {
         return runtime;
     }
 

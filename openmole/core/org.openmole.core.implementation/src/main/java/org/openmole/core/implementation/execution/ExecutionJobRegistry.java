@@ -19,6 +19,7 @@ package org.openmole.core.implementation.execution;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.execution.IJobStatisticCategory;
 
@@ -33,8 +36,17 @@ import org.openmole.core.model.job.IJob;
 
 public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements IExecutionJobRegistry<EXECUTIONJOB> {
 
-    Map<IJob, Set<EXECUTIONJOB>> jobs = new HashMap<IJob, Set<EXECUTIONJOB>>();
-    Map<IJob, EXECUTIONJOB> lastExecutionJob = new HashMap<IJob, EXECUTIONJOB>();
+    final private static Comparator<IExecutionJob> ExecutionJobComparator = new Comparator<IExecutionJob>() {
+
+        @Override
+        public int compare(IExecutionJob o1, IExecutionJob o2) {
+            return new Long(o2.getCreationTime()).compareTo(o1.getCreationTime());
+        }
+        
+    };
+    
+    
+    Map<IJob, SortedSet<EXECUTIONJOB>> jobs = new HashMap<IJob, SortedSet<EXECUTIONJOB>>();
     Map<IJobStatisticCategory, Set<IJob>> jobCategories = new HashMap<IJobStatisticCategory, Set<IJob>>();
 
 
@@ -42,10 +54,10 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         return jobs.keySet();
     }
 
-    public synchronized Set<EXECUTIONJOB> getExecutionJobsFor(IJob job) {
-        Set<EXECUTIONJOB> ret = jobs.get(job);
+    public synchronized SortedSet<EXECUTIONJOB> getExecutionJobsFor(IJob job) {
+        SortedSet<EXECUTIONJOB> ret = jobs.get(job);
         if (ret == null) {
-            ret = Collections.synchronizedSet(new HashSet<EXECUTIONJOB>());
+            ret = new TreeSet<EXECUTIONJOB>(ExecutionJobComparator);
             jobs.put(job, ret);
             IJobStatisticCategory category = new JobStatisticCategory(job);
 
@@ -63,18 +75,7 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
 
     public synchronized void remove(EXECUTIONJOB job) {
         Set<EXECUTIONJOB> executionJobs = getExecutionJobsFor(job.getJob());
-
         executionJobs.remove(job);
-
-        EXECUTIONJOB lastJob = getLastExecutionJobForJob(job.getJob());
-
-        if (lastJob != null && lastJob.equals(job)) {
-            if (!executionJobs.isEmpty()) {
-                lastExecutionJob.put(job.getJob(), findLastExecutionJob(job.getJob()));
-            } else {
-                lastExecutionJob.remove(job.getJob());
-            }
-        }
     }
 
     public synchronized boolean isEmpty() {
@@ -84,12 +85,6 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
     public synchronized void register(EXECUTIONJOB executionJob) {
         Set<EXECUTIONJOB> lst = getExecutionJobsFor(executionJob.getJob());
         lst.add(executionJob);
-
-        EXECUTIONJOB last = getLastExecutionJobForJob(executionJob.getJob());
-        if (last == null || last.getCreationTime() < executionJob.getCreationTime()) {
-            lastExecutionJob.put(executionJob.getJob(), executionJob);
-        }
-
     }
 
     public synchronized Integer getNbExecutionJobsForJob(IJob job) {
@@ -98,7 +93,7 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
 
     public synchronized Collection<EXECUTIONJOB> removeJob(IJob job) {
         Collection<EXECUTIONJOB> ret = getExecutionJobsFor(job);
-        lastExecutionJob.remove(job);
+
         jobs.remove(job);
 
         IJobStatisticCategory category = new JobStatisticCategory(job);
@@ -148,7 +143,9 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
     }
 
     public synchronized EXECUTIONJOB getLastExecutionJobForJob(IJob job) {
-        return lastExecutionJob.get(job);
+        SortedSet<EXECUTIONJOB> set = getExecutionJobsFor(job);
+        if(set.isEmpty()) return null;
+        return set.first();
     }
 
     @Override
