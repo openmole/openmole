@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.rits.cloning.Cloner;
 import com.rits.cloning.IFastCloner;
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +25,10 @@ public class ClonningService {
 
     
     public static IVariable clone(IVariable variable) throws InternalProcessingError, UserBadDataError {
-        if (variable.getValue() == null || variable.getValue().getClass().isPrimitive()) {
+        if (variable.getValue() == null || 
+                variable.getValue().getClass().isPrimitive() ||
+                variable.getValue().getClass() == BigDecimal.class ||
+                variable.getValue().getClass() == BigInteger.class) {
             return variable;
         }
         
@@ -54,6 +59,9 @@ public class ClonningService {
             }
         });
 
+        cloner.registerImmutable(BigDecimal.class);
+        cloner.registerImmutable(BigInteger.class);
+        
         Object val = cloner.deepClone(variable.getValue());
 
         if(!exceptions.isEmpty()) {
