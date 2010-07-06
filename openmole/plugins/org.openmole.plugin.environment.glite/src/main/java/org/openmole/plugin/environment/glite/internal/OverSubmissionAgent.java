@@ -46,25 +46,19 @@ import org.openmole.plugin.environment.glite.GliteEnvironment;
 
 public class OverSubmissionAgent implements IUpdatable {
 
-    long checkInterval;
     int minNumberOfJobsByCategory;
     int numberOfSimultaneousExecutionForAJobWhenUnderMinJob;
     GliteEnvironment checkedEnv;
     IWorkloadManagmentStrategy strategy;
 
-    public OverSubmissionAgent(GliteEnvironment checkedEnv, IWorkloadManagmentStrategy strategy, Integer minNumberOfJobsByCategory, Integer numberOfSimultaneousExecutionForAJobWhenUnderMinJob, long checkInterval) {
+    public OverSubmissionAgent(GliteEnvironment checkedEnv, IWorkloadManagmentStrategy strategy, Integer minNumberOfJobsByCategory, Integer numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
         super();
         this.checkedEnv = checkedEnv;
         this.strategy = strategy;
-        this.checkInterval = checkInterval;
         this.numberOfSimultaneousExecutionForAJobWhenUnderMinJob = numberOfSimultaneousExecutionForAJobWhenUnderMinJob;
         this.minNumberOfJobsByCategory = minNumberOfJobsByCategory;
     }
 
-    @Override
-    public long getUpdateInterval() {
-        return checkInterval;
-    }
 
     @Override
     public void update() {

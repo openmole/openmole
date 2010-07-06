@@ -21,8 +21,8 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
 public interface IUpdatable {
-	static final long DefaultInterval = 2 * 60 * 1000;
+	//static final long DefaultInterval = 2 * 60 * 1000;
 	
 	void update() throws InternalProcessingError, UserBadDataError, InterruptedException;
-	long getUpdateInterval();
+	//long getUpdateInterval();
 }

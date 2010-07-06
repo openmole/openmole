@@ -34,27 +34,16 @@ import org.openmole.plugin.environment.glite.GliteEnvironmentAuthentication;
 public class ProxyChecker implements IUpdatable {
 
     GliteEnvironmentAuthentication checkedEnv;
-    long interval;
     Context ctx;
 
-    public ProxyChecker(GliteEnvironmentAuthentication checkedEnv, Context ctx, long interval) {
+    public ProxyChecker(GliteEnvironmentAuthentication checkedEnv, Context ctx) {
         super();
         this.checkedEnv = checkedEnv;
         this.ctx = ctx;
-        this.interval = interval;
     }
 
     public void setCtx(Context ctx) {
         this.ctx = ctx;
-    }
-
-    public void setInterval(long interval) {
-        this.interval = interval;
-    }
-
-    @Override
-    public long getUpdateInterval() {
-        return interval;
     }
 
     @Override

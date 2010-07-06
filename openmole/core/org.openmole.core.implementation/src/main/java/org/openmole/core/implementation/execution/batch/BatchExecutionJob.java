@@ -38,7 +38,6 @@ import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IJob;
 
 public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatable {
@@ -49,23 +48,19 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     static {
         Activator.getWorkspace().addToConfigurations(UpdateInterval, "PT2M");
     }
-
-    long updateInterval;
+    
     IUpdatableFuture future;
     IBatchJob batchJob;
+    
     final AtomicBoolean killed = new AtomicBoolean(false);
-    CopyToEnvironment initStorage;
-    GetResultFromEnvironment getResult;
 
-    transient IBackgroundExecution initStorageExec;
+    CopyToEnvironment.Result copyToEnvironmentResult = null;
+    
+    transient IBackgroundExecution<CopyToEnvironment.Result> copyToEnvironmentExec;
     transient IBackgroundExecution finalizeExecution;
-    transient IURIFile inputFile;
-    transient IURIFile outputFile;
-
-    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError {
+    
+    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) {
         super(executionEnvironment, job);
-        this.updateInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(UpdateInterval);
-        this.initStorage = new CopyToEnvironment(executionEnvironment, job);
     }
 
     public void setFuture(IUpdatableFuture future) {
@@ -78,8 +73,12 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (getBatchJob() == null)  return ExecutionState.READY;
-        if(killed.get()) return ExecutionState.KILLED;
+        if (getBatchJob() == null) {
+            return ExecutionState.READY;
+        }
+        if (killed.get()) {
+            return ExecutionState.KILLED;
+        }
 
         ExecutionState oldState = getBatchJob().getState();
 
@@ -87,7 +86,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             ExecutionState newState = getBatchJob().getUpdatedState();
 
             if (oldState == ExecutionState.SUBMITED && newState == ExecutionState.RUNNING) {
-                getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusChangeInterval(), getJob());
+                getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusDurration(), getJob());
             }
         }
 
@@ -145,10 +144,11 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
         if (finalizeExecution == null) {
-            finalizeExecution = Activator.getBackgroundExecutor().createBackgroundExecution(getGetResult());
+            finalizeExecution = Activator.getBackgroundExecutor().createBackgroundExecution(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
         }
         try {
-            if (getFinalizeExecutionOperation().isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.DOWNLOAD)) {
+            if (finalizeExecution.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.DOWNLOAD)) {
+                finalizeExecution = null;
                 kill();
             }
         } catch (ExecutionException ex) {
@@ -158,63 +158,49 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         }
     }
 
-    private GetResultFromEnvironment getGetResult() {
-        if (getResult == null) {
-            getResult = new GetResultFromEnvironment(getInitStorage().getCommunicationStorage().getDescription(), getInitStorage().getOutputFile(), getJob(), getEnvironment(), getBatchJob().getLastStatusChangeInterval());
-        }
-        return getResult;
-    }
-
-    private IBackgroundExecution getFinalizeExecutionOperation() {
-        return finalizeExecution;
-    }
-
-    private CopyToEnvironment getInitStorage() {
-        return initStorage;
-    }
 
     private void trySubmit() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (initStorageExec == null) {
-            initStorageExec = Activator.getBackgroundExecutor().createBackgroundExecution(getInitStorage());
-            initStorageExec.start(ExecutorType.UPLOAD);
-        }
-        try {
-            if (initStorageExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
-                Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
-                try {
-                    IBatchJob bj = js.getLeft().createBatchJob(getInitStorage().getInputFile(), getInitStorage().getOutputFile(), getInitStorage().getRuntime());
-                    bj.submit(js.getRight());
-                    setBatchJob(bj);
-                } catch (InternalProcessingError e) {
-                    Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
-                } finally {
-                    Activator.getBatchRessourceControl().getController(js.getLeft().getDescription()).getUsageControl().releaseToken(js.getRight());
-                }
+        if (copyToEnvironmentResult == null) {
+            if (copyToEnvironmentExec == null) {
+                copyToEnvironmentExec = Activator.getBackgroundExecutor().createBackgroundExecution(new CopyToEnvironment(getEnvironment(), getJob()));
             }
-        } catch (ExecutionException ex) {
-            throw new InternalProcessingError(ex);
-        }
-    }
 
-    @Override
-    public long getUpdateInterval() {
-        return updateInterval;
+            try {
+                if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
+                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
+                    copyToEnvironmentExec = null;
+
+                    Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
+                    try {
+                        IBatchJob bj = js.getLeft().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
+                        bj.submit(js.getRight());
+                        setBatchJob(bj);
+                        copyToEnvironmentExec = null;
+                    } catch (InternalProcessingError e) {
+                        Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
+                    } finally {
+                        Activator.getBatchRessourceControl().getController(js.getLeft().getDescription()).getUsageControl().releaseToken(js.getRight());
+                    }
+                }
+            } catch (ExecutionException ex) {
+                throw new InternalProcessingError(ex);
+            }
+        }
     }
 
     private void clean() {
-        if (getInitStorage().isInitialized()) {
-             Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(getInitStorage().getCommunicationDir(),true));
+        if (copyToEnvironmentResult != null) {
+            Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true));
         }
     }
-
 
     @Override
     public void kill() {
         if (!killed.getAndSet(true)) {
             try {
                 try {
-                    if (initStorageExec != null) {
-                        initStorageExec.interrupt();
+                    if (copyToEnvironmentExec != null) {
+                        copyToEnvironmentExec.interrupt();
                     }
                     if (finalizeExecution != null) {
                         finalizeExecution.interrupt();
@@ -231,5 +217,4 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
         }
     }
-
 }

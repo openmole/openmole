@@ -4,7 +4,6 @@
  */
 package org.openmole.misc.backgroundexecutor;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import org.openmole.misc.executorservice.ExecutorType;
 
@@ -12,7 +11,7 @@ import org.openmole.misc.executorservice.ExecutorType;
  *
  * @author reuillon
  */
-public interface IBackgroundExecution {
+public interface IBackgroundExecution<T> {
 
     public void start(ExecutorType type);
 
@@ -25,6 +24,8 @@ public interface IBackgroundExecution {
     boolean isFinished();
 
     Throwable getFailureCause();
+    
+    T getResult();
 
     boolean isSucessFull();
 

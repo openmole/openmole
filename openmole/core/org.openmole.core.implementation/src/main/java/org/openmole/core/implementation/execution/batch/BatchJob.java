@@ -17,8 +17,8 @@
 package org.openmole.core.implementation.execution.batch;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.TreeMap;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.ExecutionState;
@@ -34,10 +34,8 @@ public abstract class BatchJob implements IBatchJob {
 
     ExecutionState state;
     
-    Long lastStatusChanged;
-    Long lastStatusChangeInterval;
     private final IBatchServiceDescription jobServiceDescription;
-    private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new TreeMap<ExecutionState, Long>());
+    private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
 
     public BatchJob(IBatchJobService<?> jobService) {
         super();
@@ -54,14 +52,6 @@ public abstract class BatchJob implements IBatchJob {
         if (this.state != state) {
             long curDate = System.currentTimeMillis();
             timeStemps.put(state, curDate);
-
-            if (this.state != null && !this.state.isFinal()) {
-                if (lastStatusChanged != null) {
-                    lastStatusChangeInterval = curDate - lastStatusChanged;
-                }
-            }
-
-            lastStatusChanged = curDate;
             this.state = state;
         }
     }
@@ -69,16 +59,6 @@ public abstract class BatchJob implements IBatchJob {
     @Override
     public IBatchServiceDescription getBatchJobServiceDescription() {
         return jobServiceDescription;
-    }
-
-    @Override
-    public Long getLastStatusChangedTime() {
-        return lastStatusChanged;
-    }
-
-    @Override
-    public Long getLastStatusChangeInterval() {
-        return lastStatusChangeInterval;
     }
 
     @Override
@@ -149,6 +129,22 @@ public abstract class BatchJob implements IBatchJob {
     public Long getTimeStemp(ExecutionState state) {
         return timeStemps.get(state);
     }
+
+    @Override
+    public long getLastStatusDurration() {
+        ExecutionState currentState = state;
+        int ordinal = currentState.ordinal();
+        Long previous = null;
+         
+        while(--ordinal >= 0) {
+            ExecutionState previousState = ExecutionState.values()[ordinal];
+            previous = getTimeStemp(previousState);
+            if(previous != null) break;
+        }
+        
+        return getTimeStemp(currentState) - previous;
+    }
+    
 
     private IUsageControl getUsageControl() {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();

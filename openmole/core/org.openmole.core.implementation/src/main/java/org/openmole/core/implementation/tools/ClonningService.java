@@ -21,11 +21,12 @@ import static org.openmole.commons.tools.io.FileUtil.*;
 
 public class ClonningService {
 
+    
     public static IVariable clone(IVariable variable) throws InternalProcessingError, UserBadDataError {
         if (variable.getValue() == null || variable.getValue().getClass().isPrimitive()) {
             return variable;
         }
-
+        
         Cloner cloner = new Cloner();
         final List<Throwable> exceptions = Collections.synchronizedList(new LinkedList<Throwable>());
 

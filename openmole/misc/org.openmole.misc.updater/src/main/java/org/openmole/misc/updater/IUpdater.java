@@ -22,8 +22,8 @@ import org.openmole.misc.executorservice.ExecutorType;
 
 public interface IUpdater {
 
-    IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type);
+    IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval);
 
-    IUpdatableFuture delay(IUpdatable updatable, ExecutorType type);
+    IUpdatableFuture delay(IUpdatable updatable, ExecutorType type, long updateInterval);
 
 }

@@ -54,14 +54,25 @@ import org.openmole.core.replicacatalog.IReplica;
  *
  * @author reuillon
  */
-class CopyToEnvironment implements Callable<Void> {
+class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
-    private IBatchStorage communicationStorage;
-    private IURIFile communicationDir;
-    private IURIFile inputFile;
-    private IURIFile outputFile;
-    private IRuntime runtime;
-    private boolean finished = false;
+    public class Result {
+
+        public Result(IBatchStorage communicationStorage, IURIFile communicationDir, IURIFile inputFile, IURIFile outputFile, IRuntime runtime) {
+            this.communicationStorage = communicationStorage;
+            this.communicationDir = communicationDir;
+            this.inputFile = inputFile;
+            this.outputFile = outputFile;
+            this.runtime = runtime;
+        }
+        
+        final public IBatchStorage communicationStorage;    
+        final public IURIFile communicationDir;
+        final public IURIFile inputFile;
+        final public IURIFile outputFile;
+        final public IRuntime runtime;
+    }
+
     private final BatchEnvironment environment;
     private final IJob job;
 
@@ -70,23 +81,23 @@ class CopyToEnvironment implements Callable<Void> {
         this.job = job;
     }
 
-    void initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
+    Result initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         Duo<IBatchStorage, IAccessToken> duo = getEnvironment().getAStorage();
 
-        communicationStorage = duo.getLeft();
-        IAccessToken token = duo.getRight();
+        final IBatchStorage communicationStorage = duo.getLeft();
+        final IAccessToken token = duo.getRight();
 
         try {
-            communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
+            final IURIFile communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
 
-            inputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".in"));
-            outputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".out"));
+            final IURIFile inputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".in"));
+            final IURIFile outputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".out"));
 
-            runtime = replicateTheRuntime(token);
+            final IRuntime runtime = replicateTheRuntime(token, communicationStorage);
 
-            IJobForRuntime jobForRuntime = createJobForRuntime(token);
-            IExecutionMessage executionMessage = createExecutionMessage(jobForRuntime, token);
+            final IJobForRuntime jobForRuntime = createJobForRuntime(token, communicationStorage, communicationDir);
+            final IExecutionMessage executionMessage = createExecutionMessage(jobForRuntime, token, communicationStorage, communicationDir);
 
             /* ---- upload the execution message ----*/
 
@@ -97,41 +108,19 @@ class CopyToEnvironment implements Callable<Void> {
             URIFile.copy(executionMessageURIFile, inputFile, token);
 
             executionMessageURIFile.remove(false);
-            finished = true;
+            
+            return new Result(communicationStorage, communicationDir, inputFile, outputFile, runtime);
         } finally {
             Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);
         }
     }
 
     @Override
-    public Void call() throws Exception {
-        initCommunication();
-        return null;
+    public Result call() throws Exception {
+        return initCommunication();
     }
 
-    public boolean isInitialized() {
-        return getCommunicationStorage() != null && getCommunicationDir() != null && getOutputFile() != null && getInputFile() != null;
-    }
 
-    public IURIFile getCommunicationDir() {
-        return communicationDir;
-    }
-
-    public IBatchStorage getCommunicationStorage() {
-        return communicationStorage;
-    }
-
-    public IURIFile getInputFile() {
-        return inputFile;
-    }
-
-    public IURIFile getOutputFile() {
-        return outputFile;
-    }
-
-    public IRuntime getRuntime() {
-        return runtime;
-    }
 
     IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         boolean isDir = file.isDirectory();
@@ -160,11 +149,8 @@ class CopyToEnvironment implements Callable<Void> {
         return job;
     }
 
-    public boolean isFinished() {
-        return finished;
-    }
 
-    IRuntime replicateTheRuntime(IAccessToken token) throws UserBadDataError, InternalProcessingError, InterruptedException, InternalProcessingError, IOException {
+    IRuntime replicateTheRuntime(IAccessToken token, IBatchStorage communicationStorage) throws UserBadDataError, InternalProcessingError, InterruptedException, InternalProcessingError, IOException {
         Collection<IURIFile> environmentPluginReplica = new LinkedList<IURIFile>();
         IURIFile runtimeReplica;
 
@@ -181,7 +167,7 @@ class CopyToEnvironment implements Callable<Void> {
         return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);
     }
 
-    IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
+    IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         File jobFile = Activator.getWorkspace().newTmpFile("job", ".xml");
         Iterable<Class> extendedClases = Activator.getMessageSerialiser().saveJobForRuntime(jobForRuntime, jobFile);
@@ -211,7 +197,7 @@ class CopyToEnvironment implements Callable<Void> {
         return new ExecutionMessage(pluginReplicas, new Duo<IURIFile, IHash>(jobForRuntimeFile, jobHash));
     }
 
-    IJobForRuntime createJobForRuntime(IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
+    IJobForRuntime createJobForRuntime(IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         IJobForRuntime jobForRuntime = new JobForRuntime(communicationDir);
 
         Set<File> inputFiles = new TreeSet<File>();

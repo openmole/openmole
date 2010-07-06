@@ -22,12 +22,11 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.ExecutionState;
 
 public interface IBatchJob {
-	
-	Long getLastStatusChangeInterval();
-	Long getLastStatusChangedTime();
 
         boolean hasBeenSubmitted();
 	void setState(ExecutionState state);
+        
+        long getLastStatusDurration();
 	
 	ExecutionState getState();
         Long getTimeStemp(ExecutionState state);

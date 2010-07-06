@@ -48,8 +48,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     final static String ConfigGroup = BatchEnvironment.class.getSimpleName();
     final static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
+    
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
+    
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
 
     static {
@@ -70,7 +72,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
         this.description = description;
         this.memorySizeForRuntime = memorySizeForRuntime;
-        Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN);
+        Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchJobWatcher.CheckInterval));
     }
 
     public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
@@ -81,7 +83,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
         final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job);
 
-        IUpdatableFuture future = Activator.getUpdater().registerForUpdate(bej, ExecutorType.UPDATE);
+        IUpdatableFuture future = Activator.getUpdater().registerForUpdate(bej, ExecutorType.UPDATE, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchExecutionJob.UpdateInterval));
         bej.setFuture(future);
 
         getJobRegistry().register(bej);
