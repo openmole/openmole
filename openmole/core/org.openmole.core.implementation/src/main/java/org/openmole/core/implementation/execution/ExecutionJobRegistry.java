@@ -57,7 +57,7 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
     public synchronized SortedSet<EXECUTIONJOB> getExecutionJobsFor(IJob job) {
         SortedSet<EXECUTIONJOB> ret = jobs.get(job);
         if (ret == null) {
-            ret = new TreeSet<EXECUTIONJOB>(ExecutionJobComparator);
+            ret = Collections.synchronizedSortedSet(new TreeSet<EXECUTIONJOB>(ExecutionJobComparator));
             jobs.put(job, ret);
             IJobStatisticCategory category = new JobStatisticCategory(job);
 
