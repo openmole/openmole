@@ -28,7 +28,7 @@ import org.openmole.core.model.task.IGenericTask;
 
 public interface IMoleJob {
 
-    public final static String stateChanged = "stateChanged";
+    public final static String StateChanged = "stateChanged";
 
     IGenericTask getTask();
 

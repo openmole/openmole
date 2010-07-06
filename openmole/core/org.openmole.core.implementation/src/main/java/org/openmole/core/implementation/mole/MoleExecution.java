@@ -163,10 +163,10 @@ public class MoleExecution implements IMoleExecution {
     }
    
     public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
-        Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new IMoleJob[]{moleJob});
+        Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new Object[]{moleJob});
 
         ExecutionInfoRegistry.GetInstance().register(moleJob, this);
-        Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGH.getValue(), moleExecutionAdapterForMoleJob, MoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGH.getValue(), moleExecutionAdapterForMoleJob, MoleJob.StateChanged);
         Activator.getEventDispatcher().registerListener(moleJob, Priority.NORMAL.getValue(), moleJobOutputTransitionPerformed, MoleJob.TransitionPerformed);
 
         inProgress.put(moleJob, subMole);

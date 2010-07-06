@@ -142,7 +142,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
     public IMoleJob toJob(IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError {
         MoleJob ret = new MoleJob(getAssignedTask(), context, ticket, jobId);
 
-        Activator.getEventDispatcher().registerListener(ret, Priority.LOW.getValue(), new GenericTaskCapsuleAdapter(), MoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(ret, Priority.LOW.getValue(), new GenericTaskCapsuleAdapter(), IMoleJob.StateChanged);
+        Activator.getEventDispatcher().objectChanged(this, JobCreated, new Object[]{ret});
         return ret;
     }
 
@@ -178,7 +179,6 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
             throw new UserBadDataError(e, "Error at the end of a MoleJob for task " + getAssignedTask());
         } finally {
             Activator.getEventDispatcher().objectChanged(job, MoleJob.TransitionPerformed);
-           // job.setState(State.TRANSITION_PERFORMED);
         }
     }
 
