@@ -25,39 +25,39 @@ import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.observer.IVisualizer;
+import org.openmole.core.model.observer.IInteraction;
 
 /**
  *
  * @author reuillon
  */
-public abstract class Visualizer implements IVisualizer {
+public abstract class Interaction implements IInteraction {
 
-   class VisualizerAdapterForMoleJob implements IObjectChangedSynchronousListener<IMoleJob> {
+   class InteractionAdapterForMoleJob implements IObjectChangedSynchronousListener<IMoleJob> {
 
         @Override
         public void objectChanged(IMoleJob job) throws InternalProcessingError, UserBadDataError {
             switch (job.getState()) {
                 case COMPLETED:
-                    visualize(job.getContext());
+                    interact(job.getContext());
                     break;
             }
         }
         
     } 
     
-   class VisualizerAdapterForCapsule implements IObjectChangedSynchronousListenerWithArgs<IGenericTaskCapsule> {
+   class InteractionAdapterForCapsule implements IObjectChangedSynchronousListenerWithArgs<IGenericTaskCapsule> {
 
         @Override
         public void objectChanged(IGenericTaskCapsule obj, Object[] args) throws InternalProcessingError, UserBadDataError {
             IMoleJob moleJob = (IMoleJob) args[0];
-            Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGHEST.getValue(), new VisualizerAdapterForMoleJob());
+            Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGHEST.getValue(), new InteractionAdapterForMoleJob());
         }
        
    }
    
-   public Visualizer(IGenericTaskCapsule taskCapsule) {
-       Activator.getEventDispatcher().registerListener(taskCapsule, Priority.NORMAL.getValue(), new VisualizerAdapterForCapsule());
+   public Interaction(IGenericTaskCapsule taskCapsule) {
+       Activator.getEventDispatcher().registerListener(taskCapsule, Priority.NORMAL.getValue(), new InteractionAdapterForCapsule());
    }
    
 }

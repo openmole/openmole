@@ -23,6 +23,6 @@ import org.openmole.core.model.job.IContext;
  *
  * @author reuillon
  */
-public interface IVisualizer {
-    public void visualize(IContext context);
+public interface IInteraction {
+    public void interact(IContext context);
 }
