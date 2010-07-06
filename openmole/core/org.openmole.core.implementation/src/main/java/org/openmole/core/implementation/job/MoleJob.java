@@ -94,9 +94,11 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     @ObjectModified(type = stateChanged)
     public void setState(State state) throws InternalProcessingError, UserBadDataError {
-        Collection<ITimeStamp> timeStamps = getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
-        timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
-        if(!state.isFinal()) this.state = state;
+        if(!getState().isFinal()) {
+            Collection<ITimeStamp> timeStamps = getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
+            timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
+            this.state = state;
+        }
     }
 
     @Override
