@@ -268,6 +268,7 @@ public class MoleExecution implements IMoleExecution {
             for (IMoleJob moleJob : inProgress.keySet()) {
                 moleJob.cancel();
             }
+            inProgress.clear();
         }
     }
 

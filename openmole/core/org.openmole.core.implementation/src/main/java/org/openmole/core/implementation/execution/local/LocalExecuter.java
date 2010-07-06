@@ -53,14 +53,14 @@ public class LocalExecuter implements Runnable {
 
                     for (IMoleJob moleJob : job.getMoleJobs()) {
                         if (moleJob.getState() != State.CANCELED) {
-                            LOGGER.finer("New job group taken for execution: " + moleJob);
+                            LOGGER.log(Level.FINER, "New job group taken for execution: {0}", moleJob);
 
                             if (IMoleTask.class.isAssignableFrom(moleJob.getTask().getClass())) {
                                 jobGoneIdle();
                             }
                             moleJob.perform();
                             moleJob.finished(moleJob.getContext());
-                            LOGGER.finer("End of job group execution: " + moleJob);
+                            LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);
                         }
                     }
                     executionJob.setState(ExecutionState.DONE);
