@@ -43,6 +43,12 @@
             <artifactId>org.scala-lang.scala</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
+	<dependency>
+     	   <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>${lib.org.junit.version}</version>
+           <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
