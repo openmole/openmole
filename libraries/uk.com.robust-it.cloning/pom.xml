@@ -21,6 +21,7 @@
         <dependency>
             <groupId>uk.com.robust-it</groupId>
             <artifactId>cloning</artifactId>
+            <version>${lib.uk.com.robust-it.cloning.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -75,56 +75,6 @@
                 <version>${lib.org.objenesis.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.db4o</groupId>
-                <artifactId>com.db4o</artifactId>
-                <version>${lib.com.db4o.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ibm.icu</groupId>
-                <artifactId>icu4j</artifactId>
-                <version>${lib.com.ibm.icu.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.thoughtworks.xstream</groupId>
-                <artifactId>xstream</artifactId>
-                <version>${lib.com.thoughtworks.xstream.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga</groupId>
-                <artifactId>jsaga-engine</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-classic</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-voms</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-globus</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-srm</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-wms</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.in2p3.jsaga.adaptor</groupId>
-                <artifactId>jsaga-adaptor-ssh</artifactId>
-                <version>${lib.fr.in2p3.jsaga.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>gnu-crypto</groupId>
                 <artifactId>gnu-crypto</artifactId>
                 <version>${lib.org.gnu.crypto.version}</version>
@@ -163,11 +113,6 @@
                 <groupId>org.ogf.saga</groupId>
                 <artifactId>saga-api</artifactId>
                 <version>${lib.org.ogf.saga.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.com.robust-it</groupId>
-                <artifactId>cloning</artifactId>
-                <version>${lib.uk.com.robust-it.cloning.version}</version>
             </dependency>
 
             <!-- FIXME transitive dep not imported for commons-jxpath -->
@@ -283,7 +228,7 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <symbolic.name>${pom.artifactId}</symbolic.name>
         <!-- versions of libraries used -->
-        <lib.com.db4o.version>7.4.58</lib.com.db4o.version>
+        <lib.com.db4o.version>7.12-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>2.5</lib.com.ice.tar.version>
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.3.1</lib.com.thoughtworks.xstream.version>
@@ -304,7 +249,7 @@
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
-        <lib.org.scala-lang.scala.version>2.8.0.RC6</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.8.0.RC7</lib.org.scala-lang.scala.version>
         <lib.org.objenesis.version>1.0.0</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
@@ -662,6 +607,11 @@
             <id>maven.iscpif.fr</id>
             <name>ISCPIF repository</name>
             <url>http://maven.iscpif.fr/public/</url>
+        </repository>
+        <repository>
+            <id>maven.iscpif.fr snapshots</id>
+            <name>ISCPIF snapshots repository</name>
+            <url>http://maven.iscpif.fr/public-snapshots/</url>
         </repository>
 
         <!--Code Lutin Repositories-->
