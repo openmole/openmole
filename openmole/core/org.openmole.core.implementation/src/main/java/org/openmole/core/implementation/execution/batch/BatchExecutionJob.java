@@ -162,11 +162,11 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
                 Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
                 try {
+                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
                     IBatchJob bj = js.getLeft().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
                     bj.submit(js.getRight());
                     setBatchJob(bj);
 
-                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
                     copyToEnvironmentExec = null;
                 } catch (InternalProcessingError e) {
                     Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
