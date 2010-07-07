@@ -15,7 +15,7 @@ public interface IBackgroundExecution<T> {
 
     public void start(ExecutorType type);
 
-    boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws InterruptedException, ExecutionException;
+    boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws ExecutionException;
 
     boolean isStarted();
 

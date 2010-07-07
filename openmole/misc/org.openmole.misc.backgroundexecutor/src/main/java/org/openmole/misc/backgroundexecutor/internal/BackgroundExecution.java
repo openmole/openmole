@@ -87,14 +87,10 @@ public class BackgroundExecution<T> implements IBackgroundExecution<T> {
     }
 
     @Override
-    public synchronized boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws InterruptedException, ExecutionException {
+    public synchronized boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws ExecutionException {
         if (hasFailed()) {
             Throwable t = getFailureCause();
-            if(InterruptedException.class.isAssignableFrom(t.getClass())) {
-                throw ((InterruptedException) t);
-            } else {
-                throw new ExecutionException(t);
-            }
+            throw new ExecutionException(t);
         }
 
         if (!isStarted()) {

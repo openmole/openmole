@@ -153,9 +153,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
         } catch (ExecutionException ex) {
             throw new InternalProcessingError(ex);
-        } catch (InterruptedException ex) {
-            throw new InternalProcessingError(ex);
-        }
+        } 
     }
 
 
@@ -167,14 +165,14 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
             try {
                 if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
-                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
-                    copyToEnvironmentExec = null;
 
                     Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
                     try {
                         IBatchJob bj = js.getLeft().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
                         bj.submit(js.getRight());
                         setBatchJob(bj);
+                        
+                        copyToEnvironmentResult = copyToEnvironmentExec.getResult();
                         copyToEnvironmentExec = null;
                     } catch (InternalProcessingError e) {
                         Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
@@ -184,7 +182,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 }
             } catch (ExecutionException ex) {
                 throw new InternalProcessingError(ex);
-            }
+            }  
         }
     }
 
