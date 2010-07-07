@@ -24,6 +24,12 @@
 	    <version>${lib.org.processing.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.mrfeinberg.peasycam</groupId>
+            <artifactId>peasycam</artifactId>
+	    <version>${lib.com.mrfeinberg.peasycam.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
