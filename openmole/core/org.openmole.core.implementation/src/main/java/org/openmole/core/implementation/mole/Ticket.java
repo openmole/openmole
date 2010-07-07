@@ -81,7 +81,9 @@ public class Ticket implements ITicket, Comparable<ITicket> {
 
     @Override
     public int compareTo(ITicket o) {
-        return getContent().compareTo(o.getContent());
+        int compare = getContent().compareTo(o.getContent());
+        if(compare != 0) return compare;
+        return getCategory().compareTo(o.getCategory());
     }
 
     @Override

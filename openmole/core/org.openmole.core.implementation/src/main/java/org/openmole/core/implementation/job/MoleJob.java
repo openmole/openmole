@@ -51,14 +51,15 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     final private ITicket ticket;
     final private IProgress progress;
     final private IGenericTask task;
-    final private ContextContainer context;
     final private IMoleJobId id;
+
+    private IContext context;
     volatile private State state;
 
     @ObjectConstructed
     public MoleJob(IGenericTask task, IContext context, ITicket ticket, IMoleJobId id) throws InternalProcessingError, UserBadDataError {
         super();
-        this.context = new ContextContainer(context);
+        this.context = context;
         this.task = task;
         this.ticket = ticket;
         this.id = id;
@@ -74,7 +75,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     @Override
     public IContext getContext() {
-        return context.getInnerContext();
+        return context;
     }
 
     @Override
@@ -108,7 +109,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     private void setInnerContext(IContext context) {
         context.setRoot(this.getContext().getRoot());
-        this.context.setInnerContext(context);
+        this.context = context;
     }
 
     @Override
