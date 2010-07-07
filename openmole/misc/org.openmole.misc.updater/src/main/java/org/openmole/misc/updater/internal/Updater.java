@@ -19,12 +19,10 @@ package org.openmole.misc.updater.internal;
 import org.openmole.misc.updater.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.openmole.misc.executorservice.ExecutorType;
-import org.openmole.misc.executorservice.IExecutorService;
 
 public class Updater implements IUpdater {
 
@@ -48,18 +46,18 @@ public class Updater implements IUpdater {
     }
 
     @Override
-    public IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type) {
+    public IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval) {
         UpdatableFuture updatableFuture = new UpdatableFuture();
-        UpdaterTask task = new UpdaterTask(updatable, this, updatableFuture, type);
+        UpdaterTask task = new UpdaterTask(updatable, this, updatableFuture, type, updateInterval);
         updatableFuture.setFuture(Activator.getExecutorService().getExecutorService(type).submit(task));
         return updatableFuture;
     }
 
     @Override
-    public IUpdatableFuture delay(final IUpdatable updatable, final ExecutorType type) {
+    public IUpdatableFuture delay(final IUpdatable updatable, final ExecutorType type, long updateInterval) {
 
         final UpdatableFuture future = new UpdatableFuture();
-        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, future, type);
+        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, future, type, updateInterval);
 
         delay(task);
         return future;
@@ -70,7 +68,6 @@ public class Updater implements IUpdater {
             UpdatableFuture updatableFuture = updaterTask.getFuture();
             synchronized (updatableFuture) {
                 if (!updatableFuture.isCanceled()) {
-
                     updatableFuture.setFuture(getScheduler().schedule(new Runnable() {
 
                         @Override
@@ -84,36 +81,20 @@ public class Updater implements IUpdater {
 
 
                         }
-                    }, updaterTask.getUpdatable().getUpdateInterval(), TimeUnit.MILLISECONDS));
+                    }, updaterTask.getDelay() , TimeUnit.MILLISECONDS));
                 }
             }
         }
     }
 
-  /*  public Future newtaskFor(IUpdatable updatable, UpdatableFuture future, ExecutorType type) {
-        //if (!shutDown) {
-        UpdaterTask task = new UpdaterTask(updatable, this, future, type);
-        IExecutorService service = Activator.getExecutorService();
-        ExecutorService executorService = service.getExecutorService(type);
-        return executorService.submit(task);
-        //}
-    }*/
 
     ExecutorService getExecutor(ExecutorType type) {
         return Activator.getExecutorService().getExecutorService(type);
     }
 
-    /*@Override
-    public void setShutDown(boolean shutDown) {
-    this.shutDown = shutDown;
-    }*/
+
     private ScheduledExecutorService getScheduler() {
         return scheduler;
     }
 
-    /* @Override
-    public List<Future<?>> cleanAll() {
-    setShutDown(true);
-    return Collections.EMPTY_LIST;
-    }*/
 }

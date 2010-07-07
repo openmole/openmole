@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.job.IJob;
@@ -40,18 +39,11 @@ public class BatchJobWatcher implements IUpdatable {
         Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
     }
 
-    final long interval;
     final IBatchEnvironment<?> watchedEnv;
 
     public BatchJobWatcher(IBatchEnvironment<?> watchedEnv) throws InternalProcessingError {
         super();
-        this.interval = Activator.getWorkspace().getPreferenceAsDurationInMs(CheckInterval);
         this.watchedEnv = watchedEnv;
-    }
-
-    @Override
-    public long getUpdateInterval() {
-        return interval;
     }
 
     @Override

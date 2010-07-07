@@ -199,7 +199,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         long overSubmissionInterval = Activator.getWorkspace().getPreferenceAsDurationInMs(OverSubmissionIntervalLocation);
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
-        Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin, overSubmissionInterval), ExecutorType.OWN);
+        Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval);
 
     }
 

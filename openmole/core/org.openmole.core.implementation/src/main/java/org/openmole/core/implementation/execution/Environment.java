@@ -32,7 +32,7 @@ public abstract class Environment<EXECUTIONJOB extends IExecutionJob> implements
     final static ConfigurationLocation StatisticsHistorySize = new ConfigurationLocation(ConfigGroup, "StatisticsHistorySize");
 
     static {
-        Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "1000");
+        Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "100");
     }
 
     final IEnvironmentExecutionStatistics statistics;

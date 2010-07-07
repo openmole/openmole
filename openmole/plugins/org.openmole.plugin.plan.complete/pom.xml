@@ -21,6 +21,12 @@
             <artifactId>org.openmole.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.domain.interval</artifactId>
+            <version>${project.version}</version>
+	    <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

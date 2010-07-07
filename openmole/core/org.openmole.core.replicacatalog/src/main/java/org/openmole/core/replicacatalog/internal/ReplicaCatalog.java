@@ -80,7 +80,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
-            Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this, updateInterval), ExecutorType.OWN);
+            Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this), ExecutorType.OWN, updateInterval);
         } catch (Db4oIOException e) {
             throw new InternalProcessingError(e);
         } catch (DatabaseFileLockedException e) {

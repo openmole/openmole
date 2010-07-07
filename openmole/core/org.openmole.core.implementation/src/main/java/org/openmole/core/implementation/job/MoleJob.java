@@ -92,11 +92,13 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         return state;
     }
 
-    @ObjectModified(type = stateChanged)
+    @ObjectModified(type = StateChanged)
     public void setState(State state) throws InternalProcessingError, UserBadDataError {
-        Collection<ITimeStamp> timeStamps = getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
-        timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
-        this.state = state;
+        if(getState() == null || !getState().isFinal()) {
+            Collection<ITimeStamp> timeStamps = getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
+            timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
+            this.state = state;
+        }
     }
 
     @Override
@@ -111,7 +113,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
 
     @Override
     public void perform() throws InterruptedException {
-        //Init variable for output filtering
         try {
             setState(State.RUNNING);
             getTask().perform(getContext(), progress);

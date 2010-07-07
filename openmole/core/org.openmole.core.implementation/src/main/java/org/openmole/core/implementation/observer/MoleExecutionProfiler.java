@@ -1,3 +1,5 @@
+package org.openmole.core.implementation.observer;
+
 /*
  *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
  * 
@@ -15,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole;
+
 
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.job.IMoleJob;
@@ -25,12 +27,13 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.model.observer.IMoleExecutionProfiler;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public abstract class MoleExecutionProfiler {
+public abstract class MoleExecutionProfiler implements IMoleExecutionProfiler {
 
     class MoleExecutionProfilerOneJobFinishedAdapter implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution>  {
 

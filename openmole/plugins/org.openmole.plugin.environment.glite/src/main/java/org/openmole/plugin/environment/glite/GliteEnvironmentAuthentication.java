@@ -133,12 +133,10 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
         }
 
         if (proxyChecker == null) {
-            proxyChecker = new ProxyChecker(this, ctx, interval);
-            Activator.getUpdater().delay(proxyChecker, ExecutorType.OWN);
-
+            proxyChecker = new ProxyChecker(this, ctx);
+            Activator.getUpdater().delay(proxyChecker, ExecutorType.OWN, interval);
         } else {
             proxyChecker.setCtx(ctx);
-            proxyChecker.setInterval(interval);
         }
 
         Activator.getJSagaSessionService().addContext(ctx);

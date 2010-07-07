@@ -22,11 +22,13 @@ package org.openmole.commons.tools.structure;
  * @author reuillon
  */
 public enum Priority {
-    HIGH(Integer.MAX_VALUE),
+    HIGHEST(Integer.MAX_VALUE),
+    HIGH(Integer.MAX_VALUE / 2),
     NORMAL(0),
-    LOW(Integer.MIN_VALUE);
+    LOW(Integer.MIN_VALUE / 2),
+    LOWEST(Integer.MIN_VALUE);
 
-    private Integer value;
+    final private Integer value;
 
     private Priority(Integer value) {
         this.value = value;

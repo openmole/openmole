@@ -39,6 +39,8 @@ import org.openmole.core.model.transition.ITransitionSlot;
  */
 public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGenericTask> {
 
+    public static final String JobCreated = "JobCreated";
+    
     /**
      *
      * Get the task assigned to this capsule or null if not the task has not been assigned.

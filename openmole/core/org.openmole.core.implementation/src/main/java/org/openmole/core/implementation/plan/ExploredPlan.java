@@ -24,9 +24,9 @@ import org.openmole.core.model.plan.IFactorValues;
 
 public class ExploredPlan implements IExploredPlan {
 
-    Iterable<IFactorValues> values;
+    Collection<IFactorValues> values;
 
-    public ExploredPlan(Iterable<IFactorValues> values) {
+    public ExploredPlan(Collection<IFactorValues> values) {
         super();
         this.values = values;
     }
@@ -36,4 +36,9 @@ public class ExploredPlan implements IExploredPlan {
         return values.iterator();
     }
 
+    @Override
+    public int size() {
+        return values.size();
+    }
+    
 }

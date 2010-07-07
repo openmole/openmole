@@ -25,28 +25,29 @@ import org.openmole.misc.executorservice.ExecutorType;
 
 public class UpdaterTask implements Runnable {
 
-    private IUpdatable updatable;
-    private Updater updater;
-    private ExecutorType type;
-    private UpdatableFuture future;
+    final private IUpdatable updatable;
+    final private Updater updater;
+    final private ExecutorType type;
+    final private UpdatableFuture future;
+    final private long delay;
 
-    public UpdaterTask(IUpdatable updatable, Updater updater, UpdatableFuture future, ExecutorType type) {
+    public UpdaterTask(IUpdatable updatable, Updater updater, UpdatableFuture future, ExecutorType type, long delay) {
         super();
         this.updatable = updatable;
         this.updater = updater;
         this.future = future;
         this.type = type;
+        this.delay = delay;
     }
 
+    @Override
     public void run() {
         try {
             updatable.update();
         } catch (Throwable e) {
-            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, null, e);
+            Logger.getLogger(UpdaterTask.class.getName()).log(Level.WARNING, null, e);
         } finally {
-            //if (future.shouldUpdate()) {
-                updater.delay(this);
-            //}
+            updater.delay(this);
         }
     }
 
@@ -61,11 +62,9 @@ public class UpdaterTask implements Runnable {
     public ExecutorType getExecutorType() {
         return type;
     }
-    /*public static  UpdaterTask getNew() throws InternalProcessingError {
-    return updaterPool.getNew();
-    }*/
 
-    /*public static void release(UpdaterTask object) {
-    updaterPool.release(object);
-    }*/
+    public long getDelay() {
+        return delay;
+    }
+
 }

@@ -18,11 +18,6 @@
 
 package org.openmole.core.model.plan;
 
-import java.util.Iterator;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-
-
-public interface IExploredPlan {
-    Iterator<IFactorValues> iterator() throws InternalProcessingError, UserBadDataError;
+public interface IExploredPlan extends Iterable<IFactorValues> {
+    int size();
 }

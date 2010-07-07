@@ -20,11 +20,11 @@ import au.com.bytecode.opencsv.CSVWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import org.openmole.core.implementation.mole.MoleExecutionProfiler;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.observer.MoleExecutionProfiler;
 
 import static org.openmole.plugin.executionprofiler.csv.internal.MoleJobInfoToColumns.toColumns;
 

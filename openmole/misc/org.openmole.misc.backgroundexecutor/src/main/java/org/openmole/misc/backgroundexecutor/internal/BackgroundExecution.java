@@ -7,16 +7,19 @@ import org.openmole.misc.executorservice.ExecutorType;
 
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 
-public class BackgroundExecution implements IBackgroundExecution {
+public class BackgroundExecution<T> implements IBackgroundExecution<T> {
 
-    final Callable callable;
+    Callable<T> callable;
+    
     Throwable exception = null;
     boolean finished = false;
     boolean started = false;
  
-    Future future;
+    T result;
+    
+    transient Future future;
 
-    public BackgroundExecution(Callable callable) {
+    public BackgroundExecution(Callable<T> callable) {
         super();
         this.callable = callable;
     }
@@ -39,7 +42,7 @@ public class BackgroundExecution implements IBackgroundExecution {
                 });
 
                 try {
-                    callable.call();
+                    result = callable.call();
                 } catch (Throwable e) {
                     exception = e;
                 } finally {
@@ -84,14 +87,10 @@ public class BackgroundExecution implements IBackgroundExecution {
     }
 
     @Override
-    public synchronized boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws InterruptedException, ExecutionException {
+    public synchronized boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws ExecutionException {
         if (hasFailed()) {
             Throwable t = getFailureCause();
-            if(InterruptedException.class.isAssignableFrom(t.getClass())) {
-                throw ((InterruptedException) t);
-            } else {
-                throw new ExecutionException(t);
-            }
+            throw new ExecutionException(t);
         }
 
         if (!isStarted()) {
@@ -99,5 +98,10 @@ public class BackgroundExecution implements IBackgroundExecution {
         }
 
         return isSucessFull();
+    }
+
+    @Override
+    public T getResult() {
+        return result;
     }
 }

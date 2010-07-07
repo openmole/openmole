@@ -27,12 +27,10 @@ import org.openmole.core.replicacatalog.IReplica;
  */
 public class ReplicaCatalogGC implements IUpdatable {
 
-    long updateInterval;
     final ReplicaCatalog catalog;
 
-    public ReplicaCatalogGC(ReplicaCatalog catalog, long updateInterval) {
+    public ReplicaCatalogGC(ReplicaCatalog catalog) {
         this.catalog = catalog;
-        this.updateInterval = updateInterval;
     }
 
     @Override
@@ -51,8 +49,4 @@ public class ReplicaCatalogGC implements IUpdatable {
 
     }
 
-    @Override
-    public long getUpdateInterval() {
-        return updateInterval;
-    }
 }
