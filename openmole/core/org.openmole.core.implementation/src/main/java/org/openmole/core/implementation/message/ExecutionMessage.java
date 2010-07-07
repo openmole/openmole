@@ -16,11 +16,11 @@
  */
 package org.openmole.core.implementation.message;
 
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
+import scala.Tuple2;
 
 /**
  *
@@ -29,9 +29,9 @@ import org.openmole.core.model.message.IReplicatedFile;
 public class ExecutionMessage implements IExecutionMessage {
 
     Iterable<IReplicatedFile> plugins;
-    Duo<IURIFile, IHash> jobForRuntime;
+    Tuple2<IURIFile, IHash> jobForRuntime;
 
-    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Duo<IURIFile, IHash> jobForRuntime) {
+    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Tuple2<IURIFile, IHash> jobForRuntime) {
         this.plugins = plugins;
         this.jobForRuntime = jobForRuntime;
     }
@@ -42,7 +42,7 @@ public class ExecutionMessage implements IExecutionMessage {
     }
 
     @Override
-    public Duo<IURIFile, IHash> getJobForRuntimeURI() {
+    public Tuple2<IURIFile, IHash> getJobForRuntimeURI() {
         return jobForRuntime;
     }
 

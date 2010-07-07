@@ -25,13 +25,13 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.model.job.IMoleJobId;
+import scala.Tuple2;
 
 public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob> {
 
     Collection<File> outFiles = new LinkedList<File>();
-    List<Duo<IMoleJobId, IContext>> results = new LinkedList<Duo<IMoleJobId, IContext>>();
+    List<Tuple2<IMoleJobId, IContext>> results = new LinkedList<Tuple2<IMoleJobId, IContext>>();
 
     public ContextSaver() {
         super();
@@ -41,7 +41,7 @@ public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob>
         return outFiles;
     }
 
-    public List<Duo<IMoleJobId, IContext>> getResults() {
+    public List<Tuple2<IMoleJobId, IContext>> getResults() {
         return results;
     }
 
@@ -57,7 +57,7 @@ public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob>
             case FAILED:
                 IContext res = job.getContext();
                 res.chRoot();
-                results.add(new Duo<IMoleJobId, IContext>(job.getId(), res));
+                results.add(new Tuple2<IMoleJobId, IContext>(job.getId(), res));
         }
     }
 }

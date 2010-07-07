@@ -17,7 +17,6 @@
 
 package org.openmole.commons.tools.io;
 
-import org.openmole.commons.tools.structure.Duo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,6 +27,7 @@ import java.util.Stack;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import scala.Tuple2;
 
 /**
  *
@@ -67,23 +67,23 @@ public class TarArchiver implements IArchiver {
         TarArchiveOutputStream tos = new TarArchiveOutputStream(archive);
 
         try {
-            Stack<Duo<File, String>> toArchive = new Stack<Duo<File, String>>();
-            toArchive.push(new Duo<File, String>(baseDir, ""));
+            Stack<Tuple2<File, String>> toArchive = new Stack<Tuple2<File, String>>();
+            toArchive.push(new Tuple2<File, String>(baseDir, ""));
 
             while (!toArchive.isEmpty()) {
-                Duo<File, String> cur = toArchive.pop();
+                Tuple2<File, String> cur = toArchive.pop();
 
-                if (cur.getLeft().isDirectory()) {
-                    for (String name : cur.getLeft().list()) {
-                        toArchive.push(new Duo<File, String>(new File(cur.getLeft(), name), cur.getRight() + '/' + name));
+                if (cur._1().isDirectory()) {
+                    for (String name : cur._1().list()) {
+                        toArchive.push(new Tuple2<File, String>(new File(cur._1(), name), cur._2() + '/' + name));
                     }
                 } else {
-                    TarArchiveEntry e = new TarArchiveEntry(cur.getRight());
-                    e.setSize(cur.getLeft().length());
+                    TarArchiveEntry e = new TarArchiveEntry(cur._2());
+                    e.setSize(cur._1().length());
                     additionnalCommand.apply(e);
                     tos.putArchiveEntry(e);
                     try {
-                        FileUtil.copy(new FileInputStream(cur.getLeft()), tos);
+                        FileUtil.copy(new FileInputStream(cur._1()), tos);
                     } finally {
                         tos.closeArchiveEntry();
                     }

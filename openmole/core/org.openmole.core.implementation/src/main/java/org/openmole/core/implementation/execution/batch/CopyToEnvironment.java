@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
@@ -49,6 +48,7 @@ import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.replicacatalog.IReplica;
+import scala.Tuple2;
 
 /**
  *
@@ -83,10 +83,10 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
     Result initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
-        Duo<IBatchStorage, IAccessToken> duo = getEnvironment().getAStorage();
+        Tuple2<IBatchStorage, IAccessToken> storage = getEnvironment().getAStorage();
 
-        final IBatchStorage communicationStorage = duo.getLeft();
-        final IAccessToken token = duo.getRight();
+        final IBatchStorage communicationStorage = storage._1();
+        final IAccessToken token = storage._2();
 
         try {
             final IURIFile communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
@@ -194,7 +194,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
             pluginReplicas.add(replicatedPlugin);
         }
 
-        return new ExecutionMessage(pluginReplicas, new Duo<IURIFile, IHash>(jobForRuntimeFile, jobHash));
+        return new ExecutionMessage(pluginReplicas, new Tuple2<IURIFile, IHash>(jobForRuntimeFile, jobHash));
     }
 
     IJobForRuntime createJobForRuntime(IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {

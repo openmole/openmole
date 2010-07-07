@@ -17,9 +17,9 @@
 
 package org.openmole.core.model.message;
 
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
+import scala.Tuple2;
 
 /**
  *
@@ -27,5 +27,5 @@ import org.openmole.core.model.file.IURIFile;
  */
 public interface IExecutionMessage {
     Iterable<IReplicatedFile> getPlugins();
-    Duo<IURIFile, IHash> getJobForRuntimeURI();
+    Tuple2<IURIFile, IHash> getJobForRuntimeURI();
 }

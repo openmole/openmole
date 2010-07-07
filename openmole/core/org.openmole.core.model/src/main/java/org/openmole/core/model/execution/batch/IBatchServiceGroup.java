@@ -19,11 +19,11 @@ package org.openmole.core.model.execution.batch;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple2;
 
 
 public interface IBatchServiceGroup<T extends IBatchService> extends Iterable<T> {
-	public abstract Duo<T, IAccessToken> getAService() throws InternalProcessingError, UserBadDataError, InterruptedException;
+	public abstract Tuple2<T, IAccessToken> getAService() throws InternalProcessingError, UserBadDataError, InterruptedException;
 	public abstract void put(T e);
 	public abstract int size();
 }

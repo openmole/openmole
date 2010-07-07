@@ -32,9 +32,9 @@ import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.service.RNG;
 import org.openmole.core.batchservicecontrol.IUsageControl;
+import scala.Tuple2;
 
 public class BatchServiceGroup<T extends IBatchService> implements IBatchServiceGroup<T> {
 
@@ -71,11 +71,11 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
     }
 
     @Override
-    public Duo<T, IAccessToken> getAService() throws InterruptedException, InternalProcessingError, UserBadDataError {
+    public Tuple2<T, IAccessToken> getAService() throws InterruptedException, InternalProcessingError, UserBadDataError {
 
         getSelectingRessource().lock();
         try {
-            Duo<T, IAccessToken> ret = null;
+            Tuple2<T, IAccessToken> ret = null;
 
             while (ret == null) {
                 ArrayList<T> resourcesCopy; 
@@ -101,7 +101,7 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
 
                 //Among them select one not over loaded
                 Iterator<T> bestResourcesIt = resourcesCopy.iterator();
-                List<Duo<T, IAccessToken>> notLoaded = new ArrayList<Duo<T, IAccessToken>>();
+                List<Tuple2<T, IAccessToken>> notLoaded = new ArrayList<Tuple2<T, IAccessToken>>();
 
                 while (bestResourcesIt.hasNext()) {
                     
@@ -110,15 +110,15 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
                     IAccessToken token = Activator.getBatchRessourceControl().getController(cur.getDescription()).getUsageControl().getAccessTokenInterruptly();
 
                     if (token != null) {
-                        notLoaded.add(new Duo<T, IAccessToken>(cur, token));
+                        notLoaded.add(new Tuple2<T, IAccessToken>(cur, token));
                     }
                 }
                
                 if (notLoaded.size() > 0) {
                     ret = notLoaded.remove(RNG.getRng().nextInt(notLoaded.size()));
 
-                    for (Duo<T, IAccessToken> other : notLoaded) {                    
-                         Activator.getBatchRessourceControl().getController(other.getLeft().getDescription()).getUsageControl().releaseToken(other.getRight());     
+                    for (Tuple2<T, IAccessToken> other : notLoaded) {                    
+                         Activator.getBatchRessourceControl().getController(other._1().getDescription()).getUsageControl().releaseToken(other._2());     
                     }
                 } else {
                     waitForRessourceReleased();

@@ -8,7 +8,7 @@ package org.openmole.commons.aspect.eventdispatcher.internal;
 import java.util.List;
 import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedListener;
 import org.openmole.commons.tools.object.SuperClassesLister;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple2;
 
 
 /**
@@ -22,7 +22,7 @@ public class ObjectConstructedListnerMap<T extends IObjectConstructedListener> {
         listnerMap.registerListner(object, priority, listner);
     }
 
-    List<Duo<Integer,T>> getOrCreateListners(Class object) {
+    List<Tuple2<Integer,T>> getOrCreateListners(Class object) {
         return listnerMap.getOrCreateListners(object);
     }
 

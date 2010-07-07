@@ -17,7 +17,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
@@ -32,6 +31,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IRuntimeResult;
+import scala.Tuple2;
 
 /**
  *
@@ -73,12 +73,12 @@ public class GetResultFromEnvironment implements Callable<Void> {
 
             if (result.getStdOut() != null) {
 
-                IURIFile stdOut = result.getStdOut().getLeft();
+                IURIFile stdOut = result.getStdOut()._1();
 
                 try {
                     File stdOutFile = stdOut.getFileCache(token).getFile(false);
                     IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
-                    if (!stdOutHash.equals(result.getStdOut().getRight())) {
+                    if (!stdOutHash.equals(result.getStdOut()._2())) {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
                     }
 
@@ -96,11 +96,11 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             if (result.getStdErr() != null) {
-                IURIFile stdErr = result.getStdErr().getLeft();
+                IURIFile stdErr = result.getStdErr()._1();
                 try {
                     File stdErrFile = stdErr.getFileCache(token).getFile(false);
                     IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
-                    if (!stdErrHash.equals(result.getStdErr().getRight())) {
+                    if (!stdErrHash.equals(result.getStdErr()._2())) {
                         Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
                     }
                     synchronized(System.err) {
@@ -119,10 +119,10 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 throw new InternalProcessingError("TarResult uri result was null.");
             }
 
-            IURIFile tarResult = result.getTarResult().getLeft();
+            IURIFile tarResult = result.getTarResult()._1();
             File tarResultFile = tarResult.getFileCache(token).getFile(false);
             IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
-            if (!tarResulHash.equals(result.getTarResult().getRight())) {
+            if (!tarResulHash.equals(result.getTarResult()._2())) {
                 throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
             }
 
@@ -150,7 +150,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                             os.close();
                         }
 
-                        Duo<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
+                        Tuple2<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
                         if (fileInfo == null) {
                             throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
                         }
@@ -158,7 +158,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         File file;
 
 
-                        if (fileInfo.getRight()) {
+                        if (fileInfo._2()) {
                             file = Activator.getWorkspace().newTmpDir("tarResult");
                             
                             InputStream destIn = new FileInputStream(dest);
@@ -172,7 +172,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                             file = dest;
                         }
 
-                        fileCache.fillInLocalFileCache(fileInfo.getLeft(), file);
+                        fileCache.fillInLocalFileCache(fileInfo._1(), file);
                     }
                 } finally {
                     tis.close();

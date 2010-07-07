@@ -28,6 +28,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.model.observer.IMoleExecutionProfiler;
+import scala.Tuple2;
 
 /**
  *

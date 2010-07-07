@@ -31,7 +31,6 @@ import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.updater.IUpdatableFuture;
@@ -39,6 +38,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
 import org.openmole.core.model.job.IJob;
+import scala.Tuple2;
 
 public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatable {
 
@@ -160,18 +160,18 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         try {
             if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
 
-                Duo<JS, IAccessToken> js = getEnvironment().getAJobService();
+                Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
                 try {
                     copyToEnvironmentResult = copyToEnvironmentExec.getResult();
-                    IBatchJob bj = js.getLeft().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
-                    bj.submit(js.getRight());
+                    IBatchJob bj = js._1().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
+                    bj.submit(js._2());
                     setBatchJob(bj);
 
                     copyToEnvironmentExec = null;
                 } catch (InternalProcessingError e) {
                     Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
                 } finally {
-                    Activator.getBatchRessourceControl().getController(js.getLeft().getDescription()).getUsageControl().releaseToken(js.getRight());
+                    Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
                 }
             }
         } catch (ExecutionException ex) {

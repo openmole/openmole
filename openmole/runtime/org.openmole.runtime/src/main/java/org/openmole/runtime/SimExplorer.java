@@ -44,7 +44,6 @@ import org.openmole.core.model.message.IRuntimeResult;
 import org.openmole.core.model.job.IContext;
 import org.openmole.runtime.internal.Activator;
 import org.openmole.commons.tools.io.FileUtil;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 
@@ -57,6 +56,7 @@ import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import scala.Tuple2;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
@@ -139,10 +139,10 @@ public class SimExplorer implements IApplication {
 
             Activator.getPluginManager().loadDir(pluginDir);
 
-            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI().getLeft();
+            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
             IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
 
-            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI().getRight())) {
+            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI()._2())) {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
@@ -195,7 +195,7 @@ public class SimExplorer implements IApplication {
                     FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
                     toProcess.getTask().relocate(fileCache);
 
-                    Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.stateChanged);
+                    Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged);
                     allFinished.registerJob(toProcess);
 
                     LocalExecutionEnvironment.getInstance().submit(toProcess);
@@ -271,8 +271,8 @@ public class SimExplorer implements IApplication {
                 result.setTarResult(uploadedTar, Activator.getHashService().computeHash(tarResult));
                 tarResult.delete();
 
-                for (Duo<IMoleJobId, IContext> res : saver.getResults()) {
-                    result.putResult(res.getLeft(), res.getRight());
+                for (Tuple2<IMoleJobId, IContext> res : saver.getResults()) {
+                    result.putResult(res._1(), res._2());
                 }
 
             } finally {

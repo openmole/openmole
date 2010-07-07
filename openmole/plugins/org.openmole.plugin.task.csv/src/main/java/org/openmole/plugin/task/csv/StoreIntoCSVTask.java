@@ -33,7 +33,7 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple2;
 
 /**
  *
@@ -48,7 +48,7 @@ public class StoreIntoCSVTask extends Task {
     private String fileName;
     private char delimiter;
     private char quotechar;
-    private List<Duo<IPrototype<? extends Collection>, String>> columns = new LinkedList<Duo<IPrototype<? extends Collection>, String>>();
+    private List<Tuple2<IPrototype<? extends Collection>, String>> columns = new LinkedList<Tuple2<IPrototype<? extends Collection>, String>>();
 
     /**
      * Creates an instance of StoreIntoCSVTask with a default delimiter (',') and
@@ -117,7 +117,7 @@ public class StoreIntoCSVTask extends Task {
      * @param columnName, the name of the column header
      */
     public void addColumn(IPrototype<? extends Collection> prototype, String columnName) {
-        columns.add(new Duo<IPrototype<? extends Collection>, String>(prototype, columnName));
+        columns.add(new Tuple2<IPrototype<? extends Collection>, String>(prototype, columnName));
         addInput(prototype);
     }
 
@@ -128,20 +128,20 @@ public class StoreIntoCSVTask extends Task {
             List<Iterator<Object>> valueList = new ArrayList<Iterator<Object>>();
             int listSize = 0;
 
-            File file = new File(VariableExpansion.getInstance().expandData(context, fileName));
+            File file = new File(VariableExpansion.expandData(context, fileName));
             CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quotechar);
 
             try {
                 //header
-                Iterator<Duo<IPrototype<? extends Collection>, String>> columnIt = columns.iterator();
+                Iterator<Tuple2<IPrototype<? extends Collection>, String>> columnIt = columns.iterator();
 
                 String[] header = new String[columns.size()];
                 int ind = 0;
                 while (columnIt.hasNext()) {
-                    Duo<IPrototype<? extends Collection>, String> column = columnIt.next();
-                    header[ind] = column.getRight();
+                    Tuple2<IPrototype<? extends Collection>, String> column = columnIt.next();
+                    header[ind] = column._2();
 
-                    Collection li = context.getLocalValue(column.getLeft());
+                    Collection li = context.getLocalValue(column._1());
 
                     if (listSize < li.size()) {
                         listSize = li.size();

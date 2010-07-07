@@ -38,11 +38,11 @@ import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.implementation.execution.JobStatisticCategory;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 import org.openmole.core.model.execution.IJobStatisticCategory;
 import org.openmole.plugin.environment.glite.GliteEnvironment;
+import scala.Tuple2;
 
 public class OverSubmissionAgent implements IUpdatable {
 
@@ -69,7 +69,7 @@ public class OverSubmissionAgent implements IUpdatable {
             Map<IJobStatisticCategory, AtomicInteger> nbJobsByCategory = new HashMap<IJobStatisticCategory, AtomicInteger>();
 
             Long curTime = System.currentTimeMillis();
-            AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Duo<IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
+            AssociativeCache<Tuple2<IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Tuple2<IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
 
             for (final IJob job : registry.getAllJobs()) {
                 // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " " + registry.getNbExecutionJobsForJob(job));
@@ -92,7 +92,7 @@ public class OverSubmissionAgent implements IUpdatable {
 
                         Long jobTime = curTime - lastJob.getBatchJob().getTimeStemp(executionState);
 
-                        Duo<IJobStatisticCategory, SampleType> key = new Duo<IJobStatisticCategory, SampleType>(jobStatisticCategory, sampleType);
+                        Tuple2<IJobStatisticCategory, SampleType> key = new Tuple2<IJobStatisticCategory, SampleType>(jobStatisticCategory, sampleType);
                         try {
                             Long limitTime = timeCache.getCache(this, key, new ICachable<Long>() {
 

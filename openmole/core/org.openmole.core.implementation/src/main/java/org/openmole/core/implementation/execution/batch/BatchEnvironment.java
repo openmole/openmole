@@ -27,7 +27,6 @@ import org.openmole.commons.aspect.caching.Cachable;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
@@ -43,6 +42,7 @@ import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.job.IJob;
 import org.openmole.misc.workspace.InteractiveConfiguration;
+import scala.Tuple2;
 
 public abstract class BatchEnvironment<JS extends IBatchJobService> extends Environment<IBatchExecutionJob> implements IBatchEnvironment<JS> {
 
@@ -201,7 +201,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Override
-    public Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public Tuple2<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException {
         return getStorages().getAService();
     }
 
@@ -234,7 +234,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Override
-    public Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public Tuple2<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException {
         return getJobServices().getAService();
     }
 

@@ -35,10 +35,5 @@ public class ExploredPlan implements IExploredPlan {
     public Iterator<IFactorValues> iterator() {
         return values.iterator();
     }
-
-    @Override
-    public int size() {
-        return values.size();
-    }
     
 }

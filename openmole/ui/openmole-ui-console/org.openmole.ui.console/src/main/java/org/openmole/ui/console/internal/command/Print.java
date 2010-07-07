@@ -22,12 +22,12 @@ import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.EnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.IViewer;
 import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer;
+import scala.Tuple2;
 
 /**
  *
@@ -51,10 +51,10 @@ public class Print extends UICommand {
             return null;
         }
 
-        Duo<Object, String[]> args = getArgs(list);
+        Tuple2<Object, String[]> args = getArgs(list);
 
-        for (IViewer viewer : viewers.getClosestRegistred(args.getLeft().getClass())) {
-            viewer.view(args.getLeft(), args.getRight());
+        for (IViewer viewer : viewers.getClosestRegistred(args._1().getClass())) {
+            viewer.view(args._1(), args._2());
         }
 
         return null;
