@@ -51,12 +51,12 @@ public class CSVFileProfiler extends Profiler {
 
 
     @Override
-    protected void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
+    public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
         writer.writeNext(toColumns(moleJob));
     }
 
     @Override
-    protected void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
+    public void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
         try {
             writer.close();
         } catch (IOException ex) {
@@ -67,7 +67,7 @@ public class CSVFileProfiler extends Profiler {
     }
 
     @Override
-    protected void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
+    public void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
         try {
             writer = new CSVWriter(new BufferedWriter(new FileWriter(file)));
         } catch (IOException ex) {
