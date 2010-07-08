@@ -27,14 +27,13 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.structure.Priority;
-import org.openmole.core.model.observer.IMoleExecutionProfiler;
-import scala.Tuple2;
+import org.openmole.core.model.observer.IProfiler;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public abstract class MoleExecutionProfiler implements IMoleExecutionProfiler {
+public abstract class Profiler implements IProfiler {
 
     class MoleExecutionProfilerOneJobFinishedAdapter implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution>  {
 
@@ -66,7 +65,7 @@ public abstract class MoleExecutionProfiler implements IMoleExecutionProfiler {
 
     final IMoleExecution moleExecution;
 
-    public MoleExecutionProfiler(IMoleExecution moleExecution) {
+    public Profiler(IMoleExecution moleExecution) {
         this.moleExecution = moleExecution;
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerExecutionStartingAdapter(), IMoleExecution.starting);
         Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerOneJobFinishedAdapter(), IMoleExecution.oneJobFinished);

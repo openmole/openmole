@@ -25,13 +25,13 @@ import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.observer.IInteraction;
+import org.openmole.core.model.observer.ISaver;
 
 /**
  *
  * @author reuillon
  */
-public abstract class Interaction implements IInteraction {
+public abstract class Saver implements ISaver {
 
    class InteractionAdapterForMoleJob implements IObjectChangedSynchronousListener<IMoleJob> {
 
@@ -56,7 +56,7 @@ public abstract class Interaction implements IInteraction {
        
    }
    
-   public Interaction(IGenericTaskCapsule taskCapsule) {
+   public Saver(IGenericTaskCapsule taskCapsule) {
        Activator.getEventDispatcher().registerListener(taskCapsule, Priority.NORMAL.getValue(), new InteractionAdapterForCapsule());
    }
    
