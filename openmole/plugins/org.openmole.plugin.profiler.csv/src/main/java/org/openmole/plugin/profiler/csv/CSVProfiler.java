@@ -46,7 +46,7 @@ public class CSVProfiler extends Profiler {
     }
 
     @Override
-    protected void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
+    public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
         writer.writeNext(toColumns(moleJob));
         try {
             writer.flush();
@@ -56,7 +56,7 @@ public class CSVProfiler extends Profiler {
     }
 
     @Override
-    protected void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
+    public void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
         try {
             writer.flush();
         } catch (IOException ex) {
@@ -65,7 +65,7 @@ public class CSVProfiler extends Profiler {
     }
 
     @Override
-    protected void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
+    public void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
         
     }
 }

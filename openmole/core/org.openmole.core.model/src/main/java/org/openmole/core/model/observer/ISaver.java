@@ -17,12 +17,10 @@
 
 package org.openmole.core.model.observer;
 
-import org.openmole.core.model.job.IContext;
 
 /**
  *
  * @author reuillon
  */
 public interface ISaver {
-    public void interact(IContext context);
 }

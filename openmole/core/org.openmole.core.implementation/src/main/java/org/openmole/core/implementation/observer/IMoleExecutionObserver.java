@@ -14,22 +14,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.core.implementation.observer;
 
-import java.io.File;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.observer.ISaver;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.job.IMoleJob;
 
 /**
  *
  * @author reuillon
  */
-public abstract class Saver implements ISaver, IMoleExecutionObserver {
-
-    public Saver(IMoleExecution moleExection, IGenericTaskCapsule taskCapsule, File file) {
-        new MoleExecutionObserverAdapter(moleExection, this);
-    }
-
-
+public interface IMoleExecutionObserver {
+  void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError;
+  void moleExecutionStarting() throws InternalProcessingError, UserBadDataError;
+  void moleExecutionFinished() throws InternalProcessingError, UserBadDataError;
 }

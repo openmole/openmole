@@ -18,62 +18,17 @@ package org.openmole.core.implementation.observer;
  */
 
 
-
-import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
-import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.model.observer.IProfiler;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public abstract class Profiler implements IProfiler {
-
-    class MoleExecutionProfilerOneJobFinishedAdapter implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution>  {
-
-        @Override
-        public void objectChanged(IMoleExecution obj, Object[] args) throws InternalProcessingError, UserBadDataError {
-            moleJobFinished((IMoleJob) args[0]);
-        }
-
-    }
-
-    class MoleExecutionProfilerExecutionStartingAdapter implements IObjectChangedSynchronousListener<IMoleExecution>  {
-
-        @Override
-        public void objectChanged(IMoleExecution obj) throws InternalProcessingError, UserBadDataError {
-            moleExecutionStarting();
-        }
-
-    }
-
-
-    class MoleExecutionProfilerExecutionFinishedAdapter implements IObjectChangedSynchronousListener<IMoleExecution>  {
-
-        @Override
-        public void objectChanged(IMoleExecution obj) throws InternalProcessingError, UserBadDataError {
-            moleExecutionFinished();
-        }
-     
-    }
-
-    final IMoleExecution moleExecution;
+public abstract class Profiler implements IProfiler, IMoleExecutionObserver {
 
     public Profiler(IMoleExecution moleExecution) {
-        this.moleExecution = moleExecution;
-        Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerExecutionStartingAdapter(), IMoleExecution.starting);
-        Activator.getEventDispatcher().registerListener(moleExecution, Priority.HIGH.getValue(), new MoleExecutionProfilerOneJobFinishedAdapter(), IMoleExecution.oneJobFinished);
-        Activator.getEventDispatcher().registerListener(moleExecution, Priority.LOW.getValue(), new MoleExecutionProfilerExecutionFinishedAdapter(), IMoleExecution.finished);
-    }
-
-    protected abstract void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError;
-    protected abstract void moleExecutionStarting() throws InternalProcessingError, UserBadDataError;
-    protected abstract void moleExecutionFinished() throws InternalProcessingError, UserBadDataError;
-
+        new MoleExecutionObserverAdapter(moleExecution, this);
+     }
+    
 }
