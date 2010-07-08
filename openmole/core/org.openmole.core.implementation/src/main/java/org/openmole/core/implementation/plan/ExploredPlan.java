@@ -35,5 +35,29 @@ public class ExploredPlan implements IExploredPlan {
     public Iterator<IFactorValues> iterator() {
         return values.iterator();
     }
+
+    public String toCSV() {
+        StringBuffer sb = new StringBuffer();
+        StringBuffer sbn = new StringBuffer();
+        int num = 0;
+        while (this.iterator().hasNext()) {
+            IFactorValues ifv = this.iterator().next();
+            Iterator<String> it = ifv.getNames().iterator();
+            while (it.hasNext()) {
+                if (num == 0) { // first line for factor names
+                    sbn.append(it.next()).append(",");
+                    sbn.deleteCharAt(sb.length() - 1).append("\n=");
+                }
+                sb.append(it.next()).append(",");
+                sb.deleteCharAt(sb.length() - 1).append("\n=");
+
+            }
+
+        }
+        sbn.append(sb.toString());
+
+        return sbn.toString();
+
+    }
     
 }
