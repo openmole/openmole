@@ -22,4 +22,5 @@ import org.openmole.core.model.execution.IExecutionJob;
 public interface IBatchExecutionJob<ENV extends IBatchEnvironment<?>> extends IExecutionJob<ENV> {
         IBatchJob getBatchJob();
 	void kill();
+        void retry();
 }

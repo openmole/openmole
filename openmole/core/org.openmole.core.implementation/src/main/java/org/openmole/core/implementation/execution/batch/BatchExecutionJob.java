@@ -153,29 +153,35 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private void trySubmit() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (copyToEnvironmentExec == null) {
-            copyToEnvironmentExec = Activator.getBackgroundExecutor().createBackgroundExecution(new CopyToEnvironment(getEnvironment(), getJob()));
+        if (copyToEnvironmentResult == null) {
+            if (copyToEnvironmentExec == null) {
+                copyToEnvironmentExec = Activator.getBackgroundExecutor().createBackgroundExecution(new CopyToEnvironment(getEnvironment(), getJob()));
+            }
+
+            try {
+                if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
+                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
+                    copyToEnvironmentExec = null;
+                }
+            } catch (ExecutionException ex) {
+                throw new InternalProcessingError(ex);
+            }
         }
 
-        try {
-            if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
+        if (copyToEnvironmentResult != null) {
+            Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
+            try {
 
-                Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
-                try {
-                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
-                    IBatchJob bj = js._1().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
-                    bj.submit(js._2());
-                    setBatchJob(bj);
+                IBatchJob bj = js._1().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
+                bj.submit(js._2());
+                setBatchJob(bj);
 
-                    copyToEnvironmentExec = null;
-                } catch (InternalProcessingError e) {
-                    Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
-                } finally {
-                    Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
-                }
+
+            } catch (InternalProcessingError e) {
+                Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
+            } finally {
+                Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
             }
-        } catch (ExecutionException ex) {
-            throw new InternalProcessingError(ex);
         }
 
     }
@@ -208,5 +214,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 stopUpdate();
             }
         }
+    }
+
+    @Override
+    public void retry() {
+        getBatchJob().setState(ExecutionState.READY);
     }
 }

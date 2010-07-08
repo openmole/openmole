@@ -27,6 +27,6 @@ public enum ExecutionState {
 	KILLED;
 	
 	public boolean isFinal() {
-		return this == DONE || this == FAILED || this == KILLED;
+		return this == DONE || this == KILLED;
 	}
 }
