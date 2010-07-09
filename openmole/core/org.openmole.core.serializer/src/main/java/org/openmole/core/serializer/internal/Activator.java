@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.serializer.internal;
-
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -24,17 +22,18 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.serializer.ISerializer;
+import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {
 
     static BundleContext context;
     private static IPluginManager pluginManager;
+    private static IHashService hashService;
     ServiceRegistration msgSerial;
     ServiceRegistration descSerial;
     static ISerializer runtimeMessageSerializer;
     private static IWorkspace workspace;
- 
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -84,12 +83,20 @@ public class Activator implements BundleActivator {
         }
     }
 
-
     public synchronized static IPluginManager getPluginManager() {
         if (pluginManager == null) {
             ServiceReference ref = getContext().getServiceReference(IPluginManager.class.getName());
             pluginManager = (IPluginManager) getContext().getService(ref);
         }
         return pluginManager;
+    }
+
+    public synchronized static IHashService getHashService() {
+        if (hashService == null) {
+            ServiceReference ref = getContext().getServiceReference(IHashService.class.getName());
+            hashService = (IHashService) getContext().getService(ref);
+        }
+
+        return hashService;
     }
 }

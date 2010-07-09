@@ -26,6 +26,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 
 public interface ISerializer {
 
+    Iterable<Class> serializeAsHashAndGetPluginClass(Object object, File dir) throws IOException, InternalProcessingError;
     Iterable<Class> serializeAndGetPluginClass(Object object, File file) throws IOException, InternalProcessingError;
     Iterable<Class> serializeAndGetPluginClass(Object object, OutputStream file) throws InternalProcessingError;
 
@@ -34,5 +35,5 @@ public interface ISerializer {
     
     void serialize(Object description, OutputStream file);
     void serialize(Object description, File file) throws IOException;
-    
+    void serializeAsHash(Object description, File file) throws IOException, InternalProcessingError;
 }

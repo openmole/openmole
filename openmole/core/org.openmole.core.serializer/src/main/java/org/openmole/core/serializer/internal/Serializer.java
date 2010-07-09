@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.openmole.commons.exception.InternalProcessingError;
-
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.serializer.ISerializer;
 
 
@@ -51,7 +51,15 @@ public class Serializer implements ISerializer {
          return (T) xstream.fromXML(is);
     }
 
- 
+    @Override
+    public Iterable<Class> serializeAsHashAndGetPluginClass(Object object, File dir) throws IOException, InternalProcessingError {
+        File serialized = Activator.getWorkspace().newFile();
+        Iterable<Class> ret = serializeAndGetPluginClass(object, serialized);
+        File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
+        serialized.renameTo(hashName);
+        return ret;
+    }
+     
     @Override
     public Iterable<Class> serializeAndGetPluginClass(Object object, File file) throws IOException, InternalProcessingError {
         OutputStream zos = new FileOutputStream(file);
@@ -93,5 +101,12 @@ public class Serializer implements ISerializer {
             os.close();
         }
     }
-
+    
+    @Override
+    public void serializeAsHash(Object description, File dir) throws IOException, InternalProcessingError {
+        File serialized = Activator.getWorkspace().newFile();
+        serialize(description, serialized);
+        File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
+        serialized.renameTo(hashName);
+    }
 }
