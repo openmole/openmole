@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.runtimemessageserializer.internal;
+package org.openmole.core.serializer.internal;
 
 
 import org.osgi.framework.BundleActivator;
@@ -23,8 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.runtimemessageserializer.IBatchEnvironmentDescriptionSerializer;
-import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.serializer.ISerializer;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {
@@ -33,9 +32,7 @@ public class Activator implements BundleActivator {
     private static IPluginManager pluginManager;
     ServiceRegistration msgSerial;
     ServiceRegistration descSerial;
-    static IRuntimeMessageSerializer runtimeMessageSerializer;
-    //static Lock protectUserData;
-    //static Bundle userData;
+    static ISerializer runtimeMessageSerializer;
     private static IWorkspace workspace;
  
 
@@ -43,9 +40,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         this.context = context;
 
-        msgSerial = context.registerService(IRuntimeMessageSerializer.class.getName(), getRuntimeMessageSerializer(), null);
-        descSerial = context.registerService(IBatchEnvironmentDescriptionSerializer.class.getName(), new BatchEnvironmentDescriptionSerializer(), null);
- 
+        msgSerial = context.registerService(ISerializer.class.getName(), getRuntimeMessageSerializer(), null);
     }
 
     @Override
@@ -60,14 +55,14 @@ public class Activator implements BundleActivator {
         return context;
     }
 
-    public static IRuntimeMessageSerializer getRuntimeMessageSerializer() {
+    public static ISerializer getRuntimeMessageSerializer() {
         if (runtimeMessageSerializer != null) {
             return runtimeMessageSerializer;
         }
 
         synchronized (Activator.class) {
             if (runtimeMessageSerializer == null) {
-                runtimeMessageSerializer = new RuntimeMessageSerializer();
+                runtimeMessageSerializer = new Serializer();
             }
             return runtimeMessageSerializer;
         }

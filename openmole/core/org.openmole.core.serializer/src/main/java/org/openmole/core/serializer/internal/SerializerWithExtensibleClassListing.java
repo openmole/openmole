@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.runtimemessageserializer.internal;
+package org.openmole.core.serializer.internal;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
-import org.openmole.core.runtimemessageserializer.internal.converters.PluginConverter;
+import org.openmole.core.serializer.internal.converters.PluginConverter;
 import org.openmole.core.model.message.IJobForRuntime;
 
 /**
@@ -31,25 +31,16 @@ import org.openmole.core.model.message.IJobForRuntime;
  */
 public class SerializerWithExtensibleClassListing implements ISerializerWithExtensibleClassListing{
 
-    XStream xstream = new XStream();
-    
-    Set<Class> extensibleClasses = new HashSet<Class>();
-   // Set<Class> seen = new HashSet<Class>();
+    final XStream xstream = new XStream();    
+    final Set<Class> extensibleClasses = new HashSet<Class>();
 
     public SerializerWithExtensibleClassListing() {
-        xstream = new XStream();
         xstream.registerConverter(new PluginConverter(this, new ReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider())));
     }
 
     @Override
     public void classUsed(Class c) {
-      //  if(seen.contains(c)) return;
-      //  else seen.add(c);
-
-        //if(Activator.getPluginManager().isClassProvidedByAPlugin(c)) {
-            //Logger.getLogger(SerializerWithExtensibleClassListing.class.getName()).info("Class from pluggin: " + c.getName());
-            extensibleClasses.add(c);
-        //}
+        extensibleClasses.add(c);
     }
 
     @Override
@@ -58,14 +49,13 @@ public class SerializerWithExtensibleClassListing implements ISerializerWithExte
     }
 
     @Override
-    public void toXMLAndListPlugableClasses(IJobForRuntime jobForRuntime, OutputStream outputStream) {
-        xstream.toXML(jobForRuntime, outputStream);
+    public void toXMLAndListPlugableClasses(Object obj, OutputStream outputStream) {
+        xstream.toXML(obj, outputStream);
     }
 
     @Override
     public void clean() {
-        extensibleClasses = new HashSet<Class>();
-     //   seen = new HashSet<Class>();
+        extensibleClasses.clear();
     }
 
 }

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.runtimemessageserializer.internal;
+package org.openmole.core.serializer.internal;
 
 import java.util.NoSuchElementException;
 import org.apache.commons.pool.BasePoolableObjectFactory;

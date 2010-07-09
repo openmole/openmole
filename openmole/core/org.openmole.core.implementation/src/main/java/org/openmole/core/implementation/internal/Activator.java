@@ -28,8 +28,7 @@ import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
-import org.openmole.core.runtimemessageserializer.IBatchEnvironmentDescriptionSerializer;
-import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.serializer.ISerializer;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
@@ -40,7 +39,7 @@ public class Activator implements BundleActivator {
     private static transient IUpdater updater;
     private static transient IReplicaCatalog replicaCatalog;
     private static IWorkspace workspace;
-    private static IRuntimeMessageSerializer messageSerializer;
+    private static ISerializer messageSerializer;
     private static IExecutorService executorService;
     private static IJSagaSessionService jSagaSessionService;
     private static IBatchServiceControl batchRessourceControl;
@@ -50,7 +49,6 @@ public class Activator implements BundleActivator {
     private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
     private static IFileService fileService;
     private static IHashService hashService;
-    private static IBatchEnvironmentDescriptionSerializer batchEnvironmentDescriptionSerializer;
 
     @Override
     public synchronized void start(BundleContext context) throws Exception {
@@ -124,10 +122,10 @@ public class Activator implements BundleActivator {
         return executorService;
     }
 
-    public synchronized static IRuntimeMessageSerializer getMessageSerialiser() {
+    public synchronized static ISerializer getSerializer() {
         if (messageSerializer == null) {
-            ServiceReference ref = getContext().getServiceReference(IRuntimeMessageSerializer.class.getName());
-            messageSerializer = (IRuntimeMessageSerializer) getContext().getService(ref);
+            ServiceReference ref = getContext().getServiceReference(ISerializer.class.getName());
+            messageSerializer = (ISerializer) getContext().getService(ref);
         }
         return messageSerializer;
     }
@@ -227,11 +225,4 @@ public class Activator implements BundleActivator {
         return hashService;
     }
 
-    public synchronized static IBatchEnvironmentDescriptionSerializer getEnvironmentDescriptionSerializer() {
-        if (batchEnvironmentDescriptionSerializer == null) {
-            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentDescriptionSerializer.class.getName());
-            batchEnvironmentDescriptionSerializer = (IBatchEnvironmentDescriptionSerializer) getContext().getService(ref);
-        }
-        return batchEnvironmentDescriptionSerializer;
-    }
 }

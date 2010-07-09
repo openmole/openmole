@@ -65,7 +65,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
         try {
             File resultFile = outputFile.getFileCache(token).getFile(false);
 
-            IRuntimeResult result = Activator.getMessageSerialiser().loadJarRuntimeResult(resultFile);
+            IRuntimeResult result = Activator.getSerializer().deserialize(resultFile);
 
             if (result.getException() != null) {
                 Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING,"Fatal exception thrown durring the execution of the job execution on the excution node", result.getException());

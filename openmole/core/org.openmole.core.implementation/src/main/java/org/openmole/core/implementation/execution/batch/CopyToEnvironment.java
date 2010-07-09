@@ -102,7 +102,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
             /* ---- upload the execution message ----*/
 
             File executionMessageFile = Activator.getWorkspace().newTmpFile("job", ".xml");
-            Activator.getMessageSerialiser().saveExecutionMessage(executionMessage, executionMessageFile);
+            Activator.getSerializer().serialize(executionMessage, executionMessageFile);
 
             IURIFile executionMessageURIFile = new URIFile(executionMessageFile);
             URIFile.copy(executionMessageURIFile, inputFile, token);
@@ -170,7 +170,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         File jobFile = Activator.getWorkspace().newTmpFile("job", ".xml");
-        Iterable<Class> extendedClases = Activator.getMessageSerialiser().saveJobForRuntime(jobForRuntime, jobFile);
+        Iterable<Class> extendedClases = Activator.getSerializer().serializeAndGetPluginClass(jobForRuntime, jobFile);
 
         IURIFile jobURIFile = new URIFile(jobFile);
         IURIFile jobForRuntimeFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".xml"));

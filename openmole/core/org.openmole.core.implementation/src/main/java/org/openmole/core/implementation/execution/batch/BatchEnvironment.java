@@ -111,7 +111,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     public File getDescriptionFile() throws InternalProcessingError, InterruptedException {
         try {
             File environmentDescription = Activator.getWorkspace().newFile("envrionmentDescription", ".xml");
-            Activator.getEnvironmentDescriptionSerializer().serialize(getDescription(), environmentDescription);
+            Activator.getSerializer().serialize(getDescription(), environmentDescription);
             return environmentDescription;
         } catch (IOException e) {
             throw new InternalProcessingError(e);

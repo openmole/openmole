@@ -17,7 +17,10 @@
 package org.openmole.core.implementation.observer;
 
 import java.io.File;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.observer.ISaver;
 
@@ -25,10 +28,28 @@ import org.openmole.core.model.observer.ISaver;
  *
  * @author reuillon
  */
-public abstract class Saver implements ISaver, IMoleExecutionObserver {
+public class Saver implements ISaver, IMoleExecutionObserver {
 
+    final File file;
+    
     public Saver(IMoleExecution moleExection, IGenericTaskCapsule taskCapsule, File file) {
         new MoleExecutionObserverAdapter(moleExection, this);
+        this.file = file;
+    }
+
+    @Override
+    public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 

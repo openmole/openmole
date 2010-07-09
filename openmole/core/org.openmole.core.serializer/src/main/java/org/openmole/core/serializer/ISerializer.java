@@ -15,23 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.runtimemessageserializer;
+package org.openmole.core.serializer;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.message.IExecutionMessage;
-import org.openmole.core.model.message.IJobForRuntime;
-import org.openmole.core.model.message.IRuntimeResult;
 
-public interface IRuntimeMessageSerializer {
 
-    IJobForRuntime loadJobForRuntime(File file) throws IOException;
-    Iterable<Class> saveJobForRuntime(IJobForRuntime job, File file) throws InternalProcessingError, IOException;
-    void saveExecutionMessage(IExecutionMessage job, File file) throws IOException;
-    IExecutionMessage loadExecutionMessage(File file) throws IOException;
+public interface ISerializer {
 
-    IRuntimeResult loadJarRuntimeResult(File file) throws IOException;
-    void saveRuntimeResult(IRuntimeResult job, File file) throws IOException;
+    Iterable<Class> serializeAndGetPluginClass(Object object, File file) throws IOException, InternalProcessingError;
+    Iterable<Class> serializeAndGetPluginClass(Object object, OutputStream file) throws InternalProcessingError;
+
+    <T> T deserialize(File file) throws IOException;
+    <T> T deserialize(InputStream file);
+    
+    void serialize(Object description, OutputStream file);
+    void serialize(Object description, File file) throws IOException;
+    
 }

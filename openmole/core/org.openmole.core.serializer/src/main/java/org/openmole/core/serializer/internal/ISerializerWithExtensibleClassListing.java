@@ -14,19 +14,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.serializer.internal;
 
-
-package org.openmole.core.runtimemessageserializer;
-
-import java.io.File;
 import java.io.OutputStream;
-
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.message.IJobForRuntime;
 
 
-public interface IBatchEnvironmentDescriptionSerializer {
-	IBatchEnvironmentDescription deserialize(File file) throws InternalProcessingError;
-	void serialize(IBatchEnvironmentDescription description, OutputStream file);
-	void serialize(IBatchEnvironmentDescription description, File file) throws InternalProcessingError;
+/**
+ *
+ * @author reuillon
+ */
+public interface ISerializerWithExtensibleClassListing {
+    void classUsed(Class c);
+    Iterable<Class> getExtensibleClasses();
+    void toXMLAndListPlugableClasses(Object jobForRuntime, OutputStream outputStream);
+    void clean();
 }

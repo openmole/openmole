@@ -94,7 +94,7 @@ public class SimExplorer implements IApplication {
         /* get env and init */
         IURIFile envFile = new GZipedURIFile(new URIFile(new File(environmentDescription)));
         IFileCache envFileCache = envFile.getFileCache();
-        IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(envFileCache.getFile(false));
+        IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFileCache.getFile(false));
         real.createBatchEnvironmentAuthentication().initializeAccess();
       
         PrintStream oldOut = System.out;
@@ -121,7 +121,7 @@ public class SimExplorer implements IApplication {
 
             IURIFile executionMessageFile = new GZipedURIFile(new URIFile(executionMessageURI));
             IFileCache executionMesageFileCache = executionMessageFile.getFileCache();
-            IExecutionMessage executionMessage = Activator.getMessageSerialiser().loadExecutionMessage(executionMesageFileCache.getFile(false));
+            IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache.getFile(false));
 
             File pluginDir = Activator.getWorkspace().newTmpDir();
 
@@ -146,7 +146,7 @@ public class SimExplorer implements IApplication {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
-            IJobForRuntime jobForRuntime = Activator.getMessageSerialiser().loadJobForRuntime(jobForRuntimeFileCache.getFile(false));
+            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserialize(jobForRuntimeFileCache.getFile(false));
 
             try {
                 /* --- Download the files for the local file cache ---*/
@@ -300,7 +300,7 @@ public class SimExplorer implements IApplication {
 
         if (args.length > 3) {
             final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
-            Activator.getMessageSerialiser().saveRuntimeResult(result, outputLocal);
+            Activator.getSerialiser().serialize(result, outputLocal);
             try {
                 final IURIFile output = new GZipedURIFile(new URIFile(args[3]));
 
@@ -325,7 +325,7 @@ public class SimExplorer implements IApplication {
     }
 
     private String usage() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append("SimExplorer environment_description execution_plugin_dir URL_of_execution_message [URL_of_output_message] [workspace_location]");
         return buf.toString();
     }
