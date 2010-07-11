@@ -19,8 +19,6 @@ package org.openmole.core.model.message;
 import java.io.File;
 
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.tools.io.IHash;
 import scala.Tuple2;
 
@@ -37,13 +35,7 @@ public interface IRuntimeResult extends IRuntimeMessage {
     void setStdOut(IURIFile stdOut, IHash hash);
 
     Tuple2<IURIFile, IHash> getStdOut();
-
-    public void putResult(IMoleJobId jobId, IContext context);
-
-    public boolean containsResultForJob(IMoleJobId jobId);
-
-    public IContext getContextForJob(IMoleJobId jobId);
-
+    
     Tuple2<IURIFile, IHash> getTarResult();
 
     void setTarResult(IURIFile tarResult, IHash hash);
@@ -51,4 +43,8 @@ public interface IRuntimeResult extends IRuntimeMessage {
     void addFileName(String hash, File filePath, boolean isDirectory);
 
     Tuple2<File, Boolean> getFileInfoForEntry(String hash);
+    
+    IURIFile getContextResultURI();
+    
+    void setContextResultURI(IURIFile file);
 }

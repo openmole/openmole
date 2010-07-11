@@ -27,5 +27,7 @@ import scala.Tuple2;
  */
 public interface IExecutionMessage {
     Iterable<IReplicatedFile> getPlugins();
+    Iterable<IReplicatedFile> getFiles();
     Tuple2<IURIFile, IHash> getJobForRuntimeURI();
+    IURIFile getCommunicationDir();
 }

@@ -23,6 +23,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -35,13 +37,11 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.message.RuntimeResult;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.core.model.job.IContext;
 import org.openmole.runtime.internal.Activator;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
@@ -49,14 +49,15 @@ import org.openmole.commons.tools.io.TarArchiver;
 
 import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
-import scala.Tuple2;
+import org.openmole.core.model.message.IContextResults;
+import org.openmole.core.serializer.ISerializationResult;
+import scala.collection.Iterator;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
@@ -117,8 +118,8 @@ public class SimExplorer implements IApplication {
 
             /*--- get execution message and job for runtime---*/
 
-            LocalFileCache fileCache = new LocalFileCache();
-
+           // LocalFileCache fileCache = new LocalFileCache();
+            Map<IHash, File> usedFiles = new TreeMap<IHash, File>();
             IURIFile executionMessageFile = new GZipedURIFile(new URIFile(executionMessageURI));
             IFileCache executionMesageFileCache = executionMessageFile.getFileCache();
             IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache.getFile(false));
@@ -134,29 +135,25 @@ public class SimExplorer implements IApplication {
                 if (!Activator.getHashService().computeHash(inPluginDirLocalFile).equals(plugin.getHash())) {
                     throw new InternalProcessingError("Hash of a plugin does't match.");
                 }
-                fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
+                
+                usedFiles.put(plugin.getHash(), inPluginDirLocalFile);
+         //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
             Activator.getPluginManager().loadDir(pluginDir);
 
-            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
-            IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
 
-            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI()._2())) {
-                throw new InternalProcessingError("Hash of the execution job does't match.");
-            }
-
-            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserialize(jobForRuntimeFileCache.getFile(false));
-
-            try {
-                /* --- Download the files for the local file cache ---*/
+                            /* --- Download the files for the local file cache ---*/
                 TarArchiver archiver = new TarArchiver();
 
 
-                for (IReplicatedFile repliURI : jobForRuntime.getConsumedFiles()) {
+                
+                
+                for (IReplicatedFile repliURI : executionMessage.getFiles()) {
 
                     //To avoid getting twice the same plugin with different path
-                    if (!fileCache.containsCacheFor(repliURI.getSrc())) {
+                   // if (!fileCache.containsCacheFor(repliURI.getSrc())) {
+                    
                         IFileCache replicaFileCache = repliURI.getReplica().getFileCache();
 
                         File cache = replicaFileCache.getFile(false);
@@ -180,9 +177,26 @@ public class SimExplorer implements IApplication {
                             local = cache;
                         }
 
-                        fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
-                    }
+                        if(!usedFiles.containsKey(repliURI.getHash())) {
+                            usedFiles.put(repliURI.getHash(), local);
+                        }
+                        //fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
+                    
                 }
+            
+            
+            
+            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
+            IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
+
+            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI()._2())) {
+                throw new InternalProcessingError("Hash of the execution job does't match.");
+            }
+
+            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserialize(jobForRuntimeFileCache.getFile(false));
+
+            try {
+
 
 
                 /* --- Submit all jobs to the local environment --*/
@@ -192,8 +206,8 @@ public class SimExplorer implements IApplication {
 
                 
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
-                    FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
-                    toProcess.getTask().relocate(fileCache);
+                   // FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
+                   // toProcess.getTask().relocate(fileCache);
 
                     Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged);
                     allFinished.registerJob(toProcess);
@@ -203,6 +217,24 @@ public class SimExplorer implements IApplication {
 
                 allFinished.waitAllFinished();
 
+                IContextResults contextResults = new ContextResults(saver.getResults());
+                final File contextResultFile = Activator.getWorkspace().newTmpFile();
+                
+                final ISerializationResult serializationResult = Activator.getSerialiser().serializeAndGetPluginClassAndFiles(contextResults, contextResultFile);
+         
+                final IURIFile uploadedcontextResults = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+
+                retry(new Callable<Void>(){
+                    @Override
+                    public Void call() throws Exception {
+                        URIFile.copy(contextResultFile,uploadedcontextResults);
+                        return null;
+                    }
+                }, NbRetry); 
+                
+                result.setContextResultURI(uploadedcontextResults);
+                contextResultFile.delete();
+                
                 /*-- Tar the result files --*/
 
                 final File tarResult = Activator.getWorkspace().newTmpFile("result", ".tar");
@@ -211,8 +243,7 @@ public class SimExplorer implements IApplication {
                 tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
                 try {
-                    for (File file : saver.getOutFiles()) {
-
+                    for (File file: serializationResult.getFiles()) {
                         StringInputStream is = new StringInputStream(file.getCanonicalPath());
 
                         IHash hash;
@@ -254,7 +285,8 @@ public class SimExplorer implements IApplication {
                     tos.close();
                 }
 
-                final IURIFile uploadedTar = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+                
+                final IURIFile uploadedTar = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
 
 
                 /*-- Try 3 times to write the result --*/
@@ -262,18 +294,13 @@ public class SimExplorer implements IApplication {
                 retry(new Callable<Void>(){
                     @Override
                     public Void call() throws Exception {
-                        new URIFile(tarResult).copy(uploadedTar);
+                        URIFile.copy(tarResult,uploadedTar);
                         return null;
                     }
                 }, NbRetry);    
                    
-
                 result.setTarResult(uploadedTar, Activator.getHashService().computeHash(tarResult));
                 tarResult.delete();
-
-                for (Tuple2<IMoleJobId, IContext> res : saver.getResults()) {
-                    result.putResult(res._1(), res._2());
-                }
 
             } finally {
                 outSt.close();
@@ -282,10 +309,10 @@ public class SimExplorer implements IApplication {
                 System.setOut(oldOut);
                 System.setErr(oldErr);
 
-                IURIFile output = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("output", ".txt"));
+                IURIFile output = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
                 new URIFile(out).copy(output);
 
-                IURIFile errout = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("outputError", ".txt"));
+                IURIFile errout = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
                 new URIFile(err).copy(errout);
 
                 result.setStdOut(output, Activator.getHashService().computeHash(out));

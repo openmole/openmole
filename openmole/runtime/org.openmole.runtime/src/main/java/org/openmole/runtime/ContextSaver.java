@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
 import org.openmole.core.implementation.tools.FileMigrator;
@@ -30,18 +32,18 @@ import scala.Tuple2;
 
 public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob> {
 
-    Collection<File> outFiles = new LinkedList<File>();
-    List<Tuple2<IMoleJobId, IContext>> results = new LinkedList<Tuple2<IMoleJobId, IContext>>();
+ //   Collection<File> outFiles = new LinkedList<File>();
+    Map<IMoleJobId, IContext> results = new TreeMap<IMoleJobId, IContext>();
 
     public ContextSaver() {
         super();
     }
 
-    public Iterable<File> getOutFiles() {
+/*    public Iterable<File> getOutFiles() {
         return outFiles;
     }
-
-    public List<Tuple2<IMoleJobId, IContext>> getResults() {
+*/
+    public Map<IMoleJobId, IContext> getResults() {
         return results;
     }
 
@@ -49,15 +51,15 @@ public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob>
     public void objectChanged(IMoleJob job) {
         switch (job.getState()) {
             case COMPLETED:
-                Iterable<File> files = FileMigrator.extractFilesFromVariables(job.getContext());
+          /*      Iterable<File> files = FileMigrator.extractFilesFromVariables(job.getContext());
 
                 for (File f : files) {
                     outFiles.add(f);
-                }
+                }*/
             case FAILED:
                 IContext res = job.getContext();
                 res.chRoot();
-                results.add(new Tuple2<IMoleJobId, IContext>(job.getId(), res));
+                results.put(job.getId(), res);
         }
     }
 }

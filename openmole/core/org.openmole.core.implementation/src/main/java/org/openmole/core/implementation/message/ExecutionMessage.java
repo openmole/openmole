@@ -28,12 +28,16 @@ import scala.Tuple2;
  */
 public class ExecutionMessage implements IExecutionMessage {
 
-    Iterable<IReplicatedFile> plugins;
-    Tuple2<IURIFile, IHash> jobForRuntime;
+    final Iterable<IReplicatedFile> plugins;
+    final Iterable<IReplicatedFile> files;
+    final Tuple2<IURIFile, IHash> jobForRuntime;
+    final IURIFile communicationDir;
 
-    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Tuple2<IURIFile, IHash> jobForRuntime) {
+    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Iterable<IReplicatedFile> files, Tuple2<IURIFile, IHash> jobForRuntime, IURIFile communicationDir) {
         this.plugins = plugins;
+        this.files = files;
         this.jobForRuntime = jobForRuntime;
+        this.communicationDir = communicationDir;
     }
 
     @Override
@@ -44,6 +48,16 @@ public class ExecutionMessage implements IExecutionMessage {
     @Override
     public Tuple2<IURIFile, IHash> getJobForRuntimeURI() {
         return jobForRuntime;
+    }
+
+    @Override
+    public Iterable<IReplicatedFile> getFiles() {
+        return files;
+    }
+
+    @Override
+    public IURIFile getCommunicationDir() {
+        return communicationDir;
     }
 
 }

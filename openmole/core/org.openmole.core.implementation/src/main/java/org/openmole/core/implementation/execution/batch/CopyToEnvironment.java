@@ -48,7 +48,9 @@ import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.replicacatalog.IReplica;
+import org.openmole.core.serializer.ISerializationResult;
 import scala.Tuple2;
+import scala.collection.Iterator;
 
 /**
  *
@@ -170,8 +172,8 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         File jobFile = Activator.getWorkspace().newTmpFile("job", ".xml");
-        Iterable<Class> extendedClases = Activator.getSerializer().serializeAndGetPluginClass(jobForRuntime, jobFile);
-
+        ISerializationResult serializationResult = Activator.getSerializer().serializeAndGetPluginClassAndFiles(jobForRuntime, jobFile);
+        
         IURIFile jobURIFile = new URIFile(jobFile);
         IURIFile jobForRuntimeFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".xml"));
 
@@ -183,7 +185,8 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         Set<File> plugins = new TreeSet<File>();
         List<IReplicatedFile> pluginReplicas = new LinkedList<IReplicatedFile>();
 
-        for (Class c : extendedClases) {
+        
+        for (Class c: serializationResult.getClassesFromPlugin()) {
             for (File f : Activator.getPluginManager().getPluginAndDependanciesForClass(c)) {
                 plugins.add(f);
             }
@@ -193,31 +196,28 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
             IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true);
             pluginReplicas.add(replicatedPlugin);
         }
+        
+        List<IReplicatedFile> files = new LinkedList<IReplicatedFile>();
+        
+        for(File file: serializationResult.getFiles()) {
+            files.add(toReplicatedFile(file, communicationStorage, token, true));
+        }
 
-        return new ExecutionMessage(pluginReplicas, new Tuple2<IURIFile, IHash>(jobForRuntimeFile, jobHash));
+        return new ExecutionMessage(pluginReplicas, files, new Tuple2<IURIFile, IHash>(jobForRuntimeFile, jobHash), communicationDir);
     }
 
     IJobForRuntime createJobForRuntime(IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
-        IJobForRuntime jobForRuntime = new JobForRuntime(communicationDir);
-
-        Set<File> inputFiles = new TreeSet<File>();
+       
+        List<IMoleJob> jobs = new LinkedList<IMoleJob>();
 
         for (IMoleJob job : getJob().getMoleJobs()) {
             synchronized (job) {
                 if (!job.isFinished()) {
-                    for (File f : job.getFiles()) {
-                        inputFiles.add(f);
-                    }
-                    jobForRuntime.addMoleJob(job);
+                    jobs.add(job);
                 }
             }
         }
 
-        for (File file : inputFiles) {
-            jobForRuntime.addConsumedFile(toReplicatedFile(file, communicationStorage, token, true));
-        }
-
-        return jobForRuntime;
-
+        return new JobForRuntime(jobs);
     }
 }

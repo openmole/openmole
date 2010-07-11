@@ -19,15 +19,14 @@
         <module>org.openmole.core.metadataservice</module>
         <module>org.openmole.core.objectidservice</module>
         <module>org.openmole.core.persitenceservice</module>
-        <module>org.openmole.core.fileservice</module>
         <module>org.openmole.core.file</module>
         <module>org.openmole.core.batchservicecontrol</module>
         <module>org.openmole.core.model</module>
         <module>org.openmole.core.implementation</module>
         <module>org.openmole.core.jsagasession</module>
-        <module>org.openmole.core.serializer</module>
         <module>org.openmole.core.structuregenerator</module>
         <module>org.openmole.core.replicacatalog</module>
+	<module>org.openmole.core.serializer</module>
         <module>org.openmole.core.batchenvironmentauthenticationregistry</module>
     </modules>
     <!-- ************************************************************* -->

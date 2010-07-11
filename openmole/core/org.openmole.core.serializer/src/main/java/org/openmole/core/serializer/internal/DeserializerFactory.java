@@ -25,25 +25,24 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool;
  *
  * @author reuillon
  */
-public class SerializerFactory {
+public class DeserializerFactory {
     
-    final static private ObjectPool pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
+    private final static ObjectPool pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
         @Override
-        public SerializerWithFileAndPluginListing makeObject() throws Exception {
-            return new SerializerWithFileAndPluginListing();
+        public Object makeObject() throws Exception {
+            return new DeserializerWithFileInjection();
         }
 
     });
 
-    static SerializerWithFileAndPluginListing borrowObject() throws Exception {
-        return (SerializerWithFileAndPluginListing) pool.borrowObject();
+    static DeserializerWithFileInjection borrowObject() throws Exception {
+        return (DeserializerWithFileInjection) pool.borrowObject();
     }
     
-    static void returnObject(SerializerWithFileAndPluginListing serial) throws Exception {
+    static void returnObject(DeserializerWithFileInjection serial) throws Exception {
         serial.clean();
         pool.returnObject(serial);
     }
 
-   
 }

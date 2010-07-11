@@ -17,23 +17,10 @@
 
 package org.openmole.core.model.message;
 
-import java.util.List;
-
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IMoleJob;
 
 public interface IJobForRuntime extends IRuntimeMessage {
-
+    
     Iterable<IMoleJob> getMoleJobs();
-
-    IURIFile getCommunicationDir();
-
-    void addConsumedFile(IReplicatedFile repli);
-
-    void addConsumedFiles(List<IReplicatedFile> repli);
-
-    Iterable<IReplicatedFile> getConsumedFiles();
-
-    void addMoleJob(IMoleJob moleJob);
 
 }

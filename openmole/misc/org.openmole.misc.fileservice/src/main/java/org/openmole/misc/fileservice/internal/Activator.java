@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.fileservice.internal;
+package org.openmole.misc.fileservice.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.openmole.core.fileservice.IFileService;
+import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.workspace.IWorkspace;
 

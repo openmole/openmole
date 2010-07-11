@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +19,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
@@ -30,6 +33,7 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.model.message.IRuntimeResult;
 import scala.Tuple2;
 
@@ -126,8 +130,10 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
             }
 
-            LocalFileCache fileCache = new LocalFileCache();
-
+            //LocalFileCache fileCache = new LocalFileCache();
+            Map<File, File> fileReplacement = new TreeMap<File, File>();
+            
+            
             try {
 
                 TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
@@ -157,7 +163,6 @@ public class GetResultFromEnvironment implements Callable<Void> {
 
                         File file;
 
-
                         if (fileInfo._2()) {
                             file = Activator.getWorkspace().newTmpDir("tarResult");
                             
@@ -171,8 +176,9 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         } else {
                             file = dest;
                         }
-
-                        fileCache.fillInLocalFileCache(fileInfo._1(), file);
+                        
+                        fileReplacement.put(fileInfo._1(), file);
+                        //fileCache.fillInLocalFileCache(fileInfo._1(), file);
                     }
                 } finally {
                     tis.close();
@@ -181,19 +187,27 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 throw new InternalProcessingError(e);
             }
 
+            //Download and deserialize the context results
+            IURIFile contextResultsFile = result.getContextResultURI();
+            if(contextResultsFile == null) throw new InternalProcessingError("Context results URI was null");
+            
+            IFileCache contextResutsFileCache = contextResultsFile.getFileCache(token);
+            
+            IContextResults contextResults = Activator.getSerializer().deserializeReplaceFiles(contextResutsFileCache.getFile(false), fileReplacement);
+  
+           
             int successfull = 0;
             
             //Try to download the results for all the jobs of the group
             for (IMoleJob moleJob : getJob().getMoleJobs()) {
-                if (result.containsResultForJob(moleJob.getId())) {
+                if (contextResults.containsResultForJob(moleJob.getId())) {
 
-                    IContext context = result.getContextForJob(moleJob.getId());
-                    FileMigrator.initFilesInVariables(context, fileCache);
+                    IContext context = contextResults.getContextForJob(moleJob.getId());
+                  //  FileMigrator.initFilesInVariables(context, fileCache);
 
                     synchronized (moleJob) {
                         if (!moleJob.isFinished()) {
                             try {
-
                                 moleJob.rethrowException(context);
                                 try {
                                     moleJob.finished(context);

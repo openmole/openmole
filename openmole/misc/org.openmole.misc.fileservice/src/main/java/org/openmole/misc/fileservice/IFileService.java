@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon
+ *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,20 +14,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.model.message;
 
+package org.openmole.misc.fileservice;
+
+import org.openmole.commons.tools.filecache.IFileCache;
 import java.io.File;
-
-import org.openmole.core.model.file.IURIFile;
+import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.io.IHash;
 
-public interface IReplicatedFile {
-
-    File getSrc();
-
-    boolean isDirectory();
-
-    IURIFile getReplica();
-
-    IHash getHash();
+/**
+ *
+ * @author reuillon
+ */
+public interface IFileService {
+    IHash getHashForFile(File file) throws InternalProcessingError, InterruptedException ;
+    IHash getHashForFile(File file, Object cacheLength) throws InternalProcessingError, InterruptedException ;
+    IFileCache getArchiveForDir(File file) throws InternalProcessingError, InterruptedException ;
+    IFileCache getArchiveForDir(File file, Object cacheLenght) throws InternalProcessingError, InterruptedException ;
 }

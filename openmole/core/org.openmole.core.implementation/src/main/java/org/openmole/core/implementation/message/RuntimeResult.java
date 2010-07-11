@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.openmole.core.model.file.IURIFile;
+
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.tools.io.IHash;
 import scala.Tuple2;
 
@@ -32,10 +31,13 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     Tuple2<IURIFile, IHash> stdOut;
     Tuple2<IURIFile, IHash> stdErr;
     Tuple2<IURIFile, IHash> tarResult;
+    
     Throwable exception;
-    Map<IMoleJobId, IContext> results = new TreeMap<IMoleJobId, IContext>();
     Map<String, Tuple2<File, Boolean>> files = new TreeMap<String, Tuple2<File, Boolean>>();
 
+    IURIFile contextResultURI;
+    
+    
     @Override
     public Tuple2<IURIFile, IHash> getStdOut() {
         return stdOut;
@@ -67,21 +69,6 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     }
 
     @Override
-    public IContext getContextForJob(IMoleJobId jobId) {
-        return results.get(jobId);
-    }
-
-    @Override
-    public void putResult(IMoleJobId jobId, IContext context) {
-        results.put(jobId, context);
-    }
-
-    @Override
-    public boolean containsResultForJob(IMoleJobId jobId) {
-        return results.containsKey(jobId);
-    }
-
-    @Override
     public Tuple2<IURIFile, IHash> getTarResult() {
         return tarResult;
     }
@@ -100,4 +87,15 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     public Tuple2<File, Boolean> getFileInfoForEntry(String hash) {
         return files.get(hash);
     }
+
+    @Override
+    public IURIFile getContextResultURI() {
+        return contextResultURI;
+    }
+
+    @Override
+    public void setContextResultURI(IURIFile file) {
+       this.contextResultURI = file;
+    }
+
 }

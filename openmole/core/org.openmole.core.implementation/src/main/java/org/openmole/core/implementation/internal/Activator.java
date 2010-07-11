@@ -23,7 +23,7 @@ import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
 import org.openmole.misc.executorservice.IExecutorService;
-import org.openmole.core.fileservice.IFileService;
+import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;

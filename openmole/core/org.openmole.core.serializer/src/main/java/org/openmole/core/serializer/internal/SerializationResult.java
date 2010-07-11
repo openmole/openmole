@@ -1,37 +1,48 @@
 /*
  *  Copyright (C) 2010 reuillon
- *
+ * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ * 
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * 
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.message;
+package org.openmole.core.serializer.internal;
 
-import org.openmole.core.model.message.IJobForRuntime;
-import org.openmole.core.model.job.IMoleJob;
+import java.io.File;
+import org.openmole.core.serializer.ISerializationResult;
 
-public class JobForRuntime extends RuntimeMessage implements IJobForRuntime {
+/**
+ *
+ * @author reuillon
+ */
+public class SerializationResult implements ISerializationResult {
 
-    final Iterable<IMoleJob> moleJobs;
+    final Iterable<Class> classesFromPlugin;
+    final Iterable<File> files;
 
-    public JobForRuntime(Iterable<IMoleJob> moleJobs) {
-        super();
-        this.moleJobs = moleJobs;
+    public SerializationResult(Iterable<Class> classesFromPlugin, Iterable<File> files) {
+        this.classesFromPlugin = classesFromPlugin;
+        this.files = files;
     }
-  
+
     @Override
-    public Iterable<IMoleJob> getMoleJobs() {
-        return moleJobs;
+    public Iterable<Class> getClassesFromPlugin() {
+        return classesFromPlugin;
     }
 
+    @Override
+    public Iterable<File> getFiles() {
+        return files;
+    }
+    
+    
 }
