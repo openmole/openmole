@@ -609,7 +609,7 @@
             <url>http://maven.iscpif.fr/public/</url>
         </repository>
         <repository>
-            <id>maven.iscpif.fr snapshots</id>
+            <id>maven.iscpif.fr.snapshots</id>
             <name>ISCPIF snapshots repository</name>
             <url>http://maven.iscpif.fr/public-snapshots/</url>
         </repository>
