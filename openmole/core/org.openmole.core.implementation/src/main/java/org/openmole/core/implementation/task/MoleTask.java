@@ -39,7 +39,6 @@ import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.task.IMoleTask;
 
@@ -118,53 +117,4 @@ public class MoleTask extends Task implements IMoleTask {
         return new DataSet(super.getInput(), getMole().getRoot().getAssignedTask().getInput());
     }
 
-   /* @Override
-    public Collection<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> resources = new HashSet<IResource>();
-        for (IResource resource : super.getResources()) {
-            resources.add(resource);
-        }
-
-        for (IGenericTask task : getMole().getAllTasks()) {
-            for (IResource resource : task.getResources()) {
-                resources.add(resource);
-            }
-        }
-
-        return resources;
-    }*/
-
-    @Override
-    public Set<File> getFiles() throws InternalProcessingError, UserBadDataError {
-        Set<File> files = new TreeSet<File>();
-        for (File file : super.getFiles()) {
-            files.add(file);
-        }
-
-        for (IGenericTask task : getMole().getAllTasks()) {
-            for (File file : task.getFiles()) {
-                files.add(file);
-            }
-        }
-
-        return files;
-    }
-
-
-    @Override
-    public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        super.relocate(fileCache);
-
-        for (IGenericTask task: getMole().getAllTasks()) {
-            task.relocate(fileCache);
-        }
-    }
-
-    //The resources of the task of the inner workflow will be deployer durring it's execution
-   /* @Override
-    public void deploy() throws InternalProcessingError, UserBadDataError {
-        for (IResource resource : super.getResources()) {
-            resource.deploy();
-        }
-    }*/
 }

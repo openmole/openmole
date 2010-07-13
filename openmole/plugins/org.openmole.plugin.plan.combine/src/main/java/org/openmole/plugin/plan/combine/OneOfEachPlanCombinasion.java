@@ -27,7 +27,6 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.plan.IPlan;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.plan.IFactor;
@@ -105,24 +104,6 @@ public class OneOfEachPlanCombinasion implements IPlanCombinasion {
         for(String name: from.getNames()) {
             to.setValue(name, from.getValue(name));
         }
-    }
-
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> ret = new LinkedList<IResource>();
-
-
-        for(IResource resource: getReferencePlan().getResources()) {
-            ret.add(resource);
-        }
-
-        for(IPlan plan: getPlans()) {
-            for(IResource resource: plan.getResources()) {
-                ret.add(resource);
-            }
-        }
-
-        return ret;
     }
 
     public Collection<IPlan> getPlans() {

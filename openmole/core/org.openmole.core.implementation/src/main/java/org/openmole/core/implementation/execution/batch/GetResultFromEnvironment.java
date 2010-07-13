@@ -24,8 +24,6 @@ import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.implementation.tools.FileMigrator;
-import org.openmole.core.implementation.resource.LocalFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.SampleType;

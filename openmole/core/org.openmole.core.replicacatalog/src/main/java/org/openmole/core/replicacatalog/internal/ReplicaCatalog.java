@@ -178,7 +178,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                             newFile = new GZipedURIFile(newFile);
                         }
 
-                        URIFile.copy(new URIFile(src), newFile, token);
+                        URIFile.copy(src, newFile, token);
 
                         replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);

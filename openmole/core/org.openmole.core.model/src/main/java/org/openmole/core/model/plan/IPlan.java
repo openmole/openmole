@@ -20,7 +20,6 @@ package org.openmole.core.model.plan;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.resource.IPortable;
 
 /**
  *
@@ -28,7 +27,7 @@ import org.openmole.core.model.resource.IPortable;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface IPlan extends IPortable {
+public interface IPlan {
 
 	/**
 	 * This method builds the explored plan in the givern {@code context}.

@@ -37,8 +37,6 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.job.ITicket;
-import org.openmole.commons.aspect.caching.SoftCachable;
-import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.implementation.tools.LocalHostName;
 import org.openmole.core.model.job.ITimeStamp;
@@ -148,21 +146,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     @Override
     public boolean isFinished() {
         return getState().isFinal();
-    }
-
-    @SoftCachable
-    @Override
-    public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError {
-        Set<File> files = new TreeSet<File>();
-        for (File file : getTask().getFiles()) {
-            files.add(file);
-        }
-
-        for (File file : FileMigrator.extractFilesFromVariables(getContext())) {
-            files.add(file);
-        }
-
-        return files;
     }
 
     @Override

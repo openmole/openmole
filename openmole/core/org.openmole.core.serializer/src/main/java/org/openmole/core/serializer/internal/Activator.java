@@ -22,7 +22,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.serializer.ISerializer;
-import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -30,45 +29,24 @@ public class Activator implements BundleActivator {
 
     static BundleContext context;
     private static IPluginManager pluginManager;
-    private static IFileService fileService;
     private static IHashService hashService;
     ServiceRegistration msgSerial;
-    ServiceRegistration descSerial;
-    static ISerializer serializer;
     private static IWorkspace workspace;
 
     @Override
     public void start(BundleContext context) throws Exception {
         this.context = context;
-
-        msgSerial = context.registerService(ISerializer.class.getName(), getRuntimeMessageSerializer(), null);
+        msgSerial = context.registerService(ISerializer.class.getName(), new Serializer(), null);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         this.context = null;
-        serializer = null;
         msgSerial.unregister();
-        descSerial.unregister();
     }
 
     public static BundleContext getContext() {
         return context;
-    }
-
-    public static ISerializer getRuntimeMessageSerializer() {
-        if (serializer != null) {
-            return serializer;
-        }
-
-        synchronized (Activator.class) {
-            if (serializer == null) {
-                serializer = new Serializer();
-            }
-            return serializer;
-        }
-
-
     }
 
     public static IWorkspace getWorkspace() {
@@ -91,14 +69,6 @@ public class Activator implements BundleActivator {
             pluginManager = (IPluginManager) getContext().getService(ref);
         }
         return pluginManager;
-    }
-
-    public synchronized static IFileService getFileService() {
-        if (fileService == null) {
-            ServiceReference ref = getContext().getServiceReference(IFileService.class.getName());
-            fileService = (IFileService) getContext().getService(ref);
-        }
-        return fileService;
     }
 
     public synchronized static IHashService getHashService() {

@@ -39,6 +39,5 @@ public interface IResource {
      * @throws UserBadDataError         if something goes wrong because it is missconfigured
      */
     void deploy() throws InternalProcessingError, UserBadDataError;
-    Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
-    void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
+
 }

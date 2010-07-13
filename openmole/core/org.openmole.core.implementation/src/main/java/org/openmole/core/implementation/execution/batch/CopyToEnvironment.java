@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
@@ -50,8 +52,6 @@ import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.serializer.ISerializationResult;
 import scala.Tuple2;
-import scala.collection.Iterator;
-
 /**
  *
  * @author reuillon
@@ -122,8 +122,6 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         return initCommunication();
     }
 
-
-
     IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         boolean isDir = file.isDirectory();
         File toReplicate = file;
@@ -154,16 +152,20 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
     IRuntime replicateTheRuntime(IAccessToken token, IBatchStorage communicationStorage) throws UserBadDataError, InternalProcessingError, InterruptedException, InternalProcessingError, IOException {
         Collection<IURIFile> environmentPluginReplica = new LinkedList<IURIFile>();
-        IURIFile runtimeReplica;
 
         Iterable<File> environmentPlugins = Activator.getPluginManager().getPluginAndDependanciesForClass(getEnvironment().getClass());
         File runtimeFile = getEnvironment().getRuntime();
 
         for (File environmentPlugin : environmentPlugins) {
-            environmentPluginReplica.add(toReplicatedFile(environmentPlugin, communicationStorage, token, true).getReplica());
+            IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token, true);
+            IURIFile pluginURIFile = replicatedFile.getReplica();
+            
+            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.INFO, "Pluggin uri file {0}", pluginURIFile);
+            
+            environmentPluginReplica.add(pluginURIFile);
         }
 
-        runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token, false).getReplica();
+        IURIFile runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token, false).getReplica();
 
         IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token, true).getReplica();
         return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);

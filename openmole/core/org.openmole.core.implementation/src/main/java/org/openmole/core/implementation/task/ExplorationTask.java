@@ -70,20 +70,4 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
         return plan;
     }
 
-    @SoftCachable
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> resources = new HashSet<IResource>();
-        
-        for(IResource resource: super.getResources()) {
-            resources.add(resource);
-        }
-
-        for(IResource resource: getPlan().getResources()) {
-            resources.add(resource);
-        }
-
-        return resources;
-    }
-
 }

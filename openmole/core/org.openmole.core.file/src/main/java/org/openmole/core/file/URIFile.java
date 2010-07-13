@@ -81,10 +81,6 @@ public class URIFile implements IURIFile {
        Activator.getWorkspace().addToConfigurations(CopyTimeout, "PT2M");
     }
 
-   // static final long timeout = 2 * 60 * 1000;
-    //0.1 KB/S
-   // static final int TransfertBuffSize = 10240;
-   // static final long TimeOutForTransfert = 100 * 1000;
     final String location;
 
     public URIFile(File file) throws IOException {

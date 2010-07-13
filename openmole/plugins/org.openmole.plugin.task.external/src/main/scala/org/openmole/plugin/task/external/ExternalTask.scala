@@ -20,23 +20,16 @@ package org.openmole.plugin.task.external
 import java.io.File
 import java.io.IOException
 import java.util.HashMap
-import java.util.Iterator
-import java.util.LinkedList
 import java.util.List
-import java.util.Map
 import java.util.TreeMap
-import java.net.URI
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.core.implementation.resource.FileResourceSet
-import org.openmole.core.implementation.resource.FileResource
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.tools.io.FileUtil
-import org.openmole.core.model.task.annotations.Resource
 import org.openmole.commons.tools.io.IFileOperation
 
 import org.openmole.core.implementation.tools.VariableExpansion._
@@ -46,12 +39,9 @@ import scala.collection.JavaConversions._
 
 abstract class ExternalTask(name: String) extends Task(name) {
 
-  @Resource
-  val inFiles = new FileResourceSet
-
   val inContextFiles = new ListBuffer[(IPrototype[File], String)]
   val inContextFileList = new ListBuffer[(IPrototype[List[File]], IPrototype[List[String]])]
-  val inFileNames = new TreeMap[FileResource, String]
+  val inFileNames = new TreeMap[File, String]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String)]
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
@@ -65,7 +55,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
       var ret = new ListBuffer[ToPut]
 
       inFileNames.entrySet().foreach(entry => {
-          val localFile = entry.getKey.getFile
+          val localFile = entry.getKey
           ret += (new ToPut(localFile, expandData(context, entry.getValue)))
         })
 
@@ -178,9 +168,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
   }
 
   def addInFile(file: File, name: String): Unit = {
-    var fileResource = new FileResource(file)
-    inFiles.addFileResource(fileResource)
-    inFileNames.put(fileResource, name)
+    inFileNames.put(file, name)
   }
 
   def addInFile(file: File): Unit = {

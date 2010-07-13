@@ -51,17 +51,4 @@ public abstract class Plan<T extends IFactor<?, ?>> implements IPlan {
         return factors;
     }
 
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        Collection<IResource> resourcesCache = new LinkedList<IResource>();
-
-        for (IFactor factor : getFactors()) {
-            for (IResource resource : factor.getResources()) {
-                resourcesCache.add(resource);
-            }
-        }
-
-        addAllMarkedFields(this, Resource.class, resourcesCache);
-        return resourcesCache;
-    }
 }

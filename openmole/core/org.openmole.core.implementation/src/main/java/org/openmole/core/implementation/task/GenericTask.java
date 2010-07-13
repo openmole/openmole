@@ -36,7 +36,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.task.IGenericTask;
@@ -48,7 +47,6 @@ import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Parameter;
-import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.model.data.DataModeMask;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IData;
@@ -295,7 +293,6 @@ public abstract class GenericTask implements IGenericTask {
     }
 
     @SoftCachable
-    @Override
     public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
         Collection<IResource> resourcesCache = new HashSet<IResource>();
         if (resources != null) {
@@ -314,35 +311,6 @@ public abstract class GenericTask implements IGenericTask {
             resource.deploy();
         }
     }
-
-    @Override
-    public void relocate(ILocalFileCache fileCache) throws InternalProcessingError, UserBadDataError {
-        for (IResource resource: getResources()) {
-            resource.relocate(fileCache);
-        }
-
-        FileMigrator.initFilesInVariables(getParameters().getVariables(), fileCache);
-    }
-
-    @SoftCachable
-    @Override
-    public Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError {
-        Set<File> files = new TreeSet<File>();
-
-        for(IResource resource: getResources()) {
-            for(File file: resource.getFiles()) {
-                files.add(file);
-            }
-        }
-
-        for(File file: FileMigrator.extractFilesFromVariables(getParameters().getVariables())) {
-            files.add(file);
-        }
-
-        return files;
-    }
-
-
     
     @ChangeState
     @Override

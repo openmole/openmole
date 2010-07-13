@@ -17,7 +17,6 @@
 package org.openmole.core.serializer.internal;
 
 import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 import com.thoughtworks.xstream.converters.extended.FileConverter;
 import java.io.File;
 

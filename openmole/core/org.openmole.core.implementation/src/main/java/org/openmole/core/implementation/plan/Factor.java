@@ -102,13 +102,5 @@ public class Factor<T, D extends IDomain<? extends T>> implements IFactor<T, D> 
         hash = 17 * hash + (this.domain != null ? this.domain.hashCode() : 0);
         return hash;
     }
-
-    @Override
-    public Collection<IResource> getResources() throws InternalProcessingError {
-        Collection<IResource> resourcesCache = new LinkedList<IResource>();
-        addAllMarkedFields(this, Resource.class, resourcesCache);
-        return resourcesCache;
-    }
-
     
 }

@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.misc.hashservice;
 
 import java.io.UnsupportedEncodingException;
@@ -22,67 +21,71 @@ import java.util.Arrays;
 import org.openmole.commons.exception.FatalError;
 import org.openmole.commons.tools.io.IHash;
 
-
 //Should stay in the public part for serialization purposes
 public class SHA1Hash implements IHash {
-	byte[] content;
 
-	static final byte[] HEX_CHAR_TABLE = {
-		(byte)'0', (byte)'1', (byte)'2', (byte)'3',
-		(byte)'4', (byte)'5', (byte)'6', (byte)'7',
-		(byte)'8', (byte)'9', (byte)'a', (byte)'b',
-		(byte)'c', (byte)'d', (byte)'e', (byte)'f'
-	};    
+    byte[] content;
+    static final byte[] HEX_CHAR_TABLE = {
+        (byte) '0', (byte) '1', (byte) '2', (byte) '3',
+        (byte) '4', (byte) '5', (byte) '6', (byte) '7',
+        (byte) '8', (byte) '9', (byte) 'a', (byte) 'b',
+        (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f'
+    };
 
-	public static String getHexString(byte[] raw) throws UnsupportedEncodingException 
-	{
-		byte[] hex = new byte[2 * raw.length];
-		int index = 0;
+    public static String getHexString(byte[] raw) throws UnsupportedEncodingException {
+        byte[] hex = new byte[2 * raw.length];
+        int index = 0;
 
-		for (byte b : raw) {
-			int v = b & 0xFF;
-			hex[index++] = HEX_CHAR_TABLE[v >>> 4];
-			hex[index++] = HEX_CHAR_TABLE[v & 0xF];
-		}
-		return new String(hex, "ASCII");
-	}
+        for (byte b : raw) {
+            int v = b & 0xFF;
+            hex[index++] = HEX_CHAR_TABLE[v >>> 4];
+            hex[index++] = HEX_CHAR_TABLE[v & 0xF];
+        }
+        return new String(hex, "ASCII");
+    }
 
+    public SHA1Hash(byte[] content) {
+        super();
+        this.content = content;
+    }
 
-	public SHA1Hash(byte[] content) {
-		super();
-		this.content = content;
-	}
+    @Override
+    public String toString() {
+        try {
+            return getHexString(content);
+        } catch (UnsupportedEncodingException e) {
+            throw new FatalError(e);
+        }
+    }
 
-	@Override
-	public String toString() {
-		try {
-			return getHexString(content);
-		} catch (UnsupportedEncodingException e) {
-			throw new FatalError(e);
-		}
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(content);
+        return result;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(content);
-		return result;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SHA1Hash other = (SHA1Hash) obj;
+        if (!Arrays.equals(content, other.content)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SHA1Hash other = (SHA1Hash) obj;
-		if (!Arrays.equals(content, other.content))
-			return false;
-		return true;
-	}
-
-
+    @Override
+    public int compareTo(IHash o) {
+        return toString().compareTo(o.toString());
+    }
 }

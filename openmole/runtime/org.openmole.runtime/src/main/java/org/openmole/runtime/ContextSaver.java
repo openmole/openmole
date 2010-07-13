@@ -16,19 +16,13 @@
  */
 package org.openmole.runtime;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 
-import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJobId;
-import scala.Tuple2;
 
 public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob> {
 

@@ -73,9 +73,4 @@ public class FiltredPlan implements IPlan {
         return new ExploredPlan(ret);
     }
 
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        return toFilter.getResources();
-    }
-
 }
