@@ -22,6 +22,8 @@ import org.osgi.framework.ServiceReference;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
+import org.openmole.core.file.IURIFileCache;
+import org.openmole.core.file.internal.URIFileCache;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
@@ -49,6 +51,7 @@ public class Activator implements BundleActivator {
     private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
     private static IFileService fileService;
     private static IHashService hashService;
+    private static IURIFileCache URIFileCache;
 
     @Override
     public synchronized void start(BundleContext context) throws Exception {
@@ -92,7 +95,6 @@ public class Activator implements BundleActivator {
         }
         return workspace;
     }
-
 
     public static IUpdater getUpdater() {
         if (updater != null) {
@@ -194,7 +196,6 @@ public class Activator implements BundleActivator {
         return pluginManager;
     }
 
-
     public synchronized static IBatchEnvironmentAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
         if (batchEnvironmentAuthenticationRegistry == null) {
             ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentAuthenticationRegistry.class.getName());
@@ -225,4 +226,11 @@ public class Activator implements BundleActivator {
         return hashService;
     }
 
+    public static synchronized IURIFileCache getURIFileCache() {
+        if (URIFileCache == null) {
+            ServiceReference ref = getContext().getServiceReference(IURIFileCache.class.getName());
+            URIFileCache = (IURIFileCache) getContext().getService(ref);
+        }
+        return URIFileCache;
+    }
 }

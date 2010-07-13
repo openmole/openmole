@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.openmole.core.batchservicecontrol.BatchStorageDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
@@ -196,7 +197,8 @@ public class BatchStorage extends BatchService implements IBatchStorage {
                 }
 
                 try {
-                    File local = testFile.getFileCache(token).getFile(false);
+                    IFileCache fileCache = Activator.getURIFileCache().getURIFileCache(testFile, token);
+                    File local = fileCache.getFile(false);
                     FileInputStream input = new FileInputStream(local);
                     byte[] resRdm = new byte[lenght];
                     int nb;

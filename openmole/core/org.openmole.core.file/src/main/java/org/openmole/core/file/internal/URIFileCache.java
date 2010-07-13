@@ -17,13 +17,15 @@
 
 package org.openmole.core.file.internal;
 
+import org.openmole.core.file.IURIFileCache;
 import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
+import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
 import org.openmole.commons.tools.filecache.IFileCache;
-import org.openmole.core.file.URIFile;
 import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.file.IURIFile;
 
 /**
  *
@@ -31,16 +33,16 @@ import org.openmole.core.model.execution.batch.IAccessToken;
  */
 public class URIFileCache implements IURIFileCache {
 
-    AssociativeCache<URIFile, IFileCache> associativeCache = new AssociativeCache<URIFile, IFileCache>(AssociativeCache.WEAK, AssociativeCache.HARD);
+    AssociativeCache<IURIFile, IFileCache> associativeCache = new AssociativeCache<IURIFile, IFileCache>(AssociativeCache.WEAK, AssociativeCache.HARD);
 
     @Override
-    public IFileCache getURIFileCache(final URIFile uri, Object cacheAssociation) throws InternalProcessingError, InterruptedException {
-        return associativeCache.getCache(cacheAssociation, uri, new ICachable<IFileCache>() {
+    public IFileCache getURIFileCache(final IURIFile uri) throws InternalProcessingError, InterruptedException {
+        return associativeCache.getCache(uri, uri, new ICachable<IFileCache>() {
 
             @Override
             public IFileCache compute() throws InternalProcessingError, InterruptedException {
                 try {
-                    return uri.cache();
+                    return new FileCacheDeleteOnFinalize(uri.cache());
                 } catch (IOException ex) {
                     throw  new InternalProcessingError(ex);
                 } 
@@ -50,13 +52,13 @@ public class URIFileCache implements IURIFileCache {
     }
 
     @Override
-    public IFileCache getURIFileCache(final URIFile uri, Object cacheAssociation, final IAccessToken token) throws InternalProcessingError, InterruptedException {
-        return associativeCache.getCache(cacheAssociation, uri, new ICachable<IFileCache>() {
+    public IFileCache getURIFileCache(final IURIFile uri, final IAccessToken token) throws InternalProcessingError, InterruptedException {
+        return associativeCache.getCache(uri, uri, new ICachable<IFileCache>() {
 
             @Override
             public IFileCache compute() throws InternalProcessingError, InterruptedException {
                 try {
-                    return uri.cache(token);
+                    return new FileCacheDeleteOnFinalize(uri.cache(token));
                 } catch (IOException ex) {
                     throw  new InternalProcessingError(ex);
                 }
@@ -64,7 +66,10 @@ public class URIFileCache implements IURIFileCache {
 
         });
     }
-
-
+    
+    @Override
+    public void invalidate(final IURIFile uri) {
+        associativeCache.invalidateCache(uri, uri);
+    }
 
 }

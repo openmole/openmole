@@ -17,6 +17,7 @@
 
 package org.openmole.core.file.internal;
 
+import org.openmole.core.file.IURIFileCache;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

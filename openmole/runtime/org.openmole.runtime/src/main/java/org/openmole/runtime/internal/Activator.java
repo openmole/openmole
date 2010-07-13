@@ -9,6 +9,7 @@ import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.serializer.ISerializer;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
+import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {
@@ -103,8 +104,7 @@ public class Activator implements BundleActivator {
         return pluginManager;
     }
 
-
-     public static IHashService getHashService() {
+    public static IHashService getHashService() {
         if (hashService != null) {
             return hashService;
         }
@@ -117,4 +117,5 @@ public class Activator implements BundleActivator {
         }
         return hashService;
     }
+
 }

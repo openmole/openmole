@@ -14,18 +14,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.file.internal;
+package org.openmole.core.file;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.filecache.IFileCache;
-import org.openmole.core.file.URIFile;
 import org.openmole.core.model.execution.batch.IAccessToken;
+import org.openmole.core.model.file.IURIFile;
 
 /**
  *
  * @author reuillon
  */
 public interface IURIFileCache {
-    IFileCache getURIFileCache(URIFile uri, Object cacheAssociation) throws InternalProcessingError, InterruptedException;
-    IFileCache getURIFileCache(URIFile uri, Object cacheAssociation, IAccessToken token) throws InternalProcessingError, InterruptedException;
+    IFileCache getURIFileCache(IURIFile file) throws InternalProcessingError, InterruptedException;
+    IFileCache getURIFileCache(IURIFile file, IAccessToken token) throws InternalProcessingError, InterruptedException;
+    void invalidate(final IURIFile uri);
 }

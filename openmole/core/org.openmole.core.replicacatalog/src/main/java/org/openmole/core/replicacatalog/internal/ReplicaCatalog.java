@@ -335,6 +335,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         //configuration.objectClass(Replica.class).cascadeOnUpdate(true);
         // configuration.objectClass(Replica.class).cascadeOnActivate(true);
 
+        configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);

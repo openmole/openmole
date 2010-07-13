@@ -17,7 +17,6 @@
 package org.openmole.core.model.file;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,8 +54,6 @@ public interface IURIFile extends Comparable<IURIFile> {
 
     OutputStream openOutputStream(IAccessToken token) throws IOException, InterruptedException;
 
-    String getContentAsString() throws IOException, InterruptedException;
-
     void copy(IURIFile dest) throws IOException, InterruptedException;
 
     void copy(IURIFile dest, IAccessToken srcToken) throws IOException, InterruptedException;
@@ -77,9 +74,9 @@ public interface IURIFile extends Comparable<IURIFile> {
 
     boolean exist(String name, IAccessToken token) throws IOException, InterruptedException;
 
-    IFileCache getFileCache() throws IOException, InterruptedException;
+    File cache() throws IOException, InterruptedException;
 
-    IFileCache getFileCache(IAccessToken token) throws IOException, InterruptedException;
+    File cache(IAccessToken token) throws IOException, InterruptedException;
 
     IURIFile getChild(String child) throws IOException;
 

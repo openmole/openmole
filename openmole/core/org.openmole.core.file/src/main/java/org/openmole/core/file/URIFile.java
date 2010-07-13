@@ -60,7 +60,6 @@ import org.openmole.commons.tools.filecache.FileCache;
 import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.FileUtil;
-import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -70,17 +69,15 @@ import static org.openmole.commons.tools.io.Network.*;
 public class URIFile implements IURIFile {
 
     final static String Group = URIFile.class.getSimpleName();
-
     final public static ConfigurationLocation Timeout = new ConfigurationLocation(Group, "Timeout");
     final static ConfigurationLocation BufferSize = new ConfigurationLocation(Group, "BufferSize");
     final static ConfigurationLocation CopyTimeout = new ConfigurationLocation(Group, "CopyTimeout");
 
     static {
-       Activator.getWorkspace().addToConfigurations(Timeout, "PT2M");
-       Activator.getWorkspace().addToConfigurations(BufferSize, "8192");
-       Activator.getWorkspace().addToConfigurations(CopyTimeout, "PT2M");
+        Activator.getWorkspace().addToConfigurations(Timeout, "PT2M");
+        Activator.getWorkspace().addToConfigurations(BufferSize, "8192");
+        Activator.getWorkspace().addToConfigurations(CopyTimeout, "PT2M");
     }
-
     final String location;
 
     public URIFile(File file) throws IOException {
@@ -438,8 +435,8 @@ public class URIFile implements IURIFile {
             getFailureControl().failed();
             throw new IOException(getLocationString(), e);
         } catch (InternalProcessingError e) {
-                throw new IOException(e);
-            }
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -480,32 +477,12 @@ public class URIFile implements IURIFile {
             getFailureControl().failed();
             throw new IOException(getLocationString(), e);
         } catch (InternalProcessingError e) {
-                throw new IOException(e);
-            }
+            throw new IOException(e);
+        }
     }
 
     @Override
-    public String getContentAsString() throws IOException, InterruptedException {
-        StringBuilder ret = new StringBuilder();
-
-        InputStream is = new java.io.FileInputStream(getFileCache().getFile(true));
-        try {
-            OutputStream os = new StringBuilderOutputStream(ret);
-
-            try {
-                FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
-            } catch (InternalProcessingError e) {
-                throw new IOException(e);
-            } finally {
-                os.close();
-            }
-        } finally {
-            is.close();
-        }
-        return ret.toString();
-    }
-
-    public IFileCache cache() throws IOException, InterruptedException {
+    public File cache() throws IOException, InterruptedException {
         IAccessToken token = getAToken();
         try {
             return cache(token);
@@ -514,18 +491,14 @@ public class URIFile implements IURIFile {
         }
     }
 
-
-    public synchronized IFileCache cache(IAccessToken token) throws IOException, InterruptedException {
-        if (isLocal()) {
-            return new FileCache(new File(getCachedURL().getPath()));
-        } else {
-            try {
-                File cacheTmp = Activator.getWorkspace().newTmpFile("file", "cache");
-                this.copy(new URIFile(cacheTmp), token);
-                return new FileCacheDeleteOnFinalize(cacheTmp);
-            } catch (InternalProcessingError e) {
-                throw new IOException(getLocationString(), e);
-            }
+    @Override
+    public synchronized File cache(IAccessToken token) throws IOException, InterruptedException {
+        try {
+            File cacheTmp = Activator.getWorkspace().newFile("file", "cache");
+            this.copy(new URIFile(cacheTmp), token);
+            return cacheTmp;
+        } catch (InternalProcessingError e) {
+            throw new IOException(getLocationString(), e);
         }
     }
 
@@ -606,7 +579,7 @@ public class URIFile implements IURIFile {
     }
 
     public static void copy(final File src, final IURIFile dest) throws IOException, InterruptedException {
-        IUsageControl usageControl =  Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getUsageControl();
+        IUsageControl usageControl = Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getUsageControl();
         IAccessToken token = usageControl.waitAToken();
 
         try {
@@ -632,9 +605,9 @@ public class URIFile implements IURIFile {
             try {
                 FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
                 failureControl.success();
-            } catch(InternalProcessingError e){
+            } catch (InternalProcessingError e) {
                 throw new IOException(e);
-            }catch (IOException t) {
+            } catch (IOException t) {
                 failureControl.failed();
                 throw t;
             } finally {
@@ -655,7 +628,7 @@ public class URIFile implements IURIFile {
 
         IUsageControl srcUsageControl = Activator.getBatchRessourceControl().getController(srcDescrption).getUsageControl();
         IUsageControl destUsageControl = Activator.getBatchRessourceControl().getController(destDescrption).getUsageControl();
-        
+
         IAccessToken srcToken;
         IAccessToken destToken;
 
@@ -696,7 +669,7 @@ public class URIFile implements IURIFile {
 
         IFailureControl srcFailureControl = Activator.getBatchRessourceControl().getController(src.getStorageDescription()).getFailureControl();
         IFailureControl destFailureControl = Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getFailureControl();
-        
+
         InputStream is = src.openInputStream(srcToken);
         try {
             OutputStream os = dest.openOutputStream(destToken);
@@ -707,9 +680,9 @@ public class URIFile implements IURIFile {
                 if (!sameRessource) {
                     destFailureControl.success();
                 }
-            } catch(InternalProcessingError e) {
+            } catch (InternalProcessingError e) {
                 throw new IOException(e);
-            }catch (IOException t) {
+            } catch (IOException t) {
                 srcFailureControl.failed();
                 if (!sameRessource) {
                     destFailureControl.failed();
@@ -821,7 +794,7 @@ public class URIFile implements IURIFile {
                 return ret;
             } catch (InternalProcessingError e) {
                 throw new IOException(e);
-            }catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw new IOException(getLocationString(), e);
             } catch (TimeoutException e) {
                 task.cancel(true);
@@ -874,24 +847,23 @@ public class URIFile implements IURIFile {
     }
 
 
-    @Override
+    /*@Override
     public IFileCache getFileCache() throws IOException, InterruptedException {
-        try {
-            return Activator.getFileCache().getURIFileCache(this, this);
-        } catch (InternalProcessingError ex) {
-            throw new IOException(getLocationString(), ex);
-        }
+    try {
+    return Activator.getFileCache().getURIFileCache(this);
+    } catch (InternalProcessingError ex) {
+    throw new IOException(getLocationString(), ex);
     }
-
+    }
+    
     @Override
     public IFileCache getFileCache(IAccessToken token) throws IOException, InterruptedException {
-        try {
-            return Activator.getFileCache().getURIFileCache(this, this, token);
-        } catch (InternalProcessingError ex) {
-            throw new IOException(getLocationString(), ex);
-        }
+    try {
+    return Activator.getFileCache().getURIFileCache(this, token);
+    } catch (InternalProcessingError ex) {
+    throw new IOException(getLocationString(), ex);
     }
-
+    }*/
     @Override
     public int compareTo(IURIFile o) {
         return getLocationString().compareTo(o.getLocationString());
@@ -918,11 +890,11 @@ public class URIFile implements IURIFile {
         hash = 97 * hash + (this.location != null ? this.location.hashCode() : 0);
         return hash;
     }
-    
+
     private IUsageControl getUsageControl() {
         return Activator.getBatchRessourceControl().getController(getStorageDescription()).getUsageControl();
     }
-    
+
     private IFailureControl getFailureControl() {
         return Activator.getBatchRessourceControl().getController(getStorageDescription()).getFailureControl();
     }
