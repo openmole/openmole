@@ -119,7 +119,7 @@ public class SimExplorer implements IApplication {
             /*--- get execution message and job for runtime---*/
 
            // LocalFileCache fileCache = new LocalFileCache();
-            Map<IHash, File> usedFiles = new TreeMap<IHash, File>();
+            Map<File, File> usedFiles = new TreeMap<File, File>();
             IURIFile executionMessageFile = new GZipedURIFile(new URIFile(executionMessageURI));
             IFileCache executionMesageFileCache = executionMessageFile.getFileCache();
             IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache.getFile(false));
@@ -136,7 +136,7 @@ public class SimExplorer implements IApplication {
                     throw new InternalProcessingError("Hash of a plugin does't match.");
                 }
                 
-                usedFiles.put(plugin.getHash(), inPluginDirLocalFile);
+                usedFiles.put(plugin.getSrc(), inPluginDirLocalFile);
          //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
@@ -177,15 +177,13 @@ public class SimExplorer implements IApplication {
                             local = cache;
                         }
 
-                        if(!usedFiles.containsKey(repliURI.getHash())) {
-                            usedFiles.put(repliURI.getHash(), local);
+                        if(!usedFiles.containsKey(repliURI.getSrc())) {
+                            usedFiles.put(repliURI.getSrc(), local);
                         }
                         //fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
                     
-                }
-            
-            
-            
+                }           
+    
             IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
             IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
 
@@ -193,17 +191,14 @@ public class SimExplorer implements IApplication {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
-            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserialize(jobForRuntimeFileCache.getFile(false));
+            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserializeReplaceFiles(jobForRuntimeFileCache.getFile(false), usedFiles);
 
             try {
-
-
 
                 /* --- Submit all jobs to the local environment --*/
 
                 AllFinished allFinished = new AllFinished();
                 ContextSaver saver = new ContextSaver();
-
                 
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
                    // FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
