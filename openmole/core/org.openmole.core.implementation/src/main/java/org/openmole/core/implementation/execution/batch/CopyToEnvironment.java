@@ -160,7 +160,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
             IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token, true);
             IURIFile pluginURIFile = replicatedFile.getReplica();
             
-            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Plugin uri file {0}", pluginURIFile);
+            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.INFO, "Plugin uri file {0} for file {1}", new Object[]{pluginURIFile, environmentPlugin});
             
             environmentPluginReplica.add(pluginURIFile);
         }
