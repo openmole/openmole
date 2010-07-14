@@ -25,6 +25,7 @@ import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.misc.workspace.IWorkspace;
+import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator {
 
@@ -33,13 +34,15 @@ public class Activator implements BundleActivator {
     private static IJSagaSessionService jSagaSessionService;
     private static IBatchServiceControl batchRessourceControl;
     private static IExecutorService executorService;
-    private static IURIFileCache fileCache;
 
+    ServiceRegistration reg;
+    
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
 
-        fileCache = new URIFileCache();
+        IURIFileCache fileCache = new URIFileCache();
+        reg = context.registerService(IURIFileCache.class.getName(), fileCache, null);
 
         //Activate JSAGA session bundle.
         getJSagaSessionService();
@@ -47,7 +50,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        fileCache = null;
+        reg.unregister();
     }
 
     public static IWorkspace getWorkspace() {
@@ -110,8 +113,5 @@ public class Activator implements BundleActivator {
         return context;
     }
 
-    public static IURIFileCache getFileCache() {
-        return fileCache;
-    }
 
 }
