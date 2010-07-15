@@ -228,7 +228,7 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <symbolic.name>${pom.artifactId}</symbolic.name>
         <!-- versions of libraries used -->
-        <lib.com.db4o.version>7.12-SNAPSHOT</lib.com.db4o.version>
+        <lib.com.db4o.version>7.4.58</lib.com.db4o.version>
         <lib.com.ice.tar.version>2.5</lib.com.ice.tar.version>
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.3.1</lib.com.thoughtworks.xstream.version>
