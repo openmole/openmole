@@ -198,7 +198,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                 }
             }
-            Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
+            //Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
 
             //replica.transfert(token);
             objServeur.commit();
