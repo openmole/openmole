@@ -87,7 +87,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
         final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job);
 
-        IUpdatableFuture future = Activator.getUpdater().registerForUpdate(bej, ExecutorType.UPDATE);
+        IUpdatableFuture future = Activator.getUpdater().delay(bej, ExecutorType.UPDATE);
         bej.setFuture(future);
 
         getJobRegistry().register(bej);
