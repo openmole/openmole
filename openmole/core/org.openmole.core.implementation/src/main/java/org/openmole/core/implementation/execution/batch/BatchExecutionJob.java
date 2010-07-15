@@ -134,9 +134,9 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     tryFinalise();
                     break;
             }
-
+             
             //Compute new refresh delay
-            if (oldState != state) {
+            if (oldState != getState()) {
                 this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
             } else {
                 long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
