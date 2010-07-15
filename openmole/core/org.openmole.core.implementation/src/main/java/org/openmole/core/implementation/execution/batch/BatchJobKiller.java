@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.execution.batch;
 
 import java.util.logging.Level;
@@ -26,25 +25,23 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 
 public class BatchJobKiller implements Runnable {
 
-	IBatchJob job;
-	
+    IBatchJob job;
 
-	public BatchJobKiller(IBatchJob job) {
-		super();
-		this.job = job;
-	}
+    public BatchJobKiller(IBatchJob job) {
+        super();
+        this.job = job;
+    }
 
-	@Override
-	public void run() {
-		try {
-			job.kill();
-		} catch (InternalProcessingError e) {
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING,"Could not kill job " + job.toString(), e);
-		} catch (UserBadDataError e) {
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING,"Could not kill job " + job.toString(), e);
-		}catch (InterruptedException e) {
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING,"Could not kill job " + job.toString(), e);
-		} 
-	}
-
+    @Override
+    public void run() {
+        try {
+            job.kill();
+        } catch (InternalProcessingError e) {
+            Logger.getLogger(BatchJobKiller.class.getName()).log(Level.WARNING, "Could not kill job " + job.toString(), e);
+        } catch (UserBadDataError e) {
+            Logger.getLogger(BatchJobKiller.class.getName()).log(Level.WARNING, "Could not kill job " + job.toString(), e);
+        } catch (InterruptedException e) {
+            Logger.getLogger(BatchJobKiller.class.getName()).log(Level.WARNING, "Could not kill job " + job.toString(), e);
+        }
+    }
 }

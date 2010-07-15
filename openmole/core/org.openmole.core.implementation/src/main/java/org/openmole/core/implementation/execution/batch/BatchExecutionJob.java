@@ -32,31 +32,41 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.file.URIFileCleaner;
-import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
 import org.openmole.core.model.job.IJob;
+import org.openmole.misc.updater.IUpdatableWithVariableDelay;
 import scala.Tuple2;
 
-public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatable {
+public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatableWithVariableDelay {
 
     final static String configurationGroup = BatchExecutionJob.class.getSimpleName();
-    final static ConfigurationLocation UpdateInterval = new ConfigurationLocation(configurationGroup, "UpdateInterval");
-
+    
+    final static ConfigurationLocation MinUpdateInterval = new ConfigurationLocation(configurationGroup, "MinUpdateInterval");
+    final static ConfigurationLocation MaxUpdateInterval = new ConfigurationLocation(configurationGroup, "MaxUpdateInterval");
+    final static ConfigurationLocation IncrementUpdateInterval = new ConfigurationLocation(configurationGroup, "IncrementUpdateInterval");
+   
     static {
-        Activator.getWorkspace().addToConfigurations(UpdateInterval, "PT2M");
+        Activator.getWorkspace().addToConfigurations(MinUpdateInterval, "PT2M");
+        Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
+        Activator.getWorkspace().addToConfigurations(IncrementUpdateInterval, "PT2M");
     }
+    
     IUpdatableFuture future;
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment.Result copyToEnvironmentResult = null;
+    long delay;
+    
     transient IBackgroundExecution<CopyToEnvironment.Result> copyToEnvironmentExec;
     transient IBackgroundExecution finalizeExecution;
+    
 
-    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) {
+    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError {
         super(executionEnvironment, job);
+        this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
     }
 
     public void setFuture(IUpdatableFuture future) {
@@ -106,7 +116,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     @Override
     public void update() throws InterruptedException {
-        try {
+        try {      
+            ExecutionState oldState = getState();
             ExecutionState state = updateAndGetState();
 
             switch (state) {
@@ -124,6 +135,16 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     tryFinalise();
                     break;
             }
+            
+            //Compute new refresh delay
+            if(oldState != state) {
+                this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
+            } else {
+                long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
+                if(newDelay <= Activator.getWorkspace().getPreferenceAsDurationInMs(MaxUpdateInterval)) this.delay = newDelay;
+            }
+            
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "New delay is {0}", delay);
         } catch (InternalProcessingError e) {
             kill();
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
@@ -176,7 +197,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 bj.submit(js._2());
                 setBatchJob(bj);
 
-
             } catch (InternalProcessingError e) {
                 Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
             } finally {
@@ -219,5 +239,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     @Override
     public void retry() {
         getBatchJob().setState(ExecutionState.READY);
+    }
+
+    @Override
+    public long getDelay() {
+        return delay;
     }
 }

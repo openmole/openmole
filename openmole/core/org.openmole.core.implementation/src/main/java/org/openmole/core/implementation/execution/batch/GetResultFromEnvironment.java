@@ -19,7 +19,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;

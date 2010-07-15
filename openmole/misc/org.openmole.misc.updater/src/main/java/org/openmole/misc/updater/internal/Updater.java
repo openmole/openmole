@@ -42,25 +42,35 @@ public class Updater implements IUpdater {
             }
         });
 
-        //  Activator.getFinaliser().registerForCleaning(this);
     }
-
+    
     @Override
-    public IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval) {
+    public IUpdatableFuture registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type) {
         UpdatableFuture updatableFuture = new UpdatableFuture();
-        UpdaterTask task = new UpdaterTask(updatable, this, updatableFuture, type, updateInterval);
+        UpdaterTask task = new UpdaterTask(updatable, this, updatableFuture, type);
         updatableFuture.setFuture(Activator.getExecutorService().getExecutorService(type).submit(task));
         return updatableFuture;
     }
 
     @Override
-    public IUpdatableFuture delay(final IUpdatable updatable, final ExecutorType type, long updateInterval) {
+    public IUpdatableFuture delay(final IUpdatableWithVariableDelay updatable, final ExecutorType type) {
 
         final UpdatableFuture future = new UpdatableFuture();
-        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, future, type, updateInterval);
+        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, future, type);
 
         delay(task);
         return future;
+    }
+    
+
+    @Override
+    public IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval) {
+        return registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval), type);
+    }
+
+    @Override
+    public IUpdatableFuture delay(final IUpdatable updatable, final ExecutorType type, long updateInterval) {
+        return delay(new UpdatableWithFixedDelay(updatable, updateInterval), type);
     }
 
     public void delay(final UpdaterTask updaterTask) {
