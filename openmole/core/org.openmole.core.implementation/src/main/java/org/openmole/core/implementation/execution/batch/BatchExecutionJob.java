@@ -240,7 +240,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     @Override
     public void retry() {
-        getBatchJob().setState(ExecutionState.READY);
+        setBatchJob(null);
     }
 
     @Override

@@ -161,7 +161,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
             replica = getReplica(srcPath, hash, storageDescription, environmentDescription, zipped);
            
-            //Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
+            Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
 
             
             if (replica == null) {
@@ -172,7 +172,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                 IReplica sameContent = getReplica(hash, storageDescription, environmentDescription, zipped);
                 if (sameContent != null) {
-                    //Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica with same content {0}", sameContent);
+                    Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica with same content {0}", sameContent);
                     
                     replica = new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, sameContent.getDestination());
                     insert(replica);
@@ -190,7 +190,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                         replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);
 
-                       // Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Inserted replica {0}", replica.toString());
+                        Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Inserted replica {0}", replica.toString());
                 
                     } catch (IOException e) {
                         throw new InternalProcessingError(e);
