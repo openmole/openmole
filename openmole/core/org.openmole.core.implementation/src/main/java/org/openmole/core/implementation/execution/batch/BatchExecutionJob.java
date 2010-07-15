@@ -43,30 +43,27 @@ import scala.Tuple2;
 public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob<BatchEnvironment<JS>> implements IBatchExecutionJob<BatchEnvironment<JS>>, IUpdatableWithVariableDelay {
 
     final static String configurationGroup = BatchExecutionJob.class.getSimpleName();
-    
     final static ConfigurationLocation MinUpdateInterval = new ConfigurationLocation(configurationGroup, "MinUpdateInterval");
     final static ConfigurationLocation MaxUpdateInterval = new ConfigurationLocation(configurationGroup, "MaxUpdateInterval");
     final static ConfigurationLocation IncrementUpdateInterval = new ConfigurationLocation(configurationGroup, "IncrementUpdateInterval");
-   
+
     static {
         Activator.getWorkspace().addToConfigurations(MinUpdateInterval, "PT2M");
         Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
         Activator.getWorkspace().addToConfigurations(IncrementUpdateInterval, "PT2M");
     }
-    
     IUpdatableFuture future;
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment.Result copyToEnvironmentResult = null;
     long delay;
-    
     transient IBackgroundExecution<CopyToEnvironment.Result> copyToEnvironmentExec;
     transient IBackgroundExecution finalizeExecution;
-    
 
-    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError {
+    public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError, UserBadDataError {
         super(executionEnvironment, job);
         this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
+        asynchonousCopy();
     }
 
     public void setFuture(IUpdatableFuture future) {
@@ -116,13 +113,15 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
     @Override
     public void update() throws InterruptedException {
-        try {      
+        try {
             ExecutionState oldState = getState();
             ExecutionState state = updateAndGetState();
 
             switch (state) {
                 case READY:
-                    trySubmit();
+                    if (asynchonousCopy()) {
+                        trySubmit();
+                    }
                     break;
                 case SUBMITED:
                 case RUNNING:
@@ -135,15 +134,17 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     tryFinalise();
                     break;
             }
-            
+
             //Compute new refresh delay
-            if(oldState != state) {
+            if (oldState != state) {
                 this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
             } else {
                 long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
-                if(newDelay <= Activator.getWorkspace().getPreferenceAsDurationInMs(MaxUpdateInterval)) this.delay = newDelay;
+                if (newDelay <= Activator.getWorkspace().getPreferenceAsDurationInMs(MaxUpdateInterval)) {
+                    this.delay = newDelay;
+                }
             }
-            
+
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "New delay is {0}", delay);
         } catch (InternalProcessingError e) {
             kill();
@@ -173,7 +174,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         }
     }
 
-    private void trySubmit() throws InternalProcessingError, UserBadDataError, InterruptedException {
+    private boolean asynchonousCopy() throws InternalProcessingError, UserBadDataError {
         if (copyToEnvironmentResult == null) {
             if (copyToEnvironmentExec == null) {
                 copyToEnvironmentExec = Activator.getBackgroundExecutor().createBackgroundExecution(new CopyToEnvironment(getEnvironment(), getJob()));
@@ -189,19 +190,20 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
         }
 
-        if (copyToEnvironmentResult != null) {
-            Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
-            try {
+        return copyToEnvironmentResult != null;
+    }
 
-                IBatchJob bj = js._1().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
-                bj.submit(js._2());
-                setBatchJob(bj);
+    private void trySubmit() throws InternalProcessingError, UserBadDataError, InterruptedException {
 
-            } catch (InternalProcessingError e) {
-                Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
-            } finally {
-                Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
-            }
+        Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
+        try {
+            IBatchJob bj = js._1().createBatchJob(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime);
+            bj.submit(js._2());
+            setBatchJob(bj);
+        } catch (InternalProcessingError e) {
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
+        } finally {
+            Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
         }
 
     }
