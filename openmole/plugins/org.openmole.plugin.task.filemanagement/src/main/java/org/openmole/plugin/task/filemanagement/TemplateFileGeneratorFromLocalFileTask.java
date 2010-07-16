@@ -8,7 +8,7 @@ package org.openmole.plugin.task.filemanagement;
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.aspect.caching.ChangeState;
+import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IContext;
 
 /**
@@ -19,8 +19,8 @@ public class TemplateFileGeneratorFromLocalFileTask extends TemplateFileGenerato
 
     final File template;
 
-    public TemplateFileGeneratorFromLocalFileTask(String name, File template) throws UserBadDataError, InternalProcessingError {
-        super(name);
+    public TemplateFileGeneratorFromLocalFileTask(String name, File template, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
+        super(name, outputPrototype);
         this.template = template;
     }
 

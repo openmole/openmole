@@ -45,14 +45,8 @@ public abstract class TemplateFileGeneratorTask extends Task {
     @Output
     IData<File> output;
      
-    public TemplateFileGeneratorTask(String name) throws UserBadDataError, InternalProcessingError {
+    public TemplateFileGeneratorTask(String name, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
         super(name);
-    }
-
-
-    @ChangeState
-    public void setOutputVariable(IPrototype<File> outputPrototype) {
-        output = new Data<File>(outputPrototype);
     }
 
     @Override

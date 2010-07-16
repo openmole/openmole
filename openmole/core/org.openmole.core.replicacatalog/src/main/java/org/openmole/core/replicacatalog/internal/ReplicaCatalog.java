@@ -140,6 +140,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         }
 
     }
+    
 
     synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription envDescription, final boolean zipped) {
         ObjectSet<Replica> ret = objServeur.queryByExample(new Replica(src, null, storageDescription, envDescription, zipped, null));
