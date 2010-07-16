@@ -247,14 +247,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.simexplorer.ui.ide.osgiinit</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.simexplorer.ui.ide.workflow.model</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
