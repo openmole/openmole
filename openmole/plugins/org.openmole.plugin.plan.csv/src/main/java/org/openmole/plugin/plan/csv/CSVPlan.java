@@ -37,10 +37,15 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.task.annotations.Resource;
+import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import au.com.bytecode.opencsv.CSVReader;
+import java.util.Iterator;
+import org.openmole.core.implementation.data.Data;
+import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.resource.FileResourceSet;
+import org.openmole.core.model.data.IData;
 
 /**
  *
@@ -60,7 +65,7 @@ public class CSVPlan extends Plan {
     private FileResourceSet basePaths = new FileResourceSet();
 
     private Map<Prototype<? extends File>, FileResource> pathMapping = new HashMap<Prototype<? extends File>, FileResource>();
-    private Map<String, Prototype> prototypes = new TreeMap<String, Prototype>();
+    private Map<String, IPrototype> prototypes = new TreeMap<String, IPrototype>();
 
     /**
      * Creates an intstance of CSVPlan.
@@ -87,6 +92,18 @@ public class CSVPlan extends Plan {
      */
     public void addColumn(Prototype proto) {
         prototypes.put(proto.getName(), proto);
+    }
+
+    /**
+     * 
+     * @param dataset
+     */
+    public void addColumn(DataSet dataset){
+        Iterator<IData<?>> it = dataset.iterator();
+        while(it.hasNext()){
+            IData d = it.next();
+            prototypes.put(d.getPrototype().getName(),d.getPrototype());
+        }
     }
 
     /**
