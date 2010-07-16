@@ -7,14 +7,6 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>org.openide.util</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>7.31.1.1</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.openmole.misc.clonning</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -86,7 +78,7 @@
                         <specification-version>0.3</specification-version>
                     </run-dependency>
                 </dependency>
-                 <dependency>
+                <dependency>
                     <code-name-base>org.simexplorer.ui.ide.osgiinit</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
