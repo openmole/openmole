@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.misc.updater;
 
 import org.openmole.misc.executorservice.ExecutorType;
 
 public interface IUpdater {
 
+    IUpdatableFuture registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type);
+
+    IUpdatableFuture delay(IUpdatableWithVariableDelay updatable, ExecutorType type);
+
     IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval);
 
     IUpdatableFuture delay(IUpdatable updatable, ExecutorType type, long updateInterval);
-
 }

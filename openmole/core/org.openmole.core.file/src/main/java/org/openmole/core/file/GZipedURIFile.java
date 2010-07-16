@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.file;
 
 import java.io.File;
@@ -24,39 +23,21 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.commons.tools.filecache.IFileCache;
-import org.openmole.core.file.internal.Activator;
 import org.openmole.core.model.file.IURIFile;
 
 public class GZipedURIFile extends URIFile {
-	
-	public GZipedURIFile(IURIFile file) {
-		super(file);
-	}
 
-	public InputStream openInputStream() throws IOException, InterruptedException {
-		return new GZIPInputStream(super.openInputStream());
-	}
+    public GZipedURIFile(IURIFile file) {
+        super(file);
+    }
 
-	public OutputStream openOutputStream() throws IOException, InterruptedException {
-		return new GZIPOutputStream(super.openOutputStream());
-	}
+    @Override
+    public InputStream openInputStream() throws IOException, InterruptedException {
+        return new GZIPInputStream(super.openInputStream());
+    }
 
-	
-	//@Cachable
-	@Override
-	public IFileCache cache() throws IOException, InterruptedException {
-		try {
-			File cache = Activator.getWorkspace().newTmpFile("file", "cache");
-			URIFile.copy(this, new URIFile(cache));
-			return new FileCacheDeleteOnFinalize(cache);
-		} catch (InternalProcessingError e) {
-			throw new IOException(e);
-		}
-	}
-
-
-	
+    @Override
+    public OutputStream openOutputStream() throws IOException, InterruptedException {
+        return new GZIPOutputStream(super.openOutputStream());
+    }
 }

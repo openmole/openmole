@@ -14,15 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.misc.updater;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
 public interface IUpdatable {
-	//static final long DefaultInterval = 2 * 60 * 1000;
-	
-	void update() throws InternalProcessingError, UserBadDataError, InterruptedException;
-	//long getUpdateInterval();
+
+    void update() throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

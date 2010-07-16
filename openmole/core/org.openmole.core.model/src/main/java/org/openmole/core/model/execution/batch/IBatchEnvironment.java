@@ -20,8 +20,8 @@ import java.io.File;
 import java.util.Collection;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.core.model.execution.IEnvironment;
+import scala.Tuple2;
 
 public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnvironment<IBatchExecutionJob> {
 
@@ -39,7 +39,7 @@ public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnviron
 
     IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
-    Duo<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException;
+    Tuple2<JS, IAccessToken> getAJobService() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
-    Duo<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException;
+    Tuple2<IBatchStorage, IAccessToken> getAStorage() throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

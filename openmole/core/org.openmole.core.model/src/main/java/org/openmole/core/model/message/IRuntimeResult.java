@@ -14,34 +14,37 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.message;
 
 import java.io.File;
 
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.job.IMoleJobId;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
+import scala.Tuple2;
 
 public interface IRuntimeResult extends IRuntimeMessage {
-	void setException(Throwable exception);
-	Throwable getException();
-	
-	void setStdErr(IURIFile stdErr, IHash hash);
-	Duo<IURIFile, IHash> getStdErr();
 
-	void setStdOut(IURIFile stdOut, IHash hash);
-	Duo<IURIFile, IHash> getStdOut();
-	
-	public void putResult(IMoleJobId jobId, IContext context);
-	public boolean containsResultForJob(IMoleJobId jobId);
-	public IContext getContextForJob(IMoleJobId jobId);
-	
-	Duo<IURIFile, IHash> getTarResult();
-	void setTarResult(IURIFile tarResult, IHash hash);
-	void addFileName(String hash, File filePath, boolean isDirectory);
-	Duo<File, Boolean> getFileInfoForEntry(String hash);
-	
+    void setException(Throwable exception);
+
+    Throwable getException();
+
+    void setStdErr(IURIFile stdErr, IHash hash);
+
+    Tuple2<IURIFile, IHash> getStdErr();
+
+    void setStdOut(IURIFile stdOut, IHash hash);
+
+    Tuple2<IURIFile, IHash> getStdOut();
+    
+    Tuple2<IURIFile, IHash> getTarResult();
+
+    void setTarResult(IURIFile tarResult, IHash hash);
+
+    void addFileName(String hash, File filePath, boolean isDirectory);
+
+    Tuple2<File, Boolean> getFileInfoForEntry(String hash);
+    
+    IURIFile getContextResultURI();
+    
+    void setContextResultURI(IURIFile file);
 }

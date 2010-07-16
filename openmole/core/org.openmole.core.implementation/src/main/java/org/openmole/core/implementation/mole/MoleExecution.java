@@ -38,7 +38,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.commons.tools.structure.Trio;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
 import org.openmole.core.implementation.job.Job;
@@ -54,13 +53,14 @@ import org.openmole.core.model.job.ITicket;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ILocalCommunication;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.structure.Priority;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleJobGrouping;
+import scala.Tuple2;
+import scala.Tuple3;
 
 public class MoleExecution implements IMoleExecution {
 
@@ -100,7 +100,7 @@ public class MoleExecution implements IMoleExecution {
     final IMole mole;
     final IMoleJobGrouping moleJobGrouping;
 
-    final BlockingQueue<Duo<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Duo<IJob, IEnvironment>>();
+    final BlockingQueue<Tuple2<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Tuple2<IJob, IEnvironment>>();
     final Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
 
     final AtomicLong ticketNumber = new AtomicLong();
@@ -110,7 +110,7 @@ public class MoleExecution implements IMoleExecution {
     final IEnvironmentSelection environmentSelectionStrategy;
     final IEnvironment defaultEnvironment;
     
-    final BidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
+    final BidiMap<Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
     final MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
 
     final MoleExecutionAdapterForMoleJob moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob();
@@ -177,7 +177,7 @@ public class MoleExecution implements IMoleExecution {
         if (strategy != null) {
             IMoleJobCategory category = strategy.getCategory(moleJob.getContext());
 
-            Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> key = new Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>(subMole, capsule, category);
+            Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> key = new Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>(subMole, capsule, category);
             Job job = categorizer.get(key);
             if (job == null) {
                 job = new Job();
@@ -205,7 +205,7 @@ public class MoleExecution implements IMoleExecution {
         JobRegistry.getInstance().register(job, this);
         IEnvironment environment = environmentSelectionStrategy.selectEnvironment(capsule);
         environment = environment!=null?environment:defaultEnvironment;
-        jobs.add(new Duo<IJob, IEnvironment>(job, environment));
+        jobs.add(new Tuple2<IJob, IEnvironment>(job, environment));
     }
 
     synchronized void submitGroups(ISubMoleExecution subMoleExecution) {
@@ -213,9 +213,9 @@ public class MoleExecution implements IMoleExecution {
 
         LOGGER.finer("Submit a group");
         for (Job job : jobs) {
-            Trio<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
+            Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
             subMoleExecution.decNbJobWaitingInGroup(job.size());
-            submit(job, info.getCenter());
+            submit(job, info._2());
         }
     }
 
@@ -227,16 +227,16 @@ public class MoleExecution implements IMoleExecution {
         @Override
         public void run() {
             while (!stop) {
-                Duo<IJob, IEnvironment> p;
+                Tuple2<IJob, IEnvironment> p;
                 try {
                     p = jobs.take();
                 } catch (InterruptedException e) {
                     LOGGER.log(Level.FINE, "Scheduling interrupted", e);
                     return;
                 }
-                LOGGER.log(Level.FINER, "New job taken:{0}", p.getLeft());
+                LOGGER.log(Level.FINER, "New job taken:{0}", p._1());
                 try {
-                    p.getRight().submit(p.getLeft());
+                    p._2().submit(p._1());
                 } catch (UserBadDataError e) {
                     LOGGER.log(Level.SEVERE, "Error durring scheduling", e);
                 } catch (InternalProcessingError e) {

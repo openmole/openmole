@@ -35,7 +35,6 @@ import org.openmole.core.implementation.job.Job;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.commons.tools.structure.Trio;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class LocalExecutionEnvironment extends Environment<IExecutionJob> {

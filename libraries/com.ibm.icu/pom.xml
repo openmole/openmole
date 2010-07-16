@@ -21,6 +21,7 @@
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
+            <version>${lib.com.ibm.icu.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

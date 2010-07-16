@@ -17,48 +17,49 @@
 
 package org.openmole.commons.tools.service;
 
-import org.openmole.commons.tools.structure.Duo;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import scala.Tuple2;
 
 public class LockRepository<T> {
 
-    final Map<T, Duo<Lock, Integer>> locks = new HashMap<T, Duo<Lock, Integer>>();
+    final Map<T, Tuple2<Lock, AtomicInteger>> locks = new HashMap<T, Tuple2<Lock, AtomicInteger>>();
 
     public void lock(T obj) {
-        Duo<Lock, Integer> lock;
+        Tuple2<Lock, AtomicInteger> lock;
 
         synchronized (locks) {
             lock = locks.get(obj);
 
             if (lock == null) {
-                lock = new Duo<Lock, Integer>(new ReentrantLock(), 1);
+                lock = new Tuple2<Lock, AtomicInteger>(new ReentrantLock(), new AtomicInteger(1));
                 locks.put(obj, lock);
             } else {
-                lock.setRight(lock.getRight() + 1);
+                lock._2().incrementAndGet();
             }
         }
 
-        lock.getLeft().lock();
+        lock._1().lock();
     }
 
     public void unlock(T obj) {
-        Duo<Lock, Integer> lock;
+        Tuple2<Lock, AtomicInteger> lock;
         synchronized (locks) {
             lock = locks.get(obj);
             if (lock == null) {
                 Logger.getLogger(LockRepository.class.getName()).log(Level.SEVERE, "BUG: Unlocking an object that has not been locked.");
                 return;
             }
-            lock.setRight(lock.getRight() - 1);
-            if (lock.getRight() <= 0) {
+            int value = lock._2().decrementAndGet();
+            if (value <= 0) {
                 locks.remove(obj);
             }
         }
-        lock.getLeft().unlock();
+        lock._1().unlock();
     }
 }

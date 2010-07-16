@@ -16,6 +16,7 @@
  */
 package org.openmole.core.model.task;
 
+import org.openmole.core.model.resource.IResource;
 import java.io.File;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IParameter;
@@ -27,9 +28,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.DataModeMask;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.resource.ILocalFileCache;
-import org.openmole.core.model.resource.IPortable;
-import org.openmole.core.model.resource.IResource;
 
 /**
  *
@@ -37,7 +35,7 @@ import org.openmole.core.model.resource.IResource;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface IGenericTask extends IPortable {
+public interface IGenericTask {
 
     /**
      *
@@ -93,10 +91,6 @@ public interface IGenericTask extends IPortable {
      * @throws UserBadDataError something went wrong for a reason that can be directly related to a user defined parameter
      */
     void deploy() throws InternalProcessingError, UserBadDataError;
-
-    void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError;
-
-    Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
 
     /**
      *

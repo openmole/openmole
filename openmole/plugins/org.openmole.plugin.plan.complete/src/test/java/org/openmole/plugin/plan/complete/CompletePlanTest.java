@@ -112,15 +112,11 @@ public class CompletePlanTest {
             }
             System.out.println();
         }
-        
-
-        System.out.println(expectedResult.size() + " " + result.size());
-        assertEquals(expectedResult.size(), result.size());
-        
+         
         resIt = result.iterator();
         Iterator<IFactorValues> expIt = expectedResult.iterator();
         
-        while(expIt.hasNext()) {
+        while(expIt.hasNext() && resIt.hasNext()) {
             IFactorValues curRes = resIt.next();
             IFactorValues expRes = expIt.next();
             
@@ -129,6 +125,8 @@ public class CompletePlanTest {
                 assertEquals(curRes.getValue(varName), expRes.getValue(varName));
             }
         }
+        
+        assertEquals(expIt.hasNext(), resIt.hasNext());
     }
 
 }

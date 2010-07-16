@@ -37,9 +37,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
-import org.openmole.core.implementation.resource.ComposedResource;
-import org.openmole.core.implementation.resource.FileResource;
-import org.openmole.core.model.task.annotations.Resource;
+import org.openmole.core.model.resource.IResource;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;
@@ -51,7 +49,7 @@ import static org.openmole.plugin.tools.utils.ProcessUtils.*;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class VirtualMachineResource extends ComposedResource {
+public class VirtualMachineResource implements IResource {
 
     final static ConfigurationLocation VMBootTime = new ConfigurationLocation(VirtualMachineResource.class.getSimpleName(), "VMBootTime");
 
@@ -61,8 +59,7 @@ public class VirtualMachineResource extends ComposedResource {
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
 
-    @Resource
-    final FileResource systemResource;
+    final File system;
 
     final String user;
     final String password;
@@ -90,7 +87,7 @@ public class VirtualMachineResource extends ComposedResource {
     }
 
     public VirtualMachineResource(File system, String user, String password, int memory, int vcore) {
-        this.systemResource = new FileResource(system);
+        this.system = system;
         this.user = user;
         this.password = password;
         this.memory = memory;
@@ -98,14 +95,14 @@ public class VirtualMachineResource extends ComposedResource {
     }
 
     public IVirtualMachine launchAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        if (!systemResource.getFile().isFile()) {
-            throw new UserBadDataError("Image " + systemResource.getFile().getAbsolutePath() + " doesn't exist or is not a file.");
+        if (!system.isFile()) {
+            throw new UserBadDataError("Image " + system.getAbsolutePath() + " doesn't exist or is not a file.");
         }
 
         final File vmImage;
         try {
             vmImage = workspace().newTmpFile();
-            FileUtil.copy(systemResource.getFile(), vmImage);
+            FileUtil.copy(system, vmImage);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
         }
@@ -120,7 +117,7 @@ public class VirtualMachineResource extends ComposedResource {
 
                 CommandLine commandLine = new CommandLine(new File(qemuDir, Executable));
                 commandLine.addArguments("-m " + memory + " -smp " + vcore + " -redir tcp:" + port + "::22 -nographic -hda ");
-                commandLine.addArgument(systemResource.getFile().getAbsolutePath());
+                commandLine.addArgument(system.getAbsolutePath());
                 commandLine.addArguments("-L");
                 commandLine.addArgument(qemuDir.getAbsolutePath());
                 commandLine.addArguments("-monitor null -serial none");
@@ -271,5 +268,10 @@ public class VirtualMachineResource extends ComposedResource {
 
     public String user() {
         return user;
+    }
+
+    @Override
+    public void deploy() throws InternalProcessingError, UserBadDataError {
+        
     }
 }

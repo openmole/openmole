@@ -19,10 +19,8 @@ package org.openmole.core.model.plan;
 
 import org.openmole.core.model.domain.IDomain;
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.resource.IPortable;
 
-
-public interface IFactor<T, D extends IDomain<? extends T>> extends IPortable {
+public interface IFactor<T, D extends IDomain<? extends T>> {
     D getDomain();
     IPrototype<T> getPrototype();
 }

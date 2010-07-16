@@ -29,9 +29,9 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.plugin.task.external.ExternalSystemTask;
 import org.openmole.plugin.task.netlogo.internal.Activator;
+import scala.Tuple2;
 
 /**
  *
@@ -41,8 +41,8 @@ public class NetLogoTask extends ExternalSystemTask {
 
     Iterable<String> launchingCommands;
 
-    List<Duo<IPrototype, String>> inputBinding = new LinkedList<Duo<IPrototype, String>>();
-    List<Duo<String, IPrototype>> outputBinding = new LinkedList<Duo<String, IPrototype>>();
+    List<Tuple2<IPrototype, String>> inputBinding = new LinkedList<Tuple2<IPrototype, String>>();
+    List<Tuple2<String, IPrototype>> outputBinding = new LinkedList<Tuple2<String, IPrototype>>();
 
     String relativeScriptPath;
 
@@ -75,17 +75,17 @@ public class NetLogoTask extends ExternalSystemTask {
 
                 workspace.open(script.getAbsolutePath());
                 
-                for (Duo<IPrototype, String> inBinding : getInputBinding()) {
-                    Object val = context.getLocalValue(inBinding.getLeft());
-                    workspace.command("set " + inBinding.getRight() + " " + val.toString());
+                for (Tuple2<IPrototype, String> inBinding : getInputBinding()) {
+                    Object val = context.getLocalValue(inBinding._1());
+                    workspace.command("set " + inBinding._2() + " " + val.toString());
                 }
 
                 for (String cmd : launchingCommands) {
-                    workspace.command(VariableExpansion.getInstance().expandData(context, cmd));
+                    workspace.command(VariableExpansion.expandData(context, cmd));
                 }
 
-                for (Duo<String, IPrototype> outBinding : getOutputBinding()) {
-                    context.setValue(outBinding.getRight(), workspace.report(outBinding.getLeft()));
+                for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
+                    context.setValue(outBinding._2(), workspace.report(outBinding._1()));
                 }
 
                 fetchOutputFiles(context, progress, tmpDir);
@@ -101,31 +101,21 @@ public class NetLogoTask extends ExternalSystemTask {
         }
     }
 
-/*    @Override
-    public void addInput(IPrototype prototype) {
-        addInput(prototype, prototype.getName());
-    }
-*/
-  /*  @Override
-    public void addOutput(IPrototype prototype) {
-        addOutput(prototype.getName(), prototype);
-    }
-*/
     public void addInput(IPrototype prototype, String binding) {
-        inputBinding.add(new Duo<IPrototype, String>(prototype, binding));
+        inputBinding.add(new Tuple2<IPrototype, String>(prototype, binding));
         super.addInput(prototype);
     }
 
     public void addOutput(String binding, IPrototype prototype) {
-        outputBinding.add(new Duo<String, IPrototype>(binding, prototype));
+        outputBinding.add(new Tuple2<String, IPrototype>(binding, prototype));
         super.addOutput(prototype);
     }
 
-    private List<Duo<IPrototype, String>> getInputBinding() {
+    private List<Tuple2<IPrototype, String>> getInputBinding() {
         return inputBinding;
     }
 
-    private List<Duo<String, IPrototype>> getOutputBinding() {
+    private List<Tuple2<String, IPrototype>> getOutputBinding() {
         return outputBinding;
     }
 }

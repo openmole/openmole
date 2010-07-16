@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,13 +19,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.implementation.tools.FileMigrator;
-import org.openmole.core.implementation.resource.LocalFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -31,7 +30,9 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.model.message.IRuntimeResult;
+import scala.Tuple2;
 
 /**
  *
@@ -53,9 +54,9 @@ public class GetResultFromEnvironment implements Callable<Void> {
         this.lastStatusChangeInterval = lastStatusChangeInterval;
     }
 
-     protected void successFullFinish() {
+    protected void successFullFinish() {
         environment.sample(SampleType.RUNNING, lastStatusChangeInterval, job);
-     }
+    }
 
     @Override
     public Void call() throws Exception {
@@ -63,32 +64,39 @@ public class GetResultFromEnvironment implements Callable<Void> {
         IAccessToken token = Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().waitAToken();
 
         try {
-            File resultFile = outputFile.getFileCache(token).getFile(false);
-
-            IRuntimeResult result = Activator.getMessageSerialiser().loadJarRuntimeResult(resultFile);
-
+            File resultFile = outputFile.cache(token);
+            IRuntimeResult result;
+            try {
+                result = Activator.getSerializer().deserialize(resultFile);
+            } finally {
+                resultFile.delete();
+            }
             if (result.getException() != null) {
-                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING,"Fatal exception thrown durring the execution of the job execution on the excution node", result.getException());
+                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "Fatal exception thrown durring the execution of the job execution on the excution node", result.getException());
             }
 
             if (result.getStdOut() != null) {
 
-                IURIFile stdOut = result.getStdOut().getLeft();
+                IURIFile stdOut = result.getStdOut()._1();
 
                 try {
-                    File stdOutFile = stdOut.getFileCache(token).getFile(false);
-                    IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
-                    if (!stdOutHash.equals(result.getStdOut().getRight())) {
-                        Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
-                    }
+                    File stdOutFile = stdOut.cache(token);
+                    try {
+                        IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
+                        if (!stdOutHash.equals(result.getStdOut()._2())) {
+                            Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
+                        }
 
-                    synchronized(System.out) {
-                        System.out.println("-----------------Output on remote host-----------------");
-                        FileUtil.copy(new FileInputStream(stdOutFile), System.out);
-                        System.out.println("-------------------------------------------------------");
+                        synchronized (System.out) {
+                            System.out.println("-----------------Output on remote host-----------------");
+                            FileUtil.copy(new FileInputStream(stdOutFile), System.out);
+                            System.out.println("-------------------------------------------------------");
+                        }
+                    } finally {
+                        stdOutFile.delete();
                     }
                 } catch (IOException e) {
-                   Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
+                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
                 }
 
             } else {
@@ -96,17 +104,21 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             if (result.getStdErr() != null) {
-                IURIFile stdErr = result.getStdErr().getLeft();
+                IURIFile stdErr = result.getStdErr()._1();
                 try {
-                    File stdErrFile = stdErr.getFileCache(token).getFile(false);
-                    IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
-                    if (!stdErrHash.equals(result.getStdErr().getRight())) {
-                        Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
-                    }
-                    synchronized(System.err) {
-                        System.err.println("-----------Error output on remote host------------------");
-                        FileUtil.copy(new FileInputStream(stdErrFile), System.err);
-                        System.err.println("--------------------------------------------------------");
+                    File stdErrFile = stdErr.cache(token);
+                    try {
+                        IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
+                        if (!stdErrHash.equals(result.getStdErr()._2())) {
+                            Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
+                        }
+                        synchronized (System.err) {
+                            System.err.println("-----------Error output on remote host------------------");
+                            FileUtil.copy(new FileInputStream(stdErrFile), System.err);
+                            System.err.println("--------------------------------------------------------");
+                        }
+                    } finally {
+                        stdErrFile.delete();
                     }
                 } catch (IOException e) {
                     Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
@@ -119,81 +131,97 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 throw new InternalProcessingError("TarResult uri result was null.");
             }
 
-            IURIFile tarResult = result.getTarResult().getLeft();
-            File tarResultFile = tarResult.getFileCache(token).getFile(false);
-            IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
-            if (!tarResulHash.equals(result.getTarResult().getRight())) {
-                throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
-            }
+            IURIFile tarResult = result.getTarResult()._1();
+            Map<File, File> fileReplacement = new TreeMap<File, File>();
 
-            LocalFileCache fileCache = new LocalFileCache();
+
+            File tarResultFile = tarResult.cache(token);
 
             try {
-
-                TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
+                IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
+                if (!tarResulHash.equals(result.getTarResult()._2())) {
+                    throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
+                }
 
                 try {
-                    File destDir = Activator.getWorkspace().newTmpDir("tarResult");
+                    TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
 
-                    TarArchiver unZip = new TarArchiver();
-                    ArchiveEntry te;
+                    try {
+                        File destDir = Activator.getWorkspace().newTmpDir("tarResult");
 
-                    while ((te = tis.getNextEntry()) != null) {
-                        File dest = new File(destDir, te.getName());
-                        dest.deleteOnExit();
+                        TarArchiver unZip = new TarArchiver();
+                        ArchiveEntry te;
 
-                        FileOutputStream os = new FileOutputStream(dest);
+                        while ((te = tis.getNextEntry()) != null) {
+                            File dest = new File(destDir, te.getName());
+                            dest.deleteOnExit();
 
-                        try {
-                            FileUtil.copy(tis, os);
-                        } finally {
-                            os.close();
-                        }
+                            FileOutputStream os = new FileOutputStream(dest);
 
-                        Duo<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
-                        if (fileInfo == null) {
-                            throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
-                        }
-
-                        File file;
-
-
-                        if (fileInfo.getRight()) {
-                            file = Activator.getWorkspace().newTmpDir("tarResult");
-                            
-                            InputStream destIn = new FileInputStream(dest);
                             try {
-                                unZip.extractDirArchiveWithRelativePath(file, destIn);
+                                FileUtil.copy(tis, os);
                             } finally {
-                                destIn.close();
+                                os.close();
                             }
 
-                        } else {
-                            file = dest;
-                        }
+                            Tuple2<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
+                            if (fileInfo == null) {
+                                throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
+                            }
 
-                        fileCache.fillInLocalFileCache(fileInfo.getLeft(), file);
+                            File file;
+
+                            if (fileInfo._2()) {
+                                file = Activator.getWorkspace().newTmpDir("tarResult");
+
+                                InputStream destIn = new FileInputStream(dest);
+                                try {
+                                    unZip.extractDirArchiveWithRelativePath(file, destIn);
+                                } finally {
+                                    destIn.close();
+                                }
+
+                            } else {
+                                file = dest;
+                            }
+
+                            fileReplacement.put(fileInfo._1(), file);
+                        }
+                    } finally {
+                        tis.close();
                     }
-                } finally {
-                    tis.close();
+                } catch (IOException e) {
+                    throw new InternalProcessingError(e);
                 }
-            } catch (IOException e) {
-                throw new InternalProcessingError(e);
+            } finally {
+                tarResultFile.delete();
+            }
+            //Download and deserialize the context results
+            IURIFile contextResultsFile = result.getContextResultURI();
+            if (contextResultsFile == null) {
+                throw new InternalProcessingError("Context results URI was null");
+            }
+
+            File contextResutsFileCache = contextResultsFile.cache(token);
+            IContextResults contextResults;
+            try {
+                contextResults = Activator.getSerializer().deserializeReplaceFiles(contextResutsFileCache, fileReplacement);
+            } finally {
+                contextResutsFileCache.delete();
             }
 
             int successfull = 0;
-            
+
             //Try to download the results for all the jobs of the group
             for (IMoleJob moleJob : getJob().getMoleJobs()) {
-                if (result.containsResultForJob(moleJob.getId())) {
+                if (contextResults.containsResultForJob(moleJob.getId())) {
 
-                    IContext context = result.getContextForJob(moleJob.getId());
-                    FileMigrator.initFilesInVariables(context, fileCache);
+                    IContext context = contextResults.getContextForJob(moleJob.getId());
+                    //  FileMigrator.initFilesInVariables(context, fileCache);
 
                     synchronized (moleJob) {
                         if (!moleJob.isFinished()) {
                             try {
-
                                 moleJob.rethrowException(context);
                                 try {
                                     moleJob.finished(context);
@@ -214,7 +242,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
 
             //If sucessfull for full group update stats
             if (successfull == job.size()) {
-                   successFullFinish();
+                successFullFinish();
             }
 
         } finally {

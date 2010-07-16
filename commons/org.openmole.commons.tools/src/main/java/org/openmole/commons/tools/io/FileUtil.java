@@ -35,7 +35,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.openmole.commons.tools.pattern.BufferFactory;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple1;
+import scala.Tuple2;
 
 public class FileUtil {
 
@@ -119,20 +120,20 @@ public class FileUtil {
     }
 
     public static void copy(File fromF, File toF) throws IOException {
-        Queue<Duo<File, File>> toCopy = new LinkedList<Duo<File, File>>();
-        toCopy.offer(new Duo<File, File>(fromF, toF));
+        Queue<Tuple2<File, File>> toCopy = new LinkedList<Tuple2<File, File>>();
+        toCopy.offer(new Tuple2<File, File>(fromF, toF));
 
         while (!toCopy.isEmpty()) {
-            Duo<File, File> cur = toCopy.poll();
-            File curFrom = cur.getLeft();
-            File curTo = cur.getRight();
+            Tuple2<File, File> cur = toCopy.poll();
+            File curFrom = cur._1();
+            File curTo = cur._2();
             if (curFrom.isDirectory()) {
 
                 curTo.mkdir();
 
                 for (File child : curFrom.listFiles()) {
                     File to = new File(curTo, child.getName());
-                    toCopy.offer(new Duo<File, File>(child, to));
+                    toCopy.offer(new Tuple2<File, File>(child, to));
                 }
             } else {
                 copyFile(curFrom, curTo);

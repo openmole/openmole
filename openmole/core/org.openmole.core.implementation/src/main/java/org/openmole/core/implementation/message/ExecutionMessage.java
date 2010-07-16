@@ -16,11 +16,11 @@
  */
 package org.openmole.core.implementation.message;
 
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
+import scala.Tuple2;
 
 /**
  *
@@ -28,12 +28,16 @@ import org.openmole.core.model.message.IReplicatedFile;
  */
 public class ExecutionMessage implements IExecutionMessage {
 
-    Iterable<IReplicatedFile> plugins;
-    Duo<IURIFile, IHash> jobForRuntime;
+    final Iterable<IReplicatedFile> plugins;
+    final Iterable<IReplicatedFile> files;
+    final Tuple2<IURIFile, IHash> jobForRuntime;
+    final IURIFile communicationDir;
 
-    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Duo<IURIFile, IHash> jobForRuntime) {
+    public ExecutionMessage(Iterable<IReplicatedFile> plugins, Iterable<IReplicatedFile> files, Tuple2<IURIFile, IHash> jobForRuntime, IURIFile communicationDir) {
         this.plugins = plugins;
+        this.files = files;
         this.jobForRuntime = jobForRuntime;
+        this.communicationDir = communicationDir;
     }
 
     @Override
@@ -42,8 +46,18 @@ public class ExecutionMessage implements IExecutionMessage {
     }
 
     @Override
-    public Duo<IURIFile, IHash> getJobForRuntimeURI() {
+    public Tuple2<IURIFile, IHash> getJobForRuntimeURI() {
         return jobForRuntime;
+    }
+
+    @Override
+    public Iterable<IReplicatedFile> getFiles() {
+        return files;
+    }
+
+    @Override
+    public IURIFile getCommunicationDir() {
+        return communicationDir;
     }
 
 }

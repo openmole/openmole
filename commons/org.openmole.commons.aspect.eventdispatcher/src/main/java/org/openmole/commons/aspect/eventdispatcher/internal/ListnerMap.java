@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple2;
 
 /**
  *
@@ -17,21 +17,21 @@ import org.openmole.commons.tools.structure.Duo;
  */
 public class ListnerMap<K, T> {
 
-    final Map<K, List<Duo<Integer,T>>> listnerMap = new WeakHashMap<K, List<Duo<Integer,T>>>();
+    final Map<K, List<Tuple2<Integer,T>>> listnerMap = new WeakHashMap<K, List<Tuple2<Integer,T>>>();
 
-    List<Duo<Integer,T>> getOrCreateListners(K object) {
+    List<Tuple2<Integer,T>> getOrCreateListners(K object) {
         synchronized (listnerMap) {
-            List<Duo<Integer,T>> listners = listnerMap.get(object);
+            List<Tuple2<Integer,T>> listners = listnerMap.get(object);
             if (listners == null) {
-                listners = new LinkedList<Duo<Integer,T>>();
+                listners = new LinkedList<Tuple2<Integer,T>>();
                 listnerMap.put(object, listners);
             }
             return listners;
         }
     }
 
-    Iterable<Duo<Integer,T>> getListners(K object) {
-        Iterable<Duo<Integer,T>> ret;
+    Iterable<Tuple2<Integer,T>> getListners(K object) {
+        Iterable<Tuple2<Integer,T>> ret;
 
         synchronized (listnerMap) {
             ret = listnerMap.get(object);
@@ -45,10 +45,10 @@ public class ListnerMap<K, T> {
     }
 
     void registerListner(K object, Integer priority, T listner) {
-        List<Duo<Integer,T>> listners = getOrCreateListners(object);
+        List<Tuple2<Integer,T>> listners = getOrCreateListners(object);
 
         synchronized (listners) {
-            listners.add(new Duo<Integer, T>(priority, listner));
+            listners.add(new Tuple2<Integer, T>(priority, listner));
         }
     }
 }

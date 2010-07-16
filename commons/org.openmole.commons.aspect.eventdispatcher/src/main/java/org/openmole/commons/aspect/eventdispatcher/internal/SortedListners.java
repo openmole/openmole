@@ -17,7 +17,6 @@
 
 package org.openmole.commons.aspect.eventdispatcher.internal;
 
-import org.openmole.commons.tools.structure.Duo;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import scala.Tuple2;
 
 /**
  *
@@ -48,9 +48,9 @@ public class SortedListners<T> implements Iterable<T> {
         }
     }
 
-    public void registerAllListners(Iterable<? extends Duo<Integer, ? extends T>> listeners) {
-        for(Duo<Integer, ? extends T> listener : listeners) {
-            registerListner(listener.getLeft(), listener.getRight());
+    public void registerAllListners(Iterable<? extends Tuple2<Integer, ? extends T>> listeners) {
+        for(Tuple2<Integer, ? extends T> listener : listeners) {
+            registerListner(listener._1(), listener._2());
         }
     }
 

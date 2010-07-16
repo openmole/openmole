@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
-import org.openmole.core.runtimemessageserializer.IRuntimeMessageSerializer;
+import org.openmole.core.serializer.ISerializer;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -33,7 +33,7 @@ public class Activator implements BundleActivator {
 
 	private static BundleContext context;
 	private static IUpdater updater;
-	private static IRuntimeMessageSerializer messageSerializer;
+	private static ISerializer messageSerializer;
 	private static IReplicaCatalog replicaCatalog;
 	private static IWorkspace workspace;
 	private static IJSagaSessionService jSagaSessionService;
@@ -83,10 +83,10 @@ public class Activator implements BundleActivator {
 		return updater;
 	}
 	
-	public synchronized static IRuntimeMessageSerializer getMessageSerialiser() {
+	public synchronized static ISerializer getMessageSerialiser() {
 		if(messageSerializer == null) {
-			ServiceReference ref = getContext().getServiceReference(IRuntimeMessageSerializer.class.getName());
-			messageSerializer = (IRuntimeMessageSerializer) getContext().getService(ref);
+			ServiceReference ref = getContext().getServiceReference(ISerializer.class.getName());
+			messageSerializer = (ISerializer) getContext().getService(ref);
 		}
 		return messageSerializer;
 	}

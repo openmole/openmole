@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.message;
 
 import java.io.File;
@@ -22,9 +21,13 @@ import java.io.File;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.io.IHash;
 
-public interface IReplicatedFile  {
-	File getSrc();
-        boolean isDirectory();
-	IURIFile getReplica();
-	IHash getHash();
+public interface IReplicatedFile {
+
+    File getSrc();
+
+    boolean isDirectory();
+
+    IURIFile getReplica();
+
+    IHash getHash();
 }

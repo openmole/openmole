@@ -67,9 +67,11 @@ public class BatchJobWatcher implements IUpdatable {
                     for (final IBatchExecutionJob<?> ej : registry.getExecutionJobsFor(job)) {
                         switch (ej.getState()) {
                             case FAILED:
-                                ej.kill();
+                                ej.retry();
+                                break;
                             case KILLED:
                                 executionJobsToRemove.add(ej);
+                                break;
                         }
                     }
 

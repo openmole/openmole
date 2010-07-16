@@ -24,6 +24,7 @@
         <module>org.openmole.misc.backgroundexecutor</module>
 	<module>org.openmole.misc.math</module>
 	<module>org.openmole.misc.logging</module>
+        <module>org.openmole.misc.fileservice</module>
     </modules>
 
     <!-- ************************************************************* -->

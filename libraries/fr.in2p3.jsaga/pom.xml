@@ -21,36 +21,43 @@
         <dependency>
             <groupId>fr.in2p3.jsaga</groupId>
             <artifactId>jsaga-engine</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-classic</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-voms</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-globus</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-srm</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-wms</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
        	<dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-ssh</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

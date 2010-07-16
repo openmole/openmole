@@ -130,7 +130,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                     for (Replica rep : set) {
                         build.append(rep.toString()).append(';');
                     }
-                    Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.WARNING, "Replica catalog corrupted (going to be repared), " + set.size() + " records: " + build.toString());
+                    Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.WARNING, "Replica catalog corrupted (going to be repared), {0} records: {1}", new Object[]{set.size(), build.toString()});
 
                     replica = fix(set, objectContainer);
             }
@@ -140,6 +140,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         }
 
     }
+    
 
     synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription envDescription, final boolean zipped) {
         ObjectSet<Replica> ret = objServeur.queryByExample(new Replica(src, null, storageDescription, envDescription, zipped, null));
@@ -160,13 +161,20 @@ public class ReplicaCatalog implements IReplicaCatalog {
             IBatchEnvironmentDescription environmentDescription = storage.getBatchExecutionEnvironmentDescription();
 
             replica = getReplica(srcPath, hash, storageDescription, environmentDescription, zipped);
+           
+       //     Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
+
+            
             if (replica == null) {
+                                
                 for (Replica toClean : getReplica(srcPath, storageDescription, environmentDescription, zipped)) {
                     clean(toClean);
                 }
 
                 IReplica sameContent = getReplica(hash, storageDescription, environmentDescription, zipped);
                 if (sameContent != null) {
+           //         Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica with same content {0}", sameContent);
+                    
                     replica = new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, sameContent.getDestination());
                     insert(replica);
                 } else {
@@ -178,20 +186,20 @@ public class ReplicaCatalog implements IReplicaCatalog {
                             newFile = new GZipedURIFile(newFile);
                         }
 
-                        URIFile.copy(new URIFile(src), newFile, token);
+                        URIFile.copy(src, newFile, token);
 
                         replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
                         insert(replica);
 
-                      //  Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.INFO, "Uploaded replica " + replica.toString());
-
-
+           //             Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Inserted replica {0}", replica.toString());
+                
                     } catch (IOException e) {
                         throw new InternalProcessingError(e);
                     }
 
                 }
             }
+            //Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
 
             //replica.transfert(token);
             objServeur.commit();
@@ -329,6 +337,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         //configuration.objectClass(Replica.class).cascadeOnUpdate(true);
         // configuration.objectClass(Replica.class).cascadeOnActivate(true);
 
+        configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);

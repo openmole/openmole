@@ -24,7 +24,6 @@ import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.task.IMoleTask;
-import org.openmole.commons.tools.structure.Trio;
 import org.openmole.core.model.job.State;
 
 public class LocalExecuter implements Runnable {

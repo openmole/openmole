@@ -19,7 +19,6 @@ package org.openmole.core.implementation.resource;
 
 import java.io.File;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.resource.ILocalFileCache;
 import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -30,7 +29,7 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public class PluginResource implements IResource {
 
-    FileResource plugin;
+    final File plugin;
 
     public PluginResource(String fileLocation) {
         this(new File(fileLocation));
@@ -38,23 +37,12 @@ public class PluginResource implements IResource {
 
 
     public PluginResource(File file) {
-        this.plugin = new FileResource(file);
-    }
-
-    @Override
-    public void relocate(ILocalFileCache localFileCache) throws InternalProcessingError, UserBadDataError {
-        plugin.relocate(localFileCache);
+        this.plugin = file;
     }
 
     @Override
     public void deploy() throws InternalProcessingError, UserBadDataError {
-        plugin.deploy();
-        Activator.getPluginManager().load(plugin.getFile());
-    }
-
-    @Override
-    public Iterable<File> getFiles() {
-        return plugin.getFiles();
+        Activator.getPluginManager().load(plugin);
     }
 
 }

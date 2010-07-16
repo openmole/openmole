@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.message;
 
 import java.io.File;
@@ -22,87 +21,81 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.job.IMoleJobId;
-import org.openmole.commons.tools.structure.Duo;
-import org.openmole.commons.tools.io.IHash;
 
+import org.openmole.core.model.message.IRuntimeResult;
+import org.openmole.commons.tools.io.IHash;
+import scala.Tuple2;
 
 public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
 
-	Duo<IURIFile, IHash> stdOut;
-	Duo<IURIFile, IHash> stdErr;
-	Duo<IURIFile, IHash> tarResult;
+    Tuple2<IURIFile, IHash> stdOut;
+    Tuple2<IURIFile, IHash> stdErr;
+    Tuple2<IURIFile, IHash> tarResult;
+    
+    Throwable exception;
+    Map<String, Tuple2<File, Boolean>> files = new TreeMap<String, Tuple2<File, Boolean>>();
 
-	Throwable exception;
+    IURIFile contextResultURI;
+    
+    
+    @Override
+    public Tuple2<IURIFile, IHash> getStdOut() {
+        return stdOut;
+    }
 
-	Map<IMoleJobId,IContext> results = new TreeMap<IMoleJobId,IContext>();
-	Map<String, Duo<File, Boolean>> files = new TreeMap<String, Duo<File, Boolean>>();
-	
+    @Override
+    public void setStdOut(IURIFile stdOut, IHash hash) {
+        this.stdOut = new Tuple2<IURIFile, IHash>(stdOut, hash);
+    }
 
-	@Override
-	public Duo<IURIFile, IHash> getStdOut() {
-		return stdOut;
-	}
+    @Override
+    public Tuple2<IURIFile, IHash> getStdErr() {
+        return stdErr;
+    }
 
-	@Override
-	public void setStdOut(IURIFile stdOut, IHash hash) {
-		this.stdOut = new Duo<IURIFile, IHash>(stdOut, hash);
-	}
+    @Override
+    public void setStdErr(IURIFile stdErr, IHash hash) {
+        this.stdErr = new Tuple2<IURIFile, IHash>(stdErr, hash);
+    }
 
-	@Override
-	public Duo<IURIFile, IHash> getStdErr() {
-		return stdErr;
-	}
+    @Override
+    public Throwable getException() {
+        return exception;
+    }
 
-	@Override
-	public void setStdErr(IURIFile stdErr, IHash hash) {
-		this.stdErr = new Duo<IURIFile, IHash>(stdErr, hash);
-	}
-	@Override
-	public Throwable getException() {
-		return exception;
-	}
+    @Override
+    public void setException(Throwable exception) {
+        this.exception = exception;
+    }
 
-	@Override
-	public void setException(Throwable exception) {
-		this.exception = exception;
-	}
+    @Override
+    public Tuple2<IURIFile, IHash> getTarResult() {
+        return tarResult;
+    }
 
-	@Override
-	public IContext getContextForJob(IMoleJobId jobId) {
-		return results.get(jobId);
-	}
+    @Override
+    public void setTarResult(IURIFile tarResult, IHash hash) {
+        this.tarResult = new Tuple2<IURIFile, IHash>(tarResult, hash);
+    }
 
-	@Override
-	public void putResult(IMoleJobId jobId, IContext context) {
-		results.put(jobId, context);
-	}
+    @Override
+    public void addFileName(String hash, File filePath, boolean isDirectory) {
+        files.put(hash, new Tuple2<File, Boolean>(filePath, isDirectory));
+    }
 
-	@Override
-	public boolean containsResultForJob(IMoleJobId jobId) {
-		return results.containsKey(jobId);
-	}
+    @Override
+    public Tuple2<File, Boolean> getFileInfoForEntry(String hash) {
+        return files.get(hash);
+    }
 
-	@Override
-	public Duo<IURIFile, IHash> getTarResult() {
-		return tarResult;
-	}
+    @Override
+    public IURIFile getContextResultURI() {
+        return contextResultURI;
+    }
 
-	@Override
-	public void setTarResult(IURIFile tarResult, IHash hash) {
-		this.tarResult = new Duo<IURIFile, IHash>(tarResult, hash);
-	}
-
-	@Override
-	public void addFileName(String hash, File filePath, boolean isDirectory) {
-		files.put(hash, new Duo<File, Boolean>(filePath, isDirectory));
-	}
-
-	@Override
-	public Duo<File, Boolean> getFileInfoForEntry(String hash) {
-		return files.get(hash);
-	}
+    @Override
+    public void setContextResultURI(IURIFile file) {
+       this.contextResultURI = file;
+    }
 
 }

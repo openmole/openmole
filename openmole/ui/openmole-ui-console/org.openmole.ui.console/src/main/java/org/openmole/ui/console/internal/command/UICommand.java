@@ -17,12 +17,11 @@
 
 package org.openmole.ui.console.internal.command;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.codehaus.groovy.tools.shell.CommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
-import org.openmole.commons.tools.structure.Duo;
+import scala.Tuple2;
 
 /**
  *
@@ -34,7 +33,7 @@ public abstract class UICommand extends CommandSupport  {
         super(shell, string, string1);
     }
 
-    protected Duo<Object, String[]> getArgs(List<String> objs) {
+    protected Tuple2<Object, String[]> getArgs(List<String> objs) {
         Iterator<String> it = objs.iterator();
         Object obj = shell.execute(it.next());
 
@@ -45,7 +44,7 @@ public abstract class UICommand extends CommandSupport  {
             args[i++] = it.next();
         }
 
-        return new Duo<Object, String[]>(obj, args);
+        return new Tuple2<Object, String[]>(obj, args);
     }
 
 }

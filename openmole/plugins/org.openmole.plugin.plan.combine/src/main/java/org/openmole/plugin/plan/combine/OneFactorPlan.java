@@ -23,7 +23,6 @@ import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.plan.IPlan;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.plan.FactorsValues;
@@ -69,11 +68,6 @@ public class OneFactorPlan implements IPlan {
                 };
             }
         };
-    }
-
-    @Override
-    public Iterable<IResource> getResources() throws InternalProcessingError, UserBadDataError {
-        return factor.getResources();
     }
 
 }

@@ -25,7 +25,8 @@ import org.openmole.plugin.tools.code.IContextToCode;
 import org.openmole.plugin.tools.code.FileSourceCode;
 import java.io.File;
 import java.io.IOException;
-import org.openmole.core.implementation.resource.FileResourceSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -40,8 +41,7 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
 
     private T contextToCode;
     
-    @Resource
-    private FileResourceSet libs = new FileResourceSet();
+    private Set<File> libs = new TreeSet<File>();
 
     public CodeTask(String name, T contextToCode) throws UserBadDataError, InternalProcessingError {
         super(name);
@@ -54,7 +54,7 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
             File pwd = Activator.getWorkspace().newTmpDir();
             prepareInputFiles(context, progress, pwd.getCanonicalFile());
 
-            contextToCode.execute(context, progress, getOutput(), libs.getFiles());
+            contextToCode.execute(context, progress, getOutput(), libs);
             
             fetchOutputFiles(context, progress, pwd.getCanonicalFile());
         } catch (IOException e) {
@@ -85,11 +85,11 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
 
     @ChangeState
     public synchronized void addLib(File lib) {
-        libs.addFile(lib);
+        libs.add(lib);
     }
 
     public void addLib(String lib) {
-        libs.addFile(new File(lib));
+        addLib(new File(lib));
     }
 
 }

@@ -23,6 +23,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -35,28 +37,27 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.file.GZipedURIFile;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.implementation.tools.FileMigrator;
 import org.openmole.core.implementation.message.RuntimeResult;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.core.model.job.IContext;
 import org.openmole.runtime.internal.Activator;
 import org.openmole.commons.tools.io.FileUtil;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 
 import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
-import org.openmole.core.implementation.resource.LocalFileCache;
-import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.structure.Priority;
+import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.message.IContextResults;
+import org.openmole.core.serializer.ISerializationResult;
+import scala.collection.Iterator;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
@@ -93,10 +94,11 @@ public class SimExplorer implements IApplication {
 
         /* get env and init */
         IURIFile envFile = new GZipedURIFile(new URIFile(new File(environmentDescription)));
-        IFileCache envFileCache = envFile.getFileCache();
-        IBatchEnvironmentDescription real = Activator.getEnvironmentDescriptionSerializer().deserialize(envFileCache.getFile(false));
+        File envFileCache = envFile.cache();
+        IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFileCache);
+        envFileCache.delete();
         real.createBatchEnvironmentAuthentication().initializeAccess();
-      
+
         PrintStream oldOut = System.out;
         PrintStream oldErr = System.err;
 
@@ -117,91 +119,115 @@ public class SimExplorer implements IApplication {
 
             /*--- get execution message and job for runtime---*/
 
-            LocalFileCache fileCache = new LocalFileCache();
-
+            // LocalFileCache fileCache = new LocalFileCache();
+            Map<File, File> usedFiles = new TreeMap<File, File>();
             IURIFile executionMessageFile = new GZipedURIFile(new URIFile(executionMessageURI));
-            IFileCache executionMesageFileCache = executionMessageFile.getFileCache();
-            IExecutionMessage executionMessage = Activator.getMessageSerialiser().loadExecutionMessage(executionMesageFileCache.getFile(false));
-
+            File executionMesageFileCache = executionMessageFile.cache();
+            IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache);
+            executionMesageFileCache.delete();
+            
             File pluginDir = Activator.getWorkspace().newTmpDir();
 
             for (IReplicatedFile plugin : executionMessage.getPlugins()) {
-                IFileCache replicaFileCache = plugin.getReplica().getFileCache();
-               
+                File replicaFileCache = plugin.getReplica().cache();
+
                 File inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir);
-                replicaFileCache.getFile(true).renameTo(inPluginDirLocalFile);
+                replicaFileCache.renameTo(inPluginDirLocalFile);
 
                 if (!Activator.getHashService().computeHash(inPluginDirLocalFile).equals(plugin.getHash())) {
                     throw new InternalProcessingError("Hash of a plugin does't match.");
                 }
-                fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
+
+                usedFiles.put(plugin.getSrc(), inPluginDirLocalFile);
+  
+                //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
             Activator.getPluginManager().loadDir(pluginDir);
 
-            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI().getLeft();
-            IFileCache jobForRuntimeFileCache = jobForRuntimeFile.getFileCache();
 
-            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache.getFile(false)).equals(executionMessage.getJobForRuntimeURI().getRight())) {
+            /* --- Download the files for the local file cache ---*/
+            TarArchiver archiver = new TarArchiver();
+
+            for (IReplicatedFile repliURI : executionMessage.getFiles()) {
+
+                //To avoid getting twice the same plugin with different path
+                if (!usedFiles.containsKey(repliURI.getSrc())) {
+
+                    File cache = repliURI.getReplica().cache();
+
+                    IHash cacheHash = Activator.getHashService().computeHash(cache);
+
+                    if (!cacheHash.equals(repliURI.getHash())) {
+                        throw new InternalProcessingError("Hash is incorrect for file " + repliURI.getSrc().toString() + " replicated at " + repliURI.getReplica().toString());
+                    }
+
+                    File local;
+                    if (repliURI.isDirectory()) {
+                        local = Activator.getWorkspace().newTmpDir("dirReplica");
+                        InputStream is = new FileInputStream(cache);
+
+                        try {
+                            archiver.extractDirArchiveWithRelativePath(local, is);
+                        } finally {
+                            is.close();
+                        }
+                    } else {
+                        local = cache;
+                    }
+
+                    usedFiles.put(repliURI.getSrc(), local);
+                    //fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
+                }
+            }
+
+            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
+            File jobForRuntimeFileCache = jobForRuntimeFile.cache();
+
+            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache).equals(executionMessage.getJobForRuntimeURI()._2())) {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
-            IJobForRuntime jobForRuntime = Activator.getMessageSerialiser().loadJobForRuntime(jobForRuntimeFileCache.getFile(false));
-
+            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserializeReplaceFiles(jobForRuntimeFileCache, usedFiles);
+            jobForRuntimeFileCache.delete();
+            
             try {
-                /* --- Download the files for the local file cache ---*/
-                TarArchiver archiver = new TarArchiver();
-
-
-                for (IReplicatedFile repliURI : jobForRuntime.getConsumedFiles()) {
-
-                    //To avoid getting twice the same plugin with different path
-                    if (!fileCache.containsCacheFor(repliURI.getSrc())) {
-                        IFileCache replicaFileCache = repliURI.getReplica().getFileCache();
-
-                        File cache = replicaFileCache.getFile(false);
-                        IHash cacheHash = Activator.getHashService().computeHash(cache);
-
-                        if (!cacheHash.equals(repliURI.getHash())) {
-                            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.getSrc().toString() + " replicated at " + repliURI.getReplica().toString());
-                        }
-
-                        File local;
-                        if (repliURI.isDirectory()) {
-                            local = Activator.getWorkspace().newTmpDir("dirReplica");
-                            InputStream is = new FileInputStream(cache);
-
-                            try {
-                                archiver.extractDirArchiveWithRelativePath(local, is);
-                            } finally {
-                                is.close();
-                            }
-                        } else {
-                            local = cache;
-                        }
-
-                        fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
-                    }
-                }
-
 
                 /* --- Submit all jobs to the local environment --*/
 
                 AllFinished allFinished = new AllFinished();
                 ContextSaver saver = new ContextSaver();
 
-                
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
-                    FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
-                    toProcess.getTask().relocate(fileCache);
+                    // FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
+                    // toProcess.getTask().relocate(fileCache);
 
-                    Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.stateChanged);
+                    Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged);
                     allFinished.registerJob(toProcess);
 
                     LocalExecutionEnvironment.getInstance().submit(toProcess);
                 }
 
                 allFinished.waitAllFinished();
+
+                IContextResults contextResults = new ContextResults(saver.getResults());
+                final File contextResultFile = Activator.getWorkspace().newTmpFile();
+
+                final ISerializationResult serializationResult = Activator.getSerialiser().serializeAndGetPluginClassAndFiles(contextResults, contextResultFile);
+
+                final IURIFile uploadedcontextResults = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+
+                retry(new Callable<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        URIFile.copy(contextResultFile, uploadedcontextResults);
+                        return null;
+                    }
+                }, NbRetry);
+
+                result.setContextResultURI(uploadedcontextResults);
+                contextResultFile.delete();
 
                 /*-- Tar the result files --*/
 
@@ -211,8 +237,7 @@ public class SimExplorer implements IApplication {
                 tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
                 try {
-                    for (File file : saver.getOutFiles()) {
-
+                    for (File file : serializationResult.getFiles()) {
                         StringInputStream is = new StringInputStream(file.getCanonicalPath());
 
                         IHash hash;
@@ -254,26 +279,23 @@ public class SimExplorer implements IApplication {
                     tos.close();
                 }
 
-                final IURIFile uploadedTar = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+
+                final IURIFile uploadedTar = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
 
 
                 /*-- Try 3 times to write the result --*/
-               
-                retry(new Callable<Void>(){
+
+                retry(new Callable<Void>() {
+
                     @Override
                     public Void call() throws Exception {
-                        new URIFile(tarResult).copy(uploadedTar);
+                        URIFile.copy(tarResult, uploadedTar);
                         return null;
                     }
-                }, NbRetry);    
-                   
+                }, NbRetry);
 
                 result.setTarResult(uploadedTar, Activator.getHashService().computeHash(tarResult));
                 tarResult.delete();
-
-                for (Duo<IMoleJobId, IContext> res : saver.getResults()) {
-                    result.putResult(res.getLeft(), res.getRight());
-                }
 
             } finally {
                 outSt.close();
@@ -282,10 +304,10 @@ public class SimExplorer implements IApplication {
                 System.setOut(oldOut);
                 System.setErr(oldErr);
 
-                IURIFile output = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("output", ".txt"));
+                IURIFile output = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
                 new URIFile(out).copy(output);
 
-                IURIFile errout = new GZipedURIFile(jobForRuntime.getCommunicationDir().newFileInDir("outputError", ".txt"));
+                IURIFile errout = new GZipedURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
                 new URIFile(err).copy(errout);
 
                 result.setStdOut(output, Activator.getHashService().computeHash(out));
@@ -300,11 +322,12 @@ public class SimExplorer implements IApplication {
 
         if (args.length > 3) {
             final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
-            Activator.getMessageSerialiser().saveRuntimeResult(result, outputLocal);
+            Activator.getSerialiser().serialize(result, outputLocal);
             try {
                 final IURIFile output = new GZipedURIFile(new URIFile(args[3]));
 
-                retry(new Callable<Void>(){
+                retry(new Callable<Void>() {
+
                     @Override
                     public Void call() throws Exception {
                         URIFile.copy(outputLocal, output);
@@ -325,7 +348,7 @@ public class SimExplorer implements IApplication {
     }
 
     private String usage() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append("SimExplorer environment_description execution_plugin_dir URL_of_execution_message [URL_of_output_message] [workspace_location]");
         return buf.toString();
     }

@@ -21,6 +21,6 @@ package org.openmole.commons.tools.io;
  *
  * @author reuillon
  */
-public interface IHash {
+public interface IHash extends Comparable<IHash> {
 
 }

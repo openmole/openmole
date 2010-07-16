@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 import org.openmole.misc.clonning.internal.ClonningService;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -73,21 +72,15 @@ public class ExplorationApplication {
      */
     public ExplorationApplication(String name) throws UserBadDataError, InternalProcessingError {
         this.contracts = new ArrayList<IPrototype>();
-        try {
-            treeRoot = new TasksList(name);
-            explorationTreeTask = new ExplorationTreeTask(new ExplorationTask(LABEL_EXPLORATION));
+        treeRoot = new TasksList(name);
+        explorationTreeTask = new ExplorationTreeTask(new ExplorationTask(LABEL_EXPLORATION));
 
-            treeRoot.add(explorationTreeTask);
-            explorationTreeTask.add(new TasksList(LABEL_INPUT_GENERATION));
-            explorationTreeTask.add(new TasksList(LABEL_MODEL_LAUNCHER));
-            explorationTreeTask.add(new TasksList(LABEL_OUTPUT_PROCESSING));
-            finalTask = new GroovyTask(LABEL_FINAL_OUTPUT_PROCESSING);
-            treeRoot.add(finalTask);
-        } catch (UserBadDataError ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InternalProcessingError ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        treeRoot.add(explorationTreeTask);
+        explorationTreeTask.add(new TasksList(LABEL_INPUT_GENERATION));
+        explorationTreeTask.add(new TasksList(LABEL_MODEL_LAUNCHER));
+        explorationTreeTask.add(new TasksList(LABEL_OUTPUT_PROCESSING));
+        finalTask = new GroovyTask(LABEL_FINAL_OUTPUT_PROCESSING);
+        treeRoot.add(finalTask);
         initSystemVariables();
     }
 
@@ -241,12 +234,7 @@ public class ExplorationApplication {
         return new Mole(explorationCapsule);
     }
 
-    public ExplorationApplication copy() {
-        try {
+    public ExplorationApplication copy() throws InternalProcessingError {
             return (ExplorationApplication) new ClonningService().clone(this);
-        } catch (InternalProcessingError ex) {
-            Exceptions.printStackTrace(ex);
-            return null;
-        }
     }
 }

@@ -47,8 +47,6 @@ public interface IMoleJob {
 
     IProgress getProgress();
 
-    Iterable<File> getFiles() throws InternalProcessingError, UserBadDataError;
-
     IMoleJobId getId();
 
     void cancel() throws InternalProcessingError, UserBadDataError;

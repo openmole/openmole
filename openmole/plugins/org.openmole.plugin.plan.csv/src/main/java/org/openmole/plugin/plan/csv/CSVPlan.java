@@ -31,20 +31,15 @@ import java.util.TreeMap;
 import org.openmole.core.implementation.plan.ExploredPlan;
 import org.openmole.core.implementation.plan.FactorsValues;
 import org.openmole.core.implementation.plan.Plan;
-import org.openmole.core.implementation.resource.FileResource;
-import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
-import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import au.com.bytecode.opencsv.CSVReader;
 import java.util.Iterator;
-import org.openmole.core.implementation.data.Data;
 import org.openmole.core.implementation.data.DataSet;
-import org.openmole.core.implementation.resource.FileResourceSet;
 import org.openmole.core.model.data.IData;
 
 /**
@@ -58,14 +53,11 @@ import org.openmole.core.model.data.IData;
  */
 public class CSVPlan extends Plan {
 
-    @Resource
-    private FileResource csvFile;
+    final private File csvFile;
 
-    @Resource
-    private FileResourceSet basePaths = new FileResourceSet();
 
-    private Map<IPrototype<? extends File>, FileResource> pathMapping = new HashMap<IPrototype<? extends File>, FileResource>();
-    private Map<String, IPrototype> prototypes = new TreeMap<String, IPrototype>();
+    final private Map<IPrototype<? extends File>, File> pathMapping = new HashMap<IPrototype<? extends File>, File>();
+    final private Map<String, IPrototype> prototypes = new TreeMap<String, IPrototype>();
 
     /**
      * Creates an intstance of CSVPlan.
@@ -82,7 +74,7 @@ public class CSVPlan extends Plan {
      * @param csvFilePath, the path of the CSV file as a File
      */
     public CSVPlan(File csvFile) {
-        this.csvFile = new FileResource(csvFile);
+        this.csvFile = csvFile;
     }
 
     /**
@@ -124,9 +116,7 @@ public class CSVPlan extends Plan {
      */
     public void addColumn(IPrototype<? extends File> proto, File basePath) {
         prototypes.put(proto.getName(), proto);
-        FileResource fileResource = new FileResource(basePath);
-        pathMapping.put(proto, fileResource);
-        basePaths.addFileResource(fileResource);
+        pathMapping.put(proto, basePath);
     }
 
     /**
@@ -139,7 +129,7 @@ public class CSVPlan extends Plan {
         Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
 
         try {
-            CSVReader reader = new CSVReader(new FileReader(csvFile.getFile()));
+            CSVReader reader = new CSVReader(new FileReader(csvFile));
 
             try {
                 //parse header
@@ -153,7 +143,7 @@ public class CSVPlan extends Plan {
                     headerPrototypes.put(index, p);
                     try {
                         if (pathMapping.containsKey(p)) {
-                            File deployedPath = pathMapping.get(p).getFile();
+                            File deployedPath = pathMapping.get(p);
                             convertorMapping.put(p, StringConvertor.getInstance().getConvertor(p.getType(), deployedPath));
                         } else {
                             convertorMapping.put(p, StringConvertor.getInstance().getConvertor(p.getType()));

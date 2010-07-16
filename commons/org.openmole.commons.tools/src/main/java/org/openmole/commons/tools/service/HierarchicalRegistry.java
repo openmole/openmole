@@ -28,8 +28,8 @@ import java.util.Set;
 
 import org.apache.commons.collections15.SortedBag;
 import org.apache.commons.collections15.bag.TreeBag;
-import org.openmole.commons.tools.structure.Duo;
 import org.openmole.commons.tools.structure.Priority;
+import scala.Tuple2;
 
 /**
  *
@@ -37,14 +37,14 @@ import org.openmole.commons.tools.structure.Priority;
  */
 public class HierarchicalRegistry<T> {
 
-    Map<Class, Duo<T, Integer>> registry = new HashMap<Class, Duo<T, Integer>>();
+    Map<Class, Tuple2<T, Integer>> registry = new HashMap<Class, Tuple2<T, Integer>>();
 
     public void register(Class c, T t) {
         register(c, t, Priority.NORMAL.getValue());
     }
 
     public void register(Class c, T t, Integer priority) {
-       Duo<T, Integer> toRegister = new Duo<T, Integer>(t, priority);
+       Tuple2<T, Integer> toRegister = new Tuple2<T, Integer>(t, priority);
        registry.put(c, toRegister);
     }
 
@@ -69,22 +69,22 @@ public class HierarchicalRegistry<T> {
             }
         }
 
-        Queue<Duo<Class, Integer>> toProceed = new LinkedList<Duo<Class, Integer>>();
-        toProceed.offer(new Duo<Class, Integer>(c, 0));
+        Queue<Tuple2<Class, Integer>> toProceed = new LinkedList<Tuple2<Class, Integer>>();
+        toProceed.offer(new Tuple2<Class, Integer>(c, 0));
 
 
         SortedBag<PrioritySort<T>> result = new TreeBag<PrioritySort<T>>();
 
 
         while(result.isEmpty() && !toProceed.isEmpty()) {
-            Duo<Class, Integer> cur = toProceed.poll();
-            Class curClass = cur.getLeft();
-            Integer curLevel = cur.getRight();
+            Tuple2<Class, Integer> cur = toProceed.poll();
+            Class curClass = cur._1();
+            Integer curLevel = cur._2();
             
-            Duo<T, Integer> registred = registry.get(curClass);
+            Tuple2<T, Integer> registred = registry.get(curClass);
 
             if(registred != null) {
-                result.add(new PrioritySort<T>(registred.getRight(), registred.getLeft()));
+                result.add(new PrioritySort<T>(registred._2(), registred._1()));
                 Set<Class> seen = new HashSet<Class>();
                 seen.add(curClass);
 
@@ -92,12 +92,12 @@ public class HierarchicalRegistry<T> {
                 while(!toProceed.isEmpty()) {
                     cur = toProceed.poll();
 
-                    if(cur.getRight() == curLevel && !seen.contains(cur.getLeft())) {
-                       registred = registry.get(cur.getLeft());
+                    if(cur._2() == curLevel && !seen.contains(cur._1())) {
+                       registred = registry.get(cur._1());
                        if(registred != null) {
-                           result.add(new PrioritySort(registred.getRight(), registred.getLeft()));
+                           result.add(new PrioritySort(registred._2(), registred._1()));
                        }
-                       seen.add(cur.getLeft());
+                       seen.add(cur._1());
                     } else {
                         toProceed.clear();
                     }
@@ -106,10 +106,10 @@ public class HierarchicalRegistry<T> {
                 if(curClass != Object.class) {
                     if(!curClass.isInterface()) {
                         Class sc = curClass.getSuperclass();
-                        toProceed.offer(new Duo<Class, Integer>(sc, curLevel+1));
+                        toProceed.offer(new Tuple2<Class, Integer>(sc, curLevel+1));
                     }
                     for(Class i : curClass.getInterfaces()) {
-                        toProceed.offer(new Duo<Class, Integer>(i, curLevel+1));
+                        toProceed.offer(new Tuple2<Class, Integer>(i, curLevel+1));
                     }
                 }
             }

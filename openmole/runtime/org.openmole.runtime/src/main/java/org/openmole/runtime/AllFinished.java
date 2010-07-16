@@ -36,7 +36,7 @@ public class AllFinished implements IObjectChangedSynchronousListener<IMoleJob> 
     synchronized void registerJob(IMoleJob job) {
         allFinished.drainPermits();
         nbJobs++;
-        Activator.getEventDispatcher().registerListener(job, Priority.LOW.getValue(), this, IMoleJob.stateChanged);
+        Activator.getEventDispatcher().registerListener(job, Priority.LOW.getValue(), this, IMoleJob.StateChanged);
     }
 
     public void waitAllFinished() throws InterruptedException {

@@ -21,6 +21,7 @@
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
+            <version>${lib.com.thoughtworks.xstream.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

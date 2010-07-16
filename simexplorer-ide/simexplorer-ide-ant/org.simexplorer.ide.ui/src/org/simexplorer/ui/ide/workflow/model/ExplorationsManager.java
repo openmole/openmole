@@ -32,6 +32,7 @@ import org.openide.execution.ExecutorTask;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.mole.MoleExecution;
 
 public class ExplorationsManager {
 
@@ -77,7 +78,7 @@ public class ExplorationsManager {
                     getInstance().inputOutput.getOut().println("Exploration starting…");
                     logger.info("Exploration starting…");
                     ExplorationApplication ea = explorationApplication.copy();
-                    ea.buildWorkflow().run();
+                    new MoleExecution(ea.buildWorkflow()).start();
                     getInstance().inputOutput.getOut().println("Exploration completed!");
                     logger.info("Exploration completed !");
                 } catch (UserBadDataError ex) {

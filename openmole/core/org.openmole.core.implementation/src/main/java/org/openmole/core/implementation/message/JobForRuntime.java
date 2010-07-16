@@ -17,54 +17,20 @@
 
 package org.openmole.core.implementation.message;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.message.IReplicatedFile;
 
 public class JobForRuntime extends RuntimeMessage implements IJobForRuntime {
 
-    List<IMoleJob> moleJobs = new LinkedList<IMoleJob>();
-    IURIFile communicationDir;
-    List<IReplicatedFile> consumedFiles = new LinkedList<IReplicatedFile>();
+    final Iterable<IMoleJob> moleJobs;
 
-    public JobForRuntime(IURIFile communicationDir) {
+    public JobForRuntime(Iterable<IMoleJob> moleJobs) {
         super();
-        this.communicationDir = communicationDir;
+        this.moleJobs = moleJobs;
     }
-
-    @Override
-    public void addMoleJob(IMoleJob moleJob) {
-        moleJobs.add(moleJob);
-    }
-
-    @Override
-    public IURIFile getCommunicationDir() {
-        return communicationDir;
-    }
-
-    @Override
-    public void addConsumedFile(IReplicatedFile repli) {
-        consumedFiles.add(repli);
-    }
-
-    @Override
-    public List<IReplicatedFile> getConsumedFiles() {
-        return consumedFiles;
-    }
-
-    @Override
-    public synchronized void addConsumedFiles(List<IReplicatedFile> repli) {
-        consumedFiles.addAll(repli);
-    }
-
   
     @Override
-    public Collection<IMoleJob> getMoleJobs() {
+    public Iterable<IMoleJob> getMoleJobs() {
         return moleJobs;
     }
 
