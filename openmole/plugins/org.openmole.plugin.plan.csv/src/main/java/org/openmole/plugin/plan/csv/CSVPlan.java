@@ -64,7 +64,7 @@ public class CSVPlan extends Plan {
     @Resource
     private FileResourceSet basePaths = new FileResourceSet();
 
-    private Map<Prototype<? extends File>, FileResource> pathMapping = new HashMap<Prototype<? extends File>, FileResource>();
+    private Map<IPrototype<? extends File>, FileResource> pathMapping = new HashMap<IPrototype<? extends File>, FileResource>();
     private Map<String, IPrototype> prototypes = new TreeMap<String, IPrototype>();
 
     /**
@@ -90,7 +90,7 @@ public class CSVPlan extends Plan {
      *
      * @param proto, the prototyde to be added
      */
-    public void addColumn(Prototype proto) {
+    public void addColumn(IPrototype proto) {
         prototypes.put(proto.getName(), proto);
     }
 
@@ -112,7 +112,7 @@ public class CSVPlan extends Plan {
      * @param proto, the prototyde to be added
      * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a String
      */
-    public void addColumn(Prototype<? extends File> proto, String basePath) {
+    public void addColumn(IPrototype<? extends File> proto, String basePath) {
         addColumn(proto, new File(basePath));
     }
 
@@ -122,7 +122,7 @@ public class CSVPlan extends Plan {
      * @param proto, the prototyde to be added
      * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a File
      */
-    public void addColumn(Prototype<? extends File> proto, File basePath) {
+    public void addColumn(IPrototype<? extends File> proto, File basePath) {
         prototypes.put(proto.getName(), proto);
         FileResource fileResource = new FileResource(basePath);
         pathMapping.put(proto, fileResource);
@@ -136,7 +136,7 @@ public class CSVPlan extends Plan {
     @Override
     public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
         Collection<IFactorValues> listOfListOfValues = new ArrayList<IFactorValues>();
-        Map<Prototype, IStringMapping> convertorMapping = new HashMap<Prototype, IStringMapping>();
+        Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
 
         try {
             CSVReader reader = new CSVReader(new FileReader(csvFile.getFile()));
@@ -144,9 +144,9 @@ public class CSVPlan extends Plan {
             try {
                 //parse header
                 List<String> header = Arrays.asList(reader.readNext());
-                Map<Integer, Prototype> headerPrototypes = new HashMap<Integer, Prototype>();
+                Map<Integer, IPrototype> headerPrototypes = new HashMap<Integer, IPrototype>();
                 int index;
-                for (Prototype p : prototypes.values()) {
+                for (IPrototype p : prototypes.values()) {
                     if ((index = header.indexOf(p.getName())) == -1) {
                         throw new UserBadDataError("Unknown header " + p.getName());
                     }
@@ -177,7 +177,7 @@ public class CSVPlan extends Plan {
                 while ((nextLine = reader.readNext()) != null) {
                     FactorsValues fv = new FactorsValues();
                     for (int i : headerPrototypes.keySet()) {
-                        Prototype p = headerPrototypes.get(i);
+                        IPrototype p = headerPrototypes.get(i);
                         fv.setValue(p, convertorMapping.get(p).convert(nextLine[i]));
                     }
                     listOfListOfValues.add(fv);
