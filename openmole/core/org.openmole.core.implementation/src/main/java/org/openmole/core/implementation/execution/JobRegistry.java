@@ -42,6 +42,10 @@ public class JobRegistry {
     public void register(IJob job, IMoleExecution moleExecution) {
         registry.put(job, moleExecution);
     }
+    
+    public void remove(IJob job) {
+        registry.remove(job);
+    }
 
     public IMoleExecution getMoleExecutionForJob(IJob job) {
         return registry.get(job);

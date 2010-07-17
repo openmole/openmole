@@ -145,7 +145,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 }
             }
 
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "New delay is {0}", delay);
         } catch (InternalProcessingError e) {
             kill();
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);

@@ -55,7 +55,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
         registry.register(this, ticket, context);
 
         IExploredPlan values = context.getLocalValue(ExplorationTask.ExploredPlan.getPrototype());
-      //  context.removeVariable(ExplorationTask.ExploredPlan.getPrototype().getName());
+        context.removeVariable(ExplorationTask.ExploredPlan.getPrototype().getName());
 
         ISubMoleExecution subSubMole = new SubMoleExecution(subMole);
 

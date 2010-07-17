@@ -19,7 +19,6 @@ package org.openmole.core.implementation.tools;
 
 import groovy.lang.Binding;
 import java.io.File;
-import java.net.URL;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.groovy.IGroovyProxy;
@@ -36,7 +35,6 @@ public class GroovyShellProxyAdapter implements IGroovyProxy {
 
     final static public Prototype<IContext> contextVar = new Prototype<IContext>("context", IContext.class);
     final static public Prototype<IWorkspace> workspaceVar = new Prototype<IWorkspace>("workspace", IWorkspace.class);
-
 
     IGroovyProxy groovyShellProxy;
 
@@ -58,6 +56,7 @@ public class GroovyShellProxyAdapter implements IGroovyProxy {
     }
 
 
+    @Override
     public boolean isScriptCompiled() {
         return groovyShellProxy.isScriptCompiled();
     }

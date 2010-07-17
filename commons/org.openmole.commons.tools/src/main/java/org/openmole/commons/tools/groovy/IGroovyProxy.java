@@ -19,7 +19,6 @@ package org.openmole.commons.tools.groovy;
 
 import groovy.lang.Binding;
 import java.io.File;
-import java.net.URL;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

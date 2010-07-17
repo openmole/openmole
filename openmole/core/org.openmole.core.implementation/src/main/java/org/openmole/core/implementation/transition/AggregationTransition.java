@@ -83,8 +83,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         IContext newContextEnd = new Context(job.getContext().getRoot());
 
         Collection<IContext> resultContexts;
-        resultContexts = registry.consult(this, newTicket);
-
+        resultContexts = registry.removeFromRegistry(this, newTicket);
 
         IDataSet dataToAggregate = findDataIn1WhichAreAlsoIn2(getEnd().getCapsule().getAssignedTask().getInput(), getStart().getAssignedTask().getOutput());
         
@@ -96,9 +95,6 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         }
         aggregate(newContextEnd, dataToAggregate, toClone, true, resultContexts);
 
-        //Clean registries
-        registry.removeFromRegistry(this, newTicket);
-   
         //Variable have are clonned in other transitions if necessary
         submitNextJobsIfReady(newContextEnd, newTicket, Collections.EMPTY_SET, moleExecution, subMole.getParent());
     }

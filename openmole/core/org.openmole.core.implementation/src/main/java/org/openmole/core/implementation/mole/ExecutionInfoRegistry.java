@@ -41,9 +41,11 @@ public class ExecutionInfoRegistry {
         registred.put(job, scheduler);
     }
 
-
     public IMoleExecution getMoleExecution(IMoleJob job) {
         return registred.get(job);
     }
-
+    
+    public IMoleExecution remove(IMoleJob job) {
+        return registred.remove(job);
+    }
 }
