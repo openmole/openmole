@@ -10,6 +10,6 @@ fi
 
 rm -Rf configuration/org*
 rm configuration/*.log
-java -Xmx${MEM} -jar plugins/org.eclipse.equinox.launcher_1.0.200.jar\
+java -Xmx${MEM} -jar plugins/org.eclipse.equinox.launcher_1.1.0.jar\
      -p openmole-plugins,openmole-plugins-ui $@
 cat configuration/*.log

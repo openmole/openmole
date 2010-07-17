@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
-            <artifactId>app</artifactId>
+            <artifactId>org.eclipse.equinox.app</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- dependency added in scope provided for forcing exclusion in copy-dependencies task -->
