@@ -21,7 +21,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;

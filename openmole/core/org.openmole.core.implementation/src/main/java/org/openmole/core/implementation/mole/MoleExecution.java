@@ -53,7 +53,7 @@ import org.openmole.core.model.job.ITicket;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ILocalCommunication;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.model.mole.IEnvironmentSelection;

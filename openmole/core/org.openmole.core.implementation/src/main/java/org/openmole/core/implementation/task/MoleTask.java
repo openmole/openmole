@@ -29,7 +29,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;

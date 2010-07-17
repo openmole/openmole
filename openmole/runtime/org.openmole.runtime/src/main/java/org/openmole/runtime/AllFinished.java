@@ -19,7 +19,7 @@ package org.openmole.runtime;
 
 import java.util.concurrent.Semaphore;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.runtime.internal.Activator;
 import org.openmole.core.model.job.IMoleJob;
 

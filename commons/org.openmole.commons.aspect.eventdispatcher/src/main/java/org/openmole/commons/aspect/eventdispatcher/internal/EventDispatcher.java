@@ -14,7 +14,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedAsynchronousListener;
 import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedSynchronousListener;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 

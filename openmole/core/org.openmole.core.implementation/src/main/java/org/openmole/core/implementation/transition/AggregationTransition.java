@@ -26,7 +26,7 @@ import java.util.TreeSet;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;

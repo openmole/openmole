@@ -108,7 +108,7 @@ public abstract class Transition<TS extends IGenericTaskCapsule<?, ?>> implement
             Collection<IContext> combinaison = new LinkedList<IContext>();
 
             for (ITransition t : getEnd().getTransitions()) {
-                combinaison.add(registry.consult(t, ticket));
+                combinaison.add(registry.removeFromRegistry(t, ticket));
             }
 
             Iterable<IDataChannel> itDc = getEnd().getCapsule().getInputDataChannels();

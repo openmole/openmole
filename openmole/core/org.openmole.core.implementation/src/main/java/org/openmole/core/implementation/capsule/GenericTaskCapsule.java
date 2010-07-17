@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.transition.ITransition;

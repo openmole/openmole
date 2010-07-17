@@ -14,47 +14,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.implementation.tools;
 
-
-package org.openmole.commons.tools.structure;
-
+import org.openmole.core.model.tools.IRegistry;
+import java.util.Collections;
 import java.util.HashMap;
 
 import java.util.Map;
-import org.openmole.commons.exception.InternalProcessingError;
 
-public class Registry<K,V> implements IRegistry<K,V> {
-	
-	private Map<K, V> registry = new HashMap<K, V>();
-	
-	public Registry(){}
-	
-	@Override
-	public synchronized V consumn(K key) {
-		return registry.remove(key);
-	}
+public class Registry<K, V> implements IRegistry<K, V> {
 
-	@Override
-	public synchronized boolean isRegistredFor(K key) {
-		return registry.containsKey(key);
-	}
+    private Map<K, V> registry = Collections.synchronizedMap(new HashMap<K, V>());
 
-	@Override
-	public synchronized void register(K key, V object) {
-            registry.put(key, object);
-	}
-	
-	
-	@Override
-	public synchronized V consult(K key) {
-		return registry.get(key);
-	}
+    public Registry() {
+    }
 
-	@Override
-	public void removeFromRegistry(K key) {
-		registry.remove(key);
-	}
+    @Override
+    public boolean isRegistredFor(K key) {
+        return registry.containsKey(key);
+    }
 
+    @Override
+    public void register(K key, V object) {
+        registry.put(key, object);
+    }
 
-	
+    @Override
+    public V consult(K key) {
+        return registry.get(key);
+    }
+
+    @Override
+    public V removeFromRegistry(K key) {
+        return registry.remove(key);
+    }
 }

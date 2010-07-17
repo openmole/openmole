@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 reuillon
+ *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,27 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.structure;
+package org.openmole.core.model.tools;
+
+import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *
- * @author reuillon
+ * Data structure for registring value in fonction of a key. It acts like
+ * an hashmap.
+ *
+ * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @param <K> the type of the key
+ * @param <V> the type of the value
  */
-public enum Priority {
-    HIGHEST(Integer.MAX_VALUE),
-    HIGH(Integer.MAX_VALUE / 2),
-    NORMAL(0),
-    LOW(Integer.MIN_VALUE / 2),
-    LOWEST(Integer.MIN_VALUE);
+public interface IRegistry<K,V> {
 
-    final private Integer value;
+    boolean isRegistredFor(K transition);
 
-    private Priority(Integer value) {
-        this.value = value;
-    }
+    void register(K key, V job);
 
-    public Integer getValue() {
-        return value;
-    }
+    V consult(K key);
 
+    V removeFromRegistry(K key);
 }

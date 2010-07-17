@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.collections15.SortedBag;
 import org.apache.commons.collections15.bag.TreeBag;
-import org.openmole.commons.tools.structure.Priority;
 import scala.Tuple2;
 
 /**

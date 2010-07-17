@@ -31,7 +31,7 @@ import org.openmole.core.model.execution.batch.IBatchService;
 import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.commons.tools.service.RNG;
 import org.openmole.core.batchservicecontrol.IUsageControl;
 import scala.Tuple2;

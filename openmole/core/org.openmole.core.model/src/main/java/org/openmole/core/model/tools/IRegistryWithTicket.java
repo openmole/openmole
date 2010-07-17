@@ -17,7 +17,6 @@
 package org.openmole.core.model.tools;
 
 import org.openmole.core.model.job.ITicket;
-import org.openmole.commons.exception.InternalProcessingError;
 
 /**
  *
@@ -68,5 +67,5 @@ public interface IRegistryWithTicket<K, V> {
      * @param key the index key
      * @param ticket the index ticket
      */
-    void removeFromRegistry(K key, ITicket ticket);
+    V removeFromRegistry(K key, ITicket ticket);
 }

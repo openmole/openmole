@@ -52,7 +52,7 @@ import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmen
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.commons.tools.io.StringInputStream;
-import org.openmole.commons.tools.structure.Priority;
+import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.message.IContextResults;

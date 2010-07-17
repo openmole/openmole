@@ -62,7 +62,6 @@ public abstract class TemplateFileGeneratorTask extends Task {
                 try {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        //System.out.println("line read");
                         line = expandData(context, line);
                         writer.println(line);
                     }

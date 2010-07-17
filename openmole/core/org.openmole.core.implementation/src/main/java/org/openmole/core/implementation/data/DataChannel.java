@@ -106,7 +106,7 @@ public class DataChannel implements IDataChannel {
             currentTicket = currentTicket.getParent();
         }
 
-        IContext dataChannelContext = dataChannelRegistry.consult(this, currentTicket);
+        IContext dataChannelContext = dataChannelRegistry.removeFromRegistry(this, currentTicket);
 
         if (dataChannelContext != null) {
             if (levelDif > 0) {
