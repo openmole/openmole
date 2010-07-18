@@ -89,15 +89,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
     }
 
     public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job, IMoleExecution moleExecution) throws InternalProcessingError, UserBadDataError {
-        IRegistryWithTicket   
-            
-        <IAggregationTransition ,
-        Collection       
-        <IContext>> registry =  moleExecution
-             
-            .getLocalCommunication() 
-        
-           .getAggregationTransitionRegistry();
+        IRegistryWithTicket <IAggregationTransition, Collection<IContext>> registry =  moleExecution.getLocalCommunication().getAggregationTransitionRegistry();
 
         ITicket newTicket = job.getTicket().getParent();
         IContext newContextEnd = new Context(job.getContext().getRoot());
