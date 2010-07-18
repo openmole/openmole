@@ -29,7 +29,7 @@ import org.openmole.core.model.execution.batch.IBatchStorage;
 
 public interface IReplicaCatalog {
 
-    IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException;
+    IReplica uploadAndGet(File src, File srcPath, IHash hash, IBatchStorage storage, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException;
 
     void close();
 

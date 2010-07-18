@@ -120,7 +120,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         return initCommunication();
     }
 
-    IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token, boolean zipped) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
+    IReplicatedFile toReplicatedFile(File file, IBatchStorage storage, IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {
         boolean isDir = file.isDirectory();
         File toReplicate = file;
         File toReplicatePath = file.getAbsoluteFile();
@@ -135,7 +135,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         }
 
         IHash hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution);
-        IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, toReplicatePath, hash, storage, zipped, token);
+        IReplica replica = Activator.getReplicaCatalog().uploadAndGet(toReplicate, toReplicatePath, hash, storage, token);
         return new ReplicatedFile(file, isDir, hash, replica.getDestination());
     }
 
@@ -155,15 +155,15 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         File runtimeFile = getEnvironment().getRuntime();
 
         for (File environmentPlugin : environmentPlugins) {
-            IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token, false);
+            IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token);
             IURIFile pluginURIFile = replicatedFile.getReplica();
              
             environmentPluginReplica.add(pluginURIFile);
         }
 
-        IURIFile runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token, false).getReplica();
+        IURIFile runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).getReplica();
 
-        IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token, true).getReplica();
+        IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token).getReplica();
         return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);
     }
 
@@ -191,14 +191,14 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         }
 
         for (File f : plugins) {
-            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true);
+            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token);
             pluginReplicas.add(replicatedPlugin);
         }
         
         List<IReplicatedFile> files = new LinkedList<IReplicatedFile>();
         
         for(File file: serializationResult.getFiles()) {
-            files.add(toReplicatedFile(file, communicationStorage, token, true));
+            files.add(toReplicatedFile(file, communicationStorage, token));
         }
 
         return new ExecutionMessage(pluginReplicas, files, new Tuple2<IURIFile, IHash>(jobForRuntimeFile, jobHash), communicationDir);

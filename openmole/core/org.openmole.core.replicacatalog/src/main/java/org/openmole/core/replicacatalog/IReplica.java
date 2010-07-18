@@ -28,8 +28,6 @@ public interface IReplica  {
 
     IBatchServiceDescription getStorageDescription();
 
-    boolean isZipped();
-
     IBatchEnvironmentDescription getEnvironmentDescription();
 
     IHash getSourceHash();

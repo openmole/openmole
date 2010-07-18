@@ -46,15 +46,15 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         StringBuilder builder = new StringBuilder();
 
         builder.append("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
-        builder.append(mkLcgCpCmd(env, runtime.getRuntime().getLocationString(), "$PWD/simexplorer.tar.bz2"));
+        builder.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/simexplorer.tar.bz2"));
         builder.append("mkdir envplugins; PLUGIN=0;");
 
         for(IURIFile plugin: runtime.getEnvironmentPlugins()) {
-            builder.append(mkLcgCpCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
+            builder.append(mkLcgCpGunZipCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
             builder.append("PLUGIN=`expr $PLUGIN + 1`; ");
         }
 
-        builder.append(mkLcgCpCmd(env, runtime.getEnvironmentDescriptionFile().getLocationString(),"$CUR/envinronmentDescription.xml"));
+        builder.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentDescriptionFile().getLocationString(),"$CUR/envinronmentDescription.xml"));
 
         builder.append("tar -xjf simexplorer.tar.bz2 >/dev/null; rm -f simexplorer.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
         builder.append(memorySizeForRuntime);
@@ -72,7 +72,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         return script;
     }
 
-    String mkLcgCpCmd(GliteEnvironment env, String from, String to) throws InternalProcessingError {
+    String mkLcgCpGunZipCmd(GliteEnvironment env, String from, String to) throws InternalProcessingError {
         StringBuilder builder = new StringBuilder();
 
         builder.append("lcg-cp --vo ");
@@ -83,7 +83,9 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         builder.append(from);
         builder.append(" file:");
         builder.append(to);
-        builder.append("; ");
+        builder.append(".gz; gunzip ");
+        builder.append(to);
+        builder.append(".gz;");
 
         return builder.toString();
     }
