@@ -19,6 +19,8 @@ package org.openmole.core.file;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -32,11 +34,13 @@ public class GZURIFile extends URIFile {
 
     @Override
     public InputStream openInputStream() throws IOException, InterruptedException {
+        Logger.getLogger(GZURIFile.class.getName()).log(Level.FINE, "Opening gz input stream for {0}", getLocationString());
         return new GZIPInputStream(super.openInputStream());
     }
 
     @Override
     public OutputStream openOutputStream() throws IOException, InterruptedException {
+        Logger.getLogger(GZURIFile.class.getName()).log(Level.FINE, "Opening gz output stream for {0}", getLocationString());
         return new GZIPOutputStream(super.openOutputStream());
     }
 }
