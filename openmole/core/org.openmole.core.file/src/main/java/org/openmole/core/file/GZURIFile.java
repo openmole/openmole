@@ -35,13 +35,11 @@ public class GZURIFile extends URIFile {
 
     @Override
     public InputStream openInputStream(IAccessToken token) throws IOException, InterruptedException {
-        Logger.getLogger(GZURIFile.class.getName()).log(Level.FINE, "Opening gz input stream for {0}", getLocationString());
         return new GZIPInputStream(super.openInputStream(token));
     }
 
     @Override
     public OutputStream openOutputStream(IAccessToken token) throws IOException, InterruptedException {
-        Logger.getLogger(GZURIFile.class.getName()).log(Level.FINE, "Opening gz output stream for {0}", getLocationString());
         return new GZIPOutputStream(super.openOutputStream(token));
     }
 }
