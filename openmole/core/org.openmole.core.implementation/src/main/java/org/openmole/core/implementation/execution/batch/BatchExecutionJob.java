@@ -129,6 +129,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 case KILLED:
                     break;
                 case FAILED:
+                    retry();
                     break;
                 case DONE:
                     tryFinalise();
