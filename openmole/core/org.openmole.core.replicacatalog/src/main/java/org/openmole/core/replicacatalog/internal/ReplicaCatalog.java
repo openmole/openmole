@@ -94,10 +94,10 @@ public class ReplicaCatalog implements IReplicaCatalog {
         }
     }
 
-    synchronized private Replica getReplica(final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription, final boolean zipped) {
+    synchronized private Replica getReplica(final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription) {
 
         ObjectSet<Replica> set;
-        set = objServeur.queryByExample(new Replica(null, hash, storageDescription, environmentDescription, zipped, null));
+        set = objServeur.queryByExample(new Replica(null, hash, storageDescription, environmentDescription, null));
         if (!set.isEmpty()) {
             return set.get(0);
         }
@@ -105,7 +105,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
     }
 
-    private synchronized  Replica getReplica(final File srcPath, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription, final boolean zipped)  {
+    private synchronized  Replica getReplica(final File srcPath, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription)  {
 
         ObjectSet<Replica> set;
 
@@ -113,7 +113,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
         try {
 
-            set = objectContainer.queryByExample(new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, null));
+            set = objectContainer.queryByExample(new Replica(srcPath, hash, storageDescription, environmentDescription, null));
 
             Replica replica = null;
 
@@ -142,14 +142,14 @@ public class ReplicaCatalog implements IReplicaCatalog {
     }
     
 
-    synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription envDescription, final boolean zipped) {
-        ObjectSet<Replica> ret = objServeur.queryByExample(new Replica(src, null, storageDescription, envDescription, zipped, null));
+    synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription envDescription) {
+        ObjectSet<Replica> ret = objServeur.queryByExample(new Replica(src, null, storageDescription, envDescription, null));
         return ret;
     }
 
     //Synchronization should be achieved outiside the replica for database caching and isolation purposes
     @Override
-    public IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final boolean zipped, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
+    public IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription());
 
@@ -160,35 +160,34 @@ public class ReplicaCatalog implements IReplicaCatalog {
             IBatchServiceDescription storageDescription = storage.getDescription();
             IBatchEnvironmentDescription environmentDescription = storage.getBatchExecutionEnvironmentDescription();
 
-            replica = getReplica(srcPath, hash, storageDescription, environmentDescription, zipped);
+            replica = getReplica(srcPath, hash, storageDescription, environmentDescription);
            
        //     Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica {0}", replica);
 
             
             if (replica == null) {
                                 
-                for (Replica toClean : getReplica(srcPath, storageDescription, environmentDescription, zipped)) {
+                for (Replica toClean : getReplica(srcPath, storageDescription, environmentDescription)) {
                     clean(toClean);
                 }
 
-                IReplica sameContent = getReplica(hash, storageDescription, environmentDescription, zipped);
+                IReplica sameContent = getReplica(hash, storageDescription, environmentDescription);
                 if (sameContent != null) {
            //         Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Found replica with same content {0}", sameContent);
                     
-                    replica = new Replica(srcPath, hash, storageDescription, environmentDescription, zipped, sameContent.getDestination());
+                    replica = new Replica(srcPath, hash, storageDescription, environmentDescription, sameContent.getDestination());
                     insert(replica);
                 } else {
 
                     IURIFile newFile;
                     try {
                         newFile = storage.getPersistentSpace(token).newFileInDir("replica", ".rep");
-                        if (zipped) {
-                            newFile = new GZURIFile(newFile);
-                        }
+                        newFile = new GZURIFile(newFile);
+                        
 
                         URIFile.copy(src, newFile, token);
 
-                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), zipped, newFile);
+                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), newFile);
                         insert(replica);
 
            //             Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.FINE, "Inserted replica {0}", replica.toString());
@@ -271,7 +270,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             destinationToInsert = destinations.get(0);
         }
 
-        replica = new Replica(srcToInsert, hashToInsert, storageDescritptionToInsert, environmentDescriptionToInsert, replica.isZipped(), destinationToInsert);
+        replica = new Replica(srcToInsert, hashToInsert, storageDescritptionToInsert, environmentDescriptionToInsert, destinationToInsert);
 
         objServeur.store(replica);
         return replica;
@@ -296,7 +295,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
         remove(replica);
 
-        if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getEnvironmentDescription(), replica.isZipped()) == null)
+        if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getEnvironmentDescription()) == null)
             return Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(replica.getDestination(), false));
         else return null;
     }
@@ -342,8 +341,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("persistence").indexed(true);
-        configuration.objectClass(Replica.class).objectField("zipped").indexed(true);
-
+  
         //RandomAccessFileAdapter randomAccessFileAdapter = new RandomAccessFileAdapter();
 
         //configuration.io(new NonFlushingIoAdapter(randomAccessFileAdapter));

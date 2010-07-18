@@ -37,19 +37,17 @@ public class Replica implements IReplica, Activatable {
     final IHash hash;
     final IBatchServiceDescription storageDescription;
     final IBatchEnvironmentDescription environmentDescription;
-    final Boolean zipped;
     final IURIFile destination;
 
    
     transient Activator activator;
 
 
-    public Replica(File source, IHash hash, IBatchServiceDescription storageDescription, IBatchEnvironmentDescription environmentDescription, boolean zipped, IURIFile destination) {
+    public Replica(File source, IHash hash, IBatchServiceDescription storageDescription, IBatchEnvironmentDescription environmentDescription, IURIFile destination) {
         this.source = source;
         this.hash = hash;
         this.storageDescription = storageDescription;
         this.environmentDescription = environmentDescription;
-        this.zipped = zipped;
         this.destination = destination;
     }
 
@@ -113,16 +111,9 @@ public class Replica implements IReplica, Activatable {
         return hash;
     }
 
- 
-    @Override
-    public boolean isZipped() {
-        activate(ActivationPurpose.READ);
-        return zipped;
-    }
-
     @Override
     public String toString() {
-        return "Replica [destination=" + getDestination() + ", environmentDescription=" + getEnvironmentDescription() + ", hash=" + getSourceHash() + ", source=" + getSource() + ", storageDescription=" + getStorageDescription() + ", zipped=" + isZipped() + "]";
+        return "Replica [destination=" + getDestination() + ", environmentDescription=" + getEnvironmentDescription() + ", hash=" + getSourceHash() + ", source=" + getSource() + ", storageDescription=" + getStorageDescription() + "]";
     }
 
 

@@ -91,10 +91,10 @@ public class SimExplorer implements IApplication {
         Activator.getPluginManager().loadDir(environmentPluginDir);
 
         /* get env and init */
-        IURIFile envFile = new GZURIFile(new URIFile(new File(environmentDescription)));
-        File envFileCache = envFile.cache();
-        IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFileCache);
-        envFileCache.delete();
+        File envFile = new File(environmentDescription);
+        IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFile);
+        envFile.delete();
+        
         real.createBatchEnvironmentAuthentication().initializeAccess();
 
         PrintStream oldOut = System.out;
