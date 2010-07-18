@@ -20,6 +20,8 @@ package org.openmole.core.file;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.openmole.core.model.file.IURIFile;
@@ -36,11 +38,13 @@ public class BZ2URIFile extends URIFile {
     
     @Override
     public InputStream openInputStream() throws IOException, InterruptedException {
+        Logger.getLogger(BZ2URIFile.class.getName()).log(Level.FINE, "Open bz2 input stream for {0}", getLocationString());
         return new BZip2CompressorInputStream(super.openInputStream());
     }
 
     @Override
     public OutputStream openOutputStream() throws IOException, InterruptedException {
+        Logger.getLogger(BZ2URIFile.class.getName()).log(Level.FINE, "Open bz2 output stream for {0}", getLocationString());
         return new BZip2CompressorOutputStream(super.openOutputStream());
     }
 }
