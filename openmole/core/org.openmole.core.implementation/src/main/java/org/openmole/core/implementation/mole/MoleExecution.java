@@ -311,7 +311,7 @@ public class MoleExecution implements IMoleExecution {
         subMole.decNbJobInProgress();
 
         if (subMole.getNbJobInProgess() == 0) {
-            Object[] args = {job};
+            Object[] args = {job, this};
             Activator.getEventDispatcher().objectChanged(subMole, ISubMoleExecution.finished, args);
         }
 

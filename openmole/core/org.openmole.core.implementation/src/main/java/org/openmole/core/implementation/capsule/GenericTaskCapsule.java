@@ -172,7 +172,6 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
             ISubMoleExecution subMole = execution.getSubMoleExecution(job);
 
             performTransition(job.getContext(), job.getTicket(), execution, subMole);
-
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + getAssignedTask());
         } catch (UserBadDataError e) {

@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.implementation.transition;
 
 import java.util.Collection;
@@ -22,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
+import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListenerWithArgs;
 
 
 import org.openmole.commons.exception.InternalProcessingError;
@@ -50,6 +50,20 @@ import static org.openmole.core.implementation.tools.ToCloneFinder.getVariablesT
 
 public class AggregationTransition extends SingleTransition implements IAggregationTransition {
 
+    public class AggregationTransitionAdapter implements IObjectChangedSynchronousListenerWithArgs<ISubMoleExecution> {
+
+        @Override
+        public void objectChanged(ISubMoleExecution subMole, Object[] args) throws InternalProcessingError, UserBadDataError {
+            if (!IMoleJob.class.isAssignableFrom(args[0].getClass())) {
+                throw new InternalProcessingError("BUG: argument of the event has the wrong type.");
+            }
+
+            IMoleJob lastJob = (IMoleJob) args[0];
+            IMoleExecution moleExecution = (IMoleExecution) args[1];
+            subMoleFinished(subMole, lastJob, moleExecution);
+        }
+    }
+
     public AggregationTransition(ITaskCapsule start, IGenericTaskCapsule<?, ?> end) {
         super(start, end);
     }
@@ -65,19 +79,25 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         if (!registry.isRegistredFor(this, ticket.getParent())) {
             resultContexts = new LinkedList<IContext>();
             registry.register(this, ticket.getParent(), resultContexts);
-            Activator.getEventDispatcher().registerListener(subMole, Priority.LOW.getValue(), new AggregationTransitionAdapter(this), ISubMoleExecution.finished);
+            Activator.getEventDispatcher().registerListener(subMole, Priority.LOW.getValue(), new AggregationTransitionAdapter(), ISubMoleExecution.finished);
         } else {
             resultContexts = registry.consult(this, ticket.getParent());
         }
-        
+
         //Store the result context
         resultContexts.add(context);
     }
 
-    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job) throws InternalProcessingError, UserBadDataError {
-
-        IMoleExecution moleExecution  = ExecutionInfoRegistry.GetInstance().getMoleExecution(job);
-        IRegistryWithTicket<IAggregationTransition, Collection<IContext>> registry = moleExecution.getLocalCommunication().getAggregationTransitionRegistry();
+    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job, IMoleExecution moleExecution) throws InternalProcessingError, UserBadDataError {
+        IRegistryWithTicket   
+            
+        <IAggregationTransition ,
+        Collection       
+        <IContext>> registry =  moleExecution
+             
+            .getLocalCommunication() 
+        
+           .getAggregationTransitionRegistry();
 
         ITicket newTicket = job.getTicket().getParent();
         IContext newContextEnd = new Context(job.getContext().getRoot());
