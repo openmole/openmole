@@ -30,6 +30,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.file.BZ2URIFile;
+import org.openmole.core.file.GZURIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.internal.Activator;
@@ -191,7 +192,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         }
 
         for (File f : plugins) {
-            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true);
+            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, false);
             pluginReplicas.add(replicatedPlugin);
         }
         
