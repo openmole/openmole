@@ -37,7 +37,7 @@ public class Replica implements IReplica, Activatable {
     final IHash hash;
     final IBatchServiceDescription storageDescription;
     final IBatchEnvironmentDescription environmentDescription;
-    final boolean zipped;
+    final Boolean zipped;
     final IURIFile destination;
 
    

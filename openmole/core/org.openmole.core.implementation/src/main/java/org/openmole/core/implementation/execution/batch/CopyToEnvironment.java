@@ -191,7 +191,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         }
 
         for (File f : plugins) {
-            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, false);
+            IReplicatedFile replicatedPlugin = toReplicatedFile(f, communicationStorage, token, true);
             pluginReplicas.add(replicatedPlugin);
         }
         
