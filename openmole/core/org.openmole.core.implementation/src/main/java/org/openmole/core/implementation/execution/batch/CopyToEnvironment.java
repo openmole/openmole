@@ -155,7 +155,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         File runtimeFile = getEnvironment().getRuntime();
 
         for (File environmentPlugin : environmentPlugins) {
-            IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token, true);
+            IReplicatedFile replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token, false);
             IURIFile pluginURIFile = replicatedFile.getReplica();
              
             environmentPluginReplica.add(pluginURIFile);
