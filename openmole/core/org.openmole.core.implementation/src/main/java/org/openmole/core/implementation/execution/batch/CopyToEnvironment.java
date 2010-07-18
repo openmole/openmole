@@ -29,7 +29,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.file.GZipedURIFile;
+import org.openmole.core.file.BZ2URIFile;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.internal.Activator;
@@ -91,8 +91,8 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         try {
             final IURIFile communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
 
-            final IURIFile inputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".in"));
-            final IURIFile outputFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".out"));
+            final IURIFile inputFile = new BZ2URIFile(communicationDir.newFileInDir("job", ".in"));
+            final IURIFile outputFile = new BZ2URIFile(communicationDir.newFileInDir("job", ".out"));
 
             final IRuntime runtime = replicateTheRuntime(token, communicationStorage);
 
@@ -173,7 +173,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         ISerializationResult serializationResult = Activator.getSerializer().serializeAndGetPluginClassAndFiles(jobForRuntime, jobFile);
         
         IURIFile jobURIFile = new URIFile(jobFile);
-        IURIFile jobForRuntimeFile = new GZipedURIFile(communicationDir.newFileInDir("job", ".xml"));
+        IURIFile jobForRuntimeFile = new BZ2URIFile(communicationDir.newFileInDir("job", ".xml"));
 
         URIFile.copy(jobURIFile, jobForRuntimeFile, token);
         IHash jobHash = Activator.getHashService().computeHash(jobFile);
