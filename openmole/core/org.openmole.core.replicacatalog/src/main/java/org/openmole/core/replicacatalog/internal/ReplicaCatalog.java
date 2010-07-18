@@ -48,7 +48,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.file.BZ2URIFile;
+import org.openmole.core.file.GZURIFile;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.file.URIFile;
@@ -183,7 +183,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                     try {
                         newFile = storage.getPersistentSpace(token).newFileInDir("replica", ".rep");
                         if (zipped) {
-                            newFile = new BZ2URIFile(newFile);
+                            newFile = new GZURIFile(newFile);
                         }
 
                         URIFile.copy(src, newFile, token);

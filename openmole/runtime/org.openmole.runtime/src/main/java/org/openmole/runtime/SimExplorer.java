@@ -51,7 +51,7 @@ import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.service.Priority;
-import org.openmole.core.file.BZ2URIFile;
+import org.openmole.core.file.GZURIFile;
 import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.message.IContextResults;
@@ -91,7 +91,7 @@ public class SimExplorer implements IApplication {
         Activator.getPluginManager().loadDir(environmentPluginDir);
 
         /* get env and init */
-        IURIFile envFile = new BZ2URIFile(new URIFile(new File(environmentDescription)));
+        IURIFile envFile = new GZURIFile(new URIFile(new File(environmentDescription)));
         File envFileCache = envFile.cache();
         IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFileCache);
         envFileCache.delete();
@@ -119,7 +119,7 @@ public class SimExplorer implements IApplication {
 
             // LocalFileCache fileCache = new LocalFileCache();
             Map<File, File> usedFiles = new TreeMap<File, File>();
-            IURIFile executionMessageFile = new BZ2URIFile(new URIFile(executionMessageURI));
+            IURIFile executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
             File executionMesageFileCache = executionMessageFile.cache();
             IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache);
             executionMesageFileCache.delete();
@@ -213,7 +213,7 @@ public class SimExplorer implements IApplication {
 
                 final ISerializationResult serializationResult = Activator.getSerialiser().serializeAndGetPluginClassAndFiles(contextResults, contextResultFile);
 
-                final IURIFile uploadedcontextResults = new BZ2URIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+                final IURIFile uploadedcontextResults = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
 
                 retry(new Callable<Void>() {
 
@@ -278,7 +278,7 @@ public class SimExplorer implements IApplication {
                 }
 
 
-                final IURIFile uploadedTar = new BZ2URIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+                final IURIFile uploadedTar = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
 
 
                 /*-- Try 3 times to write the result --*/
@@ -302,10 +302,10 @@ public class SimExplorer implements IApplication {
                 System.setOut(oldOut);
                 System.setErr(oldErr);
 
-                IURIFile output = new BZ2URIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
+                IURIFile output = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
                 new URIFile(out).copy(output);
 
-                IURIFile errout = new BZ2URIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
+                IURIFile errout = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
                 new URIFile(err).copy(errout);
 
                 result.setStdOut(output, Activator.getHashService().computeHash(out));
@@ -322,7 +322,7 @@ public class SimExplorer implements IApplication {
             final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
             Activator.getSerialiser().serialize(result, outputLocal);
             try {
-                final IURIFile output = new BZ2URIFile(new URIFile(args[3]));
+                final IURIFile output = new GZURIFile(new URIFile(args[3]));
 
                 retry(new Callable<Void>() {
 
