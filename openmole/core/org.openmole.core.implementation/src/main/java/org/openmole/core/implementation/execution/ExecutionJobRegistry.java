@@ -91,6 +91,7 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         lst.add(executionJob);
     }
 
+    
     @Override
     public synchronized Integer getNbExecutionJobsForJob(IJob job) {
          Set<EXECUTIONJOB> executionJobs = getExecutionJobsFor(job);
@@ -110,6 +111,18 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         if(jobs.isEmpty()) {
             jobCategories.remove(category);
         }
+    }
+
+    @Override
+    public synchronized Collection<EXECUTIONJOB> getAllExecutionJobs() {
+        List<EXECUTIONJOB> ret = new LinkedList<EXECUTIONJOB>();
+
+        for (IJob job : getAllJobs()) {
+            Set<EXECUTIONJOB> executionJobs = getExecutionJobsFor(job);
+            if(executionJobs != null) ret.addAll(executionJobs);
+        }
+
+        return ret;
     }
 
     @Override
