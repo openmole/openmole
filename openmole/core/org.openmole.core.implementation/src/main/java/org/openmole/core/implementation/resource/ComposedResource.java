@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.resource;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.openmole.core.model.resource.IResource;
