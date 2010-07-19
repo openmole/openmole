@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.core.model.execution.IExecutionJob;
 
@@ -116,7 +117,7 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     public void submit(LocalExecutionJob ejob) {
         ejob.setState(ExecutionState.SUBMITED);
-        LOGGER.finer("New job submitted: " + ejob.getJob());
+        LOGGER.log(Level.FINER, "New job submitted: {0}", ejob.getJob());
         jobs.add(ejob);
     }
 

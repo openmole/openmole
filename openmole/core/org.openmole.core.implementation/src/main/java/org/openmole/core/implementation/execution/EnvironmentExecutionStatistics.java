@@ -65,8 +65,6 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
             }
             return true;
         }
-
-      
     }
     
     final Map<IMoleExecution, Map<StatisticKey, IStatistic>> stats = Collections.synchronizedMap(new WeakHashMap<IMoleExecution, Map<StatisticKey, IStatistic>>());
@@ -102,10 +100,12 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     private synchronized IStatistic getOrConstructStatistic(IJob job) {
         Map<StatisticKey, IStatistic> map = getOrConstructStatisticMap(JobRegistry.getInstance().getMoleExecutionForJob(job));
 
-        IStatistic statistic = map.get(new StatisticKey(job));
+        StatisticKey key = new StatisticKey(job);
+        
+        IStatistic statistic = map.get(key);
         if (statistic == null) {
             statistic = new Statistic(historySize);
-            map.put(new StatisticKey(job), statistic);
+            map.put(key, statistic);
         }
 
         return statistic;
