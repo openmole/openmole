@@ -39,8 +39,6 @@
         <module>org.openmole.plugin.domain.groovy</module>
 	<module>org.openmole.plugin.domain.collection</module>
         <module>org.openmole.plugin.plan.csv</module>
-        <module>org.openmole.plugin.plan.boxbehnken</module>
-        <module>org.openmole.plugin.plan.centralcomposite</module>
         <module>org.openmole.plugin.plan.complete</module>
         <module>org.openmole.plugin.plan.lhs</module>
         <module>org.openmole.plugin.plan.combine</module>

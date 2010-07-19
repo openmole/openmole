@@ -139,12 +139,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.centralcomposite</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.plan.complete</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
@@ -176,12 +170,6 @@
 	<dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.domain.uniformintegerdistribution</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.boxbehnken</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
