@@ -18,6 +18,7 @@
 package org.openmole.core.serializer.internal;
 
 import java.io.File;
+import java.util.Collection;
 import org.openmole.core.serializer.ISerializationResult;
 
 /**
@@ -26,21 +27,21 @@ import org.openmole.core.serializer.ISerializationResult;
  */
 public class SerializationResult implements ISerializationResult {
 
-    final Iterable<Class> classesFromPlugin;
-    final Iterable<File> files;
+    final Collection<Class> classesFromPlugin;
+    final Collection<File> files;
 
-    public SerializationResult(Iterable<Class> classesFromPlugin, Iterable<File> files) {
+    public SerializationResult(Collection<Class> classesFromPlugin, Collection<File> files) {
         this.classesFromPlugin = classesFromPlugin;
         this.files = files;
     }
 
     @Override
-    public Iterable<Class> getClassesFromPlugin() {
+    public Collection<Class> getClassesFromPlugin() {
         return classesFromPlugin;
     }
 
     @Override
-    public Iterable<File> getFiles() {
+    public Collection<File> getFiles() {
         return files;
     }
     

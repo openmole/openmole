@@ -24,13 +24,14 @@ import org.openmole.core.model.file.IURIFile;
 
 import org.openmole.core.model.message.IRuntimeResult;
 import org.openmole.commons.tools.io.IHash;
+import org.openmole.core.model.message.IFileMessage;
 import scala.Tuple2;
 
 public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
 
-    Tuple2<IURIFile, IHash> stdOut;
-    Tuple2<IURIFile, IHash> stdErr;
-    Tuple2<IURIFile, IHash> tarResult;
+    IFileMessage stdOut;
+    IFileMessage stdErr;
+    IFileMessage tarResult;
     
     Throwable exception;
     Map<String, Tuple2<File, Boolean>> files = new TreeMap<String, Tuple2<File, Boolean>>();
@@ -39,23 +40,23 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     
     
     @Override
-    public Tuple2<IURIFile, IHash> getStdOut() {
+    public IFileMessage getStdOut() {
         return stdOut;
     }
 
     @Override
-    public void setStdOut(IURIFile stdOut, IHash hash) {
-        this.stdOut = new Tuple2<IURIFile, IHash>(stdOut, hash);
+    public void setStdOut(IFileMessage stdOut) {
+        this.stdOut = stdOut;
     }
 
     @Override
-    public Tuple2<IURIFile, IHash> getStdErr() {
+    public IFileMessage getStdErr() {
         return stdErr;
     }
 
     @Override
-    public void setStdErr(IURIFile stdErr, IHash hash) {
-        this.stdErr = new Tuple2<IURIFile, IHash>(stdErr, hash);
+    public void setStdErr(IFileMessage stdErr) {
+        this.stdErr = stdErr;
     }
 
     @Override
@@ -69,13 +70,13 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     }
 
     @Override
-    public Tuple2<IURIFile, IHash> getTarResult() {
+    public IFileMessage getTarResult() {
         return tarResult;
     }
 
     @Override
-    public void setTarResult(IURIFile tarResult, IHash hash) {
-        this.tarResult = new Tuple2<IURIFile, IHash>(tarResult, hash);
+    public void setTarResult(IFileMessage tarResult) {
+        this.tarResult = tarResult;
     }
 
     @Override
