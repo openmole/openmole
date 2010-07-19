@@ -13,5 +13,5 @@ reportTask = new GroovyTask("report")
 reportTask.setCode('println "First order = ${ ' + TellTask.getAnalysisI1Prototype().getName() + '}"\nprintln "Total order = ${ ' + TellTask.getAnalysisItPrototype().getName() + '}"')
 sensitivity.setReportTask(reportTask)
 
-execution = sensitivity.fast99(1000)
-execution.start()
+mole = sensitivity.fast99(1000)
+new org.openmole.core.implementation.mole.MoleExecution(mole).start()

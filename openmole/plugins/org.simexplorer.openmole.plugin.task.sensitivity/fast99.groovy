@@ -1,6 +1,7 @@
 import org.openmole.core.implementation.data.*
 import org.openmole.core.implementation.transition.*
 import org.openmole.core.implementation.mole.Mole
+import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.*
 import org.openmole.core.implementation.capsule.*
 import org.openmole.core.implementation.plan.*
@@ -58,6 +59,6 @@ reportCapsule = new TaskCapsule(reportTask)
 new ExplorationTransition(explorationCapsule, modelCapsule)
 new AggregationTransition(modelCapsule, tellCapsule)
 new SingleTransition(tellCapsule, reportCapsule)
-new Mole(explorationCapsule).start()
+new MoleExecution(new Mole(explorationCapsule)).start()
 
 

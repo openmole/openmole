@@ -47,10 +47,12 @@ import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IDataSet;
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast;
 import org.openmole.core.implementation.data.Util;
+import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.mole.FixedEnvironmentSelection;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.implementation.mole.MoleExecution;
+import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.mole.IMoleExecution;
 
 /**
@@ -70,6 +72,16 @@ public class Builder {
      */
     public IPrototype buildPrototype(String name, Class type) {
         return new Prototype(name, type);
+    }
+
+    /**
+     * Builds an OpenMOLE variable.
+     * @param name
+     * @param value
+     * @return an instance of Variable.
+     */
+    public IVariable buildVariable(String name, Object value) {
+        return new Variable(name, value);
     }
 
     /**

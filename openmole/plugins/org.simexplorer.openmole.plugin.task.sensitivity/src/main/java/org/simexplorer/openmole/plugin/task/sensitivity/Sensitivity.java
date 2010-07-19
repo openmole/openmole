@@ -30,93 +30,82 @@ import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.implementation.transition.SingleTransition;
 import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.domain.IDomain;
-import org.openmole.core.model.execution.IEnvironment;
-import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.ITask;
 
 /**
  *
- * FIXME: This shouldn't be commited in a plugin but provided as an external script.
- * 
  * @author Nicolas Dumoulin <nicolas.dumoulin@cemagref.fr>
  */
 public final class Sensitivity {
-//
-//    private ExplorationTask askTask;
-//    private ITask modelTask;
-//    private ITask reportTask;
-//    private ITaskCapsule modelCapsule;
-//    private FixedEnvironmentStrategy modelStrategy;
-//    private List<IFactor> factors;
-//
-//    public Sensitivity() throws UserBadDataError, InternalProcessingError {
-//        clear();
-//    }
-//
-//    public final Sensitivity clear() throws UserBadDataError, InternalProcessingError {
-//        askTask = new ExplorationTask("ask");
-//        factors = new ArrayList<IFactor>();
-//        this.modelCapsule = new TaskCapsule();
-//        modelStrategy = new FixedEnvironmentStrategy();
-//        return this;
-//    }
-//
-//    public Sensitivity addFactor(String name, Class type, IDomain domain) {
-//        this.factors.add(new Factor(name, type, domain));
-//        return this;
-//    }
-//
-//    public Sensitivity setModelTask(ITask task) {
-//        this.modelTask = task;
-//        this.modelCapsule.setTask(modelTask);
-//        return this;
-//    }
-//
-//    public Sensitivity setReportTask(ITask reportTask) {
-//        this.reportTask = reportTask;
-//        return this;
-//    }
-//
-//    public Sensitivity setModelEnvironment(IEnvironment env) {
-//        modelStrategy.setEnvironment(modelCapsule, env);
-//        return this;
-//    }
-//
-//    /**
-//     * 
-//     * Run the fast99 method, and clear the built workflow (by invoking the
-//     * <code>clear()</code> method).
-//     * @param samplingNumber
-//     * @return an handler on the execution process.
-//     * @throws UserBadDataError
-//     * @throws InternalProcessingError
-//     * @throws InterruptedException
-//     */
-//   public IMoleExecution fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
-//        FastPlan fastPlan = new FastPlan(samplingNumber);
-//        // Ask
-//        askTask.setPlan(fastPlan);
-//        ExplorationTaskCapsule explorationCapsule = new ExplorationTaskCapsule(askTask);
-//        // Model
-//        for (IFactor factor : factors) {
-//            modelTask.addInput(factor.getPrototype());
-//            fastPlan.addFactor(factor);
-//        }
-//        modelTask.addOutput(TellTask.getModelOutputPrototype());
-//        // Tell
-//        TellTask tellTask = new TellTask("tell");
-//        TaskCapsule tellCapsule = new TaskCapsule(tellTask);
-//        // Report
-//        reportTask.addInput(TellTask.getAnalysisI1Prototype());
-//        reportTask.addInput(TellTask.getAnalysisItPrototype());
-//        TaskCapsule reportCapsule = new TaskCapsule(reportTask);
-//        // Transition
-//        new ExplorationTransition(explorationCapsule, modelCapsule);
-//        new AggregationTransition(modelCapsule, tellCapsule);
-//        new SingleTransition(tellCapsule, reportCapsule);
-//        IMoleExecution execution = new Molnew Mole(explorationCapsule).createExecution(modelStrategy);
-//        this.clear();
-//        return execution;
-//    }
+
+    private ExplorationTask askTask;
+    private ITask modelTask;
+    private ITask reportTask;
+    private ITaskCapsule modelCapsule;
+    private List<IFactor> factors;
+
+    public Sensitivity() throws UserBadDataError, InternalProcessingError {
+        clear();
+    }
+
+    public final Sensitivity clear() throws UserBadDataError, InternalProcessingError {
+        askTask = new ExplorationTask("ask");
+        factors = new ArrayList<IFactor>();
+        this.modelCapsule = new TaskCapsule();
+        return this;
+    }
+
+    public Sensitivity addFactor(String name, Class type, IDomain domain) {
+        this.factors.add(new Factor(name, type, domain));
+        return this;
+    }
+
+    public Sensitivity setModelTask(ITask task) {
+        this.modelTask = task;
+        this.modelCapsule.setTask(modelTask);
+        return this;
+    }
+
+    public Sensitivity setReportTask(ITask reportTask) {
+        this.reportTask = reportTask;
+        return this;
+    }
+
+    /**
+     * 
+     * Run the fast99 method, and clear the built workflow (by invoking the
+     * <code>clear()</code> method).
+     * @param samplingNumber
+     * @return an handler on the execution process.
+     * @throws UserBadDataError
+     * @throws InternalProcessingError
+     * @throws InterruptedException
+     */
+   public IMole fast99(int samplingNumber) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        FastPlan fastPlan = new FastPlan(samplingNumber);
+        // Ask
+        askTask.setPlan(fastPlan);
+        ExplorationTaskCapsule explorationCapsule = new ExplorationTaskCapsule(askTask);
+        // Model
+        for (IFactor factor : factors) {
+            modelTask.addInput(factor.getPrototype());
+            fastPlan.addFactor(factor);
+        }
+        modelTask.addOutput(TellTask.getModelOutputPrototype());
+        // Tell
+        TellTask tellTask = new TellTask("tell");
+        TaskCapsule tellCapsule = new TaskCapsule(tellTask);
+        // Report
+        reportTask.addInput(TellTask.getAnalysisI1Prototype());
+        reportTask.addInput(TellTask.getAnalysisItPrototype());
+        TaskCapsule reportCapsule = new TaskCapsule(reportTask);
+        // Transition
+        new ExplorationTransition(explorationCapsule, modelCapsule);
+        new AggregationTransition(modelCapsule, tellCapsule);
+        new SingleTransition(tellCapsule, reportCapsule);
+        this.clear();
+        return new Mole(explorationCapsule);
+    }
 }
