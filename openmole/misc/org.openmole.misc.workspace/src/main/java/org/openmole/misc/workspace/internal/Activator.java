@@ -19,37 +19,23 @@ public class Activator implements BundleActivator {
     private static String OpenMoleDir = ".openmole";
     private ServiceRegistration reg;
     private static BundleContext context;
-  
+    private Workspace workspace;
+    
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
         Logger logger = Logger.getLogger("org.apache.commons.configuration.ConfigurationUtils");
         logger.addAppender(new ConsoleAppender(new PatternLayout("%-5p %d  %c - %F:%L - %m%n")));
         logger.setLevel(Level.WARN);
-        final Workspace workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
+        workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
-        
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            
-            @Override
-            public void run() {
-                try {
-                    FileUtil.recursiveDelete(workspace.getTmpDir().getLocation());
-                } catch (IOException ex) {
-                    java.util.logging.Logger.getLogger(Activator.class.getName()).log(java.util.logging.Level.WARNING, "Error when cleaning", ex);
-                } catch (InternalProcessingError ex) {
-                    java.util.logging.Logger.getLogger(Activator.class.getName()).log(java.util.logging.Level.WARNING, "Error when cleaning", ex);
-                }
-            }
-            
-        });
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        reg.unregister();       
-        FileUtil.recursiveDelete(workspace.getLocation());
+        reg.unregister();
         context = null;
+        FileUtil.recursiveDelete(workspace.getTmpDir().getLocation());
     }
 
     public static BundleContext getContext() {
