@@ -16,11 +16,8 @@
  */
 package org.openmole.core.implementation.job;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.Progress;
