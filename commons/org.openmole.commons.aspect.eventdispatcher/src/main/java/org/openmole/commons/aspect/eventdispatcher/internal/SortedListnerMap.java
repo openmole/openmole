@@ -14,7 +14,7 @@ import java.util.WeakHashMap;
  * @author reuillon
  */
 public class SortedListnerMap<K, T> {
-  final Map<K,SortedListners<T>> listnerMap = new WeakHashMap<K,SortedListners<T>>();
+    final Map<K,SortedListners<T>> listnerMap = new WeakHashMap<K,SortedListners<T>>();
 
     SortedListners<T> getOrCreateListners(K object) {
         synchronized (listnerMap) {

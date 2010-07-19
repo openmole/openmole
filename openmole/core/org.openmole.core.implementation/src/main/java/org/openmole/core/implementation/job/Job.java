@@ -20,6 +20,8 @@ package org.openmole.core.implementation.job;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.exception.ExecutionException;
@@ -33,6 +35,12 @@ public class Job implements IJob {
 
     Map<IMoleJobId, IMoleJob> moleJobs = Collections.synchronizedMap(new TreeMap<IMoleJobId, IMoleJob>());
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        Logger.getLogger(Job.class.getName()).log(Level.FINE, "Job garbage collected {0}", toString());
+    }
+    
     @Override
     public Iterable<IMoleJob> getMoleJobs() {
         return moleJobs.values();
