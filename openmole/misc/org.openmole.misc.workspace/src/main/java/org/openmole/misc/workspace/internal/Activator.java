@@ -19,15 +19,14 @@ public class Activator implements BundleActivator {
     private static String OpenMoleDir = ".openmole";
     private ServiceRegistration reg;
     private static BundleContext context;
-    private Workspace workspace;
-
+  
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
         Logger logger = Logger.getLogger("org.apache.commons.configuration.ConfigurationUtils");
         logger.addAppender(new ConsoleAppender(new PatternLayout("%-5p %d  %c - %F:%L - %m%n")));
         logger.setLevel(Level.WARN);
-        workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
+        final Workspace workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
         
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -50,7 +49,6 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         reg.unregister();       
         FileUtil.recursiveDelete(workspace.getLocation());
-        workspace = null;
         context = null;
     }
 
