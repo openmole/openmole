@@ -96,7 +96,6 @@ public class MoleExecution implements IMoleExecution {
     private static final Logger LOGGER = Logger.getLogger(MoleExecution.class.getName());
     
     
-    
     final IMole mole;
     final IMoleJobGrouping moleJobGrouping;
 

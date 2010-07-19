@@ -69,6 +69,14 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        LOGGER.log(Level.FINE, "MoleJob finalized for {0}", getTask().getName());
+    }
+
+    
+    
+    @Override
     public IContext getContext() {
         return context;
     }
