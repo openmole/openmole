@@ -31,6 +31,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.message.IContextResults;
+import org.openmole.core.model.message.IFileMessage;
 import org.openmole.core.model.message.IRuntimeResult;
 import scala.Tuple2;
 
@@ -76,24 +77,25 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             if (result.getStdOut() != null) {
-
-                IURIFile stdOut = result.getStdOut()._1();
+                IFileMessage stdOut = result.getStdOut();
 
                 try {
-                    File stdOutFile = stdOut.cache(token);
-                    try {
-                        IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
-                        if (!stdOutHash.equals(result.getStdOut()._2())) {
-                            Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
-                        }
+                    if (!stdOut.isEmpty()) {
+                        File stdOutFile = stdOut.getFile().cache(token);
+                        try {
+                            IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
+                            if (!stdOutHash.equals(result.getStdOut().getHash())) {
+                                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
+                            }
 
-                        synchronized (System.out) {
-                            System.out.println("-----------------Output on remote host-----------------");
-                            FileUtil.copy(new FileInputStream(stdOutFile), System.out);
-                            System.out.println("-------------------------------------------------------");
+                            synchronized (System.out) {
+                                System.out.println("-----------------Output on remote host-----------------");
+                                FileUtil.copy(new FileInputStream(stdOutFile), System.out);
+                                System.out.println("-------------------------------------------------------");
+                            }
+                        } finally {
+                            stdOutFile.delete();
                         }
-                    } finally {
-                        stdOutFile.delete();
                     }
                 } catch (IOException e) {
                     Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
@@ -104,24 +106,27 @@ public class GetResultFromEnvironment implements Callable<Void> {
             }
 
             if (result.getStdErr() != null) {
-                IURIFile stdErr = result.getStdErr()._1();
-                try {
-                    File stdErrFile = stdErr.cache(token);
+                if (!result.getStdErr().isEmpty()) {
+                    IURIFile stdErr = result.getStdErr().getFile();
                     try {
-                        IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
-                        if (!stdErrHash.equals(result.getStdErr()._2())) {
-                            Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
+                        File stdErrFile = stdErr.cache(token);
+                        try {
+                            IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
+                            if (!stdErrHash.equals(result.getStdErr().getHash())) {
+                                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
+                            }
+                            
+                            synchronized (System.err) {
+                                System.err.println("-----------Error output on remote host------------------");
+                                FileUtil.copy(new FileInputStream(stdErrFile), System.err);
+                                System.err.println("--------------------------------------------------------");
+                            }
+                        } finally {
+                            stdErrFile.delete();
                         }
-                        synchronized (System.err) {
-                            System.err.println("-----------Error output on remote host------------------");
-                            FileUtil.copy(new FileInputStream(stdErrFile), System.err);
-                            System.err.println("--------------------------------------------------------");
-                        }
-                    } finally {
-                        stdErrFile.delete();
+                    } catch (IOException e) {
+                        Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
                     }
-                } catch (IOException e) {
-                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
                 }
             } else {
                 Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error result was null.");
@@ -131,71 +136,75 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 throw new InternalProcessingError("TarResult uri result was null.");
             }
 
-            IURIFile tarResult = result.getTarResult()._1();
             Map<File, File> fileReplacement = new TreeMap<File, File>();
 
+            if (!result.getTarResult().isEmpty()) {
 
-            File tarResultFile = tarResult.cache(token);
-
-            try {
-                IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
-                if (!tarResulHash.equals(result.getTarResult()._2())) {
-                    throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
-                }
+                IURIFile tarResult = result.getTarResult().getFile();
+                File tarResultFile = tarResult.cache(token);
 
                 try {
-                    TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
+                    IHash tarResulHash = Activator.getHashService().computeHash(tarResultFile);
+                    if (!tarResulHash.equals(result.getTarResult().getHash())) {
+                        throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
+                    }
 
                     try {
-                        File destDir = Activator.getWorkspace().newTmpDir("tarResult");
+                        TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
 
-                        TarArchiver unZip = new TarArchiver();
-                        ArchiveEntry te;
+                        try {
+                            File destDir = Activator.getWorkspace().newTmpDir("tarResult");
 
-                        while ((te = tis.getNextEntry()) != null) {
-                            File dest = new File(destDir, te.getName());
-                            dest.deleteOnExit();
+                            TarArchiver unZip = new TarArchiver();
+                            ArchiveEntry te;
 
-                            FileOutputStream os = new FileOutputStream(dest);
+                            while ((te = tis.getNextEntry()) != null) {
+                                File dest = new File(destDir, te.getName());
+                                dest.deleteOnExit();
 
-                            try {
-                                FileUtil.copy(tis, os);
-                            } finally {
-                                os.close();
-                            }
+                                FileOutputStream os = new FileOutputStream(dest);
 
-                            Tuple2<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
-                            if (fileInfo == null) {
-                                throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
-                            }
-
-                            File file;
-
-                            if (fileInfo._2()) {
-                                file = Activator.getWorkspace().newTmpDir("tarResult");
-
-                                InputStream destIn = new FileInputStream(dest);
                                 try {
-                                    unZip.extractDirArchiveWithRelativePath(file, destIn);
+                                    FileUtil.copy(tis, os);
                                 } finally {
-                                    destIn.close();
+                                    os.close();
                                 }
 
-                            } else {
-                                file = dest;
+                                Tuple2<File, Boolean> fileInfo = result.getFileInfoForEntry(te.getName());
+                                if (fileInfo == null) {
+                                    throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
+                                }
+
+                                File file;
+
+                                if (fileInfo._2()) {
+                                    file = Activator.getWorkspace().newTmpDir("tarResult");
+
+                                    InputStream destIn = new FileInputStream(dest);
+                                    try {
+                                        unZip.extractDirArchiveWithRelativePath(file, destIn);
+                                    } finally {
+                                        destIn.close();
+                                    }
+
+                                } else {
+                                    file = dest;
+                                }
+
+                                fileReplacement.put(fileInfo._1(), file);
                             }
 
-                            fileReplacement.put(fileInfo._1(), file);
+                        } finally {
+                            tis.close();
                         }
-                    } finally {
-                        tis.close();
+                    } catch (IOException e) {
+                        throw new InternalProcessingError(e);
                     }
-                } catch (IOException e) {
-                    throw new InternalProcessingError(e);
+                } finally {
+                    tarResultFile.delete();
                 }
-            } finally {
-                tarResultFile.delete();
             }
+
             //Download and deserialize the context results
             IURIFile contextResultsFile = result.getContextResultURI();
             if (contextResultsFile == null) {

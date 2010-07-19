@@ -15,35 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.internal;
+package org.openmole.core.implementation.message;
 
-import java.io.File;
-import java.util.Collection;
-import org.openmole.core.serializer.ISerializationResult;
+import org.openmole.commons.tools.io.IHash;
+import org.openmole.core.model.file.IURIFile;
+import org.openmole.core.model.message.IFileMessage;
 
 /**
  *
  * @author reuillon
  */
-public class SerializationResult implements ISerializationResult {
+public class FileMessage implements IFileMessage {
+    
+    public static final IFileMessage EMPTY_RESULT = new FileMessage(null, null);
+    
+    private final IURIFile file;
+    private final IHash hash;
 
-    final Collection<Class> classesFromPlugin;
-    final Collection<File> files;
-
-    public SerializationResult(Collection<Class> classesFromPlugin, Collection<File> files) {
-        this.classesFromPlugin = classesFromPlugin;
-        this.files = files;
+    public FileMessage(IURIFile file, IHash hash) {
+        this.file = file;
+        this.hash = hash;
     }
 
     @Override
-    public Collection<Class> getClassesFromPlugin() {
-        return classesFromPlugin;
+    public boolean isEmpty() {
+         return file != null;
     }
 
     @Override
-    public Collection<File> getFiles() {
-        return files;
+    public IURIFile getFile() {
+        return file;
     }
+
+    @Override
+    public IHash getHash() {
+        return hash;
+    }
+    
+    
     
     
 }

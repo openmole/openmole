@@ -18,12 +18,13 @@
 package org.openmole.core.serializer;
 
 import java.io.File;
+import java.util.Collection;
 
 /**
  *
  * @author reuillon
  */
 public interface ISerializationResult {
-    Iterable<Class> getClassesFromPlugin();
-    Iterable<File> getFiles();
+    Collection<Class> getClassesFromPlugin();
+    Collection<File> getFiles();
 }

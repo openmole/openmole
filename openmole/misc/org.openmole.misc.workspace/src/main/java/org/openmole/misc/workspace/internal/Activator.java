@@ -5,6 +5,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.openmole.commons.tools.io.FileUtil;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -16,6 +17,7 @@ public class Activator implements BundleActivator {
     private static String simExplorerDir = ".openmole";
     private ServiceRegistration reg;
     private static BundleContext context;
+    private IWorkspace workspace;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -23,13 +25,23 @@ public class Activator implements BundleActivator {
         Logger logger = Logger.getLogger("org.apache.commons.configuration.ConfigurationUtils");
         logger.addAppender(new ConsoleAppender(new PatternLayout("%-5p %d  %c - %F:%L - %m%n")));
         logger.setLevel(Level.WARN);
-        IWorkspace workspace = new Workspace(new File(System.getProperty("user.home"), simExplorerDir));
+        workspace = new Workspace(new File(System.getProperty("user.home"), simExplorerDir));
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+
+            @Override
+            public void run() {
+                 FileUtil.recursiveDelete(workspace.getLocation());
+            }
+            
+        });
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        reg.unregister();
+        reg.unregister();       
+        FileUtil.recursiveDelete(workspace.getLocation());
         context = null;
     }
 
