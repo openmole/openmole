@@ -24,6 +24,10 @@ public class TemplateFileGeneratorFromLocalFileTask extends TemplateFileGenerato
         this.template = template;
     }
 
+    public TemplateFileGeneratorFromLocalFileTask(String name,String templateName, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
+        this(name, new File(templateName),outputPrototype);
+    }
+
     @Override
     File getFile(IContext context) {
         return template;
