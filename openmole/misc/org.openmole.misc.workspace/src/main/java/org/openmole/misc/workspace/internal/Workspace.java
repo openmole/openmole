@@ -41,7 +41,7 @@ public class Workspace implements IWorkspace {
     transient long currentTime = System.currentTimeMillis();
 
 
-    Workspace(File location) throws InternalProcessingError {
+    Workspace(File location) {
         this.location = location;
         /*if (!exist()) {
         create();

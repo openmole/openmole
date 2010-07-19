@@ -27,7 +27,7 @@ import org.openmole.core.model.message.IFileMessage;
  */
 public class FileMessage implements IFileMessage {
     
-    public static final IFileMessage EMPTY_RESULT = new FileMessage(null, null);
+    public static final FileMessage EMPTY_RESULT = new FileMessage(null, null);
     
     private final IURIFile file;
     private final IHash hash;
@@ -39,7 +39,7 @@ public class FileMessage implements IFileMessage {
 
     @Override
     public boolean isEmpty() {
-         return file != null;
+         return file == null;
     }
 
     @Override
