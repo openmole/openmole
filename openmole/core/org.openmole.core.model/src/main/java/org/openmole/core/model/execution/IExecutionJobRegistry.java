@@ -30,7 +30,7 @@ public interface IExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
     
     Collection<IJob> getJobsForTheCategory(IJobStatisticCategory category);
 
-    Collection<EXECUTIONJOB> getAllExecutionJobs();
+   // Collection<EXECUTIONJOB> getAllExecutionJobs();
 
     Collection<IJob> getAllJobs();
 
@@ -46,6 +46,6 @@ public interface IExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
 
     void remove(EXECUTIONJOB job);
 
-    Collection<EXECUTIONJOB> removeJob(IJob job);
+    void removeJob(IJob job);
 
 }
