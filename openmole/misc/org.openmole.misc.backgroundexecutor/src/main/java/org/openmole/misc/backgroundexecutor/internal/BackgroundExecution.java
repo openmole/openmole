@@ -16,8 +16,6 @@ public class BackgroundExecution<T> implements IBackgroundExecution<T> {
     boolean started = false;
  
     T result;
-    
-    transient Future future;
 
     public BackgroundExecution(Callable<T> callable) {
         super();
@@ -25,11 +23,11 @@ public class BackgroundExecution<T> implements IBackgroundExecution<T> {
     }
 
     @Override
-    public synchronized void start(ExecutorType type) {
+    public synchronized Future start(ExecutorType type) {
         if (isStarted()) {
-            return;
+            throw new IllegalStateException("Background execution allready started");
         }
-        future = Activator.getExecutorService().getExecutorService(type).submit(new Runnable() {
+        Future future = Activator.getExecutorService().getExecutorService(type).submit(new Runnable() {
 
             @Override
             public void run() {
@@ -52,6 +50,7 @@ public class BackgroundExecution<T> implements IBackgroundExecution<T> {
         });
 
         started = true;
+        return future;
     }
 
     @Override
@@ -80,23 +79,11 @@ public class BackgroundExecution<T> implements IBackgroundExecution<T> {
     }
 
     @Override
-    public synchronized void interrupt() {
-        if(future != null) {
-            future.cancel(true);
-        }
-    }
-
-    @Override
-    public synchronized boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws ExecutionException {
+    public synchronized boolean isSucessFullExceptionIfFailed() throws ExecutionException {
         if (hasFailed()) {
             Throwable t = getFailureCause();
             throw new ExecutionException(t);
         }
-
-        if (!isStarted()) {
-            start(type);
-        }
-
         return isSucessFull();
     }
 
