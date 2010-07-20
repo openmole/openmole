@@ -25,22 +25,20 @@ import java.util.LinkedList
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.plugin.tools.utils.ProcessUtils._
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.apache.commons.exec.PumpStreamHandler
 import org.openmole.plugin.task.external.ExternalSystemTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
 
-class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer] = null) extends ExternalSystemTask(name) {
+class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer], relativeDir: String) extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
 
   object Prototypes {
@@ -48,9 +46,21 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
   }
   
   def this(name: String, cmd: String) = {
-    this(name, cmd, null)
+    this(name, cmd, null, "")
   }
-
+  
+  def this(name: String, cmd: String, relativeDir: String) = {
+    this(name, cmd, null, relativeDir)
+  }
+  
+  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
+    this(name, cmd, returnValue, "")
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
+    this(name, cmd, returnValue, relativeDir)
+  }
+  
   override protected def process(context: IContext, progress: IProgress) = {
     try {
       val tmpDir = workspace.newTmpDir("systemExecTask")
@@ -62,7 +72,8 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       val commandLine = CommandLine.parse(expandData(context,vals, cmd))
 
       try {
-        val process = Runtime.getRuntime().exec(commandLine.toString, null, tmpDir)
+        val workdir = new File(tmpDir, relativeDir)
+        val process = Runtime.getRuntime().exec(commandLine.toString, null, workdir)
         val ret = executeProcess(process, System.out, System.err)
         if(returnValue != null) context.setValue(returnValue, new Integer(ret))
       } catch {

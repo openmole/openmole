@@ -38,8 +38,12 @@ import scala.collection.JavaConversions._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.commons.tools.service.Retry.retry
 
-abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
+abstract class ExternalVirtualTask(name: String, relativeDir: String) extends ExternalTask(name) {
 
+  def this(name: String) {
+    this(name, "")
+  }
+  
   implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
 
 //  object Configuration {
@@ -74,10 +78,12 @@ abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
 
         prepareInputFiles(context, progress, workDir, sftp)
         
+        
+        
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + " ; " + expandData(context, cmd))
+          session.execCommand("cd " + workDir + relativeDir + " ; " + expandData(context, cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close
