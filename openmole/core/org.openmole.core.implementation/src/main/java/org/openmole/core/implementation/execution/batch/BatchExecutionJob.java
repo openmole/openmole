@@ -161,8 +161,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             if (finalizeExecutionFuture.isDone()) {
                 finalizeExecutionFuture.get();
                 finalizeExecutionFuture = null;
+                kill();
             }
-            kill();
         } catch (ExecutionException ex) {
             throw new InternalProcessingError(ex);
         } catch (InterruptedException ex) {
