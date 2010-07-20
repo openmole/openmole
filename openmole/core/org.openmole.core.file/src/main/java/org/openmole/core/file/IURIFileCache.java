@@ -17,6 +17,7 @@
 package org.openmole.core.file;
 
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.file.IURIFile;
@@ -26,7 +27,7 @@ import org.openmole.core.model.file.IURIFile;
  * @author reuillon
  */
 public interface IURIFileCache {
-    IFileCache getURIFileCache(IURIFile file) throws InternalProcessingError, InterruptedException;
-    IFileCache getURIFileCache(IURIFile file, IAccessToken token) throws InternalProcessingError, InterruptedException;
+    IFileCache getURIFileCache(IURIFile file) throws InternalProcessingError, UserBadDataError, InterruptedException;
+    IFileCache getURIFileCache(IURIFile file, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
     void invalidate(final IURIFile uri);
 }

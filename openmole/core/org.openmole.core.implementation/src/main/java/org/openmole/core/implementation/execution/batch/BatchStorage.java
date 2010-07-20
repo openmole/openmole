@@ -78,7 +78,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     }
 
     @Override
-    public synchronized IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
+    public synchronized IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError {
         if (persistentSpace == null) {
             try {
                 persistentSpace = getBaseDir(token).mkdirIfNotExist(persistent, token);
@@ -141,7 +141,7 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     return tmpSpace;
     }*/
     @Override
-    public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException {
+    public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError {
         if (baseSpace == null) {
             try {
                 IURIFile storeFile = new URIFile(getURI().toString());

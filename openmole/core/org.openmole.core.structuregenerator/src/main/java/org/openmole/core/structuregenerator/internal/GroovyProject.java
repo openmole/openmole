@@ -12,6 +12,7 @@ import org.apache.tools.ant.types.Path;
 
 import org.codehaus.groovy.ant.Groovyc;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 public class GroovyProject {
 
@@ -23,7 +24,7 @@ public class GroovyProject {
 
     Manifest manifest;
 
-    void initProject() throws IOException, InternalProcessingError {
+    void initProject() throws IOException, InternalProcessingError, UserBadDataError {
         nameSpaceSuffix = UUID.randomUUID().toString();
         nameSpaceSuffix = "generatedpackage" + nameSpaceSuffix.replace("-", "");
 

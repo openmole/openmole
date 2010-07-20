@@ -125,7 +125,7 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
         return jobs.take();
     }
 
-    public synchronized static LocalExecutionEnvironment getInstance() throws InternalProcessingError {
+    public synchronized static LocalExecutionEnvironment getInstance() throws InternalProcessingError, UserBadDataError {
         if(instance == null) {
             instance = new LocalExecutionEnvironment();
         }

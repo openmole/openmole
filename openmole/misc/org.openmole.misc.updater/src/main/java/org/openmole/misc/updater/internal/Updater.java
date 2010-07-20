@@ -88,8 +88,6 @@ public class Updater implements IUpdater {
                                     updatableFuture.setFuture(Activator.getExecutorService().getExecutorService(updaterTask.getExecutorType()).submit(updaterTask));
                                 }
                             }
-
-
                         }
                     }, updaterTask.getDelay() , TimeUnit.MILLISECONDS));
                 }

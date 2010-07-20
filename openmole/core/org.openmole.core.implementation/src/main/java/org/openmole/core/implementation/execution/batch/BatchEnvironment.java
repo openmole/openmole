@@ -48,22 +48,18 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     final static String ConfigGroup = BatchEnvironment.class.getSimpleName();
     final static ConfigurationLocation MemorySizeForRuntime = new ConfigurationLocation(ConfigGroup, "MemorySizeForRuntime");
-    
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
-    
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
 
     static {
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
     }
-    
     BatchServiceGroup<JS> jobServices;
     BatchServiceGroup<IBatchStorage> storages;
     Lock initJS;
     Lock initST;
-    
     final IBatchEnvironmentDescription description;
     final Integer memorySizeForRuntime;
     final File runtime;
@@ -75,7 +71,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         this.description = description;
         this.memorySizeForRuntime = memorySizeForRuntime;
         this.runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
-        
+
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchJobWatcher.CheckInterval));
     }
 
@@ -108,14 +104,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     @Cachable
-    public File getDescriptionFile() throws InternalProcessingError, InterruptedException {
-        try {
-            File environmentDescription = Activator.getWorkspace().newFile("envrionmentDescription", ".xml");
-            Activator.getSerializer().serialize(getDescription(), environmentDescription);
-            return environmentDescription;
-        } catch (IOException e) {
-            throw new InternalProcessingError(e);
-        }
+    public File getDescriptionFile() throws InternalProcessingError, InterruptedException, UserBadDataError {
+        File environmentDescription = Activator.getWorkspace().newFile("envrionmentDescription", ".xml");
+        Activator.getSerializer().serialize(getDescription(), environmentDescription);
+        return environmentDescription;
     }
 
     @Override

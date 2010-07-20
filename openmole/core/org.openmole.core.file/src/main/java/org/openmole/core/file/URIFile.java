@@ -166,7 +166,7 @@ public class URIFile implements IURIFile {
 
     }
 
-    protected void close(final NSEntry entry) throws InterruptedException {
+    protected void close(final NSEntry entry) throws InterruptedException, IOException {
         Task<?, ?> task;
         try {
             task = entry.close(TaskMode.ASYNC);
@@ -178,14 +178,13 @@ public class URIFile implements IURIFile {
         try {
             task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
-            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
+            throw new IOException(e);
         } catch (TimeoutException e) {
             task.cancel(true);
-            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
+            throw new IOException(e);
         } catch (InternalProcessingError e) {
-            Logger.getLogger(URIFile.class.getName()).log(Level.WARNING, "Error when closing entry for URL " + location, e);
-        }
-
+            throw new IOException(e);
+        } 
     }
 
     @SoftCachable
@@ -748,7 +747,7 @@ public class URIFile implements IURIFile {
                 throw new IOException(getLocationString(), e);
             } catch (InternalProcessingError e) {
                 throw new IOException(e);
-            }
+            } 
         } finally {
             close(entry);
         }

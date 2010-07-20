@@ -46,8 +46,6 @@ public class UpdaterTask implements Runnable {
     }
 
     
-    
-    
     @Override
     public void run() {
         try {

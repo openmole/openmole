@@ -54,7 +54,7 @@ public class ClonningService {
                     exceptions.add(ex);
                 } catch (InternalProcessingError ex) {
                     exceptions.add(ex);
-                }
+                } 
                 return null;
             }
         });

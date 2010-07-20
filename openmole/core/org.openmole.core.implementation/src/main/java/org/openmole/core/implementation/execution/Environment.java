@@ -16,6 +16,7 @@
  */
 package org.openmole.core.implementation.execution;
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;

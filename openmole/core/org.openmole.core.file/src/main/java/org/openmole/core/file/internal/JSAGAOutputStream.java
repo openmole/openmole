@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.file.internal;
 
 import java.io.IOException;
@@ -27,13 +26,15 @@ import org.ogf.saga.file.FileOutputStream;
 import org.ogf.saga.task.Task;
 import org.ogf.saga.task.TaskMode;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
 
 /**
  *
  * @author reuillon
  */
-public class JSAGAOutputStream extends OutputStream{
+public class JSAGAOutputStream extends OutputStream {
+
     FileOutputStream stream;
 
     public JSAGAOutputStream(FileOutputStream stream) {
@@ -67,7 +68,7 @@ public class JSAGAOutputStream extends OutputStream{
             task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS);
         } catch (InternalProcessingError e) {
             throw new IOException(e);
-        }catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new IOException(e);
         } catch (TimeoutException e) {
             task.cancel(true);
@@ -76,6 +77,4 @@ public class JSAGAOutputStream extends OutputStream{
             throw new IOException(e);
         }
     }
-
-
 }

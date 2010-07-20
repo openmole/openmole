@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -39,7 +40,7 @@ public class ExecutorService implements IExecutorService {
     final java.util.concurrent.ExecutorService cachedPool;
     int nbThreads;
 
-    public ExecutorService(ThreadFactory threadFactory) throws InternalProcessingError {
+    public ExecutorService(ThreadFactory threadFactory) throws InternalProcessingError, UserBadDataError {
         super();
         this.threadFactory = threadFactory;
         nbThreads = Activator.getWorkspace().getPreferenceAsInt(NbTread);

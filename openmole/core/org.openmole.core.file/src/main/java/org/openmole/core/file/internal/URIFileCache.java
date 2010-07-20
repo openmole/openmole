@@ -17,6 +17,7 @@
 
 package org.openmole.core.file.internal;
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.IURIFileCache;
 import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -36,7 +37,7 @@ public class URIFileCache implements IURIFileCache {
     AssociativeCache<IURIFile, IFileCache> associativeCache = new AssociativeCache<IURIFile, IFileCache>(AssociativeCache.WEAK, AssociativeCache.HARD);
 
     @Override
-    public IFileCache getURIFileCache(final IURIFile uri) throws InternalProcessingError, InterruptedException {
+    public IFileCache getURIFileCache(final IURIFile uri) throws InternalProcessingError, InterruptedException, UserBadDataError {
         return associativeCache.getCache(uri, uri, new ICachable<IFileCache>() {
 
             @Override
@@ -52,7 +53,7 @@ public class URIFileCache implements IURIFileCache {
     }
 
     @Override
-    public IFileCache getURIFileCache(final IURIFile uri, final IAccessToken token) throws InternalProcessingError, InterruptedException {
+    public IFileCache getURIFileCache(final IURIFile uri, final IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError {
         return associativeCache.getCache(uri, uri, new ICachable<IFileCache>() {
 
             @Override
