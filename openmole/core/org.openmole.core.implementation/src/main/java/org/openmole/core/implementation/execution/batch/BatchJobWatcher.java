@@ -47,7 +47,7 @@ public class BatchJobWatcher implements IUpdatable {
     }
 
     @Override
-    public void update() throws InterruptedException {
+    public boolean update() throws InterruptedException {
         IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
         List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
         
@@ -92,6 +92,6 @@ public class BatchJobWatcher implements IUpdatable {
                 registry.removeJob(j);
             }
         }
-
+        return true;
     }
 }

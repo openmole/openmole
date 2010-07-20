@@ -17,7 +17,6 @@
 package org.openmole.core.implementation.execution.batch;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,8 +82,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
         final BatchExecutionJob<JS> bej = new BatchExecutionJob<JS>(this, job);
 
-        IUpdatableFuture future = Activator.getUpdater().delay(bej, ExecutorType.UPDATE);
-        bej.setFuture(future);
+        Activator.getUpdater().delay(bej, ExecutorType.UPDATE);
 
         getJobRegistry().register(bej);
     }

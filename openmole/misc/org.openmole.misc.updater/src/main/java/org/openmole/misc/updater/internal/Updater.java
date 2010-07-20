@@ -16,8 +16,8 @@
  */
 package org.openmole.misc.updater.internal;
 
-import org.openmole.misc.updater.*;
 import java.util.concurrent.ExecutorService;
+import org.openmole.misc.updater.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -43,66 +43,49 @@ public class Updater implements IUpdater {
         });
 
     }
-    
+
     @Override
-    public IUpdatableFuture registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type) {
-        UpdatableFuture updatableFuture = new UpdatableFuture();
-        UpdaterTask task = new UpdaterTask(updatable, this, updatableFuture, type);
-        updatableFuture.setFuture(Activator.getExecutorService().getExecutorService(type).submit(task));
-        return updatableFuture;
+    public void registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type) {
+        UpdaterTask task = new UpdaterTask(updatable, this, type);
+        Activator.getExecutorService().getExecutorService(type).submit(task);
     }
 
     @Override
-    public IUpdatableFuture delay(final IUpdatableWithVariableDelay updatable, final ExecutorType type) {
-
-        final UpdatableFuture future = new UpdatableFuture();
-        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, future, type);
-
+    public void delay(final IUpdatableWithVariableDelay updatable, final ExecutorType type) {
+        final UpdaterTask task = new UpdaterTask(updatable, Updater.this, type);
         delay(task);
-        return future;
-    }
-    
-
-    @Override
-    public IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval) {
-        return registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval), type);
     }
 
     @Override
-    public IUpdatableFuture delay(final IUpdatable updatable, final ExecutorType type, long updateInterval) {
-        return delay(new UpdatableWithFixedDelay(updatable, updateInterval), type);
+    public void registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval) {
+        registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval), type);
+    }
+
+    @Override
+    public void delay(final IUpdatable updatable, final ExecutorType type, long updateInterval) {
+        delay(new UpdatableWithFixedDelay(updatable, updateInterval), type);
     }
 
     public void delay(final UpdaterTask updaterTask) {
         if (!shutDown) {
-            UpdatableFuture updatableFuture = updaterTask.getFuture();
-            synchronized (updatableFuture) {
-                if (!updatableFuture.isCanceled()) {
-                    updatableFuture.setFuture(getScheduler().schedule(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            UpdatableFuture updatableFuture = updaterTask.getFuture();
-                            synchronized (updatableFuture) {
-                                if (!updatableFuture.isCanceled()) {
-                                    updatableFuture.setFuture(Activator.getExecutorService().getExecutorService(updaterTask.getExecutorType()).submit(updaterTask));
-                                }
-                            }
-                        }
-                    }, updaterTask.getDelay() , TimeUnit.MILLISECONDS));
+            getScheduler().schedule(new Runnable() {
+
+                @Override
+                public void run() {
+                    Activator.getExecutorService().getExecutorService(updaterTask.getExecutorType()).submit(updaterTask);
                 }
-            }
-        }
-    }
+            }, updaterTask.getDelay(), TimeUnit.MILLISECONDS);
 
+        }
+
+    }
 
     ExecutorService getExecutor(ExecutorType type) {
         return Activator.getExecutorService().getExecutorService(type);
     }
 
-
     private ScheduledExecutorService getScheduler() {
         return scheduler;
     }
-
 }
