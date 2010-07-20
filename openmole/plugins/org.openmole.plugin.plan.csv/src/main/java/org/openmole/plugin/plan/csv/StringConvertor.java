@@ -41,6 +41,7 @@ public class StringConvertor {
         register(String.class,StringMapping.class);
         register(File.class,FileMapping.class);
         register(Double.class,DoubleMapping.class);
+        register(Integer.class,IntegerMapping.class);
     }
 
     private static <T> void register(Class<T> cl,
