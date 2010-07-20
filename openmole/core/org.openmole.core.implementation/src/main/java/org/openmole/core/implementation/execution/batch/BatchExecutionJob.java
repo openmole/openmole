@@ -17,6 +17,7 @@
 package org.openmole.core.implementation.execution.batch;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,6 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.file.URIFileCleaner;
-import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
@@ -56,8 +56,9 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment.Result copyToEnvironmentResult = null;
     long delay;
-    transient IBackgroundExecution<CopyToEnvironment.Result> copyToEnvironmentExec;
-    transient IBackgroundExecution finalizeExecution;
+ 
+    transient Future<CopyToEnvironment.Result> copyToEnvironmentExecFuture;
+    transient Future finalizeExecutionFuture;
 
     public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError, UserBadDataError {
         super(executionEnvironment, job);
@@ -153,31 +154,37 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
-        if (finalizeExecution == null) {
-            finalizeExecution = Activator.getBackgroundExecutor().createBackgroundExecution(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
+        if (finalizeExecutionFuture == null) {
+            finalizeExecutionFuture = Activator.getExecutorService().getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
         }
         try {
-            if (finalizeExecution.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.DOWNLOAD)) {
-                finalizeExecution = null;
-                kill();
+            if (finalizeExecutionFuture.isDone()) {
+                finalizeExecutionFuture.get();
+                finalizeExecutionFuture = null;
             }
+            kill();
         } catch (ExecutionException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (InterruptedException ex) {
             throw new InternalProcessingError(ex);
         }
     }
 
     private boolean asynchonousCopy() throws InternalProcessingError, UserBadDataError {
         if (copyToEnvironmentResult == null) {
-            if (copyToEnvironmentExec == null) {
-                copyToEnvironmentExec = Activator.getBackgroundExecutor().createBackgroundExecution(new CopyToEnvironment(getEnvironment(), getJob()));
+            if (copyToEnvironmentExecFuture == null) {
+                copyToEnvironmentExecFuture = Activator.getExecutorService().getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(getEnvironment(), getJob()));
             }
 
             try {
-                if (copyToEnvironmentExec.isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType.UPLOAD)) {
-                    copyToEnvironmentResult = copyToEnvironmentExec.getResult();
-                    copyToEnvironmentExec = null;
+                if (copyToEnvironmentExecFuture.isDone()) {
+                    copyToEnvironmentResult = copyToEnvironmentExecFuture.get();
+                    copyToEnvironmentExecFuture = null;
                 }
+
             } catch (ExecutionException ex) {
+                throw new InternalProcessingError(ex);
+            } catch (InterruptedException ex) {
                 throw new InternalProcessingError(ex);
             }
         }
@@ -210,11 +217,16 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     public void kill() {
         if (!killed.getAndSet(true)) {
             try {
-                if (copyToEnvironmentExec != null) {
-                    copyToEnvironmentExec.interrupt();
+                Future copy = copyToEnvironmentExecFuture;
+
+                if (copy != null) {
+                    copy.cancel(true);
                 }
-                if (finalizeExecution != null) {
-                    finalizeExecution.interrupt();
+
+                Future finalize = finalizeExecutionFuture;
+
+                if (finalize != null) {
+                    finalize.cancel(true);
                 }
                 clean();
             } finally {

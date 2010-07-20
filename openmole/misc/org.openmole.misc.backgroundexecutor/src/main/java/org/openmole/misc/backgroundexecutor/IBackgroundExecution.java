@@ -5,17 +5,18 @@
 package org.openmole.misc.backgroundexecutor;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.openmole.misc.executorservice.ExecutorType;
 
 /**
  *
  * @author reuillon
  */
-public interface IBackgroundExecution<T> {
+public interface IBackgroundExecution<T>  {
 
-    public void start(ExecutorType type);
+    public Future start(ExecutorType type);
 
-    boolean isSucessFullStartIfNecessaryExceptionIfFailed(ExecutorType type) throws ExecutionException;
+    boolean isSucessFullExceptionIfFailed() throws ExecutionException;
 
     boolean isStarted();
 
@@ -29,5 +30,4 @@ public interface IBackgroundExecution<T> {
 
     boolean isSucessFull();
 
-    void interrupt();
 }
