@@ -40,6 +40,15 @@ public class UpdaterTask implements Runnable {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        Logger.getLogger(UpdaterTask.class.getName()).log(Level.FINE, "Garbage collected upadeter tastk for {0}", updatable.toString());
+    }
+
+    
+    
+    
+    @Override
     public void run() {
         try {
             updatable.update();
