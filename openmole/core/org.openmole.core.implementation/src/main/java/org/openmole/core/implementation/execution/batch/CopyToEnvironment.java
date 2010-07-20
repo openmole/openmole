@@ -34,6 +34,7 @@ import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.message.ExecutionMessage;
+import org.openmole.core.implementation.message.FileMessage;
 import org.openmole.core.implementation.message.JobForRuntime;
 import org.openmole.core.implementation.message.ReplicatedFile;
 import org.openmole.core.model.execution.batch.IAccessToken;
@@ -201,7 +202,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
             files.add(toReplicatedFile(file, communicationStorage, token));
         }
 
-        return new ExecutionMessage(pluginReplicas, files, new Tuple2<IURIFile, IHash>(jobForRuntimeFile, jobHash), communicationDir);
+        return new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir);
     }
 
     IJobForRuntime createJobForRuntime(IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, InterruptedException, UserBadDataError, IOException {

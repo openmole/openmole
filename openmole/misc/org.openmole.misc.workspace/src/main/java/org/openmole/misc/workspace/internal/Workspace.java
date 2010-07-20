@@ -41,7 +41,7 @@ public class Workspace implements IWorkspace {
     transient long currentTime = System.currentTimeMillis();
 
 
-    Workspace(File location) throws InternalProcessingError {
+    Workspace(File location) {
         this.location = location;
         /*if (!exist()) {
         create();
@@ -96,8 +96,7 @@ public class Workspace implements IWorkspace {
     }
 
     @Cachable
-    private synchronized TempDir getTmpDir() throws IOException, InternalProcessingError {
-        // if (tmpDir == null) {
+    synchronized TempDir getTmpDir() throws IOException, InternalProcessingError {
         File locTmp = new File(getPreference(TmpLocation), getPreference(UniqueID));
         locTmp = new File(locTmp, Long.toString(currentTime));
 
@@ -109,9 +108,8 @@ public class Workspace implements IWorkspace {
 
         locTmp.deleteOnExit();
         return new TempDir(locTmp);
-        /* }
-        return tmpDir;*/
     }
+
 
     @Override
     public File newTmpDir(String prefix) throws IOException, InternalProcessingError {
@@ -136,12 +134,6 @@ public class Workspace implements IWorkspace {
 
     @Cachable
     private File getConfigurationFile() throws InternalProcessingError {
-        /* if (configurationCache != null) {
-        return configurationCache;
-        }
-
-        synchronized (this) {
-        if (configurationCache == null) {*/
         File configurationCacheTmp;
         configurationCacheTmp = new File(getLocation(), ConfigurationFile);
 
@@ -152,21 +144,10 @@ public class Workspace implements IWorkspace {
         }
 
         return configurationCacheTmp;
-
-        //   configurationCache = configurationCacheTmp;
-        //}
-        // return configurationCache;
-
-
-
     }
 
     @Cachable
     private synchronized FileConfiguration getConfiguration() throws InternalProcessingError {
-        /* if (configuration != null) {
-        return configuration;
-        }*/
-
         try {
             FileConfiguration configuration = new PropertiesConfiguration(getConfigurationFile());
             configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
@@ -174,14 +155,9 @@ public class Workspace implements IWorkspace {
         } catch (ConfigurationException e) {
             throw new InternalProcessingError(e);
         }
-
-
-
     }
 
-    /* private synchronized void reinitConfiguration() {
-    configuration = null;
-    }*/
+
     @Override
     public String getDefaultValue(ConfigurationLocation location) {
         ConfigurationElement cf = configurations.get(location);
@@ -302,8 +278,6 @@ public class Workspace implements IWorkspace {
     @Override
     public synchronized void resetPreferences() throws InternalProcessingError {
         getConfigurationFile().delete();
-        /* configurationCache = null;
-        reinitConfiguration();*/
     }
 
     @Override

@@ -17,9 +17,7 @@
 
 package org.openmole.core.model.message;
 
-import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
-import scala.Tuple2;
 
 /**
  *
@@ -28,6 +26,6 @@ import scala.Tuple2;
 public interface IExecutionMessage {
     Iterable<IReplicatedFile> getPlugins();
     Iterable<IReplicatedFile> getFiles();
-    Tuple2<IURIFile, IHash> getJobForRuntimeURI();
+    IFileMessage getJobForRuntimeURI();
     IURIFile getCommunicationDir();
 }

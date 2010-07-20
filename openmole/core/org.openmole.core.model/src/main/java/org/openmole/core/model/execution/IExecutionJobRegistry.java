@@ -46,6 +46,6 @@ public interface IExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
 
     void remove(EXECUTIONJOB job);
 
-    Collection<EXECUTIONJOB> removeJob(IJob job);
+    void removeJob(IJob job);
 
 }

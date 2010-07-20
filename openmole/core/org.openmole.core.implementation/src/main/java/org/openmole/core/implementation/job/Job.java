@@ -31,7 +31,7 @@ import org.openmole.commons.exception.UserBadDataError;
 
 public class Job implements IJob {
 
-    Map<IMoleJobId,IMoleJob> moleJobs = Collections.synchronizedMap(new TreeMap<IMoleJobId, IMoleJob>());
+    Map<IMoleJobId, IMoleJob> moleJobs = Collections.synchronizedMap(new TreeMap<IMoleJobId, IMoleJob>());
 
     @Override
     public Iterable<IMoleJob> getMoleJobs() {

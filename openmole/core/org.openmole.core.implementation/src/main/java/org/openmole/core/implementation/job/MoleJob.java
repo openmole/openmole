@@ -16,11 +16,8 @@
  */
 package org.openmole.core.implementation.job;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.Progress;
@@ -71,6 +68,14 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         setState(State.READY);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        LOGGER.log(Level.FINE, "MoleJob finalized for {0}", getTask().getName());
+    }
+
+    
+    
     @Override
     public IContext getContext() {
         return context;

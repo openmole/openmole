@@ -53,6 +53,7 @@ import org.openmole.commons.tools.io.StringInputStream;
 import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.file.GZURIFile;
 import org.openmole.core.implementation.message.ContextResults;
+import org.openmole.core.implementation.message.FileMessage;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.serializer.ISerializationResult;
@@ -137,7 +138,7 @@ public class SimExplorer implements IApplication {
                 }
 
                 usedFiles.put(plugin.getSrc(), inPluginDirLocalFile);
-  
+
                 //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
@@ -179,10 +180,10 @@ public class SimExplorer implements IApplication {
                 }
             }
 
-            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI()._1();
+            IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI().getFile();
             File jobForRuntimeFileCache = jobForRuntimeFile.cache();
 
-            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache).equals(executionMessage.getJobForRuntimeURI()._2())) {
+            if (!Activator.getHashService().computeHash(jobForRuntimeFileCache).equals(executionMessage.getJobForRuntimeURI().getHash())) {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
@@ -234,65 +235,70 @@ public class SimExplorer implements IApplication {
                 TarArchiveOutputStream tos = new TarArchiveOutputStream(new FileOutputStream(tarResult));
                 tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
-                try {
-                    for (File file : serializationResult.getFiles()) {
-                        StringInputStream is = new StringInputStream(file.getCanonicalPath());
+                
+                if (!serializationResult.getFiles().isEmpty()) {
+                    
+                    try {
+                        for (File file : serializationResult.getFiles()) {
+                            StringInputStream is = new StringInputStream(file.getCanonicalPath());
 
-                        IHash hash;
-                        try {
-                            hash = Activator.getHashService().computeHash(is);
-                        } finally {
-                            is.close();
-                        }
-                        TarArchiveEntry entry = new TarArchiveEntry(hash.toString());
-
-                        File toArchive;
-
-                        if (file.isDirectory()) {
-                            toArchive = Activator.getWorkspace().newTmpFile();
-                            OutputStream outputStream = new FileOutputStream(toArchive);
-
+                            IHash hash;
                             try {
-                                archiver.createDirArchiveWithRelativePath(file, outputStream);
+                                hash = Activator.getHashService().computeHash(is);
                             } finally {
-                                outputStream.close();
+                                is.close();
+                            }
+                            TarArchiveEntry entry = new TarArchiveEntry(hash.toString());
+
+                            File toArchive;
+
+                            if (file.isDirectory()) {
+                                toArchive = Activator.getWorkspace().newTmpFile();
+                                OutputStream outputStream = new FileOutputStream(toArchive);
+
+                                try {
+                                    archiver.createDirArchiveWithRelativePath(file, outputStream);
+                                } finally {
+                                    outputStream.close();
+                                }
+
+                            } else {
+                                toArchive = file;
                             }
 
-                        } else {
-                            toArchive = file;
-                        }
+                            //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
+                            entry.setSize(toArchive.length());
+                            tos.putArchiveEntry(entry);
+                            try {
+                                FileUtil.copy(new FileInputStream(toArchive), tos);
+                            } finally {
+                                tos.closeArchiveEntry();
+                            }
 
-                        //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
-                        entry.setSize(toArchive.length());
-                        tos.putArchiveEntry(entry);
-                        try {
-                            FileUtil.copy(new FileInputStream(toArchive), tos);
-                        } finally {
-                            tos.closeArchiveEntry();
+                            result.addFileName(entry.getName(), file, file.isDirectory());
                         }
-
-                        result.addFileName(entry.getName(), file, file.isDirectory());
+                    } finally {
+                        tos.close();
                     }
-                } finally {
-                    tos.close();
+
+                    final IURIFile uploadedTar = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
+
+                    /*-- Try 3 times to write the result --*/
+
+                    retry(new Callable<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            URIFile.copy(tarResult, uploadedTar);
+                            return null;
+                        }
+                    }, NbRetry);
+
+                    result.setTarResult(new FileMessage(uploadedTar, Activator.getHashService().computeHash(tarResult)));
+                } else {
+                    result.setTarResult(FileMessage.EMPTY_RESULT);
                 }
-
-
-                final IURIFile uploadedTar = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
-
-
-                /*-- Try 3 times to write the result --*/
-
-                retry(new Callable<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        URIFile.copy(tarResult, uploadedTar);
-                        return null;
-                    }
-                }, NbRetry);
-
-                result.setTarResult(uploadedTar, Activator.getHashService().computeHash(tarResult));
+                
                 tarResult.delete();
 
             } finally {
@@ -302,14 +308,22 @@ public class SimExplorer implements IApplication {
                 System.setOut(oldOut);
                 System.setErr(oldErr);
 
-                IURIFile output = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
-                new URIFile(out).copy(output);
 
-                IURIFile errout = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
-                new URIFile(err).copy(errout);
+                if (out.length() != 0) {
+                    IURIFile output = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
+                    URIFile.copy(out, output);
+                    result.setStdOut(new FileMessage(output, Activator.getHashService().computeHash(out)));
+                } else {
+                    result.setStdOut(FileMessage.EMPTY_RESULT);
+                }
 
-                result.setStdOut(output, Activator.getHashService().computeHash(out));
-                result.setStdErr(errout, Activator.getHashService().computeHash(err));
+                if (err.length() != 0) {                    
+                    IURIFile errout = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
+                    URIFile.copy(err, errout);
+                    result.setStdErr(new FileMessage(errout, Activator.getHashService().computeHash(err)));
+                } else {
+                    result.setStdErr(FileMessage.EMPTY_RESULT);
+                }
 
                 out.delete();
                 err.delete();
