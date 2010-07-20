@@ -31,7 +31,6 @@ import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.core.serializer.ISerializer;
-import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -45,7 +44,6 @@ public class Activator implements BundleActivator {
     private static IExecutorService executorService;
     private static IJSagaSessionService jSagaSessionService;
     private static IBatchServiceControl batchRessourceControl;
-    private static IBackgroundExecutor transferMonitor;
     private static IEventDispatcher eventDispatcher;
     private static IPluginManager pluginManager;
     private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
@@ -157,20 +155,6 @@ public class Activator implements BundleActivator {
                 batchRessourceControl = (IBatchServiceControl) getContext().getService(ref);
             }
             return batchRessourceControl;
-        }
-    }
-
-    public static IBackgroundExecutor getBackgroundExecutor() {
-        if (transferMonitor != null) {
-            return transferMonitor;
-        }
-
-        synchronized (Activator.class) {
-            if (transferMonitor == null) {
-                ServiceReference ref = getContext().getServiceReference(IBackgroundExecutor.class.getName());
-                transferMonitor = (IBackgroundExecutor) getContext().getService(ref);
-            }
-            return transferMonitor;
         }
     }
 

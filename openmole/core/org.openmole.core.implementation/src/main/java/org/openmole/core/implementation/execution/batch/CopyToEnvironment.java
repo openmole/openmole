@@ -85,8 +85,6 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
     }
 
     Result initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
-
-        Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Intialize the files");
         
         Tuple2<IBatchStorage, IAccessToken> storage = getEnvironment().getAStorage();
 
@@ -114,7 +112,6 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
             executionMessageURIFile.remove(false);
             
-            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Files are initialized");
             return new Result(communicationStorage, communicationDir, inputFile, outputFile, runtime);
         } finally {
             Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);
