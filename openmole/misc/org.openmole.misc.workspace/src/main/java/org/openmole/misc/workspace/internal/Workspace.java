@@ -1,11 +1,12 @@
 package org.openmole.misc.workspace.internal;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 import org.apache.commons.configuration.Configuration;
@@ -24,7 +25,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.ConfigurationElement;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.misc.workspace.IPasswordProvider;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Workspace implements IWorkspace {
@@ -37,9 +37,8 @@ public class Workspace implements IWorkspace {
     static final String passwordTestString = "test";
     File location;
     Map<ConfigurationLocation, ConfigurationElement> configurations = new TreeMap<ConfigurationLocation, ConfigurationElement>();
-    transient IPasswordProvider passwordProvider;
+    transient String password = "";
     transient long currentTime = System.currentTimeMillis();
-
 
     Workspace(File location) {
         this.location = location;
@@ -96,13 +95,13 @@ public class Workspace implements IWorkspace {
     }
 
     @Cachable
-    synchronized TempDir getTmpDir() throws IOException, InternalProcessingError {
+    synchronized TempDir getTmpDir() throws InternalProcessingError {
         File locTmp = new File(getPreference(TmpLocation), getPreference(UniqueID));
         locTmp = new File(locTmp, Long.toString(currentTime));
 
         if (!locTmp.exists()) {
             if (!locTmp.mkdirs()) {
-                throw new IOException("Cannot create tmp dir " + locTmp.getAbsolutePath());
+                throw new InternalProcessingError("Cannot create tmp dir " + locTmp.getAbsolutePath());
             }
         }
 
@@ -110,26 +109,39 @@ public class Workspace implements IWorkspace {
         return new TempDir(locTmp);
     }
 
-
     @Override
-    public File newTmpDir(String prefix) throws IOException, InternalProcessingError {
-        return getTmpDir().createNewTempDir(prefix);
+    public File newTmpDir(String prefix) throws InternalProcessingError {
+        try {
+            return getTmpDir().createNewTempDir(prefix);
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
     }
 
     @Override
-    public File newTmpFile(String prefix, String suffix) throws IOException, InternalProcessingError {
-        return getTmpDir().createNewTempFile(prefix, suffix);
+    public File newTmpFile(String prefix, String suffix) throws InternalProcessingError {
+        try {
+            return getTmpDir().createNewTempFile(prefix, suffix);
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
     }
 
     @Override
-    public File newFile(String prefix, String suffix) throws IOException, InternalProcessingError {
-        return getTmpDir().createNewFile(prefix, suffix);
+    public File newFile(String prefix, String suffix) throws InternalProcessingError {
+        try {
+            return getTmpDir().createNewFile(prefix, suffix);
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
     }
 
-    public File getTmpFile(String name) throws IOException, InternalProcessingError {
+    public File getTmpFile(String name) throws InternalProcessingError {
+
         File ret = new File(getTmpDir().getLocation(), name);
         ret.deleteOnExit();
         return ret;
+
     }
 
     @Cachable
@@ -156,7 +168,6 @@ public class Workspace implements IWorkspace {
             throw new InternalProcessingError(e);
         }
     }
-
 
     @Override
     public String getDefaultValue(ConfigurationLocation location) {
@@ -204,8 +215,6 @@ public class Workspace implements IWorkspace {
 
     @Cachable
     private synchronized BasicTextEncryptor getTextEncryptor() throws InternalProcessingError {
-        // if (textEncryptor == null) {
-        String password = getPasswordProvider().getPassword();
         BasicTextEncryptor tmpTextEncryptor = new BasicTextEncryptor();
         tmpTextEncryptor.setPassword(password);
         //textEncryptor = tmpTextEncryptor;
@@ -217,24 +226,23 @@ public class Workspace implements IWorkspace {
     /*private synchronized void reinitTextEncryptor() {
     textEncryptor = null;
     }*/
-    @Override
+    /*    @Override
     public void setPasswordProvider(IPasswordProvider passwordProvider) {
-        this.passwordProvider = passwordProvider;
+    this.passwordProvider = passwordProvider;
     }
-
+    
     private IPasswordProvider getPasswordProvider() {
-        if (passwordProvider != null) {
-            return passwordProvider;
-        }
-
-        synchronized (this) {
-            if (passwordProvider == null) {
-                passwordProvider = new SystemInPasswordProvider();
-            }
-            return passwordProvider;
-        }
+    if (passwordProvider != null) {
+    return passwordProvider;
     }
-
+    
+    synchronized (this) {
+    if (passwordProvider == null) {
+    passwordProvider = new SystemInPasswordProvider();
+    }
+    return passwordProvider;
+    }
+    }*/
     @Override
     public synchronized void removePreference(
             ConfigurationLocation location)
@@ -260,17 +268,17 @@ public class Workspace implements IWorkspace {
     }
 
     @Override
-    public File newTmpFile() throws IOException, InternalProcessingError {
+    public File newTmpFile() throws InternalProcessingError {
         return newTmpFile(fixedPrefix, fixedPrefix);
     }
 
     @Override
-    public File newFile() throws IOException, InternalProcessingError {
+    public File newFile() throws InternalProcessingError {
         return newFile(fixedPrefix, fixedPostfix);
     }
 
     @Override
-    public File newTmpDir() throws IOException, InternalProcessingError {
+    public File newTmpDir() throws InternalProcessingError {
         return newTmpDir(fixedDir);
     }
 
@@ -287,15 +295,13 @@ public class Workspace implements IWorkspace {
 
     @Override
     public void providePassword(String password) throws InternalProcessingError, UserBadDataError {
-        setPasswordProvider(new StaticPasswordProvider(password));
-        //reinitTextEncryptor();
+        this.password = password;
         try {
             getPreference(passwordTest);
         } catch (EncryptionOperationNotPossibleException e) {
             throw new UserBadDataError(e, "Wrong password");
         }
     }
-
 
     @Override
     public long getPreferenceAsDurationInMs(ConfigurationLocation location) throws InternalProcessingError {

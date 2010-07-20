@@ -28,14 +28,11 @@ public class UpdaterTask implements Runnable {
     final private IUpdatableWithVariableDelay updatable;
     final private Updater updater;
     final private ExecutorType type;
-    final private UpdatableFuture future;
 
-
-    public UpdaterTask(IUpdatableWithVariableDelay updatable, Updater updater, UpdatableFuture future, ExecutorType type) {
+    public UpdaterTask(IUpdatableWithVariableDelay updatable, Updater updater, ExecutorType type) {
         super();
         this.updatable = updatable;
         this.updater = updater;
-        this.future = future;
         this.type = type;
     }
 
@@ -46,22 +43,16 @@ public class UpdaterTask implements Runnable {
     }
 
     
-    
-    
     @Override
     public void run() {
         try {
-            updatable.update();
+            if(updatable.update())   
+                updater.delay(this);
         } catch (Throwable e) {
             Logger.getLogger(UpdaterTask.class.getName()).log(Level.WARNING, null, e);
-        } finally {
-            updater.delay(this);
-        }
+        } 
     }
 
-    public UpdatableFuture getFuture() {
-        return future;
-    }
 
     public IUpdatableWithVariableDelay getUpdatable() {
         return updatable;

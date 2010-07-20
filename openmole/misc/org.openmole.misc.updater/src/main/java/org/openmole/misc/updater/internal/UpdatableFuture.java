@@ -14,33 +14,29 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package org.openmole.misc.updater.internal;
 
 import java.util.concurrent.Future;
 import org.openmole.misc.updater.*;
 
 public class UpdatableFuture implements IUpdatableFuture {
-	
-	Future future;
 
-	public UpdatableFuture() {
-		super();
-            //    this.future = future;
-	}
+    Future future;
 
-	@Override
-	public synchronized void stopUpdate() {
-		future.cancel(true);
-	}
+    public UpdatableFuture() {
+        super();
+    }
 
-        public boolean isCanceled() {
-            return future != null && future.isCancelled();
-        }
+    @Override
+    public synchronized void stopUpdate() {
+        future.cancel(true);
+    }
 
-	public synchronized void setFuture(Future future) {
-		this.future = future;
-	}
+    public boolean isCanceled() {
+        return future != null && future.isCancelled();
+    }
 
+    public synchronized void setFuture(Future future) {
+        this.future = future;
+    }
 }

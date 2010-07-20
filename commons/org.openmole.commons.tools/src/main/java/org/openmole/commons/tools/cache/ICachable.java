@@ -18,11 +18,12 @@
 package org.openmole.commons.tools.cache;
 
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *
  * @author reuillon
  */
 public interface ICachable<T> {
-    T compute() throws InternalProcessingError, InterruptedException;
+    T compute() throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

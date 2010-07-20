@@ -52,7 +52,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
         Activator.getWorkspace().addToConfigurations(IncrementUpdateInterval, "PT2M");
     }
-    IUpdatableFuture future;
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment.Result copyToEnvironmentResult = null;
@@ -64,10 +63,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         super(executionEnvironment, job);
         this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
         asynchonousCopy();
-    }
-
-    public void setFuture(IUpdatableFuture future) {
-        this.future = future;
     }
 
     @Override
@@ -112,7 +107,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     @Override
-    public void update() throws InterruptedException {
+    public boolean update() throws InterruptedException {
         try {
             ExecutionState oldState = getState();
             ExecutionState state = updateAndGetState();
@@ -135,7 +130,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     tryFinalise();
                     break;
             }
-             
+
             //Compute new refresh delay
             if (oldState != getState()) {
                 this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
@@ -154,10 +149,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
         }
 
-    }
-
-    private void stopUpdate() {
-        future.stopUpdate();
+        return !killed.get();
     }
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
@@ -218,22 +210,18 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     public void kill() {
         if (!killed.getAndSet(true)) {
             try {
-                try {
-                    if (copyToEnvironmentExec != null) {
-                        copyToEnvironmentExec.interrupt();
-                    }
-                    if (finalizeExecution != null) {
-                        finalizeExecution.interrupt();
-                    }
-                    clean();
-                } finally {
-                    IBatchJob bj = getBatchJob();
-                    if (bj != null) {
-                        Activator.getExecutorService().getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj));
-                    }
+                if (copyToEnvironmentExec != null) {
+                    copyToEnvironmentExec.interrupt();
                 }
+                if (finalizeExecution != null) {
+                    finalizeExecution.interrupt();
+                }
+                clean();
             } finally {
-                stopUpdate();
+                IBatchJob bj = getBatchJob();
+                if (bj != null) {
+                    Activator.getExecutorService().getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj));
+                }
             }
         }
     }

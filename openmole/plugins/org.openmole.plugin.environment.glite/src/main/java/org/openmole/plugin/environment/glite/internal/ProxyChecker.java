@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.environment.glite.internal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ogf.saga.context.Context;
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
@@ -28,6 +30,7 @@ import org.ogf.saga.error.PermissionDeniedException;
 import org.ogf.saga.error.TimeoutException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.service.Retry;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.plugin.environment.glite.GliteEnvironmentAuthentication;
 
@@ -47,28 +50,34 @@ public class ProxyChecker implements IUpdatable {
     }
 
     @Override
-    public void update() throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public boolean update() throws InterruptedException {
         try {
             checkedEnv.initContext(ctx);
             ctx.getAttribute(Context.USERID);
-
-           // Logger.getLogger(ProxyChecker.class.getName()).log(Level.INFO,ctx.getAttribute(Context.LIFETIME));
         } catch (NotImplementedException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (AuthenticationFailedException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (AuthorizationFailedException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (PermissionDeniedException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (IncorrectStateException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (DoesNotExistException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (TimeoutException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (NoSuccessException ex) {
-            throw new InternalProcessingError(ex);
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
+        } catch (InternalProcessingError ex) {
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
+        } catch (UserBadDataError ex) {
+            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         }
+        
+        return true;
     }
+    
+
 }

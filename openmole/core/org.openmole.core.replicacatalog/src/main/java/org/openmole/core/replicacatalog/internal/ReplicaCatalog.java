@@ -73,7 +73,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
     final ReplicaLockRepository locks;
     final ObjectContainer objServeur;
 
-    public ReplicaCatalog() throws InternalProcessingError {
+    public ReplicaCatalog() throws InternalProcessingError, UserBadDataError {
         super();
         try {
             String objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);

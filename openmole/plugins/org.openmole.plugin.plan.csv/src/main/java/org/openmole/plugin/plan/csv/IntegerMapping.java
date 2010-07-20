@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
+ *  Copyright (C) 2010 mathieu leclaire <mathieu.leclaire@openmole.org>
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,28 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.workspace.internal;
-
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.misc.workspace.IPasswordProvider;
-import org.openmole.misc.workspace.IPasswordProvider;
+package org.openmole.plugin.plan.csv;
 
 /**
  *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class StaticPasswordProvider implements IPasswordProvider {
-
-    final String password;
-
-    public StaticPasswordProvider(String password) {
-        this.password = password;
-    }
-
+public class IntegerMapping implements IStringMapping {
 
     @Override
-    public String getPassword() throws InternalProcessingError {
-        return password;
+    public Object convert(String stringToBeConverted) {
+        return new Integer(stringToBeConverted);
     }
-
 }

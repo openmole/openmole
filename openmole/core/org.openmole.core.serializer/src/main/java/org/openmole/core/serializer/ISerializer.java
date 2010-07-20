@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *
@@ -30,7 +31,7 @@ import org.openmole.commons.exception.InternalProcessingError;
  */
 public interface ISerializer {
 
-  ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj,File dir) throws InternalProcessingError;
+  ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj,File dir) throws InternalProcessingError, UserBadDataError;
   ISerializationResult serializeAndGetPluginClassAndFiles(Object obj,File file) throws InternalProcessingError;
   ISerializationResult serializeAndGetPluginClassAndFiles(Object obj, OutputStream os) throws InternalProcessingError;    
   
@@ -44,5 +45,5 @@ public interface ISerializer {
   void serialize(Object obj, File file) throws InternalProcessingError;
   void serialize(Object obj, OutputStream os) throws InternalProcessingError;
     
-  void serializeAsHash(Object obj, File file) throws InternalProcessingError;
+  void serializeAsHash(Object obj, File file) throws InternalProcessingError, UserBadDataError;
 }

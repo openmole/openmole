@@ -19,6 +19,7 @@
  */
 package org.openmole.core.structuregenerator.internal;
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.osgi.framework.Bundle;
 import org.openmole.commons.exception.InternalProcessingError;
 
@@ -50,7 +51,7 @@ public class StructureGenerator implements IStructureGenerator {
     private String classPrefix = "FromStructure";
 
     @Override
-    public Class generateClass(ComplexNode structures) throws InternalProcessingError {
+    public Class generateClass(ComplexNode structures) throws InternalProcessingError, UserBadDataError {
         File jar;
 
         GroovyProject gp;
@@ -83,7 +84,7 @@ public class StructureGenerator implements IStructureGenerator {
         }
     }
 
-    public GroovyProject compile(Collection<ComplexNode> structures) throws IOException, InternalProcessingError {
+    public GroovyProject compile(Collection<ComplexNode> structures) throws IOException, InternalProcessingError, UserBadDataError {
         GroovyProject gp = new GroovyProject();
         gp.initProject();
         packStructures(structures, gp.getPackDir(), gp.getNameSpace());

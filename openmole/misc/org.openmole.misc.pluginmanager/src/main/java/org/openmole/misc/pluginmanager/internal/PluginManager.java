@@ -44,16 +44,17 @@ public class PluginManager implements IPluginManager {
     @Override
     public synchronized Bundle load(File path) throws InternalProcessingError {
         try {
-            Bundle b = Activator.getContext().installBundle(path.toURI().toString());
+            Bundle b = installBundle(path);
 
-            if (!resolvedBundlesDirectDependencies.containsKey(b)) {
-                b.start();
-                files.put(b, path);
-                resolvedBundlesDirectDependencies.put(b, getDirectDependencieBundles(b));
+            if (b != null) {                
+                if (!resolvedBundlesDirectDependencies.containsKey(b)) {
+                    b.start();
+                    resolvedBundlesDirectDependencies.put(b, getDirectDependencieBundles(b));
+                }
+            } else {
+                b = getBundleForFile(path);
             }
             return b;
-            //allBundles.add(b);
-
         } catch (BundleException ex) {
             throw new InternalProcessingError(ex, "Installing " + path.getAbsolutePath() + " " + ex.getLocalizedMessage());
         }
@@ -77,17 +78,26 @@ public class PluginManager implements IPluginManager {
         }
 
         try {
+            List<Bundle> bundlesRet = new LinkedList<Bundle>();
             List<Bundle> bundles = new LinkedList<Bundle>();
 
             for (File f : path.listFiles(fiter)) {
                 Bundle b;
 
-                b = Activator.getContext().installBundle(f.toURI().toString());
+                b = installBundle(f);
 
-                if (!resolvedBundlesDirectDependencies.containsKey(b)) {
+                if (b != null && !resolvedBundlesDirectDependencies.containsKey(b)) {
                     bundles.add(b);
-                    files.put(b, f);
+                    
                     resolvedBundlesDirectDependencies.put(b, Collections.EMPTY_LIST);
+                }
+                
+                if (b != null) {
+                    bundlesRet.add(b);
+                    
+                } else {
+                    bundlesRet.add(getBundleForFile(f));
+                    
                 }
             }
 
@@ -104,7 +114,7 @@ public class PluginManager implements IPluginManager {
                 resolvedBundlesDirectDependencies.put(b, getDirectDependencieBundles(b));
             }
 
-            return bundles;
+            return bundlesRet;
 
         } catch (BundleException ex) {
             throw new InternalProcessingError(ex, ex.getLocalizedMessage());
@@ -119,11 +129,6 @@ public class PluginManager implements IPluginManager {
             for (Bundle ib : getDependingBundles(bundle)) {
                 if (ib.equals(b)) {
                     dependencies.add(bundle);
-
-
-                    /*for (Bundle depBun : getResolvedDependencies(bundle)) {
-                    dependencies.add(depBun);
-                    }*/
                 }
             }
         }
@@ -263,5 +268,20 @@ public class PluginManager implements IPluginManager {
     @Override
     public Collection<Bundle> loadDir(String path) throws InternalProcessingError {
         return loadDir(new File(path));
+    }
+    
+    private Bundle getBundleForFile(File f) {
+        return files.getKey(f.getAbsoluteFile());
+    }
+    
+    private Bundle installBundle(File f) throws BundleException {
+        File file = f.getAbsoluteFile();
+        
+        if (!files.containsValue(file)) {
+            Bundle ret = Activator.getContext().installBundle(file.toURI().toString());
+            files.put(ret, file);
+            return ret;
+        }
+        return null;
     }
 }

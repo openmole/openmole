@@ -97,6 +97,9 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
         } catch (InternalProcessingError e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
+        }  catch (UserBadDataError e) {
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            return false;
         } catch (NotImplementedException e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
@@ -152,11 +155,8 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             UserBadDataError, InterruptedException {
 
         File script;
-        try {
-            script = Activator.getWorkspace().newTmpFile("script", ".sh");
-        } catch (IOException e) {
-            throw new InternalProcessingError(e);
-        }
+        script = Activator.getWorkspace().newTmpFile("script", ".sh");
+        
 
         JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), environment, runtime, script);
         IJSAGAJobDescription JSAGAJobDescription = new JSAGAJobDescription(jobDescription, script);
@@ -166,8 +166,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
 
     @Cachable
     private JobService getJobServiceCache() throws InternalProcessingError {
-        //Logger.getLogger(JSAGAJobService.class.getName()).info("/!\\ CREATE JOB SERVICE..." + jobServiceURI.toString() + " "+ System.identityHashCode(this));
-
+   
         final URL url;
         Task<?, JobService> task;
         try {

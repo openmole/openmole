@@ -36,6 +36,7 @@ import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 
@@ -104,7 +105,7 @@ public class JSAGAJobBuilder {
         }
     }
 
-    public JobDescription getHelloWorld() throws InternalProcessingError {
+    public JobDescription getHelloWorld() throws InternalProcessingError, UserBadDataError {
         if (hello != null) {
             return hello;
         }
@@ -127,25 +128,25 @@ public class JSAGAJobBuilder {
                     hello.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{helloFile.toURI().getSchemeSpecificPart() + ">" + helloFile.getName()});
 
                 } catch (NotImplementedException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (NoSuccessException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (AuthenticationFailedException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (AuthorizationFailedException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (PermissionDeniedException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (IncorrectStateException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (BadParameterException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (DoesNotExistException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (TimeoutException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 } catch (IOException e) {
-                    new InternalProcessingError(e);
+                    throw new InternalProcessingError(e);
                 }
             }
 

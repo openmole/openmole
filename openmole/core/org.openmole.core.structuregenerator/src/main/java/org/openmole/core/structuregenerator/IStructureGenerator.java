@@ -6,11 +6,12 @@
 package org.openmole.core.structuregenerator;
 
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
 /**
  *
  * @author reuillon
  */
 public interface IStructureGenerator {
-    Class generateClass(ComplexNode application) throws InternalProcessingError;
+    Class generateClass(ComplexNode application) throws InternalProcessingError, UserBadDataError;
 }

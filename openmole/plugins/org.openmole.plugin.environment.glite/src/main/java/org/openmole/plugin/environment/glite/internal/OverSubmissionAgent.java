@@ -61,7 +61,7 @@ public class OverSubmissionAgent implements IUpdatable {
 
 
     @Override
-    public void update() {
+    public boolean update() {
 
         final IExecutionJobRegistry<IBatchExecutionJob> registry = checkedEnv.getJobRegistry();
 
@@ -181,6 +181,8 @@ public class OverSubmissionAgent implements IUpdatable {
                 }
             }
         }
+        
+        return true;
     }
 
     private IStatistic computeStat(Collection<IBatchExecutionJob> allExecutionjobs) {
