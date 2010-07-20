@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
@@ -84,6 +86,8 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
     Result initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
+        Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Intialize the files");
+        
         Tuple2<IBatchStorage, IAccessToken> storage = getEnvironment().getAStorage();
 
         final IBatchStorage communicationStorage = storage._1();
@@ -110,6 +114,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
             executionMessageURIFile.remove(false);
             
+            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "File are initialized");
             return new Result(communicationStorage, communicationDir, inputFile, outputFile, runtime);
         } finally {
             Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);

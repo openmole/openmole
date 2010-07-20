@@ -34,7 +34,6 @@ import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.misc.backgroundexecutor.IBackgroundExecution;
 import org.openmole.core.implementation.execution.ExecutionJob;
 import org.openmole.core.model.job.IJob;
 import org.openmole.misc.updater.IUpdatableWithVariableDelay;
@@ -52,6 +51,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
         Activator.getWorkspace().addToConfigurations(IncrementUpdateInterval, "PT2M");
     }
+    
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironment.Result copyToEnvironmentResult = null;
@@ -173,11 +173,13 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     private boolean asynchonousCopy() throws InternalProcessingError, UserBadDataError {
         if (copyToEnvironmentResult == null) {
             if (copyToEnvironmentExecFuture == null) {
+                Logger.getLogger(BatchEnvironment.class.getName()).log(Level.FINE, "Starting copy");
                 copyToEnvironmentExecFuture = Activator.getExecutorService().getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(getEnvironment(), getJob()));
             }
 
             try {
                 if (copyToEnvironmentExecFuture.isDone()) {
+                    Logger.getLogger(BatchEnvironment.class.getName()).log(Level.FINE, "Copy is done");
                     copyToEnvironmentResult = copyToEnvironmentExecFuture.get();
                     copyToEnvironmentExecFuture = null;
                 }
