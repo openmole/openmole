@@ -40,10 +40,6 @@ import scala.collection.JavaConversions._
 
 class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer], relativeDir: String) extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
-
-  object Prototypes {
-    val PWD = new Prototype[File]("PWD", classOf[File])
-  }
   
   def this(name: String, cmd: String) = {
     this(name, cmd, null, "")
@@ -66,22 +62,18 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       val tmpDir = workspace.newTmpDir("systemExecTask")
 
       prepareInputFiles(context, progress, tmpDir)
-
-      val vals = new LinkedList[IVariable[_]]
-      vals.add(new Variable(Prototypes.PWD, tmpDir))
-      val commandLine = CommandLine.parse(expandData(context,vals, cmd))
-      val workdir = new File(tmpDir, relativeDir)
+      val workDir = new File(tmpDir, relativeDir)
+      val commandLine = CommandLine.parse(expandData(context,CommonVariables(workDir.getAbsolutePath), cmd))
       
-      try {
-        
-        val process = Runtime.getRuntime().exec(commandLine.toString, null, workdir)
+      try {       
+        val process = Runtime.getRuntime().exec(commandLine.toString, null, workDir)
         val ret = executeProcess(process, System.out, System.err)
         if(returnValue != null) context.setValue(returnValue, new Integer(ret))
       } catch {
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }
 
-      fetchOutputFiles(context, progress, workdir)
+      fetchOutputFiles(context, progress, workDir)
 
     } catch {
       case e: IOException => throw new InternalProcessingError(e)

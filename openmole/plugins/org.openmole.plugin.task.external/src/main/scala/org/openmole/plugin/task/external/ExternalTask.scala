@@ -20,13 +20,15 @@ package org.openmole.plugin.task.external
 import java.io.File
 import java.io.IOException
 import java.util.HashMap
-import java.util.List
 import java.util.TreeMap
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
+import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.tools.io.FileUtil
@@ -39,8 +41,17 @@ import scala.collection.JavaConversions._
 
 abstract class ExternalTask(name: String) extends Task(name) {
 
+  object CommonVariables {
+    val PWD = new Prototype[String]("PWD", classOf[String])
+    
+    def apply(pwd: String): List[IVariable[_]] = {
+      val vals = List(new Variable(PWD, pwd))
+      vals
+    }
+  }
+ 
   val inContextFiles = new ListBuffer[(IPrototype[File], String)]
-  val inContextFileList = new ListBuffer[(IPrototype[List[File]], IPrototype[List[String]])]
+  val inContextFileList = new ListBuffer[(IPrototype[java.util.List[File]], IPrototype[java.util.List[String]])]
   val inFileNames = new TreeMap[File, String]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String)]
@@ -66,10 +77,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
             throw new UserBadDataError("File supposed to be present in variable \"" + p._1.getName + "\" at the beging of the task \"" + getName + "\" and is not.")
           }
 
-          //val correctName = new File(tmpDir,expandData(context, p._2))
           ret += (new ToPut(f, expandData(context, p._2)))
-
-          //  copyTo(f, correctName)
         })
 
       inContextFileList.foreach( p => {
@@ -84,10 +92,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
               val f = fIt.next
               val name = sIt.next
 
-              //val fo = new File(tmpDir,expandData(context, name))
-
               ret += (new ToPut(f, expandData(context, name)))
-              //   copyTo(f, fo)
             }
           }
         })
@@ -140,7 +145,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
     return ret.toList
   }
 
-  def exportFilesFromContextAs(fileList: IPrototype[List[File]], names: IPrototype[List[String]]) = {
+  def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]) = {
     inContextFileList += ((fileList, names))
     super.addInput(fileList)
     super.addInput(names)

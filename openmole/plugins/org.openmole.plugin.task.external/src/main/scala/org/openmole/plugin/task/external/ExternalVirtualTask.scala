@@ -17,26 +17,20 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import ch.ethz.ssh2._
 import org.openmole.plugin.tools.utils.SSHUtils._
 import java.io.File
-import java.io.PrintStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.plugin.resource.virtual.IVirtualMachine
-import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.plugin.task.external.internal.Activator._
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.commons.tools.service.Retry.retry
 
 abstract class ExternalVirtualTask(name: String, relativeDir: String) extends ExternalTask(name) {
 
@@ -45,11 +39,6 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
   }
   
   implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
-
-//  object Configuration {
-//    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
-//    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
-//  }
 
   def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
     listInputFiles(context, progress).foreach( f => {
@@ -82,7 +71,7 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + " ; " + expandData(context, cmd))
+          session.execCommand("cd " + workDir + " ; " + expandData(context, CommonVariables(workDir), cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close
