@@ -241,7 +241,7 @@
         <lib.fr.in2p3.jsaga.version>0.9.9-SNAPSHOT</lib.fr.in2p3.jsaga.version>
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
-        <lib.org.codehaus.groovy.version>1.7.2</lib.org.codehaus.groovy.version>
+        <lib.org.codehaus.groovy.version>1.7.3</lib.org.codehaus.groovy.version>
         <lib.org.ogf.saga.version>1.0</lib.org.ogf.saga.version>
         <lib.uk.com.robust-it.cloning.version>1.7.1</lib.uk.com.robust-it.cloning.version>
         <lib.org.nuiton.j2r.version>1.0.0</lib.org.nuiton.j2r.version>
