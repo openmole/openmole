@@ -19,22 +19,19 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.model.task.annotations.Resource
-import org.openmole.plugin.resource.virtual.IVirtualMachine
-import org.openmole.plugin.resource.virtual.IVirtualMachinePool
 import org.openmole.plugin.resource.virtual.VirtualMachineResource
 import org.openmole.plugin.task.external.ExternalVirtualTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
-import org.openmole.misc.workspace.ConfigurationLocation
-import com.jcraft.jsch.ChannelExec
-import java.util.Collections
-import java.io.PrintStream
+
 import scala.collection.JavaConversions._
 
-class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String) extends ExternalVirtualTask(name) {
+class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String, relativeDir: String) extends ExternalVirtualTask(name, relativeDir) {
 
+  def this(name: String, virtualMachineResourceArg: VirtualMachineResource, cmd: String) {
+    this(name, virtualMachineResourceArg, cmd, "")
+  }
+  
   @Resource
   val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 

@@ -70,9 +70,10 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       val vals = new LinkedList[IVariable[_]]
       vals.add(new Variable(Prototypes.PWD, tmpDir))
       val commandLine = CommandLine.parse(expandData(context,vals, cmd))
-
+      val workdir = new File(tmpDir, relativeDir)
+      
       try {
-        val workdir = new File(tmpDir, relativeDir)
+        
         val process = Runtime.getRuntime().exec(commandLine.toString, null, workdir)
         val ret = executeProcess(process, System.out, System.err)
         if(returnValue != null) context.setValue(returnValue, new Integer(ret))
@@ -80,7 +81,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }
 
-      fetchOutputFiles(context, progress, tmpDir)
+      fetchOutputFiles(context, progress, workdir)
 
     } catch {
       case e: IOException => throw new InternalProcessingError(e)

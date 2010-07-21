@@ -73,17 +73,16 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
       val sftp = new SFTPv3Client(connection)
 
       try {
-        val workDir = "/tmp/" + UUID.randomUUID + '/'
-        sftp.mkdir(workDir, 0x777)
+        val tmpDir = "/tmp/" + UUID.randomUUID + '/'
+        sftp.mkdir(tmpDir, 0x777)
 
-        prepareInputFiles(context, progress, workDir, sftp)
+        prepareInputFiles(context, progress, tmpDir, sftp)
         
-        
-        
+        val workDir = if(!relativeDir.isEmpty) tmpDir + relativeDir + '/' else tmpDir
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + relativeDir + " ; " + expandData(context, cmd))
+          session.execCommand("cd " + workDir + " ; " + expandData(context, cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close
