@@ -19,6 +19,7 @@ package org.openmole.core.implementation.observer;
 import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
@@ -30,26 +31,30 @@ import org.openmole.core.model.observer.ISaver;
  */
 public class Saver implements ISaver, IMoleExecutionObserver {
 
-    final File file;
+    final File dir;
     
-    public Saver(IMoleExecution moleExection, IGenericTaskCapsule taskCapsule, File file) {
+    public Saver(IMoleExecution moleExection, IGenericTaskCapsule taskCapsule, File dir) {
         new MoleExecutionObserverAdapter(moleExection, this);
-        this.file = file;
+        this.dir = dir;
     }
-
+    
+    public Saver(IMoleExecution moleExection, IGenericTaskCapsule taskCapsule, String dir) {
+        this(moleExection, taskCapsule, new File(dir));
+    }
+    
     @Override
     public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Activator.getSerializer().serializeAsHash(moleJob.getContext(), dir);
     }
 
     @Override
     public void moleExecutionStarting() throws InternalProcessingError, UserBadDataError {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(!dir.exists()) dir.mkdirs();
     }
 
     @Override
     public void moleExecutionFinished() throws InternalProcessingError, UserBadDataError {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
 

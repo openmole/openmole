@@ -49,12 +49,12 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
     }
 
     @Override
-    public synchronized void performImpl(IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    public synchronized void performImpl(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
 
         IRegistryWithTicket<ITransition, IContext> registry = moleExecution.getLocalCommunication().getTransitionRegistry();
         registry.register(this, ticket, context);
 
-        IExploredPlan values = context.getLocalValue(ExplorationTask.ExploredPlan.getPrototype());
+        IExploredPlan values = context.getValue(ExplorationTask.ExploredPlan.getPrototype());
         context.removeVariable(ExplorationTask.ExploredPlan.getPrototype().getName());
 
         ISubMoleExecution subSubMole = new SubMoleExecution(subMole);
@@ -70,7 +70,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
             subSubMole.incNbJobInProgress();
 
             ITicket newTicket = moleExecution.nextTicket(ticket);
-            IContext destContext = new Context(context.getRoot());
+            IContext destContext = new Context();
 
             Set<IData<?>> notFound = new HashSet<IData<?>>();
 
@@ -78,7 +78,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
                 //Check filtred here to avoid useless clonning
                 if (context.contains(in.getPrototype()) && !getFiltred().contains(in.getPrototype().getName())) {
 
-                    IVariable<?> varToClone = context.getLocalVariable(in.getPrototype());
+                    IVariable<?> varToClone = context.getVariable(in.getPrototype());
                     IVariable<?> var;
 
                     if(!in.getMode().isImmutable() && factorIt.hasNext()) {
@@ -107,7 +107,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
                 }
             }
             
-            submitNextJobsIfReady(destContext, newTicket, toClone, moleExecution, subSubMole);
+            submitNextJobsIfReady(destContext, global, newTicket, toClone, moleExecution, subSubMole);
         }
 
         subSubMole.decNbJobInProgress(size);

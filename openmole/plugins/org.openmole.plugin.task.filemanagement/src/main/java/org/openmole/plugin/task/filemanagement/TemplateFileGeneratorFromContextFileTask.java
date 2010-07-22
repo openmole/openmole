@@ -30,7 +30,7 @@ public class TemplateFileGeneratorFromContextFileTask extends TemplateFileGenera
 
     @Override
     File getFile(IContext context) {
-        return context.getLocalValue(templateFile.getPrototype());
+        return context.getValue(templateFile.getPrototype());
     }
 
 }

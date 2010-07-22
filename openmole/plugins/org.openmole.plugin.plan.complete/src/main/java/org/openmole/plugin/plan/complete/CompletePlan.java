@@ -51,7 +51,7 @@ public class CompletePlan extends Plan<IFactor<Object, ?>> {
     }
 
     @Override
-    public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError {
+    public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
 
         List<IFactorValues> listOfListOfValues = new ArrayList<IFactorValues>();
 
@@ -62,7 +62,7 @@ public class CompletePlan extends Plan<IFactor<Object, ?>> {
         int i = 0;
         for (IFactor<?, ?> factor: getFactors()) {
             factor = getFactors().get(i);
-            iterators[i] = factor.getDomain().iterator(context);
+            iterators[i] = factor.getDomain().iterator(global, context);
  
             if(iterators[i].hasNext())
                 iteratorsCurrentValue[i] = iterators[i].next();
@@ -99,7 +99,7 @@ public class CompletePlan extends Plan<IFactor<Object, ?>> {
                         break;
                     }
                     // else, we reset the current vector, and let incrementing the next vector
-                    iterators[i] = f.getDomain().iterator(context);
+                    iterators[i] = f.getDomain().iterator(global, context);
                     iteratorsCurrentValue[i] = iterators[i].next();
                 }
                 i++;

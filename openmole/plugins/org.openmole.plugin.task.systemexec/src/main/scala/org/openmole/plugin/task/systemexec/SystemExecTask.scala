@@ -61,13 +61,13 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
     this(name, cmd, returnValue, relativeDir)
   }
   
-  override protected def process(context: IContext, progress: IProgress) = {
+  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
     try {
       val tmpDir = workspace.newTmpDir("systemExecTask")
 
-      prepareInputFiles(context, progress, tmpDir)
+      prepareInputFiles(global, context, progress, tmpDir)
       val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, CommonVariables(workDir.getAbsolutePath), cmd))
+      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
       
       try {                    
        // val executor = new DefaultExecutor
@@ -81,7 +81,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }
 
-      fetchOutputFiles(context, progress, workDir)
+      fetchOutputFiles(global, context, progress, workDir)
 
     } catch {
       case e: IOException => throw new InternalProcessingError(e)

@@ -22,7 +22,8 @@ import org.openmole.core.implementation.domain.Interval;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.tools.VariableExpansion;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 /**
  *
@@ -43,15 +44,15 @@ public class LogarithmRangeDouble extends LogarithmIntervalDomain<Double>{
     }
 
     @Override
-    public Double getRange(IContext context) throws InternalProcessingError, UserBadDataError {
-        return getInterval().getMax(context) - getInterval().getMin(context);
+    public Double getRange(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        return getInterval().getMax(global, context) - getInterval().getMin(global,context);
     }
 
     @Override
-    public List<Double> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
-        Double min = Math.log(getInterval().getMin(context));
-        Double max = Math.log(getInterval().getMax(context));
-        Integer nbstep = new Integer(VariableExpansion.expandData(context,getNbStep()));
+    public List<Double> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        Double min = Math.log(getInterval().getMin(global, context));
+        Double max = Math.log(getInterval().getMax(global, context));
+        Integer nbstep = new Integer(expandData(global, context,getNbStep()));
         Double step = new Double(Math.abs(max - min)) / nbstep;
 
         List<Double> val = new ArrayList<Double>(step.intValue()+1);
@@ -63,11 +64,6 @@ public class LogarithmRangeDouble extends LogarithmIntervalDomain<Double>{
         }
 
         return val;
-    }
-
-    @Override
-    public Double getCenter(IContext context) throws InternalProcessingError, UserBadDataError {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

@@ -103,7 +103,7 @@ public class CompletePlanTest {
         expectedResult.add(value);
 
         
-        IExploredPlan result = instance.build(context);
+        IExploredPlan result = instance.build(new Context(), context);
         Iterator<IFactorValues> resIt = result.iterator();
         while(resIt.hasNext()) {
             IFactorValues res = resIt.next();

@@ -35,12 +35,12 @@ class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMach
   @Resource
   val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 
-  override protected def process(context: IContext, progress: IProgress) {
+  override protected def process(global: IContext, context: IContext, progress: IProgress) {
     val pool = virtualMachineResource.getVirtualMachineShared
     val virtualMachine = pool.borrowAVirtualMachine
    
     try {
-       execute(context, progress, cmd, virtualMachine, virtualMachineResource.user, virtualMachineResource.password)
+       execute(global, context, progress, cmd, virtualMachine, virtualMachineResource.user, virtualMachineResource.password)
     } finally {
        pool.returnVirtualMachine(virtualMachine)
     }

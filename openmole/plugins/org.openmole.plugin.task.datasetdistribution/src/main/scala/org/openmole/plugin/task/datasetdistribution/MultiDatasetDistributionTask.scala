@@ -55,14 +55,14 @@ class  MultiDatasetDistributionTask(name: String,
                                                                                          imageWidth,
                                                                                          imageHeight) {
 
-  private def createChart(dataset: DefaultCategoryDataset, context: IContext): JFreeChart = {
+  private def createChart(dataset: DefaultCategoryDataset, global: IContext, context: IContext): JFreeChart = {
  // private def createChart(dataset: HistogramDataset, context: IContext): JFreeChart = {
     setChartTheme (createLegacyTheme())
   //  dataset:HistogramDataset = dataset.asInstanceOf[HistogramDataset]
   //  val chart = createBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
 
 
-    val chart = createStackedBarChart(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+    val chart = createStackedBarChart(expandData(global, context, chartTitle),expandData(global, context, xLegend), expandData(global, context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
 
   /*  val plot = chart getXYPlot()
     val renderer:GroupedStackedBarRenderer = plot.getRenderer().asInstanceOf[GroupedStackedBarRenderer]
@@ -75,11 +75,11 @@ class  MultiDatasetDistributionTask(name: String,
     chart
   }
 
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(global: IContext, context: IContext, progress: IProgress) = {
     try {
       val dataset = new DefaultCategoryDataset();
       charts foreach ( chart => {
-          val data = context getLocalValue(chart._1)
+          val data = context getValue(chart._1)
            val array = new Array[Double](data.size)
           var i = 0
           data foreach ( v => {
@@ -87,7 +87,7 @@ class  MultiDatasetDistributionTask(name: String,
               dataset.addValue(v.doubleValue,chart._2,xLegends.get(i));
          // dataset addSeries("", array, expandIntegerData(context, nbCategories))
               //    array(i) = v.doubleValue
-          println("dataset.addValue " + v.doubleValue +", " +"h"+", "+ xLegends.get(i));
+          //println("dataset.addValue " + v.doubleValue +", " +"h"+", "+ xLegends.get(i));
 
               i += 1
             } )
@@ -96,14 +96,14 @@ class  MultiDatasetDistributionTask(name: String,
           //   dataset addSeries("", array, expandIntegerData(context, nbCategories))
           //
         } )
-          val jfchart = createChart(dataset, context)
+          val jfchart = createChart(dataset, global, context)
 
 
        /* GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
         KeyToGroupMap map = new KeyToGroupMap("G1");*/
 
-          println("STORE: " + expandData(context, outputDirectoryPath + "/" + "chart.png"));
-          val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + "chart.png")));
+        //  println("STORE: " + expandData(global, context, outputDirectoryPath + "/" + "chart.png"));
+          val os = new BufferedOutputStream(new FileOutputStream(expandData(global, context, outputDirectoryPath + "/" + "chart.png")));
           try {
             writeChartAsPNG(os,jfchart,imageWidth,imageHeight)
           } finally {

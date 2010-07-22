@@ -14,5 +14,5 @@ import org.openmole.commons.exception.UserBadDataError;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public interface IDomainWithRange<T>  {
-    T getRange(IContext context) throws InternalProcessingError, UserBadDataError;
+    T getRange(IContext global, IContext context) throws InternalProcessingError, UserBadDataError;
 }

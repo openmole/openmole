@@ -49,13 +49,16 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     final private IMoleJobId id;
 
     private IContext context;
+    final private IContext global;
+    
     volatile private State state;
 
     @ObjectConstructed
-    public MoleJob(IGenericTask task, IContext context, ITicket ticket, IMoleJobId id) throws InternalProcessingError, UserBadDataError {
+    public MoleJob(IGenericTask task, IContext global, IContext context, ITicket ticket, IMoleJobId id) throws InternalProcessingError, UserBadDataError {
         super();
         this.context = context;
         this.task = task;
+        this.global = global;
         this.ticket = ticket;
         this.id = id;
         this.progress = new Progress();
@@ -91,7 +94,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     @ObjectModified(type = StateChanged)
     public void setState(State state) throws InternalProcessingError, UserBadDataError {
         if(getState() == null || !getState().isFinal()) {
-            Collection<ITimeStamp> timeStamps = getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
+            Collection<ITimeStamp> timeStamps = getContext().getValue(GenericTask.Timestamps.getPrototype());
             timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
             this.state = state;
         }
@@ -103,7 +106,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     }
 
     private void setInnerContext(IContext context) {
-        context.setRoot(this.getContext().getRoot());
         this.context = context;
     }
 
@@ -111,7 +113,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     public void perform() throws InterruptedException {
         try {
             setState(State.RUNNING);
-            getTask().perform(getContext(), progress);
+            getTask().perform(getGlobalContext(), getContext(), progress);
         } catch (Throwable e) {
             getContext().putVariable(GenericTask.Exception.getPrototype(), e);
 
@@ -124,7 +126,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     @Override
     public void rethrowException(IContext context) throws ExecutionException {
         if (context.containsVariableWithName(GenericTask.Exception.getPrototype())) {
-            throw new ExecutionException("Error durring job execution for task " + getTask().getName(), context.getLocalValue(GenericTask.Exception.getPrototype()));
+            throw new ExecutionException("Error durring job execution for task " + getTask().getName(), context.getValue(GenericTask.Exception.getPrototype()));
         }
     }
 
@@ -135,7 +137,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         if (!context.containsVariableWithName(GenericTask.Exception.getPrototype())) {
             setState(State.COMPLETED);
         } else {
-            LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", context.getLocalValue(GenericTask.Exception.getPrototype()));
+            LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", context.getValue(GenericTask.Exception.getPrototype()));
             setState(State.FAILED);
         }
     }
@@ -158,5 +160,10 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     @Override
     public IProgress getProgress() {
         return progress;
+    }
+
+    @Override
+    public IContext getGlobalContext() {
+        return global;
     }
 }

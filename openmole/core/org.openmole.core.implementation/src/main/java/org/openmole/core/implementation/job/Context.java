@@ -37,43 +37,11 @@ import org.openmole.core.model.data.IPrototype;
 
 public class Context implements IVisitable<IVariable>, IContext {
 
-    Map<String, IVariable> variables;
-    IContext root;
-
+    final Map<String, IVariable> variables;
+ 
     public Context() {
         variables = Collections.synchronizedMap(new TreeMap<String, IVariable>());
-        setRoot(this);
     }
-
-    public Context(IContext root) {
-        variables = Collections.synchronizedMap(new TreeMap<String, IVariable>());
-        setRoot(root);
-        //parent.addChild(name, this, ticket);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-       super.finalize();
-    }
-
-    @Override
-    public void chRoot() {
-        setRoot(this);
-    }
-
-    @Override
-    public void setRoot(IContext root) {
-        this.root = root;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#getRoot()
-     */
-    @Override
-    public IContext getRoot() {
-        return root;
-    }
-
 
     /* (non-Javadoc)
      * @see org.openmole.core.task.IContext#setVariables(java.util.ArrayList)
@@ -107,9 +75,7 @@ public class Context implements IVisitable<IVariable>, IContext {
      */
     @Override
     public void putVariable(IVariable<?> variable) {
-        synchronized (getVariables()) {
-            getVariables().put(variable.getPrototype().getName(), variable);
-        }
+        getVariables().put(variable.getPrototype().getName(), variable);
     }
 
     /* (non-Javadoc)
@@ -128,13 +94,6 @@ public class Context implements IVisitable<IVariable>, IContext {
         putVariable(new Variable<Object>(name, type, value));
     }
     
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#putGlobalVariable(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public void putGlobalVariable(String name, Object value) {
-        getRoot().putVariable(new Variable<Object>(name, value));
-    }
 
     /* (non-Javadoc)
      * @see org.openmole.core.task.IContext#putVariable(org.openmole.core.data.structure.Prototype, java.lang.Object)
@@ -144,22 +103,14 @@ public class Context implements IVisitable<IVariable>, IContext {
         putVariable(new Variable<T>(proto, value));
     }
 
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#putGlobalVariable(org.openmole.core.data.structure.Prototype, java.lang.Object)
-     */
-    @Override
-    public <T> void putGlobalVariable(IPrototype<? super T> proto, T value) {
-        getRoot().putVariable(new Variable<T>(proto, value));
-    }
-
     //	@Override
 	/* (non-Javadoc)
      * @see org.openmole.core.task.IContext#getLocalValue(java.lang.String)
      */
     @Override
-    public <IT> IT getLocalValue(String name) {
+    public <IT> IT getValue(String name) {
         synchronized (getVariables()) {
-            Variable<IT> elt = getLocalVariable(name);
+            Variable<IT> elt = getVariable(name);
 
             if (elt != null) {
                 return elt.getValue();
@@ -173,8 +124,8 @@ public class Context implements IVisitable<IVariable>, IContext {
      * @see org.openmole.core.task.IContext#getLocalValue(org.openmole.core.data.structure.Prototype)
      */
     @Override
-    public <IT> IT getLocalValue(IPrototype<IT> proto) {
-        return this.<IT>getLocalValue(proto.getName());
+    public <IT> IT getValue(IPrototype<IT> proto) {
+        return this.<IT>getValue(proto.getName());
     }
 
     //	@Override
@@ -182,13 +133,8 @@ public class Context implements IVisitable<IVariable>, IContext {
      * @see org.openmole.core.task.IContext#getLocalVariable(java.lang.String)
      */
     @Override
-    public <IT> Variable<IT> getLocalVariable(String name) {
+    public <IT> Variable<IT> getVariable(String name) {
         return (Variable<IT>) getVariables().get(name);
-    }
-
-    @Override
-    public <IT> Variable<IT> getLocalVariable(IPrototype<IT> proto) {
-        return (Variable<IT>) getVariables().get(proto.getName());
     }
 
     /* (non-Javadoc)
@@ -227,45 +173,7 @@ public class Context implements IVisitable<IVariable>, IContext {
         }
         return proto.getType().isAssignableFrom(v.getType());
     }
-
-
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#getGlobal(java.lang.String)
-     */
-    @Override
-    public IVariable<?> getGlobalVariable(String name) {
-        return getRoot().getVariable(name);
-    }
-
-    @Override
-    public void removeGlobalVariable(String name) {
-        getRoot().removeVariable(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#getGlobalValue(java.lang.String)
-     */
-    @Override
-    public <IT> IT getGlobalValue(String name) {
-        IVariable<IT> var = getRoot().getVariable(name);
-
-        if (var == null) {
-            return null;
-        }
-
-        return (IT) var.getValue();
-    }
-
-    @Override
-    public <IT> IT getGlobalValue(IPrototype<? extends IT> proto) {
-        return (IT) getRoot().getVariable(proto).getValue();
-    }
-
-    @Override
-    public boolean existGlobal(IPrototype<?> proto) {
-        return getRoot().contains(proto);
-    }
-
+    
     /* (non-Javadoc)
      * @see org.openmole.core.task.IContext#setValue(java.lang.String, java.lang.Object)
      */
@@ -306,17 +214,9 @@ public class Context implements IVisitable<IVariable>, IContext {
     @Override
     public void clean() {
         synchronized (getVariables()) {
-            variables = new TreeMap<String, IVariable>();
+            variables.clear();
         }
-        //	cleanCache();
     }
-
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#getParent()
-     */
-    /*public IContext getParent() {
-    return parent;
-    }*/
 
     /* (non-Javadoc)
      * @see org.openmole.core.task.IContext#visit(org.openmole.commons.tools.IVisitor)
@@ -328,16 +228,6 @@ public class Context implements IVisitable<IVariable>, IContext {
         }
     }
 
-    /*public Set<String> getChildNames() {
-    return childs.keySet();
-    }*/
-    /* (non-Javadoc)
-     * @see org.openmole.core.task.IContext#getVariable(java.lang.String)
-     */
-    @Override
-    public <T> Variable<T> getVariable(String name) {
-        return (Variable<T>) getVariables().get(name);
-    }
 
     /*@Override
     public Collection<IChildContext> getChlids() {
@@ -347,11 +237,5 @@ public class Context implements IVisitable<IVariable>, IContext {
     public Iterator<IVariable> iterator() {
         return variables.values().iterator();
     }
-
-    @Override
-    public boolean isRoot() {
-        return this.equals(getRoot());
-    }
-
 
 }

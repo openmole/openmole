@@ -37,8 +37,8 @@ public class IterableVariableDomain<T> implements IDomain<T>{
     }
 
     @Override
-    public Iterator<? extends T> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
-        return context.getLocalValue(variable).iterator();
+    public Iterator<? extends T> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
+        return context.getValue(variable).iterator();
     }
 
 }

@@ -66,10 +66,10 @@ class DatasetDistributionTask (name: String,
                                                                                     imageWidth,
                                                                                     imageHeight) {
 
-  private def createChart(dataset: HistogramDataset, context: IContext): JFreeChart = {
+  private def createChart(dataset: HistogramDataset, global: IContext, context: IContext): JFreeChart = {
     setChartTheme (createLegacyTheme())
 
-    val chart = createHistogram(expandData(context, chartTitle),expandData(context, xLegend), expandData(context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
+    val chart = createHistogram(expandData(global, context, chartTitle),expandData(global, context, xLegend), expandData(global, context, yLegend), dataset, PlotOrientation.VERTICAL, false, false, false)
     chart getXYPlot() getRenderer() setSeriesPaint(0, ChartColor.VERY_LIGHT_BLUE)
 
     val plot = chart getXYPlot()
@@ -86,10 +86,10 @@ class DatasetDistributionTask (name: String,
    * 2- builds a HistogramDataset object
    * 3- saves it as a PNG file
    */
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(global: IContext, context: IContext, progress: IProgress) = {
     try {
       charts foreach ( chart => {
-          val data = context getLocalValue(chart._1)
+          val data = context getValue(chart._1)
           val array = new Array[Double](data.size)
           var i = 0
           data foreach ( v => {
@@ -98,12 +98,12 @@ class DatasetDistributionTask (name: String,
             } )
 
           val dataset = new HistogramDataset()
-          dataset addSeries("", array, expandIntegerData(context, nbCategories))
+          dataset addSeries("", array, expandIntegerData(global, context, nbCategories))
 
-          val jfchart = createChart(dataset, context)
-          val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + chart._2)));
+          val jfchart = createChart(dataset, global, context)
+          val os = new BufferedOutputStream(new FileOutputStream(expandData(global, context, outputDirectoryPath + "/" + chart._2)));
           try {
-            writeChartAsPNG(os,jfchart,imageWidth,imageHeight)
+            writeChartAsPNG(os, jfchart, imageWidth, imageHeight)
           } finally {
             os.close()
           }

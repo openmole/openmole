@@ -26,7 +26,6 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.plan.IPlan;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
@@ -48,11 +47,10 @@ public class FiltredPlan implements IPlan {
     }
 
     @Override
-    public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
-        IExploredPlan exploredPlan = toFilter.build(context);
+    public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        IExploredPlan exploredPlan = toFilter.build(global, context);
         Collection<IFactorValues> ret = new LinkedList<IFactorValues>();
         Iterator<IFactorValues> it = exploredPlan.iterator();
-
 
         while(it.hasNext()) {
             IFactorValues values = it.next();

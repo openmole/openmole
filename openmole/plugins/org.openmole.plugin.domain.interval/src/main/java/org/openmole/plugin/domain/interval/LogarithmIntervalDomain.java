@@ -20,7 +20,6 @@ package org.openmole.plugin.domain.interval;
 import org.openmole.core.implementation.domain.FiniteDomain;
 import org.openmole.core.implementation.domain.Interval;
 import org.openmole.core.model.domain.IDiscretizedIntervalDomain;
-import org.openmole.core.model.domain.IDomainWithCenter;
 import org.openmole.core.model.domain.IDomainWithRange;
 import org.openmole.core.model.domain.IInterval;
 
@@ -28,12 +27,12 @@ import org.openmole.core.model.domain.IInterval;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public abstract class LogarithmIntervalDomain<T> extends FiniteDomain<T> implements IDiscretizedIntervalDomain<T>, IDomainWithCenter<T>, IDomainWithRange<T> {
+public abstract class LogarithmIntervalDomain<T> extends FiniteDomain<T> implements IDiscretizedIntervalDomain<T>, IDomainWithRange<T> {
     private Interval<T> interval;
     private String nbStep;
 
 
-public LogarithmIntervalDomain(Interval<T> interval, String nbStep) {
+    public LogarithmIntervalDomain(Interval<T> interval, String nbStep) {
         this.interval = interval;
         this.nbStep = nbStep;
     }

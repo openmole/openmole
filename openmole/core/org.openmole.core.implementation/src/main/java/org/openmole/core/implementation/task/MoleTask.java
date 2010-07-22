@@ -51,7 +51,7 @@ public class MoleTask extends Task implements IMoleTask {
         @Override
         public void objectChanged(IMoleExecution t, Object[] os) throws InternalProcessingError, UserBadDataError {
             IMoleJob moleJob = (IMoleJob) os[0];
-            Throwable exception = moleJob.getContext().getLocalValue(GenericTask.Exception.getPrototype());
+            Throwable exception = moleJob.getContext().getValue(GenericTask.Exception.getPrototype());
 
             if (exception != null) {
                 throwables.add(exception);
@@ -71,19 +71,19 @@ public class MoleTask extends Task implements IMoleTask {
     }
 
     @Override
-    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
-        IContext rootContext = new Context();
-        IContext firstTaskContext = new Context(rootContext);
+        IContext globalContext = new Context();
+        IContext firstTaskContext = new Context();
 
         for (IData<?> input : getInput()) {
             if (!input.getMode().isOptional() || input.getMode().isOptional() && context.contains(input.getPrototype())) {
                 IPrototype p = input.getPrototype();
-                firstTaskContext.putVariable(p, context.getLocalValue(p));
+                firstTaskContext.putVariable(p, context.getValue(p));
             }
         }
 
-        IMoleExecution execution = new MoleExecution(mole, firstTaskContext);
+        IMoleExecution execution = new MoleExecution(mole, globalContext, firstTaskContext);
 
         ExceptionLister exceptionLister = new ExceptionLister();
 
@@ -94,8 +94,8 @@ public class MoleTask extends Task implements IMoleTask {
 
         for (IData<?> output : getUserOutput()) {
             IPrototype p = output.getPrototype();
-            if (rootContext.contains(p)) {
-                context.putVariable(p, rootContext.getGlobalValue(p));
+            if (globalContext.contains(p)) {
+                context.putVariable(p, globalContext.getValue(p));
             }
         }
 

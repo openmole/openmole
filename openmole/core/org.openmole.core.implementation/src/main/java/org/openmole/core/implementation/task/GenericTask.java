@@ -100,7 +100,7 @@ public abstract class GenericTask implements IGenericTask {
         List<IVariable<?>> vars = new LinkedList<IVariable<?>>();
         for (IData<?> d : getOutput()) {
             IPrototype<?> p = d.getPrototype();
-            IVariable<?> var = context.getLocalVariable(p);
+            IVariable<?> var = context.getVariable(p);
             if (var != null) {
                 if (p.getType().isAssignableFrom(var.getValue().getClass())) {
                     vars.add(var);
@@ -136,17 +136,18 @@ public abstract class GenericTask implements IGenericTask {
      * @throws org.openmole.core.InternalProcessingError
      * @throws InterruptedException
      */
-    protected abstract void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException;
+    protected abstract void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException;
+   
 
     /* (non-Javadoc)
      * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
      */
     @Override
-    public void perform(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public void perform(IContext global, IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException {
         try {
             deploy();
             init(context);
-            process(context, progress);
+            process(global, context, progress);
             end(context);
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e, "Error in task " + getName());

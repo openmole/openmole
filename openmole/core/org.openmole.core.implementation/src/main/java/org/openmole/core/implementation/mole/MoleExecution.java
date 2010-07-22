@@ -119,22 +119,22 @@ public class MoleExecution implements IMoleExecution {
     transient Thread submiter;
 
     public MoleExecution(IMole mole) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
+        this(mole, new Context(), new Context(), FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
     }
     
     public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), environmentSelectionStrategy, MoleJobGrouping.EMPTY_GROUPING);
+        this(mole, new Context(), new Context(), environmentSelectionStrategy, MoleJobGrouping.EMPTY_GROUPING);
     }
 
     public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), environmentSelectionStrategy, moleJobGrouping);
+        this(mole, new Context(), new Context(), environmentSelectionStrategy, moleJobGrouping);
     }
     
-    public MoleExecution(IMole mole, IContext context) throws InternalProcessingError, UserBadDataError {
-        this(mole, context, FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
+    public MoleExecution(IMole mole, IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        this(mole, global, context, FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
     }
     
-    public MoleExecution(IMole mole, IContext context, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
+    public MoleExecution(IMole mole, IContext global, IContext context, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
         this.mole = mole;
         this.moleJobGrouping = moleJobGrouping;
         this.localCommunication = new LocalCommunication();
@@ -143,21 +143,17 @@ public class MoleExecution implements IMoleExecution {
 
         ITicket ticket = nextTicket(createRootTicket());
 
-        if (context.isRoot()) {
-            context = new Context(context);
-        }
-
         IGenericTaskCapsule root = mole.getRoot();
         if (root == null) {
             throw new UserBadDataError("First task of workflow hasn't been set.");
         }
 
-        submit(root, context, ticket, new SubMoleExecution());
+        submit(root, global, context, ticket, new SubMoleExecution());
     }
 
     @Override
-    public synchronized void submit(IGenericTaskCapsule capsule, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
-        IMoleJob job = capsule.toJob(context, ticket, nextJobId());
+    public synchronized void submit(IGenericTaskCapsule capsule, IContext global, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+        IMoleJob job = capsule.toJob(global, context, ticket, nextJobId());
         submit(job, capsule, subMole);
     }
    

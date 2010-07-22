@@ -17,18 +17,11 @@
 package org.openmole.core.implementation.plan;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import org.openmole.core.model.plan.IPlan;
 import java.util.List;
 
 import org.openmole.core.model.plan.IFactor;
-import org.openmole.core.model.resource.IResource;
-import org.openmole.core.model.task.annotations.Resource;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 
-import static org.openmole.core.implementation.tools.MarkedFieldFinder.*;
 
 public abstract class Plan<T extends IFactor<?, ?>> implements IPlan {
 

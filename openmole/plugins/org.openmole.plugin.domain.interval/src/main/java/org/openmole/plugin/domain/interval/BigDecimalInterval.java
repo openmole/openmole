@@ -7,10 +7,11 @@ package org.openmole.plugin.domain.interval;
 
 import java.math.BigDecimal;
 import org.openmole.core.implementation.domain.Interval;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 /**
  *
@@ -23,13 +24,13 @@ public class BigDecimalInterval extends Interval<BigDecimal> {
     }
 
     @Override
-    public BigDecimal getMax(IContext context) throws InternalProcessingError, UserBadDataError {
-         return new BigDecimal(VariableExpansion.getInstance().expandData(context, getMax()));
+    public BigDecimal getMax(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+         return new BigDecimal(expandData(global, context, getMax()));
     }
 
     @Override
-    public BigDecimal getMin(IContext context) throws InternalProcessingError, UserBadDataError {
-         return new BigDecimal(VariableExpansion.getInstance().expandData(context, getMin()));
+    public BigDecimal getMin(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+         return new BigDecimal(expandData(global, context, getMin()));
     }
 
 }

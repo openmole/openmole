@@ -88,30 +88,30 @@ public class ContextToGroovyCode implements IContextToCode {
     }
 
     @Override
-    public Object execute(IContext context) throws UserBadDataError, InternalProcessingError {
-        return execute(context,  Progress.DUMMY, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+    public Object execute(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
+        return execute(global, context,  Progress.DUMMY, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
 
     @Override
-    public Object execute(IContext context, Iterable<IVariable> tmpVariables) throws UserBadDataError, InternalProcessingError {
-        return execute(context, tmpVariables, Progress.DUMMY, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+    public Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables) throws UserBadDataError, InternalProcessingError {
+        return execute(global, context, tmpVariables, Progress.DUMMY, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
 
     /*public Object execute(IContext context, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
         return execute(context, Progress.DUMMY, Collections.EMPTY_LIST, libs);
     }*/
     @Override
-    public Object execute(IContext context, Iterable<IVariable> tmpVariables, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
-        return execute(context, tmpVariables, Progress.DUMMY, Collections.EMPTY_LIST, libs);
+    public Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
+        return execute(global, context, tmpVariables, Progress.DUMMY, Collections.EMPTY_LIST, libs);
     }
 
     @Override
-    public Object execute(IContext context, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
-        return execute(context, Collections.EMPTY_LIST, progress, output, libs);
+    public Object execute(IContext global, IContext context, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
+        return execute(global, context, Collections.EMPTY_LIST, progress, output, libs);
     }
 
     @Override
-    public Object execute(IContext context, Iterable<IVariable> tmpVariables, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
+    public Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError {
         GroovyProxyPool pool = getEditorPool();
         IGroovyProxy groovyProxy = pool.borrowObject();
 
@@ -122,7 +122,7 @@ public class ContextToGroovyCode implements IContextToCode {
                 editor.compile(getSource(), libs);
             }
 
-            Binding binding = GroovyShellProxyAdapter.fromContextToBinding(context);
+            Binding binding = GroovyShellProxyAdapter.fromContextToBinding(global, context);
 
             for(IVariable variable: tmpVariables) {
                 binding.setVariable(variable.getPrototype().getName(), variable.getValue());

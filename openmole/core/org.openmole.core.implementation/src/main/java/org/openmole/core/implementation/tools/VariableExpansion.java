@@ -52,27 +52,27 @@ public class VariableExpansion {
         }
     }
 
-    public static BigDecimal expandBigDecimalData(IContext context, String s) throws InternalProcessingError, UserBadDataError {
-        return new BigDecimal(expandData(context, s));
+    public static BigDecimal expandBigDecimalData(IContext global, IContext context, String s) throws InternalProcessingError, UserBadDataError {
+        return new BigDecimal(expandData(global, context, s));
     }
 
-    public static double expandDoubleData(IContext context, String s) throws InternalProcessingError, UserBadDataError {
-        return new Double(expandData(context, s));
+    public static double expandDoubleData(IContext global, IContext context, String s) throws InternalProcessingError, UserBadDataError {
+        return new Double(expandData(global, context, s));
     }
 
-    public static int expandIntegerData(IContext context, String s) throws InternalProcessingError, UserBadDataError {
-        return new Integer(expandData(context, s));
+    public static int expandIntegerData(IContext global, IContext context, String s) throws InternalProcessingError, UserBadDataError {
+        return new Integer(expandData(global, context, s));
     }
 
-    public static String expandData(IContext context, String s) throws InternalProcessingError, UserBadDataError {
-        return expandData(context, Collections.EMPTY_LIST, s);
+    public static String expandData(IContext global, IContext context, String s) throws InternalProcessingError, UserBadDataError {
+        return expandData(global, context, Collections.EMPTY_LIST, s);
     }
 
-    public static String expandData(IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
-        return getInstance().expandDataInernal(context, tmpVariable, s);
+    public static String expandData(IContext global, IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
+        return getInstance().expandDataInernal(global, context, tmpVariable, s);
     }
 
-    public String expandDataInernal(IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
+    public String expandDataInernal(IContext global, IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
 
         String ret = s;
 
@@ -101,7 +101,7 @@ public class VariableExpansion {
             //System.out.println("" + cur);
 
             if (cur < retLenght) {
-                String toInsert = expandOneData(context,tmpVariable, getVarName(ret.substring(beginIndex+1, cur + 1)));
+                String toInsert = expandOneData(global, context, tmpVariable, getVarName(ret.substring(beginIndex+1, cur + 1)));
                // System.out.println("toins: " +toInsert);
                 ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1);
             } else {
@@ -151,10 +151,10 @@ public class VariableExpansion {
         return str.substring(1, str.length() - 1);
     }
 
-    protected String expandOneData(IContext context, List<IVariable> tmpVariable, String variable) throws InternalProcessingError, UserBadDataError {
+    protected String expandOneData(IContext global, IContext context, List<IVariable> tmpVariable, String variable) throws InternalProcessingError, UserBadDataError {
         GroovyShellProxyAdapter shell = new GroovyShellProxyAdapter(new GroovyProxy());
 
-        Binding binding = GroovyShellProxyAdapter.fromContextToBinding(context);
+        Binding binding = GroovyShellProxyAdapter.fromContextToBinding(global, context);
         for(IVariable v: tmpVariable) {
             binding.setVariable(v.getPrototype().getName(), v.getValue());
         }

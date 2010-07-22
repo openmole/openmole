@@ -36,14 +36,11 @@ import org.openmole.plugin.task.external.internal.Activator._
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
-  def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
-    Logger.getLogger(getClass.getName).log(Level.FINE, "Prepare input files.")
-
-    
-    listInputFiles(context, progress).foreach( f => {
+  def prepareInputFiles(global: IContext, context: IContext, progress: IProgress, tmpDir: File) {
+   
+    listInputFiles(global, context, progress).foreach( f => {
         val to = new File(tmpDir, f.name)
 
-        Logger.getLogger(getClass.getName).log(Level.FINE, "Copying {0} to {1}.", Array[Object](f.file, to))
         copy(f.file, to)
 
         applyRecursive(to, new IFileOperation() {
@@ -59,10 +56,10 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
   }
 
 
-  def fetchOutputFiles(context: IContext, progress: IProgress, localDir: File) = {
+  def fetchOutputFiles(global: IContext, context: IContext, progress: IProgress, localDir: File) = {
     val usedFiles = new TreeSet[File]
 
-    setOutputFilesVariables(context,progress,localDir).foreach( f => {
+    setOutputFilesVariables(global, context,progress,localDir).foreach( f => {
         if (!f.file.exists) {
           throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + getName + " doesn't exist")
         }

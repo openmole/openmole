@@ -69,7 +69,7 @@ public class ContextAggregator {
                     IVariable<?> tmp;
 
                     if (toClone.contains(inProt.getName())) {
-                        IVariable<?> varToClone = current.getLocalVariable(inProt);
+                        IVariable<?> varToClone = current.getVariable(inProt);
                         tmp = ClonningService.clone(varToClone);
                     } else {
                         tmp = current.getVariable(inProt.getName());
@@ -79,14 +79,14 @@ public class ContextAggregator {
                     if (forceArrays || inContext.containsVariableWithName(inProt.getName())) {
                         /* Var is being merged */
                         if (mergingVars.contains(tmp.getPrototype().getName())) {
-                            inContext.<List>getLocalValue(tmp.getPrototype().getName()).add(tmp.getValue());
+                            inContext.<List>getValue(tmp.getPrototype().getName()).add(tmp.getValue());
                         } else {
                             mergingVars.add(inProt.getName());
                             //Array list for non-recursive clonning
                             List agregationList = new ArrayList();
                             agregationList.add(tmp.getValue());
                             if (inContext.containsVariableWithName(inProt.getName())) {
-                                agregationList.add(inContext.getLocalValue(inProt.getName()));
+                                agregationList.add(inContext.getValue(inProt.getName()));
                             }
                             inContext.putVariable(inProt.getName(), List.class, agregationList);
                         }

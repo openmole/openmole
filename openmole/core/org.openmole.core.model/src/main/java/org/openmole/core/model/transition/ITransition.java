@@ -63,7 +63,7 @@ public interface ITransition<TS extends IGenericTaskCapsule>  {
     ICondition getCondition();
 
 
-    boolean isConditionTrue(IContext context) throws UserBadDataError, InternalProcessingError;
+    boolean isConditionTrue(IContext global, IContext context) throws UserBadDataError, InternalProcessingError;
 
     /**
      *
@@ -146,6 +146,6 @@ public interface ITransition<TS extends IGenericTaskCapsule>  {
      * @throws InternalProcessingError  if something goes wrong because of a system failure
      * @throws UserBadDataError         if something goes wrong because it is missconfigured
      */
-    void perform(IContext from, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
+    void perform(IContext global, IContext from, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
 
 }

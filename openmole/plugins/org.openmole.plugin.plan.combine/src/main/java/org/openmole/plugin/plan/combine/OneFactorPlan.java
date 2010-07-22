@@ -40,14 +40,14 @@ public class OneFactorPlan implements IPlan {
     }
 
     @Override
-    public IExploredPlan build(final IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public IExploredPlan build(final IContext global, final IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
         return new IExploredPlan() {
 
             @Override
             public Iterator<IFactorValues> iterator() throws UserBadDataError, InternalProcessingError {
                 return new Iterator<IFactorValues>() {
 
-                    final Iterator iterator = factor.getDomain().iterator(context);
+                    final Iterator iterator = factor.getDomain().iterator(global, context);
 
                     @Override
                     public boolean hasNext() {

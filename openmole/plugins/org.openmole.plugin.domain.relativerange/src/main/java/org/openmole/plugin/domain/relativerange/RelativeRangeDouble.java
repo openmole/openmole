@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
+
 
 public class RelativeRangeDouble extends RelativeRange<Double> {
 
@@ -37,10 +39,10 @@ public class RelativeRangeDouble extends RelativeRange<Double> {
     }
 
     @Override
-    public List<Double> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
-        Double nominal = new Double(VariableExpansion.getInstance().expandData(context, getNominal()));
-        Double percent = new Double(VariableExpansion.getInstance().expandData(context, getPercent()));
-        Integer size = new Integer(VariableExpansion.getInstance().expandData(context, getSize()));
+    public List<Double> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        Double nominal = new Double(expandData(global, context, getNominal()));
+        Double percent = new Double(expandData(global, context, getPercent()));
+        Integer size = new Integer(expandData(global, context, getSize()));
 
         List<Double> values = new ArrayList<Double>(size);
 

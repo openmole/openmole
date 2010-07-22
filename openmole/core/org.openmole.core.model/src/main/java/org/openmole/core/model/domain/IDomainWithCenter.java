@@ -14,5 +14,5 @@ import org.openmole.commons.exception.UserBadDataError;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 public interface IDomainWithCenter<T>  {
-    T getCenter(IContext context) throws InternalProcessingError, UserBadDataError;
+    T getCenter(IContext global, IContext context) throws InternalProcessingError, UserBadDataError;
 }

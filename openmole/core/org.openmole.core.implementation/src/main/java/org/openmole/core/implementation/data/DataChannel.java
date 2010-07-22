@@ -157,7 +157,7 @@ public class DataChannel implements IDataChannel {
             if (!toArray) {
                 for (IData<?> data : getData()) {
                     if (context.containsVariableWithName(data.getPrototype().getName())) {
-                        IVariable var = context.getLocalVariable(data.getPrototype());
+                        IVariable var = context.getVariable(data.getPrototype());
                         IVariable tmp;
 
                         if (toClone.contains(data.getPrototype().getName())) {
@@ -172,10 +172,10 @@ public class DataChannel implements IDataChannel {
             } else {
                 for (IData<?> data : getData()) {
                     if (context.containsVariableWithName(data.getPrototype().getName())) {
-                        IVariable var = context.getLocalVariable(data.getPrototype());
+                        IVariable var = context.getVariable(data.getPrototype());
                         Collection curVal;
                         if(curentContext.containsVariableWithName(data.getPrototype())) {
-                            curVal = curentContext.getLocalValue(toArray(data.getPrototype()));
+                            curVal = curentContext.getValue(toArray(data.getPrototype()));
                         } else {
                             curVal = new ArrayList();
                             curentContext.putVariable(new Variable(toArray(data.getPrototype()), curVal));

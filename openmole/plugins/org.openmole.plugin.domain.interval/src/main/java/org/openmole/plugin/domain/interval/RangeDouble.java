@@ -24,8 +24,9 @@ import java.util.List;
 import org.openmole.core.implementation.domain.Interval;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 public class RangeDouble extends UniformelyDiscretizedIntervalDomain<Double> {
 
@@ -46,10 +47,10 @@ public class RangeDouble extends UniformelyDiscretizedIntervalDomain<Double> {
     }
 
     @Override
-    public List<Double> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
-        Double min = getInterval().getMin(context);
-        Double max = getInterval().getMax(context);
-        Double step = new Double(VariableExpansion.getInstance().expandData(context, getStep()));
+    public List<Double> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        Double min = getInterval().getMin(global, context);
+        Double max = getInterval().getMax(global, context);
+        Double step = new Double(expandData(global, context, getStep()));
 
         int size = new Double(Math.abs(max - min) / step).intValue();
 
@@ -67,13 +68,13 @@ public class RangeDouble extends UniformelyDiscretizedIntervalDomain<Double> {
   
 
     @Override
-    public Double getCenter(IContext context) throws InternalProcessingError, UserBadDataError {
-        Double min = getInterval().getMin(context);
-        return min + ((getInterval().getMax(context) - min) / 2);
+    public Double getCenter(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        Double min = getInterval().getMin(global, context);
+        return min + ((getInterval().getMax(global, context) - min) / 2);
     }
 
     @Override
-    public Double getRange(IContext context) throws InternalProcessingError, UserBadDataError {
-        return getInterval().getMax(context) - getInterval().getMin(context);
+    public Double getRange(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        return getInterval().getMax(global, context) - getInterval().getMin(global, context);
     }
 }
