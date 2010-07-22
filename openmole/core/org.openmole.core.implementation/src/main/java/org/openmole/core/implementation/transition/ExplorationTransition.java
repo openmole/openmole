@@ -107,7 +107,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
                 }
             }
             
-            submitNextJobsIfReady(destContext, global, newTicket, toClone, moleExecution, subSubMole);
+            submitNextJobsIfReady(global, destContext, newTicket, toClone, moleExecution, subSubMole);
         }
 
         subSubMole.decNbJobInProgress(size);
