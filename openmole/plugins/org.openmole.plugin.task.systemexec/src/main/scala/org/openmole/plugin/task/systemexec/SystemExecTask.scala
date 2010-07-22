@@ -69,11 +69,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
       val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, CommonVariables(workDir.getAbsolutePath), cmd))
       
-      try {              
-        Logger.getLogger(getClass.getName).log(Level.FINE, "Listing work dir.")
-        
-        workDir.listFiles.foreach{ f => Logger.getLogger(getClass.getName).log(Level.FINE, f.getName) }
-        
+      try {                    
        // val executor = new DefaultExecutor
        // executor.setWorkingDirectory(workDir)
        // val ret = executor.execute(commandLine);

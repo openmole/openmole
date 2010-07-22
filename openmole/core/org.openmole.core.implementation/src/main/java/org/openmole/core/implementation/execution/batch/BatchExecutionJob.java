@@ -54,10 +54,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
-    CopyToEnvironment.Result copyToEnvironmentResult = null;
+    CopyToEnvironmentResult copyToEnvironmentResult = null;
     long delay;
  
-    transient Future<CopyToEnvironment.Result> copyToEnvironmentExecFuture;
+    transient Future<CopyToEnvironmentResult> copyToEnvironmentExecFuture;
     transient Future finalizeExecutionFuture;
 
     public BatchExecutionJob(BatchEnvironment<JS> executionEnvironment, IJob job) throws InternalProcessingError, UserBadDataError {
