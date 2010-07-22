@@ -22,6 +22,8 @@ import java.io.IOException
 
 import java.util.LinkedList
 
+import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.launcher.CommandLauncherFactory
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.plugin.tools.utils.ProcessUtils._
@@ -29,6 +31,8 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.plugin.task.external.ExternalSystemTask
@@ -62,13 +66,21 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
       val tmpDir = workspace.newTmpDir("systemExecTask")
 
       prepareInputFiles(context, progress, tmpDir)
-      val workDir = new File(tmpDir, relativeDir)
-      val commandLine = CommandLine.parse(expandData(context,CommonVariables(workDir.getAbsolutePath), cmd))
+      val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
+      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, CommonVariables(workDir.getAbsolutePath), cmd))
       
-      try {       
+      try {              
+        Logger.getLogger(getClass.getName).log(Level.FINE, "Listing work dir.")
+        
+        workDir.listFiles.foreach{ f => Logger.getLogger(getClass.getName).log(Level.FINE, f.getName) }
+        
+       // val executor = new DefaultExecutor
+       // executor.setWorkingDirectory(workDir)
+       // val ret = executor.execute(commandLine);
+     
         val process = Runtime.getRuntime().exec(commandLine.toString, null, workDir)
         val ret = executeProcess(process, System.out, System.err)
-        if(returnValue != null) context.setValue(returnValue, new Integer(ret))
+        if(returnValue != null) context.setValue[Integer](returnValue, ret)
       } catch {
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }

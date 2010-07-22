@@ -22,6 +22,9 @@ import java.io.IOException
 import java.util.HashMap
 import java.util.TreeMap
 
+import java.util.logging.Level
+import java.util.logging.Logger
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.implementation.data.Prototype
@@ -66,7 +69,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
       var ret = new ListBuffer[ToPut]
 
       inFileNames.entrySet().foreach(entry => {
-          val localFile = entry.getKey
+          val localFile = entry.getKey         
           ret += (new ToPut(localFile, expandData(context, entry.getValue)))
         })
 

@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.task.external
 
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
@@ -35,9 +37,13 @@ import org.openmole.plugin.task.external.internal.Activator._
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
   def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
+    Logger.getLogger(getClass.getName).log(Level.FINE, "Prepare input files.")
+
+    
     listInputFiles(context, progress).foreach( f => {
         val to = new File(tmpDir, f.name)
 
+        Logger.getLogger(getClass.getName).log(Level.FINE, "Copying {0} to {1}.", Array[Object](f.file, to))
         copy(f.file, to)
 
         applyRecursive(to, new IFileOperation() {
