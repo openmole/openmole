@@ -17,10 +17,16 @@
 package org.openmole.core.implementation.observer;
 
 import java.io.File;
+import java.util.Set;
+import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.internal.Activator;
+import org.openmole.core.implementation.job.Context;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.data.IData;
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.observer.ISaver;
@@ -44,7 +50,19 @@ public class Saver implements ISaver, IMoleExecutionObserver {
     
     @Override
     public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
-        Activator.getSerializer().serializeAsHash(moleJob.getContext(), dir);
+        Set<String> filter = new TreeSet<String>();
+        
+        for(IData data: moleJob.getTask().getOutput()) {
+            if(data.getMode().isSystem()) filter.add(data.getPrototype().getName());
+        }
+        
+        IContext context = new Context();
+        
+        for(IVariable variable: moleJob.getContext()) {
+            if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
+        }
+        
+        Activator.getSerializer().serializeAsHash(context, dir);
     }
 
     @Override

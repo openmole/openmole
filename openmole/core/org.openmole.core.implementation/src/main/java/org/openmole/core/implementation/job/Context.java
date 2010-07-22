@@ -40,7 +40,7 @@ public class Context implements IVisitable<IVariable>, IContext {
     final Map<String, IVariable> variables;
  
     public Context() {
-        variables = Collections.synchronizedMap(new TreeMap<String, IVariable>());
+        variables = new TreeMap<String, IVariable>();
     }
 
     /* (non-Javadoc)

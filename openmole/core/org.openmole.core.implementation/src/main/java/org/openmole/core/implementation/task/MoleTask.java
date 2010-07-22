@@ -33,6 +33,7 @@ import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Context;
+import org.openmole.core.implementation.job.SynchronizedContext;
 import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
@@ -73,7 +74,7 @@ public class MoleTask extends Task implements IMoleTask {
     @Override
     protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
-        IContext globalContext = new Context();
+        IContext globalContext = new SynchronizedContext();
         IContext firstTaskContext = new Context();
 
         for (IData<?> input : getInput()) {

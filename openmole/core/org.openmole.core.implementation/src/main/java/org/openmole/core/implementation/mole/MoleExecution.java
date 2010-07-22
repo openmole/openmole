@@ -56,6 +56,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.implementation.execution.JobRegistry;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
+import org.openmole.core.implementation.job.SynchronizedContext;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleJobGrouping;
@@ -119,15 +120,15 @@ public class MoleExecution implements IMoleExecution {
     transient Thread submiter;
 
     public MoleExecution(IMole mole) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), new Context(), FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
+        this(mole, new SynchronizedContext(), new Context(), FixedEnvironmentSelection.EMPTY_SELECTION, MoleJobGrouping.EMPTY_GROUPING);
     }
     
     public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), new Context(), environmentSelectionStrategy, MoleJobGrouping.EMPTY_GROUPING);
+        this(mole, new SynchronizedContext(), new Context(), environmentSelectionStrategy, MoleJobGrouping.EMPTY_GROUPING);
     }
 
     public MoleExecution(IMole mole, IEnvironmentSelection environmentSelectionStrategy, IMoleJobGrouping moleJobGrouping) throws InternalProcessingError, UserBadDataError {
-        this(mole, new Context(), new Context(), environmentSelectionStrategy, moleJobGrouping);
+        this(mole, new SynchronizedContext(), new Context(), environmentSelectionStrategy, moleJobGrouping);
     }
     
     public MoleExecution(IMole mole, IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
