@@ -89,7 +89,7 @@ public class VirtualMachineShared extends AbstractVirtualMachinePool {
                                 vm.shutdown();
                                 running.set(false);
                                 vm = null;
-                                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "VM shutted down.");
+                                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "VM shutted down.");
                             }
                         }
                     }

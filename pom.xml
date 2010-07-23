@@ -109,11 +109,6 @@
                 <artifactId>Rserve</artifactId>
                 <version>0.6-0</version>
             </dependency>
-            <dependency>
-                <groupId>org.ogf.saga</groupId>
-                <artifactId>saga-api</artifactId>
-                <version>${lib.org.ogf.saga.version}</version>
-            </dependency>
 
             <!-- FIXME transitive dep not imported for commons-jxpath -->
             <dependency>
