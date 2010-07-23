@@ -43,7 +43,7 @@ public interface IExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> {
     boolean isEmpty();
 
     void register(EXECUTIONJOB executionJob);
-
+    
     void remove(EXECUTIONJOB job);
 
     void removeJob(IJob job);

@@ -106,7 +106,6 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         jobs.remove(job);
 
         IJobStatisticCategory category = new JobStatisticCategory(job);
-
         Set<IJob> jobs = jobCategories.get(category);
         jobs.remove(job);
 

@@ -139,11 +139,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.codehaus.groovy</artifactId>
-            <version>${lib.org.codehaus.groovy.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.structuregenerator</artifactId>
             <version>${project.version}</version>
         </dependency>

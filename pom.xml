@@ -85,11 +85,6 @@
                 <version>${lib.com.ice.tar.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fusesource.jansi</groupId>
-                <artifactId>jansi</artifactId>
-                <version>1.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.nuiton</groupId>
                 <artifactId>nuiton-j2r</artifactId>
                 <version>${lib.org.nuiton.j2r.version}</version>
@@ -265,6 +260,7 @@
 	<lib.org.processing.version>1.1</lib.org.processing.version>
 	<lib.com.mrfeinberg.peasycam.version>0.8.3</lib.com.mrfeinberg.peasycam.version>
 	<lib.org.junit.version>4.8.1</lib.org.junit.version>
+	<lib.org.fusesource.jansi.version>1.2.1</lib.org.fusesource.jansi.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->

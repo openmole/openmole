@@ -16,6 +16,7 @@
  */
 package org.openmole.core.implementation.execution.batch;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -148,6 +149,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         } catch (UserBadDataError e) {
             kill();
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+        } catch(CancellationException e) {
+            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Operation interrupted cause job was killed.", e);
         }
 
         return !killed.get();
@@ -167,7 +170,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             throw new InternalProcessingError(ex);
         } catch (InterruptedException ex) {
             throw new InternalProcessingError(ex);
-        }
+        } 
     }
 
     private boolean asynchonousCopy() throws InternalProcessingError, UserBadDataError {
