@@ -16,11 +16,8 @@
  */
 package org.openmole.core.implementation.task;
 
-import java.util.Collection;
-import java.util.HashSet;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.data.IData;
-import org.openmole.core.model.resource.IResource;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
@@ -30,7 +27,6 @@ import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.annotations.Output;
 import org.openmole.commons.aspect.caching.ChangeState;
-import org.openmole.commons.aspect.caching.SoftCachable;
 
 public class ExplorationTask extends GenericTask implements IExplorationTask {
 
@@ -50,8 +46,8 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
 
     //If input prototype as the same name as the output it is erased
     @Override
-    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
-        context.putVariable(ExploredPlan.getPrototype(), plan.build(context));
+    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+        context.putVariable(ExploredPlan.getPrototype(), plan.build(global, context));
     }
 
     /* (non-Javadoc)

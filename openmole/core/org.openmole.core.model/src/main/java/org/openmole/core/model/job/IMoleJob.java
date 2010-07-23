@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.job;
 
-import java.io.File;
 import org.openmole.commons.exception.ExecutionException;
 
 
@@ -37,6 +36,7 @@ public interface IMoleJob {
     boolean isFinished();
 
     IContext getContext();
+    IContext getGlobalContext();
     
     void perform() throws InterruptedException;
     void finished(IContext executionJob) throws UserBadDataError, InternalProcessingError;

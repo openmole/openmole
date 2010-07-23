@@ -25,5 +25,5 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IContext;
 
 public interface IDomain<T>  {
-   Iterator<? extends T> iterator(IContext context) throws UserBadDataError, InternalProcessingError;
+   Iterator<? extends T> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError;
 }

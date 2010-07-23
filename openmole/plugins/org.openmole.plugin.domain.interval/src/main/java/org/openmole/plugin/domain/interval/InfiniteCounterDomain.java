@@ -65,7 +65,7 @@ public class InfiniteCounterDomain extends Domain<Long> {
     }
 
     @Override
-    public Iterator<? extends Long> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
+    public Iterator<? extends Long> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
         return counter.iterator();
     }
 }

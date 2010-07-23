@@ -57,24 +57,7 @@ import scala.Tuple2;
  *
  * @author reuillon
  */
-class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
-
-    public class Result {
-
-        public Result(IBatchStorage communicationStorage, IURIFile communicationDir, IURIFile inputFile, IURIFile outputFile, IRuntime runtime) {
-            this.communicationStorage = communicationStorage;
-            this.communicationDir = communicationDir;
-            this.inputFile = inputFile;
-            this.outputFile = outputFile;
-            this.runtime = runtime;
-        }
-        
-        final public IBatchStorage communicationStorage;    
-        final public IURIFile communicationDir;
-        final public IURIFile inputFile;
-        final public IURIFile outputFile;
-        final public IRuntime runtime;
-    }
+class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
 
     private final BatchEnvironment environment;
     private final IJob job;
@@ -84,9 +67,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
         this.job = job;
     }
 
-    Result initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
-
-        Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Intialize the files");
+    CopyToEnvironmentResult initCommunication() throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
         
         Tuple2<IBatchStorage, IAccessToken> storage = getEnvironment().getAStorage();
 
@@ -114,15 +95,14 @@ class CopyToEnvironment implements Callable<CopyToEnvironment.Result> {
 
             executionMessageURIFile.remove(false);
             
-            Logger.getLogger(CopyToEnvironment.class.getName()).log(Level.FINE, "Files are initialized");
-            return new Result(communicationStorage, communicationDir, inputFile, outputFile, runtime);
+            return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime);
         } finally {
             Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);
         }
     }
 
     @Override
-    public Result call() throws Exception {
+    public CopyToEnvironmentResult call() throws Exception {
         return initCommunication();
     }
 

@@ -32,7 +32,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.task.annotations.Resource;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.code.internal.Activator;
 import org.openmole.plugin.task.external.ExternalSystemTask;
@@ -49,14 +48,14 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
     }
 
     @Override
-    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
+    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
         try {
             File pwd = Activator.getWorkspace().newTmpDir();
-            prepareInputFiles(context, progress, pwd.getCanonicalFile());
+            prepareInputFiles(global, context, progress, pwd.getCanonicalFile());
 
-            contextToCode.execute(context, progress, getOutput(), libs);
+            contextToCode.execute(global, context, progress, getOutput(), libs);
             
-            fetchOutputFiles(context, progress, pwd.getCanonicalFile());
+            fetchOutputFiles(global, context, progress, pwd.getCanonicalFile());
         } catch (IOException e) {
             throw new InternalProcessingError(e);
         }

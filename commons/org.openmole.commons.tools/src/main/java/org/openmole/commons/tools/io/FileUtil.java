@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.openmole.commons.tools.pattern.BufferFactory;
-import scala.Tuple1;
 import scala.Tuple2;
 
 public class FileUtil {
@@ -246,7 +245,6 @@ public class FileUtil {
                     f.cancel(true);
                     throw new IOException("Timeout on writting " + reader.getAmountRead() + " bytes, write was longer than " + timeout + " ms.", e1);
                 }
-
             }
         } finally {
             try {
@@ -255,6 +253,13 @@ public class FileUtil {
                 throw new IOException(e);
             }
         }
-
     }
+    
+    public static void move(File from, File to) throws IOException {
+        if(!from.renameTo(to)) {
+            copy(from, to);
+            from.delete();
+        }
+    }
+    
 }

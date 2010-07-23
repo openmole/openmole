@@ -57,7 +57,7 @@ public class SingleTransition extends Transition<ITaskCapsule> implements ISingl
 
 
     @Override
-    public void performImpl(IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    public void performImpl(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         ILevelComputing level = LevelComputing.getLevelComputing(moleExecution);
 
        int beginLevel = level.getLevel(getStart());
@@ -76,7 +76,7 @@ public class SingleTransition extends Transition<ITaskCapsule> implements ISingl
        }
 
         synchronized (getEnd()) {
-            submitNextJobsIfReady(context, destTicket, toClone, moleExecution, newSubMole);
+            submitNextJobsIfReady(global, context, destTicket, toClone, moleExecution, newSubMole);
         }
     }
 

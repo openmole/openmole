@@ -36,12 +36,6 @@ public class Job implements IJob {
     Map<IMoleJobId, IMoleJob> moleJobs = Collections.synchronizedMap(new TreeMap<IMoleJobId, IMoleJob>());
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        Logger.getLogger(Job.class.getName()).log(Level.FINE, "Job garbage collected {0}", toString());
-    }
-    
-    @Override
     public Iterable<IMoleJob> getMoleJobs() {
         return moleJobs.values();
     }

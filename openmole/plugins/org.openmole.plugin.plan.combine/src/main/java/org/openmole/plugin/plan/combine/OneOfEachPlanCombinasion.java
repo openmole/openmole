@@ -65,19 +65,19 @@ public class OneOfEachPlanCombinasion implements IPlanCombinasion {
     }
 
     @Override
-    public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         /* Compute plans */
         Collection<Iterator<IFactorValues>> cachedExploredPlans = new ArrayList<Iterator<IFactorValues>>(plans.size());
 
         for(IPlan otherPlan: getPlans()) {
-            cachedExploredPlans.add(otherPlan.build(context).iterator());
+            cachedExploredPlans.add(otherPlan.build(global, context).iterator());
         }
 
         /* Compose plans */
         Collection<IFactorValues> factorValuesCollection = new LinkedList<IFactorValues>();
 
-        Iterator<IFactorValues> valuesIterator = referencePlan.build(context).iterator();
+        Iterator<IFactorValues> valuesIterator = referencePlan.build(global, context).iterator();
         boolean oneFinished = false;
 
         while(valuesIterator.hasNext() && !oneFinished) {

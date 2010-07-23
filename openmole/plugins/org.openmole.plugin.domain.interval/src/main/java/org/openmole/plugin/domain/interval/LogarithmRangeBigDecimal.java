@@ -24,9 +24,11 @@ import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.domain.Interval;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
 import org.openmole.misc.math.BigDecimalOperations;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
+
 
 /**
  *
@@ -44,10 +46,10 @@ public class LogarithmRangeBigDecimal extends LogarithmIntervalDomain<BigDecimal
 
     @Override
     //TODO: use a gopd implementation of bigdecimal operations. Operation currently return double
-    public List<BigDecimal> computeValues(IContext ic) throws InternalProcessingError, UserBadDataError {
-        BigDecimal min = BigDecimalOperations.log(getInterval().getMin(ic));
-        BigDecimal max = BigDecimalOperations.log(getInterval().getMax(ic));
-        Integer nbstep = new Integer(VariableExpansion.expandData(ic,getNbStep()));
+    public List<BigDecimal> computeValues(IContext global, IContext ic) throws InternalProcessingError, UserBadDataError {
+        BigDecimal min = BigDecimalOperations.log(getInterval().getMin(global, ic));
+        BigDecimal max = BigDecimalOperations.log(getInterval().getMax(global, ic));
+        Integer nbstep = new Integer(expandData(global, ic,getNbStep()));
         BigDecimal step = max.subtract(min).abs().divide(new BigDecimal(nbstep),RoundingMode.HALF_UP);
 
         BigDecimal cur = min;
@@ -62,13 +64,8 @@ public class LogarithmRangeBigDecimal extends LogarithmIntervalDomain<BigDecimal
     }
 
     @Override
-    public BigDecimal getCenter(IContext ic) throws InternalProcessingError, UserBadDataError {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public BigDecimal getRange(IContext ic) throws InternalProcessingError, UserBadDataError {
-        return getInterval().getMax(ic).subtract(getInterval().getMin(ic));
+    public BigDecimal getRange(IContext global, IContext ic) throws InternalProcessingError, UserBadDataError {
+        return getInterval().getMax(global, ic).subtract(getInterval().getMin(global, ic));
     }
 
 }

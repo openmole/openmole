@@ -62,7 +62,7 @@ public class LHSPlan extends Plan<IFactor<? super Double, IDiscretizedIntervalDo
     // dist distribution : in the factor domain 
 
     @Override
-    public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError {
+    public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
      
         //System.out.println("LHSPlan::computeValues");
         //Inititalize a temp structure
@@ -79,8 +79,8 @@ public class LHSPlan extends Plan<IFactor<? super Double, IDiscretizedIntervalDo
         for (int j = 0; j < nbOfExperiments; j++) {
             int i = 0;
             for (IFactor<? super Double, IDiscretizedIntervalDomain<? extends Double>> f : getFactors()) {
-                Double tempMin = f.getDomain().getInterval().getMin(context);
-                Double tempMax = f.getDomain().getInterval().getMax(context);
+                Double tempMin = f.getDomain().getInterval().getMin(global, context);
+                Double tempMax = f.getDomain().getInterval().getMax(global, context);
                 TempFactors.get(i).add( ((j + RNG.getRng().nextDouble()) / nbOfExperiments) * (tempMax - tempMin) + tempMin  );
                 i++;
             }

@@ -26,14 +26,6 @@ import org.openmole.core.model.data.IVariable;
 
 public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
 
-    void chRoot();
-
-    abstract IContext getRoot();
-
-    void setRoot(IContext root);
-
-    boolean isRoot();
-
     void setVariables(List<IVariable<?>> variables);
 
     Map<String, IVariable> getVariables();
@@ -41,27 +33,18 @@ public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
     <T> IVariable<T> getVariable(String name);
 
     <T> IVariable<? extends T> getVariable(IPrototype<T> proto);
-
+     
     void putVariable(IVariable<?> variable);
 
     void putVariable(String name, Object value);
 
     <T> void putVariable(String name, Class<? super T> type, T value);
-
-    void putGlobalVariable(String name, Object value);
-
-    <T> void putGlobalVariable(IPrototype<? super T> proto, T value);
-
+    
     <T> void putVariable(IPrototype<? super T> proto, T value);
 
-    <IT> IT getLocalValue(String name);
+    <IT> IT getValue(String name);
 
-    <IT> IT getLocalValue(IPrototype<IT> proto);
-
-    //	@Override
-    <IT> IVariable<IT> getLocalVariable(String name);
-
-    <IT> IVariable<IT> getLocalVariable(IPrototype<IT> proto);
+    <IT> IT getValue(IPrototype<IT> proto);
 
     void removeVariable(String name);
 
@@ -70,14 +53,6 @@ public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
     boolean containsVariableWithName(String name);
 
     boolean contains(IPrototype<?> proto);
-
-    boolean existGlobal(IPrototype<?> proto);
-
-    IVariable<?> getGlobalVariable(String name);
-
-    <IT> IT getGlobalValue(String name);
-
-    <IT> IT getGlobalValue(IPrototype<? extends IT> proto);
 
     void setValue(String name, Object value);
 
@@ -89,5 +64,4 @@ public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
      */
     void clean();
 
-    void removeGlobalVariable(String name);
 }

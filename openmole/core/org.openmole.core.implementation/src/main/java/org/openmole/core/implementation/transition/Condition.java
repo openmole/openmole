@@ -45,11 +45,11 @@ public class Condition implements ICondition {
 	}
 
 	@Override
-	public boolean evaluate(IContext context) throws UserBadDataError, InternalProcessingError {
+	public boolean evaluate(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
             final GroovyShellProxyAdapter groovyShellProxyAdapter = getGroovyShellProxyAdapter();
             
             synchronized(groovyShellProxyAdapter) {
-                return (Boolean) groovyShellProxyAdapter.execute(context);
+                return (Boolean) groovyShellProxyAdapter.execute(global, context);
             }           
 	}
 

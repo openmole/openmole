@@ -16,6 +16,7 @@
  */
 package org.openmole.plugin.resource.virtual;
 
+import ch.ethz.ssh2.Connection;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -152,10 +153,11 @@ public class VirtualMachineResource implements IResource {
                 while (true) {
                     try {
                         Socket socket = new Socket(ret.host(), ret.port());
-                        //Connection connection = new Connection(ret.host(), ret.port());
-                        //connection.connect(null, timeOut.intValue(), timeOut.intValue());
-                        //connection.close();
                         socket.close();
+                        Connection connection = new Connection(ret.host(), ret.port());
+                        connection.connect(null, 0, 0);
+                        connection.close();
+                      //socket.close();
                         break;
                     } catch (IOException ex) {
                         Logger.getLogger(VirtualMachineResource.class.getName()).log(Level.WARNING, "Problem durring the connection, retrying...", ex);

@@ -46,9 +46,9 @@ public class SampledDomain<T> extends FiniteDomain<T> {
     }
 
     @Override
-    public  List<T> computeValues(IContext context) throws UserBadDataError, InternalProcessingError {
+    public  List<T> computeValues(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
         List<T> values = new ArrayList<T>(size);
-        Iterator<? extends T> it = domain.iterator(context);
+        Iterator<? extends T> it = domain.iterator(global, context);
         int i = 0;
 
         while (i < size && it.hasNext()) {

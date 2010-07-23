@@ -82,6 +82,11 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.codehaus.groovy</artifactId>
+            <version>${lib.org.codehaus.groovy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
         </dependency>

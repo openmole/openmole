@@ -94,7 +94,7 @@ public abstract class Transition<TS extends IGenericTaskCapsule<?, ?>> implement
         return true;
     }
 
-    protected synchronized void submitNextJobsIfReady(IContext context, ITicket ticket, Set<String> toClonne, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    protected synchronized void submitNextJobsIfReady(IContext global, IContext context, ITicket ticket, Set<String> toClonne, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
              
         /*-- Remove filtred --*/
         for(String name: getFiltred()) {
@@ -126,19 +126,19 @@ public abstract class Transition<TS extends IGenericTaskCapsule<?, ?>> implement
             }
 
             //Agregate the variables = inputs for the next job
-            IContext newContextEnd = new Context(context.getRoot());
+            IContext newContextEnd = new Context();
 
             aggregate(newContextEnd, getEnd().getCapsule().getAssignedTask().getInput(), toClonne, false, combinaison);
 
            // Logger.getLogger(Transition.class.getName()).info("Submit job for task " + getEnd().getCapsule().getTask().getName());
-            moleExecution.submit(getEnd().getCapsule(), newContextEnd, newTicket, subMole);
+            moleExecution.submit(getEnd().getCapsule(),  global, newContextEnd, newTicket, subMole);
         }
     }
 
     @Override
-    public void perform(IContext context, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
-        if (isConditionTrue(context)) {
-            performImpl(context, ticket, toClone, scheduler, subMole);
+    public void perform(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+        if (isConditionTrue(global, context)) {
+            performImpl(global, context, ticket, toClone, scheduler, subMole);
         }
     }
 
@@ -153,11 +153,11 @@ public abstract class Transition<TS extends IGenericTaskCapsule<?, ?>> implement
     }
 
     @Override
-    public boolean isConditionTrue(IContext context) throws UserBadDataError, InternalProcessingError {
+    public boolean isConditionTrue(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
         if (condition == null) {
             return true;
         }
-        return condition.evaluate(context);
+        return condition.evaluate(global, context);
     }
 
     @Override
@@ -196,6 +196,6 @@ public abstract class Transition<TS extends IGenericTaskCapsule<?, ?>> implement
     }
 
     
-    abstract protected void performImpl(IContext context, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
+    abstract protected void performImpl(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution scheduler, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
     abstract protected void plugStart();
 }

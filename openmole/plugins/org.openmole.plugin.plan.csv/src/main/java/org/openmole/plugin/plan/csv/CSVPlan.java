@@ -124,7 +124,7 @@ public class CSVPlan extends Plan {
      *
      */
     @Override
-    public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException {
         Collection<IFactorValues> listOfListOfValues = new ArrayList<IFactorValues>();
         Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
 

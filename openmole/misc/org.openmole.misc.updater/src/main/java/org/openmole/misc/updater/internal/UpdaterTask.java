@@ -35,13 +35,6 @@ public class UpdaterTask implements Runnable {
         this.updater = updater;
         this.type = type;
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        Logger.getLogger(UpdaterTask.class.getName()).log(Level.FINE, "Garbage collected upadeter tastk for {0}", updatable.toString());
-    }
-
     
     @Override
     public void run() {
@@ -52,7 +45,6 @@ public class UpdaterTask implements Runnable {
             Logger.getLogger(UpdaterTask.class.getName()).log(Level.WARNING, null, e);
         } 
     }
-
 
     public IUpdatableWithVariableDelay getUpdatable() {
         return updatable;

@@ -37,5 +37,5 @@ public interface ICondition {
      * @throws InternalProcessingError  if something goes wrong because of a system failure
      * @throws UserBadDataError         if something goes wrong because it is missconfigured
      */
-    boolean evaluate(IContext context) throws UserBadDataError, InternalProcessingError;
+    boolean evaluate(IContext global, IContext context) throws UserBadDataError, InternalProcessingError;
 }

@@ -51,18 +51,8 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ogf.saga</groupId>
-            <artifactId>saga-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.executorservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.backgroundexecutor</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

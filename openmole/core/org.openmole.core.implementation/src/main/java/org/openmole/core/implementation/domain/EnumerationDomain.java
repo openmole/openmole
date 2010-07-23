@@ -66,10 +66,10 @@ public class EnumerationDomain<T> extends FiniteDomain<T> {
     }
 
     @Override
-    public List<T> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
+    public List<T> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
         List<T> val = new ArrayList<T>(enumeration.size());
         for(String s: enumeration) {
-            val.add((T) VariableExpansion.getInstance().expandData(context, s));
+            val.add((T) VariableExpansion.getInstance().expandData(global, context, s));
         }
         return val;
     }

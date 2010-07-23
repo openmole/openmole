@@ -49,12 +49,12 @@ public class InputToGlobalTask extends Task {
     }
 
     @Override
-    protected void process(IContext context, IProgress progress)
+    protected void process(IContext global, IContext context, IProgress progress)
             throws UserBadDataError, InternalProcessingError {
         for (IData data : getUserInput()) {
             IPrototype p = data.getPrototype();
             if (!data.getMode().isOptional() || data.getMode().isOptional() && context.contains(p)) {
-                context.putGlobalVariable(p, context.getLocalValue(p));
+                global.putVariable(p, context.getValue(p));
             }
         }
     }

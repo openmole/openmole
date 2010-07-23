@@ -20,13 +20,18 @@ package org.openmole.plugin.task.external
 import java.io.File
 import java.io.IOException
 import java.util.HashMap
-import java.util.List
 import java.util.TreeMap
 
+import java.util.logging.Level
+import java.util.logging.Logger
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
+import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.commons.tools.io.FileUtil
@@ -39,8 +44,17 @@ import scala.collection.JavaConversions._
 
 abstract class ExternalTask(name: String) extends Task(name) {
 
+  object CommonVariables {
+    val PWD = new Prototype[String]("PWD", classOf[String])
+    
+    def apply(pwd: String): List[IVariable[_]] = {
+      val vals = List(new Variable(PWD, pwd))
+      vals
+    }
+  }
+ 
   val inContextFiles = new ListBuffer[(IPrototype[File], String)]
-  val inContextFileList = new ListBuffer[(IPrototype[List[File]], IPrototype[List[String]])]
+  val inContextFileList = new ListBuffer[(IPrototype[java.util.List[File]], IPrototype[java.util.List[String]])]
   val inFileNames = new TreeMap[File, String]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String)]
@@ -50,31 +64,28 @@ abstract class ExternalTask(name: String) extends Task(name) {
   protected class ToPut(val file: File, val name: String)
   protected class ToGet(val name: String, val file: File)
 
-  protected def listInputFiles(context: IContext, progress: IProgress): List[ToPut] = {
+  protected def listInputFiles(global: IContext, context: IContext, progress: IProgress): List[ToPut] = {
     try {
       var ret = new ListBuffer[ToPut]
 
       inFileNames.entrySet().foreach(entry => {
-          val localFile = entry.getKey
-          ret += (new ToPut(localFile, expandData(context, entry.getValue)))
+          val localFile = entry.getKey         
+          ret += (new ToPut(localFile, expandData(global, context, entry.getValue)))
         })
 
       inContextFiles.foreach( p => {
-          val f = context.getLocalValue(p._1)
+          val f = context.getValue(p._1)
 
           if (f == null) {
             throw new UserBadDataError("File supposed to be present in variable \"" + p._1.getName + "\" at the beging of the task \"" + getName + "\" and is not.")
           }
 
-          //val correctName = new File(tmpDir,expandData(context, p._2))
-          ret += (new ToPut(f, expandData(context, p._2)))
-
-          //  copyTo(f, correctName)
+          ret += (new ToPut(f, expandData(global, context, p._2)))
         })
 
       inContextFileList.foreach( p => {
-          val lstFile = context.getLocalValue(p._1)
-          val lstName = context.getLocalValue(p._2)
+          val lstFile = context.getValue(p._1)
+          val lstName = context.getValue(p._2)
 
           if (lstFile != null && lstName != null) {
             val fIt = lstFile.iterator
@@ -84,10 +95,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
               val f = fIt.next
               val name = sIt.next
 
-              //val fo = new File(tmpDir,expandData(context, name))
-
-              ret += (new ToPut(f, expandData(context, name)))
-              //   copyTo(f, fo)
+              ret += (new ToPut(f, expandData(global, context, name)))
             }
           }
         })
@@ -108,12 +116,12 @@ abstract class ExternalTask(name: String) extends Task(name) {
   }
 
 
-  protected def setOutputFilesVariables(context: IContext, progress: IProgress, localDir: File): List[ToGet] = {
+  protected def setOutputFilesVariables(global: IContext, context: IContext, progress: IProgress, localDir: File): List[ToGet] = {
 
     var ret = new ListBuffer[ToGet]
 
     outFileNames.foreach(p => {
-        val filename = expandData(context, p._2)
+        val filename = expandData(global, context, p._2)
         val fo = new File(localDir,filename)
 
         ret += (new ToGet(filename, fo))
@@ -130,7 +138,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
           throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + getName)
         }
 
-        val filename = context getLocalValue (p._2);
+        val filename = context getValue (p._2);
         val fo = new File(localDir, filename)
         ret += (new ToGet(filename, fo))
 
@@ -140,7 +148,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
     return ret.toList
   }
 
-  def exportFilesFromContextAs(fileList: IPrototype[List[File]], names: IPrototype[List[String]]) = {
+  def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]) = {
     inContextFileList += ((fileList, names))
     super.addInput(fileList)
     super.addInput(names)

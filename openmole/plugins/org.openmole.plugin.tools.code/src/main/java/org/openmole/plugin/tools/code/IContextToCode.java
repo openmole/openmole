@@ -33,10 +33,10 @@ import org.openmole.commons.exception.UserBadDataError;
 public interface IContextToCode {
     void setCode(ISourceCode sourceCode) throws UserBadDataError, InternalProcessingError;
     String getCode();
-    Object execute(IContext context) throws UserBadDataError, InternalProcessingError;
-    Object execute(IContext context, Iterable<IVariable> tmpVariables) throws UserBadDataError, InternalProcessingError;
-    Object execute(IContext context, Iterable<IVariable> tmpVariables, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
-    Object execute(IContext context, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
-    Object execute(IContext context, Iterable<IVariable> tmpVariables, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
+    Object execute(IContext global, IContext context) throws UserBadDataError, InternalProcessingError;
+    Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables) throws UserBadDataError, InternalProcessingError;
+    Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
+    Object execute(IContext global, IContext context, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
+    Object execute(IContext global, IContext context, Iterable<IVariable> tmpVariables, IProgress progress, Iterable<IData<?>> output, Iterable<File> libs) throws UserBadDataError, InternalProcessingError;
 
 }

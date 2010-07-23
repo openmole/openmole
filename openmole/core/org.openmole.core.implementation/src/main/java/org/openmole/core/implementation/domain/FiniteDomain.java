@@ -29,8 +29,8 @@ import org.openmole.core.model.job.IContext;
 public abstract class FiniteDomain<T> extends Domain<T> implements IFiniteDomain<T> {
 
     @Override
-    public Iterator<T> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
-        return computeValues(context).iterator();
+    public Iterator<T> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
+        return computeValues(global, context).iterator();
     }
 
 }

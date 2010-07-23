@@ -31,7 +31,6 @@ import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchStorage;
-import org.openmole.misc.updater.IUpdatableFuture;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.model.execution.batch.IAccessToken;

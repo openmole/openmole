@@ -31,6 +31,6 @@ public interface IInterval<T> {
      */
     String getMin();
 
-    T getMax(IContext context) throws InternalProcessingError, UserBadDataError;
-    T getMin(IContext context) throws InternalProcessingError, UserBadDataError;
+    T getMax(IContext global, IContext context) throws InternalProcessingError, UserBadDataError;
+    T getMin(IContext global, IContext context) throws InternalProcessingError, UserBadDataError;
 }
