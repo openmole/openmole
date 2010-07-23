@@ -588,6 +588,13 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository>
+        <repository>
+            <id>grid.in2p3.fr</id>
+            <name>IN2P3 maven repository</name>
+            <url>http://grid.in2p3.fr/maven2/</url>
+        </repository>
+
+
         <!-- SimExplorer repository - can serve as proxy -->
         <repository>
             <id>maven.simexplorer.org</id>
