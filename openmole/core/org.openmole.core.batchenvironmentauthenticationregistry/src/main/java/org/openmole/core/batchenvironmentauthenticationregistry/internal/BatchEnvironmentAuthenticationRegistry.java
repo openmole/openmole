@@ -7,7 +7,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
-import org.openmole.core.model.execution.batch.IBatchJobService;
 
 public class BatchEnvironmentAuthenticationRegistry implements IBatchEnvironmentAuthenticationRegistry {
 

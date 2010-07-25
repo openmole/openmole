@@ -14,46 +14,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.commons.tools.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 
-public class ReaderRunnable implements Runnable{
+public class ReaderRunnable implements Callable<Integer> {
 
-	
-	byte[] buffer;
-	int amountRead;
-	IOException exception;
-	InputStream from;
-	int maxRead;
+    final byte[] buffer;
+    final InputStream from;
+    final int maxRead;
 
-	public ReaderRunnable(InputStream from, byte[] buffer, int maxRead) {
-		super();
-		this.from = from;
-		this.maxRead = maxRead;
-		this.buffer = buffer;
-	}
+    public ReaderRunnable(InputStream from, byte[] buffer, int maxRead) {
+        super();
+        this.from = from;
+        this.maxRead = maxRead;
+        this.buffer = buffer;
+    }
 
-	@Override
-	public void run() {
-		try {
-			exception = null;
-			amountRead = from.read(buffer,0,maxRead);
-		} catch (IOException e) {
-			exception = e;
-		}
-	}
-
-	public int getAmountRead() {
-		return amountRead;
-	}
-
-	public IOException getException() {
-		return exception;
-	}
-
-
+    @Override
+    public Integer call() throws IOException {
+         return from.read(buffer, 0, maxRead);
+    }
 
 }
