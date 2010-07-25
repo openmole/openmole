@@ -128,17 +128,20 @@ public class SHA1Computing implements IHashService {
 
     @Override
     public SHA1Hash computeHash(InputStream is, int maxRead, long timeout) throws IOException {
-        if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
+       /* if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
             throw new IOException("Max buffer size is " + BufferFactory.MAX_BUFF_SIZE + " unable to evaluate timeout on " + maxRead + " bytes.");
-        }
+        }*/
 
-        IMessageDigest md;
+        SHA1Hash ret;
         ExecutorService thread = Activator.getExecutorService().getExecutorService(ExecutorType.OWN);
-        try {
-            md = new Sha160();
 
-            byte[] buffer;
-            try {
+        try {
+            final byte[] buffer = new byte[BufferFactory.MAX_BUFF_SIZE];
+            final IMessageDigest md = new Sha160();
+            //md = new Sha160();
+
+           
+           /* try {
                 buffer = (byte[]) BufferFactory.GetInstance().borrowObject();
             } catch (NoSuchElementException e) {
                 throw new IOException(e);
@@ -160,18 +163,15 @@ public class SHA1Computing implements IHashService {
                 } catch (Exception e) {
                     throw new IOException(e);
                 }
-                try {
-
+                try */
+                    int read;
                     ReaderRunnable reader = new ReaderRunnable(is, buffer, maxRead);
 
                     while (true) {
-                        Future<?> f = thread.submit(reader);
+                        Future<Integer> f = thread.submit(reader);
 
                         try {
-                            f.get(timeout, TimeUnit.MILLISECONDS);
-                            if (reader.getException() != null) {
-                                throw reader.getException();
-                            }
+                            read = f.get(timeout, TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e1) {
                             throw new IOException(e1);
                         } catch (ExecutionException e1) {
@@ -181,15 +181,17 @@ public class SHA1Computing implements IHashService {
                             throw new IOException("Timout on reading, read was longer than " + timeout, e1);
                         }
 
-                        if (reader.getAmountRead() == -1) {
+                        if (read == -1) {
                             break;
                         }
 
 
-                        md.update(buffer, 0, reader.getAmountRead());
+                        md.update(buffer, 0, read);
 
                     }
-                } finally {
+                    
+                    ret = new SHA1Hash(md.digest());
+                /*} finally {
                     try {
                         sha1Pool.returnObject(md);
                     } catch (Exception e) {
@@ -202,12 +204,11 @@ public class SHA1Computing implements IHashService {
                 } catch (Exception e) {
                     Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to return object to the pool: memomry leak.", e);
                 }
-            }
+            }*/
         } finally {
             thread.shutdownNow();
-
         }
 
-        return new SHA1Hash(md.digest());
+        return ret;
     }
 }
