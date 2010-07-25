@@ -44,7 +44,7 @@ import org.openmole.commons.tools.pattern.BufferFactory;
 
 public class SHA1Computing implements IHashService {
 
-    private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
+   /* private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
         @Override
         public Object makeObject() throws Exception {
@@ -56,7 +56,7 @@ public class SHA1Computing implements IHashService {
             ((Sha160) obj).reset();
             super.passivateObject(obj);
         }
-    });
+    });*/
 
     @Override
     public SHA1Hash computeHash(File file) throws IOException {
@@ -73,10 +73,13 @@ public class SHA1Computing implements IHashService {
 
     @Override
     public SHA1Hash computeHash(InputStream is) throws IOException {
+        
+        final byte[] buffer = new byte[BufferFactory.MAX_BUFF_SIZE];
+        final IMessageDigest md = new Sha160();
 
-        IMessageDigest md;
+       // IMessageDigest md;
 
-        byte[] buffer;
+       /* byte[] buffer;
         try {
             buffer = (byte[]) BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {
@@ -98,7 +101,7 @@ public class SHA1Computing implements IHashService {
                 throw new IOException(e);
             }
 
-            try {
+            try {*/
                 while (true) {
                     int amount = is.read(buffer);
                     if (amount == -1) {
@@ -108,7 +111,7 @@ public class SHA1Computing implements IHashService {
                 }
                 return new SHA1Hash(md.digest());
 
-            } finally {
+        /*    } finally {
                 try {
                     sha1Pool.returnObject(md);
                 } catch (Exception e) {
@@ -122,7 +125,7 @@ public class SHA1Computing implements IHashService {
             } catch (Exception e) {
                 Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to return object to the pool: memomry leak.", e);
             }
-        }
+        }*/
 
     }
 
@@ -132,13 +135,13 @@ public class SHA1Computing implements IHashService {
             throw new IOException("Max buffer size is " + BufferFactory.MAX_BUFF_SIZE + " unable to evaluate timeout on " + maxRead + " bytes.");
         }*/
 
-        SHA1Hash ret;
+        final byte[] buffer = new byte[maxRead];
+        final IMessageDigest md = new Sha160();
+
         ExecutorService thread = Activator.getExecutorService().getExecutorService(ExecutorType.OWN);
 
         try {
-            final byte[] buffer = new byte[BufferFactory.MAX_BUFF_SIZE];
-            final IMessageDigest md = new Sha160();
-            //md = new Sha160();
+               //md = new Sha160();
 
            
            /* try {
@@ -190,7 +193,6 @@ public class SHA1Computing implements IHashService {
 
                     }
                     
-                    ret = new SHA1Hash(md.digest());
                 /*} finally {
                     try {
                         sha1Pool.returnObject(md);
@@ -209,6 +211,6 @@ public class SHA1Computing implements IHashService {
             thread.shutdownNow();
         }
 
-        return ret;
+        return new SHA1Hash(md.digest());
     }
 }
