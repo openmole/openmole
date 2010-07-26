@@ -37,10 +37,10 @@ public abstract class BatchJob implements IBatchJob {
     private final IBatchServiceDescription jobServiceDescription;
     private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
 
-    public BatchJob(IBatchJobService<?> jobService) {
+    public BatchJob(IBatchJobService jobService) {
         super();
         this.jobServiceDescription = jobService.getDescription();
-        setState(ExecutionState.READY);
+        setState(ExecutionState.SUBMITED);
     }
 
     @Override

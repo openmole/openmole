@@ -16,9 +16,6 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
-import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,26 +24,19 @@ import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;
 import org.ogf.saga.error.DoesNotExistException;
 import org.ogf.saga.error.IncorrectStateException;
-import org.ogf.saga.error.IncorrectURLException;
 import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.PermissionDeniedException;
 import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.job.Job;
-import org.ogf.saga.job.JobFactory;
-import org.ogf.saga.job.JobService;
 import org.ogf.saga.monitoring.Metric;
 import org.ogf.saga.task.State;
-import org.ogf.saga.url.URL;
-import org.ogf.saga.url.URLFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.batch.IBatchJobService;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
 import org.openmole.core.implementation.execution.batch.BatchJob;
-import org.openmole.plugin.environment.jsaga.internal.Activator;
 
 public class JSAGAJob extends BatchJob {
 
@@ -55,28 +45,10 @@ public class JSAGAJob extends BatchJob {
     final String jobId;
     final JSAGAJobService jobService;
 
-    public JSAGAJob(Job job, JSAGAJobService jobService) throws InternalProcessingError {
+    public JSAGAJob(String jobId, JSAGAJobService jobService) {
         super(jobService);
         this.jobService = jobService;
-        try {
-            this.jobId = job.getAttribute(Job.JOBID);
-        } catch (NotImplementedException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (AuthenticationFailedException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (AuthorizationFailedException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (PermissionDeniedException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (IncorrectStateException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (DoesNotExistException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (TimeoutException ex) {
-           throw new InternalProcessingError(ex);
-        } catch (NoSuccessException ex) {
-           throw new InternalProcessingError(ex);
-        }
+        this.jobId = jobId; 
     }
 
     public synchronized Job getJob() throws InternalProcessingError {
