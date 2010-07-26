@@ -45,38 +45,22 @@ public class JSAGAJob extends BatchJob {
     final String jobId;
     final JSAGAJobService jobService;
 
-    public JSAGAJob(String jobId, JSAGAJobService jobService) {
+    public JSAGAJob(String jobId, JSAGAJobService jobService) throws InternalProcessingError {
         super(jobService);
         this.jobService = jobService;
-        this.jobId = jobId; 
-    }
-
-    public synchronized Job getJob() throws InternalProcessingError {
-        
-       // URL serviceURL;
-        String nativeJobId;
-        
-        Matcher matcher = pattern.matcher(jobId);
+         
+         Matcher matcher = pattern.matcher(jobId);
 
         if (matcher.find()) {
-           /* try {
-                serviceURL = URLFactory.createURL(matcher.group(1));
-            } catch (BadParameterException e) {
-                throw new InternalProcessingError(e);
-            } catch (NoSuccessException e) {
-                throw new InternalProcessingError(e);
-            } catch (NotImplementedException e) {
-                throw new InternalProcessingError(e);
-            }*/
-            nativeJobId = matcher.group(2);
+            this.jobId = matcher.group(2);
         } else {
             throw new InternalProcessingError("Job ID does not match regular expression: " + pattern.pattern());
         }
+    }
 
-        //JobService service;
+    public synchronized Job getJob() throws InternalProcessingError {
         try {
-          //  service = JobFactory.createJobService(Activator.getJSagaSessionService().getSession(), serviceURL);
-            return jobService.getJobServiceCache().getJob(nativeJobId);
+            return jobService.getJobServiceCache().getJob(jobId);
         } catch (NotImplementedException e) {
             throw new InternalProcessingError(e);
         } catch (AuthenticationFailedException e) {
