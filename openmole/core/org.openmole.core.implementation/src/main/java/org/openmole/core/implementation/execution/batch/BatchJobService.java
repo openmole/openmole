@@ -19,10 +19,13 @@
 package org.openmole.core.implementation.execution.batch;
 
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.batchservicecontrol.UsageControl;
 import org.openmole.core.batchservicecontrol.FailureControl;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobDescription;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
@@ -31,6 +34,5 @@ public abstract class BatchJobService<BJ extends IBatchJobDescription> extends B
 
     public BatchJobService(IBatchEnvironmentDescription batchEnvironmentDescription, IBatchServiceDescription description, int nbAccess) throws InternalProcessingError {
         super(batchEnvironmentDescription, description, new UsageControl(nbAccess), new FailureControl());
-    }
-   
+    }    
 }

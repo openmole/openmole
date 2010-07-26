@@ -22,8 +22,8 @@ import org.ogf.saga.job.JobDescription;
 
 public class JSAGAJobDescription implements IJSAGAJobDescription {
 
-    JobDescription descritpion;
-    File script;
+    final JobDescription descritpion;
+    final File script;
 
     public JSAGAJobDescription(JobDescription descritpion, File script) {
         super();
@@ -40,4 +40,6 @@ public class JSAGAJobDescription implements IJSAGAJobDescription {
     public File getScript() {
         return script;
     }
+    
+    
 }

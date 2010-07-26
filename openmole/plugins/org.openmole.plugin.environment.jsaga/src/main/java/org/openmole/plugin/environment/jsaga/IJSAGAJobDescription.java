@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environment.jsaga;
 
 import java.io.File;
@@ -22,8 +21,9 @@ import java.io.File;
 import org.ogf.saga.job.JobDescription;
 import org.openmole.core.model.execution.batch.IBatchJobDescription;
 
-
 public interface IJSAGAJobDescription extends IBatchJobDescription {
-	public JobDescription getJobDescription();
-	File getScript();
+
+    JobDescription getJobDescription();
+
+    File getScript();
 }

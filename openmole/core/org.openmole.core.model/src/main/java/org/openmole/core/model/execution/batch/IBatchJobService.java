@@ -23,6 +23,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
 public interface IBatchJobService<JOBDESC extends IBatchJobDescription> extends IBatchService {
-	IBatchJob createBatchJob(JOBDESC batchJobDescription) throws InternalProcessingError;
-	IBatchJob createBatchJob(IURIFile inputFile, IURIFile outputFile, IRuntime runtime) throws InternalProcessingError, UserBadDataError, InterruptedException;
+	IBatchJob submit(JOBDESC batchJobDescription, IAccessToken token) throws InternalProcessingError;
+	IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

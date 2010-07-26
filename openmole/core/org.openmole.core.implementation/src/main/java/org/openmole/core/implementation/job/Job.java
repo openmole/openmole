@@ -20,8 +20,6 @@ package org.openmole.core.implementation.job;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.commons.exception.ExecutionException;

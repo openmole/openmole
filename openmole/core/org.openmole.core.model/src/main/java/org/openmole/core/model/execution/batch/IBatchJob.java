@@ -36,8 +36,8 @@ public interface IBatchJob {
 	void kill() throws InternalProcessingError, UserBadDataError, InterruptedException;
 	void kill(IAccessToken token) throws UserBadDataError, InternalProcessingError;
 	
-	void submit() throws InternalProcessingError, UserBadDataError, InterruptedException;	
-	void submit(IAccessToken token) throws InternalProcessingError, InterruptedException;
+	//void submit() throws InternalProcessingError, UserBadDataError, InterruptedException;	
+	//void submit(IAccessToken token) throws InternalProcessingError, InterruptedException;
 	
 	ExecutionState getUpdatedState() throws InternalProcessingError, UserBadDataError, InterruptedException;
 	ExecutionState getUpdatedState(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;

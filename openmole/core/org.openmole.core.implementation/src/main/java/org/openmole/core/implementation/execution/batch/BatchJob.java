@@ -82,28 +82,7 @@ public abstract class BatchJob implements IBatchJob {
         deleteJob();
     }
 
-    @Override
-    public void submit() throws InternalProcessingError, InterruptedException, UserBadDataError {
-        IAccessToken token = getUsageControl().waitAToken();
-        try {
-            submit(token);
-        } finally {
-            getUsageControl().releaseToken(token);
-        }
-    }
-
-    @Override
-    public synchronized void submit(IAccessToken token) throws InternalProcessingError, InterruptedException {
-        try {
-            submitJob();
-            getFailureControl().success();
-        } catch (InternalProcessingError e) {
-            getFailureControl().failed();
-            throw e;
-        }
-        setState(ExecutionState.SUBMITED);
-    }
-
+   
     @Override
     public ExecutionState getUpdatedState() throws InternalProcessingError, InterruptedException, UserBadDataError {
         IAccessToken token = getUsageControl().waitAToken();
@@ -156,7 +135,7 @@ public abstract class BatchJob implements IBatchJob {
     
     public abstract void deleteJob() throws InternalProcessingError;
 
-    public abstract void submitJob() throws InternalProcessingError;
+ //   public abstract void submitJob() throws InternalProcessingError;
 
     public abstract ExecutionState updateState() throws InternalProcessingError;
 }
