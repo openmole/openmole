@@ -46,7 +46,7 @@ import static org.openmole.core.implementation.tools.ContextAggregator.aggregate
 import static org.openmole.core.implementation.tools.ContextAggregator.findDataIn1WhichAreAlsoIn2;
 import static org.openmole.core.implementation.tools.ToCloneFinder.getVariablesToClone;
 
-public class AggregationTransition extends SingleTransition implements IAggregationTransition {
+public class AggregationTransition extends Transition implements IAggregationTransition {
 
     public class AggregationTransitionAdapter implements IObjectChangedSynchronousListenerWithArgs<ISubMoleExecution> {
 

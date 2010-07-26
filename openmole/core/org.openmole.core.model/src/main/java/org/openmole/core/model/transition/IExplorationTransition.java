@@ -30,6 +30,6 @@ import org.openmole.core.model.plan.IFactorValues;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface IExplorationTransition extends ITransition<IExplorationTaskCapsule> {
+public interface IExplorationTransition extends IGenericTransition<IExplorationTaskCapsule> {
 
 }

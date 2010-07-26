@@ -32,7 +32,7 @@ import org.openmole.core.model.plan.IExploredPlan;
 import org.openmole.core.model.plan.IFactorValues;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.transition.IExplorationTransition;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.tools.IRegistryWithTicket;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
@@ -42,7 +42,7 @@ import org.openmole.core.model.job.ITicket;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.mole.ISubMoleExecution;
 
-public class ExplorationTransition extends Transition<IExplorationTaskCapsule> implements IExplorationTransition {
+public class ExplorationTransition extends GenericTransition<IExplorationTaskCapsule> implements IExplorationTransition {
 
     public ExplorationTransition(IExplorationTaskCapsule start, IGenericTaskCapsule<?, ?> end) {
         super(start, end);
@@ -51,7 +51,7 @@ public class ExplorationTransition extends Transition<IExplorationTaskCapsule> i
     @Override
     public synchronized void performImpl(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
 
-        IRegistryWithTicket<ITransition, IContext> registry = moleExecution.getLocalCommunication().getTransitionRegistry();
+        IRegistryWithTicket<IGenericTransition, IContext> registry = moleExecution.getLocalCommunication().getTransitionRegistry();
         registry.register(this, ticket, context);
 
         IExploredPlan values = context.getValue(ExplorationTask.ExploredPlan.getPrototype());

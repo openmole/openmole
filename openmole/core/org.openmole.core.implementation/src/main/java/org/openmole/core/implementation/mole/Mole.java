@@ -31,7 +31,7 @@ import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 
 /**
  * A Mole is a workflow with a defined start capsule. Indeed, it is a set of
@@ -88,7 +88,7 @@ public class Mole implements IMole {
             IGenericTaskCapsule<?, ?> current = toExplore.poll();
 
             if (!tasks.contains(current)) {
-                for (ITransition transition : current.getOutputTransitions()) {
+                for (IGenericTransition transition : current.getOutputTransitions()) {
                     toExplore.add(transition.getEnd().getCapsule());
                 }
                 tasks.add(current);

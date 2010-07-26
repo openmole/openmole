@@ -18,7 +18,7 @@
 package org.openmole.core.model.capsule;
 
 import org.openmole.core.model.task.ITask;
-import org.openmole.core.model.transition.ISingleTransition;
+import org.openmole.core.model.transition.ITransition;
 
 /**
  *
@@ -26,6 +26,6 @@ import org.openmole.core.model.transition.ISingleTransition;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface ITaskCapsule extends IGenericTaskCapsule<ISingleTransition, ITask> {
+public interface ITaskCapsule extends IGenericTaskCapsule<ITransition, ITask> {
 
 }

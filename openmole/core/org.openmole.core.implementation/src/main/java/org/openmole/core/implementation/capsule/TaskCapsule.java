@@ -19,10 +19,10 @@
 package org.openmole.core.implementation.capsule;
 
 import org.openmole.core.model.task.ITask;
-import org.openmole.core.model.transition.ISingleTransition;
+import org.openmole.core.model.transition.ITransition;
 import org.openmole.core.model.capsule.ITaskCapsule;
 
-public class TaskCapsule extends GenericTaskCapsule<ISingleTransition, ITask> implements ITaskCapsule {
+public class TaskCapsule extends GenericTaskCapsule<ITransition, ITask> implements ITaskCapsule {
 
     public TaskCapsule() {
         super(null);

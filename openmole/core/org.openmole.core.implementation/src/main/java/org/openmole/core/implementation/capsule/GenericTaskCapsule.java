@@ -16,8 +16,8 @@
  */
 package org.openmole.core.implementation.capsule;
 
-import org.openmole.core.implementation.transition.TransitionSlotSet;
-import org.openmole.core.implementation.transition.TransitionSlot;
+import org.openmole.core.implementation.transition.SlotSet;
+import org.openmole.core.implementation.transition.Slot;
 import org.openmole.core.implementation.job.MoleJob;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,8 +29,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.job.ITicket;
@@ -46,7 +46,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 
 import static org.openmole.core.implementation.tools.ToCloneFinder.getVariablesToClone;
 
-public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends IGenericTask> implements IGenericTaskCapsule<TOUT, TASK> {
+public abstract class GenericTaskCapsule<TOUT extends IGenericTransition, TASK extends IGenericTask> implements IGenericTaskCapsule<TOUT, TASK> {
 
     class GenericTaskCapsuleAdapter implements IObjectChangedSynchronousListener<MoleJob> {
 
@@ -59,8 +59,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
             }
         }
     }
-    private TransitionSlotSet inSlotSet;
-    private ITransitionSlot defaultSlot;
+    private SlotSet inSlotSet;
+    private ISlot defaultSlot;
     private MultiOut<TOUT> out;
     private Set<IDataChannel> inputDataChannels;
     private Set<IDataChannel> outputDataChannels;
@@ -71,8 +71,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
 
         this.task = task;
 
-        this.defaultSlot = new TransitionSlot(this);
-        this.inSlotSet = new TransitionSlotSet();
+        this.defaultSlot = new Slot(this);
+        this.inSlotSet = new SlotSet();
         this.out = new MultiOut<TOUT>();
 
         addInputTransitionSlot(defaultSlot);
@@ -82,17 +82,17 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
     }
 
     @Override
-    public void addInputTransitionSlot(ITransitionSlot group) {
+    public void addInputTransitionSlot(ISlot group) {
         inSlotSet.addInputTransitionGroup(group);
     }
 
     @Override
-    public ITransitionSlot getDefaultInputSlot() {
+    public ISlot getDefaultInputSlot() {
         return defaultSlot;
     }
 
     @Override
-    public Collection<ITransitionSlot> getIntputTransitionsSlots() {
+    public Collection<ISlot> getIntputTransitionsSlots() {
         return inSlotSet.getGroups();
     }
 

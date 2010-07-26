@@ -26,7 +26,7 @@ import org.openmole.core.model.capsule.IGenericTaskCapsule;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface ITransitionSlot {
+public interface ISlot {
 
     /**
      *
@@ -34,7 +34,7 @@ public interface ITransitionSlot {
      *
      * @return all the transitions plugged into this slot
      */
-    Iterable<ITransition> getTransitions();
+    Iterable<IGenericTransition> getTransitions();
 
     /**
      *
@@ -42,7 +42,7 @@ public interface ITransitionSlot {
      *
      * @param transition the transition to plug
      */
-    void plugTransition(ITransition transition);
+    void plugTransition(IGenericTransition transition);
 
     /**
      *
@@ -50,7 +50,7 @@ public interface ITransitionSlot {
      *
      * @param transition the transition to unplug
      */
-    void unplugTransition(ITransition transition);
+    void unplugTransition(IGenericTransition transition);
 
     /**
      *
@@ -59,7 +59,7 @@ public interface ITransitionSlot {
      * @param transition the transition to test
      * @return true if the transition is plugged to this slot
      */
-    boolean isPlugged(ITransition transition);
+    boolean isPlugged(IGenericTransition transition);
 
     /**
      *

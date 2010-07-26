@@ -22,7 +22,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.data.IDataChannel;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.data.IData;
@@ -43,11 +43,11 @@ public class ToCloneFinder {
             AtomicInteger nbMutable = new AtomicInteger();
         }
 
-        Iterable<? extends ITransition> outputTransitions = caps.getOutputTransitions();
+        Iterable<? extends IGenericTransition> outputTransitions = caps.getOutputTransitions();
 
         Map<String, DataInfo> counters = new TreeMap<String, DataInfo>();
 
-        for (ITransition transition : outputTransitions) {
+        for (IGenericTransition transition : outputTransitions) {
             if (transition.isConditionTrue(global, context)) {
                 for (IData<?> data : transition.getEnd().getCapsule().getTask().getInput()) {
                     String name = data.getPrototype().getName();

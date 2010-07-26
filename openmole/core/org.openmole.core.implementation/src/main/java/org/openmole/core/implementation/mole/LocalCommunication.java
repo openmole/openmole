@@ -19,7 +19,7 @@ package org.openmole.core.implementation.mole;
 import java.util.Collection;
 import org.openmole.core.implementation.tools.RegistryWithTicket;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.data.IDataChannel;
 import org.openmole.core.model.tools.IRegistryWithTicket;
 import org.openmole.core.model.mole.ILocalCommunication;
@@ -27,12 +27,12 @@ import org.openmole.core.model.transition.IAggregationTransition;
 
 public class LocalCommunication implements ILocalCommunication {
 
-    IRegistryWithTicket<ITransition, IContext> transitionRegistry = new RegistryWithTicket<ITransition, IContext>();
+    IRegistryWithTicket<IGenericTransition, IContext> transitionRegistry = new RegistryWithTicket<IGenericTransition, IContext>();
     IRegistryWithTicket<IAggregationTransition, Collection<IContext>> aggregationTransitionRegistry = new RegistryWithTicket<IAggregationTransition, Collection<IContext>>();
     IRegistryWithTicket<IDataChannel, IContext> dataChannetContextRegistry = new RegistryWithTicket<IDataChannel, IContext>();
 
     @Override
-    public IRegistryWithTicket<ITransition, IContext> getTransitionRegistry() {
+    public IRegistryWithTicket<IGenericTransition, IContext> getTransitionRegistry() {
         return transitionRegistry;
     }
 

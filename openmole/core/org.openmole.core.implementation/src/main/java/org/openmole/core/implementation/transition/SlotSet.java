@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon
+ *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,17 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition;
+package org.openmole.core.implementation.transition;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.capsule.ITaskCapsule;
+import java.util.HashSet;
+import java.util.Set;
+import org.openmole.core.model.transition.ISlot;
 
-/**
- *
- * A transition from a {@link ITaskCapsule} to a {@link IGenericTaskCapsule}
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public interface ISingleTransition extends ITransition<ITaskCapsule> {
+public class SlotSet {
 
+    Set<ISlot> slots = new HashSet<ISlot>();
+
+    public void addInputTransitionGroup(ISlot group) {
+        slots.add(group);
+    }
+
+    public int nbGroups() {
+        return slots.size();
+    }
+
+    public Set<ISlot> getGroups() {
+        return slots;
+    }
 }

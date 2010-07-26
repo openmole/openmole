@@ -23,10 +23,10 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.tools.IRegistryWithTicket;
 
 import org.openmole.core.model.transition.IAggregationTransition;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 
 public interface ILocalCommunication {
-    IRegistryWithTicket<ITransition, IContext> getTransitionRegistry();
+    IRegistryWithTicket<IGenericTransition, IContext> getTransitionRegistry();
     IRegistryWithTicket<IAggregationTransition, Collection<IContext>> getAggregationTransitionRegistry();
     IRegistryWithTicket<IDataChannel, IContext> getDataChannelRegistry();
 }

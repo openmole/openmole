@@ -27,8 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.core.model.transition.IAggregationTransition;
 import org.openmole.core.model.transition.IExplorationTransition;
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
@@ -91,8 +91,8 @@ public class LevelComputing implements ILevelComputing {
 
         int level = Integer.MAX_VALUE;
 
-        for (ITransitionSlot group : capsule.getIntputTransitionsSlots()) {
-            for (ITransition t : group.getTransitions()) {
+        for (ISlot group : capsule.getIntputTransitionsSlots()) {
+            for (IGenericTransition t : group.getTransitions()) {
                 int inLevel = getLevel(t.getStart(), workflow, allreadySeen);
 
                 if (IExplorationTransition.class.isAssignableFrom(t.getClass())) {
