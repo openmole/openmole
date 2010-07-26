@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -34,11 +33,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.openmole.commons.tools.pattern.BufferFactory;
 import scala.Tuple2;
 
 public class FileUtil {
 
+    public final static int DEFAULT_BUFF_SIZE = 8 * 1024;
     final static ExecutorService pool = Executors.newCachedThreadPool();
 
     public static long getLastModification(File file) {
@@ -161,7 +160,7 @@ public class FileUtil {
     }
 
     public static void copy(InputStream from, OutputStream to) throws IOException {
-        byte[] buffer = new byte[BufferFactory.MAX_BUFF_SIZE];
+        byte[] buffer = new byte[DEFAULT_BUFF_SIZE];
         /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {

@@ -36,15 +36,16 @@ import java.util.logging.Logger;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.SoftReferenceObjectPool;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.hashservice.SHA1Hash;
 import org.openmole.commons.tools.io.ReaderRunnable;
-import org.openmole.commons.tools.pattern.BufferFactory;
+
 
 public class SHA1Computing implements IHashService {
 
-   /* private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
+  /*  private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
         @Override
         public Object makeObject() throws Exception {
@@ -74,7 +75,7 @@ public class SHA1Computing implements IHashService {
     @Override
     public SHA1Hash computeHash(InputStream is) throws IOException {
         
-        final byte[] buffer = new byte[BufferFactory.MAX_BUFF_SIZE];
+        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
         final IMessageDigest md = new Sha160();
 
        // IMessageDigest md;
@@ -140,7 +141,7 @@ public class SHA1Computing implements IHashService {
 
         ExecutorService thread = Activator.getExecutorService().getExecutorService(ExecutorType.OWN);
 
-        try {
+   //     try {
                //md = new Sha160();
 
            
@@ -207,9 +208,9 @@ public class SHA1Computing implements IHashService {
                     Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to return object to the pool: memomry leak.", e);
                 }
             }*/
-        } finally {
+     /*   } finally {
             thread.shutdownNow();
-        }
+        }*/
 
         return new SHA1Hash(md.digest());
     }

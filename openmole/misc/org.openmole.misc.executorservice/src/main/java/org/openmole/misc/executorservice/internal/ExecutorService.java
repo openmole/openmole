@@ -29,7 +29,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class ExecutorService implements IExecutorService {
 
-    static ConfigurationLocation NbTread = new ConfigurationLocation(ExecutorService.class.getSimpleName(), "NbThreadsByExecutorTypes");
+    final static ConfigurationLocation NbTread = new ConfigurationLocation(ExecutorService.class.getSimpleName(), "NbThreadsByExecutorTypes");
 
     static {
         Activator.getWorkspace().addToConfigurations(NbTread, "20");
