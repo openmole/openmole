@@ -330,22 +330,12 @@ public class ReplicaCatalog implements IReplicaCatalog {
     private Configuration getB4oConfiguration() {
         Configuration configuration = Db4o.newConfiguration();
         configuration.add(new TransparentPersistenceSupport());
-        // configuration.add(new TransparentActivationSupport());
-
-        //configuration.objectClass(Replica.class).cascadeOnDelete(true);
-        //configuration.objectClass(Replica.class).cascadeOnUpdate(true);
-        // configuration.objectClass(Replica.class).cascadeOnActivate(true);
-
+  
         configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);
-        configuration.objectClass(Replica.class).objectField("persistence").indexed(true);
-  
-        //RandomAccessFileAdapter randomAccessFileAdapter = new RandomAccessFileAdapter();
-
-        //configuration.io(new NonFlushingIoAdapter(randomAccessFileAdapter));
-
+     
         return configuration;
     }
 

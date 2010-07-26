@@ -61,6 +61,7 @@ public class JSAGAJobService extends BatchJobService {
         Activator.getWorkspace().addToConfigurations(CreationTimout, "PT2M");
         Activator.getWorkspace().addToConfigurations(TestJobDoneTimeOut, "PT30M");
     }
+    
     URI jobServiceURI;
     JSAGAEnvironment environment;
 
