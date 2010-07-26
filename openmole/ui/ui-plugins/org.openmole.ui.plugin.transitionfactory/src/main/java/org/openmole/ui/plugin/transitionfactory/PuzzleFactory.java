@@ -21,7 +21,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.transition.AggregationTransition;
 import org.openmole.core.implementation.transition.ExplorationTransition;
-import org.openmole.core.implementation.transition.SingleTransition;
+import org.openmole.core.implementation.transition.Transition;
 import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
@@ -57,7 +57,7 @@ public class PuzzleFactory {
     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildChain(ITaskCapsule... capsules) {
         int startIndex = 0;
         for (int i = 1; i < capsules.length; i++) {
-            new SingleTransition(capsules[startIndex], capsules[i]);
+            new Transition(capsules[startIndex], capsules[i]);
             startIndex++;
         }
         return new PuzzleFirstAndLast(capsules[0], capsules[capsules.length - 1]);
@@ -70,7 +70,7 @@ public class PuzzleFactory {
      * @return an instance of IPuzzleFirstAndLast
      */
     private static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildChain(ITaskCapsule capsule, IGenericTaskCapsule genCapsule) {
-        new SingleTransition(capsule, genCapsule);
+        new Transition(capsule, genCapsule);
         return new PuzzleFirstAndLast(capsule, genCapsule);
     }
 
@@ -86,7 +86,7 @@ public class PuzzleFactory {
         int length = workflowPuzzles.length;
         int startIndex = 0;
         for (int i = 1; i < length; i++) {
-            new SingleTransition(workflowPuzzles[startIndex].getLastCapsule(), workflowPuzzles[i].getFirstCapsule());
+            new Transition(workflowPuzzles[startIndex].getLastCapsule(), workflowPuzzles[i].getFirstCapsule());
             startIndex++;
         }
         return new PuzzleFirstAndLast(workflowPuzzles[0].getFirstCapsule(), workflowPuzzles[length - 1].getLastCapsule());
@@ -150,7 +150,7 @@ public class PuzzleFactory {
         } else {
             ITaskCapsule startCapsule = capsules[0];
             for (int i = 1; i < capsules.length; i++) {
-                new SingleTransition(startCapsule, capsules[i]);
+                new Transition(startCapsule, capsules[i]);
             }
         }
         return new PuzzleFirst(capsules[0]);
@@ -196,7 +196,7 @@ public class PuzzleFactory {
             ITaskCapsule finalCapsule = capsules[capsules.length - 1];
             for (int i = 0; i < capsules.length - 1; i++) {
                 System.out.println("SINGLE TRANSITION: " + capsules[i].getClass() + " and" + finalCapsule.getClass());
-                new SingleTransition(capsules[i], finalCapsule);
+                new Transition(capsules[i], finalCapsule);
             }
             return new PuzzleLast(finalCapsule);
         }
