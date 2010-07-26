@@ -28,7 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.openmole.commons.tools.pattern.BufferFactory;
+import org.openmole.commons.tools.io.FileUtil;
 
 /**
  *
@@ -69,13 +69,13 @@ public class SSHUtils {
     }
 
     private static void copyTo(final SFTPv3Client client, final FileInputStream local, final SFTPv3FileHandle remote) throws IOException {
-        final byte[] buffer;
-        try {
+        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
+        /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (Exception ex) {
             throw new IOException(ex);
         }
-        try {
+        try {*/
             long offset = 0;
 
             while (true) {
@@ -87,13 +87,13 @@ public class SSHUtils {
                 offset += amountRead;
             }
 
-        } finally {
+      /*  } finally {
             try {
                 BufferFactory.GetInstance().returnObject(buffer);
             } catch (Exception ex) {
                 throw new IOException(ex);
             }
-        }
+        }*/
     }
 
     public static void copyFrom(SFTPv3Client client, String remote, File local) throws IOException {
@@ -126,13 +126,13 @@ public class SSHUtils {
     }
 
     private static void copyFrom(SFTPv3Client client, SFTPv3FileHandle remote, OutputStream local) throws IOException {
-        final byte[] buffer;
-        try {
+        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
+        /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (Exception ex) {
             throw new IOException(ex);
         }
-        try {
+        try {*/
             long offset = 0;
 
             while (true) {
@@ -144,13 +144,13 @@ public class SSHUtils {
                 offset += amountRead;
             }
 
-        } finally {
+        /*} finally {
             try {
                 BufferFactory.GetInstance().returnObject(buffer);
             } catch (Exception ex) {
                 throw new IOException(ex);
             }
-        }
+        }*/
     }
 
     public static void delete(SFTPv3Client client, String path) throws IOException {
