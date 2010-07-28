@@ -106,6 +106,8 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
         
         IStatistic statistic = map.get(key);
         if (statistic == null) {
+            Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).log(Level.FINE,"New Map.");
+       
             statistic = new Statistic(historySize);
             map.put(key, statistic);
         }
@@ -116,9 +118,7 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     private synchronized Map<StatisticKey, IStatistic> getOrConstructStatisticMap(IMoleExecution moleExecution) {
         Map<StatisticKey, IStatistic> map = stats.get(moleExecution);
 
-        if (map == null) {
-            Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).log(Level.FINE,"New Map.");
-            
+        if (map == null) {     
             map = Collections.synchronizedMap(new HashMap<StatisticKey, IStatistic>());
             stats.put(moleExecution, map);
         }

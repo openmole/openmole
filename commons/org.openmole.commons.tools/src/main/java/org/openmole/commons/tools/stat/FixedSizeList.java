@@ -22,10 +22,10 @@ import java.util.List;
 
 public class FixedSizeList<T> {
 
-    final Integer size;
+    final int size;
     final LinkedList<T> list = new LinkedList<T>();
 
-    public FixedSizeList(Integer size) {
+    public FixedSizeList(int size) {
         super();
         this.size = size;
     }
