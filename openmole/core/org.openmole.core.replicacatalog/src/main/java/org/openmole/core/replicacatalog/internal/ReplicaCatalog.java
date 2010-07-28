@@ -82,6 +82,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
             defragmentConfig.forceBackupDelete(true);
             Defragment.defrag(defragmentConfig);
+             
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
@@ -365,11 +366,13 @@ public class ReplicaCatalog implements IReplicaCatalog {
         Configuration configuration = Db4o.newConfiguration();
         configuration.add(new TransparentPersistenceSupport());
         
+        configuration.freespace().discardSmallerThan(50);
+        
         configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
         configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);
-     
+        
         return configuration;
     }
 
