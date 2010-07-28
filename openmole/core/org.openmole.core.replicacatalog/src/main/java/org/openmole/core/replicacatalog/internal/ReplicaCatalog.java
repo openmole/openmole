@@ -34,6 +34,8 @@ import com.db4o.Db4o;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.config.Configuration;
+import com.db4o.defragment.Defragment;
+import com.db4o.defragment.DefragmentConfig;
 import com.db4o.ext.DatabaseFileLockedException;
 import com.db4o.ext.DatabaseReadOnlyException;
 import com.db4o.ext.Db4oIOException;
@@ -77,10 +79,15 @@ public class ReplicaCatalog implements IReplicaCatalog {
         super();
         try {
             String objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);
+            DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
+            defragmentConfig.forceBackupDelete(true);
+            Defragment.defrag(defragmentConfig);
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
             Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this), ExecutorType.OWN, updateInterval);
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
         } catch (Db4oIOException e) {
             throw new InternalProcessingError(e);
         } catch (DatabaseFileLockedException e) {
@@ -357,7 +364,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
     private Configuration getB4oConfiguration() {
         Configuration configuration = Db4o.newConfiguration();
         configuration.add(new TransparentPersistenceSupport());
-  
+        
         configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
