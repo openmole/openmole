@@ -82,7 +82,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
             defragmentConfig.forceBackupDelete(true);
             Defragment.defrag(defragmentConfig);
-             
+                      
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
@@ -125,10 +125,10 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                 @Override
                 public boolean match(Replica replica) {
-                    return replica.source.equals(srcPath) 
-                            && replica.hash.equals(hash) 
-                            && replica.storageDescription.equals(storageDescription)
-                            && replica.environmentDescription.equals(environmentDescription);
+                    return replica.getSource().equals(srcPath) 
+                            && replica.getSourceHash().equals(hash) 
+                            && replica.getStorageDescription().equals(storageDescription)
+                            && replica.getEnvironmentDescription().equals(environmentDescription);
                 }
                 
             });
@@ -164,9 +164,9 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
             @Override
             public boolean match(Replica replica) {
-                return replica.source.equals(src)
-                        && replica.storageDescription.equals(storageDescription)
-                        && replica.environmentDescription.equals(envDescription);
+                return replica.getSource().equals(src)
+                        && replica.getStorageDescription().equals(storageDescription)
+                        && replica.getEnvironmentDescription().equals(envDescription);
             }
             
         });
