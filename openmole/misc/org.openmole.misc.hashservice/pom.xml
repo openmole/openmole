@@ -16,7 +16,7 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -26,16 +26,17 @@
             <version>${lib.org.gnu.crypto.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.pool</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.pool</artifactId>
+	    <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.executorservice</artifactId>
             <version>${project.version}</version>
         </dependency>

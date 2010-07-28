@@ -36,8 +36,9 @@
             <version>${lib.org.apache.commons.collections15.version}</version>
         </dependency>
 	<dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.pool</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.pool</artifactId>
+	    <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>

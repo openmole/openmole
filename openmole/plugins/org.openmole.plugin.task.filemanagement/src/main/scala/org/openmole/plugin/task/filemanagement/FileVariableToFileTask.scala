@@ -35,7 +35,7 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.commons.tools.io.FileUtil.copy
 import org.openmole.core.implementation.tools.VariableExpansion._
 
-class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Task(name) {
+class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
   val toCopy = new ListBuffer[(IPrototype[File],String)]()
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String)]()

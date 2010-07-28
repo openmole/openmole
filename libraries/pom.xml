@@ -26,6 +26,7 @@
         <module>org.codehaus.groovy</module>
         <module>org.apache.commons.collections15</module>
         <module>org.apache.commons.compress</module>
+        <module>org.apache.commons.pool</module>
         <module>org.nuiton.j2r</module>
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>
