@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.MultipleException;
 import org.openmole.commons.exception.UserBadDataError;
@@ -25,6 +27,8 @@ public class ClonningService {
 
     
     public static IVariable clone(IVariable variable) throws InternalProcessingError, UserBadDataError {
+        Logger.getLogger(ClonningService.class.getName()).log(Level.FINE, "Clonning {0}", variable.getPrototype());
+        
         if (variable.getValue() == null || 
                 variable.getValue().getClass().isPrimitive() ||
                 variable.getValue().getClass() == BigDecimal.class ||

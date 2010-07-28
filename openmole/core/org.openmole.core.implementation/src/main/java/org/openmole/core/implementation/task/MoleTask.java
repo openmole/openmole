@@ -16,11 +16,8 @@
  */
 package org.openmole.core.implementation.task;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.IDataSet;
@@ -40,7 +37,6 @@ import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.task.IMoleTask;
 
 public class MoleTask extends Task implements IMoleTask {

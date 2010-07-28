@@ -17,9 +17,9 @@
 package org.openmole.core.implementation.execution;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -29,7 +29,7 @@ public class Statistic implements IStatistic {
 
     public static IStatistic EMPTY_STAT = new Statistic(0);
 
-    Map<SampleType, FixedSizeList> averages = Collections.synchronizedMap(new TreeMap<SampleType, FixedSizeList>());
+    Map<SampleType, FixedSizeList> averages = Collections.synchronizedMap(new EnumMap<SampleType, FixedSizeList>(SampleType.class));
     Integer historySize;
 
     public Statistic(Integer historySize) {
