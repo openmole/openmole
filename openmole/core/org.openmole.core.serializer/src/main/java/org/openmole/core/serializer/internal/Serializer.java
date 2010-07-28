@@ -26,8 +26,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.serializer.ISerializationResult;
 import org.openmole.core.serializer.ISerializer;
+import static org.openmole.commons.tools.io.FileUtil.*;
 
 /**
  *
@@ -61,12 +63,12 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj, File dir) throws InternalProcessingError {
+    public ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj, File dir) throws InternalProcessingError, UserBadDataError {
         try {
             File serialized = Activator.getWorkspace().newFile();
             ISerializationResult ret = serializeAndGetPluginClassAndFiles(obj, serialized);
             File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
-            serialized.renameTo(hashName);
+            move(serialized, hashName);
             return ret;
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
@@ -156,12 +158,12 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public void serializeAsHash(Object obj, File dir) throws InternalProcessingError {
+    public void serializeAsHash(Object obj, File dir) throws InternalProcessingError, UserBadDataError {
         try {
             File serialized = Activator.getWorkspace().newFile();
             serialize(obj, serialized);
             File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
-            serialized.renameTo(hashName);
+            move(serialized, hashName);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
         }

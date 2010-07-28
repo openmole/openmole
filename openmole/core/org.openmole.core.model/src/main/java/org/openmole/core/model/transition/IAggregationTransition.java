@@ -26,6 +26,6 @@ import org.openmole.core.model.capsule.ITaskCapsule;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public interface IAggregationTransition extends ISingleTransition {
+public interface IAggregationTransition extends ITransition {
 
 }

@@ -16,8 +16,8 @@
  */
 package org.openmole.core.implementation.capsule;
 
-import org.openmole.core.implementation.transition.TransitionSlotSet;
-import org.openmole.core.implementation.transition.TransitionSlot;
+import org.openmole.core.implementation.transition.SlotSet;
+import org.openmole.core.implementation.transition.Slot;
 import org.openmole.core.implementation.job.MoleJob;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,8 +29,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.core.model.job.IMoleJobId;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.job.ITicket;
@@ -46,7 +46,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousList
 
 import static org.openmole.core.implementation.tools.ToCloneFinder.getVariablesToClone;
 
-public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends IGenericTask> implements IGenericTaskCapsule<TOUT, TASK> {
+public abstract class GenericTaskCapsule<TOUT extends IGenericTransition, TASK extends IGenericTask> implements IGenericTaskCapsule<TOUT, TASK> {
 
     class GenericTaskCapsuleAdapter implements IObjectChangedSynchronousListener<MoleJob> {
 
@@ -59,8 +59,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
             }
         }
     }
-    private TransitionSlotSet inSlotSet;
-    private ITransitionSlot defaultSlot;
+    private SlotSet inSlotSet;
+    private ISlot defaultSlot;
     private MultiOut<TOUT> out;
     private Set<IDataChannel> inputDataChannels;
     private Set<IDataChannel> outputDataChannels;
@@ -71,8 +71,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
 
         this.task = task;
 
-        this.defaultSlot = new TransitionSlot(this);
-        this.inSlotSet = new TransitionSlotSet();
+        this.defaultSlot = new Slot(this);
+        this.inSlotSet = new SlotSet();
         this.out = new MultiOut<TOUT>();
 
         addInputTransitionSlot(defaultSlot);
@@ -82,17 +82,17 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
     }
 
     @Override
-    public void addInputTransitionSlot(ITransitionSlot group) {
+    public void addInputTransitionSlot(ISlot group) {
         inSlotSet.addInputTransitionGroup(group);
     }
 
     @Override
-    public ITransitionSlot getDefaultInputSlot() {
+    public ISlot getDefaultInputSlot() {
         return defaultSlot;
     }
 
     @Override
-    public Collection<ITransitionSlot> getIntputTransitionsSlots() {
+    public Collection<ISlot> getIntputTransitionsSlots() {
         return inSlotSet.getGroups();
     }
 
@@ -139,8 +139,8 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
 
 
     @Override
-    public IMoleJob toJob(IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError {
-        MoleJob ret = new MoleJob(getAssignedTask(), context, ticket, jobId);
+    public IMoleJob toJob(IContext global, IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError {
+        MoleJob ret = new MoleJob(getAssignedTask(), global, context, ticket, jobId);
 
         Activator.getEventDispatcher().registerListener(ret, Priority.LOW.getValue(), new GenericTaskCapsuleAdapter(), IMoleJob.StateChanged);
         Activator.getEventDispatcher().objectChanged(this, JobCreated, new Object[]{ret});
@@ -171,7 +171,7 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
             IMoleExecution execution = ExecutionInfoRegistry.GetInstance().remove(job);
             ISubMoleExecution subMole = execution.getSubMoleExecution(job);
 
-            performTransition(job.getContext(), job.getTicket(), execution, subMole);
+            performTransition(job.getGlobalContext(), job.getContext(), job.getTicket(), execution, subMole);
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + getAssignedTask());
         } catch (UserBadDataError e) {
@@ -181,12 +181,12 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
         }
     }
 
-    protected void performTransition(IContext context, ITicket ticket, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    protected void performTransition(IContext global, IContext context, ITicket ticket, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         for (IDataChannel dataChannel : getOutputDataChannels()) {
-            dataChannel.provides(context, ticket, getVariablesToClone(this, context), moleExecution);
+            dataChannel.provides(context, ticket, getVariablesToClone(this, global, context), moleExecution);
         }
 
-        performTransitionImpl(context, ticket, moleExecution, subMole);
+        performTransitionImpl(global, context, ticket, moleExecution, subMole);
     }
 
     @Override
@@ -210,14 +210,14 @@ public abstract class GenericTaskCapsule<TOUT extends ITransition, TASK extends 
 
 
 
-    public void performTransitionImpl(IContext context, ITicket ticket, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    public void performTransitionImpl(IContext global, IContext context, ITicket ticket, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         Collection<TOUT> outputTransitions = getOutputTransitions();
 
         if (outputTransitions.size() == 1 && getOutputDataChannels().isEmpty()) {
-            outputTransitions.iterator().next().perform(context, ticket, Collections.EMPTY_SET, moleExecution, subMole);
+            outputTransitions.iterator().next().perform(global, context, ticket, Collections.EMPTY_SET, moleExecution, subMole);
         } else {
             for (TOUT transition : outputTransitions) {
-                transition.perform(context, ticket, getVariablesToClone(this, context), moleExecution, subMole);
+                transition.perform(global, context, ticket, getVariablesToClone(this, global, context), moleExecution, subMole);
             }
         }
     }

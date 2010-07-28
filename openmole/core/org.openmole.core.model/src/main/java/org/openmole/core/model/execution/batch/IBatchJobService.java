@@ -14,15 +14,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.execution.batch;
-
 
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-public interface IBatchJobService<JOBDESC extends IBatchJobDescription> extends IBatchService {
-	IBatchJob createBatchJob(JOBDESC batchJobDescription) throws InternalProcessingError;
-	IBatchJob createBatchJob(IURIFile inputFile, IURIFile outputFile, IRuntime runtime) throws InternalProcessingError, UserBadDataError, InterruptedException;
+public interface IBatchJobService extends IBatchService {
+
+    IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

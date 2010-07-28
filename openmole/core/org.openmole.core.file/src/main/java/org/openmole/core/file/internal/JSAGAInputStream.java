@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.file.internal;
 
 import java.io.IOException;
@@ -27,6 +26,7 @@ import org.ogf.saga.file.FileInputStream;
 import org.ogf.saga.task.Task;
 import org.ogf.saga.task.TaskMode;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
 
 /**

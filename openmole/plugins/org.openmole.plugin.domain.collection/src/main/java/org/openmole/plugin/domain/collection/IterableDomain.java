@@ -46,7 +46,7 @@ public class IterableDomain<T> implements IDomain<T>{
     }
 
     @Override
-    public Iterator<? extends T> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
+    public Iterator<? extends T> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
         return iterable.iterator();
     }
 

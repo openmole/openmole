@@ -33,6 +33,7 @@ import org.openmole.core.implementation.internal.Activator;
  */
 public class GroovyShellProxyAdapter implements IGroovyProxy {
 
+    final static public Prototype<IContext> globalContextVar = new Prototype<IContext>("global", IContext.class);
     final static public Prototype<IContext> contextVar = new Prototype<IContext>("context", IContext.class);
     final static public Prototype<IWorkspace> workspaceVar = new Prototype<IWorkspace>("workspace", IWorkspace.class);
 
@@ -42,9 +43,10 @@ public class GroovyShellProxyAdapter implements IGroovyProxy {
         this.groovyShellProxy = groovyShellProxy;
     }
 
-    public static Binding fromContextToBinding(IContext context) {
+    public static Binding fromContextToBinding(IContext global, IContext context) {
          Binding binding = new Binding();
 
+         binding.setVariable(globalContextVar.getName(), global);
          binding.setVariable(contextVar.getName(), context);
          binding.setVariable(workspaceVar.getName(), Activator.getWorkspace());
 
@@ -75,7 +77,7 @@ public class GroovyShellProxyAdapter implements IGroovyProxy {
     public Object execute(Binding binding) {
         return groovyShellProxy.execute(binding);
     }
-    public Object execute(IContext binding) {
-        return execute(fromContextToBinding(binding));
+    public Object execute(IContext global, IContext binding) {
+        return execute(fromContextToBinding(global, binding));
     }
 }

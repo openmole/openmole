@@ -27,5 +27,5 @@ import org.openmole.core.model.job.IContext;
  * @author reuillon
  */
 public interface IFiniteDomain<T> extends IDomain<T> {
-    public List<T> computeValues(IContext context) throws InternalProcessingError, UserBadDataError;
+    public List<T> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError;
 }

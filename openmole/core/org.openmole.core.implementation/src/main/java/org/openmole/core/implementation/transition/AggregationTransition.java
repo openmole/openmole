@@ -46,7 +46,7 @@ import static org.openmole.core.implementation.tools.ContextAggregator.aggregate
 import static org.openmole.core.implementation.tools.ContextAggregator.findDataIn1WhichAreAlsoIn2;
 import static org.openmole.core.implementation.tools.ToCloneFinder.getVariablesToClone;
 
-public class AggregationTransition extends SingleTransition implements IAggregationTransition {
+public class AggregationTransition extends Transition implements IAggregationTransition {
 
     public class AggregationTransitionAdapter implements IObjectChangedSynchronousListenerWithArgs<ISubMoleExecution> {
 
@@ -67,7 +67,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
     }
 
     @Override
-    public synchronized void performImpl(IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    public synchronized void performImpl(IContext global, IContext context, ITicket ticket, Set<String> toClone, IMoleExecution moleExecution, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
 
         IRegistryWithTicket<IAggregationTransition, Collection<IContext>> registry = moleExecution.getLocalCommunication().getAggregationTransitionRegistry();
 
@@ -90,7 +90,7 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         IRegistryWithTicket <IAggregationTransition, Collection<IContext>> registry =  moleExecution.getLocalCommunication().getAggregationTransitionRegistry();
 
         ITicket newTicket = job.getTicket().getParent();
-        IContext newContextEnd = new Context(job.getContext().getRoot());
+        IContext newContextEnd = new Context();
 
         Collection<IContext> resultContexts;
         resultContexts = registry.removeFromRegistry(this, newTicket);
@@ -100,12 +100,12 @@ public class AggregationTransition extends SingleTransition implements IAggregat
         Set<String> toClone = new TreeSet<String>();
 
         //Find the variable to clonne, it is function of the evaluation of condition on the transition
-        for(IContext c: resultContexts) {
-             toClone.addAll(getVariablesToClone(getStart(), c));
+        for(IContext context: resultContexts) {
+             toClone.addAll(getVariablesToClone(getStart(), job.getGlobalContext(), context));
         }
         aggregate(newContextEnd, dataToAggregate, toClone, true, resultContexts);
 
         //Variable have are clonned in other transitions if necessary
-        submitNextJobsIfReady(newContextEnd, newTicket, Collections.EMPTY_SET, moleExecution, subMole.getParent());
+        submitNextJobsIfReady(job.getGlobalContext(), newContextEnd, newTicket, Collections.EMPTY_SET, moleExecution, subMole.getParent());
     }
 }

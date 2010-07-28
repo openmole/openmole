@@ -42,7 +42,7 @@ public class OnVariableGroupingStrategy implements IMoleJobGroupingStrategy {
         List vals = new LinkedList();
 
         for(IPrototype prototype : prototypes) {
-            Object val = context.getLocalValue(prototype);
+            Object val = context.getValue(prototype);
 
             if(val != null) {
                 vals.add(val);

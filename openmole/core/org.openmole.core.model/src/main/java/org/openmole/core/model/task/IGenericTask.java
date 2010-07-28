@@ -47,7 +47,7 @@ public interface IGenericTask {
      * @throws UserBadDataError something went wrong for a reason that can be directly related to a user defined parameter
      * @throws InterruptedException the thread has been interupted
      */
-    void perform(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException;
+    void perform(IContext global, IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError, InterruptedException;
 
     /**
      *

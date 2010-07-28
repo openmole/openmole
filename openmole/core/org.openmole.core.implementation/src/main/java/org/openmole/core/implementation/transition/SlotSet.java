@@ -15,10 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution.batch;
+package org.openmole.core.implementation.transition;
 
-import org.openmole.core.model.execution.batch.IBatchJobDescription;
+import java.util.HashSet;
+import java.util.Set;
+import org.openmole.core.model.transition.ISlot;
 
-public abstract class BatchJobDescription implements IBatchJobDescription {
-		
+public class SlotSet {
+
+    Set<ISlot> slots = new HashSet<ISlot>();
+
+    public void addInputTransitionGroup(ISlot group) {
+        slots.add(group);
+    }
+
+    public int nbGroups() {
+        return slots.size();
+    }
+
+    public Set<ISlot> getGroups() {
+        return slots;
+    }
 }

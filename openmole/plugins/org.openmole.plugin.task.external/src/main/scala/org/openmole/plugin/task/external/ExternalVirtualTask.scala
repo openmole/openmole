@@ -17,73 +17,67 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import ch.ethz.ssh2._
 import org.openmole.plugin.tools.utils.SSHUtils._
 import java.io.File
-import java.io.PrintStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.plugin.resource.virtual.IVirtualMachine
-import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.plugin.task.external.internal.Activator._
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.commons.tools.service.Retry.retry
 
-abstract class ExternalVirtualTask(name: String) extends ExternalTask(name) {
+abstract class ExternalVirtualTask(name: String, relativeDir: String) extends ExternalTask(name) {
 
+  def this(name: String) {
+    this(name, "")
+  }
+  
   implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
 
-//  object Configuration {
-//    val VirtualMachineConnectionTimeOut = new ConfigurationLocation(classOf[ExternalVirtualTask].getSimpleName(), "VirtualMachineConnectionTimeOut")
-//    workspace.addToConfigurations(VirtualMachineConnectionTimeOut, "PT2M")
-//  }
-
-  def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
-    listInputFiles(context, progress).foreach( f => {
+  def prepareInputFiles(global: IContext, context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
+    listInputFiles(global, context, progress).foreach( f => {
         val to = vmDir + '/' + f.name
         copyTo(client, f.file, to)
       })
   }
 
 
-  def fetchOutputFiles(context: IContext, progress: IProgress, vmDir: String, destDir: File, client: SFTPv3Client) = {
-    setOutputFilesVariables(context,progress,destDir).foreach( f => {
+  def fetchOutputFiles(global: IContext, context: IContext, progress: IProgress, vmDir: String, destDir: File, client: SFTPv3Client) = {
+    setOutputFilesVariables(global, context,progress,destDir).foreach( f => {
         val from = vmDir + '/' + f.name
         copyFrom(client, from, f.file)
       })
   }
 
 
-  protected def execute(context: IContext, progress: IProgress, cmd: String, vm: IVirtualMachine, user: String, password: String) = {
+  protected def execute(global: IContext, context: IContext, progress: IProgress, cmd: String, vm: IVirtualMachine, user: String, password: String) = {
     val connection = getSSHConnection(vm, user, password, 0) //workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
     try {
       val sftp = new SFTPv3Client(connection)
 
       try {
-        val workDir = "/tmp/" + UUID.randomUUID + '/'
-        sftp.mkdir(workDir, 0x777)
+        val tmpDir = "/tmp/" + UUID.randomUUID + '/'
+        sftp.mkdir(tmpDir, 0x777)
 
-        prepareInputFiles(context, progress, workDir, sftp)
+        prepareInputFiles(global, context, progress, tmpDir, sftp)
         
+        val workDir = if(!relativeDir.isEmpty) tmpDir + relativeDir + '/' else tmpDir
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + " ; " + expandData(context, cmd))
+          session.execCommand("cd " + workDir + " ; " + expandData(global, context, CommonVariables(workDir), cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close
         }
 
-        fetchOutputFiles(context, progress, workDir, workspace.newTmpDir, sftp)
+        fetchOutputFiles(global, context, progress, workDir, workspace.newTmpDir, sftp)
         delete(sftp,workDir)
       } finally {
         sftp.close

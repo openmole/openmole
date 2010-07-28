@@ -20,36 +20,36 @@ package org.openmole.core.implementation.transition;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 
-public class TransitionSlot implements ITransitionSlot {
+public class Slot implements ISlot {
 
-    Set<ITransition> transitions = new HashSet<ITransition>();
+    Set<IGenericTransition> transitions = new HashSet<IGenericTransition>();
     IGenericTaskCapsule<?, ?> end;
 
-    public TransitionSlot(IGenericTaskCapsule<?, ?> end) {
+    public Slot(IGenericTaskCapsule<?, ?> end) {
         setEnd(end);
     }
 
     @Override
-    public void plugTransition(ITransition transition) {
+    public void plugTransition(IGenericTransition transition) {
         transitions.add(transition);
     }
 
     @Override
-    public void unplugTransition(ITransition transition) {
+    public void unplugTransition(IGenericTransition transition) {
         transitions.remove(transition);
     }
 
     @Override
-    public Iterable<ITransition> getTransitions() {
+    public Iterable<IGenericTransition> getTransitions() {
         return transitions;
     }
 
     @Override
-    public boolean isPlugged(ITransition transition) {
+    public boolean isPlugged(IGenericTransition transition) {
         return transitions.contains(transition);
     }
 

@@ -24,8 +24,10 @@ import java.util.List;
 import org.openmole.core.implementation.domain.Interval;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.job.IContext;
+
+import static org.openmole.core.implementation.tools.VariableExpansion.*;
+
 
 public class RangeBigDecimal extends UniformelyDiscretizedIntervalDomain<BigDecimal> {
 
@@ -42,10 +44,10 @@ public class RangeBigDecimal extends UniformelyDiscretizedIntervalDomain<BigDeci
     }
 
     @Override
-    public List<BigDecimal> computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
-        BigDecimal min = getInterval().getMin(context);
-        BigDecimal max = getInterval().getMax(context);
-        BigDecimal step = new BigDecimal(VariableExpansion.getInstance().expandData(context, getStep()));
+    public List<BigDecimal> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        BigDecimal min = getInterval().getMin(global, context);
+        BigDecimal max = getInterval().getMax(global, context);
+        BigDecimal step = new BigDecimal(expandData(global, context, getStep()));
 
         int size = max.subtract(min).abs().divide(step,RoundingMode.HALF_UP).intValue();
         BigDecimal cur = min;
@@ -63,13 +65,13 @@ public class RangeBigDecimal extends UniformelyDiscretizedIntervalDomain<BigDeci
 
  
     @Override
-    public BigDecimal getCenter(IContext context) throws InternalProcessingError, UserBadDataError {
-        BigDecimal min = getInterval().getMin(context);
-        return min.add((getInterval().getMax(context).subtract(min).divide(new BigDecimal(2.0))));
+    public BigDecimal getCenter(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        BigDecimal min = getInterval().getMin(global, context);
+        return min.add((getInterval().getMax(global, context).subtract(min).divide(new BigDecimal(2.0))));
     }
 
     @Override
-    public BigDecimal getRange(IContext context) throws InternalProcessingError, UserBadDataError {
-        return getInterval().getMax(context).subtract(getInterval().getMin(context));
+    public BigDecimal getRange(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        return getInterval().getMax(global, context).subtract(getInterval().getMin(global, context));
     }
 }

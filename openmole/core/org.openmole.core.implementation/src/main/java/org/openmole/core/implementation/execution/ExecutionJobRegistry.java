@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.execution.IJobStatisticCategory;
 
@@ -104,13 +106,16 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         jobs.remove(job);
 
         IJobStatisticCategory category = new JobStatisticCategory(job);
-
         Set<IJob> jobs = jobCategories.get(category);
         jobs.remove(job);
 
         if(jobs.isEmpty()) {
+             Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job category removed from registry");
+
             jobCategories.remove(category);
         }
+        
+        Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job removed from registry {0}", job.toString());
     }
 
     @Override

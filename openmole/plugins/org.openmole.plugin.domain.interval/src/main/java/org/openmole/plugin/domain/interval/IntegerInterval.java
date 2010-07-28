@@ -22,13 +22,13 @@ public class IntegerInterval extends Interval<Integer> {
     }
 
     @Override
-    public Integer getMax(IContext context) throws InternalProcessingError, UserBadDataError {
-         return new Integer(expandData(context, getMax()));
+    public Integer getMax(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+         return new Integer(expandData(global, context, getMax()));
     }
 
     @Override
-    public Integer getMin(IContext context) throws InternalProcessingError, UserBadDataError {
-       return new Integer(expandData(context, getMin()));
+    public Integer getMin(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+       return new Integer(expandData(global, context, getMin()));
     }
 
 }

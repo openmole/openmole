@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.plugin.transitionfactory;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -22,7 +21,7 @@ import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.transition.AggregationTransition;
 import org.openmole.core.implementation.transition.ExplorationTransition;
-import org.openmole.core.implementation.transition.SingleTransition;
+import org.openmole.core.implementation.transition.Transition;
 import org.openmole.core.model.capsule.ITaskCapsule;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
@@ -44,6 +43,7 @@ public class TransitionFactory {
     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> build(ITask singleTask) {
         return build(new TaskCapsule(singleTask));
     }
+
     /**
      * Creates a single transition between taskCapsules, making thus a chain. For
      * instance, if 3 capsules C1, C2, C3 are given, 2 single transitions are
@@ -54,7 +54,7 @@ public class TransitionFactory {
     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildChain(ITaskCapsule... capsules) {
         int startIndex = 0;
         for (int i = 1; i < capsules.length; i++) {
-            new SingleTransition(capsules[startIndex], capsules[i]);
+            new Transition(capsules[startIndex], capsules[i]);
             startIndex++;
         }
         return new PuzzleFirstAndLast(capsules[0], capsules[capsules.length - 1]);
@@ -69,7 +69,7 @@ public class TransitionFactory {
     }
 
     private static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildChain(ITaskCapsule capsule, IGenericTaskCapsule genCapsule) {
-        new SingleTransition(capsule, genCapsule);
+        new Transition(capsule, genCapsule);
         return new PuzzleFirstAndLast(capsule, genCapsule);
     }
 
@@ -77,7 +77,7 @@ public class TransitionFactory {
         int length = workflowPuzzles.length;
         int startIndex = 0;
         for (int i = 1; i < length; i++) {
-            new SingleTransition(workflowPuzzles[startIndex].getLastCapsule(), workflowPuzzles[i].getFirstCapsule());
+            new Transition(workflowPuzzles[startIndex].getLastCapsule(), workflowPuzzles[i].getFirstCapsule());
             startIndex++;
         }
         return new PuzzleFirstAndLast(workflowPuzzles[0].getFirstCapsule(), workflowPuzzles[length - 1].getLastCapsule());
@@ -85,7 +85,7 @@ public class TransitionFactory {
 
     public static PuzzleFirst buildChain(ITask task, IPuzzleFirst firstPuzzle) {
         TaskCapsule firstCapsule = new TaskCapsule(task);
-        new SingleTransition(firstCapsule, firstPuzzle.getFirstCapsule());
+        new Transition(firstCapsule, firstPuzzle.getFirstCapsule());
         return new PuzzleFirst(firstCapsule);
     }
 
@@ -114,7 +114,7 @@ public class TransitionFactory {
         } else {
             ITaskCapsule startCapsule = capsules[0];
             for (int i = 1; i < capsules.length; i++) {
-                new SingleTransition(startCapsule, capsules[i]);
+                new Transition(startCapsule, capsules[i]);
             }
         }
         return new PuzzleFirst(capsules[0]);
@@ -143,8 +143,7 @@ public class TransitionFactory {
         } else {
             ITaskCapsule finalCapsule = capsules[capsules.length - 1];
             for (int i = 0; i < capsules.length - 1; i++) {
-                System.out.println("SINGLE TRANSITION: " + capsules[i].getClass() + " and" + finalCapsule.getClass());
-                new SingleTransition(capsules[i], finalCapsule);
+                new Transition(capsules[i], finalCapsule);
             }
             return new PuzzleLast(finalCapsule);
         }
@@ -175,18 +174,18 @@ public class TransitionFactory {
         return new PuzzleFirstAndLast(exploreCapsule, aggregationCapsule);
     }
 
-     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle, ITask aggregationTask) {
-         return buildExploration(new ExplorationTaskCapsule(exploreTask), puzzle, new TaskCapsule(aggregationTask));
-     }
-
-     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTaskCapsule exploreCapsule, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
-        new ExplorationTransition(exploreCapsule, puzzle.getFirstCapsule());
-        return new PuzzleFirstAndLast(exploreCapsule,puzzle.getLastCapsule());
+    public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle, ITask aggregationTask) {
+        return buildExploration(new ExplorationTaskCapsule(exploreTask), puzzle, new TaskCapsule(aggregationTask));
     }
 
-     public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
+    public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTaskCapsule exploreCapsule, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
+        new ExplorationTransition(exploreCapsule, puzzle.getFirstCapsule());
+        return new PuzzleFirstAndLast(exploreCapsule, puzzle.getLastCapsule());
+    }
+
+    public static IPuzzleFirstAndLast<? extends ITaskCapsule, ? extends ITaskCapsule> buildExploration(IExplorationTask exploreTask, IPuzzleFirstAndLast<? extends IGenericTaskCapsule, ? extends ITaskCapsule> puzzle) {
         ExplorationTaskCapsule etc = new ExplorationTaskCapsule(exploreTask);
         new ExplorationTransition(etc, puzzle.getFirstCapsule());
-        return new PuzzleFirstAndLast(etc,puzzle.getLastCapsule());
+        return new PuzzleFirstAndLast(etc, puzzle.getLastCapsule());
     }
 }

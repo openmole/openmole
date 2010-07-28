@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.apache.commons.collections15.map.ReferenceMap;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.service.LockRepository;
 
 public class AssociativeCache<K, T> {
@@ -72,7 +73,7 @@ public class AssociativeCache<K, T> {
         return cache.get(key);
     }
 
-    public T getCache(final Object cacheAssociation, final K key, ICachable<? extends T> cachable) throws InternalProcessingError, InterruptedException {
+    public T getCache(final Object cacheAssociation, final K key, ICachable<? extends T> cachable) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
         final Map<K, T> cache = getHashCache(cacheAssociation);
 

@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.jsaga;
 
 import org.joda.time.format.ISOPeriodFormat;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.misc.workspace.ConfigurationLocation;

@@ -16,11 +16,13 @@
  */
 package org.openmole.misc.fileservice.internal;
 
+import gnu.crypto.sasl.UserAlreadyExistsException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.fileservice.IFileService;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
@@ -69,17 +71,17 @@ public class FileService implements IFileService {
     AssociativeCache<String, CachedArchiveForDir> archiveCache = new AssociativeCache<String, CachedArchiveForDir>(AssociativeCache.SOFT, AssociativeCache.SOFT);
 
     @Override
-    public IHash getHashForFile(File file) throws InternalProcessingError, InterruptedException {
+    public IHash getHashForFile(File file) throws InternalProcessingError, UserBadDataError, InterruptedException {
         return getHashForFile(file, file);
     }
 
     @Override
-    public IFileCache getArchiveForDir(File file) throws InternalProcessingError, InterruptedException {
+    public IFileCache getArchiveForDir(File file) throws InternalProcessingError, InterruptedException, UserBadDataError {
         return getArchiveForDir(file, file);
     }
 
     @Override
-    public IHash getHashForFile(final File file, final Object cacheLength) throws InternalProcessingError, InterruptedException {
+    public IHash getHashForFile(final File file, final Object cacheLength) throws InternalProcessingError, UserBadDataError, InterruptedException {
         invalidateHashCacheIfModified(file, cacheLength);
         return hashCach.getCache(cacheLength, file.getAbsolutePath(), new ICachable<HashWithLastModified>() {
 
@@ -108,14 +110,14 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public IFileCache getArchiveForDir(final File file, Object cacheLenght) throws InternalProcessingError, InterruptedException {
+    public IFileCache getArchiveForDir(final File file, Object cacheLenght) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
         invalidateDirCacheIfModified(file, cacheLenght);
 
         return archiveCache.getCache(cacheLenght, file.getAbsolutePath(), new ICachable<CachedArchiveForDir>() {
 
             @Override
-            public CachedArchiveForDir compute() throws InternalProcessingError, InterruptedException {
+            public CachedArchiveForDir compute() throws InternalProcessingError, InterruptedException, UserBadDataError {
                 try {
                //     Logger.getLogger(FileService.class.getName()).info("Compute cache");
 

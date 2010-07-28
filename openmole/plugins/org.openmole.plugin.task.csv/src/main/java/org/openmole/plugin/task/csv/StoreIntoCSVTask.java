@@ -122,13 +122,13 @@ public class StoreIntoCSVTask extends Task {
     }
 
     @Override
-    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
         try {
             List<Iterator<Object>> valueList = new ArrayList<Iterator<Object>>();
             int listSize = 0;
 
-            File file = new File(VariableExpansion.expandData(context, fileName));
+            File file = new File(VariableExpansion.expandData(global, context, fileName));
             CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quotechar);
 
             try {
@@ -141,7 +141,7 @@ public class StoreIntoCSVTask extends Task {
                     Tuple2<IPrototype<? extends Collection>, String> column = columnIt.next();
                     header[ind] = column._2();
 
-                    Collection li = context.getLocalValue(column._1());
+                    Collection li = context.getValue(column._1());
 
                     if (listSize < li.size()) {
                         listSize = li.size();

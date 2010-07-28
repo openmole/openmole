@@ -37,7 +37,7 @@ public interface IPlan {
          * @throws UserBadDataError         if something goes wrong because it is missconfigured
          * @throws InternalProcessingError  if the thread is interrupted
 	 */
-	public IExploredPlan build(IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException;
+	public IExploredPlan build(IContext global, IContext context) throws InternalProcessingError, UserBadDataError, InterruptedException;
 
 
 }

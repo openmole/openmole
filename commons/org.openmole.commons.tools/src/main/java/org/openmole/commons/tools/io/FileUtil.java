@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -34,12 +33,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.openmole.commons.tools.pattern.BufferFactory;
-import scala.Tuple1;
 import scala.Tuple2;
 
 public class FileUtil {
 
+    public final static int DEFAULT_BUFF_SIZE = 8 * 1024;
     final static ExecutorService pool = Executors.newCachedThreadPool();
 
     public static long getLastModification(File file) {
@@ -97,7 +95,7 @@ public class FileUtil {
             for (File sub : f.listFiles()) {
                 if (sub.isFile()) {
                     return false;
-                } else if(sub.isDirectory()) {
+                } else if (sub.isDirectory()) {
                     toProceed.offer(sub);
                 }
             }
@@ -162,8 +160,8 @@ public class FileUtil {
     }
 
     public static void copy(InputStream from, OutputStream to) throws IOException {
-        byte[] buffer;
-        try {
+        byte[] buffer = new byte[DEFAULT_BUFF_SIZE];
+        /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {
             throw new IOException(e);
@@ -173,7 +171,7 @@ public class FileUtil {
             throw new IOException(e);
         }
 
-        try {
+        try {*/
             while (true) {
                 int amountRead = from.read(buffer);
                 if (amountRead == -1) {
@@ -181,24 +179,23 @@ public class FileUtil {
                 }
                 to.write(buffer, 0, amountRead);
             }
-        } finally {
+       /* } finally {
             try {
                 BufferFactory.GetInstance().returnObject(buffer);
             } catch (Exception e) {
                 throw new IOException(e);
             }
-        }
+        }*/
     }
 
     public static void copy(final InputStream from, final OutputStream to, int maxRead, long timeout) throws IOException, InterruptedException {
 
-        if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
+        /*if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
             throw new IOException("Max buffer size is " + BufferFactory.MAX_BUFF_SIZE + " unable to evaluate timeout on " + maxRead + " bytes.");
-        }
+        }*/
 
-
-        byte[] buffer;
-        try {
+        byte[] buffer = new byte[maxRead];
+        /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {
             throw new IOException(e);
@@ -208,53 +205,49 @@ public class FileUtil {
             throw new IOException(e);
         }
 
-        try {
-            ReaderRunnable reader = new ReaderRunnable(from, buffer, maxRead);
-            WritterRunnable writer = new WritterRunnable(to, buffer);
+        try {*/
+            Integer read;
 
             while (true) {
-                Future<?> f = pool.submit(reader);
+                Future<Integer> futureRead = pool.submit(new ReaderRunnable(from, buffer, maxRead));
 
                 try {
-                    f.get(timeout, TimeUnit.MILLISECONDS);
-                    if (reader.getException() != null) {
-                        throw reader.getException();
-                    }
+                    read = futureRead.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (ExecutionException e1) {
                     throw new IOException(e1);
                 } catch (TimeoutException e1) {
-                    f.cancel(true);
+                    futureRead.cancel(true);
                     throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e1);
                 }
 
-
-                if (reader.getAmountRead() == -1) {
+                if (read == -1) {
                     break;
                 }
 
-                writer.setAmountRead(reader.getAmountRead());
-                f = pool.submit(writer);
+                Future<Void> futureWrite = pool.submit(new WritterRunnable(to, buffer, read));
 
                 try {
-                    f.get(timeout, TimeUnit.MILLISECONDS);
-                    if (writer.getException() != null) {
-                        throw writer.getException();
-                    }
+                    futureWrite.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (ExecutionException e1) {
                     throw new IOException(e1);
                 } catch (TimeoutException e1) {
-                    f.cancel(true);
-                    throw new IOException("Timeout on writting " + reader.getAmountRead() + " bytes, write was longer than " + timeout + " ms.", e1);
+                    futureWrite.cancel(true);
+                    throw new IOException("Timeout on writting " + read + " bytes, write was longer than " + timeout + " ms.", e1);
                 }
-
             }
-        } finally {
+        /*} finally {
             try {
                 BufferFactory.GetInstance().returnObject(buffer);
             } catch (Exception e) {
                 throw new IOException(e);
             }
-        }
+        }*/
+    }
 
+    public static void move(File from, File to) throws IOException {
+        if (!from.renameTo(to)) {
+            copy(from, to);
+            from.delete();
+        }
     }
 }

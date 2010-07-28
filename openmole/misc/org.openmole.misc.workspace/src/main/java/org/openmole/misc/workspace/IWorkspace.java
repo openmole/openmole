@@ -19,12 +19,12 @@ public interface IWorkspace {
 	void setLocation(File location);
         File getLocation();
 
-	File newTmpDir(String prefix) throws IOException, InternalProcessingError;
-        File newTmpDir() throws IOException, InternalProcessingError;
-	File newTmpFile(String prefix, String suffix) throws IOException, InternalProcessingError;
-	File newFile(String prefix, String suffix) throws IOException, InternalProcessingError;
-        File newTmpFile() throws IOException, InternalProcessingError;
-        File newFile() throws IOException, InternalProcessingError;
+	File newTmpDir(String prefix) throws InternalProcessingError;
+        File newTmpDir() throws InternalProcessingError;
+	File newTmpFile(String prefix, String suffix) throws InternalProcessingError;
+	File newFile(String prefix, String suffix) throws InternalProcessingError;
+        File newTmpFile() throws InternalProcessingError;
+        File newFile() throws InternalProcessingError;
 
         File getFile(String name) throws IOException;
 
@@ -45,7 +45,7 @@ public interface IWorkspace {
         void removePreference(ConfigurationLocation configurationElement) throws InternalProcessingError;
 
         void providePassword(String password) throws InternalProcessingError, UserBadDataError;
-        void setPasswordProvider(IPasswordProvider passwordProvider);
+
         void resetPreferences() throws InternalProcessingError;
 
 	void addToConfigurations(ConfigurationLocation location, ConfigurationElement element);

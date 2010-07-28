@@ -37,7 +37,7 @@ public class UniformIntegerDistribution implements IDomain<Integer>{
 
 
     @Override
-    public Iterator<? extends Integer> iterator(IContext context) throws UserBadDataError, InternalProcessingError {
+    public Iterator<? extends Integer> iterator(IContext global, IContext context) throws UserBadDataError, InternalProcessingError {
         return new Iterator<Integer>() {
 
             @Override

@@ -16,10 +16,6 @@
  */
 package org.openmole.misc.updater;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-
 public interface IUpdatable {
-
-    void update() throws InternalProcessingError, UserBadDataError, InterruptedException;
+    boolean update() throws InterruptedException;
 }

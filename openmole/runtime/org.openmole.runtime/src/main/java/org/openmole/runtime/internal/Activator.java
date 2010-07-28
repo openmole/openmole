@@ -8,7 +8,6 @@ import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.jsagasession.IJSagaSessionService;
 import org.openmole.core.serializer.ISerializer;
-import org.openmole.misc.backgroundexecutor.IBackgroundExecutor;
 import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.workspace.IWorkspace;
 
@@ -18,7 +17,6 @@ public class Activator implements BundleActivator {
     private static ISerializer messageSerializer;
     private static IWorkspace workspace;
     private static IJSagaSessionService jSagaSessionService;
-    private static IBackgroundExecutor backgroundExecutor;
     private static IEventDispatcher eventDispatcher;
     private static IPluginManager pluginManager;
     private static IHashService hashService;
@@ -65,20 +63,6 @@ public class Activator implements BundleActivator {
                 jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
             }
             return jSagaSessionService;
-        }
-    }
-
-    public static IBackgroundExecutor getBackgroundExecutor() {
-        if (backgroundExecutor != null) {
-            return backgroundExecutor;
-        }
-
-        synchronized (Activator.class) {
-            if (backgroundExecutor == null) {
-                ServiceReference ref = getContext().getServiceReference(IBackgroundExecutor.class.getName());
-                backgroundExecutor = (IBackgroundExecutor) getContext().getService(ref);
-            }
-            return backgroundExecutor;
         }
     }
 

@@ -16,7 +16,6 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,79 +24,44 @@ import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;
 import org.ogf.saga.error.DoesNotExistException;
 import org.ogf.saga.error.IncorrectStateException;
-import org.ogf.saga.error.IncorrectURLException;
 import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.PermissionDeniedException;
 import org.ogf.saga.error.TimeoutException;
 import org.ogf.saga.job.Job;
-import org.ogf.saga.job.JobFactory;
-import org.ogf.saga.job.JobService;
 import org.ogf.saga.monitoring.Metric;
 import org.ogf.saga.task.State;
-import org.ogf.saga.url.URL;
-import org.ogf.saga.url.URLFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.batch.IBatchJobService;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
 import org.openmole.core.implementation.execution.batch.BatchJob;
-import org.openmole.plugin.environment.jsaga.internal.Activator;
 
 public class JSAGAJob extends BatchJob {
 
     static final Pattern pattern = Pattern.compile("\\[(.*)\\]-\\[(.*)\\]");
 
-    String jobId;
+    final String jobId;
+    final JSAGAJobService jobService;
 
-    transient Job job;
-    transient File script;
- 
-    public JSAGAJob(Job job, IBatchJobService<?> jobService, File script) throws InternalProcessingError {
+    public JSAGAJob(String jobId, JSAGAJobService jobService) throws InternalProcessingError {
         super(jobService);
-        this.job = job;
-        this.script = script;
-    }
-
-    public synchronized Job getJob() throws InternalProcessingError {
-        if (job != null) {
-            return job;
-        }
-
-        URL serviceURL;
-        String nativeJobId;
-
-        if (jobId == null) {
-            throw new InternalProcessingError("Trying to get job with null jobId.");
-        }
-
-        Matcher matcher = pattern.matcher(jobId);
+        this.jobService = jobService;
+         
+         Matcher matcher = pattern.matcher(jobId);
 
         if (matcher.find()) {
-            try {
-                serviceURL = URLFactory.createURL(matcher.group(1));
-            } catch (BadParameterException e) {
-                throw new InternalProcessingError(e);
-            } catch (NoSuccessException e) {
-                throw new InternalProcessingError(e);
-            } catch (NotImplementedException e) {
-                throw new InternalProcessingError(e);
-            }
-            nativeJobId = matcher.group(2);
+            this.jobId = matcher.group(2);
         } else {
             throw new InternalProcessingError("Job ID does not match regular expression: " + pattern.pattern());
         }
+    }
 
-        JobService service;
+    public synchronized Job getJob() throws InternalProcessingError {
         try {
-            service = JobFactory.createJobService(Activator.getJSagaSessionService().getSession(), serviceURL);
-            job = service.getJob(nativeJobId);
-            return job;
+            return jobService.getJobServiceCache().getJob(jobId);
         } catch (NotImplementedException e) {
-            throw new InternalProcessingError(e);
-        } catch (IncorrectURLException e) {
             throw new InternalProcessingError(e);
         } catch (AuthenticationFailedException e) {
             throw new InternalProcessingError(e);
@@ -157,15 +121,11 @@ public class JSAGAJob extends BatchJob {
             default:
                 return ExecutionState.FAILED;
         }
-
     }
 
     @Override
     public void deleteJob() throws InternalProcessingError {
         try {
-            if (script != null && script.exists()) {
-                script.delete();
-            }
             if (getState() == ExecutionState.SUBMITED || getState() == ExecutionState.RUNNING) {
                 getJob().cancel();
             }
@@ -181,38 +141,7 @@ public class JSAGAJob extends BatchJob {
 
     }
 
-    @Override
-    public void submitJob() throws InternalProcessingError {
-        try {
-            if (job == null) {
-                throw new InternalProcessingError("Job has been serialized before submission (regenerate).");
-            }
-
-            job.run();
-
-            script.delete();
-            script = null;
-
-            this.jobId = job.getAttribute(Job.JOBID);
-        } catch (NotImplementedException e) {
-            throw new InternalProcessingError(e);
-        } catch (IncorrectStateException e) {
-            throw new InternalProcessingError(e);
-        } catch (TimeoutException e) {
-            throw new InternalProcessingError(e);
-        } catch (NoSuccessException e) {
-            throw new InternalProcessingError(e);
-        } catch (AuthenticationFailedException e) {
-            throw new InternalProcessingError(e);
-        } catch (AuthorizationFailedException e) {
-            throw new InternalProcessingError(e);
-        } catch (PermissionDeniedException e) {
-            throw new InternalProcessingError(e);
-        } catch (DoesNotExistException e) {
-            throw new InternalProcessingError(e);
-        }
-    }
-
+  
     @Override
     public ExecutionState updateState() throws InternalProcessingError {
         try {

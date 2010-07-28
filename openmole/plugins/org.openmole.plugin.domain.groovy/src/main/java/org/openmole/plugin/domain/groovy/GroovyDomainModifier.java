@@ -70,17 +70,17 @@ public class GroovyDomainModifier<T> implements IDomain<T> {
     }
 
     @Override
-    public Iterator<? extends T> iterator(final IContext context) throws UserBadDataError, InternalProcessingError {
-        final Iterator<? extends T> testIt = domain.iterator(context);
+    public Iterator<? extends T> iterator(final IContext global, final IContext context) throws UserBadDataError, InternalProcessingError {
+        final Iterator<? extends T> testIt = domain.iterator(global, context);
         if(testIt.hasNext()) {
             List<IVariable> vars = new ArrayList<IVariable>(1);
             vars.add(new Variable<T>(prototype, testIt.next()));
-            T testRes = (T) contextToGroovyCode.execute(context, vars);
+            T testRes = (T) contextToGroovyCode.execute(global, context, vars);
         }
 
         return new Iterator<T>() {
 
-            final Iterator<? extends T> iterator = domain.iterator(context);
+            final Iterator<? extends T> iterator = domain.iterator(global, context);
 
             @Override
             public boolean hasNext() {
@@ -93,7 +93,7 @@ public class GroovyDomainModifier<T> implements IDomain<T> {
                     T next = iterator.next();
                     List<IVariable> vars = new ArrayList<IVariable>(1);
                     vars.add(new Variable<T>(prototype, next));
-                    return (T) contextToGroovyCode.execute(context, vars);
+                    return (T) contextToGroovyCode.execute(global, context, vars);
                 } catch (UserBadDataError ex) {
                     throw new NoSuchElementException(ex.getLocalizedMessage());
                 } catch (InternalProcessingError ex) {

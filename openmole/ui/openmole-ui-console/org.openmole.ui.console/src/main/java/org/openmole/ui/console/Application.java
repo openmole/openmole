@@ -12,7 +12,6 @@ import org.apache.commons.cli.ParseException;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.ui.console.internal.Activator;
 import org.openmole.ui.console.internal.Console;
 import org.openmole.ui.console.internal.command.Init;
@@ -49,7 +48,6 @@ public class Application implements IApplication {
         }
 
         // Init Console
-        Activator.getWorkspace().setPasswordProvider(new ForbidenPasswordProvider());
         Console console = Activator.getConsole();
         console.setVariable(pluginManager, Activator.getPluginManager());
         console.setVariable(structureGenerator, Activator.getStructureGenerator());

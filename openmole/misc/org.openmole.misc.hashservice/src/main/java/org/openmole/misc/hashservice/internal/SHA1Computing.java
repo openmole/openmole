@@ -36,15 +36,16 @@ import java.util.logging.Logger;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.SoftReferenceObjectPool;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.hashservice.SHA1Hash;
 import org.openmole.commons.tools.io.ReaderRunnable;
-import org.openmole.commons.tools.pattern.BufferFactory;
+
 
 public class SHA1Computing implements IHashService {
 
-    private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
+  /*  private ObjectPool sha1Pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
         @Override
         public Object makeObject() throws Exception {
@@ -56,7 +57,7 @@ public class SHA1Computing implements IHashService {
             ((Sha160) obj).reset();
             super.passivateObject(obj);
         }
-    });
+    });*/
 
     @Override
     public SHA1Hash computeHash(File file) throws IOException {
@@ -73,10 +74,13 @@ public class SHA1Computing implements IHashService {
 
     @Override
     public SHA1Hash computeHash(InputStream is) throws IOException {
+        
+        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
+        final IMessageDigest md = new Sha160();
 
-        IMessageDigest md;
+       // IMessageDigest md;
 
-        byte[] buffer;
+       /* byte[] buffer;
         try {
             buffer = (byte[]) BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {
@@ -98,7 +102,7 @@ public class SHA1Computing implements IHashService {
                 throw new IOException(e);
             }
 
-            try {
+            try {*/
                 while (true) {
                     int amount = is.read(buffer);
                     if (amount == -1) {
@@ -108,7 +112,7 @@ public class SHA1Computing implements IHashService {
                 }
                 return new SHA1Hash(md.digest());
 
-            } finally {
+        /*    } finally {
                 try {
                     sha1Pool.returnObject(md);
                 } catch (Exception e) {
@@ -122,23 +126,26 @@ public class SHA1Computing implements IHashService {
             } catch (Exception e) {
                 Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to return object to the pool: memomry leak.", e);
             }
-        }
+        }*/
 
     }
 
     @Override
     public SHA1Hash computeHash(InputStream is, int maxRead, long timeout) throws IOException {
-        if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
+       /* if (maxRead > BufferFactory.MAX_BUFF_SIZE) {
             throw new IOException("Max buffer size is " + BufferFactory.MAX_BUFF_SIZE + " unable to evaluate timeout on " + maxRead + " bytes.");
-        }
+        }*/
 
-        IMessageDigest md;
+        final byte[] buffer = new byte[maxRead];
+        final IMessageDigest md = new Sha160();
+
         ExecutorService thread = Activator.getExecutorService().getExecutorService(ExecutorType.OWN);
-        try {
-            md = new Sha160();
 
-            byte[] buffer;
-            try {
+   //     try {
+               //md = new Sha160();
+
+           
+           /* try {
                 buffer = (byte[]) BufferFactory.GetInstance().borrowObject();
             } catch (NoSuchElementException e) {
                 throw new IOException(e);
@@ -160,18 +167,15 @@ public class SHA1Computing implements IHashService {
                 } catch (Exception e) {
                     throw new IOException(e);
                 }
-                try {
-
+                try */
+                    int read;
                     ReaderRunnable reader = new ReaderRunnable(is, buffer, maxRead);
 
                     while (true) {
-                        Future<?> f = thread.submit(reader);
+                        Future<Integer> f = thread.submit(reader);
 
                         try {
-                            f.get(timeout, TimeUnit.MILLISECONDS);
-                            if (reader.getException() != null) {
-                                throw reader.getException();
-                            }
+                            read = f.get(timeout, TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e1) {
                             throw new IOException(e1);
                         } catch (ExecutionException e1) {
@@ -181,15 +185,16 @@ public class SHA1Computing implements IHashService {
                             throw new IOException("Timout on reading, read was longer than " + timeout, e1);
                         }
 
-                        if (reader.getAmountRead() == -1) {
+                        if (read == -1) {
                             break;
                         }
 
 
-                        md.update(buffer, 0, reader.getAmountRead());
+                        md.update(buffer, 0, read);
 
                     }
-                } finally {
+                    
+                /*} finally {
                     try {
                         sha1Pool.returnObject(md);
                     } catch (Exception e) {
@@ -202,11 +207,10 @@ public class SHA1Computing implements IHashService {
                 } catch (Exception e) {
                     Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Unable to return object to the pool: memomry leak.", e);
                 }
-            }
-        } finally {
+            }*/
+     /*   } finally {
             thread.shutdownNow();
-
-        }
+        }*/
 
         return new SHA1Hash(md.digest());
     }

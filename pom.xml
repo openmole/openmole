@@ -85,11 +85,6 @@
                 <version>${lib.com.ice.tar.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fusesource.jansi</groupId>
-                <artifactId>jansi</artifactId>
-                <version>1.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.nuiton</groupId>
                 <artifactId>nuiton-j2r</artifactId>
                 <version>${lib.org.nuiton.j2r.version}</version>
@@ -108,11 +103,6 @@
                 <groupId>org.nuiton.thirdparty</groupId>
                 <artifactId>Rserve</artifactId>
                 <version>0.6-0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ogf.saga</groupId>
-                <artifactId>saga-api</artifactId>
-                <version>${lib.org.ogf.saga.version}</version>
             </dependency>
 
             <!-- FIXME transitive dep not imported for commons-jxpath -->
@@ -241,7 +231,7 @@
         <lib.fr.in2p3.jsaga.version>0.9.9-SNAPSHOT</lib.fr.in2p3.jsaga.version>
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
-        <lib.org.codehaus.groovy.version>1.7.2</lib.org.codehaus.groovy.version>
+        <lib.org.codehaus.groovy.version>1.7.3</lib.org.codehaus.groovy.version>
         <lib.org.ogf.saga.version>1.0</lib.org.ogf.saga.version>
         <lib.uk.com.robust-it.cloning.version>1.7.1</lib.uk.com.robust-it.cloning.version>
         <lib.org.nuiton.j2r.version>1.0.0</lib.org.nuiton.j2r.version>
@@ -270,6 +260,7 @@
 	<lib.org.processing.version>1.1</lib.org.processing.version>
 	<lib.com.mrfeinberg.peasycam.version>0.8.3</lib.com.mrfeinberg.peasycam.version>
 	<lib.org.junit.version>4.8.1</lib.org.junit.version>
+	<lib.org.fusesource.jansi.version>1.2.1</lib.org.fusesource.jansi.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
@@ -593,6 +584,13 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository>
+        <repository>
+            <id>grid.in2p3.fr</id>
+            <name>IN2P3 maven repository</name>
+            <url>http://grid.in2p3.fr/maven2/</url>
+        </repository>
+
+
         <!-- SimExplorer repository - can serve as proxy -->
         <repository>
             <id>maven.simexplorer.org</id>

@@ -38,9 +38,8 @@ public interface IMoleExecution {
     void waitUntilEnded() throws InterruptedException;
     boolean isFinished();
 
-    void submit(IGenericTaskCapsule<?, ?> capsule, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
+    void submit(IGenericTaskCapsule<?, ?> capsule, IContext global, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError;
 
-  //  int getLevel();
     IMole getMole();
 
     ITicket createRootTicket();

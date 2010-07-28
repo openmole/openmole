@@ -45,14 +45,8 @@ public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob>
     public void objectChanged(IMoleJob job) {
         switch (job.getState()) {
             case COMPLETED:
-          /*      Iterable<File> files = FileMigrator.extractFilesFromVariables(job.getContext());
-
-                for (File f : files) {
-                    outFiles.add(f);
-                }*/
             case FAILED:
                 IContext res = job.getContext();
-                res.chRoot();
                 results.put(job.getId(), res);
         }
     }

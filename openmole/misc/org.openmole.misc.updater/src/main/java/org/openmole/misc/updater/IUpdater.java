@@ -20,11 +20,11 @@ import org.openmole.misc.executorservice.ExecutorType;
 
 public interface IUpdater {
 
-    IUpdatableFuture registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type);
+    void registerForUpdate(IUpdatableWithVariableDelay updatable, ExecutorType type);
 
-    IUpdatableFuture delay(IUpdatableWithVariableDelay updatable, ExecutorType type);
+    void delay(IUpdatableWithVariableDelay updatable, ExecutorType type);
 
-    IUpdatableFuture registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval);
+    void registerForUpdate(IUpdatable updatable, ExecutorType type, long updateInterval);
 
-    IUpdatableFuture delay(IUpdatable updatable, ExecutorType type, long updateInterval);
+    void delay(IUpdatable updatable, ExecutorType type, long updateInterval);
 }

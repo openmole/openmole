@@ -42,11 +42,11 @@ class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Tas
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[List[File]],IPrototype[List[String]],String)]()
 
 
-  override def process(context: IContext, progress: IProgress)  {
+  override def process(global: IContext, context: IContext, progress: IProgress)  {
     try{
       toCopy foreach( p => {
-          val from = context.getLocalValue(p._1)
-          val to = new File(expandData(context, p._2))
+          val from = context.getValue(p._1)
+          val to = new File(expandData(global, context, p._2))
           copy(from, to)
 
           if(remove) from.delete()
@@ -54,23 +54,23 @@ class FilePrototypeToFileTask(name: String, remove: Boolean = false) extends Tas
         })
 
       toCopyWithNameInVariable foreach( p => {
-          val from = context.getLocalValue(p._1)
+          val from = context.getValue(p._1)
 
-          val name = context.getLocalValue(p._2)
-          val to = new File(expandData(context, p._3), name)
+          val name = context.getValue(p._2)
+          val to = new File(expandData(global, context, p._3), name)
           copy(from, to)
 
           if(remove) from.delete()
         })
 
       listToCopyWithNameInVariable foreach ( cpList => {
-          val files = context.getLocalValue(cpList._1)
-          val names = context.getLocalValue(cpList._2)
+          val files = context.getValue(cpList._1)
+          val names = context.getValue(cpList._2)
           val urlDir = cpList._3;
 
           if(files != null && names != null) {
 
-            val toDir = new File(expandData(context, urlDir))
+            val toDir = new File(expandData(global, context, urlDir))
 
             val itFile = files.iterator()
             val itName = names.iterator()

@@ -22,7 +22,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.transition.ITransition;
+import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.data.IDataChannel;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.data.IData;
@@ -36,19 +36,19 @@ import org.openmole.commons.exception.UserBadDataError;
 public class ToCloneFinder {
 
     //TODO Improvement condition are evaluated several times
-    public static Set<String> getVariablesToClone(IGenericTaskCapsule<?, ?> caps, IContext context) throws InternalProcessingError, UserBadDataError {
+    public static Set<String> getVariablesToClone(IGenericTaskCapsule<?, ?> caps, IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
 
         class DataInfo {
             AtomicInteger nbUsage = new AtomicInteger();
             AtomicInteger nbMutable = new AtomicInteger();
         }
 
-        Iterable<? extends ITransition> outputTransitions = caps.getOutputTransitions();
+        Iterable<? extends IGenericTransition> outputTransitions = caps.getOutputTransitions();
 
         Map<String, DataInfo> counters = new TreeMap<String, DataInfo>();
 
-        for (ITransition transition : outputTransitions) {
-            if (transition.isConditionTrue(context)) {
+        for (IGenericTransition transition : outputTransitions) {
+            if (transition.isConditionTrue(global, context)) {
                 for (IData<?> data : transition.getEnd().getCapsule().getTask().getInput()) {
                     String name = data.getPrototype().getName();
 

@@ -17,7 +17,6 @@
 package org.openmole.plugin.environment.jsaga;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +26,7 @@ import java.util.logging.Logger;
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;
+import org.ogf.saga.error.DoesNotExistException;
 import org.ogf.saga.error.IncorrectStateException;
 import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
@@ -36,7 +36,6 @@ import org.ogf.saga.job.Job;
 import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.ogf.saga.job.JobService;
-import org.ogf.saga.task.State;
 import org.ogf.saga.task.Task;
 import org.ogf.saga.task.TaskMode;
 import org.ogf.saga.url.URL;
@@ -46,13 +45,14 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.core.implementation.execution.batch.BatchJobService;
+import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
+public class JSAGAJobService extends BatchJobService {
 
     final static ConfigurationLocation CreationTimout = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "CreationTimout");
     final static ConfigurationLocation TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "TestJobDoneTimeOut");
@@ -61,6 +61,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
         Activator.getWorkspace().addToConfigurations(CreationTimout, "PT2M");
         Activator.getWorkspace().addToConfigurations(TestJobDoneTimeOut, "PT30M");
     }
+    
     URI jobServiceURI;
     JSAGAEnvironment environment;
 
@@ -74,7 +75,7 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
     public boolean test() {
 
         try {
-           // Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO,"Testing " + getDescription().toString());
+            // Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO,"Testing " + getDescription().toString());
 
             JobDescription hello = JSAGAJobBuilder.GetInstance().getHelloWorld();
             final Job job = getJobServiceCache().createJob(hello);
@@ -84,10 +85,10 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             //job.cancel();
             return true;
 
-           /* float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
+            /* float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
             if(!job.waitFor(timeOut)) {
-                job.cancel();
-                return false;
+            job.cancel();
+            return false;
             }
             State state = job.getState();
             return state == State.DONE;*/
@@ -97,6 +98,9 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
         } catch (InternalProcessingError e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
+        } catch (UserBadDataError e) {
+            Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
+            return false;
         } catch (NotImplementedException e) {
             Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, null, e);
             return false;
@@ -122,12 +126,21 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
     }
 
     @Override
-    public IBatchJob createBatchJob(IJSAGAJobDescription batchJobDescription) throws InternalProcessingError {
+    public IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError,
+            UserBadDataError, InterruptedException {
 
-        IBatchJob ret;
+        File script;
+        script = Activator.getWorkspace().newTmpFile("script", ".sh");
         try {
-            ret = new JSAGAJob(getJobServiceCache().createJob(batchJobDescription.getJobDescription()), this, batchJobDescription.getScript());
-            return ret;
+            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), environment, runtime, script);
+            Job job = getJobServiceCache().createJob(jobDescription);
+            job.run();
+
+            return new JSAGAJob(job.getAttribute(Job.JOBID), this);
+        } catch (DoesNotExistException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (IncorrectStateException ex) {
+            throw new InternalProcessingError(ex);
         } catch (NotImplementedException e) {
             throw new InternalProcessingError(e);
         } catch (AuthenticationFailedException e) {
@@ -144,29 +157,13 @@ public class JSAGAJobService extends BatchJobService<IJSAGAJobDescription> {
             throw new InternalProcessingError(e);
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e);
+        } finally {
+            script.delete();
         }
-    }
-
-    @Override
-    public IBatchJob createBatchJob(IURIFile inputFile, IURIFile outputFile, IRuntime runtime) throws InternalProcessingError,
-            UserBadDataError, InterruptedException {
-
-        File script;
-        try {
-            script = Activator.getWorkspace().newTmpFile("script", ".sh");
-        } catch (IOException e) {
-            throw new InternalProcessingError(e);
-        }
-
-        JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), environment, runtime, script);
-        IJSAGAJobDescription JSAGAJobDescription = new JSAGAJobDescription(jobDescription, script);
-
-        return createBatchJob(JSAGAJobDescription);
     }
 
     @Cachable
-    private JobService getJobServiceCache() throws InternalProcessingError {
-        //Logger.getLogger(JSAGAJobService.class.getName()).info("/!\\ CREATE JOB SERVICE..." + jobServiceURI.toString() + " "+ System.identityHashCode(this));
+    public JobService getJobServiceCache() throws InternalProcessingError {
 
         final URL url;
         Task<?, JobService> task;

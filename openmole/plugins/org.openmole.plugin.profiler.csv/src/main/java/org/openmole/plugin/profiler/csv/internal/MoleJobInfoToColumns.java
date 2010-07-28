@@ -30,7 +30,7 @@ import org.openmole.core.model.job.ITimeStamp;
 public class MoleJobInfoToColumns {
 
     public static String[] toColumns(IMoleJob moleJob) {
-        Collection<ITimeStamp> timeStamps = moleJob.getContext().getLocalValue(GenericTask.Timestamps.getPrototype());
+        Collection<ITimeStamp> timeStamps = moleJob.getContext().getValue(GenericTask.Timestamps.getPrototype());
         String[] toWrite = new String[(timeStamps.size() - 1) + 2];
 
         int cur = 0;

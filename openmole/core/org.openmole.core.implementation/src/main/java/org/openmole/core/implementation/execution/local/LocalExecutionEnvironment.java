@@ -105,8 +105,8 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
     @Override
     public void submit(IJob job) throws InternalProcessingError, UserBadDataError {
          LocalExecutionJob ejob = new LocalExecutionJob(this, job);
-         submit(ejob);
          getJobRegistry().register(ejob);
+         submit(ejob);
     }
 
     public void submit(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
@@ -125,7 +125,7 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
         return jobs.take();
     }
 
-    public synchronized static LocalExecutionEnvironment getInstance() throws InternalProcessingError {
+    public synchronized static LocalExecutionEnvironment getInstance() throws InternalProcessingError, UserBadDataError {
         if(instance == null) {
             instance = new LocalExecutionEnvironment();
         }

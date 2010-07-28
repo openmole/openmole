@@ -14,49 +14,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
 package org.openmole.commons.tools.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
 
-public class WritterRunnable  implements Runnable{
+public class WritterRunnable implements Callable<Void> {
 
-		int amountRead;
-		IOException exception;
-		OutputStream to;
-		byte[] buffer;
-		
-		public WritterRunnable(OutputStream to, byte[] buffer) {
-			super();
-			this.to = to;
-			this.buffer = buffer;
-		}
+    final OutputStream to;
+    final byte[] buffer;
+    final int amount;
 
-		void setAmountRead(int amountRead) {
-			this.amountRead = amountRead;
-		}
+    public WritterRunnable(OutputStream to, byte[] buffer, int amount) {
+        super();
+        this.to = to;
+        this.buffer = buffer;
+        this.amount = amount;
+    }
 
-		@Override
-		public void run() {
-			try {
-				exception = null;
-				to.write(buffer, 0, amountRead);
-				to.flush();
-			} catch (IOException e) {
-				exception = e;
-//				Logger.getLogger(FastCopy.class.getName()).log(Level.WARNING, null, e);
-			}
-		}
-
-		IOException getException() {
-			return exception;
-		}
-
-
-		
-		
-
+    @Override
+    public Void call() throws IOException {
+        to.write(buffer, 0, amount);
+        return null;
+    }
 }

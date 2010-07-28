@@ -17,8 +17,6 @@
 
 package org.openmole.misc.updater.internal;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.misc.updater.IUpdatableWithVariableDelay;
 
@@ -42,8 +40,8 @@ public class UpdatableWithFixedDelay implements IUpdatableWithVariableDelay {
     }
 
     @Override
-    public void update() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        updatable.update();
+    public boolean update() throws InterruptedException {
+        return updatable.update();
     }
     
     

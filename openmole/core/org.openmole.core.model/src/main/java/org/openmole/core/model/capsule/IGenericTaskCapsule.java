@@ -26,8 +26,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 
 /**
  *
@@ -37,7 +37,7 @@ import org.openmole.core.model.transition.ITransitionSlot;
  * @param <TOUT> Type of the output transition.
  * @param <TASK> Type of the task inside the capsule.
  */
-public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGenericTask> {
+public interface IGenericTaskCapsule<TOUT extends IGenericTransition, TASK extends IGenericTask> {
 
     public static final String JobCreated = "JobCreated";
     
@@ -121,7 +121,7 @@ public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGen
      *
      * @return the default input slot of this capsule
      */
-    ITransitionSlot getDefaultInputSlot();
+    ISlot getDefaultInputSlot();
 
     /**
      *
@@ -129,7 +129,7 @@ public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGen
      *
      * @return the input slots of this capsule
      */
-    Collection<ITransitionSlot> getIntputTransitionsSlots();
+    Collection<ISlot> getIntputTransitionsSlots();
 
     /**
      * 
@@ -137,7 +137,7 @@ public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGen
      * 
      * @param group the transition slot to be added.
      */
-    void addInputTransitionSlot(ITransitionSlot group);
+    void addInputTransitionSlot(ISlot group);
 
 
     /**
@@ -167,5 +167,5 @@ public interface IGenericTaskCapsule<TOUT extends ITransition, TASK extends IGen
      * @throws InternalProcessingError if something goes wrong because of a system failure
      * @throws UserBadDataError if something goes wrong because it is missconfigured
      */
-    IMoleJob toJob(IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError;
+    IMoleJob toJob(IContext global, IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError;
 }

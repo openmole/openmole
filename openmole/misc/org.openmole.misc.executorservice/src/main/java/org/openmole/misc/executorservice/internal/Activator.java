@@ -18,6 +18,7 @@
 package org.openmole.misc.executorservice.internal;
 
 import java.util.concurrent.ThreadFactory;
+import org.openmole.commons.exception.UserBadDataError;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -52,7 +53,7 @@ public class Activator implements BundleActivator {
 		return context;
 	}
 
-    public synchronized static IExecutorService getExecutorService() throws InternalProcessingError {
+    public synchronized static IExecutorService getExecutorService() throws InternalProcessingError, UserBadDataError {
         if (executorService == null) {
             executorService = new ExecutorService(new ThreadFactory() {
 

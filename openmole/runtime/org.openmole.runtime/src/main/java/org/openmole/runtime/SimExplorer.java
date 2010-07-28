@@ -45,7 +45,6 @@ import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
 
-import org.openmole.misc.workspace.ForbidenPasswordProvider;
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IReplicatedFile;
@@ -73,8 +72,6 @@ public class SimExplorer implements IApplication {
         if (args.length > 4) {
             Activator.getWorkspace().setLocation(new File(args[4]));
         }
-
-        Activator.getWorkspace().setPasswordProvider(new ForbidenPasswordProvider());
 
         //init jsaga
         Activator.getJSagaSessionService();

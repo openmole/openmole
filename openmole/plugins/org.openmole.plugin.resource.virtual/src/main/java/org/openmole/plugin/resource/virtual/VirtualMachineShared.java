@@ -17,10 +17,13 @@
 package org.openmole.plugin.resource.virtual;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -34,6 +37,8 @@ public class VirtualMachineShared extends AbstractVirtualMachinePool {
     IVirtualMachine vm = null;
     final AtomicBoolean running = new AtomicBoolean(false);
     final AtomicInteger used = new AtomicInteger(0);
+    
+    Future killerFuture;
 
     public VirtualMachineShared(VirtualMachineResource resource) {
         super(resource);
@@ -48,28 +53,43 @@ public class VirtualMachineShared extends AbstractVirtualMachinePool {
     public IVirtualMachine borrowAVirtualMachine() throws UserBadDataError, InternalProcessingError, InterruptedException {
         synchronized (this) {
             if (!running.get()) {
+                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "Starting VM.");
                 vm = resource().launchAVirtualMachine();
                 running.set(true);
+                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "VM started.");
             }
 
             used.incrementAndGet();
+            
+            if(killerFuture != null) {
+                killerFuture.cancel(true);
+                killerFuture = null;
+            }
+            
             return vm;
         }
     }
+    
+    
+    
+    
 
     @Override
     public void returnVirtualMachine(IVirtualMachine virtualMachine) throws InternalProcessingError {
         synchronized (this) {
             if (used.decrementAndGet() == 0) {
-                killer().schedule(new Runnable() {
+                killerFuture = killer().schedule(new Runnable() {
 
                     @Override
                     public void run() {
                         synchronized (VirtualMachineShared.this) {
+                            Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "Timeout on VM.");
                             if (used.get() == 0) {
+                                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "Shutting down vm.");
                                 vm.shutdown();
                                 running.set(false);
                                 vm = null;
+                                Logger.getLogger(VirtualMachineShared.class.getName()).log(Level.FINE, "VM shutted down.");
                             }
                         }
                     }
