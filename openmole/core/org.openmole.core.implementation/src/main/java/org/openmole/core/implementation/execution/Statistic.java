@@ -17,18 +17,19 @@
 package org.openmole.core.implementation.execution;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
-import org.openmole.commons.tools.stat.Samples;
+import org.openmole.commons.tools.stat.FixedSizeList;
 
 public class Statistic implements IStatistic {
 
     public static IStatistic EMPTY_STAT = new Statistic(0);
 
-    Map<SampleType, Samples> averages = Collections.synchronizedMap(new TreeMap<SampleType, Samples>());
+    Map<SampleType, FixedSizeList> averages = Collections.synchronizedMap(new TreeMap<SampleType, FixedSizeList>());
     Integer historySize;
 
     public Statistic(Integer historySize) {
@@ -37,26 +38,20 @@ public class Statistic implements IStatistic {
     }
 
     @Override
-    public Long[] getOrderedSamples(SampleType type) {
-        Samples av = averages.get(type);
-        if(av == null) return new Long[0];
-        return av.getOrderedValues();
+    public List<Long> getSamples(SampleType type) {
+        FixedSizeList av = averages.get(type);
+        if(av == null) return Collections.EMPTY_LIST;
+        return av.getValues();
     }
 
     @Override
     public synchronized void sample(SampleType type, Long length) {
-        Samples av = averages.get(type);
+        FixedSizeList av = averages.get(type);
         if (av == null) {
-            av = new Samples(historySize);
+            av = new FixedSizeList(historySize);
             averages.put(type, av);
         }
         av.add(length);
     }
 
-    @Override
-    public synchronized int getNbSamples(SampleType type) {
-        Samples av = averages.get(type);
-        if(av == null) return 0;
-        return av.getCurrentHistorySize();
-    }
 }

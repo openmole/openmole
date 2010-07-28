@@ -18,10 +18,9 @@ package org.openmole.plugin.environment.glite.internal;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
-
-import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
 
 /**
@@ -40,11 +39,14 @@ public class DicotomicWorkloadStrategy implements IWorkloadManagmentStrategy {
     }
 
     @Override
-    public Long getWhenJobShouldBeResubmited(SampleType type, IStatistic finishedStat, IStatistic runningStat) {
+    public Long getWhenJobShouldBeResubmited(SampleType type, List<Long> finishedStat, List<Long> runningStat) {
 
-        Long[] finished = finishedStat.getOrderedSamples(type);
-        Long[] running = runningStat.getOrderedSamples(type);
+        Long[] finished = finishedStat.toArray(new Long[0]);
+        Long[] running = runningStat.toArray(new Long[0]);
 
+        Arrays.sort(finished);
+        Arrays.sort(running);
+        
         if (finished.length == 0) {
             return Long.MAX_VALUE;
 
@@ -53,11 +55,12 @@ public class DicotomicWorkloadStrategy implements IWorkloadManagmentStrategy {
             return Long.MAX_VALUE;
         }
 
-        Long tmax = finished[finished.length - 1];
-        Long tmin = finished[0];
+        long tmax = finished[finished.length - 1];
+        long tmin = finished[0];
 
-        Long t;
-        Long lastTPToSmall = Long.MAX_VALUE;
+        long t;
+        long lastTPToSmall = Long.MAX_VALUE;
+        
         double p;
         double ratio = maxOverSubmitRatio.get(type);
         
@@ -104,7 +107,7 @@ public class DicotomicWorkloadStrategy implements IWorkloadManagmentStrategy {
 
     }
 
-    int nbSup(Long[] samples, Long t) {
+    int nbSup(Long[] samples, long t) {
         int indice = Arrays.binarySearch(samples, t);
 
         while (indice > 0 && samples[indice] == samples[indice - 1]) {

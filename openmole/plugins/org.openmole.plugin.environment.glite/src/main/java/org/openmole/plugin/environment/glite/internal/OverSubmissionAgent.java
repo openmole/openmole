@@ -17,8 +17,11 @@
 package org.openmole.plugin.environment.glite.internal;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -72,25 +75,16 @@ public class OverSubmissionAgent implements IUpdatable {
             AssociativeCache<Tuple2<IJobStatisticCategory, SampleType>, Long> timeCache = new AssociativeCache<Tuple2<IJobStatisticCategory, SampleType>, Long>(AssociativeCache.HARD, AssociativeCache.HARD);
 
             for (final IJob job : registry.getAllJobs()) {
-                // Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,job.toString() + " " + registry.getNbExecutionJobsForJob(job));
-
-                if (!job.allMoleJobsFinished()) {
+                 if (!job.allMoleJobsFinished()) {
 
                     final IJobStatisticCategory jobStatisticCategory = new JobStatisticCategory(job);
-
-                    IBatchExecutionJob lastJob = registry.getLastExecutionJobForJob(job);
-
-                    if (lastJob == null) {
-                        Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.WARNING, "Bug: last execution job should never be null.");
-                        continue;
-                    }
-
-                    ExecutionState executionState = lastJob.getState();
+                    final IBatchExecutionJob lastJob = registry.getLastExecutionJobForJob(job);
+                    final ExecutionState executionState = lastJob.getState();
                     final SampleType sampleType = getSampleType(executionState);
 
                     if (sampleType != null) {
 
-                        Long jobTime = curTime - lastJob.getBatchJob().getTimeStemp(executionState);
+                        final long jobTime = curTime - lastJob.getBatchJob().getTimeStemp(executionState);
 
                         Tuple2<IJobStatisticCategory, SampleType> key = new Tuple2<IJobStatisticCategory, SampleType>(jobStatisticCategory, sampleType);
                         try {
@@ -98,10 +92,9 @@ public class OverSubmissionAgent implements IUpdatable {
 
                                 @Override
                                 public Long compute() throws InternalProcessingError, InterruptedException {
-                                    IStatistic finishedStat = checkedEnv.getStatistics().getStatFor(job);
-                                    IStatistic runningStat = computeStat(registry.getExecutionJobsForTheCategory(jobStatisticCategory));
-                                    Long t = strategy.getWhenJobShouldBeResubmited(sampleType, finishedStat, runningStat);
-                                    return t;
+                                    List<Long> finishedStat = checkedEnv.getStatistics().getStatFor(job).getSamples(sampleType);
+                                    List<Long> runningStat = computeStat(sampleType, registry.getExecutionJobsForTheCategory(jobStatisticCategory));
+                                    return strategy.getWhenJobShouldBeResubmited(sampleType, finishedStat, runningStat);
                                 }
                             });
 
@@ -184,26 +177,31 @@ public class OverSubmissionAgent implements IUpdatable {
         
         return true;
     }
-
-    private IStatistic computeStat(Collection<IBatchExecutionJob> allExecutionjobs) {
-        IStatistic statistic = new Statistic(allExecutionjobs.size());
-        Long curTime = System.currentTimeMillis();
-        Long length;
-
-        for (IBatchExecutionJob executionJob : allExecutionjobs) {
-            switch (executionJob.getState()) {
-                case SUBMITED:
-                    length = curTime - executionJob.getBatchJob().getTimeStemp(ExecutionState.SUBMITED);
-                    statistic.sample(SampleType.WAITING, length);
-                    break;
-                case RUNNING:
-                    length = curTime - executionJob.getBatchJob().getTimeStemp(ExecutionState.RUNNING);
-                    statistic.sample(SampleType.RUNNING, length);
-                    break;
-            }
+   
+    
+    private List<Long> computeStat(SampleType type, Collection<IBatchExecutionJob> allExecutionjobs) {
+                  
+        long curTime = System.currentTimeMillis();
+        List<Long> stat = new LinkedList<Long>();
+        
+        switch(type) {
+            case WAITING:
+                for (IBatchExecutionJob executionJob : allExecutionjobs) {
+                    if(executionJob.getState() == ExecutionState.SUBMITED) {
+                        stat.add(curTime - executionJob.getBatchJob().getTimeStemp(ExecutionState.SUBMITED));
+                    }
+                }
+                break;
+            case RUNNING:
+                for (IBatchExecutionJob executionJob : allExecutionjobs) {
+                    if(executionJob.getState() == ExecutionState.RUNNING) {
+                        stat.add(curTime - executionJob.getBatchJob().getTimeStemp(ExecutionState.RUNNING));
+                    }
+                }
+                break;
         }
-
-        return statistic;
+        
+        return stat;
     }
 
     private SampleType getSampleType(ExecutionState executionState) {
