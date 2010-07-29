@@ -106,15 +106,6 @@ abstract class ExternalTask(name: String) extends Task(name) {
     }
   }
 
-  private def setDeleteOnExit(file: File) = {
-    FileUtil.applyRecursive(file, new IFileOperation() {
-
-        override def execute(file: File) = {
-          file.deleteOnExit
-        }
-      })
-  }
-
 
   protected def setOutputFilesVariables(global: IContext, context: IContext, progress: IProgress, localDir: File): List[ToGet] = {
 
@@ -144,7 +135,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
         context putVariable (p._1, fo)
       })
-    setDeleteOnExit(localDir)
+
     return ret.toList
   }
 

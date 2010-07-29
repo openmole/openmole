@@ -63,7 +63,7 @@ class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[I
   
   override protected def process(global: IContext, context: IContext, progress: IProgress) = {
     try {
-      val tmpDir = workspace.newTmpDir("systemExecTask")
+      val tmpDir = workspace.newDir("systemExecTask")
 
       prepareInputFiles(global, context, progress, tmpDir)
       val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)

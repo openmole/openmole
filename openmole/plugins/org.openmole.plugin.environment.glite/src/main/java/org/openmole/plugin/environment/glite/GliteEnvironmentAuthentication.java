@@ -152,7 +152,7 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
             ctx.setAttribute(Context.LIFETIME, getTime());
 
             if (proxy == null) {
-                proxy = Activator.getWorkspace().newTmpFile("proxy", ".x509");
+                proxy = Activator.getWorkspace().newFile("proxy", ".x509");
             }
             ctx.setAttribute(Context.USERPROXY, proxy.getCanonicalPath());
 

@@ -153,15 +153,13 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         TarArchiveInputStream tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
 
                         try {
-                            File destDir = Activator.getWorkspace().newTmpDir("tarResult");
+                            File destDir = Activator.getWorkspace().newDir("tarResult");
 
                             TarArchiver unZip = new TarArchiver();
                             ArchiveEntry te;
 
                             while ((te = tis.getNextEntry()) != null) {
-                                File dest = new File(destDir, te.getName());
-                                dest.deleteOnExit();
-
+                                File dest = new File(destDir, te.getName());                               
                                 FileOutputStream os = new FileOutputStream(dest);
 
                                 try {
@@ -178,7 +176,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                                 File file;
 
                                 if (fileInfo._2()) {
-                                    file = Activator.getWorkspace().newTmpDir("tarResult");
+                                    file = Activator.getWorkspace().newDir("tarResult");
 
                                     InputStream destIn = new FileInputStream(dest);
                                     try {

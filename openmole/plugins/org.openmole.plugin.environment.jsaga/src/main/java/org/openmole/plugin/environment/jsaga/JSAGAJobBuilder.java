@@ -115,7 +115,7 @@ public class JSAGAJobBuilder {
             if (hello == null) {
                 try {
 
-                    File helloFile = Activator.getWorkspace().newTmpFile("testhello", ".txt");
+                    File helloFile = Activator.getWorkspace().newFile("testhello", ".txt");
                     PrintStream str = new PrintStream(helloFile);
 
                     str.println("Hello");

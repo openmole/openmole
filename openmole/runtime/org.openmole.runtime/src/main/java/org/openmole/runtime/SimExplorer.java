@@ -122,7 +122,7 @@ public class SimExplorer implements IApplication {
             IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache);
             executionMesageFileCache.delete();
             
-            File pluginDir = Activator.getWorkspace().newTmpDir();
+            File pluginDir = Activator.getWorkspace().newDir();
 
             for (IReplicatedFile plugin : executionMessage.getPlugins()) {
                 File replicaFileCache = plugin.getReplica().cache();
@@ -160,7 +160,7 @@ public class SimExplorer implements IApplication {
 
                     File local;
                     if (repliURI.isDirectory()) {
-                        local = Activator.getWorkspace().newTmpDir("dirReplica");
+                        local = Activator.getWorkspace().newDir("dirReplica");
                         InputStream is = new FileInputStream(cache);
 
                         try {
@@ -207,7 +207,7 @@ public class SimExplorer implements IApplication {
                 allFinished.waitAllFinished();
 
                 IContextResults contextResults = new ContextResults(saver.getResults());
-                final File contextResultFile = Activator.getWorkspace().newTmpFile();
+                final File contextResultFile = Activator.getWorkspace().newFile();
 
                 final ISerializationResult serializationResult = Activator.getSerialiser().serializeAndGetPluginClassAndFiles(contextResults, contextResultFile);
 
@@ -227,7 +227,7 @@ public class SimExplorer implements IApplication {
 
                 /*-- Tar the result files --*/
 
-                final File tarResult = Activator.getWorkspace().newTmpFile("result", ".tar");
+                final File tarResult = Activator.getWorkspace().newFile("result", ".tar");
 
                 TarArchiveOutputStream tos = new TarArchiveOutputStream(new FileOutputStream(tarResult));
                 tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
@@ -250,7 +250,7 @@ public class SimExplorer implements IApplication {
                             File toArchive;
 
                             if (file.isDirectory()) {
-                                toArchive = Activator.getWorkspace().newTmpFile();
+                                toArchive = Activator.getWorkspace().newFile();
                                 OutputStream outputStream = new FileOutputStream(toArchive);
 
                                 try {

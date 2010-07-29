@@ -105,23 +105,13 @@ public class Workspace implements IWorkspace {
             }
         }
 
-        locTmp.deleteOnExit();
         return new TempDir(locTmp);
     }
 
     @Override
-    public File newTmpDir(String prefix) throws InternalProcessingError {
+    public File newDir(String prefix) throws InternalProcessingError {
         try {
-            return getTmpDir().createNewTempDir(prefix);
-        } catch (IOException ex) {
-            throw new InternalProcessingError(ex);
-        }
-    }
-
-    @Override
-    public File newTmpFile(String prefix, String suffix) throws InternalProcessingError {
-        try {
-            return getTmpDir().createNewTempFile(prefix, suffix);
+            return getTmpDir().createNewDir(prefix);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
         }
@@ -268,18 +258,13 @@ public class Workspace implements IWorkspace {
     }
 
     @Override
-    public File newTmpFile() throws InternalProcessingError {
-        return newTmpFile(fixedPrefix, fixedPrefix);
-    }
-
-    @Override
     public File newFile() throws InternalProcessingError {
         return newFile(fixedPrefix, fixedPostfix);
     }
 
     @Override
-    public File newTmpDir() throws InternalProcessingError {
-        return newTmpDir(fixedDir);
+    public File newDir() throws InternalProcessingError {
+        return newDir(fixedDir);
     }
 
     @ChangeState
