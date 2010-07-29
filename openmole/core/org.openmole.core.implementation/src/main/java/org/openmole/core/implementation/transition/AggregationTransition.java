@@ -58,7 +58,8 @@ public class AggregationTransition extends Transition implements IAggregationTra
 
             IMoleJob lastJob = (IMoleJob) args[0];
             IMoleExecution moleExecution = (IMoleExecution) args[1];
-            subMoleFinished(subMole, lastJob, moleExecution);
+            ITicket ticket = (ITicket) args[2];
+            subMoleFinished(subMole, lastJob, ticket, moleExecution);
         }
     }
 
@@ -86,10 +87,10 @@ public class AggregationTransition extends Transition implements IAggregationTra
         resultContexts.add(context);
     }
 
-    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job, IMoleExecution moleExecution) throws InternalProcessingError, UserBadDataError {
+    public void subMoleFinished(ISubMoleExecution subMole, IMoleJob job, ITicket ticket, IMoleExecution moleExecution) throws InternalProcessingError, UserBadDataError {
         IRegistryWithTicket <IAggregationTransition, Collection<IContext>> registry =  moleExecution.getLocalCommunication().getAggregationTransitionRegistry();
 
-        ITicket newTicket = job.getTicket().getParent();
+        ITicket newTicket = ticket.getParent();
         IContext newContextEnd = new Context();
 
         Collection<IContext> resultContexts;

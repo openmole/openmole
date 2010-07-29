@@ -139,8 +139,8 @@ public abstract class GenericTaskCapsule<TOUT extends IGenericTransition, TASK e
 
 
     @Override
-    public IMoleJob toJob(IContext global, IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError {
-        MoleJob ret = new MoleJob(getAssignedTask(), global, context, ticket, jobId);
+    public IMoleJob toJob(IContext global, IContext context, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError {
+        MoleJob ret = new MoleJob(getAssignedTask(), global, context,jobId);
 
         Activator.getEventDispatcher().registerListener(ret, Priority.LOW.getValue(), new GenericTaskCapsuleAdapter(), IMoleJob.StateChanged);
         Activator.getEventDispatcher().objectChanged(this, JobCreated, new Object[]{ret});
@@ -170,8 +170,9 @@ public abstract class GenericTaskCapsule<TOUT extends IGenericTransition, TASK e
         try {
             IMoleExecution execution = ExecutionInfoRegistry.GetInstance().remove(job);
             ISubMoleExecution subMole = execution.getSubMoleExecution(job);
+            ITicket ticket = execution.getTicket(job);
 
-            performTransition(job.getGlobalContext(), job.getContext(), job.getTicket(), execution, subMole);
+            performTransition(job.getGlobalContext(), job.getContext(), ticket, execution, subMole);
         } catch (InternalProcessingError e) {
             throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + getAssignedTask());
         } catch (UserBadDataError e) {

@@ -101,8 +101,8 @@ public class MoleExecution implements IMoleExecution {
     final IMoleJobGrouping moleJobGrouping;
 
     final BlockingQueue<Tuple2<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Tuple2<IJob, IEnvironment>>();
-    final Map<IMoleJob, ISubMoleExecution> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, ISubMoleExecution>());
-
+    final Map<IMoleJob, Tuple2<ISubMoleExecution, ITicket>> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, Tuple2<ISubMoleExecution, ITicket>>()); 
+    
     final AtomicLong ticketNumber = new AtomicLong();
     final AtomicLong currentJobId = new AtomicLong();
 
@@ -154,18 +154,18 @@ public class MoleExecution implements IMoleExecution {
 
     @Override
     public synchronized void submit(IGenericTaskCapsule capsule, IContext global, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
-        IMoleJob job = capsule.toJob(global, context, ticket, nextJobId());
-        submit(job, capsule, subMole);
+        IMoleJob job = capsule.toJob(global, context, nextJobId());
+        submit(job, capsule, subMole, ticket);
     }
    
-    public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
+    public synchronized void submit(IMoleJob moleJob, IGenericTaskCapsule capsule, ISubMoleExecution subMole, ITicket ticket) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobSubmitted, new Object[]{moleJob});
 
         ExecutionInfoRegistry.GetInstance().register(moleJob, this);
         Activator.getEventDispatcher().registerListener(moleJob, Priority.HIGH.getValue(), moleExecutionAdapterForMoleJob, MoleJob.StateChanged);
         Activator.getEventDispatcher().registerListener(moleJob, Priority.NORMAL.getValue(), moleJobOutputTransitionPerformed, MoleJob.TransitionPerformed);
 
-        inProgress.put(moleJob, subMole);
+        inProgress.put(moleJob, new Tuple2<ISubMoleExecution, ITicket>(subMole, ticket));
         subMole.incNbJobInProgress();
 
         IMoleJobGroupingStrategy strategy = moleJobGrouping.getMoleJobGroupingStrategy(capsule);
@@ -302,16 +302,18 @@ public class MoleExecution implements IMoleExecution {
     private synchronized void jobOutputTransitionsPerformed(IMoleJob job) throws InternalProcessingError, UserBadDataError {
         Activator.getEventDispatcher().objectChanged(this, oneJobFinished, new IMoleJob[]{job});
 
-        ISubMoleExecution subMole = inProgress.get(job);
-
+        Tuple2<ISubMoleExecution, ITicket> jobInfo = inProgress.remove(job);
+        ISubMoleExecution subMole = jobInfo._1();
+        ITicket ticket = jobInfo._2();
+        
         subMole.decNbJobInProgress();
 
         if (subMole.getNbJobInProgess() == 0) {
-            Object[] args = {job, this};
+            Object[] args = {job, this, ticket};
             Activator.getEventDispatcher().objectChanged(subMole, ISubMoleExecution.finished, args);
         }
 
-        inProgress.remove(job);
+        //inProgress.remove(job);
 
         if (isFinished()) {
             getSubmiter().interrupt();
@@ -354,7 +356,11 @@ public class MoleExecution implements IMoleExecution {
 
     @Override
     public ISubMoleExecution getSubMoleExecution(IMoleJob job) {
-        return inProgress.get(job);
+        return inProgress.get(job)._1();
     }
-
+    
+    @Override
+    public ITicket getTicket(IMoleJob job) {
+        return inProgress.get(job)._2();
+    }
 }
