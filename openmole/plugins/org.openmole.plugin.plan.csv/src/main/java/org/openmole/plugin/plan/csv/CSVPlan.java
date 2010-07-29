@@ -39,8 +39,10 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import au.com.bytecode.opencsv.CSVReader;
 import java.util.Iterator;
+import org.openide.util.lookup.ServiceProvider;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.model.data.IData;
+import org.openmole.core.model.plan.IPlan;
 
 /**
  *
@@ -51,6 +53,8 @@ import org.openmole.core.model.data.IData;
  * the number of parameters to be used. Actually all the parameters to be taken into account
  * have to be specified using the method addColumn()
  */
+
+@ServiceProvider(service=IPlan.class)
 public class CSVPlan extends Plan {
 
     final private File csvFile;
