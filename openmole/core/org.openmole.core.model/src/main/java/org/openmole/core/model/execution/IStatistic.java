@@ -16,10 +16,10 @@
  */
 package org.openmole.core.model.execution;
 
+import java.util.List;
 import org.openmole.core.model.execution.batch.SampleType;
 
 public interface IStatistic {
     void sample(SampleType type, Long length);
-    Long[] getOrderedSamples(SampleType type);
-    int getNbSamples(SampleType type);
+    List<Long> getSamples(SampleType type);
 }

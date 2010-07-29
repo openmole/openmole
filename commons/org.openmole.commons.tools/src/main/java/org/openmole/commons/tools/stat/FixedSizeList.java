@@ -16,37 +16,34 @@
  */
 package org.openmole.commons.tools.stat;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.List;
 
-public class Samples {
+public class FixedSizeList<T> {
 
-    Integer historySize;
-    Queue<Long> history = new LinkedList<Long>();
+    final int size;
+    final LinkedList<T> list = new LinkedList<T>();
 
-    public Samples(Integer historySize) {
+    public FixedSizeList(int size) {
         super();
-        this.historySize = historySize;
+        this.size = size;
     }
 
-    public synchronized void add(Long nval) {
-        if (history.size() < historySize) {
-            history.offer(nval);
+    public synchronized void add(T nval) {
+        if (list.size() < size) {
+            list.offer(nval);
         } else {
-            history.remove();
-            history.offer(nval);
+            list.remove();
+            list.offer(nval);
         }
     }
 
-    public synchronized Long[] getOrderedValues() {
-        Long[] ret =  history.toArray(new Long[0]);
-
-        Arrays.sort(ret);
-        return ret;
+    public synchronized List<T> getValues() {
+        return Collections.unmodifiableList(list);
     }
 
-    public synchronized int getCurrentHistorySize() {
-        return history.size();
+    public synchronized int size() {
+        return list.size();
     }
 }

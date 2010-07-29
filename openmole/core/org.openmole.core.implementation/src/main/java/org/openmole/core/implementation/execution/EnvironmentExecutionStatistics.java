@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmole.core.model.execution.IEnvironmentExecutionStatistics;
 import org.openmole.core.model.execution.batch.SampleType;
@@ -104,6 +106,8 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
         
         IStatistic statistic = map.get(key);
         if (statistic == null) {
+            Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).log(Level.FINE,"New Map.");
+       
             statistic = new Statistic(historySize);
             map.put(key, statistic);
         }
@@ -114,7 +118,7 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
     private synchronized Map<StatisticKey, IStatistic> getOrConstructStatisticMap(IMoleExecution moleExecution) {
         Map<StatisticKey, IStatistic> map = stats.get(moleExecution);
 
-        if (map == null) {
+        if (map == null) {     
             map = Collections.synchronizedMap(new HashMap<StatisticKey, IStatistic>());
             stats.put(moleExecution, map);
         }

@@ -16,11 +16,11 @@
  */
 package org.openmole.plugin.environment.glite.internal;
 
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
 
 
@@ -30,7 +30,7 @@ public class WorkloadOnAverages implements IWorkloadManagmentStrategy {
     Integer historySize;
 
     IBatchEnvironment<?> environment;
-    Map<SampleType, Double> resubmitRatio = new HashMap<SampleType, Double>();
+    Map<SampleType, Double> resubmitRatio = new EnumMap<SampleType, Double>(SampleType.class);
 
 
     public WorkloadOnAverages(Integer minStat, Double resubmitRatioWaiting, Double resubmitRatioRunning, IBatchEnvironment<?> environment) {
@@ -46,10 +46,10 @@ public class WorkloadOnAverages implements IWorkloadManagmentStrategy {
 
     
     @Override
-    public Long getWhenJobShouldBeResubmited(SampleType type, IStatistic finishedStat, IStatistic runningStat) {
+    public Long getWhenJobShouldBeResubmited(SampleType type, List<Long> finishedStat, List<Long> runningStat) {
 
         //IStatistic stat = stats.getStatFor(capsule);
-        if (finishedStat.getNbSamples(type) < minStat) {
+        if (finishedStat.size() < minStat) {
             return Long.MAX_VALUE;
         }
 
@@ -65,16 +65,12 @@ public class WorkloadOnAverages implements IWorkloadManagmentStrategy {
                 return false;
         }*/
 
-        Long[] samples = finishedStat.getOrderedSamples(type);
-
-       /* if (samples.length < minStat) {
-            return false;
-        }*/
+     
 
         long avg = 0;
 
-        for (Long sample : samples) {
-            avg += sample / samples.length;
+        for (Long sample : finishedStat) {
+            avg += sample / finishedStat.size();
         }
 
         return (long) (avg * resubmitRatio.get(type));
