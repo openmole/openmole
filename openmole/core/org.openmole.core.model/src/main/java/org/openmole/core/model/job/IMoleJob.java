@@ -43,8 +43,6 @@ public interface IMoleJob {
 
     void rethrowException(IContext context) throws ExecutionException;
 
-    ITicket getTicket();
-
     IProgress getProgress();
 
     IMoleJobId getId();

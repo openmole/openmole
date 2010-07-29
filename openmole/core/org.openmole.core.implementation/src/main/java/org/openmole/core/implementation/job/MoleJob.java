@@ -43,7 +43,7 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     final public static String TransitionPerformed = "TransitionPerformed";
     private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
 
-    final private ITicket ticket;
+ //   final private ITicket ticket;
     final private IProgress progress;
     final private IGenericTask task;
     final private IMoleJobId id;
@@ -54,12 +54,11 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     volatile private State state;
 
     @ObjectConstructed
-    public MoleJob(IGenericTask task, IContext global, IContext context, ITicket ticket, IMoleJobId id) throws InternalProcessingError, UserBadDataError {
+    public MoleJob(IGenericTask task, IContext global, IContext context, IMoleJobId id) throws InternalProcessingError, UserBadDataError {
         super();
         this.context = context;
         this.task = task;
         this.global = global;
-        this.ticket = ticket;
         this.id = id;
         this.progress = new Progress();
 
@@ -98,11 +97,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
             timeStamps.add(new TimeStamp(state, LocalHostName.getInstance().getNameForLocalHost(), System.currentTimeMillis()));
             this.state = state;
         }
-    }
-
-    @Override
-    public ITicket getTicket() {
-        return ticket;
     }
 
     private void setInnerContext(IContext context) {

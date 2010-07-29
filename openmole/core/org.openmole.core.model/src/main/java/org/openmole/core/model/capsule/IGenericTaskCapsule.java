@@ -167,5 +167,5 @@ public interface IGenericTaskCapsule<TOUT extends IGenericTransition, TASK exten
      * @throws InternalProcessingError if something goes wrong because of a system failure
      * @throws UserBadDataError if something goes wrong because it is missconfigured
      */
-    IMoleJob toJob(IContext global, IContext context, ITicket ticket, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError;
+    IMoleJob toJob(IContext global, IContext context, IMoleJobId jobId) throws InternalProcessingError, UserBadDataError;
 }

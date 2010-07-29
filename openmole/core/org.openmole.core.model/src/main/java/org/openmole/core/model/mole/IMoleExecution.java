@@ -51,6 +51,8 @@ public interface IMoleExecution {
     ILocalCommunication getLocalCommunication();
 
     ISubMoleExecution getSubMoleExecution(IMoleJob job);
-
+    
+    ITicket getTicket(IMoleJob job);
+    
     Iterable<IMoleJob> getAllMoleJobs();
 }
