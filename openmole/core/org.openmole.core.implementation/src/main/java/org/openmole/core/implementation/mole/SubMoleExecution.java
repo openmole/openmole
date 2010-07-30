@@ -69,10 +69,6 @@ public class SubMoleExecution implements ISubMoleExecution {
     }
 
     void checkAllJobsWaitingInGroup() throws InternalProcessingError, UserBadDataError  {
-        assert(nbJobInProgress < nbJobWaitingInGroup);
-
-       // Logger.getLogger(SubMoleExecution.class.getName()).info("inprogress = " + nbJobInProgress + " ; nbJobWaitingInGroup "+ nbJobWaitingInGroup);
-        
         if(nbJobInProgress == nbJobWaitingInGroup && nbJobWaitingInGroup > 0) {
             Activator.getEventDispatcher().objectChanged(this, allJobsWaitingInGroup);
         }

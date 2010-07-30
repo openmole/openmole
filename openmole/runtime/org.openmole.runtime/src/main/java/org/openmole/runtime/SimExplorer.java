@@ -139,6 +139,7 @@ public class SimExplorer implements IApplication {
                 //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
+
             Activator.getPluginManager().loadDir(pluginDir);
 
 
@@ -177,6 +178,7 @@ public class SimExplorer implements IApplication {
                 }
             }
 
+            
             IURIFile jobForRuntimeFile = executionMessage.getJobForRuntimeURI().getFile();
             File jobForRuntimeFileCache = jobForRuntimeFile.cache();
 
