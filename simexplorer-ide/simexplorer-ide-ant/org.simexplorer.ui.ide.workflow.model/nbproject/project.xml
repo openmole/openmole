@@ -7,23 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>org.openmole.misc.clonning</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.openmole.commons.exception</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>0.3</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openmole.core.structuregenerator</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -47,7 +31,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.task.structuregeneration</code-name-base>
+                    <code-name-base>org.openmole.core.structuregenerator</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -79,6 +63,14 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.openmole.plugin.task.structuregeneration</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>0.3</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.simexplorer.ui.ide.osgiinit</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -86,8 +78,17 @@
                         <specification-version>0.3</specification-version>
                     </run-dependency>
                 </dependency>
+                <dependency>
+                    <code-name-base>uk.com.robustit.cloning</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.7.1</specification-version>
+                    </run-dependency>
+                </dependency>
             </module-dependencies>
             <public-packages>
+                <package>org.simexplorer.core.workflow.model</package>
                 <package>org.simexplorer.core.workflow.model.metada</package>
                 <package>org.simexplorer.ui.ide.workflow.model</package>
             </public-packages>

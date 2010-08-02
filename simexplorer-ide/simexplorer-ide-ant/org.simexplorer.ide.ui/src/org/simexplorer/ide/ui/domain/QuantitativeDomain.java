@@ -73,7 +73,7 @@ public class QuantitativeDomain extends FiniteDomain {
     }
 
     @Override
-    public List computeValues(IContext context) throws InternalProcessingError, UserBadDataError {
+    public List computeValues(IContext ic, IContext ic1) throws InternalProcessingError, UserBadDataError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -18,6 +18,7 @@
  */
 package org.simexplorer.core.workflow.methods.task;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import org.openide.util.Exceptions;
@@ -30,7 +31,6 @@ import javax.swing.event.UndoableEditListener;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.WindowManager;
 import org.simexplorer.ide.ui.tools.ActionsUtils;
-import org.openmole.core.implementation.resource.FileResource;
 import org.openmole.plugin.task.groovy.GroovyTask;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
@@ -38,7 +38,7 @@ import org.simexplorer.core.workflow.methods.EditorPanel;
 public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
 
     private DefaultListModel listModel;
-    private Map<String, FileResource> jarsAdded;
+    private Map<String, File> jarsAdded;
 
     public GroovyEditablePanel() {
         this(GroovyTask.class);
@@ -47,7 +47,7 @@ public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
     public GroovyEditablePanel(Class<? extends GroovyTask>... typesEditable) {
         super(typesEditable);
         listModel = new DefaultListModel();
-        jarsAdded = new HashMap<String, FileResource>();
+        jarsAdded = new HashMap<String, File>();
         initComponents();
     }
 
@@ -80,14 +80,14 @@ public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
         jButton1.setText("Add");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                AddJarActionPerformed(evt);
             }
         });
 
         jButton2.setText("Remove");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                RemoveJarActionPerformed(evt);
             }
         });
 
@@ -154,26 +154,26 @@ public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
     }// </editor-fold>//GEN-END:initComponents
 
     private void textEditorCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_textEditorCaretUpdate
-        try {
+// TF only done one time with apply change
+/*        try {
             getObjectEdited().setCode(textEditor.getText());
         } catch (UserBadDataError ex) {
             Exceptions.printStackTrace(ex);
         } catch (InternalProcessingError ex) {
             Exceptions.printStackTrace(ex);
         }
+ */
     }//GEN-LAST:event_textEditorCaretUpdate
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void AddJarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddJarActionPerformed
         JFileChooser jfc = ActionsUtils.getJFileChooser("Add a Jar", null);
         if (jfc.showSaveDialog(WindowManager.getDefault().getMainWindow()) == JFileChooser.APPROVE_OPTION) {
-            String absolutePath = jfc.getSelectedFile().getAbsoluteFile().getAbsolutePath();
-            listModel.addElement(absolutePath);
+            File absoluteFile = jfc.getSelectedFile().getAbsoluteFile();
+            listModel.addElement(absoluteFile.getAbsolutePath());
             list.repaint();
-            // FIXME
-            //jarsAdded.put(absolutePath, getObjectEdited().addJar(absolutePath));
-            throw new UnsupportedOperationException();
+            jarsAdded.put(absoluteFile.getAbsolutePath(), absoluteFile);
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_AddJarActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         JDialog dialog = new JDialog(WindowManager.getDefault().getMainWindow());
@@ -182,15 +182,12 @@ public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void RemoveJarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RemoveJarActionPerformed
         String selected = (String) list.getSelectedValue();
-        FileResource fileRessource = jarsAdded.get(selected);
+        File file = jarsAdded.get(selected);
         jarsAdded.remove(selected);
         listModel.removeElement(selected);
-        // FIXME
-        //getObjectEdited().removeJar(fileRessource);
-        throw new UnsupportedOperationException();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_RemoveJarActionPerformed
 
     @Override
     public void setObjectEdited(GroovyTask method) {
@@ -202,12 +199,28 @@ public class GroovyEditablePanel extends EditorPanel<GroovyTask> {
         } catch (InternalProcessingError ex) {
             Exceptions.printStackTrace(ex);
         }
-        // TODO fetch jars resources
-        /*for (File jar : getObjectEdited().getLocalJarList()) {
+            // FIXME need to modify the CodeTask api to be able to get the libraries files
+/*        for (File jar : getObjectEdited().getLocalJarList()) {
         listModel.addElement(jar);
         jarsAdded.put(absolutePath, getObjectEdited().addJar(absolutePath));
-        }*/
+        }
+ */
     }
+
+    @Override
+    public void applyChanges() {
+        super.applyChanges();
+        try {
+            getObjectEdited().setCode(textEditor.getText());
+        } catch (UserBadDataError ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (InternalProcessingError ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        for (File file:jarsAdded.values()) getObjectEdited().addLib(file);
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;

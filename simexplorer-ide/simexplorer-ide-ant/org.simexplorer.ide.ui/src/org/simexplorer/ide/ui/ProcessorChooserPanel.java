@@ -36,7 +36,7 @@ import org.openide.util.NbBundle;
 import org.openmole.core.implementation.task.Task;
 import org.simexplorer.core.workflow.model.metada.MetadataLoader;
 import org.openmole.core.implementation.task.GenericTask;
-import org.openmole.commons.tools.structure.Duo;
+import org.simexplorer.core.workflow.model.Duo;
 import org.simexplorer.core.workflow.model.metada.Metadata;
 
 public class ProcessorChooserPanel extends javax.swing.JPanel {

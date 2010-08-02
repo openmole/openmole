@@ -19,12 +19,12 @@
  */
 package org.simexplorer.ui.ide.workflow.model;
 
+import com.rits.cloning.Cloner;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import org.openmole.misc.clonning.internal.ClonningService;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -34,12 +34,13 @@ import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.transition.AggregationTransition;
 import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.implementation.transition.ExplorationTransition;
-import org.openmole.core.implementation.transition.SingleTransition;
+import org.openmole.core.implementation.transition.Transition;
 import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.plan.Plan;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.data.Util;
+import org.openmole.core.implementation.tools.ClonningService;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.ITask;
@@ -224,7 +225,7 @@ public class ExplorationApplication {
             for (GenericTask task : (TasksList) tasksList) {
                 if (task instanceof Task) {
                     current = new TaskCapsule((ITask) task);
-                    new SingleTransition((TaskCapsule) previous, current);
+                    new Transition((TaskCapsule) previous, current);
                 } else {
                     Logger.getLogger(ExplorationApplication.class.getName()).warning("Generic task are not handled here. Your task was: " + task.getName());
                 }
@@ -235,6 +236,6 @@ public class ExplorationApplication {
     }
 
     public ExplorationApplication copy() throws InternalProcessingError {
-            return (ExplorationApplication) new ClonningService().clone(this);
+        return (ExplorationApplication) new Cloner().deepClone(this);
     }
 }
