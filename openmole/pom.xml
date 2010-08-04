@@ -49,6 +49,12 @@
            <version>${lib.org.junit.version}</version>
            <scope>test</scope>
         </dependency>
+	<!--<dependency>
+           <groupId>org.netbeans.api</groupId>
+           <artifactId>org-openide-util-lookup</artifactId>
+           <version>RELEASE69</version>
+	   <scope>compile</scope>
+        </dependency>-->
     </dependencies>
 
     <build>

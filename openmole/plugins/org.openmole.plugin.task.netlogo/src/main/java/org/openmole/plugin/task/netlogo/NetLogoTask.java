@@ -67,7 +67,7 @@ public class NetLogoTask extends ExternalSystemTask {
     @Override
     protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
-            File tmpDir = Activator.getWorkspace().newTmpDir("netLogoTask");
+            File tmpDir = Activator.getWorkspace().newDir("netLogoTask");
             prepareInputFiles(global, context, progress, tmpDir);
             File script = new File(tmpDir, relativeScriptPath);
             HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();

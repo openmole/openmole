@@ -51,6 +51,7 @@ import org.openmole.core.model.data.IData;
  * the number of parameters to be used. Actually all the parameters to be taken into account
  * have to be specified using the method addColumn()
  */
+
 public class CSVPlan extends Plan {
 
     final private File csvFile;

@@ -102,7 +102,7 @@ public class VirtualMachineResource implements IResource {
 
         final File vmImage;
         try {
-            vmImage = workspace().newTmpFile();
+            vmImage = workspace().newFile();
             FileUtil.copy(system, vmImage);
         } catch (IOException ex) {
             throw new InternalProcessingError(ex);
@@ -203,7 +203,7 @@ public class VirtualMachineResource implements IResource {
     private File getQEmuDir() throws IOException, InternalProcessingError, InterruptedException {
         final String os = System.getProperty("os.name");
 
-        final File qemuDir = workspace().newTmpDir();
+        final File qemuDir = workspace().newDir();
         final String qemuJarPath;
         final String[] toCopy;
 
@@ -243,7 +243,6 @@ public class VirtualMachineResource implements IResource {
             try {
                 FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
                 qemu.setExecutable(true);
-                qemu.deleteOnExit();
             } finally {
                 outputStream.close();
             }
@@ -254,7 +253,6 @@ public class VirtualMachineResource implements IResource {
 
             try {
                 FileUtil.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
-                dest.deleteOnExit();
             } finally {
                 outputStream.close();
             }

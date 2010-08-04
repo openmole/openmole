@@ -17,6 +17,8 @@
 
 package org.openmole.core.serializer.internal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.SoftReferenceObjectPool;
@@ -26,7 +28,7 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool;
  * @author reuillon
  */
 public class DeserializerFactory {
-    
+        
     private final static ObjectPool pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
         @Override

@@ -64,7 +64,7 @@ public class StructureGenerator implements IStructureGenerator {
             //structures = packProcessorList(application, gp.getPackDir(), gp.getNameSpace());
             gp.compile();
 
-            jar = Activator.getWorkspace().newTmpFile("structure", ".jar");
+            jar = Activator.getWorkspace().newFile("structure", ".jar");
             mkJar(gp.getBinDir(), jar, gp.getManifest());
         } catch (IOException e) {
             throw new InternalProcessingError(e);

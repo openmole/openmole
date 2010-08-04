@@ -130,7 +130,7 @@ public class JSAGAJobService extends BatchJobService {
             UserBadDataError, InterruptedException {
 
         File script;
-        script = Activator.getWorkspace().newTmpFile("script", ".sh");
+        script = Activator.getWorkspace().newFile("script", ".sh");
         try {
             JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), environment, runtime, script);
             Job job = getJobServiceCache().createJob(jobDescription);

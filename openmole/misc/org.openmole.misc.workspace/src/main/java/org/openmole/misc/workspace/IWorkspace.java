@@ -19,11 +19,9 @@ public interface IWorkspace {
 	void setLocation(File location);
         File getLocation();
 
-	File newTmpDir(String prefix) throws InternalProcessingError;
-        File newTmpDir() throws InternalProcessingError;
-	File newTmpFile(String prefix, String suffix) throws InternalProcessingError;
+	File newDir(String prefix) throws InternalProcessingError;
+        File newDir() throws InternalProcessingError;
 	File newFile(String prefix, String suffix) throws InternalProcessingError;
-        File newTmpFile() throws InternalProcessingError;
         File newFile() throws InternalProcessingError;
 
         File getFile(String name) throws IOException;

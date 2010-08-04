@@ -50,7 +50,7 @@ public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemT
     @Override
     protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
         try {
-            File pwd = Activator.getWorkspace().newTmpDir();
+            File pwd = Activator.getWorkspace().newDir();
             prepareInputFiles(global, context, progress, pwd.getCanonicalFile());
 
             contextToCode.execute(global, context, progress, getOutput(), libs);

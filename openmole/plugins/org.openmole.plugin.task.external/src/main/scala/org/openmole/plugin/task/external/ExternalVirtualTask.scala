@@ -77,7 +77,7 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
           session.close
         }
 
-        fetchOutputFiles(global, context, progress, workDir, workspace.newTmpDir, sftp)
+        fetchOutputFiles(global, context, progress, workDir, workspace.newDir, sftp)
         delete(sftp,workDir)
       } finally {
         sftp.close

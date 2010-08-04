@@ -33,7 +33,6 @@ import org.openmole.core.model.job.State;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.job.IMoleJobId;
-import org.openmole.core.model.job.ITicket;
 import org.openmole.core.implementation.task.GenericTask;
 import org.openmole.core.implementation.tools.LocalHostName;
 import org.openmole.core.model.job.ITimeStamp;
@@ -43,7 +42,6 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
     final public static String TransitionPerformed = "TransitionPerformed";
     private static final Logger LOGGER = Logger.getLogger(MoleJob.class.getName());
 
- //   final private ITicket ticket;
     final private IProgress progress;
     final private IGenericTask task;
     final private IMoleJobId id;

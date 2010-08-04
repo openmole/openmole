@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.filecache.IFileCache;
@@ -77,6 +75,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
         try {
             final IURIFile communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token);
 
+            
             final IURIFile inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"));
             final IURIFile outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"));
 
@@ -87,13 +86,13 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
 
             /* ---- upload the execution message ----*/
 
-            File executionMessageFile = Activator.getWorkspace().newTmpFile("job", ".xml");
+            File executionMessageFile = Activator.getWorkspace().newFile("job", ".xml");
             Activator.getSerializer().serialize(executionMessage, executionMessageFile);
 
             IURIFile executionMessageURIFile = new URIFile(executionMessageFile);
             URIFile.copy(executionMessageURIFile, inputFile, token);
 
-            executionMessageURIFile.remove(false);
+            executionMessageFile.delete();
             
             return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime);
         } finally {
@@ -155,7 +154,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
 
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
-        File jobFile = Activator.getWorkspace().newTmpFile("job", ".xml");
+        File jobFile = Activator.getWorkspace().newFile("job", ".xml");
         ISerializationResult serializationResult = Activator.getSerializer().serializeAndGetPluginClassAndFiles(jobForRuntime, jobFile);
         
         IURIFile jobURIFile = new URIFile(jobFile);

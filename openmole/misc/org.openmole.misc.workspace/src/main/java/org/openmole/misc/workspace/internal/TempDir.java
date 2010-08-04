@@ -33,7 +33,7 @@ public class TempDir {
     /**
      * Creates a temp directory in the System temp directory.
      */
-    public synchronized File createNewTempDir(String prefix) throws IOException {
+    public synchronized File createNewDir(String prefix) throws IOException {
         File tempFile = File.createTempFile(prefix, "", base);
 
         if (!tempFile.delete()) {
@@ -46,13 +46,7 @@ public class TempDir {
         tempFile.deleteOnExit();
         return tempFile;
     }
-    
-    public File createNewTempFile(String prefix, String suffix) throws IOException {
-        File tempFile = File.createTempFile(prefix, suffix, base);
-        tempFile.deleteOnExit();
-        
-        return tempFile;
-    }
+   
     
     public File createNewFile(String prefix, String suffix) throws IOException {
     	File tempFile = File.createTempFile(prefix, suffix, base);

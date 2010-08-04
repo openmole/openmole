@@ -56,6 +56,7 @@ public class JSAGAJob extends BatchJob {
         } else {
             throw new InternalProcessingError("Job ID does not match regular expression: " + pattern.pattern());
         }
+
     }
 
     public synchronized Job getJob() throws InternalProcessingError {

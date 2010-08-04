@@ -47,9 +47,9 @@ public class ClonningService {
                 File cloned;
                 try {
                     if (toClone.isDirectory()) {
-                        cloned = Activator.getWorkspace().newTmpDir();
+                        cloned = Activator.getWorkspace().newDir();
                     } else {
-                        cloned = Activator.getWorkspace().newTmpFile();
+                        cloned = Activator.getWorkspace().newFile();
                     }
 
                     copy(toClone, cloned);

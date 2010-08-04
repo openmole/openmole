@@ -28,39 +28,30 @@ public class GroovyProject {
         nameSpaceSuffix = UUID.randomUUID().toString();
         nameSpaceSuffix = "generatedpackage" + nameSpaceSuffix.replace("-", "");
 
-        projDir = Activator.getWorkspace().newTmpDir("groovy");
-        projDir.deleteOnExit();
+        projDir = Activator.getWorkspace().newDir("groovy");
 
         srcDir = new File(projDir, "src");
         srcDir.mkdir();      
-        srcDir.deleteOnExit();
 
         File orgDir = new File(srcDir,"org");
         orgDir.mkdir();
-        orgDir.deleteOnExit();
 
         File simexplorerDir = new File(orgDir,"simexplorer");
         simexplorerDir.mkdir();
-        simexplorerDir.deleteOnExit();
 
         File userDir = new File(simexplorerDir,"user");
         userDir.mkdir();
-        userDir.deleteOnExit();
 
         File dataDir = new File(userDir,"data");
         dataDir.mkdir();
-        dataDir.deleteOnExit();
 
         packDir = new File(dataDir, nameSpaceSuffix);
         packDir.mkdir();
-        packDir.deleteOnExit();
 
         binDir = new File(projDir, "bin");
         binDir.mkdir();
-        binDir.deleteOnExit();
 
         File manifestFile = new File(projDir, "Manifest.mf");
-        manifestFile.deleteOnExit();
         
         PrintStream manifestS = new PrintStream(new FileOutputStream(manifestFile));
         try {

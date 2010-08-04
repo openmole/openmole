@@ -1,12 +1,10 @@
 package org.openmole.misc.workspace.internal;
 
 import java.io.File;
-import java.io.IOException;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.io.FileUtil;
 
 import org.osgi.framework.BundleActivator;
@@ -29,6 +27,16 @@ public class Activator implements BundleActivator {
         logger.setLevel(Level.WARN);
         workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
+        
+        final File tmpDir = workspace.getTmpDir().getLocation();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+
+            @Override
+            public void run() {
+                FileUtil.recursiveDelete(tmpDir);
+            }
+            
+        });
     }
 
     @Override
