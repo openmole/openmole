@@ -20,6 +20,7 @@
 package org.openmole.core.implementation.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -41,6 +42,10 @@ public class EnumerationDomain<T> extends FiniteDomain<T> {
         } else {
             enumeration = val;
         }
+    }
+
+    public EnumerationDomain(String... vals) {
+        enumeration = new ArrayList<String>(Arrays.asList(vals));
     }
 
     /**
