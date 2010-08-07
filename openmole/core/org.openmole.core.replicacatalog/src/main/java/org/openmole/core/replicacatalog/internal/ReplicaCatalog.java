@@ -78,10 +78,13 @@ public class ReplicaCatalog implements IReplicaCatalog {
         super();
         try {
             String objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);
-            DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
-            defragmentConfig.forceBackupDelete(true);
-            Defragment.defrag(defragmentConfig);
-                      
+            
+            if(new File(objRepoLocation).exists()) {
+                DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
+                defragmentConfig.forceBackupDelete(true);
+                Defragment.defrag(defragmentConfig);
+            }
+            
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
