@@ -224,11 +224,9 @@ public class GliteEnvironment extends JSAGAEnvironment {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
             }
         }
-
         return jobServices;
     }
 
-//    @Cachable
     @Override
     public Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
 

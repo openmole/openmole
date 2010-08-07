@@ -107,14 +107,11 @@ public class SimExplorer implements IApplication {
         //init jsaga
         Activator.getJSagaSessionService();
 
-        
         String environmentPluginDirPath = cmdLine.getOptionValue(pluginOpt.getOpt());
         String executionMessageURI = cmdLine.getOptionValue(inOpt.getOpt());
 
-
         File environmentPluginDir = new File(environmentPluginDirPath);
         Activator.getPluginManager().loadDir(environmentPluginDir);
-
         
         if (cmdLine.hasOption(authenticationOpt.getOpt())) {
             /* get env and init */
@@ -124,8 +121,6 @@ public class SimExplorer implements IApplication {
             envFile.delete();
         }
 
-        
-        
         PrintStream oldOut = System.out;
         PrintStream oldErr = System.err;
 
@@ -141,12 +136,9 @@ public class SimExplorer implements IApplication {
         IRuntimeResult result = new RuntimeResult();
 
         try {
-
             LocalExecutionEnvironment.getInstance().setNbThread(NumberOfLocalTheads);
 
             /*--- get execution message and job for runtime---*/
-
-            // LocalFileCache fileCache = new LocalFileCache();
             Map<File, File> usedFiles = new TreeMap<File, File>();
             IURIFile executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
             File executionMesageFileCache = executionMessageFile.cache();

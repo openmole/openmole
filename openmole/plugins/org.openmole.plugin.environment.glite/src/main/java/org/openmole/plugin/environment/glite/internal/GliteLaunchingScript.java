@@ -16,6 +16,8 @@
  */
 package org.openmole.plugin.environment.glite.internal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -65,11 +67,11 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         builder.append(in);
         builder.append(" -o ");
         builder.append(out);
-        builder.append(" -w $CUR; cd .. ; rm -rf $CUR");
+        builder.append(" -w $CUR ; cd .. ; rm -rf $CUR");
 
         String script = builder.toString();
 
-        //System.out.println(script);
+        Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
 
         return script;
     }
