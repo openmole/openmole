@@ -89,6 +89,7 @@ public class SimExplorer implements IApplication {
         options.addOption(workspaceOpt);
         options.addOption(inOpt);
         options.addOption(outOpt);
+        options.addOption(pluginOpt);
         
         CommandLineParser parser = new BasicParser();
         CommandLine cmdLine;
