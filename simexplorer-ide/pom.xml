@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.simexplorer</groupId>
-        <artifactId>simexplorer</artifactId>
+        <groupId>org.openmole</groupId>
+        <artifactId>openmole-ecosystem</artifactId>
         <version>0.3</version>
     </parent>
 

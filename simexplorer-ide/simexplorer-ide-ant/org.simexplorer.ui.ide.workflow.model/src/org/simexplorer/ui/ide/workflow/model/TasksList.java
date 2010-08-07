@@ -53,7 +53,7 @@ public class TasksList extends GenericTask implements Iterable<GenericTask> {
     }
 
     @Override
-    protected void process(IContext ic, IProgress ip) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    protected void process(IContext ic, IContext ic1, IProgress ip) throws UserBadDataError, InternalProcessingError, InterruptedException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

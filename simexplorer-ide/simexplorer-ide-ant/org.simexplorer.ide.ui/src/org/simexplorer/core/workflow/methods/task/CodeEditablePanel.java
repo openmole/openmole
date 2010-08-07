@@ -111,13 +111,15 @@ public class CodeEditablePanel extends EditorPanel<CodeTask> {
     }// </editor-fold>//GEN-END:initComponents
 
     private void textEditorCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_textEditorCaretUpdate
-        try {
+// TF only done one time with apply change
+/*        try {
             getObjectEdited().setCode(textEditor.getText());
         } catch (UserBadDataError ex) {
             Exceptions.printStackTrace(ex);
         } catch (InternalProcessingError ex) {
             Exceptions.printStackTrace(ex);
         }
+ */
     }//GEN-LAST:event_textEditorCaretUpdate
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -152,6 +154,19 @@ public class CodeEditablePanel extends EditorPanel<CodeTask> {
             Exceptions.printStackTrace(ex);
         }
     }
+
+    @Override
+    public void applyChanges() {
+        super.applyChanges();
+        try {
+            getObjectEdited().setCode(textEditor.getText());
+        } catch (UserBadDataError ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (InternalProcessingError ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
