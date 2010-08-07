@@ -213,7 +213,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     
     private static long getTime() throws InternalProcessingError, UserBadDataError {
         try {
-            return (long) UDuration.toInt(getTime());
+            return (long) UDuration.toInt(getTimeString());
         } catch (ParseException ex) {
             throw new UserBadDataError(ex);
         }
