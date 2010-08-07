@@ -35,8 +35,8 @@ import org.openmole.plugin.environment.glite.GliteAuthentication;
 
 public class ProxyChecker implements IUpdatable {
 
-    GliteAuthentication checkedEnv;
-    Context ctx;
+    final GliteAuthentication checkedEnv;
+    final Context ctx;
 
     public ProxyChecker(GliteAuthentication checkedEnv, Context ctx) {
         super();
@@ -44,31 +44,10 @@ public class ProxyChecker implements IUpdatable {
         this.ctx = ctx;
     }
 
-    public void setCtx(Context ctx) {
-        this.ctx = ctx;
-    }
-
     @Override
     public boolean update() throws InterruptedException {
         try {
-            checkedEnv.initContext(ctx);
-            ctx.getAttribute(Context.USERID);
-        } catch (NotImplementedException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (AuthenticationFailedException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (AuthorizationFailedException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (PermissionDeniedException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (IncorrectStateException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (DoesNotExistException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (TimeoutException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
-        } catch (NoSuccessException ex) {
-            Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
+            checkedEnv.initContext(ctx); 
         } catch (InternalProcessingError ex) {
             Logger.getLogger(ProxyChecker.class.getName()).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } catch (UserBadDataError ex) {

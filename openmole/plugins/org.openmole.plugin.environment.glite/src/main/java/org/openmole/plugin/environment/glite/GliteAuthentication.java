@@ -57,9 +57,11 @@ import org.openmole.plugin.environment.glite.internal.ProxyChecker;
  */
 public class GliteAuthentication implements IBatchServiceAuthentication {
 
-    final String voName;
-    final String vomsURL;
-    volatile private long proxyExpiresTime = Long.MAX_VALUE;
+    final private String voName;
+    final private String vomsURL;
+    
+    transient private File proxy = null;
+    transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
     public GliteAuthentication(String voName, String vomsURL) {
         this.voName = voName;
@@ -131,12 +133,10 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
 
             ctx.setAttribute(Context.LIFETIME, getTimeString());
 
-            String proxyPath = ctx.getAttribute(Context.USERPROXY);
-            if (proxyPath == null) {
-                proxyPath = Activator.getWorkspace().newFile("proxy", ".x509").getCanonicalPath();
-            }
-
-            ctx.setAttribute(Context.USERPROXY, proxyPath);
+            File oldProxy = proxy;
+            proxy = Activator.getWorkspace().newFile("proxy", ".x509");
+                
+            ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath());
 
             if (getCertType().equalsIgnoreCase("p12")) {
                 ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath());
@@ -161,8 +161,11 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
                 keyPassword = "";
             }
             ctx.setAttribute(Context.USERPASS, keyPassword);
-
+            
+            ctx.getAttribute(Context.USERID);
             proxyExpiresTime = System.currentTimeMillis() + getTime();
+            
+            if(oldProxy != null) oldProxy.delete();
             
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
