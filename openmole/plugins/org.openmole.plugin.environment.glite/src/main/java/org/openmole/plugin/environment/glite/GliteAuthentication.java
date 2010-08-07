@@ -116,7 +116,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         Context ctx = Activator.getJSagaSessionService().createContext();
         initContext(ctx);
         
-        long interval = (long) (getTime() * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)) * 1000;
+        long interval = (long) (getTime() * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio));
        
         Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
         Activator.getUpdater().delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
@@ -213,7 +213,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     
     private static long getTime() throws InternalProcessingError, UserBadDataError {
         try {
-            return (long) UDuration.toInt(getTimeString());
+            return UDuration.toInt(getTimeString()) * 1000L;
         } catch (ParseException ex) {
             throw new UserBadDataError(ex);
         }
