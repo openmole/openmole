@@ -133,8 +133,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
 
             ctx.setAttribute(Context.LIFETIME, getTimeString());
 
-            File oldProxy = proxy;
-            proxy = Activator.getWorkspace().newFile("proxy", ".x509");
+            if(proxy == null) proxy = Activator.getWorkspace().newFile("proxy", ".x509");
                 
             ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath());
 
@@ -164,8 +163,6 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
             
             ctx.getAttribute(Context.USERID);
             proxyExpiresTime = System.currentTimeMillis() + getTime();
-            
-            if(oldProxy != null) oldProxy.delete();
             
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
