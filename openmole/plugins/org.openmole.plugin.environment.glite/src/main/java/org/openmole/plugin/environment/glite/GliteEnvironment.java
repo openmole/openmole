@@ -18,7 +18,6 @@ package org.openmole.plugin.environment.glite;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent;
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
@@ -209,7 +208,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     }
 
     @Override
-    public Collection<JSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
+    public Collection<JSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         List<URI> jss = getBDII().queryWMSURIs(getVOName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation)).intValue());
 
@@ -219,7 +218,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
             try {
                 URI wms = new URI("wms:" + js.getRawSchemeSpecificPart());
 
-                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthentication(voName, vomsURL), threadsByWMS);
+                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL), threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -231,14 +230,14 @@ public class GliteEnvironment extends JSAGAEnvironment {
 
 //    @Cachable
     @Override
-    public Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError {
+    public Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         Collection<IBatchStorage> allStorages = new LinkedList<IBatchStorage>();
 
         Set<URI> stors = getBDII().querySRMURIs(getVOName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation)).intValue());
 
         for (URI stor : stors) {
-            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthentication(voName, vomsURL),threadsBySE);
+            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL),threadsBySE);
             allStorages.add(storage);
         }
 

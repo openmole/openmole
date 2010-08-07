@@ -16,6 +16,7 @@
  */
 package org.openmole.runtime;
 
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,7 +43,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.message.RuntimeResult;
 import org.openmole.core.model.file.IURIFile;
@@ -62,7 +62,6 @@ import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.file.GZURIFile;
 import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.implementation.message.FileMessage;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
 import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.serializer.ISerializationResult;
 
@@ -119,8 +118,8 @@ public class SimExplorer implements IApplication {
         if (cmdLine.hasOption(authenticationOpt.getOpt())) {
             /* get env and init */
             File envFile = new File(cmdLine.getOptionValue(authenticationOpt.getOpt()));
-            IBatchEnvironmentAuthentication real = Activator.getSerialiser().deserialize(envFile);            
-            real.initialize();
+            IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);            
+            authentication.initialize();
             envFile.delete();
         }
 

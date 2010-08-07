@@ -27,9 +27,9 @@ public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnviron
 
     File getRuntime();
 
-    Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError;
+    Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
-    Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError;
+    Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
     IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
 

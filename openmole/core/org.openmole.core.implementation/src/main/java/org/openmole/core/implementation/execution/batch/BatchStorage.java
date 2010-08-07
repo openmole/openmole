@@ -65,7 +65,7 @@ public class BatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServ
     transient IURIFile persistentSpace;
     transient Long time;
 
-    public BatchStorage(URI baselocation, IBatchServiceAuthenticationKey<? extends AUTH> key, ENV batchEnvironment, AUTH authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    public BatchStorage(URI baselocation,  ENV batchEnvironment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
         super(batchEnvironment, key, authentication, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl());
         this.location = baselocation;
     }
