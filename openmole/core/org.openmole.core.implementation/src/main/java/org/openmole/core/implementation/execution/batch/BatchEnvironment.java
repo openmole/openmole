@@ -22,7 +22,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.openmole.commons.aspect.caching.Cachable;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -34,8 +33,6 @@ import org.openmole.core.model.execution.batch.IBatchStorage;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchServiceGroup;
 import org.openmole.core.model.job.IJob;
@@ -54,27 +51,26 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
     }
-    BatchServiceGroup<JS> jobServices;
-    BatchServiceGroup<IBatchStorage> storages;
-    Lock initJS;
-    Lock initST;
-    final IBatchEnvironmentDescription description;
+    
+    transient BatchServiceGroup<JS> jobServices;
+    transient BatchServiceGroup<IBatchStorage> storages;
+    transient Lock initJS;
+    transient Lock initST;
+    
     final Integer memorySizeForRuntime;
     final File runtime;
 
-    public BatchEnvironment(IBatchEnvironmentDescription description, int memorySizeForRuntime) throws InternalProcessingError {
+    public BatchEnvironment(int memorySizeForRuntime) throws InternalProcessingError {
         super();
-        Activator.getBatchEnvironmentAuthenticationRegistry().createAuthenticationIfNeeded(description);
-
-        this.description = description;
+     
         this.memorySizeForRuntime = memorySizeForRuntime;
         this.runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
 
         Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchJobWatcher.CheckInterval));
     }
 
-    public BatchEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
-        this(description, Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime));
+    public BatchEnvironment() throws InternalProcessingError {
+        this(Activator.getWorkspace().getPreferenceAsInt(MemorySizeForRuntime));
     }
 
     @Override
@@ -95,25 +91,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         return memorySizeForRuntime;
     }
 
-    @Override
-    public IBatchEnvironmentDescription getDescription() {
-        return description;
-    }
-
-    @Cachable
-    public File getDescriptionFile() throws InternalProcessingError, InterruptedException, UserBadDataError {
-        File environmentDescription = Activator.getWorkspace().newFile("envrionmentDescription", ".xml");
-        Activator.getSerializer().serialize(getDescription(), environmentDescription);
-        return environmentDescription;
-    }
-
-    @Override
-    public IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError {
-        return Activator.getBatchEnvironmentAuthenticationRegistry().getAuthentication(description);
-    }
-
     protected BatchServiceGroup<IBatchStorage> selectStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        getAuthentication().initializeAccessIfNeeded();
         final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
 
         Collection<IBatchStorage> stors = allStorages();
@@ -151,7 +129,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     }
 
     protected BatchServiceGroup<JS> selectWorkingJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        getAuthentication().initializeAccessIfNeeded();
         final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
         Collection<JS> allJobServices = allJobServices();
         final Semaphore done = new Semaphore(0);

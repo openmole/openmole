@@ -16,34 +16,40 @@
  */
 package org.openmole.core.implementation.execution.batch;
 
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.internal.Activator;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public abstract class BatchService implements IBatchService {
+public abstract class BatchService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> implements IBatchService<ENV, AUTH> {
 
-    private IBatchServiceDescription description;
-    private IBatchEnvironmentDescription batchEnvironmentDescription;
+    final private IBatchServiceDescription description;
+    final private ENV batchEnvironment;
+    final private IBatchServiceAuthenticationKey<? extends AUTH> key;
 
-   // private IBatchServiceGroup<?> group;
+    public BatchService(ENV batchEnvironment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, IBatchServiceDescription description, IUsageControl usageControl, IFailureControl failureControl) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
-    public BatchService(IBatchEnvironmentDescription batchEnvironmentDescription, IBatchServiceDescription description, IUsageControl usageControl, IFailureControl failureControl) {
-
+        Activator.getBatchEnvironmentAuthenticationRegistry().initAndRegisterIfNotAllreadyIs(key, authentication);
+        
         if(!Activator.getBatchRessourceControl().contains(description)) {
             Activator.getBatchRessourceControl().registerRessouce(description, usageControl, failureControl);
         } else {
             Activator.getBatchRessourceControl().getController(description).getFailureControl().reinit();
         }
-
+        
         this.description = description;
-        this.batchEnvironmentDescription = batchEnvironmentDescription;
+        this.batchEnvironment = batchEnvironment;
+        this.key = key;
     }
 
     @Override
@@ -52,8 +58,8 @@ public abstract class BatchService implements IBatchService {
     }
 
     @Override
-    public IBatchEnvironmentDescription getBatchExecutionEnvironmentDescription() {
-        return batchEnvironmentDescription;
+    public ENV getBatchExecutionEnvironment() {
+        return batchEnvironment;
     }
 
     @Override
@@ -61,4 +67,14 @@ public abstract class BatchService implements IBatchService {
         return getDescription().toString();
     }
 
+    @Override
+    public AUTH getAuthentication() {
+        return Activator.getBatchEnvironmentAuthenticationRegistry().getRegistred(getAuthenticationKey());
+    }
+
+    @Override
+    public IBatchServiceAuthenticationKey<? extends AUTH> getAuthenticationKey() {
+        return key;
+    }
+    
 }

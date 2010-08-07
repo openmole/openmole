@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
+ *  Copyright (C) 2010 reuillon
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,15 +17,10 @@
 
 package org.openmole.core.model.execution.batch;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
-
 /**
  *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author reuillon
  */
-public interface IBatchEnvironmentAuthentication {
-    void initializeAccessIfNeeded() throws UserBadDataError, InternalProcessingError, InterruptedException;
-    void initializeAccess() throws UserBadDataError, InternalProcessingError, InterruptedException;
-    boolean isAccessInitialized();
+public interface IBatchServiceAuthenticationKey<T extends IBatchServiceAuthentication> {
+
 }

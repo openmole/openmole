@@ -16,11 +16,17 @@
  */
 package org.openmole.core.model.execution.batch;
 
-public interface IBatchService {
+
+public interface IBatchService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> {
 
     boolean test();
 
     IBatchServiceDescription getDescription();
 
-    IBatchEnvironmentDescription getBatchExecutionEnvironmentDescription();
+    ENV getBatchExecutionEnvironment();
+    
+    AUTH getAuthentication();
+    
+    IBatchServiceAuthenticationKey<? extends AUTH> getAuthenticationKey();
+
 }

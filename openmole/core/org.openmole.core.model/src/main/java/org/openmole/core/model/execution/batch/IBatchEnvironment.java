@@ -27,10 +27,6 @@ public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnviron
 
     File getRuntime();
 
-    IBatchEnvironmentDescription getDescription();
-
-    IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError;
-
     Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError;
 
     Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError;

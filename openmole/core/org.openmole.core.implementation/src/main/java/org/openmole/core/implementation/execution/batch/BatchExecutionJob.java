@@ -200,7 +200,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
         try {
             IBatchJob bj = js._1().submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2());
-            //bj.submit(js._2());
             setBatchJob(bj);
         } catch (InternalProcessingError e) {
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);

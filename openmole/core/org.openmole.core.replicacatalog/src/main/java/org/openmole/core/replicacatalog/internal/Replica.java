@@ -27,7 +27,8 @@ import com.db4o.ta.Activatable;
 import java.io.File;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.replicacatalog.IReplica;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 
@@ -36,18 +37,18 @@ public class Replica implements IReplica, Activatable {
     final File source;
     final IHash hash;
     final IBatchServiceDescription storageDescription;
-    final IBatchEnvironmentDescription environmentDescription;
+    final IBatchServiceAuthenticationKey authenticationKey;
     final IURIFile destination;
 
    
     transient Activator activator;
 
 
-    public Replica(File source, IHash hash, IBatchServiceDescription storageDescription, IBatchEnvironmentDescription environmentDescription, IURIFile destination) {
+    public Replica(File source, IHash hash, IBatchServiceDescription storageDescription, IBatchServiceAuthenticationKey authenticationKey, IURIFile destination) {
         this.source = source;
         this.hash = hash;
         this.storageDescription = storageDescription;
-        this.environmentDescription = environmentDescription;
+        this.authenticationKey = authenticationKey;
         this.destination = destination;
     }
 
@@ -73,9 +74,9 @@ public class Replica implements IReplica, Activatable {
     }
 
     @Override
-    public IBatchEnvironmentDescription getEnvironmentDescription() {
+    public IBatchServiceAuthenticationKey getAuthenticationKey() {
         activate(ActivationPurpose.READ);
-        return environmentDescription;
+        return authenticationKey;
     }
 
     @Override
@@ -113,7 +114,7 @@ public class Replica implements IReplica, Activatable {
 
     @Override
     public String toString() {
-        return "Replica [destination=" + getDestination() + ", environmentDescription=" + getEnvironmentDescription() + ", hash=" + getSourceHash() + ", source=" + getSource() + ", storageDescription=" + getStorageDescription() + "]";
+        return "Replica [destination=" + getDestination() + ", authenticationKey=" + getAuthenticationKey() + ", hash=" + getSourceHash() + ", source=" + getSource() + ", storageDescription=" + getStorageDescription() + "]";
     }
 
 

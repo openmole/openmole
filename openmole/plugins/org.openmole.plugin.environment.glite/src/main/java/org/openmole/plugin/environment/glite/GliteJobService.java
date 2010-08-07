@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
+ *  Copyright (C) 2010 reuillon
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,33 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution.batch;
+package org.openmole.plugin.environment.glite;
 
+import java.net.URI;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
-import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.plugin.environment.jsaga.JSAGAJob;
+import org.openmole.plugin.environment.jsaga.JSAGAJobService;
 
 /**
  *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author reuillon
  */
-public abstract class BatchEnvironmentAuthentication implements IBatchEnvironmentAuthentication {
+public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuthentication> {
 
-    boolean isAccessInitialized = false;
-
-    @Override
-    public synchronized void initializeAccessIfNeeded() throws UserBadDataError, InternalProcessingError, InterruptedException {
-        if(!isAccessInitialized) {
-            initializeAccess();
-            isAccessInitialized = true;
-        }
+    public GliteJobService(URI jobServiceURI, GliteEnvironment environment, GliteAuthenticationKey authenticationKey, GliteAuthentication authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        super(jobServiceURI, environment, authenticationKey, authentication, nbAccess);
     }
 
     @Override
-    public boolean isAccessInitialized() {
-        return isAccessInitialized;
+    protected JSAGAJob buildJob(String id) throws InternalProcessingError {
+        return new GliteJob(id, this, getAuthentication().getProxyExpiresTime());
     }
-
-
+    
 }

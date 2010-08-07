@@ -30,16 +30,15 @@ import org.ogf.saga.error.PermissionDeniedException;
 import org.ogf.saga.error.TimeoutException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.service.Retry;
 import org.openmole.misc.updater.IUpdatable;
-import org.openmole.plugin.environment.glite.GliteEnvironmentAuthentication;
+import org.openmole.plugin.environment.glite.GliteAuthentication;
 
 public class ProxyChecker implements IUpdatable {
 
-    GliteEnvironmentAuthentication checkedEnv;
+    GliteAuthentication checkedEnv;
     Context ctx;
 
-    public ProxyChecker(GliteEnvironmentAuthentication checkedEnv, Context ctx) {
+    public ProxyChecker(GliteAuthentication checkedEnv, Context ctx) {
         super();
         this.checkedEnv = checkedEnv;
         this.ctx = ctx;

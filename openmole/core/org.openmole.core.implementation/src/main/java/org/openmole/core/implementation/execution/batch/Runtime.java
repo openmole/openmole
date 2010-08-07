@@ -29,12 +29,12 @@ public class Runtime implements IRuntime {
 
     final IURIFile runtime;
     final Collection<IURIFile> environmentPlugins;
-    final IURIFile environmentDescritpion;
+    final IURIFile authentication;
 
-    public Runtime(IURIFile runtime, Collection<IURIFile> environmentPlugins, IURIFile environmentDescritpion) {
+    public Runtime(IURIFile runtime, Collection<IURIFile> environmentPlugins, IURIFile authentication) {
         this.runtime = runtime;
         this.environmentPlugins = environmentPlugins;
-        this.environmentDescritpion = environmentDescritpion;
+        this.authentication = authentication;
     }
 
 
@@ -49,8 +49,8 @@ public class Runtime implements IRuntime {
     }
 
     @Override
-    public IURIFile getEnvironmentDescriptionFile() {
-        return environmentDescritpion;
+    public IURIFile getEnvironmentAuthenticationFile() {
+        return authentication;
     }
 
 }

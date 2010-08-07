@@ -59,18 +59,13 @@ public class JSAGAJobBuilder {
 
             description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
 
-            StringBuilder args = new StringBuilder();
-            args.append(in.toString());
-            args.append(" ");
-            args.append(out.toString());
-
+          
             BufferedWriter writter = new BufferedWriter(new FileWriter(tmpScript));
 
-            String argsSt = args.toString();
-
+          
             //, env.getDescriptionFile().toURI().getSchemeSpecificPart() + ">" + env.getDescriptionFile().getName()
 
-            writter.write(env.getLaunchingScript().getScript(argsSt, runtime, env.getMemorySizeForRuntime()));
+            writter.write(env.getLaunchingScript().getScript(in.toString(), out.toString(), runtime, env.getMemorySizeForRuntime()));
 
             writter.close();
 

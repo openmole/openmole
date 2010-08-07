@@ -1,7 +1,7 @@
-package org.openmole.core.batchenvironmentauthenticationregistry.ssh;
+package org.openmole.core.authenticationregistry.ssh;
 
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.batchenvironmentauthenticationregistry.jsaga.model.IJSAGALaunchingScript;
+import org.openmole.core.authenticationregistry.jsaga.model.IJSAGALaunchingScript;
 import org.openmole.core.model.execution.batch.IRuntime;
 
 public class SSHLaunchingScript implements IJSAGALaunchingScript<SSHEnvironment>{

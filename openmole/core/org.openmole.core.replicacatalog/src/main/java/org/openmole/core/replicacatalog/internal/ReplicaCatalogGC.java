@@ -41,14 +41,9 @@ public class ReplicaCatalogGC implements IUpdatable {
         for (IReplica replica : catalog.getAllReplicas()) {
 
             //May be the env pluggin is not loaded in this case a version of the description class is persisted by db4o
-            if (Activator.getBatchEnvironmentAuthenticationRegistry().isRegistred(replica.getEnvironmentDescription())) {
-                try {
-                    boolean initialized = Activator.getBatchEnvironmentAuthenticationRegistry().getAuthentication(replica.getEnvironmentDescription()).isAccessInitialized();
-                    if (!replica.getSource().exists() && initialized) {
-                        catalog.clean(replica);
-                    }
-                } catch (InternalProcessingError ex) {
-                    Logger.getLogger(ReplicaCatalogGC.class.getName()).log(Level.SEVERE, "Error in replica catalog garbage collection.", ex);
+            if (Activator.getBatchEnvironmentAuthenticationRegistry().isRegistred(replica.getAuthenticationKey())) {
+                if (!replica.getSource().exists()) {
+                    catalog.clean(replica);
                 }
             }
         }

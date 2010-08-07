@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environment.glite;
 
 import fr.in2p3.jsaga.adaptor.base.usage.UDuration;
@@ -41,11 +40,12 @@ import org.ogf.saga.error.IncorrectStateException;
 import org.ogf.saga.error.NoSuccessException;
 import org.ogf.saga.error.NotImplementedException;
 import org.ogf.saga.error.PermissionDeniedException;
+import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.file.URIFile;
-import org.openmole.core.implementation.execution.batch.BatchEnvironmentAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.plugin.environment.glite.internal.Activator;
@@ -55,62 +55,51 @@ import org.openmole.plugin.environment.glite.internal.ProxyChecker;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthentication {
+public class GliteAuthentication implements IBatchServiceAuthentication {
 
-    final GliteEnvironmentDescription gliteEnvironmentDescription;
-    File CACertificatesDir;
-    ProxyChecker proxyChecker;
-    File proxy;
+    final String voName;
+    final String vomsURL;
+    volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
-    public GliteEnvironmentAuthentication(GliteEnvironmentDescription gliteEnvironmentDescription) {
-        this.gliteEnvironmentDescription = gliteEnvironmentDescription;
+    public GliteAuthentication(String voName, String vomsURL) {
+        this.voName = voName;
+        this.vomsURL = vomsURL;
     }
 
+    @Cachable
     private File getCACertificatesDir() throws InternalProcessingError, InterruptedException {
-        if (CACertificatesDir != null) {
-            return CACertificatesDir;
-        }
+        try {
+            String X509_CERT_DIR = System.getenv("X509_CERT_DIR");
 
-        synchronized (this) {
-            if (CACertificatesDir == null) {
+            File caDir;
+            if (X509_CERT_DIR != null && (caDir = new File(X509_CERT_DIR)).exists()) {
+                return caDir;
+            } else {
+                caDir = new File("/etc/grid-security/certificates/");
+                if (caDir.exists()) {
+                    return caDir;
+                } else {
+                    File tmp = Activator.getWorkspace().getFile("CACertificates");
 
-                try {
-                    if (CACertificatesDir == null) {
-                        String X509_CERT_DIR = System.getenv("X509_CERT_DIR");
-
-                        File caDir;
-                        if (X509_CERT_DIR != null && (caDir = new File(X509_CERT_DIR)).exists()) {
-                            CACertificatesDir = caDir;
-                        } else {
-                            caDir = new File("/etc/grid-security/certificates/");
-                            if (caDir.exists()) {
-                                CACertificatesDir = caDir;
-                            } else {
-                                File tmp = Activator.getWorkspace().getFile("CACertificates");
-
-                                if (!tmp.exists() || !new File(tmp, ".complete").exists()) {
-                                    tmp.mkdir();
-                                    dowloadCACertificates(new URI(Activator.getWorkspace().getPreference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
-                                    new File(tmp, ".complete").createNewFile();
-                                }
-                                CACertificatesDir = tmp;
-                            }
-                        }
+                    if (!tmp.exists() || !new File(tmp, ".complete").exists()) {
+                        tmp.mkdir();
+                        dowloadCACertificates(new URI(Activator.getWorkspace().getPreference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
+                        new File(tmp, ".complete").createNewFile();
                     }
-                } catch (URISyntaxException e) {
-                    throw new InternalProcessingError(e);
-                } catch (IOException e) {
-                    throw new InternalProcessingError(e);
+                    return tmp;
                 }
-
             }
+
+        } catch (URISyntaxException e) {
+            throw new InternalProcessingError(e);
+        } catch (IOException e) {
+            throw new InternalProcessingError(e);
         }
 
-        return CACertificatesDir;
     }
 
     @Override
-    public void initializeAccess() throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void initialize() throws UserBadDataError, InternalProcessingError, InterruptedException {
         File proxyFile;
 
         if (System.getenv().containsKey("X509_USER_PROXY") && (proxyFile = new File(System.getenv().get("X509_USER_PROXY"))).exists()) {
@@ -124,20 +113,11 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
 
         Context ctx = Activator.getJSagaSessionService().createContext();
         initContext(ctx);
-        String time = getTime();
-        long interval;
-        try {
-            interval = ((long) (UDuration.toInt(time) * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio))) * 1000;
-        } catch (ParseException ex) {
-            throw new UserBadDataError(ex);
-        }
-
-        if (proxyChecker == null) {
-            proxyChecker = new ProxyChecker(this, ctx);
-            Activator.getUpdater().delay(proxyChecker, ExecutorType.OWN, interval);
-        } else {
-            proxyChecker.setCtx(ctx);
-        }
+        
+        long interval = (long) (getTime() * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)) * 1000;
+       
+        Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
+        Activator.getUpdater().delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
 
         Activator.getJSagaSessionService().addContext(ctx);
     }
@@ -149,24 +129,26 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
             ctx.setAttribute(VOMSContext.VOMSDIR, "");
             ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
-            ctx.setAttribute(Context.LIFETIME, getTime());
+            ctx.setAttribute(Context.LIFETIME, getTimeString());
 
-            if (proxy == null) {
-                proxy = Activator.getWorkspace().newFile("proxy", ".x509");
+            String proxyPath = ctx.getAttribute(Context.USERPROXY);
+            if (proxyPath == null) {
+                proxyPath = Activator.getWorkspace().newFile("proxy", ".x509").getCanonicalPath();
             }
-            ctx.setAttribute(Context.USERPROXY, proxy.getCanonicalPath());
 
-            if(getCertType().equalsIgnoreCase("p12")) {
+            ctx.setAttribute(Context.USERPROXY, proxyPath);
+
+            if (getCertType().equalsIgnoreCase("p12")) {
                 ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath());
-            } else if(getCertType().equalsIgnoreCase("pem")) {
+            } else if (getCertType().equalsIgnoreCase("pem")) {
                 ctx.setAttribute(Context.USERCERT, getCertPath());
                 ctx.setAttribute(Context.USERKEY, getKeyPath());
             } else {
                 throw new UserBadDataError("Unknown certificate type " + getCertType());
             }
 
-            ctx.setAttribute(Context.SERVER, getVomsURL());
-            ctx.setAttribute(Context.USERVO, getVoName());
+            ctx.setAttribute(Context.SERVER, vomsURL);
+            ctx.setAttribute(Context.USERVO, voName);
 
             String fqan = getFQAN();
 
@@ -175,9 +157,13 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
             }
 
             String keyPassword = Activator.getWorkspace().getPreference(GliteEnvironment.PasswordLocation);
-            if(keyPassword == null) keyPassword = "";
+            if (keyPassword == null) {
+                keyPassword = "";
+            }
             ctx.setAttribute(Context.USERPASS, keyPassword);
 
+            proxyExpiresTime = System.currentTimeMillis() + getTime();
+            
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
         } catch (NotImplementedException e) {
@@ -221,9 +207,18 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
         return Activator.getWorkspace().getPreference(GliteEnvironment.FqanLocation);
     }
 
-    private static String getTime() throws InternalProcessingError {
+    private static String getTimeString() throws InternalProcessingError {
         return Activator.getWorkspace().getPreference(GliteEnvironment.TimeLocation);
     }
+    
+    private static long getTime() throws InternalProcessingError, UserBadDataError {
+        try {
+            return (long) UDuration.toInt(getTime());
+        } catch (ParseException ex) {
+            throw new UserBadDataError(ex);
+        }
+    }
+
 
     static void dowloadCACertificates(URI uri, File dir) throws InternalProcessingError, IOException, InterruptedException {
 
@@ -302,13 +297,9 @@ public class GliteEnvironmentAuthentication extends BatchEnvironmentAuthenticati
         }
     }
 
-
-    public String getVoName() {
-        return gliteEnvironmentDescription.getVoName();
+    public long getProxyExpiresTime() {
+        return proxyExpiresTime;
     }
-
-    String getVomsURL() {
-        return gliteEnvironmentDescription.getVomsURL();
-    }
-
+    
+    
 }

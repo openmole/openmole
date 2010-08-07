@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.execution.batch;
-
 
 import java.net.URI;
 
@@ -24,19 +22,15 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.file.IURIFile;
 
+public interface IBatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends IBatchService<ENV, AUTH> {
 
-public interface IBatchStorage extends IBatchService {
-	
-	URI getURI();
-	
-	static final int waitStorageTimeOut = 5 * 60 * 1000;
+    URI getURI();
 
-	IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
-       // IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-	IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-      //  IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-	IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-       // IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError,UserBadDataError, InterruptedException;
-		
-	//IBatchStorageDescription getDescription();
+    IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    IURIFile getPersistentSpace(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
+
+    IBatchServiceAuthentication getRemoteAuthentication();
 }

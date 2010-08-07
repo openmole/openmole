@@ -1,4 +1,4 @@
-package org.openmole.core.batchenvironmentauthenticationregistry.ssh.internal;
+package org.openmole.core.authenticationregistry.ssh.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

@@ -20,7 +20,6 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-public interface IBatchJobService extends IBatchService {
-
+public interface IBatchJobService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends IBatchService<ENV, AUTH> {
     IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

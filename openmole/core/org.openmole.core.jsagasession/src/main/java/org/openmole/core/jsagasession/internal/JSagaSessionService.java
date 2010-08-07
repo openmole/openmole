@@ -33,13 +33,11 @@ public class JSagaSessionService implements IJSagaSessionService {
 
     @Override
     public void addContext(Context context) throws InternalProcessingError {
-
         try {
             getSession().addContext(context);
         } catch (NotImplementedException e) {
             throw new InternalProcessingError(e);
         }
-
     }
 
     @Override

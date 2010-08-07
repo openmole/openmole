@@ -20,9 +20,7 @@ package org.openmole.plugin.environment.jsaga;
 
 import org.joda.time.format.ISOPeriodFormat;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironment;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 
@@ -40,32 +38,32 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
     final private int requieredMemory;
     final private String requieredCPUTime;
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
-        super(description);
+    public JSAGAEnvironment(int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
+        super();
         this.requieredMemory = requieredMemory;
         this.requieredCPUTime = requieredCPUTime;
     }
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory) throws InternalProcessingError {
-        this(description, requieredMemory, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    public JSAGAEnvironment(int requieredMemory) throws InternalProcessingError {
+        this(requieredMemory, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description, String requieredCPUTime) throws InternalProcessingError {
-        this(description, Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), requieredCPUTime);
+    public JSAGAEnvironment(String requieredCPUTime) throws InternalProcessingError {
+        this(Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), requieredCPUTime);
     }
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description) throws InternalProcessingError {
-        this(description, Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    public JSAGAEnvironment() throws InternalProcessingError {
+        this(Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
-        super(description, memoryForRuntime);
+    public JSAGAEnvironment(int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
+        super(memoryForRuntime);
         this.requieredMemory = requieredMemory;
         this.requieredCPUTime = requieredCPUTime;
     }
 
-    public JSAGAEnvironment(IBatchEnvironmentDescription description, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
-        this(description, requieredMemory, memoryForRuntime, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    public JSAGAEnvironment(int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
+        this(requieredMemory, memoryForRuntime, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
     public int getRequieredCPUTime() {

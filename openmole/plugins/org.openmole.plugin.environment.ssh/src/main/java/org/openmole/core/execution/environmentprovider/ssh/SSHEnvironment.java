@@ -2,16 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openmole.core.batchenvironmentauthenticationregistry.ssh;
+package org.openmole.core.authenticationregistry.ssh;
 
 import java.util.Collection;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.core.batchenvironmentauthenticationregistry.jsaga.JSAGAExecutionEnvironment;
-import org.openmole.core.batchenvironmentauthenticationregistry.jsaga.model.IJSAGAJobService;
-import org.openmole.core.batchenvironmentauthenticationregistry.jsaga.model.IJSAGALaunchingScript;
-import org.openmole.core.batchenvironmentauthenticationregistry.ssh.internal.Activator;
+import org.openmole.core.authenticationregistry.jsaga.JSAGAExecutionEnvironment;
+import org.openmole.core.authenticationregistry.jsaga.model.IJSAGAJobService;
+import org.openmole.core.authenticationregistry.jsaga.model.IJSAGALaunchingScript;
+import org.openmole.core.authenticationregistry.ssh.internal.Activator;
 import org.openmole.core.model.execution.EnvironmentConfiguration;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 

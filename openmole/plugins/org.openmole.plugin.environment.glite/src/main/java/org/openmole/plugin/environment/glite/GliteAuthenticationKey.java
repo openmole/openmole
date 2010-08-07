@@ -17,60 +17,38 @@
 
 package org.openmole.plugin.environment.glite;
 
-import org.openmole.core.model.execution.batch.IBatchEnvironmentAuthentication;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 
-public class GliteEnvironmentDescription implements IBatchEnvironmentDescription {
+public class GliteAuthenticationKey implements IBatchServiceAuthenticationKey {
 
     String voName;
     String vomsURL;
 
-    public GliteEnvironmentDescription(String voName, String vomsURL) {
+    public GliteAuthenticationKey(String voName, String vomsURL) {
         super();
         this.voName = voName;
         this.vomsURL = vomsURL;
     }
 
-
-    String getVomsURL() {
-        return vomsURL;
-    }
-
-    String getVoName() {
-        return voName;
-    }
-
-    void setVoName(String voName) {
-        this.voName = voName;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        //Logger.getLogger(GliteEnvironmentDescription.class.getName()).info(this.toString() + " " + obj.toString() + "O");
-
         if (obj == null) {
             return false;
         }
 
-
-       // Logger.getLogger(GliteEnvironmentDescription.class.getName()).info(this.toString() + " " + obj.toString() + "1");
         if (getClass() != obj.getClass()) {
-
             return false;
         }
 
-       // Logger.getLogger(GliteEnvironmentDescription.class.getName()).info(this.toString() + " " + obj.toString() + "2");
-        final GliteEnvironmentDescription other = (GliteEnvironmentDescription) obj;
+        final GliteAuthenticationKey other = (GliteAuthenticationKey) obj;
         if ((this.voName == null) ? (other.voName != null) : !this.voName.equals(other.voName)) {
             return false;
         }
 
-       // Logger.getLogger(GliteEnvironmentDescription.class.getName()).info(this.toString() + " " + obj.toString() + "3");
         if ((this.vomsURL == null) ? (other.vomsURL != null) : !this.vomsURL.equals(other.vomsURL)) {
             return false;
         }
 
-       // Logger.getLogger(GliteEnvironmentDescription.class.getName()).info(this.toString() + " " + obj.toString() + "4");
         return true;
     }
 
@@ -84,12 +62,7 @@ public class GliteEnvironmentDescription implements IBatchEnvironmentDescription
 
     @Override
     public String toString() {
-        return GliteEnvironmentDescription.class.getName() + ": " + voName + "," + vomsURL;
-    }
-
-    @Override
-    public IBatchEnvironmentAuthentication createBatchEnvironmentAuthentication() {
-        return new GliteEnvironmentAuthentication(this);
+        return GliteAuthenticationKey.class.getName() + ": " + voName + "," + vomsURL;
     }
 
 

@@ -41,7 +41,6 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        //System.setProperty("jsaga.universe.create.if.missing", "true");
         this.context = context;
 
         System.setProperty("JSAGA_VAR", getWorkspace().newDir().getAbsolutePath());
@@ -58,14 +57,6 @@ public class Activator implements BundleActivator {
             Logger.getLogger(Activator.class.getName()).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
         }
 
-
-       /* BufferedReader r =  new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(JSAGAConfigFile)));
-        String s;
-        while((s = r.readLine()) != null) {
-            System.out.println(s);
-        }*/
-
-
         java.net.URL timeout = this.getClass().getClassLoader().getResource(JSAGATimeOutFile);
 
         if (universe != null) {
@@ -77,8 +68,6 @@ public class Activator implements BundleActivator {
         initializeURLProtocol(context);
 
         reg = context.registerService(IJSagaSessionService.class.getName(), new JSagaSessionService(), null);
-
-
     }
 
     @Override

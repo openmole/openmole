@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -8,38 +8,42 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole</artifactId>
+        <artifactId>libraries</artifactId>
         <groupId>org.openmole</groupId>
         <version>0.3</version>
     </parent>
 
-    <artifactId>core</artifactId>
+    <!--Used to build the symbolic name of the bundle-->
+    <artifactId>org.apache.commons.cli</artifactId>
+    <version>${lib.org.apache.commons.cli.version}</version>
 
-    <modules>
-        <module>org.openmole.core.metadataservice</module>
-        <module>org.openmole.core.objectidservice</module>
-        <module>org.openmole.core.persitenceservice</module>
-        <module>org.openmole.core.file</module>
-        <module>org.openmole.core.batchservicecontrol</module>
-        <module>org.openmole.core.model</module>
-        <module>org.openmole.core.implementation</module>
-        <module>org.openmole.core.jsagasession</module>
-        <module>org.openmole.core.structuregenerator</module>
-        <module>org.openmole.core.replicacatalog</module>
-	<module>org.openmole.core.serializer</module>
-        <module>org.openmole.core.authenticationregistry</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>${lib.org.apache.commons.cli.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
     <name>${project.artifactId}</name>
-    <description>Third-party OSGi bundles used by SimExplorer</description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
 
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
+
+
+    <!--optional. Use this property to tune the exported packages-->
+    <!--<properties>
+        <export.packages>
+            TODO
+        </export.packages>
+    </properties>-->
 
 </project>

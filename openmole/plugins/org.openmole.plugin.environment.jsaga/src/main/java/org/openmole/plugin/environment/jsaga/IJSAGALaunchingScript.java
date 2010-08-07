@@ -21,5 +21,5 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.batch.IRuntime;
 
 public interface IJSAGALaunchingScript {
-	String getScript(String args, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError;
+	String getScript(String in, String out, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError;
 }

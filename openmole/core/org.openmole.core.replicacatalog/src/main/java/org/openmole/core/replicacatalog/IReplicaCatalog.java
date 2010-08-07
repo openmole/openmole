@@ -37,5 +37,4 @@ public interface IReplicaCatalog {
 
     void remove(IReplica replica);
 
-    void removeAllReplicaForEnvironment(IBatchEnvironment environment);
 }

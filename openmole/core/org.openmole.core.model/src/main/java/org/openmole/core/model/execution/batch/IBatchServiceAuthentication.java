@@ -16,7 +16,10 @@
  */
 package org.openmole.core.model.execution.batch;
 
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 
-public interface IBatchEnvironmentDescription {
-    IBatchEnvironmentAuthentication createBatchEnvironmentAuthentication();
+
+public interface IBatchServiceAuthentication {
+    void initialize() throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

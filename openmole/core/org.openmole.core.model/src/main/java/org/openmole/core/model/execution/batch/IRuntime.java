@@ -25,7 +25,7 @@ import org.openmole.core.model.file.IURIFile;
  * @author reuillon
  */
 public interface IRuntime {
-    IURIFile getEnvironmentDescriptionFile();
+    IURIFile getEnvironmentAuthenticationFile();
     IURIFile getRuntime();
     Collection<IURIFile> getEnvironmentPlugins();
 }

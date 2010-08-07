@@ -158,7 +158,6 @@ public class JSAGAJob extends BatchJob {
             setState(ExecutionState.FAILED);
             throw new InternalProcessingError(e);
         }
-
     }
 
     @Override

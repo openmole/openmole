@@ -18,6 +18,7 @@ package org.openmole.plugin.environment.glite;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent;
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
@@ -129,68 +130,62 @@ public class GliteEnvironment extends JSAGAEnvironment {
     }
 
     WorkloadOnAverages workload;
-    String bdiiURL;
     Integer threadsByWMS;
     Integer threadsBySE;
-    String VOName;
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError {
-        super(description);
-        init(description, bdii);
-    }
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, String requieredCPUTime) throws InternalProcessingError {
-        super(description, requieredCPUTime);
-        init(description, bdii);
-    }
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii , int requieredMemory) throws InternalProcessingError {
-        super(description, requieredMemory);
-        init(description, bdii);
-    }
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
-        super(description, requieredMemory, requieredCPUTime);
-        init(description, bdii);
-    }
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
-        super(description, requieredMemory, memoryForRuntime);
-        init(description, bdii);
-    }
-
-    public GliteEnvironment(GliteEnvironmentDescription description, String bdii, int requieredMemory, int memoryForRuntime , String requieredCPUTime) throws InternalProcessingError {
-        super(description, requieredMemory, memoryForRuntime, requieredCPUTime);
-        init(description, bdii);
-    }
+    
+    final String voName;
+    final String vomsURL;
+    final String bdiiURL;
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii);
+        super();
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
     public GliteEnvironment(String voName, String vomsURL, String bdii, String requieredCPUTime) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredCPUTime);
+        super(requieredCPUTime);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
     public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory);
+        super(requieredMemory);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
     public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory, requieredCPUTime);
+        super(requieredMemory, requieredCPUTime);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
     public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory, memoryForRuntime);
+        super(requieredMemory, memoryForRuntime);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
     public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
-        this(new GliteEnvironmentDescription(voName, vomsURL), bdii, requieredMemory,memoryForRuntime, requieredCPUTime);
+        super(requieredMemory, memoryForRuntime, requieredCPUTime);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        init();
     }
 
-    private void init(GliteEnvironmentDescription description, String bdii) throws InternalProcessingError{
-        this.bdiiURL = bdii;
-        VOName = description.getVoName();
+    private void init() throws InternalProcessingError{
         threadsBySE = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsBySELocation);
         threadsByWMS = Activator.getWorkspace().getPreferenceAsInt(LocalThreadsByWMSLocation);
         Double overSubmissionWaitingRatio = Activator.getWorkspace().getPreferenceAsDouble(OverSubmissionRatioWaitingLocation);
@@ -200,7 +195,6 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
         Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval);
-
     }
 
 
@@ -211,12 +205,9 @@ public class GliteEnvironment extends JSAGAEnvironment {
     }
 
     public String getVOName() {
-        return VOName;
+        return voName;
     }
 
-
-
-//   @Cachable
     @Override
     public Collection<JSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError {
 
@@ -228,7 +219,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
             try {
                 URI wms = new URI("wms:" + js.getRawSchemeSpecificPart());
 
-                JSAGAJobService jobService = new JSAGAJobService(wms, this, threadsByWMS);
+                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthentication(voName, vomsURL), threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -247,7 +238,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Set<URI> stors = getBDII().querySRMURIs(getVOName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation)).intValue());
 
         for (URI stor : stors) {
-            IBatchStorage storage = new BatchStorage(stor, getDescription(), threadsBySE);
+            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthentication(voName, vomsURL),threadsBySE);
             allStorages.add(storage);
         }
 
@@ -259,5 +250,5 @@ public class GliteEnvironment extends JSAGAEnvironment {
     private BDII getBDII() {
         return new BDII(bdiiURL);
     }
-
+    
 }

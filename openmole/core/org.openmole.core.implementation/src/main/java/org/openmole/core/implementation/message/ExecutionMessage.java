@@ -16,12 +16,10 @@
  */
 package org.openmole.core.implementation.message;
 
-import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.message.IExecutionMessage;
 import org.openmole.core.model.message.IFileMessage;
 import org.openmole.core.model.message.IReplicatedFile;
-import scala.Tuple2;
 
 /**
  *
