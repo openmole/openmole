@@ -79,17 +79,11 @@ public class SimExplorer implements IApplication {
 
         Options options = new Options();
 
-        Option authenticationOpt = OptionBuilder.withLongOpt("auth").withDescription("Path to a serialized authentication to initialize.").isRequired(false).create("a");
-        Option workspaceOpt = OptionBuilder.withLongOpt("workspace").withDescription("Path for the workspace.").isRequired(true).create("w");
-        Option inOpt = OptionBuilder.withLongOpt("in").withDescription("Path for the input message.").isRequired(true).create("i");
-        Option outOpt = OptionBuilder.withLongOpt("out").withDescription("Path for the output message.").isRequired(true).create("o");
-        Option pluginOpt = OptionBuilder.withLongOpt("plugin").withDescription("Path for plugin dir to preload.").isRequired(true).create("p");
-
-        options.addOption(authenticationOpt);
-        options.addOption(workspaceOpt);
-        options.addOption(inOpt);
-        options.addOption(outOpt);
-        options.addOption(pluginOpt);
+        options.addOption("a", true, "Path to a serialized authentication to initialize.");
+        options.addOption("w", true, "Path for the workspace.");
+        options.addOption("i", true, "Path for the input message.");
+        options.addOption("o", true, "Path for the output message.");
+        options.addOption("p", true, "Path for plugin dir to preload.");
         
         CommandLineParser parser = new BasicParser();
         CommandLine cmdLine;
@@ -102,20 +96,20 @@ public class SimExplorer implements IApplication {
             return IApplication.EXIT_OK;
         }
         
-        Activator.getWorkspace().setLocation(new File(cmdLine.getOptionValue(workspaceOpt.getOpt())));
+        Activator.getWorkspace().setLocation(new File(cmdLine.getOptionValue("w")));
 
         //init jsaga
         Activator.getJSagaSessionService();
 
-        String environmentPluginDirPath = cmdLine.getOptionValue(pluginOpt.getOpt());
-        String executionMessageURI = cmdLine.getOptionValue(inOpt.getOpt());
+        String environmentPluginDirPath = cmdLine.getOptionValue("p");
+        String executionMessageURI = cmdLine.getOptionValue("i");
 
         File environmentPluginDir = new File(environmentPluginDirPath);
         Activator.getPluginManager().loadDir(environmentPluginDir);
         
-        if (cmdLine.hasOption(authenticationOpt.getOpt())) {
+        if (cmdLine.hasOption("a")) {
             /* get env and init */
-            File envFile = new File(cmdLine.getOptionValue(authenticationOpt.getOpt()));
+            File envFile = new File(cmdLine.getOptionValue("a"));
             IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);            
             authentication.initialize();
             envFile.delete();
@@ -357,7 +351,7 @@ public class SimExplorer implements IApplication {
         final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
         Activator.getSerialiser().serialize(result, outputLocal);
         try {
-            final IURIFile output = new GZURIFile(new URIFile(cmdLine.getOptionValue(outOpt.getOpt())));
+            final IURIFile output = new GZURIFile(new URIFile(cmdLine.getOptionValue("o")));
 
             retry(new Callable<Void>() {
 

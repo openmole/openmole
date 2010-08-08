@@ -71,7 +71,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
 
         String script = builder.toString();
 
-        Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
+        //Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
 
         return script;
     }
