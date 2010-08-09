@@ -23,7 +23,6 @@ import java.util.TreeMap;
 import org.openmole.core.model.file.IURIFile;
 
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.message.IFileMessage;
 import scala.Tuple2;
 
