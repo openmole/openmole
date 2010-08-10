@@ -1,6 +1,5 @@
 package org.openmole.commons.aspect.caching;
 
-import java.lang.ref.ReferenceQueue;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
