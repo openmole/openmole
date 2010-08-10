@@ -13,13 +13,14 @@ public class SoftMethodCache {
     final Map<Object, Map<String, Object>> cache = Collections.synchronizedMap(new WeakHashMap<Object, Map<String, Object>>());
   
     void putCachedMethodResult(Object object, String method, Object result) {
-        LOGGER.log(Level.FINE, "Softcache size {0}", size());
+        LOGGER.log(Level.FINE, "Softcache size {0} ({1})", new Object[]{size(), method});
 
         final Map<String, Object> methodMap = getMethodMap(object);
         methodMap.put(method, result);
     }
 
     Object getCachedMethodResult(Object object, String method) {
+        LOGGER.log(Level.FINE, "Get softcached size {0} ({1})", new Object[]{size(), method});
         Map<String, Object> methodMap = cache.get(object);
         if (methodMap == null) {
             return null;
