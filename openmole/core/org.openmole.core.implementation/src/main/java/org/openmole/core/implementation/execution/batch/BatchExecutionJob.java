@@ -73,11 +73,12 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (getBatchJob() == null) {
-            return ExecutionState.READY;
-        }
         if (killed.get()) {
             return ExecutionState.KILLED;
+        }
+
+        if (getBatchJob() == null) {
+            return ExecutionState.READY;
         }
 
         ExecutionState oldState = getBatchJob().getState();
