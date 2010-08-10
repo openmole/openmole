@@ -4,7 +4,6 @@ import java.lang.ref.ReferenceQueue;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.map.ReferenceMap;
@@ -12,18 +11,8 @@ import org.apache.commons.collections15.map.ReferenceMap;
 public class SoftMethodCache {
 
     final static Logger LOGGER = Logger.getLogger(SoftMethodCache.class.getName());
-    final Map<Object, Map<String, Object>> cache = new WeakHashMap<Object, Map<String, Object>>();
-    final ReferenceQueue referenceQueue = new ReferenceQueue();
-
-    public SoftMethodCache() {
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-
-            @Override
-            public void run() {
-            }
-        });
-    }
-
+    final Map<Object, Map<String, Object>> cache = Collections.synchronizedMap(new WeakHashMap<Object, Map<String, Object>>());
+  
     void putCachedMethodResult(Object object, String method, Object result) {
         LOGGER.log(Level.FINE, "Softcache size {0}", size());
 
@@ -58,5 +47,9 @@ public class SoftMethodCache {
 
     public int size() {
         return cache.size();
+    }
+
+    void clear(Object obj) {
+        cache.remove(obj);
     }
 }
