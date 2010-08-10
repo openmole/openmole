@@ -5,35 +5,43 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class SoftMethodCache {
-
+    
+    final static Logger LOGGER = Logger.getLogger(SoftMethodCache.class.getName());
+    
     class ObjectContainer {
-        Object obj;
+        
+        final String key;
+        final Object obj;
 
-        ObjectContainer(Object obj) {
+        ObjectContainer(String key, Object obj) {
+            this.key = key;
             this.obj = obj;
         }
 
-        Object getObject() {
-            return obj;
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            LOGGER.log(Level.FINE, "Remove cache for {0}", key);
+            synchronized (cache) {
+                cache.remove(key);                
+            }
         }
+        
     }
 
     final Map<Object, Map<String, SoftReference<ObjectContainer>>> cache = new WeakHashMap<Object, Map<String, SoftReference<ObjectContainer>>>();
 
-    void putCachedMethodResult(Object object, final String method, Object result) {
+   
+    void putCachedMethodResult(Object object, String method, Object result) {
+        LOGGER.log(Level.FINE, "Softcache size {0}", size());
+        
         final Map<String, SoftReference<ObjectContainer>> methodMap = getMethodMap(object);
-        methodMap.put(method, new SoftReference<ObjectContainer>(new ObjectContainer(result) {
-
-            @Override
-            protected void finalize() throws Throwable {
-                super.finalize();
-                methodMap.remove(method);
-            }
- 
-        }));
+        methodMap.put(method, new SoftReference<ObjectContainer>(new ObjectContainer(method, result)));
     }
 
     Object getCachedMethodResult(Object object, String method) {
@@ -46,7 +54,7 @@ public class SoftMethodCache {
         } else {
             ObjectContainer objectContainer = ref.get();
             if(objectContainer == null) return null;
-            else return objectContainer.getObject();
+            else return objectContainer.obj;
         }
     }
 
@@ -64,10 +72,6 @@ public class SoftMethodCache {
             }
             return methodMap;
         }
-    }
-
-    void clear(Object obj) {
-        cache.remove(obj);
     }
 
     public int size() {

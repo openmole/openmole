@@ -831,8 +831,8 @@ public class URIFile implements IURIFile {
         return new BatchStorageDescription(getLocation());
     }
 
-    @Override
     @SoftCachable
+    @Override
     public URI getLocation() {
         return URI.create(getLocationString());
     }
@@ -842,24 +842,6 @@ public class URIFile implements IURIFile {
         return location;
     }
 
-
-    /*@Override
-    public IFileCache getFileCache() throws IOException, InterruptedException {
-    try {
-    return Activator.getFileCache().getURIFileCache(this);
-    } catch (InternalProcessingError ex) {
-    throw new IOException(getLocationString(), ex);
-    }
-    }
-    
-    @Override
-    public IFileCache getFileCache(IAccessToken token) throws IOException, InterruptedException {
-    try {
-    return Activator.getFileCache().getURIFileCache(this, token);
-    } catch (InternalProcessingError ex) {
-    throw new IOException(getLocationString(), ex);
-    }
-    }*/
     @Override
     public int compareTo(IURIFile o) {
         return getLocationString().compareTo(o.getLocationString());

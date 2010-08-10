@@ -141,12 +141,12 @@ public class FileUtil {
     }
 
     static void copyFile(File fromF, File toF) throws IOException {
-        FileInputStream from = new FileInputStream(fromF);
+        FileChannel from = new FileInputStream(fromF).getChannel();
 
         try {
-            FileOutputStream to = new FileOutputStream(toF);
+            FileChannel to = new FileOutputStream(toF).getChannel();
             try {
-                copy(from.getChannel(), to.getChannel());
+                copy(from, to);
             } finally {
                 to.close();
             }
