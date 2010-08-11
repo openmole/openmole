@@ -19,8 +19,8 @@ package org.openmole.core.implementation.message;
 
 import java.io.File;
 import org.openmole.commons.tools.io.IHash;
-
 import org.openmole.core.model.file.IURIFile;
+
 import org.openmole.core.model.message.IReplicatedFile;
 
 //Should be kept in public package for deserialization

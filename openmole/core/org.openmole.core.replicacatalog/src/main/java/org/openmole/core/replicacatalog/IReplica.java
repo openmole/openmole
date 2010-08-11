@@ -19,10 +19,10 @@ package org.openmole.core.replicacatalog;
 
 import java.io.File;
 
-import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
+import org.openmole.core.model.file.IURIFile;
 
 public interface IReplica  {
 

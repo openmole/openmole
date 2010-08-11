@@ -38,7 +38,7 @@ public class SoftMethodCache {
         synchronized (cache) {
             methodMap = cache.get(object);
             if (methodMap == null) {
-                methodMap = Collections.synchronizedMap(new ReferenceMap<String, Object>(ReferenceMap.HARD, ReferenceMap.SOFT));
+                methodMap = Collections.synchronizedMap(new ReferenceMap<String, Object>(ReferenceMap.SOFT, ReferenceMap.SOFT));
                 cache.put(object, methodMap);
             }
             return methodMap;

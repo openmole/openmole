@@ -118,7 +118,7 @@ public class URIFile implements IURIFile {
 
         Task<?, NSEntry> task;
         try {
-            task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getCachedURL());
+            task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL());
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NotImplementedException ex) {
@@ -144,7 +144,7 @@ public class URIFile implements IURIFile {
     private NSDirectory fetchEntryAsDirectory() throws IOException, InterruptedException {
         Task<?, NSDirectory> task;
         try {
-            task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getCachedURL());
+            task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL());
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NotImplementedException ex) {
@@ -187,8 +187,7 @@ public class URIFile implements IURIFile {
         } 
     }
 
-    @SoftCachable
-    protected URL getCachedURL() throws IOException {
+    protected URL getSAGAURL() throws IOException {
         return fromLocation(location);
     }
 
@@ -278,7 +277,7 @@ public class URIFile implements IURIFile {
                 cname = name + '/';
             }
 
-            final URL dest = getChild(getCachedURL(), cname);
+            final URL dest = getChild(getSAGAURL(), cname);
 
             Task<?, ?> task;
             try {
@@ -407,7 +406,7 @@ public class URIFile implements IURIFile {
 
         Task<?, FileInputStream> task;
         try {
-            task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getCachedURL());
+            task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL());
         } catch (NotImplementedException ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NoSuccessException ex) {
@@ -450,7 +449,7 @@ public class URIFile implements IURIFile {
 
         Task<?, FileOutputStream> task;
         try {
-            task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getCachedURL(), false);
+            task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL(), false);
         } catch (NotImplementedException ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NoSuccessException ex) {
@@ -499,7 +498,7 @@ public class URIFile implements IURIFile {
     }
 
     private boolean isLocal() throws IOException {
-        return (getCachedURL().getHost() == null || getCachedURL().getScheme() == null || (getCachedURL().getScheme() != null && getCachedURL().getScheme().compareToIgnoreCase("file") == 0) || IsLocalHost(getCachedURL().getHost()));
+        return (getSAGAURL().getHost() == null || getSAGAURL().getScheme() == null || (getSAGAURL().getScheme() != null && getSAGAURL().getScheme().compareToIgnoreCase("file") == 0) || IsLocalHost(getSAGAURL().getHost()));
     }
 
     @Override
@@ -825,13 +824,11 @@ public class URIFile implements IURIFile {
         }
     }
 
-    @SoftCachable
     @Override
     public IBatchServiceDescription getStorageDescription() {
         return new BatchStorageDescription(getLocation());
     }
 
-    @SoftCachable
     @Override
     public URI getLocation() {
         return URI.create(getLocationString());

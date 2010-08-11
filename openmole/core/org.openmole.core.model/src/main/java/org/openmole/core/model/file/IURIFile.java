@@ -23,7 +23,6 @@ import java.io.OutputStream;
 
 import java.net.URI;
 import java.util.List;
-import org.openmole.commons.tools.filecache.IFileCache;
 
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;

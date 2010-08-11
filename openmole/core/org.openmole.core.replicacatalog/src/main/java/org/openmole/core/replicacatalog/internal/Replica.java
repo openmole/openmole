@@ -27,7 +27,6 @@ import com.db4o.ta.Activatable;
 import java.io.File;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.replicacatalog.IReplica;
-import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
@@ -111,7 +110,7 @@ public class Replica implements IReplica, Activatable {
         activate(ActivationPurpose.READ);
         return hash;
     }
-
+   
     @Override
     public String toString() {
         return "Replica [destination=" + getDestination() + ", authenticationKey=" + getAuthenticationKey() + ", hash=" + getSourceHash() + ", source=" + getSource() + ", storageDescription=" + getStorageDescription() + "]";

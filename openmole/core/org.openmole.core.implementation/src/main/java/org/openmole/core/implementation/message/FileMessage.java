@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.message;
 
+import java.net.URI;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.message.IFileMessage;
