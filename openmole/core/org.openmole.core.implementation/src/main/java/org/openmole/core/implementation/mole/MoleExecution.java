@@ -193,8 +193,6 @@ public class MoleExecution implements IMoleExecution {
             job.addMoleJob(moleJob);
             submit(job, capsule);
         }
-
-        LOGGER.log(Level.FINER, "A new job has been successfully submitted:{0}", moleJob);
     }
 
     private void submit(Job job, IGenericTaskCapsule capsule) {
@@ -207,7 +205,6 @@ public class MoleExecution implements IMoleExecution {
     synchronized void submitGroups(ISubMoleExecution subMoleExecution) {
         Iterable<Job> jobs = jobsGrouping.remove(subMoleExecution);
 
-        LOGGER.finer("Submit a group");
         for (Job job : jobs) {
             Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
             subMoleExecution.decNbJobWaitingInGroup(job.size());
