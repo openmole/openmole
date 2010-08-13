@@ -80,7 +80,6 @@ public class VariableExpansion {
         allVariables.putVariables(context);
         allVariables.putVariables(tmpVariable);
 
-
         do {
             int beginIndex = ret.indexOf(eval);
 
@@ -105,7 +104,6 @@ public class VariableExpansion {
 
             if (cur < retLenght) {
                 String toInsert = expandOneData(global, allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)));
-                // System.out.println("toins: " +toInsert);
                 ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1);
             } else {
                 break;
