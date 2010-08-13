@@ -195,8 +195,8 @@
 
     <licenses>
         <license>
-            <name>GPL</name>
-            <url>http://www.gnu.org/copyleft/gpl.html</url>
+            <name>AGPLv3.0</name>
+            <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
