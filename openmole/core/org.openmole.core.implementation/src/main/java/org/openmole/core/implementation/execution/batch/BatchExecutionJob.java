@@ -145,7 +145,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 }
             }
             
-            LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getBatchJob().getState(), delay});
+            LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
 
 
         } catch (InternalProcessingError e) {
