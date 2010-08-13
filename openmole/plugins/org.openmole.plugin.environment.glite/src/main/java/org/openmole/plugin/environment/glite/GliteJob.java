@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.environment.glite;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.plugin.environment.jsaga.JSAGAJob;
@@ -29,14 +27,11 @@ import org.openmole.plugin.environment.jsaga.JSAGAJob;
  */
 public class GliteJob extends JSAGAJob {
 
-    final static Logger LOGGER = Logger.getLogger(GliteJob.class.getName());
-    
     final long proxyExpired;
     
     public GliteJob(String jobId, GliteJobService jobService, long proxyExpired) throws InternalProcessingError {
         super(jobId, jobService);
         this.proxyExpired = proxyExpired;
-        LOGGER.log(Level.FINE, "Job will be killed if not executed before {0}", proxyExpired);
     }
 
     @Override
@@ -45,7 +40,4 @@ public class GliteJob extends JSAGAJob {
         return super.updateState();
     }
 
-    
-    
-    
 }

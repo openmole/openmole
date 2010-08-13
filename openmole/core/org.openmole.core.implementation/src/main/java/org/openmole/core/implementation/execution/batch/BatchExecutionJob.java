@@ -46,7 +46,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     final static ConfigurationLocation MinUpdateInterval = new ConfigurationLocation(configurationGroup, "MinUpdateInterval");
     final static ConfigurationLocation MaxUpdateInterval = new ConfigurationLocation(configurationGroup, "MaxUpdateInterval");
     final static ConfigurationLocation IncrementUpdateInterval = new ConfigurationLocation(configurationGroup, "IncrementUpdateInterval");
-
+    final static Logger LOGGER = Logger.getLogger(BatchExecutionJob.class.getName());
+    
     static {
         Activator.getWorkspace().addToConfigurations(MinUpdateInterval, "PT2M");
         Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
@@ -56,7 +57,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironmentResult copyToEnvironmentResult = null;
-    long delay;
+    Long delay = null;
  
     transient Future<CopyToEnvironmentResult> copyToEnvironmentExecFuture;
     transient Future finalizeExecutionFuture;
@@ -90,6 +91,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusDurration(), getJob());
             }
         }
+        
+        LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getBatchJob().getState(), delay});
 
         return getState();
     }
@@ -135,7 +138,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
 
             //Compute new refresh delay
-            if (oldState != getState()) {
+            if (delay == null || oldState != getState()) {
                 this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
             } else {
                 long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
@@ -244,6 +247,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     @Override
     public void retry() {
         setBatchJob(null);
+        delay = null;
     }
 
     @Override
