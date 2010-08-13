@@ -44,8 +44,8 @@ public class SynchronizedContext implements IContext {
     }
 
     @Override
-    public synchronized void setVariables(List<IVariable<?>> variables) {
-        context.setVariables(variables);
+    public synchronized void putVariables(List<IVariable<?>> variables) {
+        context.putVariables(variables);
     }
 
     @Override

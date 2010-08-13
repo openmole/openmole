@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.job;
 
-import java.util.List;
 import java.util.Map;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.tools.pattern.IVisitable;
@@ -26,7 +25,7 @@ import org.openmole.core.model.data.IVariable;
 
 public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
 
-    void setVariables(List<IVariable<?>> variables);
+    void putVariables(Iterable<? extends IVariable> variables);
 
     Map<String, IVariable> getVariables();
 
