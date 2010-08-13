@@ -91,9 +91,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusDurration(), getJob());
             }
         }
-        
-        LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getBatchJob().getState(), delay});
-
+      
         return getState();
     }
 
@@ -146,6 +144,9 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     this.delay = newDelay;
                 }
             }
+            
+            LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getBatchJob().getState(), delay});
+
 
         } catch (InternalProcessingError e) {
             kill();
