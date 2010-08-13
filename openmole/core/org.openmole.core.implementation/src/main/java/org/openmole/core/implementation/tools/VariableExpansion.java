@@ -76,6 +76,11 @@ public class VariableExpansion {
     public String expandDataInernal(IContext global, IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
         String ret = s;
 
+        IContext allVariables = new Context();
+        allVariables.putVariables(context);
+        allVariables.putVariables(tmpVariable);
+
+
         do {
             int beginIndex = ret.indexOf(eval);
 
@@ -98,13 +103,9 @@ public class VariableExpansion {
                 cur++;
             }
 
-            IContext allVariables = new Context();
-            allVariables.putVariables(context);
-            allVariables.putVariables(tmpVariable);
-
             if (cur < retLenght) {
-                String toInsert = expandOneData(global, allVariables, getVarName(ret.substring(beginIndex+1, cur + 1)));
-               // System.out.println("toins: " +toInsert);
+                String toInsert = expandOneData(global, allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)));
+                // System.out.println("toins: " +toInsert);
                 ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1);
             } else {
                 break;
@@ -115,9 +116,6 @@ public class VariableExpansion {
         return ret;
 
     }
-
-
-
 
     public static String expandData(ReplacementSet replace, List<IVariable> tmpVariable, String s) {
         return getInstance().expandDataInternal(replace, tmpVariable, s);
@@ -155,8 +153,10 @@ public class VariableExpansion {
 
     protected String expandOneData(IContext global, IContext allVariables, String variableExpression) throws InternalProcessingError, UserBadDataError {
         IVariable variable = allVariables.getVariable(variableExpression);
-        if(variable != null) return variable.getValue().toString();
-       
+        if (variable != null) {
+            return variable.getValue().toString();
+        }
+
         GroovyShellProxyAdapter shell = new GroovyShellProxyAdapter(new GroovyProxy());
         Binding binding = GroovyShellProxyAdapter.fromContextToBinding(global, allVariables);
 
