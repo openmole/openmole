@@ -46,10 +46,12 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     @InteractiveConfiguration(label = "Runtime location")
     final static ConfigurationLocation RuntimeLocation = new ConfigurationLocation(ConfigGroup, "RuntimeLocation");
     final static ConfigurationLocation ResourcesExpulseThreshod = new ConfigurationLocation(ConfigGroup, "ResourcesExpulseThreshod");
+    final static ConfigurationLocation CheckInterval = new ConfigurationLocation(ConfigGroup, "CheckInterval");
 
     static {
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
         Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
+        Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
     }
     
     transient BatchServiceGroup<JS> jobServices;
@@ -66,7 +68,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         this.memorySizeForRuntime = memorySizeForRuntime;
         this.runtime = new File(Activator.getWorkspace().getPreference(RuntimeLocation));
 
-        Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchJobWatcher.CheckInterval));
+        Activator.getUpdater().registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(CheckInterval));
     }
 
     public BatchEnvironment() throws InternalProcessingError {

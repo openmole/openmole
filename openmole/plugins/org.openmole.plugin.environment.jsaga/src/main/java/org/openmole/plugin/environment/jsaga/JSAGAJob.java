@@ -36,6 +36,8 @@ import org.openmole.core.model.execution.ExecutionState;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.batch.BatchJob;
 
 public class JSAGAJob extends BatchJob {
@@ -128,6 +130,7 @@ public class JSAGAJob extends BatchJob {
     public void deleteJob() throws InternalProcessingError {
         try {
             if (getState() == ExecutionState.SUBMITED || getState() == ExecutionState.RUNNING) {
+                Logger.getLogger(JSAGAJob.class.getName()).log(Level.FINE, "Job {0} canceled.", toString());
                 getJob().cancel();
             }
         } catch (NotImplementedException e) {
@@ -139,7 +142,6 @@ public class JSAGAJob extends BatchJob {
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
         }
-
     }
 
   

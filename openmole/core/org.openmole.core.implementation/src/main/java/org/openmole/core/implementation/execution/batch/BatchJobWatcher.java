@@ -33,12 +33,6 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchJobWatcher implements IUpdatable {
 
-    final static ConfigurationLocation CheckInterval = new ConfigurationLocation(BatchJobWatcher.class.getName(), "CheckInterval");
-
-    static {
-        Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
-    }
-
     final IBatchEnvironment<?> watchedEnv;
 
     public BatchJobWatcher(IBatchEnvironment<?> watchedEnv) throws InternalProcessingError {
@@ -48,6 +42,8 @@ public class BatchJobWatcher implements IUpdatable {
 
     @Override
     public boolean update() throws InterruptedException {
+        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Watching env");
+
         IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
         List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
         
@@ -57,6 +53,7 @@ public class BatchJobWatcher implements IUpdatable {
                 if (job.allMoleJobsFinished()) {
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
                         ej.kill();
+                        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Killed allready finished job {0}", ej.toString());
                     }
 
                     jobGroupsToRemove.add(job);
