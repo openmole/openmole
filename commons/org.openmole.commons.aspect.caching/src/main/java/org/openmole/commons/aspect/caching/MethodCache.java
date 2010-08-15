@@ -3,9 +3,14 @@ package org.openmole.commons.aspect.caching;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 public class MethodCache {
 
+    final static Logger LOGGER = Logger.getLogger(MethodCache.class.getName());
+    
     final Map<Object, Map<String, Object>> cache = new WeakHashMap<Object, Map<String, Object>>();
 
     void putCachedMethodResult(Object object, String method, Object result) {
@@ -16,6 +21,8 @@ public class MethodCache {
     return getMethodMap(object).containsKey(method);
     }*/
     Object getCachedMethodResult(Object object, String method) {
+        LOGGER.log(Level.FINE, "Cached {0} size {1}", new Object[]{method, size()});
+        
         Map<String, Object> methodMap = cache.get(object);
         if (methodMap == null) {
             return null;
