@@ -3,13 +3,11 @@ package org.openmole.commons.aspect.caching;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.collections15.map.ReferenceMap;
 
 public class SoftMethodCache {
 
-    final static Logger LOGGER = Logger.getLogger(SoftMethodCache.class.getName());
+//    final static Logger LOGGER = Logger.getLogger(SoftMethodCache.class.getName());
     
     final Map<Object, Map<String, Object>> cache = Collections.synchronizedMap(new WeakHashMap<Object, Map<String, Object>>());
   
@@ -19,9 +17,8 @@ public class SoftMethodCache {
     }
 
     Object getCachedMethodResult(Object object, String method) {
-        LOGGER.log(Level.FINE, "Soft Cached {0} size {1}", new Object[]{method, size()});
+//        LOGGER.log(Level.FINE, "Soft Cached {0} size {1}", new Object[]{method, size()});
 
-        
         Map<String, Object> methodMap = cache.get(object);
         if (methodMap == null) {
             return null;
