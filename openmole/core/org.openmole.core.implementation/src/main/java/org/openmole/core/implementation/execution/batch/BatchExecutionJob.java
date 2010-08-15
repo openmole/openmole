@@ -162,10 +162,14 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
+        LOGGER.log(Level.FINE, "Finalysing job");
+
         if (finalizeExecutionFuture == null) {
             finalizeExecutionFuture = Activator.getExecutorService().getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
         }
         try {
+            LOGGER.log(Level.FINE, "Finalysing isDone? {0}", finalizeExecutionFuture.isDone());
+
             if (finalizeExecutionFuture.isDone()) {
                 finalizeExecutionFuture.get();
                 finalizeExecutionFuture = null;

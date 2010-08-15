@@ -52,8 +52,6 @@ public class BatchJobWatcher implements IUpdatable {
                     Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Job finished killing all execution jobs.");
 
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
-                        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Kill allready finished job {0} was in state {1}", new Object[]{ej.toString(), ej.getState()});
-
                         ej.kill();
                     }
 

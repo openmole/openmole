@@ -33,7 +33,6 @@ import org.openmole.core.batchservicecontrol.IUsageControl;
 public abstract class BatchJob implements IBatchJob {
 
     ExecutionState state;
-    
     private final IBatchServiceDescription jobServiceDescription;
     private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
 
@@ -78,11 +77,13 @@ public abstract class BatchJob implements IBatchJob {
 
     @Override
     public synchronized void kill(IAccessToken token) throws InternalProcessingError {
-        setState(ExecutionState.KILLED);
-        deleteJob();
+        try {
+            deleteJob();
+        } finally {
+            setState(ExecutionState.KILLED);
+        }
     }
 
-   
     @Override
     public ExecutionState getUpdatedState() throws InternalProcessingError, InterruptedException, UserBadDataError {
         IAccessToken token = getUsageControl().waitAToken();
@@ -114,28 +115,27 @@ public abstract class BatchJob implements IBatchJob {
         ExecutionState currentState = state;
         int ordinal = currentState.ordinal();
         Long previous = null;
-         
-        while(--ordinal >= 0) {
+
+        while (--ordinal >= 0) {
             ExecutionState previousState = ExecutionState.values()[ordinal];
             previous = getTimeStemp(previousState);
-            if(previous != null) break;
+            if (previous != null) {
+                break;
+            }
         }
-        
+
         return getTimeStemp(currentState) - previous;
     }
-    
 
     private IUsageControl getUsageControl() {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();
     }
-    
+
     private IFailureControl getFailureControl() {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
     }
-    
-    public abstract void deleteJob() throws InternalProcessingError;
 
- //   public abstract void submitJob() throws InternalProcessingError;
+    public abstract void deleteJob() throws InternalProcessingError;
 
     public abstract ExecutionState updateState() throws InternalProcessingError;
 }
