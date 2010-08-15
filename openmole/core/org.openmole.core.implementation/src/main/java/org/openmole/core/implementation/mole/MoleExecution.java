@@ -227,7 +227,6 @@ public class MoleExecution implements IMoleExecution {
                     LOGGER.log(Level.FINE, "Scheduling interrupted", e);
                     return;
                 }
-                LOGGER.log(Level.FINER, "New job taken:{0}", p._1());
                 try {
                     p._2().submit(p._1());
                 } catch (UserBadDataError e) {

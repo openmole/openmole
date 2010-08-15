@@ -26,10 +26,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 import org.openmole.misc.updater.IUpdatable;
-import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchJobWatcher implements IUpdatable {
 
@@ -49,11 +47,14 @@ public class BatchJobWatcher implements IUpdatable {
         
         synchronized (registry) {
             for (IJob job : registry.getAllJobs()) {
-         
+
                 if (job.allMoleJobsFinished()) {
+                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Job finished killing all execution jobs.");
+
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
+                        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Kill allready finished job {0} was in state {1}", new Object[]{ej.toString(), ej.getState()});
+
                         ej.kill();
-                        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Killed allready finished job {0}", ej.toString());
                     }
 
                     jobGroupsToRemove.add(job);
@@ -89,6 +90,9 @@ public class BatchJobWatcher implements IUpdatable {
                 registry.removeJob(j);
             }
         }
+
+        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "End watching env");
+
         return true;
     }
 }
