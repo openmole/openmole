@@ -48,35 +48,6 @@
         </dependency>
     </dependencies>
 
-<!--
-    <dependencies>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.implementation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.jsagasession</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.apache.commons.exec</artifactId>
-            <version>${lib.org.apache.commons.exec.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.jcraft.jsch</artifactId>
-            <version>${lib.com.jcraft.jsch.version}</version>
-        </dependency>
-    </dependencies>
--->
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
@@ -91,8 +62,72 @@
     <packaging>bundle</packaging>
 
     <properties>
+	<qemu.directory>target/qemu</qemu.directory>
 	<bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
     </properties>
+
+    <build>
+	<plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-qemu</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.qemu</groupId>
+                                    <artifactId>qemu-linux-i386</artifactId>
+                                    <version>0.12.5</version>
+				    <type>tgz</type>
+				    <outputDirectory>${qemu.directory}/qemu_linux_32/</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.qemu</groupId>
+                                    <artifactId>qemu-linux-x86_64</artifactId>
+                                    <version>0.12.5</version>
+				    <type>tgz</type>
+				    <outputDirectory>${qemu.directory}/qemu_linux_64/</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.qemu</groupId>
+                                    <artifactId>qemu-windows-i386</artifactId>
+                                    <version>0.12.2</version>
+				    <type>tgz</type>
+				    <outputDirectory>${qemu.directory}/qemu_windows/</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.qemu</groupId>
+                                    <artifactId>qemu-OSX10.6-x86_64</artifactId>
+                                    <version>0.12.4</version>
+				    <type>tgz</type>
+				    <outputDirectory>${qemu.directory}/qemu_OSX-10.6/</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.qemu</groupId>
+                                    <artifactId>bios.bin</artifactId>
+                                    <version>0.12.5</version>
+				    <type>tgz</type>
+				    <outputDirectory>${qemu.directory}/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+ 	<resources>
+      	    <resource>
+        	<directory>${qemu.directory}</directory>
+		<includes>
+		   <include>**</include>
+		</includes>
+      	    </resource>
+        </resources>
+    </build>
 
 </project>
 
