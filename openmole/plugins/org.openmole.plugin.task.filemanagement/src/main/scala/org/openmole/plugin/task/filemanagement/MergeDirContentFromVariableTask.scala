@@ -17,6 +17,21 @@
 
 package org.openmole.plugin.task.filemanagement
 
-class CopyDirContentFromVariableTask {
+import java.io.File
+import org.openmole.core.implementation.task.Task
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.execution.IProgress
+import org.openmole.core.model.job.IContext
+import org.openmole.commons.tools.io.FileUtil.copy
 
+class MergeDirContentFromVariableTask(name: String,
+                                      toBeDumpedPrototype: IPrototype[File],
+                                      outputDir: String) extends Task(name) {
+ 
+  override def process(global: IContext, context: IContext, progress: IProgress){
+    val from = context.getValue(toBeDumpedPrototype)
+    val to = new File(outputDir)
+    copy(from, to)
+  }
 }
+
