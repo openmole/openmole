@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -79,7 +79,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
             final IURIFile inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"));
             final IURIFile outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"));
 
-            final IRuntime runtime = replicateTheRuntime(token, communicationStorage);
+            final IRuntime runtime = replicateTheRuntime(token, communicationStorage, communicationDir);
 
             final IJobForRuntime jobForRuntime = createJobForRuntime(token, communicationStorage, communicationDir);
             final IExecutionMessage executionMessage = createExecutionMessage(jobForRuntime, token, communicationStorage, communicationDir);
@@ -133,7 +133,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
     }
 
 
-    IRuntime replicateTheRuntime(IAccessToken token, IBatchStorage communicationStorage) throws UserBadDataError, InternalProcessingError, InterruptedException, InternalProcessingError, IOException {
+    IRuntime replicateTheRuntime(IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws UserBadDataError, InternalProcessingError, InterruptedException, InternalProcessingError, IOException {
         Collection<IURIFile> environmentPluginReplica = new LinkedList<IURIFile>();
 
         Iterable<File> environmentPlugins = Activator.getPluginManager().getPluginAndDependanciesForClass(getEnvironment().getClass());
@@ -147,9 +147,14 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
         }
 
         IURIFile runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).getReplica();
-
-        IURIFile environmentDescription = toReplicatedFile(environment.getDescriptionFile(), communicationStorage, token).getReplica();
-        return new Runtime(runtimeReplica, environmentPluginReplica, environmentDescription);
+        
+        File authenticationFile = Activator.getWorkspace().newFile("envrionmentAuthentication", ".xml");
+        Activator.getSerializer().serialize(communicationStorage.getRemoteAuthentication(), authenticationFile);
+        IURIFile authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"));
+        URIFile.copy(authenticationFile, authenticationURIFile, token);
+        authenticationFile.delete();
+        
+        return new Runtime(runtimeReplica, environmentPluginReplica, authenticationURIFile);
     }
 
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {

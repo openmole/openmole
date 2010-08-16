@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -16,11 +16,17 @@
  */
 package org.openmole.core.model.execution.batch;
 
-public interface IBatchService {
+
+public interface IBatchService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> {
 
     boolean test();
 
     IBatchServiceDescription getDescription();
 
-    IBatchEnvironmentDescription getBatchExecutionEnvironmentDescription();
+    ENV getBatchExecutionEnvironment();
+    
+    AUTH getAuthentication();
+    
+    IBatchServiceAuthenticationKey<? extends AUTH> getAuthenticationKey();
+
 }

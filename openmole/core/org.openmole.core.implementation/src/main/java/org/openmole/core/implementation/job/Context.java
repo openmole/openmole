@@ -47,7 +47,7 @@ public class Context implements IVisitable<IVariable>, IContext {
      * @see org.openmole.core.task.IContext#setVariables(java.util.ArrayList)
      */
     @Override
-    public void setVariables(List<IVariable<?>> vars) {
+    public void putVariables(Iterable<? extends IVariable> vars) {
         for (IVariable<?> variable : vars) {
             putVariable(variable);
         }

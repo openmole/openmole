@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  * 
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
@@ -18,7 +18,8 @@
 package org.openmole.core.replicacatalog.internal;
 
 import org.openmole.commons.tools.io.IHash;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
 /**
@@ -28,12 +29,12 @@ import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 public class ReplicaCatalogKey {
     final IHash hash;
     final IBatchServiceDescription storage;
-    final IBatchEnvironmentDescription environment;
+    final IBatchServiceAuthenticationKey authenticationKey;
 
-    public ReplicaCatalogKey(IHash hash, IBatchServiceDescription storage, IBatchEnvironmentDescription environment) {
+    public ReplicaCatalogKey(IHash hash, IBatchServiceDescription storage, IBatchServiceAuthenticationKey authenticationKey) {
         this.hash = hash;
         this.storage = storage;
-        this.environment = environment;
+        this.authenticationKey = authenticationKey;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class ReplicaCatalogKey {
         if (this.storage != other.storage && (this.storage == null || !this.storage.equals(other.storage))) {
             return false;
         }
-        if (this.environment != other.environment && (this.environment == null || !this.environment.equals(other.environment))) {
+        if (this.authenticationKey != other.authenticationKey && (this.authenticationKey == null || !this.authenticationKey.equals(other.authenticationKey))) {
             return false;
         }
         return true;
@@ -62,7 +63,7 @@ public class ReplicaCatalogKey {
         int hash = 7;
         hash = 53 * hash + (this.hash != null ? this.hash.hashCode() : 0);
         hash = 53 * hash + (this.storage != null ? this.storage.hashCode() : 0);
-        hash = 53 * hash + (this.environment != null ? this.environment.hashCode() : 0);
+        hash = 53 * hash + (this.authenticationKey != null ? this.authenticationKey.hashCode() : 0);
         return hash;
     }
 

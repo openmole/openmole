@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -24,7 +24,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 
 public interface IReplicaCatalog {
@@ -37,5 +36,4 @@ public interface IReplicaCatalog {
 
     void remove(IReplica replica);
 
-    void removeAllReplicaForEnvironment(IBatchEnvironment environment);
 }

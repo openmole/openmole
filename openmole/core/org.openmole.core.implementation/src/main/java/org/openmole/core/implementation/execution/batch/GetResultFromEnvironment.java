@@ -90,7 +90,12 @@ public class GetResultFromEnvironment implements Callable<Void> {
 
                             synchronized (System.out) {
                                 System.out.println("-----------------Output on remote host-----------------");
-                                FileUtil.copy(new FileInputStream(stdOutFile), System.out);
+                                InputStream fis = new FileInputStream(stdOutFile);
+                                try {
+                                   FileUtil.copy(fis, System.out); 
+                                } finally {
+                                    fis.close();
+                                }
                                 System.out.println("-------------------------------------------------------");
                             }
                         } finally {
@@ -118,7 +123,12 @@ public class GetResultFromEnvironment implements Callable<Void> {
                             
                             synchronized (System.err) {
                                 System.err.println("-----------Error output on remote host------------------");
-                                FileUtil.copy(new FileInputStream(stdErrFile), System.err);
+                                InputStream fis = new FileInputStream(stdErrFile);
+                                try {
+                                  FileUtil.copy(fis, System.err);  
+                                } finally {
+                                    fis.close();
+                                }
                                 System.err.println("--------------------------------------------------------");
                             }
                         } finally {

@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -18,7 +18,7 @@
 
 package org.openmole.core.replicacatalog.internal;
 
-import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
+import org.openmole.core.authenticationregistry.IAuthenticationRegistry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
     private static IExecutorService executorService;
  //   private static IBatchRessourceControl batchRessourceControl;
     private static IUpdater updater;
-    private static IBatchEnvironmentAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
+    private static IAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
     private IReplicaCatalog catalog;
     private ServiceRegistration reg;
 
@@ -97,10 +97,10 @@ public class Activator implements BundleActivator {
     }
 
 
-      public synchronized static IBatchEnvironmentAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
+      public synchronized static IAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
         if (batchEnvironmentAuthenticationRegistry == null) {
-            ServiceReference ref = getContext().getServiceReference(IBatchEnvironmentAuthenticationRegistry.class.getName());
-            batchEnvironmentAuthenticationRegistry = (IBatchEnvironmentAuthenticationRegistry) getContext().getService(ref);
+            ServiceReference ref = getContext().getServiceReference(IAuthenticationRegistry.class.getName());
+            batchEnvironmentAuthenticationRegistry = (IAuthenticationRegistry) getContext().getService(ref);
         }
         return batchEnvironmentAuthenticationRegistry;
     }

@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -48,11 +48,13 @@ import org.openmole.core.implementation.execution.batch.BatchJobService;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 import org.openmole.core.model.execution.batch.IBatchJob;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public class JSAGAJobService extends BatchJobService {
+public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchJobService<ENV, AUTH> {
 
     final static ConfigurationLocation CreationTimout = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "CreationTimout");
     final static ConfigurationLocation TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "TestJobDoneTimeOut");
@@ -63,20 +65,16 @@ public class JSAGAJobService extends BatchJobService {
     }
     
     URI jobServiceURI;
-    JSAGAEnvironment environment;
-
-    public JSAGAJobService(URI jobServiceURI, JSAGAEnvironment environment, int nbAccess) throws InternalProcessingError {
-        super(environment.getDescription(), new BatchJobServiceDescription(jobServiceURI.toString()), nbAccess);
+ 
+    public JSAGAJobService(URI jobServiceURI, ENV environment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        super(environment, key, authentication, new BatchJobServiceDescription(jobServiceURI.toString()), nbAccess);
         this.jobServiceURI = jobServiceURI;
-        this.environment = environment;
     }
 
     @Override
     public boolean test() {
 
         try {
-            // Logger.getLogger(JSAGAJobService.class.getName()).log(Level.INFO,"Testing " + getDescription().toString());
-
             JobDescription hello = JSAGAJobBuilder.GetInstance().getHelloWorld();
             final Job job = getJobServiceCache().createJob(hello);
 
@@ -132,11 +130,11 @@ public class JSAGAJobService extends BatchJobService {
         File script;
         script = Activator.getWorkspace().newFile("script", ".sh");
         try {
-            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), environment, runtime, script);
+            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), getBatchExecutionEnvironment(), runtime, script);
             Job job = getJobServiceCache().createJob(jobDescription);
             job.run();
 
-            return new JSAGAJob(job.getAttribute(Job.JOBID), this);
+            return buildJob(job.getAttribute(Job.JOBID));
         } catch (DoesNotExistException ex) {
             throw new InternalProcessingError(ex);
         } catch (IncorrectStateException ex) {
@@ -188,6 +186,10 @@ public class JSAGAJobService extends BatchJobService {
             task.cancel(true);
             throw new InternalProcessingError(e);
         }
-
     }
+    
+    protected JSAGAJob buildJob(String id) throws InternalProcessingError {
+        return new JSAGAJob(id, this);
+    }
+    
 }

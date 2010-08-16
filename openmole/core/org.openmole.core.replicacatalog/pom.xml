@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.batchenvironmentauthenticationregistry</artifactId>
+            <artifactId>org.openmole.core.authenticationregistry</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -27,7 +27,7 @@
         <module>org.openmole.core.structuregenerator</module>
         <module>org.openmole.core.replicacatalog</module>
 	<module>org.openmole.core.serializer</module>
-        <module>org.openmole.core.batchenvironmentauthenticationregistry</module>
+        <module>org.openmole.core.authenticationregistry</module>
     </modules>
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->

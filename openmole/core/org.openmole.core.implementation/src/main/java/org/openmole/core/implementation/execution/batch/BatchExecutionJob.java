@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -46,7 +46,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     final static ConfigurationLocation MinUpdateInterval = new ConfigurationLocation(configurationGroup, "MinUpdateInterval");
     final static ConfigurationLocation MaxUpdateInterval = new ConfigurationLocation(configurationGroup, "MaxUpdateInterval");
     final static ConfigurationLocation IncrementUpdateInterval = new ConfigurationLocation(configurationGroup, "IncrementUpdateInterval");
-
+    final static Logger LOGGER = Logger.getLogger(BatchExecutionJob.class.getName());
+    
     static {
         Activator.getWorkspace().addToConfigurations(MinUpdateInterval, "PT2M");
         Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M");
@@ -56,7 +57,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     IBatchJob batchJob;
     final AtomicBoolean killed = new AtomicBoolean(false);
     CopyToEnvironmentResult copyToEnvironmentResult = null;
-    long delay;
+    Long delay = null;
  
     transient Future<CopyToEnvironmentResult> copyToEnvironmentExecFuture;
     transient Future finalizeExecutionFuture;
@@ -73,11 +74,12 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private ExecutionState updateAndGetState() throws InternalProcessingError, UserBadDataError, InterruptedException {
-        if (getBatchJob() == null) {
-            return ExecutionState.READY;
-        }
         if (killed.get()) {
             return ExecutionState.KILLED;
+        }
+
+        if (getBatchJob() == null) {
+            return ExecutionState.READY;
         }
 
         ExecutionState oldState = getBatchJob().getState();
@@ -89,7 +91,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 getEnvironment().sample(SampleType.WAITING, getBatchJob().getLastStatusDurration(), getJob());
             }
         }
-
+      
         return getState();
     }
 
@@ -134,7 +136,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             }
 
             //Compute new refresh delay
-            if (oldState != getState()) {
+            if (delay == null || oldState != getState()) {
                 this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
             } else {
                 long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
@@ -142,6 +144,9 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                     this.delay = newDelay;
                 }
             }
+            
+            LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
+
 
         } catch (InternalProcessingError e) {
             kill();
@@ -157,10 +162,14 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     }
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
+        LOGGER.log(Level.FINE, "Finalysing job");
+
         if (finalizeExecutionFuture == null) {
             finalizeExecutionFuture = Activator.getExecutorService().getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
         }
         try {
+            LOGGER.log(Level.FINE, "Finalysing isDone? {0}", finalizeExecutionFuture.isDone());
+
             if (finalizeExecutionFuture.isDone()) {
                 finalizeExecutionFuture.get();
                 finalizeExecutionFuture = null;
@@ -200,7 +209,6 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
         try {
             IBatchJob bj = js._1().submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2());
-            //bj.submit(js._2());
             setBatchJob(bj);
         } catch (InternalProcessingError e) {
             Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
@@ -244,6 +252,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     @Override
     public void retry() {
         setBatchJob(null);
+        delay = null;
     }
 
     @Override

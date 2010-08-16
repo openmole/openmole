@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -41,10 +41,12 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.tools.service.RNG;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public class BatchStorage extends BatchService implements IBatchStorage {
+public class BatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchService<ENV, AUTH> implements IBatchStorage<ENV, AUTH> {
 
     final static Logger LOGGER = Logger.getLogger(BatchStorage.class.getName());
 
@@ -63,8 +65,8 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     transient IURIFile persistentSpace;
     transient Long time;
 
-    public BatchStorage(URI baselocation, IBatchEnvironmentDescription batchEnvironmentDescription, int nbAccess) throws InternalProcessingError {
-        super(batchEnvironmentDescription, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl());
+    public BatchStorage(URI baselocation,  ENV batchEnvironment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        super(batchEnvironment, key, authentication, new BatchStorageDescription(baselocation), new UsageControl(nbAccess), new FailureControl());
         this.location = baselocation;
     }
 
@@ -129,17 +131,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return tmpSpace;
     }
 
-    /* @Override
-    public synchronized IURIFile getTmpSpace(IAccessToken token) throws InternalProcessingError, InterruptedException {
-    if (tmpSpace == null) {
-    try {
-    tmpSpace = getBaseDir().mkdirIfNotExist(tmp, token);
-    } catch (IOException e) {
-    throw new InternalProcessingError(e);
-    }
-    }
-    return tmpSpace;
-    }*/
     @Override
     public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException, UserBadDataError {
         if (baseSpace == null) {
@@ -153,18 +144,6 @@ public class BatchStorage extends BatchService implements IBatchStorage {
         return baseSpace;
     }
 
-    /* @Override
-    public IURIFile getBaseDir(IAccessToken token) throws InternalProcessingError, InterruptedException {
-    if (baseSpace == null) {
-    try {
-    IURIFile storeFile = new URIFile(getURI().toString());
-    baseSpace = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/', token);
-    } catch (IOException e) {
-    throw new InternalProcessingError(e);
-    }
-    }
-    return baseSpace;
-    }*/
     @Override
     public boolean test() {
 
@@ -228,4 +207,10 @@ public class BatchStorage extends BatchService implements IBatchStorage {
     public String toString() {
         return location.toString();
     }
+
+    @Override
+    public IBatchServiceAuthentication getRemoteAuthentication() {
+        return getAuthentication();
+    }
+    
 }

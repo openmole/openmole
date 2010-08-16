@@ -19,7 +19,6 @@
  */
 package org.openmole.core.implementation.data;
 
-
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.data.IVariable;
 
@@ -31,83 +30,68 @@ import org.openmole.core.model.data.IVariable;
  */
 public class Variable<T> implements IVariable<T> {
 
-	private IPrototype<? super T> prototype;
-	protected T value;
+    private IPrototype<? super T> prototype;
+    protected T value;
 
-	private Variable() {
-	}
+    private Variable() {
+    }
 
-	public Variable(String name,  T value) {
-		this(new Prototype<T>(name, (Class<T>)value.getClass()), value);
-	}
-	
-	public Variable(String name,  Class<? extends T> type, T value) {
-		this(new Prototype<T>(name, type), value);
-	}
+    public Variable(String name, T value) {
+        this(new Prototype<T>(name, (Class<T>) value.getClass()), value);
+    }
 
-	public Variable(String name, Class<? extends T> type) {
-		this(new Prototype<T>(name, type));
-	}
+    public Variable(String name, Class<? extends T> type, T value) {
+        this(new Prototype<T>(name, type), value);
+    }
 
-	public Variable(IPrototype<T> prototype) {
-		this.prototype = prototype;
-	}
+    public Variable(String name, Class<? extends T> type) {
+        this(new Prototype<T>(name, type));
+    }
 
+    public Variable(IPrototype<T> prototype) {
+        this.prototype = prototype;
+    }
 
-	public Variable(IPrototype<? super T> prototype, T value) {
-		this.prototype = prototype;
-		setValue(value);
-	}
+    public Variable(IPrototype<? super T> prototype, T value) {
+        this.prototype = prototype;
+        setValue(value);
+    }
 
+    public Object readResolve() {
+        if (getValue() == null) {
+            if (getType() == Integer.class) {
+                value = (T) new Integer(0);
+            } else {
+                value = (T) new Double(0.0);
+            }
+        }
+        return this;
+    }
 
+    @Override
+    public void setValue(T value) {
+        this.value = value;
+    }
 
-	public Object readResolve() {
-		if (getValue() == null) {
-			if (getType() == Integer.class) {
-				value = (T) new Integer(0);
-			} else {
-				value = (T) new Double(0.0);
-			}
-		}
-		return this;
-	}
+    @Override
+    public IPrototype<? super T> getPrototype() {
+        return prototype;
+    }
 
-        @Override
-	public void setValue(T value) {
-		//if (getType().isAssignableFrom(value.getClass())) {
-		this.value = value;
-		/*} else {
-			throw new AssigmentException("Cannot assign " + getType() + " from " + value.getClass());
-		}*/
-	}
+    public String getName() {
+        return getPrototype().getName();
+    }
 
-        @Override
-	public IPrototype<? super T> getPrototype() {
-		return prototype;
-	}
+    public Class getType() {
+        return getPrototype().getType();
+    }
 
-	/*public void setPrototype(Prototype<? super T> structure) {
-		this.prototype = structure;
-	}*/
+    public T getValue() {
+        return value;
+    }
 
-	public String getName() {
-	//	return /*namespace.child(getPrototype().getName()).toString()*/;
-		return getPrototype().getName();
-	}
-
-	public Class getType() {
-		return getPrototype().getType();
-	}
-
-	public T getValue() {
-		return value;
-	}
-
-	@Override
-	public String toString() {
-		return prototype.getName() + '=' + value.toString();
-	}
-
-	
-	
+    @Override
+    public String toString() {
+        return prototype.getName() + '=' + value.toString();
+    }
 }

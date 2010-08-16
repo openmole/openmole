@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -110,8 +110,7 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         jobs.remove(job);
 
         if(jobs.isEmpty()) {
-             Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job category removed from registry");
-
+            Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job category removed from registry");
             jobCategories.remove(category);
         }
         

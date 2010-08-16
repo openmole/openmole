@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -16,6 +16,8 @@
  */
 package org.openmole.plugin.environment.glite.internal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -41,12 +43,12 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
     }
 
     @Override
-    public String getScript(String args, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError {
+    public String getScript(String in, String out, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError {
 
         StringBuilder builder = new StringBuilder();
 
         builder.append("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/simexplorer.tar.bz2"));
+        builder.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
         builder.append("mkdir envplugins; PLUGIN=0;");
 
         for(IURIFile plugin: runtime.getEnvironmentPlugins()) {
@@ -54,20 +56,22 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
             builder.append("PLUGIN=`expr $PLUGIN + 1`; ");
         }
 
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentDescriptionFile().getLocationString(),"$CUR/envinronmentDescription.xml"));
+        builder.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
 
-        builder.append("tar -xjf simexplorer.tar.bz2 >/dev/null; rm -f simexplorer.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
+        builder.append("tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
         builder.append(memorySizeForRuntime);
         builder.append("m ");
-        builder.append("$CUR/envinronmentDescription.xml ");
-        builder.append("$CUR/envplugins/ ");
-        builder.append(' ');
-        builder.append(args);
-        builder.append(" $CUR; cd .. ; rm -rf $CUR");
+        builder.append("-a $CUR/authentication.xml ");
+        builder.append("-p $CUR/envplugins/ ");
+        builder.append("-i ");
+        builder.append(in);
+        builder.append(" -o ");
+        builder.append(out);
+        builder.append(" -w $CUR ; cd .. ; rm -rf $CUR");
 
         String script = builder.toString();
 
-        //System.out.println(script);
+        //Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
 
         return script;
     }

@@ -27,6 +27,7 @@ import org.openmole.core.model.data.IVariable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.groovy.GroovyProxy;
+import org.openmole.core.implementation.job.Context;
 import org.openmole.core.model.job.IContext;
 
 public class VariableExpansion {
@@ -73,8 +74,11 @@ public class VariableExpansion {
     }
 
     public String expandDataInernal(IContext global, IContext context, List<IVariable> tmpVariable, String s) throws InternalProcessingError, UserBadDataError {
-
         String ret = s;
+
+        IContext allVariables = new Context();
+        allVariables.putVariables(context);
+        allVariables.putVariables(tmpVariable);
 
         do {
             int beginIndex = ret.indexOf(eval);
@@ -98,11 +102,8 @@ public class VariableExpansion {
                 cur++;
             }
 
-            //System.out.println("" + cur);
-
             if (cur < retLenght) {
-                String toInsert = expandOneData(global, context, tmpVariable, getVarName(ret.substring(beginIndex+1, cur + 1)));
-               // System.out.println("toins: " +toInsert);
+                String toInsert = expandOneData(global, allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)));
                 ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1);
             } else {
                 break;
@@ -113,9 +114,6 @@ public class VariableExpansion {
         return ret;
 
     }
-
-
-
 
     public static String expandData(ReplacementSet replace, List<IVariable> tmpVariable, String s) {
         return getInstance().expandDataInternal(replace, tmpVariable, s);
@@ -151,15 +149,16 @@ public class VariableExpansion {
         return str.substring(1, str.length() - 1);
     }
 
-    protected String expandOneData(IContext global, IContext context, List<IVariable> tmpVariable, String variable) throws InternalProcessingError, UserBadDataError {
-        GroovyShellProxyAdapter shell = new GroovyShellProxyAdapter(new GroovyProxy());
-
-        Binding binding = GroovyShellProxyAdapter.fromContextToBinding(global, context);
-        for(IVariable v: tmpVariable) {
-            binding.setVariable(v.getPrototype().getName(), v.getValue());
+    protected String expandOneData(IContext global, IContext allVariables, String variableExpression) throws InternalProcessingError, UserBadDataError {
+        IVariable variable = allVariables.getVariable(variableExpression);
+        if (variable != null) {
+            return variable.getValue().toString();
         }
 
-        shell.compile(variable, Collections.EMPTY_LIST);
+        GroovyShellProxyAdapter shell = new GroovyShellProxyAdapter(new GroovyProxy());
+        Binding binding = GroovyShellProxyAdapter.fromContextToBinding(global, allVariables);
+
+        shell.compile(variableExpression, Collections.EMPTY_LIST);
 
         String ret = shell.execute(binding).toString();
         return ret;

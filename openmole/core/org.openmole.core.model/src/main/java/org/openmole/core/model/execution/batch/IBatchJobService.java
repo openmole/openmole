@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -20,7 +20,6 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-public interface IBatchJobService extends IBatchService {
-
+public interface IBatchJobService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends IBatchService<ENV, AUTH> {
     IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException;
 }

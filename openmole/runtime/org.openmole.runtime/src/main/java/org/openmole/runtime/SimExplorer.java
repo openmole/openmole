@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -16,6 +16,7 @@
  */
 package org.openmole.runtime;
 
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +27,15 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -33,7 +43,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.message.RuntimeResult;
 import org.openmole.core.model.file.IURIFile;
@@ -53,7 +62,6 @@ import org.openmole.commons.tools.service.Priority;
 import org.openmole.core.file.GZURIFile;
 import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.implementation.message.FileMessage;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
 import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.serializer.ISerializationResult;
 
@@ -66,34 +74,46 @@ public class SimExplorer implements IApplication {
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
-
+        
         String args[] = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
 
-        if (args.length > 4) {
-            Activator.getWorkspace().setLocation(new File(args[4]));
+        Options options = new Options();
+
+        options.addOption("a", true, "Path to a serialized authentication to initialize.");
+        options.addOption("w", true, "Path for the workspace.");
+        options.addOption("i", true, "Path for the input message.");
+        options.addOption("o", true, "Path for the output message.");
+        options.addOption("p", true, "Path for plugin dir to preload.");
+        
+        CommandLineParser parser = new BasicParser();
+        CommandLine cmdLine;
+        
+        try {
+            cmdLine = parser.parse(options, args);
+        } catch (ParseException e) {
+            Logger.getLogger(SimExplorer.class.getName()).severe("Error while parsing command line arguments");
+            new HelpFormatter().printHelp(" ", options);
+            return IApplication.EXIT_OK;
         }
+        
+        Activator.getWorkspace().setLocation(new File(cmdLine.getOptionValue("w")));
 
         //init jsaga
         Activator.getJSagaSessionService();
 
-        if (args.length < 3) {
-            throw new UserBadDataError(null, usage());
-        }
-
-        String environmentDescription = args[0];
-        String environmentPluginDirPath = args[1];
-        String executionMessageURI = args[2];
-
+        String environmentPluginDirPath = cmdLine.getOptionValue("p");
+        String executionMessageURI = cmdLine.getOptionValue("i");
 
         File environmentPluginDir = new File(environmentPluginDirPath);
         Activator.getPluginManager().loadDir(environmentPluginDir);
-
-        /* get env and init */
-        File envFile = new File(environmentDescription);
-        IBatchEnvironmentDescription real = Activator.getSerialiser().deserialize(envFile);
-        envFile.delete();
         
-        real.createBatchEnvironmentAuthentication().initializeAccess();
+        if (cmdLine.hasOption("a")) {
+            /* get env and init */
+            File envFile = new File(cmdLine.getOptionValue("a"));
+            IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);            
+            authentication.initialize();
+            envFile.delete();
+        }
 
         PrintStream oldOut = System.out;
         PrintStream oldErr = System.err;
@@ -110,12 +130,9 @@ public class SimExplorer implements IApplication {
         IRuntimeResult result = new RuntimeResult();
 
         try {
-
             LocalExecutionEnvironment.getInstance().setNbThread(NumberOfLocalTheads);
 
             /*--- get execution message and job for runtime---*/
-
-            // LocalFileCache fileCache = new LocalFileCache();
             Map<File, File> usedFiles = new TreeMap<File, File>();
             IURIFile executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
             File executionMesageFileCache = executionMessageFile.cache();
@@ -331,25 +348,24 @@ public class SimExplorer implements IApplication {
             result.setException(t);
         }
 
-        if (args.length > 3) {
-            final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
-            Activator.getSerialiser().serialize(result, outputLocal);
-            try {
-                final IURIFile output = new GZURIFile(new URIFile(args[3]));
+        final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
+        Activator.getSerialiser().serialize(result, outputLocal);
+        try {
+            final IURIFile output = new GZURIFile(new URIFile(cmdLine.getOptionValue("o")));
 
-                retry(new Callable<Void>() {
+            retry(new Callable<Void>() {
 
-                    @Override
-                    public Void call() throws Exception {
-                        URIFile.copy(outputLocal, output);
-                        return null;
-                    }
-                }, NbRetry);
+                @Override
+                public Void call() throws Exception {
+                    URIFile.copy(outputLocal, output);
+                    return null;
+                }
+            }, NbRetry);
 
-            } finally {
-                outputLocal.delete();
-            }
+        } finally {
+            outputLocal.delete();
         }
+        
 
         return IApplication.EXIT_OK;
     }
@@ -358,9 +374,4 @@ public class SimExplorer implements IApplication {
     public void stop() {
     }
 
-    private String usage() {
-        StringBuilder buf = new StringBuilder();
-        buf.append("SimExplorer environment_description execution_plugin_dir URL_of_execution_message [URL_of_output_message] [workspace_location]");
-        return buf.toString();
-    }
 }

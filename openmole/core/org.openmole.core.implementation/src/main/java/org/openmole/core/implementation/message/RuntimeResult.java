@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -23,7 +23,6 @@ import java.util.TreeMap;
 import org.openmole.core.model.file.IURIFile;
 
 import org.openmole.core.model.message.IRuntimeResult;
-import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.model.message.IFileMessage;
 import scala.Tuple2;
 

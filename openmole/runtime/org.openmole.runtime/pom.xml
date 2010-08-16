@@ -96,6 +96,11 @@
             <artifactId>org.scala-lang.scala</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
+	<dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.cli</artifactId>
+            <version>${lib.org.apache.commons.cli.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.app</artifactId>

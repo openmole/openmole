@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -29,12 +29,12 @@ public class Runtime implements IRuntime {
 
     final IURIFile runtime;
     final Collection<IURIFile> environmentPlugins;
-    final IURIFile environmentDescritpion;
+    final IURIFile authentication;
 
-    public Runtime(IURIFile runtime, Collection<IURIFile> environmentPlugins, IURIFile environmentDescritpion) {
+    public Runtime(IURIFile runtime, Collection<IURIFile> environmentPlugins, IURIFile authentication) {
         this.runtime = runtime;
         this.environmentPlugins = environmentPlugins;
-        this.environmentDescritpion = environmentDescritpion;
+        this.authentication = authentication;
     }
 
 
@@ -49,8 +49,8 @@ public class Runtime implements IRuntime {
     }
 
     @Override
-    public IURIFile getEnvironmentDescriptionFile() {
-        return environmentDescritpion;
+    public IURIFile getEnvironmentAuthenticationFile() {
+        return authentication;
     }
 
 }

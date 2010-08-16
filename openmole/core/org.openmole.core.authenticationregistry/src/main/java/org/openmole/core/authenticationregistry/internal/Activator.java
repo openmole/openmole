@@ -1,9 +1,9 @@
-package org.openmole.core.batchenvironmentauthenticationregistry.internal;
+package org.openmole.core.authenticationregistry.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.openmole.core.batchenvironmentauthenticationregistry.IBatchEnvironmentAuthenticationRegistry;
+import org.openmole.core.authenticationregistry.IAuthenticationRegistry;
 
 public class Activator implements BundleActivator {
 
@@ -18,8 +18,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
 
-        IBatchEnvironmentAuthenticationRegistry provider = new BatchEnvironmentAuthenticationRegistry();
-        reg = context.registerService(IBatchEnvironmentAuthenticationRegistry.class.getName(), provider, null);
+        IAuthenticationRegistry provider = new AuthenticationRegistry();
+        reg = context.registerService(IAuthenticationRegistry.class.getName(), provider, null);
     }
 
     /*

@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -59,18 +59,13 @@ public class JSAGAJobBuilder {
 
             description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
 
-            StringBuilder args = new StringBuilder();
-            args.append(in.toString());
-            args.append(" ");
-            args.append(out.toString());
-
+          
             BufferedWriter writter = new BufferedWriter(new FileWriter(tmpScript));
 
-            String argsSt = args.toString();
-
+          
             //, env.getDescriptionFile().toURI().getSchemeSpecificPart() + ">" + env.getDescriptionFile().getName()
 
-            writter.write(env.getLaunchingScript().getScript(argsSt, runtime, env.getMemorySizeForRuntime()));
+            writter.write(env.getLaunchingScript().getScript(in.toString(), out.toString(), runtime, env.getMemorySizeForRuntime()));
 
             writter.close();
 

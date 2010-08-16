@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -193,8 +193,6 @@ public class MoleExecution implements IMoleExecution {
             job.addMoleJob(moleJob);
             submit(job, capsule);
         }
-
-        LOGGER.log(Level.FINER, "A new job has been successfully submitted:{0}", moleJob);
     }
 
     private void submit(Job job, IGenericTaskCapsule capsule) {
@@ -207,7 +205,6 @@ public class MoleExecution implements IMoleExecution {
     synchronized void submitGroups(ISubMoleExecution subMoleExecution) {
         Iterable<Job> jobs = jobsGrouping.remove(subMoleExecution);
 
-        LOGGER.finer("Submit a group");
         for (Job job : jobs) {
             Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory> info = categorizer.removeValue(job);
             subMoleExecution.decNbJobWaitingInGroup(job.size());
@@ -230,7 +227,6 @@ public class MoleExecution implements IMoleExecution {
                     LOGGER.log(Level.FINE, "Scheduling interrupted", e);
                     return;
                 }
-                LOGGER.log(Level.FINER, "New job taken:{0}", p._1());
                 try {
                     p._2().submit(p._1());
                 } catch (UserBadDataError e) {

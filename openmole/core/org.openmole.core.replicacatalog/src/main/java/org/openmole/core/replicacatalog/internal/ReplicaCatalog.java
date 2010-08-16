@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -45,6 +45,7 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import com.db4o.ta.TransparentPersistenceSupport;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -56,8 +57,7 @@ import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
 import org.openmole.core.model.execution.batch.IAccessToken;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.core.model.execution.batch.IBatchStorage;
 
@@ -79,10 +79,13 @@ public class ReplicaCatalog implements IReplicaCatalog {
         super();
         try {
             String objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);
-            DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
-            defragmentConfig.forceBackupDelete(true);
-            Defragment.defrag(defragmentConfig);
-                      
+            
+            if(new File(objRepoLocation).exists()) {
+                DefragmentConfig defragmentConfig = new DefragmentConfig(objRepoLocation);
+                defragmentConfig.forceBackupDelete(true);
+                Defragment.defrag(defragmentConfig);
+            }
+            
             objServeur = Db4o.openFile(getB4oConfiguration(), objRepoLocation);
             locks = new ReplicaLockRepository();
             long updateInterval = Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval);
@@ -102,10 +105,10 @@ public class ReplicaCatalog implements IReplicaCatalog {
         }
     }
 
-    synchronized private Replica getReplica(final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription) {
+    synchronized private Replica getReplica(final IHash hash, final IBatchServiceDescription storageDescription, final IBatchServiceAuthenticationKey authenticationKey) {
 
         ObjectSet<Replica> set;
-        set = objServeur.queryByExample(new Replica(null, hash, storageDescription, environmentDescription, null));
+        set = objServeur.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
         if (!set.isEmpty()) {
             return set.get(0);
         }
@@ -113,7 +116,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
     }
 
-    private synchronized  Replica getReplica(final File srcPath, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription environmentDescription)  {
+    private synchronized  Replica getReplica(final File srcPath, final IHash hash, final IBatchServiceDescription storageDescription, final IBatchServiceAuthenticationKey authenticationKey)  {
 
         ObjectSet<Replica> set;
 
@@ -128,7 +131,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                     return replica.getSource().equals(srcPath) 
                             && replica.getSourceHash().equals(hash) 
                             && replica.getStorageDescription().equals(storageDescription)
-                            && replica.getEnvironmentDescription().equals(environmentDescription);
+                            && replica.getAuthenticationKey().equals(authenticationKey);
                 }
                 
             });
@@ -159,14 +162,14 @@ public class ReplicaCatalog implements IReplicaCatalog {
     }
     
 
-    synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchEnvironmentDescription envDescription) {
+    synchronized ObjectSet<Replica> getReplica(final File src, final IBatchServiceDescription storageDescription, final IBatchServiceAuthenticationKey authenticationKey) {
         ObjectSet<Replica> ret = objServeur.query(new Predicate<Replica>(Replica.class){
 
             @Override
             public boolean match(Replica replica) {
                 return replica.getSource().equals(src)
                         && replica.getStorageDescription().equals(storageDescription)
-                        && replica.getEnvironmentDescription().equals(envDescription);
+                        && replica.getAuthenticationKey().equals(authenticationKey);
             }
             
         });
@@ -178,27 +181,27 @@ public class ReplicaCatalog implements IReplicaCatalog {
     @Override
     public IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
-        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription());
+        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getAuthenticationKey());
 
         locks.lock(key);
 
         Replica replica;
         try {
             IBatchServiceDescription storageDescription = storage.getDescription();
-            IBatchEnvironmentDescription environmentDescription = storage.getBatchExecutionEnvironmentDescription();
+            IBatchServiceAuthenticationKey authenticationKey = storage.getAuthenticationKey();
 
-            replica = getReplica(srcPath, hash, storageDescription, environmentDescription);
+            replica = getReplica(srcPath, hash, storageDescription, authenticationKey);
         
             
             if (replica == null) {
                                 
-                for (Replica toClean : getReplica(srcPath, storageDescription, environmentDescription)) {
+                for (Replica toClean : getReplica(srcPath, storageDescription, authenticationKey)) {
                     clean(toClean);
                 }
 
-                IReplica sameContent = getReplica(hash, storageDescription, environmentDescription);
+                IReplica sameContent = getReplica(hash, storageDescription, authenticationKey);
                 if (sameContent != null) {                 
-                    replica = new Replica(srcPath, hash, storageDescription, environmentDescription, sameContent.getDestination());
+                    replica = new Replica(srcPath, hash, storageDescription, authenticationKey, sameContent.getDestination());
                     insert(replica);
                 } else {
                     IURIFile newFile;
@@ -208,7 +211,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
                         URIFile.copy(src, newFile, token);
 
-                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getBatchExecutionEnvironmentDescription(), newFile);
+                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getAuthenticationKey(), newFile);
                         insert(replica);              
                     } catch (IOException e) {
                         throw new InternalProcessingError(e);
@@ -254,7 +257,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
         File srcToInsert = replica.getSource();
         IHash hashToInsert = replica.getSourceHash();
         IBatchServiceDescription storageDescritptionToInsert = replica.getStorageDescription();
-        IBatchEnvironmentDescription environmentDescriptionToInsert = replica.getEnvironmentDescription();
+        IBatchServiceAuthenticationKey authenticationKeyToInsert = replica.getAuthenticationKey();
         IURIFile destinationToInsert = replica.getDestination();
 
         ObjectSet<File> srcsInbase = objServeur.query(new Predicate<File>(File.class) {
@@ -294,17 +297,17 @@ public class ReplicaCatalog implements IReplicaCatalog {
             storageDescritptionToInsert = storagesDescritptionInBase.get(0);
         }
 
-        ObjectSet<IBatchEnvironmentDescription> environmentDescriptionInBase = objServeur.query(new Predicate<IBatchEnvironmentDescription>(IBatchEnvironmentDescription.class) {
+        ObjectSet<IBatchServiceAuthenticationKey> authenticationKeyInBase = objServeur.query(new Predicate<IBatchServiceAuthenticationKey>(IBatchServiceAuthenticationKey.class) {
 
             @Override
-            public boolean match(IBatchEnvironmentDescription batchEnvironmentDescription) {
-                return batchEnvironmentDescription.equals(replica.getEnvironmentDescription());
+            public boolean match(IBatchServiceAuthenticationKey batchEnvironmentDescription) {
+                return batchEnvironmentDescription.equals(replica.getAuthenticationKey());
             }
             
         });
         
-        if (!environmentDescriptionInBase.isEmpty()) {
-            environmentDescriptionToInsert = environmentDescriptionInBase.get(0);
+        if (!authenticationKeyInBase.isEmpty()) {
+            authenticationKeyToInsert = authenticationKeyInBase.get(0);
         }
 
         /*ObjectSet<IURIFile> destinations = objServeur.query(destinationToInsert);
@@ -312,7 +315,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
             destinationToInsert = destinations.get(0);
         }*/
 
-        final IReplica replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescritptionToInsert, environmentDescriptionToInsert, destinationToInsert);
+        final IReplica replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescritptionToInsert, authenticationKeyToInsert, destinationToInsert);
 
         objServeur.store(replicaToInsert);
         return replicaToInsert;
@@ -335,8 +338,8 @@ public class ReplicaCatalog implements IReplicaCatalog {
 
         remove(replica);
 
-        if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getEnvironmentDescription()) == null)
-            return Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(replica.getDestination(), false));
+        if(getReplica(replica.getSourceHash(), replica.getStorageDescription(), replica.getAuthenticationKey()) == null)
+            return Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.getDestination()), false));
         else return null;
     }
 
@@ -371,34 +374,10 @@ public class ReplicaCatalog implements IReplicaCatalog {
         configuration.objectClass(Replica.class).objectField("hash").indexed(true);
         configuration.objectClass(Replica.class).objectField("source").indexed(true);
         configuration.objectClass(Replica.class).objectField("storageDescription").indexed(true);
-        configuration.objectClass(Replica.class).objectField("environmentDescription").indexed(true);
+        configuration.objectClass(Replica.class).objectField("authenticationKey").indexed(true);
         
         return configuration;
     }
 
-    @Override
-    synchronized public void removeAllReplicaForEnvironment(IBatchEnvironment environment) {
-
-        ObjectContainer container = objServeur;
-        try {
-
-            ObjectSet<Replica> set;
-
-            Query q = container.query();
-            q.constrain(Replica.class);
-
-            q.descend("environmentDescription").constrain(environment.getDescription());
-
-
-            set = q.execute();
-
-
-            for (Replica r : set) {
-                remove(r);
-            }
-        } finally {
-            container.commit();
-        }
-
-    }
+ 
 }

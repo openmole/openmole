@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -19,16 +19,19 @@
 package org.openmole.core.implementation.execution.batch;
 
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.batchservicecontrol.UsageControl;
 import org.openmole.core.batchservicecontrol.FailureControl;
 import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.core.model.execution.batch.IBatchEnvironmentDescription;
+import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchJobService;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
-public abstract class BatchJobService extends BatchService implements IBatchJobService {
+public abstract class BatchJobService<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchService<ENV, AUTH> implements IBatchJobService<ENV, AUTH> {
 
-    public BatchJobService(IBatchEnvironmentDescription batchEnvironmentDescription, IBatchServiceDescription description, int nbAccess) throws InternalProcessingError {
-        super(batchEnvironmentDescription, description, new UsageControl(nbAccess), new FailureControl());
+    public BatchJobService(ENV batchEnvironment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, IBatchServiceDescription description, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
+        super(batchEnvironment, key, authentication, description, new UsageControl(nbAccess), new FailureControl());
     }    
 }

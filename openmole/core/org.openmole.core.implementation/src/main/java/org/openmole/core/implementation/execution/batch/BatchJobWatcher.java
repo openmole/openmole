@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -26,18 +26,10 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.job.IJob;
-import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 import org.openmole.misc.updater.IUpdatable;
-import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchJobWatcher implements IUpdatable {
-
-    final static ConfigurationLocation CheckInterval = new ConfigurationLocation(BatchJobWatcher.class.getName(), "CheckInterval");
-
-    static {
-        Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
-    }
 
     final IBatchEnvironment<?> watchedEnv;
 
@@ -48,13 +40,17 @@ public class BatchJobWatcher implements IUpdatable {
 
     @Override
     public boolean update() throws InterruptedException {
+        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Watching env");
+
         IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
         List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
         
         synchronized (registry) {
             for (IJob job : registry.getAllJobs()) {
-         
+
                 if (job.allMoleJobsFinished()) {
+                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Job finished killing all execution jobs.");
+
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
                         ej.kill();
                     }
@@ -92,6 +88,9 @@ public class BatchJobWatcher implements IUpdatable {
                 registry.removeJob(j);
             }
         }
+
+        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "End watching env");
+
         return true;
     }
 }

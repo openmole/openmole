@@ -115,7 +115,7 @@ public abstract class GenericTask implements IGenericTask {
         }
 
         context.clean();
-        context.setVariables(vars);
+        context.putVariables(vars);
     }
 
     private void init(IContext context) throws UserBadDataError, InternalProcessingError {

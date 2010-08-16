@@ -26,11 +26,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
-                <artifactId>com.springsource.org.apache.commons.cli</artifactId>
-                <version>1.2.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
                 <artifactId>com.springsource.org.apache.commons.collections</artifactId>
                 <version>3.2.0</version>
             </dependency>
@@ -200,8 +195,8 @@
 
     <licenses>
         <license>
-            <name>GPL</name>
-            <url>http://www.gnu.org/copyleft/gpl.html</url>
+            <name>AGPLv3.0</name>
+            <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -227,6 +222,7 @@
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
 	<lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
+	<lib.org.apache.commons.cli.version>1.2.0</lib.org.apache.commons.cli.version>
         <lib.org.codehaus.groovy.version>1.7.3</lib.org.codehaus.groovy.version>
         <lib.org.ogf.saga.version>1.0</lib.org.ogf.saga.version>
         <lib.uk.com.robust-it.cloning.version>1.7.1</lib.uk.com.robust-it.cloning.version>

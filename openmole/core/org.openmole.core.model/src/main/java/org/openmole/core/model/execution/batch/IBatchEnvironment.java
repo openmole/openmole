@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Affero GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -27,13 +27,9 @@ public interface IBatchEnvironment<JS extends IBatchJobService> extends IEnviron
 
     File getRuntime();
 
-    IBatchEnvironmentDescription getDescription();
+    Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
-    IBatchEnvironmentAuthentication getAuthentication() throws InternalProcessingError;
-
-    Collection<JS> allJobServices() throws InternalProcessingError, UserBadDataError;
-
-    Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError;
+    Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
     IBatchServiceGroup<JS> getJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException;
 
