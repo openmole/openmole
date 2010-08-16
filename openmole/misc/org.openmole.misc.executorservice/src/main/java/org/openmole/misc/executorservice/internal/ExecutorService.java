@@ -37,20 +37,20 @@ public class ExecutorService implements IExecutorService {
     
     final ThreadFactory threadFactory;
     final Map<Object, java.util.concurrent.ExecutorService> executorServices = new TreeMap<Object, java.util.concurrent.ExecutorService>();
-    final java.util.concurrent.ExecutorService cachedPool;
+    //final java.util.concurrent.ExecutorService cachedPool;
     int nbThreads;
 
     public ExecutorService(ThreadFactory threadFactory) throws InternalProcessingError, UserBadDataError {
         super();
         this.threadFactory = threadFactory;
         nbThreads = Activator.getWorkspace().getPreferenceAsInt(NbTread);
-        cachedPool = Executors.newCachedThreadPool(threadFactory);
+        //cachedPool = Executors.newCachedThreadPool(threadFactory);
     }
 
     @Override
     public java.util.concurrent.ExecutorService getExecutorService(ExecutorType type) {
         if (type == ExecutorType.OWN) {
-            return cachedPool;
+            return Executors.newSingleThreadExecutor(threadFactory);
         }
 
         java.util.concurrent.ExecutorService ret;

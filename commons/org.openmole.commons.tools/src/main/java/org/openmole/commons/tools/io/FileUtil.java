@@ -38,7 +38,6 @@ import scala.Tuple2;
 public class FileUtil {
 
     public final static int DEFAULT_BUFF_SIZE = 8 * 1024;
-    final static ExecutorService pool = Executors.newCachedThreadPool();
 
     public static long getLastModification(File file) {
 
@@ -195,6 +194,7 @@ public class FileUtil {
         }*/
 
         byte[] buffer = new byte[maxRead];
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (NoSuchElementException e) {
@@ -209,7 +209,7 @@ public class FileUtil {
             Integer read;
 
             while (true) {
-                Future<Integer> futureRead = pool.submit(new ReaderRunnable(from, buffer, maxRead));
+                Future<Integer> futureRead = executor.submit(new ReaderRunnable(from, buffer, maxRead));
 
                 try {
                     read = futureRead.get(timeout, TimeUnit.MILLISECONDS);
@@ -224,7 +224,7 @@ public class FileUtil {
                     break;
                 }
 
-                Future<Void> futureWrite = pool.submit(new WritterRunnable(to, buffer, read));
+                Future<Void> futureWrite = executor.submit(new WritterRunnable(to, buffer, read));
 
                 try {
                     futureWrite.get(timeout, TimeUnit.MILLISECONDS);
@@ -235,6 +235,7 @@ public class FileUtil {
                     throw new IOException("Timeout on writting " + read + " bytes, write was longer than " + timeout + " ms.", e1);
                 }
             }
+
         /*} finally {
             try {
                 BufferFactory.GetInstance().returnObject(buffer);
