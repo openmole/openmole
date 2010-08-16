@@ -228,7 +228,7 @@ public class VirtualMachineResource implements IResource {
             toCopy = new String[]{Executable + ".exe", "SDL.dll"};
         } else if (os.toLowerCase().contains("mac")) {
             if (System.getProperty("os.version").contains("10.6")) {
-                qemuJarPath = "/OSX-10.6/";
+                qemuJarPath = "/qemu_OSX-10.6/";
                 toCopy = new String[]{Executable};
             } else {
                 throw new InternalProcessingError("Unsuported OSX version " + System.getProperty("os.version"));
