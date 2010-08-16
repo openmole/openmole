@@ -43,11 +43,11 @@ import static org.openmole.core.implementation.tools.VariableExpansion.*;
 public abstract class TemplateFileGeneratorTask extends Task {
 
     @Output
-    IData<File> output;
+    final IData<File> output;
      
     public TemplateFileGeneratorTask(String name, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
         super(name);
-        output = new Data(outputPrototype);
+        this.output = new Data(outputPrototype);
     }
 
     @Override
