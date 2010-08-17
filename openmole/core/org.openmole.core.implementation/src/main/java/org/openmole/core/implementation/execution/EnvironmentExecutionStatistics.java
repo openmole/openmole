@@ -106,8 +106,6 @@ public class EnvironmentExecutionStatistics implements IEnvironmentExecutionStat
         
         IStatistic statistic = map.get(key);
         if (statistic == null) {
-            Logger.getLogger(EnvironmentExecutionStatistics.class.getName()).log(Level.FINE,"New Map.");
-       
             statistic = new Statistic(historySize);
             map.put(key, statistic);
         }

@@ -145,31 +145,27 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
                 }
             }
             
-            LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
+            //LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
 
 
         } catch (InternalProcessingError e) {
             kill();
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+            LOGGER.log(Level.WARNING, "Error in job update", e);
         } catch (UserBadDataError e) {
             kill();
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.WARNING, "Error in job update", e);
+            LOGGER.log(Level.WARNING, "Error in job update", e);
         } catch(CancellationException e) {
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Operation interrupted cause job was killed.", e);
+            LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e);
         }
 
         return !killed.get();
     }
 
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
-        LOGGER.log(Level.FINE, "Finalysing job");
-
-        if (finalizeExecutionFuture == null) {
+         if (finalizeExecutionFuture == null) {
             finalizeExecutionFuture = Activator.getExecutorService().getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
         }
         try {
-            LOGGER.log(Level.FINE, "Finalysing isDone? {0}", finalizeExecutionFuture.isDone());
-
             if (finalizeExecutionFuture.isDone()) {
                 finalizeExecutionFuture.get();
                 finalizeExecutionFuture = null;
@@ -211,7 +207,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             IBatchJob bj = js._1().submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2());
             setBatchJob(bj);
         } catch (InternalProcessingError e) {
-            Logger.getLogger(BatchExecutionJob.class.getName()).log(Level.FINE, "Error durring job submission.", e);
+            LOGGER.log(Level.FINE, "Error durring job submission.", e);
         } finally {
             Activator.getBatchRessourceControl().getController(js._1().getDescription()).getUsageControl().releaseToken(js._2());
         }

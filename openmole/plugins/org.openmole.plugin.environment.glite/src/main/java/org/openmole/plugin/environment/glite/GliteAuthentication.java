@@ -255,7 +255,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
                         tarEntry = tis.getNextTarEntry();
                     }
                 } catch (IOException e) {
-                    Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);
+                    Logger.getLogger(GliteAuthentication.class.getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);
                 } finally {
                     tis.close();
                 }

@@ -34,7 +34,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
     final GliteEnvironment env;
 
     static {
-        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT30M");
+        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT2M");
     }
 
     public GliteLaunchingScript(GliteEnvironment env) {
@@ -81,7 +81,16 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
 
         builder.append("lcg-cp --vo ");
         builder.append(env.getVOName());
-        builder.append(" -t ");
+        builder.append(" --connect-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --sendreceive-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --bdii-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --srm-timeout ");
         builder.append(getTimeOut());
         builder.append(" ");
         builder.append(from);

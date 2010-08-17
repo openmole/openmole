@@ -47,7 +47,6 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
         Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, "1");
     }
 
-    private static final Logger LOGGER = Logger.getLogger(LocalExecutionEnvironment.class.getName());
     private static LocalExecutionEnvironment instance;
 
     BlockingQueue<LocalExecutionJob> jobs = new LinkedBlockingQueue<LocalExecutionJob>();
@@ -117,7 +116,6 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     public void submit(LocalExecutionJob ejob) {
         ejob.setState(ExecutionState.SUBMITED);
-        LOGGER.log(Level.FINER, "New job submitted: {0}", ejob.getJob());
         jobs.add(ejob);
     }
 

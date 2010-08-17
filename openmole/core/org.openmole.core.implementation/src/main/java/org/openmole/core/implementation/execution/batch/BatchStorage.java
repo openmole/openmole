@@ -198,7 +198,7 @@ public class BatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServ
                 Activator.getBatchRessourceControl().getController(getDescription()).getUsageControl().releaseToken(token);
             }
         } catch (Throwable e) {
-            Logger.getLogger(BatchStorage.class.getName()).log(Level.FINE, getURI().toString(), e);
+            LOGGER.log(Level.FINE, getURI().toString(), e);
         }
         return false;
     }
