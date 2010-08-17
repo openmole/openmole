@@ -8,8 +8,6 @@ package org.openmole.commons.aspect.eventdispatcher.internal;
 import java.util.List;
 import org.openmole.commons.aspect.eventdispatcher.IObjectConstructedListener;
 import org.openmole.commons.tools.object.SuperClassesLister;
-import scala.Tuple2;
-
 
 /**
  *
