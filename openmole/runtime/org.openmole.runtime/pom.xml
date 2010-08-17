@@ -128,11 +128,6 @@
             <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>com.springsource.org.aspectj.weaver</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 	<dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.ant</artifactId>
