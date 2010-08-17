@@ -41,6 +41,7 @@ import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 
@@ -69,6 +70,10 @@ public class JSAGAJobBuilder {
             } finally {
                 os.close();
             }
+            
+            FileInputStream is = new FileInputStream(tmpScript);
+            FileUtil.copy(is, System.out);
+            is.close();
 
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(env.getRequieredCPUTime()).toString());

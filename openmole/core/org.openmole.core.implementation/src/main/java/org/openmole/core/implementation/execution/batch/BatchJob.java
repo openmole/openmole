@@ -16,11 +16,6 @@
  */
 package org.openmole.core.implementation.execution.batch;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.ExecutionState;
@@ -29,7 +24,6 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
 
 public abstract class BatchJob implements IBatchJob {
