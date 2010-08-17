@@ -68,15 +68,14 @@ public class DnDAddPrototypeProvider extends DnDProvider{
     @Override
     public void accept(Widget widget, Point point, Transferable t) {
         try {
-
-
-            String inputValue = JOptionPane.showInputDialog("Create a new "+((Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)).getSimpleName()+" prototype");
+            String inputValue = JOptionPane.showInputDialog("Create a new "+ ((Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)).getSimpleName()+" prototype");
 
             MoleSceneManager manager = moleScene.getManager();
             if (inputValue != null){
                 Preferences.getInstance().registerPrototype(new PrototypeUI(inputValue,
                                                                             (Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)));
-
+                
+                
             //CategoryBuilder.getInstance().getPrototypeInstanceCategory(CategoryName.PROTOTYPE_INSTANCE).getChildren().refreshNodes();
             //MoleSceneTopComponentTopComponent.getDefault().refreshPalette();
 
