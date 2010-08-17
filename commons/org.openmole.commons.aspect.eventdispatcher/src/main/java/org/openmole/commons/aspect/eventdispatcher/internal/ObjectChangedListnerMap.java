@@ -65,7 +65,7 @@ public class ObjectChangedListnerMap<T extends IObjectChangedListener> {
         if (ret == null) {
             return Collections.EMPTY_LIST;
         } else {
-            LOGGER.log(Level.FINE, "Size of the listners for " + object + " and " + type + " is " + listnersByType.get(type).size());
+            LOGGER.log(Level.FINE, "Size of the listners for {0} and {1} is {2}", new Object[]{object, type, listnersByType.get(type).size()});
             return ret;
         }
     }
