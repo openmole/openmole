@@ -16,6 +16,7 @@
  */
 package org.openmole.core.implementation.data;
 
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -77,6 +78,15 @@ public class DataChannel implements IDataChannel {
         }
     }
 
+    public DataChannel(IGenericTaskCapsule<?, ?> start, IGenericTaskCapsule<?, ?> end, DataSet dataset){
+        this(start, end);
+
+        Iterator<IData<?>> it = dataset.iterator();
+        while(it.hasNext()) {
+            add(it.next().getPrototype());
+        }
+    }
+    
     @Override
     public IGenericTaskCapsule<?, ?> getStart() {
         return start;
