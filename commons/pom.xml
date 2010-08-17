@@ -27,8 +27,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>com.springsource.org.aspectj.runtime</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.aspectj.runtime</artifactId>
+	    <version>${lib.org.aspectj.version}</version>
             <scope>compile</scope>
         </dependency>
 	<dependency>

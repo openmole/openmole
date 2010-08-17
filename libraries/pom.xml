@@ -43,6 +43,7 @@
 	<module>org.slf4j</module>
 	<module>net.java.dev.j3d</module>
 	<module>org.processing</module>
+	<module>org.aspectj.runtime</module>
     </modules>
 
     <!-- ************************************************************* -->

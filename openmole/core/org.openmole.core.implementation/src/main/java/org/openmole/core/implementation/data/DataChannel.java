@@ -81,9 +81,8 @@ public class DataChannel implements IDataChannel {
     public DataChannel(IGenericTaskCapsule<?, ?> start, IGenericTaskCapsule<?, ?> end, DataSet dataset){
         this(start, end);
 
-        Iterator<IData<?>> it = dataset.iterator();
-        while(it.hasNext()) {
-            add(it.next().getPrototype());
+        for(IData data: dataset) {
+            add(data.getPrototype());
         }
     }
     

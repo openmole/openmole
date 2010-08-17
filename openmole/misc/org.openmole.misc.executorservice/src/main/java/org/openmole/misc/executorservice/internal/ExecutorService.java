@@ -36,7 +36,7 @@ public class ExecutorService implements IExecutorService {
     }
     
     final ThreadFactory threadFactory;
-    final Map<Object, java.util.concurrent.ExecutorService> executorServices = new TreeMap<Object, java.util.concurrent.ExecutorService>();
+    final Map<String, java.util.concurrent.ExecutorService> executorServices = new TreeMap<String, java.util.concurrent.ExecutorService>();
     //final java.util.concurrent.ExecutorService cachedPool;
     int nbThreads;
 
@@ -56,10 +56,10 @@ public class ExecutorService implements IExecutorService {
         java.util.concurrent.ExecutorService ret;
 
         synchronized (executorServices) {
-            ret = executorServices.get(type);
+            ret = executorServices.get(type.name());
             if (ret == null) {
                 ret = Executors.newFixedThreadPool(nbThreads, threadFactory);
-                executorServices.put(type, ret);
+                executorServices.put(type.name(), ret);
             }
         }
         return ret;

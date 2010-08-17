@@ -22,10 +22,6 @@ public class ObjectConstructedListnerMap<T extends IObjectConstructedListener> {
         listnerMap.registerListner(object, priority, listner);
     }
 
-    List<Tuple2<Integer,T>> getOrCreateListners(Class object) {
-        return listnerMap.getOrCreateListners(object);
-    }
-
     Iterable<T> getListners(Class c) {
         SortedListners<T> ret = new SortedListners<T>();
 

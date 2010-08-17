@@ -43,8 +43,8 @@ public interface IMoleExecution {
     IMole getMole();
 
     ITicket createRootTicket();
-
     ITicket nextTicket(ITicket parent);
+    void register(ISubMoleExecution subMoleExecution);
 
     IMoleJobId nextJobId();
 
