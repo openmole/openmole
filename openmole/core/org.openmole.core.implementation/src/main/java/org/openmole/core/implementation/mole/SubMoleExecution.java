@@ -16,11 +16,11 @@
  */
 package org.openmole.core.implementation.mole;
 
-import java.util.logging.Logger;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.mole.ISubMoleExecution;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.mole.IMoleExecution;
 
 /**
  *
@@ -33,12 +33,14 @@ public class SubMoleExecution implements ISubMoleExecution {
 
     ISubMoleExecution parent;
 
-    public SubMoleExecution() {
+    public SubMoleExecution(IMoleExecution moleExecution) {
         this.parent = this;
+        moleExecution.register(this);
     }
 
-    public SubMoleExecution(ISubMoleExecution parent) {
+    public SubMoleExecution(IMoleExecution moleExecution, ISubMoleExecution parent) {
         this.parent = parent;
+        moleExecution.register(this);
     }
 
     @Override
