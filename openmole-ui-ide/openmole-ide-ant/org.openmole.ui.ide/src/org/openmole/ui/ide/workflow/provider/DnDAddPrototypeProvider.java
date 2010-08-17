@@ -38,22 +38,13 @@ import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class DnDAddPrototypeProvider extends DnDProvider{
-    private boolean encapsulated = false;
-    private TaskCapsuleViewUI view;
-    private MoleScene moleScene;
+public class DnDAddPrototypeProvider extends DnDAbstractAddPrototype{
 
     private boolean dialogOK = false;
 
     public DnDAddPrototypeProvider(MoleScene molescene,
                                    TaskCapsuleViewUI view) {
-        super(molescene);
-        this.moleScene = molescene;
-        this.view = view;
-    }
-
-    public void setEncapsulated(boolean encapsulated) {
-        this.encapsulated = encapsulated;
+        super(molescene,view);
     }
 
     @Override
@@ -75,10 +66,6 @@ public class DnDAddPrototypeProvider extends DnDProvider{
                 Preferences.getInstance().registerPrototype(new PrototypeUI(inputValue,
                                                                             (Class) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)));
                 
-                
-            //CategoryBuilder.getInstance().getPrototypeInstanceCategory(CategoryName.PROTOTYPE_INSTANCE).getChildren().refreshNodes();
-            //MoleSceneTopComponentTopComponent.getDefault().refreshPalette();
-
             if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH/2) view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
             else view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
             }

@@ -45,7 +45,7 @@ public class PrototypeInstanceNode extends AbstractNode {
     public Transferable drag() throws IOException {
         ExTransferable retValue = ExTransferable.create( super.drag() );
         //add the 'data' into the Transferable
-        retValue.put( new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) {
+        retValue.put( new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR) {
             @Override
             protected Object getData() throws IOException, UnsupportedFlavorException
             {return proto;}

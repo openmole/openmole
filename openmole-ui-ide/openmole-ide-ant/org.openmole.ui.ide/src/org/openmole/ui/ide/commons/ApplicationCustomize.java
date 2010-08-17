@@ -72,7 +72,8 @@ public class ApplicationCustomize {
 
     public static final int NB_MAX_SLOTS = 5;
 
-    public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor();
+   // public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor();
+    public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor(Class.class, "Prototype instances" );
     public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );

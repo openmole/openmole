@@ -41,10 +41,12 @@ public class PrototypeInstanceChildren extends GenericChildren {
 
         @Override
     protected List<Node> initCollection() {
+            System.out.println("*********** initCollection");
         Collection<PrototypeUI> prototypes = Preferences.getInstance().getPrototypes();
 
         ArrayList childrenNodes = new ArrayList(prototypes.size());
         for (PrototypeUI proto : prototypes) {
+            System.out.println("*********** "+proto.getName());
             childrenNodes.add(new PrototypeInstanceNode(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR, proto.getName()));
         }
         return childrenNodes;
