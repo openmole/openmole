@@ -41,7 +41,6 @@ public class EventDispatcher implements IEventDispatcher {
 
     @Override
     public <T> void registerListener(T object, IObjectChangedAsynchronousListener<? super T> listner, String type) {
-        LOGGER.log(Level.FINE, "Register listner {0} for {1}", new Object[]{listner, object});
         asynchronousObjectChangedMap.registerListner(object, Priority.NORMAL.getValue(), listner, type);
     }
 
@@ -79,7 +78,7 @@ public class EventDispatcher implements IEventDispatcher {
                 }
             });
         }
-
+    
         /* --- Listners without args ---*/
 
         Iterable<IObjectChangedSynchronousListener> listeners = synchronousObjectChangedMap.getListners(object, type);
