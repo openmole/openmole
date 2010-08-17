@@ -17,14 +17,10 @@
 
 package org.openmole.commons.aspect.eventdispatcher.internal;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.TreeSet;
 import scala.Tuple2;
 
 /**
@@ -33,19 +29,29 @@ import scala.Tuple2;
  */
 public class SortedListners<T> implements Iterable<T> {
 
-    final SortedMap<Integer, List<T>> listnersList = new TreeMap<Integer, List<T>>(Collections.reverseOrder());
-    final Set<T> listners = new HashSet<T>();
+    static class ListnerContainer<T2> {
+        final T2 listner;
+        final Integer priority;
 
-    public void registerListner(Integer priority, T listner) {
-        synchronized (listnersList) {
-            List<T> listnerForPrio = listnersList.get(priority);
-            if (listnerForPrio == null) {
-                listnerForPrio = new LinkedList<T>();
-                listnersList.put(priority, listnerForPrio);
-            }
-            listnerForPrio.add(listner);
-            listners.add(listner);
+        public ListnerContainer(T2 listner, Integer priority) {
+            this.listner = listner;
+            this.priority = priority;
         }
+    }
+    
+    static class PriorityComparator<T2> implements Comparator<ListnerContainer<T2>> {
+
+        @Override
+        public int compare(ListnerContainer<T2> o1, ListnerContainer<T2> o2) {
+            return o2.priority - o1.priority;
+        }
+        
+    }
+    
+    final Set<ListnerContainer<T>> listners = new TreeSet<ListnerContainer<T>>(new PriorityComparator<T>());
+ 
+    public void registerListner(Integer priority, T listner) {
+        listners.add(new ListnerContainer<T>(listner, priority));
     }
 
     public void registerAllListners(Iterable<? extends Tuple2<Integer, ? extends T>> listeners) {
@@ -54,41 +60,25 @@ public class SortedListners<T> implements Iterable<T> {
         }
     }
 
-    public boolean contains(T o) {
-        return listners.contains(o);
-    }
-
     @Override
     public Iterator<T> iterator() {
-        return new Iterator() {
+        return new Iterator<T>() {
 
-            Iterator<List<T>> listIterator = listnersList.values().iterator();
-            Iterator<T> elementIterator;
-
+            Iterator<ListnerContainer<T>> iterator = listners.iterator();
+            
             @Override
             public boolean hasNext() {
-                if (elementIterator == null || !elementIterator.hasNext()) {
-                    if (listIterator.hasNext()) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return true;
-                }
+                return iterator.hasNext();
             }
 
             @Override
-            public Object next() {
-                if (elementIterator == null || !elementIterator.hasNext()) {
-                    elementIterator = listIterator.next().iterator();
-                }
-                return elementIterator.next();
+            public T next() {
+                return iterator.next().listner;
             }
 
             @Override
             public void remove() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                iterator.remove();
             }
         };
     }

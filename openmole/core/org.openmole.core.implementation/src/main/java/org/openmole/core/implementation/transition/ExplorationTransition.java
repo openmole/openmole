@@ -57,7 +57,7 @@ public class ExplorationTransition extends GenericTransition<IExplorationTaskCap
         IExploredPlan values = context.getValue(ExplorationTask.ExploredPlan.getPrototype());
         context.removeVariable(ExplorationTask.ExploredPlan.getPrototype().getName());
 
-        ISubMoleExecution subSubMole = new SubMoleExecution(subMole);
+        ISubMoleExecution subSubMole = new SubMoleExecution(moleExecution, subMole);
 
         int size = 0;
 

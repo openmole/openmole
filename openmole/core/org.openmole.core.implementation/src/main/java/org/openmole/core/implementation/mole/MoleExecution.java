@@ -149,9 +149,14 @@ public class MoleExecution implements IMoleExecution {
             throw new UserBadDataError("First task of workflow hasn't been set.");
         }
 
-        submit(root, global, context, ticket, new SubMoleExecution());
+        submit(root, global, context, ticket, new SubMoleExecution(this));
     }
 
+    @Override
+    public void register(ISubMoleExecution subMoleExecution) {
+         Activator.getEventDispatcher().registerListener(subMoleExecution, Priority.NORMAL.getValue(), moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.allJobsWaitingInGroup);
+    }
+    
     @Override
     public synchronized void submit(IGenericTaskCapsule capsule, IContext global, IContext context, ITicket ticket, ISubMoleExecution subMole) throws InternalProcessingError, UserBadDataError {
         IMoleJob job = capsule.toJob(global, context, nextJobId());
@@ -180,10 +185,6 @@ public class MoleExecution implements IMoleExecution {
 
                 categorizer.put(key, job);
                 jobsGrouping.put(subMole, job);
-
-                if (!Activator.getEventDispatcher().isRegistred(subMole, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.allJobsWaitingInGroup)) {
-                    Activator.getEventDispatcher().registerListener(subMole, Priority.NORMAL.getValue(), moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.allJobsWaitingInGroup);
-                }
             }
 
             job.addMoleJob(moleJob);
@@ -359,4 +360,5 @@ public class MoleExecution implements IMoleExecution {
     public ITicket getTicket(IMoleJob job) {
         return inProgress.get(job)._2();
     }
+    
 }
