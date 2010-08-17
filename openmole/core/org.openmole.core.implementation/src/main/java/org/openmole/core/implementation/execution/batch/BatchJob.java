@@ -36,7 +36,8 @@ public abstract class BatchJob implements IBatchJob {
 
     ExecutionState state;
     private final IBatchServiceDescription jobServiceDescription;
-    private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
+    private final long timeStemps[] = new long[ExecutionState.values().length];
+    //private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
 
     public BatchJob(IBatchJobService jobService) {
         super();
@@ -52,7 +53,7 @@ public abstract class BatchJob implements IBatchJob {
     private synchronized void setStateAndUpdateIntervals(ExecutionState state) {
         if (this.state != state) {
             long curDate = System.currentTimeMillis();
-            timeStemps.put(state, curDate);
+            timeStemps[state.ordinal()] = curDate;
             this.state = state;
         }
     }
@@ -109,7 +110,7 @@ public abstract class BatchJob implements IBatchJob {
 
     @Override
     public Long getTimeStemp(ExecutionState state) {
-        return timeStemps.get(state);
+        return timeStemps[state.ordinal()];
     }
 
     @Override
