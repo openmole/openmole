@@ -124,8 +124,7 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
     }
 
     @Override
-    public IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError,
-            UserBadDataError, InterruptedException {
+    public IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         File script;
         script = Activator.getWorkspace().newFile("script", ".sh");

@@ -130,7 +130,6 @@ public class JSAGAJob extends BatchJob {
     public void deleteJob() throws InternalProcessingError {
         try {
             if (getState() == ExecutionState.SUBMITED || getState() == ExecutionState.RUNNING) {
-                Logger.getLogger(JSAGAJob.class.getName()).log(Level.FINE, "Job {0} canceled.", toString());
                 getJob().cancel();
             }
         } catch (NotImplementedException e) {
