@@ -36,8 +36,6 @@ import org.openmole.core.model.execution.ExecutionState;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.batch.BatchJob;
 
 public class JSAGAJob extends BatchJob {

@@ -23,7 +23,6 @@ import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.core.authenticationregistry.IAuthenticationRegistry;
 import org.openmole.core.file.IURIFileCache;
-import org.openmole.core.file.internal.URIFileCache;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;

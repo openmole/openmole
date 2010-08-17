@@ -27,9 +27,6 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public class EventDispatcher implements IEventDispatcher {
 
-    final static Logger LOGGER = Logger.getLogger(EventDispatcher.class.getName());
-    volatile int nb = 0;
-    
     final static private ExecutorService Executor = Executors.newCachedThreadPool();
 
     final ObjectChangedListnerMap<IObjectChangedAsynchronousListener> asynchronousObjectChangedMap = new ObjectChangedListnerMap<IObjectChangedAsynchronousListener>();
@@ -83,7 +80,7 @@ public class EventDispatcher implements IEventDispatcher {
         /* --- Listners without args ---*/
 
         Iterable<IObjectChangedSynchronousListener> listeners = synchronousObjectChangedMap.getListners(object, type);
-
+        
         synchronized (listeners) {
             for (IObjectChangedSynchronousListener listner : listeners) {
                 listner.objectChanged(object);
@@ -104,7 +101,6 @@ public class EventDispatcher implements IEventDispatcher {
 
     @Override
     public <T> void registerListener(T object, Integer priority, IObjectChangedSynchronousListener<? super T> listner, String type) {
-        LOGGER.log(Level.FINE, "Register {0} {1}", new Object[]{nb++, object});
         synchronousObjectChangedMap.registerListner(object, priority, listner, type);
     }
 
@@ -151,21 +147,16 @@ public class EventDispatcher implements IEventDispatcher {
 
     @Override
     public <T> void registerListener(T object, IObjectChangedAsynchronousListenerWithArgs<? super T> listner, String type) {
-        LOGGER.log(Level.FINE, "Register {0} {1}", new Object[]{nb++, object});
-
         asynchronousObjectChangedWithArgsMap.registerListner(object, Priority.NORMAL.getValue(), listner, type);
     }
 
     @Override
     public <T> void registerListener(T object, Integer priority, IObjectChangedSynchronousListenerWithArgs<? super T> listner, String type) {
-        LOGGER.log(Level.FINE, "Register {0} {1}", new Object[]{nb++, object});
-
         synchronousObjectChangedWithArgsMap.registerListner(object, priority, listner, type);
     }
 
     @Override
     public void objectChanged(Object object, String type) throws InternalProcessingError, UserBadDataError {
-        LOGGER.log(Level.FINE, "Object changed {0}", object);
         objectChanged(object, type, Collections.EMPTY_LIST.toArray());
     }
 

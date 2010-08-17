@@ -19,6 +19,8 @@ package org.openmole.core.implementation.execution.batch;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.ExecutionState;
@@ -41,7 +43,7 @@ public abstract class BatchJob implements IBatchJob {
         this.jobServiceDescription = jobService.getDescription();
         setState(ExecutionState.SUBMITED);
     }
-
+    
     @Override
     public void setState(ExecutionState state) {
         setStateAndUpdateIntervals(state);
@@ -131,9 +133,9 @@ public abstract class BatchJob implements IBatchJob {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();
     }
 
-    private IFailureControl getFailureControl() {
+    /*private IFailureControl getFailureControl() {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
-    }
+    }*/
 
     public abstract void deleteJob() throws InternalProcessingError;
 

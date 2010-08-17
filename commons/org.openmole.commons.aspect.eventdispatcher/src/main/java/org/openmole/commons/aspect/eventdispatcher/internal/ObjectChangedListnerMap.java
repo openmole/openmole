@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedListener;
 
 /**
@@ -18,7 +16,6 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectChangedListener;
  */
 public class ObjectChangedListnerMap<T extends IObjectChangedListener> {
 
-    final Logger LOGGER = Logger.getLogger(ObjectChangedListnerMap.class.getName());
     final Map<Object, Map<String, SortedListners<T>>> listnerTypeMap = new WeakHashMap<Object, Map<String, SortedListners<T>>>();
 
     private SortedListners<T> getOrCreateListners(Object object, String type) {
@@ -65,7 +62,6 @@ public class ObjectChangedListnerMap<T extends IObjectChangedListener> {
         if (ret == null) {
             return Collections.EMPTY_LIST;
         } else {
-            LOGGER.log(Level.FINE, "Size of the listners for {0} and {1} is {2}", new Object[]{object, type, listnersByType.get(type).size()});
             return ret;
         }
     }

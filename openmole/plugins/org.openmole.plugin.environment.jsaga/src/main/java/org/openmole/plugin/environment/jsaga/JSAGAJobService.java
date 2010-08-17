@@ -133,6 +133,11 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
             Job job = getJobServiceCache().createJob(jobDescription);
             job.run();
 
+            for(String id: getJobServiceCache().list()) {
+                Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, id);
+            }
+            
+            
             return buildJob(job.getAttribute(Job.JOBID));
         } catch (DoesNotExistException ex) {
             throw new InternalProcessingError(ex);
