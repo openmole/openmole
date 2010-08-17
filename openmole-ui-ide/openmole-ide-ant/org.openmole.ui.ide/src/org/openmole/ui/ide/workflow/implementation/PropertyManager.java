@@ -41,7 +41,8 @@ public class PropertyManager {
 
     public static void readProperties(CategoryName cat) {
 
-        File actual = new File("src/resources/" + Category.toString(cat) + "/");
+      //  File actual = new File("src/resources/" + Category.toString(cat) + "/");
+        File actual = new File("src/resources/",Category.toString(cat));
         for (File f : actual.listFiles()) {
             Properties props = read(f.getPath());
             try {
