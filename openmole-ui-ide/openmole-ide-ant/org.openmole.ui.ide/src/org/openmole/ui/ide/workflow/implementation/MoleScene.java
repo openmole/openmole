@@ -49,8 +49,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.core.model.transition.ITransition;
-import org.openmole.core.model.transition.ITransitionSlot;
+import org.openmole.core.model.transition.IGenericTransition;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.provider.DnDNewTaskCapsuleProvider;
@@ -179,14 +179,14 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
             @Override
             public void action(IGenericTaskCapsule visited) throws InternalProcessingError, UserBadDataError {
                 String nodeID, startNodeId;
-                Iterator<ITransitionSlot> itG = visited.getIntputTransitionsSlots().iterator();
+                Iterator<ISlot> itG = visited.getIntputTransitionsSlots().iterator();
                 while (itG.hasNext()) {
-                    ITransitionSlot its = itG.next();
+                    ISlot its = itG.next();
                     nodeID = getConnectableName(visited);
                     buildXXTasks(visited, nodeID);
-                    Iterator<ITransition> itT = its.getTransitions().iterator();
+                    Iterator<IGenericTransition> itT = its.getTransitions().iterator();
                     while (itT.hasNext()) {
-                        ITransition transition = itT.next();
+                        IGenericTransition transition = itT.next();
                         startNodeId = getConnectableName(transition.getStart());
                         buildXXTasks(transition.getStart(), startNodeId);
                         createEdge(startNodeId,

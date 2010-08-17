@@ -30,6 +30,7 @@ import org.openmole.ui.ide.workflow.implementation.paint.MyConnectableWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeInstanceProvider;
 import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeProvider;
 import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
 
@@ -43,6 +44,7 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
     protected MyConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeProvider dnDAddPrototypeProvider;
+    private DnDAddPrototypeInstanceProvider dnDAddPrototypeInstanceProvider;
     private TaskCapsuleMenuProvider taskCapsuleMenuProvider;
 
     public TaskCapsuleViewUI(MoleScene scene,
@@ -68,11 +70,13 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         addOutputSlot();
 
         dnDAddPrototypeProvider = new DnDAddPrototypeProvider(scene, this);
+        dnDAddPrototypeInstanceProvider = new DnDAddPrototypeInstanceProvider(scene, this);
 
         taskCapsuleMenuProvider = new TaskCapsuleMenuProvider(scene, this);
         getActions().addAction(ActionFactory.createPopupMenuAction(taskCapsuleMenuProvider));
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(scene, this)));
-        getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider));
+      //  getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider));
+        getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeInstanceProvider));
 
     }
 
@@ -94,6 +98,7 @@ public class TaskCapsuleViewUI extends ObjectViewUI implements ITaskCapsuleView 
         changeConnectableWidget();
 
         dnDAddPrototypeProvider.setEncapsulated(true);
+        dnDAddPrototypeInstanceProvider.setEncapsulated(true);
 
         scene.getManager().incrementNodeName();
         connectableWidget.addTitle(scene.getManager().getNodeName());
