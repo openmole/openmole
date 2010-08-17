@@ -64,7 +64,7 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
         Activator.getWorkspace().addToConfigurations(TestJobDoneTimeOut, "PT30M");
     }
     
-    URI jobServiceURI;
+    final URI jobServiceURI;
  
     public JSAGAJobService(URI jobServiceURI, ENV environment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
         super(environment, key, authentication, new BatchJobServiceDescription(jobServiceURI.toString()), nbAccess);
@@ -132,11 +132,6 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
             JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), getBatchExecutionEnvironment(), runtime, script);
             Job job = getJobServiceCache().createJob(jobDescription);
             job.run();
-
-            for(String id: getJobServiceCache().list()) {
-                Logger.getLogger(JSAGAJobService.class.getName()).log(Level.FINE, id);
-            }
-            
             
             return buildJob(job.getAttribute(Job.JOBID));
         } catch (DoesNotExistException ex) {

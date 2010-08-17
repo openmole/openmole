@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environment.jsaga;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.model.execution.batch.IRuntime;
 
 public interface IJSAGALaunchingScript {
-	String getScript(String in, String out, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError;
+
+    void generateScript(String in, String out, IRuntime runtime, int memorySizeForRuntime, OutputStream os) throws InternalProcessingError, IOException;
 }

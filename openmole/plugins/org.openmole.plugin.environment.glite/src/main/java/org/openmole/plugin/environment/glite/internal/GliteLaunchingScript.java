@@ -16,8 +16,9 @@
  */
 package org.openmole.plugin.environment.glite.internal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -43,37 +44,31 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
     }
 
     @Override
-    public String getScript(String in, String out, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError {
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
-        builder.append("mkdir envplugins; PLUGIN=0;");
+    public void generateScript(String in, String out, IRuntime runtime, int memorySizeForRuntime, OutputStream os) throws IOException, InternalProcessingError {
+        
+        OutputStreamWriter writter = new OutputStreamWriter(os);
+       
+        writter.append("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
+        writter.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
+        writter.append("mkdir envplugins; PLUGIN=0;");
 
         for(IURIFile plugin: runtime.getEnvironmentPlugins()) {
-            builder.append(mkLcgCpGunZipCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
-            builder.append("PLUGIN=`expr $PLUGIN + 1`; ");
+            writter.append(mkLcgCpGunZipCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
+            writter.append("PLUGIN=`expr $PLUGIN + 1`; ");
         }
 
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
+        writter.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
 
-        builder.append("tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
-        builder.append(memorySizeForRuntime);
-        builder.append("m ");
-        builder.append("-a $CUR/authentication.xml ");
-        builder.append("-p $CUR/envplugins/ ");
-        builder.append("-i ");
-        builder.append(in);
-        builder.append(" -o ");
-        builder.append(out);
-        builder.append(" -w $CUR ; cd .. ; rm -rf $CUR");
-
-        String script = builder.toString();
-
-        //Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
-
-        return script;
+        writter.append("tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
+        writter.append(Integer.toString(memorySizeForRuntime));
+        writter.append("m ");
+        writter.append("-a $CUR/authentication.xml ");
+        writter.append("-p $CUR/envplugins/ ");
+        writter.append("-i ");
+        writter.append(in);
+        writter.append(" -o ");
+        writter.append(out);
+        writter.append(" -w $CUR ; cd .. ; rm -rf $CUR");
     }
 
     String mkLcgCpGunZipCmd(GliteEnvironment env, String from, String to) throws InternalProcessingError {
