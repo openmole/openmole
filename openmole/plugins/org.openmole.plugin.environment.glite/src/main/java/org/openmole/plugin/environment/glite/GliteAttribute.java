@@ -22,5 +22,5 @@ package org.openmole.plugin.environment.glite;
  * @author reuillon
  */
 public class GliteAttribute {
-    public final static String ARCH = "GlueHostArchitecturePlatformType";
+    public final static String ARCH = "other.GlueHostArchitecturePlatformType";
 }
