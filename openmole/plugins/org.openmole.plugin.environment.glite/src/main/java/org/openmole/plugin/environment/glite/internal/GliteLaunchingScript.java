@@ -31,8 +31,6 @@ import org.openmole.plugin.environment.glite.GliteEnvironment;
 import org.openmole.plugin.environment.jsaga.IJSAGALaunchingScript;
 
 public class GliteLaunchingScript implements IJSAGALaunchingScript {
-
-    Logger LOGGER = Logger.getLogger(GliteLaunchingScript.class.getName());
     
     final static String ConfigGroup = GliteLaunchingScript.class.getSimpleName();
     final static ConfigurationLocation LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut");
@@ -101,7 +99,6 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         builder.append(".gz;");
 
         String cp = builder.toString();
-        LOGGER.log(Level.FINE, cp);
         return cp;
     }
 
