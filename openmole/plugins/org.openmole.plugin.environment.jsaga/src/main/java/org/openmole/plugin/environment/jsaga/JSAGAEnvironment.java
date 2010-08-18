@@ -18,15 +18,17 @@
 package org.openmole.plugin.environment.jsaga;
 
 
+import java.util.Map;
 import org.joda.time.format.ISOPeriodFormat;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
+import static org.openmole.plugin.environment.jsaga.JSAGAAttributes.*;
 
 
 public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService> {
-
+    
     final static ConfigurationLocation DefaultRequieredCPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredCPUTime");
     final static ConfigurationLocation DefaultRequieredMemory  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredMemory");
 
@@ -35,44 +37,33 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
         Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "1024");
     }
 
-    final private int requieredMemory;
-    final private String requieredCPUTime;
+    final private Map<String, String> attributes;
 
-    public JSAGAEnvironment(int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
-        super();
-        this.requieredMemory = requieredMemory;
-        this.requieredCPUTime = requieredCPUTime;
+    public JSAGAEnvironment(Map<String, String> attributes) throws InternalProcessingError {
+        super();    
+        initDefault(attributes);
+        this.attributes = attributes;
     }
 
-    public JSAGAEnvironment(int requieredMemory) throws InternalProcessingError {
-        this(requieredMemory, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
+    public JSAGAEnvironment(int requieredMemory, Map<String, String> attributes) throws InternalProcessingError {
+        super(requieredMemory);       
+        initDefault(attributes);
+        this.attributes = attributes;
+    }
+    
+    private void initDefault(Map<String, String> attributes) throws InternalProcessingError {
+        if(!attributes.containsKey(MEMORY)) attributes.put(MEMORY, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
+        if(!attributes.containsKey(CPUTIME)) attributes.put(CPUTIME, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
-    public JSAGAEnvironment(String requieredCPUTime) throws InternalProcessingError {
-        this(Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), requieredCPUTime);
-    }
-
-    public JSAGAEnvironment() throws InternalProcessingError {
-        this(Activator.getWorkspace().getPreferenceAsInt(DefaultRequieredMemory), Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
-    }
-
-    public JSAGAEnvironment(int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
-        super(memoryForRuntime);
-        this.requieredMemory = requieredMemory;
-        this.requieredCPUTime = requieredCPUTime;
-    }
-
-    public JSAGAEnvironment(int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
-        this(requieredMemory, memoryForRuntime, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
-    }
 
     public int getRequieredCPUTime() {
-        return ISOPeriodFormat.standard().parsePeriod(requieredCPUTime).toStandardSeconds().getSeconds();
+        return ISOPeriodFormat.standard().parsePeriod(attributes.get(CPUTIME)).toStandardSeconds().getSeconds();
     }
 
-    public int getRequieredMemory() {
-        return requieredMemory;
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
-
+    
     abstract public IJSAGALaunchingScript getLaunchingScript();
 }

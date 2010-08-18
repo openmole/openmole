@@ -23,8 +23,10 @@ import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
 import org.openmole.plugin.environment.glite.internal.WorkloadOnAverages;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -137,47 +139,24 @@ public class GliteEnvironment extends JSAGAEnvironment {
     final String bdiiURL;
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
-        super();
+        super(Collections.EMPTY_MAP);
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
         init();
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String requieredCPUTime) throws InternalProcessingError {
-        super(requieredCPUTime);
+    public GliteEnvironment(String voName, String vomsURL, String bdii, Map<String, String> attributes) throws InternalProcessingError {
+        super(attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
         init();
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory) throws InternalProcessingError {
-        super(requieredMemory);
-        this.bdiiURL = bdii;
-        this.voName = voName;
-        this.vomsURL = vomsURL;
-        init();
-    }
-
-    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, String requieredCPUTime) throws InternalProcessingError {
-        super(requieredMemory, requieredCPUTime);
-        this.bdiiURL = bdii;
-        this.voName = voName;
-        this.vomsURL = vomsURL;
-        init();
-    }
-
-    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime) throws InternalProcessingError {
-        super(requieredMemory, memoryForRuntime);
-        this.bdiiURL = bdii;
-        this.voName = voName;
-        this.vomsURL = vomsURL;
-        init();
-    }
-
-    public GliteEnvironment(String voName, String vomsURL, String bdii, int requieredMemory, int memoryForRuntime, String requieredCPUTime) throws InternalProcessingError {
-        super(requieredMemory, memoryForRuntime, requieredCPUTime);
+    
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
+        super(memoryForRuntime, attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
