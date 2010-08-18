@@ -71,10 +71,6 @@ public class JSAGAJobBuilder {
                 os.close();
             }
             
-            FileInputStream is = new FileInputStream(tmpScript);
-            FileUtil.copy(is, System.out);
-            is.close();
-
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(env.getRequieredCPUTime()).toString());
             description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(env.getRequieredMemory()).toString());
