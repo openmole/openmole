@@ -36,13 +36,11 @@ import org.openmole.core.model.execution.ExecutionState;
 
 
 import fr.in2p3.jsaga.adaptor.job.SubState;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.core.implementation.execution.batch.BatchJob;
 
 public class JSAGAJob extends BatchJob {
 
-    static final Pattern pattern = Pattern.compile("\\[(.*)\\]-\\[(.*)\\]");
+    //static final Pattern pattern = Pattern.compile("\\[(.*)\\]-\\[(.*)\\]");
 
     final String jobId;
     final JSAGAJobService jobService;
@@ -50,14 +48,18 @@ public class JSAGAJob extends BatchJob {
     public JSAGAJob(String jobId, JSAGAJobService jobService) throws InternalProcessingError {
         super(jobService);
         this.jobService = jobService;
-         
-         Matcher matcher = pattern.matcher(jobId);
+        int end = jobId.lastIndexOf(']');
+        int begin = jobId.lastIndexOf('[');
+        
+        this.jobId = jobId.substring(begin + 1, end);
+        
+        /*Matcher matcher = pattern.matcher(jobId);
 
         if (matcher.find()) {
             this.jobId = matcher.group(2);
         } else {
             throw new InternalProcessingError("Job ID does not match regular expression: " + pattern.pattern());
-        }
+        }*/
 
     }
 

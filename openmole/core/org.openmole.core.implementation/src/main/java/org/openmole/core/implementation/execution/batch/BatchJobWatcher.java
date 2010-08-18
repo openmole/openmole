@@ -40,8 +40,6 @@ public class BatchJobWatcher implements IUpdatable {
 
     @Override
     public boolean update() throws InterruptedException {
-        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Watching env");
-
         IExecutionJobRegistry<IBatchExecutionJob> registry = watchedEnv.getJobRegistry();
         List<IJob> jobGroupsToRemove = new LinkedList<IJob>();
         
@@ -49,7 +47,6 @@ public class BatchJobWatcher implements IUpdatable {
             for (IJob job : registry.getAllJobs()) {
 
                 if (job.allMoleJobsFinished()) {
-                    Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "Job finished killing all execution jobs.");
 
                     for (final IBatchExecutionJob ej : registry.getExecutionJobsFor(job)) {
                         ej.kill();
@@ -88,8 +85,6 @@ public class BatchJobWatcher implements IUpdatable {
                 registry.removeJob(j);
             }
         }
-
-        Logger.getLogger(BatchJobWatcher.class.getName()).log(Level.FINE, "End watching env");
 
         return true;
     }

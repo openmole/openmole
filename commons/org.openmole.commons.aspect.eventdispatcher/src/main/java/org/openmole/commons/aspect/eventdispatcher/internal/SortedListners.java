@@ -59,6 +59,10 @@ public class SortedListners<T> implements Iterable<T> {
             registerListner(listener._1(), listener._2());
         }
     }
+    
+    public int size() {
+        return listners.size();
+    }
 
     @Override
     public Iterator<T> iterator() {

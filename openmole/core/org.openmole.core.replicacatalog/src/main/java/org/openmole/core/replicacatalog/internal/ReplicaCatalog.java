@@ -150,7 +150,7 @@ public class ReplicaCatalog implements IReplicaCatalog {
                     for (Replica rep : set) {
                         build.append(rep.toString()).append(';');
                     }
-                    Logger.getLogger(ReplicaCatalog.class.getName()).log(Level.WARNING, "Replica catalog corrupted (going to be repared), {0} records: {1}", new Object[]{set.size(), build.toString()});
+                    LOGGER.log(Level.WARNING, "Replica catalog corrupted (going to be repared), {0} records: {1}", new Object[]{set.size(), build.toString()});
 
                     replica = fix(set, objectContainer);
             }

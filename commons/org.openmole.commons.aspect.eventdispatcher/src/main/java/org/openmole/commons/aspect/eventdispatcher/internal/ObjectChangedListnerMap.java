@@ -52,7 +52,7 @@ public class ObjectChangedListnerMap<T extends IObjectChangedListener> {
         if (listnersByType == null) {
             return Collections.EMPTY_LIST;
         }
-
+        
         Iterable<T> ret;
 
         synchronized (listnersByType) {

@@ -16,6 +16,10 @@
  */
 package org.openmole.plugin.environment.glite.internal;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -27,14 +31,14 @@ import org.openmole.plugin.environment.glite.GliteEnvironment;
 import org.openmole.plugin.environment.jsaga.IJSAGALaunchingScript;
 
 public class GliteLaunchingScript implements IJSAGALaunchingScript {
-
+    
     final static String ConfigGroup = GliteLaunchingScript.class.getSimpleName();
     final static ConfigurationLocation LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut");
 
     final GliteEnvironment env;
 
     static {
-        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT30M");
+        Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT2M");
     }
 
     public GliteLaunchingScript(GliteEnvironment env) {
@@ -43,37 +47,31 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
     }
 
     @Override
-    public String getScript(String in, String out, IRuntime runtime, int memorySizeForRuntime) throws InternalProcessingError {
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
-        builder.append("mkdir envplugins; PLUGIN=0;");
+    public void generateScript(String in, String out, IRuntime runtime, int memorySizeForRuntime, OutputStream os) throws IOException, InternalProcessingError {
+        
+        PrintStream writter = new PrintStream(os);
+       
+        writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
+        writter.print(mkLcgCpGunZipCmd(env, runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
+        writter.print("mkdir envplugins; PLUGIN=0;");
 
         for(IURIFile plugin: runtime.getEnvironmentPlugins()) {
-            builder.append(mkLcgCpGunZipCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
-            builder.append("PLUGIN=`expr $PLUGIN + 1`; ");
+            writter.print(mkLcgCpGunZipCmd(env, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
+            writter.print("PLUGIN=`expr $PLUGIN + 1`; ");
         }
 
-        builder.append(mkLcgCpGunZipCmd(env, runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
+        writter.print(mkLcgCpGunZipCmd(env, runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
 
-        builder.append("tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
-        builder.append(memorySizeForRuntime);
-        builder.append("m ");
-        builder.append("-a $CUR/authentication.xml ");
-        builder.append("-p $CUR/envplugins/ ");
-        builder.append("-i ");
-        builder.append(in);
-        builder.append(" -o ");
-        builder.append(out);
-        builder.append(" -w $CUR ; cd .. ; rm -rf $CUR");
-
-        String script = builder.toString();
-
-        //Logger.getLogger(GliteLaunchingScript.class.getName()).log(Level.FINE, script);
-
-        return script;
+        writter.print("tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
+        writter.print(Integer.toString(memorySizeForRuntime));
+        writter.print("m ");
+        writter.print("-a $CUR/authentication.xml ");
+        writter.print("-p $CUR/envplugins/ ");
+        writter.print("-i ");
+        writter.print(in);
+        writter.print(" -o ");
+        writter.print(out);
+        writter.print(" -w $CUR ; cd .. ; rm -rf $CUR");
     }
 
     String mkLcgCpGunZipCmd(GliteEnvironment env, String from, String to) throws InternalProcessingError {
@@ -81,7 +79,16 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
 
         builder.append("lcg-cp --vo ");
         builder.append(env.getVOName());
-        builder.append(" -t ");
+        builder.append(" --checksum --connect-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --sendreceive-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --bdii-timeout ");
+        builder.append(getTimeOut());
+        builder.append(" ");
+        builder.append(" --srm-timeout ");
         builder.append(getTimeOut());
         builder.append(" ");
         builder.append(from);
@@ -91,7 +98,8 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         builder.append(to);
         builder.append(".gz;");
 
-        return builder.toString();
+        String cp = builder.toString();
+        return cp;
     }
 
 

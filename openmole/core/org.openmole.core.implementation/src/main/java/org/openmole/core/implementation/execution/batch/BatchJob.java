@@ -16,9 +16,6 @@
  */
 package org.openmole.core.implementation.execution.batch;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.model.execution.ExecutionState;
@@ -27,21 +24,21 @@ import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchJobService;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.batchservicecontrol.IFailureControl;
 import org.openmole.core.batchservicecontrol.IUsageControl;
 
 public abstract class BatchJob implements IBatchJob {
 
     ExecutionState state;
     private final IBatchServiceDescription jobServiceDescription;
-    private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
+    private final long timeStemps[] = new long[ExecutionState.values().length];
+    //private final Map<ExecutionState, Long> timeStemps = Collections.synchronizedMap(new EnumMap<ExecutionState, Long>(ExecutionState.class));
 
     public BatchJob(IBatchJobService jobService) {
         super();
         this.jobServiceDescription = jobService.getDescription();
         setState(ExecutionState.SUBMITED);
     }
-
+    
     @Override
     public void setState(ExecutionState state) {
         setStateAndUpdateIntervals(state);
@@ -50,7 +47,7 @@ public abstract class BatchJob implements IBatchJob {
     private synchronized void setStateAndUpdateIntervals(ExecutionState state) {
         if (this.state != state) {
             long curDate = System.currentTimeMillis();
-            timeStemps.put(state, curDate);
+            timeStemps[state.ordinal()] = curDate;
             this.state = state;
         }
     }
@@ -107,7 +104,7 @@ public abstract class BatchJob implements IBatchJob {
 
     @Override
     public Long getTimeStemp(ExecutionState state) {
-        return timeStemps.get(state);
+        return timeStemps[state.ordinal()];
     }
 
     @Override
@@ -131,9 +128,9 @@ public abstract class BatchJob implements IBatchJob {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();
     }
 
-    private IFailureControl getFailureControl() {
+    /*private IFailureControl getFailureControl() {
         return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
-    }
+    }*/
 
     public abstract void deleteJob() throws InternalProcessingError;
 

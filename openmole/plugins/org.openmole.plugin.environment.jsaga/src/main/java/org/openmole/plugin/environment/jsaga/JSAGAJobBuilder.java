@@ -14,13 +14,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environment.jsaga;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 
@@ -37,13 +41,14 @@ import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
 
 public class JSAGAJobBuilder {
 
     private static JSAGAJobBuilder instance = new JSAGAJobBuilder();
- 
+
     private JSAGAJobBuilder() {
     }
 
@@ -59,16 +64,13 @@ public class JSAGAJobBuilder {
 
             description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
 
-          
-            BufferedWriter writter = new BufferedWriter(new FileWriter(tmpScript));
-
-          
-            //, env.getDescriptionFile().toURI().getSchemeSpecificPart() + ">" + env.getDescriptionFile().getName()
-
-            writter.write(env.getLaunchingScript().getScript(in.toString(), out.toString(), runtime, env.getMemorySizeForRuntime()));
-
-            writter.close();
-
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpScript));
+            try {
+                env.getLaunchingScript().generateScript(in.toString(), out.toString(), runtime, env.getMemorySizeForRuntime(), os);
+            } finally {
+                os.close();
+            }
+            
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(env.getRequieredCPUTime()).toString());
             description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(env.getRequieredMemory()).toString());

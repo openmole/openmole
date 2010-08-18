@@ -110,11 +110,9 @@ public class ExecutionJobRegistry<EXECUTIONJOB extends IExecutionJob> implements
         jobs.remove(job);
 
         if(jobs.isEmpty()) {
-            Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job category removed from registry");
             jobCategories.remove(category);
         }
         
-        Logger.getLogger(ExecutionJobRegistry.class.getName()).log(Level.FINE, "Job removed from registry {0}", job.toString());
     }
 
     @Override

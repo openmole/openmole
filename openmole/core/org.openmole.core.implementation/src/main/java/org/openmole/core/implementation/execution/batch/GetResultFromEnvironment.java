@@ -41,6 +41,8 @@ import scala.Tuple2;
  */
 public class GetResultFromEnvironment implements Callable<Void> {
 
+    final static Logger LOGGER = Logger.getLogger(GetResultFromEnvironment.class.getName());
+    
     final IBatchServiceDescription communicationStorageDescription;
     final IURIFile outputFile;
     final IJob job;
@@ -73,7 +75,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                 resultFile.delete();
             }
             if (result.getException() != null) {
-                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "Fatal exception thrown durring the execution of the job execution on the excution node", result.getException());
+                LOGGER.log(Level.WARNING, "Fatal exception thrown durring the execution of the job execution on the excution node", result.getException());
             }
 
             if (result.getStdOut() != null) {
@@ -85,7 +87,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         try {
                             IHash stdOutHash = Activator.getHashService().computeHash(stdOutFile);
                             if (!stdOutHash.equals(result.getStdOut().getHash())) {
-                                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
+                                LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
                             }
 
                             synchronized (System.out) {
@@ -103,11 +105,11 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         }
                     }
                 } catch (IOException e) {
-                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output transfer has failed.", e);
+                    LOGGER.log(Level.WARNING, "The standard output transfer has failed.", e);
                 }
 
             } else {
-                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard output result was null.");
+                LOGGER.log(Level.WARNING, "The standard output result was null.");
             }
 
             if (result.getStdErr() != null) {
@@ -118,7 +120,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
                         try {
                             IHash stdErrHash = Activator.getHashService().computeHash(stdErrFile);
                             if (!stdErrHash.equals(result.getStdErr().getHash())) {
-                                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
+                                LOGGER.log(Level.WARNING, "The standard error output has been corrupted durring the transfert.");
                             }
                             
                             synchronized (System.err) {
@@ -135,11 +137,11 @@ public class GetResultFromEnvironment implements Callable<Void> {
                             stdErrFile.delete();
                         }
                     } catch (IOException e) {
-                        Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error output transfer has failed.", e);
+                        LOGGER.log(Level.WARNING, "The standard error output transfer has failed.", e);
                     }
                 }
             } else {
-                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "The standard error result was null.");
+                LOGGER.log(Level.WARNING, "The standard error result was null.");
             }
 
             if (result.getTarResult() == null) {
@@ -244,13 +246,13 @@ public class GetResultFromEnvironment implements Callable<Void> {
                                     moleJob.finished(context);
                                     successfull++;
                                 } catch (InternalProcessingError e) {
-                                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.SEVERE, "Error when finishing job.", e);
+                                    LOGGER.log(Level.SEVERE, "Error when finishing job.", e);
                                 } catch (UserBadDataError e) {
-                                    Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.SEVERE, "Error when finishing job.", e);
+                                    LOGGER.log(Level.SEVERE, "Error when finishing job.", e);
                                 }
 
                             } catch (ExecutionException e) {
-                                Logger.getLogger(GetResultFromEnvironment.class.getName()).log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e);
+                                LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e);
                             }
                         }
                     }

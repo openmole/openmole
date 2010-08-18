@@ -132,7 +132,7 @@ public class BDII {
 
                     srmIds.add(httpgURI.getHost());
                 } else {
-                    Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "No path found in BDII for host " + httpgURI.getHost());
+                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "No path found in BDII for host " + httpgURI.getHost());
                 }
 
 
