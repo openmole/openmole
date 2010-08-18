@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.ConfigurationLocation;
@@ -30,6 +32,8 @@ import org.openmole.plugin.environment.jsaga.IJSAGALaunchingScript;
 
 public class GliteLaunchingScript implements IJSAGALaunchingScript {
 
+    Logger LOGGER = Logger.getLogger(GliteLaunchingScript.class.getName());
+    
     final static String ConfigGroup = GliteLaunchingScript.class.getSimpleName();
     final static ConfigurationLocation LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut");
 
@@ -77,7 +81,7 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
 
         builder.append("lcg-cp --vo ");
         builder.append(env.getVOName());
-        builder.append(" --connect-timeout ");
+        builder.append(" --checksum --connect-timeout ");
         builder.append(getTimeOut());
         builder.append(" ");
         builder.append(" --sendreceive-timeout ");
@@ -96,7 +100,9 @@ public class GliteLaunchingScript implements IJSAGALaunchingScript {
         builder.append(to);
         builder.append(".gz;");
 
-        return builder.toString();
+        String cp = builder.toString();
+        LOGGER.log(Level.FINE, cp);
+        return cp;
     }
 
 
