@@ -53,12 +53,7 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
     
     private void initDefault(Map<String, String> attributes) throws InternalProcessingError {
         if(!attributes.containsKey(MEMORY)) attributes.put(MEMORY, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
-        if(!attributes.containsKey(CPUTIME)) attributes.put(CPUTIME, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
-    }
-
-
-    public int getRequieredCPUTime() {
-        return ISOPeriodFormat.standard().parsePeriod(attributes.get(CPUTIME)).toStandardSeconds().getSeconds();
+        if(!attributes.containsKey(CPU_TIME)) attributes.put(CPU_TIME, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
     public Map<String, String> getAttributes() {

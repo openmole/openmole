@@ -25,6 +25,7 @@ import org.ogf.saga.job.JobDescription;
  */
 public class JSAGAAttributes {
     public final static String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
-    public final static String CPUTIME = JobDescription.TOTALCPUTIME;
+    public final static String CPU_TIME = JobDescription.TOTALCPUTIME;
+    public final static String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
     public final static String RUNTIME_MEMORY = "RUNTIME_MEMORY";
 }

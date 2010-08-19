@@ -23,11 +23,11 @@ import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
 import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
 import org.openmole.plugin.environment.glite.internal.WorkloadOnAverages;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,7 +139,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     final String bdiiURL;
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
-        super(Collections.EMPTY_MAP);
+        super(new TreeMap());
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;

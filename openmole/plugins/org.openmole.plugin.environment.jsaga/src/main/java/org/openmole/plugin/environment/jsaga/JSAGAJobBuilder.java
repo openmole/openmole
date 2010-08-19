@@ -76,7 +76,7 @@ public class JSAGAJobBuilder {
             for(Map.Entry<String, String> entry: env.getAttributes().entrySet()) {
                 final String value;
                 
-                if(entry.getKey().equals(CPUTIME)) {
+                if(entry.getKey().equals(CPU_TIME)) {
                      value = new Integer(ISOPeriodFormat.standard().parsePeriod(entry.getValue()).toStandardSeconds().getSeconds()).toString();
                 } else value = entry.getValue();
       
