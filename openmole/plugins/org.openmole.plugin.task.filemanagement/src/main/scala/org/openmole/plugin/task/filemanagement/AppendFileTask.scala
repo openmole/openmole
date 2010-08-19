@@ -41,6 +41,13 @@ class AppendFileTask(name: String,
   override def process(global: IContext, context: IContext, progress: IProgress){
     val from = context getValue(toBeDumpedPrototype)
     val to = new File(outputFile)
+    if (!from.exists()){
+      throw new UserBadDataError("The file "+from+" does not exist.")
+    }
+    
+    if (!to.exists()){
+      throw new UserBadDataError("The file "+to+" does not exist.")
+    }
     
     if (from.isDirectory() && to.isDirectory()){
       val toFiles = to.list
