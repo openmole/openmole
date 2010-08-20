@@ -16,17 +16,15 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
+import java.util.Map;
+import org.joda.time.format.ISOPeriodFormat;
 
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
@@ -41,9 +39,10 @@ import org.ogf.saga.job.JobDescription;
 import org.ogf.saga.job.JobFactory;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
+import scala.collection.immutable.Map.Map1;
+import static org.openmole.plugin.environment.jsaga.JSAGAAttributes.*;
 
 public class JSAGAJobBuilder {
 
@@ -72,11 +71,18 @@ public class JSAGAJobBuilder {
             }
             
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
-            description.setAttribute(JobDescription.TOTALCPUTIME, new Integer(env.getRequieredCPUTime()).toString());
-            description.setAttribute(JobDescription.TOTALPHYSICALMEMORY, new Integer(env.getRequieredMemory()).toString());
-
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().getSchemeSpecificPart() + ">" + tmpScript.getName()});
-
+      
+            for(Map.Entry<String, String> entry: env.getAttributes().entrySet()) {
+                final String value;
+                
+                if(entry.getKey().equals(CPU_TIME)) {
+                     value = new Integer(ISOPeriodFormat.standard().parsePeriod(entry.getValue()).toStandardSeconds().getSeconds()).toString();
+                } else value = entry.getValue();
+      
+                description.setAttribute(entry.getKey(), value);
+            }
+                
             return description;
 
         } catch (IOException e) {
