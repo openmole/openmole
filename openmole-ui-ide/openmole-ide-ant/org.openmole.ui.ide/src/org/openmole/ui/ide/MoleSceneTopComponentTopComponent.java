@@ -18,7 +18,10 @@ package org.openmole.ui.ide;
 
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.util.NbBundle;
@@ -30,8 +33,10 @@ import org.netbeans.spi.palette.PaletteController;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.control.task.TaskSettingTabManager;
+import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.palette.PaletteSupport;
+import org.openmole.ui.ide.workflow.action.ManagePrototypeAction;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
 import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
 
@@ -45,8 +50,8 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
     private static MoleSceneTopComponentTopComponent instance;
     private PaletteController palette;
     private JComponent myView;
+    private PrototypeManagementPanel prototypeManagement;
     private JToolBar toolBar = new JToolBar("SSSE");
-
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
     private static final String PREFERRED_ID = "MoleSceneTopComponentTopComponent";
@@ -58,39 +63,47 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
         //FIXME un meilleur endroit pour les inits??
-       // TableMapping.getInstance().initialize();
-       // Preferences.getInstance().initialize();
-       TaskSettingTabManager.getInstance().setTabbedPane(jTabbedPane1);
+        // TableMapping.getInstance().initialize();
+        // Preferences.getInstance().initialize();
+        TaskSettingTabManager.getInstance().setTabbedPane(jTabbedPane1);
 
 
         MoleScene scene = new MoleScene();
         myView = scene.createView();
 
         moleSceneScrollPane.setViewportView(myView);
-        jTabbedPane1.add("Workflow",moleSceneScrollPane);
+        jTabbedPane1.add("Workflow", moleSceneScrollPane);
         refreshPalette();
         associateLookup(Lookups.fixed(new Object[]{palette}));
+
+        prototypeManagement = new PrototypeManagementPanel();
+        prototypeManagement.setVisible(true);
 
         JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
         moveButton.addActionListener(new MoveOrDrawTransitionAction());
         moveButton.setSelected(false);
 
-        JToggleButton detailedViewButton  = new JToggleButton("Detailed view");
+        JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
 
+        JButton newPrototypeButton = new JButton("New prototype");
+        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement));
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
+        toolBar.add(new JToolBar.Separator());
+        toolBar.add(newPrototypeButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
         add(jTabbedPane1, java.awt.BorderLayout.CENTER);
 
-     //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
+       
+
+        //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
-    
-    public void refreshPalette(){
+
+    public void refreshPalette() {
         palette = PaletteSupport.createPalette();
         repaint();
     }
-
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -109,7 +122,6 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
 
         add(moleSceneScrollPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JScrollPane moleSceneScrollPane;

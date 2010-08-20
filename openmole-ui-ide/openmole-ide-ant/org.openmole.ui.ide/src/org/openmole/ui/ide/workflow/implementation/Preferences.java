@@ -117,7 +117,7 @@ public class Preferences {
         prototypeTypes.add(File.class);
     }
 
-    public Collection getPrototypeTypes() {
+    public Collection<Class> getPrototypeTypes() {
         if (prototypeTypes.isEmpty()) {
             setPrototypeTypes();
         }
@@ -137,7 +137,9 @@ public class Preferences {
     }
 
     public Collection<PrototypeUI> getPrototypes(){
-        prototypes.put("eieie", new PrototypeUI("eieie",BigInteger.class));
+        prototypes.put("proto1", new PrototypeUI("proto1",BigInteger.class));
+        prototypes.put("proto2", new PrototypeUI("proto2",BigDecimal.class));
+        prototypes.put("proto3", new PrototypeUI("proto3",File.class));
         return prototypes.values();
     }
 
