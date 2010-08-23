@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 reuillon
  * 
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the Affero GNU General Public License as published by
+ *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.filemanagement
 
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
@@ -40,7 +41,7 @@ class AppendFileTask(name: String,
  
   override def process(global: IContext, context: IContext, progress: IProgress){
     val from = context getValue(toBeDumpedPrototype)
-    val to = new File(outputFile)
+    val to = new File(VariableExpansion.expandData(global,context,outputFile))
     if (!from.exists()){
       throw new UserBadDataError("The file "+from+" does not exist.")
     }
