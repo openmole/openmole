@@ -29,7 +29,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.event.UndoableEditListener;
 import org.simexplorer.core.workflow.methods.EditorPanel;
-import org.simexplorer.ide.ui.tools.ActionsUtils;
+import org.simexplorer.ui.tools.ActionsUtils;
 import org.openmole.plugin.task.code.CodeTask;
 
 public class CodeEditablePanel extends EditorPanel<CodeTask> {

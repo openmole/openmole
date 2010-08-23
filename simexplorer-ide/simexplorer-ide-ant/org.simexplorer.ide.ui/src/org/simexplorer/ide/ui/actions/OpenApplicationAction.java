@@ -18,7 +18,7 @@
  */
 package org.simexplorer.ide.ui.actions;
 
-import org.simexplorer.ide.ui.tools.ActionsUtils;
+import org.simexplorer.ui.tools.ActionsUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;

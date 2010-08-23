@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.model.data.IPrototype;
-import org.simexplorer.ide.ui.tools.SimpleWizard;
+import org.simexplorer.ui.tools.SimpleWizard;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 

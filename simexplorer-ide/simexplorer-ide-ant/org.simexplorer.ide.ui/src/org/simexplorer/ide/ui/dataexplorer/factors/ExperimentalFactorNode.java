@@ -18,7 +18,7 @@
  */
 package org.simexplorer.ide.ui.dataexplorer.factors;
 
-import org.simexplorer.ide.ui.dataexplorer.MetadataProperties;
+import org.simexplorer.ui.ide.workflow.model.MetadataProperties;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.AbstractAction;
