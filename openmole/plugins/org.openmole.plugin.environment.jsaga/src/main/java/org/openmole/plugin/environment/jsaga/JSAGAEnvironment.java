@@ -19,7 +19,6 @@ package org.openmole.plugin.environment.jsaga;
 
 
 import java.util.Map;
-import org.joda.time.format.ISOPeriodFormat;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironment;
 import org.openmole.misc.workspace.ConfigurationLocation;
