@@ -18,42 +18,12 @@
     <version>${lib.org.openmole.tools.distrng.version}</version>
 
     <dependencies>
-		<dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
+         <dependency>
+            <groupId>org.openmole.tools</groupId>
+            <artifactId>distrng</artifactId>
+            <version>${lib.org.openmole.tools.distrng.version}</version>
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>gnu-crypto</groupId>
-            <artifactId>gnu-crypto</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.2.128</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.co.robust-it</groupId>
-            <artifactId>cloning</artifactId>
-            <version>1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.collections</groupId>
-            <artifactId>collections-generic</artifactId>
-            <version>4.01</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.3.2</version>
-	</dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
