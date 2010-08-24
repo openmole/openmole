@@ -44,6 +44,7 @@
         <module>org.openmole.plugin.plan.combine</module>
         <module>org.openmole.plugin.plan.filtred</module>
         <module>org.openmole.plugin.profiler.csv</module>
+        <module>org.openmole.plugin.domain.prng</module>
     </modules>
 
     <!-- ************************************************************* -->

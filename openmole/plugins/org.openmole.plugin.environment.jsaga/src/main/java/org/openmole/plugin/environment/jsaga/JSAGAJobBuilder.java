@@ -41,7 +41,6 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
-import scala.collection.immutable.Map.Map1;
 import static org.openmole.plugin.environment.jsaga.JSAGAAttributes.*;
 
 public class JSAGAJobBuilder {

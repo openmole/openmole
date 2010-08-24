@@ -231,6 +231,7 @@
 	<lib.com.mrfeinberg.peasycam.version>0.8.3</lib.com.mrfeinberg.peasycam.version>
 	<lib.org.junit.version>4.8.1</lib.org.junit.version>
 	<lib.org.fusesource.jansi.version>1.2.1</lib.org.fusesource.jansi.version>
+	<lib.org.openmole.tools.distrng.version>1.0-SNAPSHOT</lib.org.openmole.tools.distrng.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
