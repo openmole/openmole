@@ -38,12 +38,9 @@
 
     <packaging>bundle</packaging>
 
-
     <!--optional. Use this property to tune the exported packages-->
-    <!--<properties>
-        <export.packages>
-            TODO
-        </export.packages>
-    </properties>-->
+    <properties>
+        <libraries.export.packages>${project.artifactId}.*</libraries.export.packages>
+    </properties>
 
 </project>

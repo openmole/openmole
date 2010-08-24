@@ -261,8 +261,6 @@ public abstract class GenericTask implements IGenericTask {
         }
 
         addAllMarkedFields(this, Input.class, tmpInputCache);
-        //verifyNotDuplicate(tmpInputCache, "input");
-
         return new DataSet(tmpInputCache);
     }
 
@@ -277,8 +275,8 @@ public abstract class GenericTask implements IGenericTask {
         if (output != null) {
             tmpOutputCache.addAll(output.values());
         }
+        
         addAllMarkedFields(this, Output.class, tmpOutputCache);
-
         return new DataSet(tmpOutputCache);
     }
 
