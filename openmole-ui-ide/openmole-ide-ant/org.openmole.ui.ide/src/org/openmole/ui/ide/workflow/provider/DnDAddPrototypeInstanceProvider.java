@@ -37,29 +37,43 @@ import org.openmole.ui.ide.exception.MoleExceptionManagement;
  *
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class DnDAddPrototypeInstanceProvider extends DnDAbstractAddPrototype {
+public class DnDAddPrototypeInstanceProvider extends DnDProvider {
+
+    protected boolean encapsulated = false;
+    protected TaskCapsuleViewUI view;
+    protected MoleScene moleScene;
 
     public DnDAddPrototypeInstanceProvider(MoleScene molescene,
-                                           TaskCapsuleViewUI view) {
-        super(molescene, view);
+            TaskCapsuleViewUI view) {
+        super(molescene);
+        this.moleScene = molescene;
+        this.view = view;
+    }
+
+    public void setEncapsulated(boolean encapsulated) {
+        this.encapsulated = encapsulated;
     }
 
     @Override
     public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
         ConnectorState state = ConnectorState.REJECT;
-        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR) &&
-            encapsulated == true)
+        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR)
+                && encapsulated == true) {
             state = ConnectorState.ACCEPT;
+        }
         return state;
     }
 
     @Override
-    public void accept(Widget widget, Point point, Transferable t)  {
+    public void accept(Widget widget, Point point, Transferable t) {
         try {
             String inputValue = (String) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR);
-            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH/2) view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
-            else view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
-         } catch (UserBadDataError ex) {
+            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH / 2) {
+                view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
+            } else {
+                view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
+            }
+        } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);
         } catch (UnsupportedFlavorException ex) {
             MoleExceptionManagement.showException(ex);
