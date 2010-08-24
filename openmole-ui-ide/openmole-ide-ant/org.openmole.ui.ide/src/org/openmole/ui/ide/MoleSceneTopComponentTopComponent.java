@@ -86,7 +86,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
 
-        JButton newPrototypeButton = new JButton("New prototype");
+        JButton newPrototypeButton = new JButton("Prototypes");
         newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement));
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);

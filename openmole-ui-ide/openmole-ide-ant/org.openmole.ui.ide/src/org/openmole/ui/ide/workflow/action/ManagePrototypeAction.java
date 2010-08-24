@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import org.openmole.ui.ide.dialog.DialogSupport;
 import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
 
 /**
@@ -48,8 +49,8 @@ public class ManagePrototypeAction implements ActionListener {
 
         //Display the window.
        // frame.pack();
-        prototypePanel.setVisible(!prototypePanel.isVisible());
-
+       // prototypePanel.setVisible(!prototypePanel.isVisible());
+DialogSupport.showDialog(prototypePanel);
 
 
 //        

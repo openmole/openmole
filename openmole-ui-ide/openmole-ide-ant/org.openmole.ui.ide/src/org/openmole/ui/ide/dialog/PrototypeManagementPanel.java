@@ -18,17 +18,13 @@ package org.openmole.ui.ide.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
-import javax.swing.DefaultButtonModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -41,8 +37,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.plaf.basic.BasicBorders.RadioButtonBorder;
-import org.openide.util.Exceptions;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
@@ -51,23 +45,24 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
  *
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class PrototypeManagementPanel extends JFrame implements ListSelectionListener {
+public class PrototypeManagementPanel extends javax.swing.JPanel implements ListSelectionListener {
 
-    private static final String addString = "Update";
+    private static final String updateString = "Update";
+    private static final String removeString = "Remove";
     private DefaultListModel prototypeListModel;
     private JTextField nameField;
     private JList list;
-    private JButton addButton;
+    private JButton upButton;
+    private JButton removeButton;
     private ButtonGroup typeButtonGroup;
-    private HashMap<String,ButtonModel> buttonModelMap  = new HashMap();
+    private HashMap<String, ButtonModel> buttonModelMap = new HashMap();
 
     public PrototypeManagementPanel() {
 
-        super("Prototype management");
+        super(new BorderLayout());
         prototypeListModel = new DefaultListModel();
 
         for (PrototypeUI p : Preferences.getInstance().getPrototypes()) {
-            //  prototypeListModel.addElement(p.getName() +", "+p.getType().getSimpleName());
             prototypeListModel.addElement(p);
         }
 
@@ -82,9 +77,14 @@ public class PrototypeManagementPanel extends JFrame implements ListSelectionLis
         nameField.addActionListener(new AddButtonListener());
 
         //Create the new prototype button.
-        addButton = new JButton(addString);
-        addButton.setActionCommand(addString);
-        addButton.addActionListener(new AddButtonListener());
+        upButton = new JButton(updateString);
+        upButton.setActionCommand(updateString);
+        upButton.addActionListener(new AddButtonListener());
+
+        //Create the new prototype button.
+        removeButton = new JButton(removeString);
+        removeButton.setActionCommand(removeString);
+        removeButton.addActionListener(new RemoveButtonListener());
 
         typeButtonGroup = new ButtonGroup();
         JPanel typePanel = new JPanel();
@@ -95,7 +95,6 @@ public class PrototypeManagementPanel extends JFrame implements ListSelectionLis
         for (Class c : Preferences.getInstance().getPrototypeTypes()) {
             JRadioButton radio = new JRadioButton(c.getSimpleName());
             radio.setActionCommand(c.getCanonicalName());
-            //  radio.addActionListener(new RadioButtonListener());
             typeButtonGroup.add(radio);
             typePanel.add(radio);
             radio.setSelected(true);
@@ -104,7 +103,8 @@ public class PrototypeManagementPanel extends JFrame implements ListSelectionLis
 
         JPanel namePane = new JPanel();
         namePane.add(nameField);
-        namePane.add(addButton);
+        namePane.add(upButton);
+        namePane.add(removeButton);
 
 
         JPanel controlPane = new JPanel();
@@ -151,12 +151,26 @@ public class PrototypeManagementPanel extends JFrame implements ListSelectionLis
                 update(proto);
             } else if (!nameField.getText().equals("")) {
                 try {
-                    prototypeListModel.addElement(new PrototypeUI(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand())));              
+                    PrototypeUI newproto = new PrototypeUI(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
+                    prototypeListModel.addElement(newproto);
                     list.setSelectedIndex(prototypeListModel.getSize());
+                    Preferences.getInstance().registerPrototype(newproto);
                     nameField.setText("");
                 } catch (ClassNotFoundException ex) {
                     MoleExceptionManagement.showException(ex);
                 }
+            }
+        }
+    }
+
+    class RemoveButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            PrototypeUI proto = exists(nameField.getText());
+            if (proto != null) {
+                prototypeListModel.removeElement(proto);
+                nameField.setText("");
             }
         }
     }

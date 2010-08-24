@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.WeakHashMap;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
@@ -44,7 +45,7 @@ public class Preferences {
     private Collection<Class> prototypeTypes = new ArrayList<Class>();
 
 
-    private Map<String, PrototypeUI> prototypes = new HashMap<String, PrototypeUI>();
+    private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
 
     public void register() {
         if (models.isEmpty()) {
@@ -112,8 +113,11 @@ public class Preferences {
     }
 
     private void setPrototypeTypes() {
+        prototypeTypes.add(Integer.class);
+        prototypeTypes.add(Double.class);
         prototypeTypes.add(BigInteger.class);
         prototypeTypes.add(BigDecimal.class);
+        prototypeTypes.add(String.class);
         prototypeTypes.add(File.class);
     }
 
@@ -135,7 +139,7 @@ public class Preferences {
             throw new UserBadDataError("The prototype " + st + " doest not exist.");
         }
     }
-
+    
     public Collection<PrototypeUI> getPrototypes(){
         prototypes.put("proto1", new PrototypeUI("proto1",BigInteger.class));
         prototypes.put("proto2", new PrototypeUI("proto2",BigDecimal.class));
