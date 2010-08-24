@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>org.simexplorer.ide.ui/wrapped-jars</module>
+        <module>org.netbeans.spi.wizard</module>
         <module>org.simexplorer.ui.ide.is/wrapped-jars</module>
         <module>simexplorer-cluster</module>
     </modules>
