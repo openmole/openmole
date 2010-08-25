@@ -35,7 +35,7 @@ import org.openide.util.LookupListener;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
-import org.simexplorer.ide.ui.dataexplorer.MetadataProperties;
+import org.simexplorer.ui.ide.workflow.model.MetadataProperties;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.data.IPrototype;

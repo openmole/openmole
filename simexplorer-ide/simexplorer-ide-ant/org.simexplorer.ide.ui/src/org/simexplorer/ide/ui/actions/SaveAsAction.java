@@ -19,7 +19,7 @@
 package org.simexplorer.ide.ui.actions;
 
 import java.io.IOException;
-import org.simexplorer.ide.ui.tools.ActionsUtils;
+import org.simexplorer.ui.tools.ActionsUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;

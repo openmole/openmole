@@ -39,8 +39,6 @@
         <folder name="Window">
             <file name="org-simexplorer-ide-ui-applicationexplorer-ApplicationsAction.instance"/>
             <file name="org-simexplorer-ide-ui-dataexplorer-factors-FactorsExplorerAction.instance"/>
-            <file name="org-simexplorer-ide-ui-dataexplorer-structure-InputStructureAction.instance"/>
-            <file name="org-simexplorer-ide-ui-dataexplorer-structure-OutputStructureAction.instance"/>
             <file name="org-simexplorer-ide-ui-dataexplorer-variables-VariablesAction.instance"/>
             <file name="org-simexplorer-ide-ui-processoreditor-TaskEditorAction.instance"/>
         </folder>
@@ -133,14 +131,6 @@
                 <file name="FactorsExplorerAction.shadow">
                     <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ide-ui-dataexplorer-factors-FactorsExplorerAction.instance"/>
                     <attr name="position" intvalue="300"/>
-                </file>
-                <file name="InputStructureAction.shadow">
-                    <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ide-ui-dataexplorer-structure-InputStructureAction.instance"/>
-                    <attr name="position" intvalue="500"/>
-                </file>
-                <file name="OutputStructureAction.shadow">
-                    <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ide-ui-dataexplorer-structure-OutputStructureAction.instance"/>
-                    <attr name="position" intvalue="600"/>
                 </file>
                 <file name="VariablesAction.shadow">
                     <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ide-ui-dataexplorer-variables-VariablesAction.instance"/>
@@ -237,8 +227,6 @@
         <folder name="Components">
             <file name="ApplicationsTopComponent.settings" url="ApplicationsTopComponentSettings.xml"/>
             <file name="FactorsExplorerTopComponent.settings" url="dataexplorer/factors/FactorsExplorerTopComponentSettings.xml"/>
-            <file name="InputStructureTopComponent.settings" url="InputStructureTopComponentSettings.xml"/>
-            <file name="OutputStructureTopComponent.settings" url="OutputStructureTopComponentSettings.xml"/>
             <file name="TaskEditorTopComponent.settings" url="TaskEditorTopComponentSettings.xml"/>
             <file name="VariablesTopComponent.settings" url="VariablesTopComponentSettings.xml"/>
         </folder>
@@ -253,9 +241,7 @@
                 <file name="runtime.wstcref_hidden"/>
             </folder>
             <folder name="properties">
-                <file name="InputStructureTopComponent.wstcref" url="InputStructureTopComponentWstcref.xml"/>
                 <file name="FactorsExplorerTopComponent.wstcref" url="FactorsExplorerTopComponentWstcref.xml"/>
-                <file name="OutputStructureTopComponent.wstcref" url="OutputStructureTopComponentWstcref.xml"/>
                 <file name="VariablesTopComponent.wstcref" url="VariablesTopComponentWstcref.xml"/>
             </folder>
         </folder>

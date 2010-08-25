@@ -29,7 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import org.simexplorer.core.workflow.model.metada.Metadata;
-import org.simexplorer.ide.ui.tools.SimpleWizard;
+import org.simexplorer.ui.tools.SimpleWizard;
 
 /**
  *

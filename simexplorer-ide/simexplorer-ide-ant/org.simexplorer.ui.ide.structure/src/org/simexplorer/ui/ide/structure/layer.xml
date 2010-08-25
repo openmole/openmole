@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+                <folder name="Window">
+            <file name="org-simexplorer-ui-ide-structure-InputStructureAction.instance"/>
+            <file name="org-simexplorer-ui-ide-structure-OutputStructureAction.instance"/>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Window">
+            <folder name="Data">
+                <file name="InputStructureAction.shadow">
+                    <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ui-ide-structure-InputStructureAction.instance"/>
+                    <attr name="position" intvalue="500"/>
+                </file>
+                <file name="OutputStructureAction.shadow">
+                    <attr name="originalFile" stringvalue="Actions/Window/org-simexplorer-ui-ide-structure-OutputStructureAction.instance"/>
+                    <attr name="position" intvalue="600"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="InputStructureTopComponent.settings" url="InputStructureTopComponentSettings.xml"/>
+            <file name="OutputStructureTopComponent.settings" url="OutputStructureTopComponentSettings.xml"/>
+        </folder>
+        <folder name="Modes">
+            <folder name="properties">
+                <file name="InputStructureTopComponent.wstcref" url="InputStructureTopComponentWstcref.xml"/>
+                <file name="OutputStructureTopComponent.wstcref" url="OutputStructureTopComponentWstcref.xml"/>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

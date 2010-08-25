@@ -37,7 +37,7 @@ import org.openmole.core.implementation.data.Prototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.simexplorer.ide.ui.PanelFactory;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
-import org.simexplorer.ide.ui.tools.SimpleWizard;
+import org.simexplorer.ui.tools.SimpleWizard;
 import org.openmole.core.implementation.plan.Factor;
 import org.simexplorer.core.workflow.methods.DomainEditorPanel;
 import org.openmole.core.implementation.domain.Domain;

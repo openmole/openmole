@@ -14,13 +14,15 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.simexplorer.ide.ui.dataexplorer.factors.FactorsExplorerTopComponent;
-import org.simexplorer.ide.ui.dataexplorer.structure.InputStructureTopComponent;
-import org.simexplorer.ide.ui.dataexplorer.structure.OutputStructureTopComponent;
+import org.simexplorer.ui.ide.structure.InputStructureTopComponent;
+import org.simexplorer.ui.ide.structure.OutputStructureTopComponent;
 import org.simexplorer.ide.ui.dataexplorer.variables.VariablesTopComponent;
 import org.simexplorer.ide.ui.processoreditor.TaskEditorTopComponent;
+import org.simexplorer.ui.ide.workflow.model.ApplicationsExplorerService;
 import org.simexplorer.ui.ide.workflow.model.ExplorationApplication;
 //import org.openide.util.Utilities;
 

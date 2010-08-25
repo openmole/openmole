@@ -24,7 +24,7 @@ import java.io.File;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import org.openide.util.lookup.ServiceProvider;
-import org.simexplorer.ide.ui.tools.ActionsUtils;
+import org.simexplorer.ui.tools.ActionsUtils;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
 @ServiceProvider(service=EditorPanel.class)

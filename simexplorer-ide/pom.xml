@@ -17,15 +17,6 @@
         <module>simexplorer-ide-ant</module>
     </modules>
     
-    <dependencies>	
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>com.springsource.org.aspectj.runtime</artifactId>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
-
-
     <properties>
         <simexplorer-ide.ant-script>${basedir}/simexplorer-ide-ant/build.xml</simexplorer-ide.ant-script>
     </properties>

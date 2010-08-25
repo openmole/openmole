@@ -26,7 +26,7 @@ import org.openide.nodes.Sheet;
 import org.openide.util.Lookup;
 import org.openmole.core.implementation.task.GenericTask;
 import org.simexplorer.core.workflow.model.metada.Metadata;
-import org.simexplorer.ide.ui.dataexplorer.MetadataProperties;
+import org.simexplorer.ui.ide.workflow.model.MetadataProperties;
 import org.simexplorer.core.workflow.model.metada.MetadataLoader;
 import org.simexplorer.ui.ide.workflow.model.MetadataProxy;
 

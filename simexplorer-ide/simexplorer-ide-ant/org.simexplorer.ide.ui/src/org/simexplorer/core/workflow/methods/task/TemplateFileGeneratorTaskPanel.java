@@ -35,8 +35,8 @@ import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.plugin.task.filemanagement.TemplateFileGeneratorFromLocalFileTask;
 import org.simexplorer.ide.ui.applicationexplorer.ApplicationsTopComponent;
-import org.simexplorer.ide.ui.dataexplorer.structure.InputStructureTopComponent;
-import org.simexplorer.ide.ui.tools.ActionsUtils;
+import org.simexplorer.ui.ide.structure.InputStructureTopComponent;
+import org.simexplorer.ui.tools.ActionsUtils;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
 @ServiceProvider(service=EditorPanel.class)

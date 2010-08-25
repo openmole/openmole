@@ -33,7 +33,6 @@ public class CategoryBuilder extends Children.Keys {
     public CategoryBuilder() {
         categories.put(CategoryName.TASK, new TaskCategory());
         categories.put(CategoryName.TASK_CAPSULE, new TaskCapsuleCategory());
-        categories.put(CategoryName.PROTOTYPE, new PrototypeCategory());
         categories.put(CategoryName.PROTOTYPE_INSTANCE, new PrototypeInstanceCategory());
     }
 
