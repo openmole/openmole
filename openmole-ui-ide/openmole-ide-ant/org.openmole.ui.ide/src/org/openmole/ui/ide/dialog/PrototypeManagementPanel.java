@@ -18,6 +18,8 @@ package org.openmole.ui.ide.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
@@ -33,6 +35,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -45,7 +48,7 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
  *
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class PrototypeManagementPanel extends javax.swing.JPanel implements ListSelectionListener {
+public class PrototypeManagementPanel extends javax.swing.JPanel implements ListSelectionListener,java.awt.event.ActionListener {
 
     private static final String updateString = "Update";
     private static final String removeString = "Remove";
@@ -76,12 +79,12 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         nameField = new JTextField(10);
         nameField.addActionListener(new AddButtonListener());
 
-        //Create the new prototype button.
+        //Create the update prototype button.
         upButton = new JButton(updateString);
         upButton.setActionCommand(updateString);
         upButton.addActionListener(new AddButtonListener());
 
-        //Create the new prototype button.
+        //Create the remove prototype button.
         removeButton = new JButton(removeString);
         removeButton.setActionCommand(removeString);
         removeButton.addActionListener(new RemoveButtonListener());
@@ -89,14 +92,13 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         typeButtonGroup = new ButtonGroup();
         JPanel typePanel = new JPanel();
         typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.Y_AXIS));
-
-
+       // typePanel.setLayout(new BorderLayout());
 
         for (Class c : Preferences.getInstance().getPrototypeTypes()) {
             JRadioButton radio = new JRadioButton(c.getSimpleName());
             radio.setActionCommand(c.getCanonicalName());
             typeButtonGroup.add(radio);
-            typePanel.add(radio);
+            typePanel.add(radio,BorderLayout.WEST);
             radio.setSelected(true);
             buttonModelMap.put(c.getCanonicalName(), radio.getModel());
         }
@@ -106,25 +108,38 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         namePane.add(upButton);
         namePane.add(removeButton);
 
-
         JPanel controlPane = new JPanel();
-        controlPane.setLayout(new BoxLayout(controlPane, BoxLayout.Y_AXIS));
+      //  controlPane.setLayout(new BoxLayout(controlPane, BoxLayout.Y_AXIS));
+    //    controlPane.setLayout(new BorderLayout());
+        GridLayout lay = new GridLayout(3,1,0,0); 
+        
         controlPane.add(namePane);
         controlPane.add(typePanel);
 
-        add(controlPane, BorderLayout.PAGE_START);
-        add(listScrollPane, BorderLayout.CENTER);
-        setSize(400, 400);
+    //    add(controlPane, BorderLayout.PAGE_START);
+    //    add(listScrollPane, BorderLayout.CENTER);
+        add(controlPane, BorderLayout.NORTH);
+        add(new JSeparator(), BorderLayout.CENTER);
+        add(listScrollPane, BorderLayout.SOUTH);
+        controlPane.setLayout(lay);
+     //   setSize(250, 400);
     }
 
+    /**
+     * Actions connected to any changement in the list, essentially selecting a row.
+     */
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!list.isSelectionEmpty()) {
             PrototypeUI proto = (PrototypeUI) prototypeListModel.get(list.getSelectedIndex());
             nameField.setText(proto.getName());
             typeButtonGroup.setSelected(buttonModelMap.get(proto.getType().getCanonicalName()), true);
-
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     class MyCellRenderer extends DefaultListCellRenderer {
@@ -144,6 +159,9 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
 
     class AddButtonListener implements ActionListener {
 
+        /**
+         * Action linked to the adding of a new prototype
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             PrototypeUI proto = exists(nameField.getText());
@@ -162,7 +180,10 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
             }
         }
     }
-
+    
+        /**
+         * Action linked to the removing of an existing prototype
+         */
     class RemoveButtonListener implements ActionListener {
 
         @Override
@@ -175,6 +196,12 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         }
     }
 
+    /**
+     * Updates a prototype, in the imutable way: removing the prototype and
+     * creating a new one with the new features.
+     * 
+     * @param proto, the prototype to be updated
+     */
     private void update(PrototypeUI proto) {
         try {
             prototypeListModel.removeElement(proto);
@@ -185,6 +212,12 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         }
     }
 
+    /**
+     * Search within a prototype still exists.
+     * 
+     * @param testedName, the name of the protype to be searched.
+     * @return the PrototypeUI wether found and null otherwise
+     */
     private PrototypeUI exists(String testedName) {
         Enumeration<?> en = prototypeListModel.elements();
         PrototypeUI proto = null;

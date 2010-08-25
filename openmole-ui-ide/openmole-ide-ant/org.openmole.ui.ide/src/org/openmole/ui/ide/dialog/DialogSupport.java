@@ -17,8 +17,11 @@
 package org.openmole.ui.ide.dialog;
 
 import java.awt.Dialog;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
  *
@@ -26,11 +29,18 @@ import org.openide.DialogDisplayer;
  */
 public class DialogSupport {
 
-    private DialogDescriptor dialogDescriptor;
-
     public static void showDialog(javax.swing.JPanel panel) {
+        Object[] options = {new JButton("Close")};
 
-        DialogDescriptor dialogDescriptor = new DialogDescriptor(panel, panel.getName());
+        DialogDescriptor dialogDescriptor = new DialogDescriptor(panel,
+                panel.getName(),
+                true,
+                options,
+                null,
+                DialogDescriptor.DEFAULT_ALIGN,
+                null,
+                null);
+
         dialogDescriptor.setValid(false);
         Dialog dialog = DialogDisplayer.getDefault().createDialog(dialogDescriptor);
         dialog.setVisible(true);
