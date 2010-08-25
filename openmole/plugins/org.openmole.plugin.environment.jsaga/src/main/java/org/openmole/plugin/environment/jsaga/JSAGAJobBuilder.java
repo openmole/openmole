@@ -24,6 +24,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.format.ISOPeriodFormat;
 
 import org.ogf.saga.error.AuthenticationFailedException;
@@ -78,7 +80,7 @@ public class JSAGAJobBuilder {
                 if(entry.getKey().equals(CPU_TIME)) {
                      value = new Integer(ISOPeriodFormat.standard().parsePeriod(entry.getValue()).toStandardSeconds().getSeconds()).toString();
                 } else value = entry.getValue();
-      
+                  
                 description.setAttribute(entry.getKey(), value);
             }
                 
