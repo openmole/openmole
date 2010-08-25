@@ -227,6 +227,12 @@
             <version>${lib.ccl.northwestern.edu.netlogo.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.tools.distrng</artifactId>
+            <version>${lib.org.openmole.tools.distrng.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
