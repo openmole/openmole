@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import org.openmole.ui.ide.MoleSceneTopComponent;
 import org.openmole.ui.ide.dialog.DialogSupport;
 import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
 
@@ -29,9 +30,12 @@ import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
  */
 public class ManagePrototypeAction implements ActionListener {
     private PrototypeManagementPanel prototypePanel;
+    private MoleSceneTopComponent topComponent;
     
-    public ManagePrototypeAction(PrototypeManagementPanel protoPanel) {
-        prototypePanel = protoPanel;
+    public ManagePrototypeAction(PrototypeManagementPanel protoPanel,
+                                 MoleSceneTopComponent topcomponent) {
+        this.prototypePanel = protoPanel;
+        this.topComponent = topcomponent;
     }
     
     @Override
@@ -50,8 +54,8 @@ public class ManagePrototypeAction implements ActionListener {
         //Display the window.
        // frame.pack();
        // prototypePanel.setVisible(!prototypePanel.isVisible());
-DialogSupport.showDialog(prototypePanel);
-
+            DialogSupport.showDialog(prototypePanel);
+                topComponent.refreshPalette();
 
 //        
 //        

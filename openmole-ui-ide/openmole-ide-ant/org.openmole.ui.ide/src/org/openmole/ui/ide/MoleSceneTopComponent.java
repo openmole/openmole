@@ -45,9 +45,9 @@ import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
  */
 @ConvertAsProperties(dtd = "-//org.openmole.ui.ide//MoleSceneTopComponent//EN",
 autostore = false)
-public final class MoleSceneTopComponentTopComponent extends TopComponent {
+public final class MoleSceneTopComponent extends TopComponent {
 
-    private static MoleSceneTopComponentTopComponent instance;
+    private static MoleSceneTopComponent instance;
     private PaletteController palette;
     private JComponent myView;
     private PrototypeManagementPanel prototypeManagement;
@@ -56,10 +56,10 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
     private static final String PREFERRED_ID = "MoleSceneTopComponentTopComponent";
 
-    public MoleSceneTopComponentTopComponent() {
+    public MoleSceneTopComponent() {
         initComponents();
-        setName(NbBundle.getMessage(MoleSceneTopComponentTopComponent.class, "CTL_MoleSceneTopComponentTopComponent"));
-        setToolTipText(NbBundle.getMessage(MoleSceneTopComponentTopComponent.class, "HINT_MoleSceneTopComponentTopComponent"));
+        setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponentTopComponent"));
+        setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponentTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
         //FIXME un meilleur endroit pour les inits??
@@ -73,7 +73,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
 
         moleSceneScrollPane.setViewportView(myView);
         jTabbedPane1.add("Workflow", moleSceneScrollPane);
-        refreshPalette();
+        palette = PaletteSupport.createPalette();
         associateLookup(Lookups.fixed(new Object[]{palette}));
 
         prototypeManagement = new PrototypeManagementPanel();
@@ -87,7 +87,7 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
         detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
 
         JButton newPrototypeButton = new JButton("Prototypes");
-        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement));
+        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement,this));
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
@@ -101,8 +101,10 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
     }
 
     public void refreshPalette() {
-        palette = PaletteSupport.createPalette();
-        repaint();
+        System.out.println("-- refreshPalette");
+      //  palette = PaletteSupport.createPalette();
+     //   associateLookup(Lookups.fixed(new Object[]{palette}));
+     //   repaint();
     }
 
     /** This method is called from within the constructor to
@@ -132,9 +134,9 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
      * i.e. deserialization routines; otherwise you could get a non-deserialized instance.
      * To obtain the singleton instance, use {@link #findInstance}.
      */
-    public static synchronized MoleSceneTopComponentTopComponent getDefault() {
+    public static synchronized MoleSceneTopComponent getDefault() {
         if (instance == null) {
-            instance = new MoleSceneTopComponentTopComponent();
+            instance = new MoleSceneTopComponent();
         }
         return instance;
     }
@@ -142,17 +144,17 @@ public final class MoleSceneTopComponentTopComponent extends TopComponent {
     /**
      * Obtain the MoleSceneTopComponentTopComponent instance. Never call {@link #getDefault} directly!
      */
-    public static synchronized MoleSceneTopComponentTopComponent findInstance() {
+    public static synchronized MoleSceneTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
         if (win == null) {
-            Logger.getLogger(MoleSceneTopComponentTopComponent.class.getName()).warning(
+            Logger.getLogger(MoleSceneTopComponent.class.getName()).warning(
                     "Cannot find " + PREFERRED_ID + " component. It will not be located properly in the window system.");
             return getDefault();
         }
-        if (win instanceof MoleSceneTopComponentTopComponent) {
-            return (MoleSceneTopComponentTopComponent) win;
+        if (win instanceof MoleSceneTopComponent) {
+            return (MoleSceneTopComponent) win;
         }
-        Logger.getLogger(MoleSceneTopComponentTopComponent.class.getName()).warning(
+        Logger.getLogger(MoleSceneTopComponent.class.getName()).warning(
                 "There seem to be multiple components with the '" + PREFERRED_ID
                 + "' ID. That is a potential source of errors and unexpected behavior.");
         return getDefault();
