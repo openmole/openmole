@@ -581,7 +581,7 @@
         <repository>
             <id>maven.iscpif.fr.snapshots</id>
             <name>ISCPIF snapshots repository</name>
-            <url>http://maven.iscpif.fr/public-snapshots/</url>
+            <url>http://maven.iscpif.fr/snapshots/</url>
         </repository>
 
         <!--Code Lutin Repositories-->
