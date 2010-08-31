@@ -16,12 +16,12 @@
  */
 package org.openmole.ui.ide;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.util.NbBundle;
@@ -30,6 +30,7 @@ import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.spi.palette.PaletteController;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.control.task.TaskSettingTabManager;
@@ -74,8 +75,16 @@ public final class MoleSceneTopComponent extends TopComponent {
         moleSceneScrollPane.setViewportView(myView);
         jTabbedPane1.add("Workflow", moleSceneScrollPane);
         palette = PaletteSupport.createPalette();
+       // refreshPalette();
         associateLookup(Lookups.fixed(new Object[]{palette}));
-
+//        associateLookup(Lookups.proxy(new Lookup.Provider() {
+//
+//            @Override
+//            public Lookup getLookup() {
+//                return Lookups.fixed(new Object[]{palette});
+//            }
+//        }));
+        
         prototypeManagement = new PrototypeManagementPanel();
         prototypeManagement.setVisible(true);
 
@@ -102,9 +111,16 @@ public final class MoleSceneTopComponent extends TopComponent {
 
     public void refreshPalette() {
         System.out.println("-- refreshPalette");
-      //  palette = PaletteSupport.createPalette();
-     //   associateLookup(Lookups.fixed(new Object[]{palette}));
-     //   repaint();
+//        palette = PaletteSupport.createPalette();
+//        associateLookup(Lookups.proxy(new Lookup.Provider() {
+//        
+//            @Override
+//            public Lookup getLookup() {
+//                return palette.getRoot();
+//            }
+//        }));
+//       // associateLookup(Lookups.fixed(new Object[]{palette}));
+//        repaint();
     }
 
     /** This method is called from within the constructor to
