@@ -75,11 +75,11 @@
                     </aspectLibrarys>
                     <weaveDependencies>
                         <weaveDependency>
-                            <groupId>org.openmole</groupId>
+                            <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
                         </weaveDependency>
                         <weaveDependency>
-                            <groupId>org.openmole</groupId>
+                            <groupId>${project.groupId}</groupId>
                             <artifactId>org.openmole.commons.aspect.caching</artifactId>
                         </weaveDependency>
                     </weaveDependencies>
