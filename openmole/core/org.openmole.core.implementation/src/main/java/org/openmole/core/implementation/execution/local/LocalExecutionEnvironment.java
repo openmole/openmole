@@ -17,15 +17,22 @@
 
 package org.openmole.core.implementation.execution.local;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openmole.core.model.execution.IExecutionJob;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Job;
@@ -45,15 +52,20 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     private static LocalExecutionEnvironment instance;
 
-    BlockingQueue<LocalExecutionJob> jobs = new LinkedBlockingQueue<LocalExecutionJob>();
-    final List<LocalExecuter> executers = new LinkedList<LocalExecuter>();
+    final private BlockingQueue<LocalExecutionJob> jobs = new LinkedBlockingQueue<LocalExecutionJob>();
+    final private List<LocalExecuter> executers = new LinkedList<LocalExecuter>();
     int nbThread;
 
-    private LocalExecutionEnvironment() throws InternalProcessingError {
+    public LocalExecutionEnvironment() throws InternalProcessingError {
+        this(Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads));
+    }
+    
+    public LocalExecutionEnvironment(int nbThread) throws InternalProcessingError {
         super();
-        this.nbThread = Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads);
+        this.nbThread = nbThread;
         addExecuters(nbThread);
     }
+
 
     void addExecuters(int nbExecuters) {
         for (int i = 0; i < nbExecuters; i++) {
@@ -75,7 +87,6 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
     public synchronized void setNbThread(int newNbThread) {
         if (nbThread == newNbThread) {
             return;
-
         }
         if (newNbThread > nbThread) {
             addExecuters(newNbThread - nbThread);

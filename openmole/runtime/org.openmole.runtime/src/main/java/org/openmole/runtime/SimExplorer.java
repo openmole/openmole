@@ -128,7 +128,7 @@ public class SimExplorer implements IApplication {
         IRuntimeResult result = new RuntimeResult();
 
         try {
-            LocalExecutionEnvironment.getInstance().setNbThread(NumberOfLocalTheads);
+            LocalExecutionEnvironment localExecutionEnvironment = new LocalExecutionEnvironment(NumberOfLocalTheads);
 
             /*--- get execution message and job for runtime---*/
             Map<File, File> usedFiles = new TreeMap<File, File>();
@@ -212,13 +212,9 @@ public class SimExplorer implements IApplication {
                 ContextSaver saver = new ContextSaver();
 
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
-                    // FileMigrator.initFilesInVariables(toProcess.getContext(), fileCache);
-                    // toProcess.getTask().relocate(fileCache);
-
                     Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged);
                     allFinished.registerJob(toProcess);
-
-                    LocalExecutionEnvironment.getInstance().submit(toProcess);
+                    localExecutionEnvironment.submit(toProcess);
                 }
 
                 allFinished.waitAllFinished();
