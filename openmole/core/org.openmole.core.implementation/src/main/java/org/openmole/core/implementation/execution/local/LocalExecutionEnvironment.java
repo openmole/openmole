@@ -17,19 +17,15 @@
 
 package org.openmole.core.implementation.execution.local;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.core.model.execution.IExecutionJob;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Job;
@@ -41,16 +37,16 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     final static String ConfigGroup = LocalExecutionEnvironment.class.getSimpleName();
-    final static ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "Time");
+    final static ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "ThreadNumber");
 
     static {
-        Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, "1");
+        Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(Runtime.getRuntime().availableProcessors()));
     }
 
     private static LocalExecutionEnvironment instance;
 
     BlockingQueue<LocalExecutionJob> jobs = new LinkedBlockingQueue<LocalExecutionJob>();
-    final Map<LocalExecuter, Future<?>> executers = new HashMap<LocalExecuter, Future<?>>();
+    final List<LocalExecuter> executers = new LinkedList<LocalExecuter>();
     int nbThread;
 
     private LocalExecutionEnvironment() throws InternalProcessingError {
@@ -63,8 +59,11 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
         for (int i = 0; i < nbExecuters; i++) {
             LocalExecuter executer = new LocalExecuter(this);
             synchronized (executers) {
-                Future<?> f = Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(executer);
-                executers.put(executer, f);
+                Thread thread = new Thread(executer);
+                thread.setDaemon(true);
+                thread.setPriority(Thread.NORM_PRIORITY + 1);
+                thread.start();
+                executers.add(executer);
             }
         }
     }
@@ -83,7 +82,7 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
         } else {
             int toStop = nbThread - newNbThread;
             synchronized (executers) {
-                Iterator<LocalExecuter> it = executers.keySet().iterator();
+                Iterator<LocalExecuter> it = executers.iterator();
 
                 while (it.hasNext() && toStop > 0) {
                     LocalExecuter exe = it.next();

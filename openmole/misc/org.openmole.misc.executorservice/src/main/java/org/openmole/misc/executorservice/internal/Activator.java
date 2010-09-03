@@ -41,7 +41,8 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         this.context = context;
-        regExecutor = context.registerService(IExecutorService.class.getName(), getExecutorService(), null);
+        executorService = executorService = new ExecutorService();
+        regExecutor = context.registerService(IExecutorService.class.getName(), executorService, null);
     }
 
     @Override
@@ -53,21 +54,6 @@ public class Activator implements BundleActivator {
 		return context;
 	}
 
-    public synchronized static IExecutorService getExecutorService() throws InternalProcessingError, UserBadDataError {
-        if (executorService == null) {
-            executorService = new ExecutorService(new ThreadFactory() {
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
-        }
-        return executorService;
-
-    }
 
     public static IWorkspace getWorkspace() {
 		if(workspace != null) return workspace;

@@ -31,18 +31,27 @@ public class ExecutorService implements IExecutorService {
 
     final static ConfigurationLocation NbTread = new ConfigurationLocation(ExecutorService.class.getSimpleName(), "NbThreadsByExecutorTypes");
 
+    final ThreadFactory threadFactory = new ThreadFactory() {
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r);
+                    t.setDaemon(true);
+                    return t;
+                }
+            };
+        
+    
     static {
         Activator.getWorkspace().addToConfigurations(NbTread, "20");
     }
-    
-    final ThreadFactory threadFactory;
+
     final Map<String, java.util.concurrent.ExecutorService> executorServices = new TreeMap<String, java.util.concurrent.ExecutorService>();
-    //final java.util.concurrent.ExecutorService cachedPool;
+
     int nbThreads;
 
-    public ExecutorService(ThreadFactory threadFactory) throws InternalProcessingError, UserBadDataError {
+    public ExecutorService() throws InternalProcessingError, UserBadDataError {
         super();
-        this.threadFactory = threadFactory;
         nbThreads = Activator.getWorkspace().getPreferenceAsInt(NbTread);
         //cachedPool = Executors.newCachedThreadPool(threadFactory);
     }
