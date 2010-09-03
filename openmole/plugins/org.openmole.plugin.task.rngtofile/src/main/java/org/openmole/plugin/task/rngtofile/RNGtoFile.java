@@ -17,16 +17,17 @@
 
 package org.openmole.plugin.task.rngtofile;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.tools.distrng.prng.PRNG;
-import org.openmole.tools.distrng.serializer.Serializer;
+import org.openmole.tools.distrng.data.MT19937v32Data;
+import org.openmole.tools.distrng.rng.RNG;
+import org.openmole.tools.distrng.serializer.DataSerializer;
 
 /**
  *
@@ -34,27 +35,34 @@ import org.openmole.tools.distrng.serializer.Serializer;
  */
 public class RNGtoFile extends Task{
 
-    Serializer serializer;
-    String filePath;
-    List<Prototype<PRNG>> statusList = new LinkedList<Prototype<PRNG>>();
+    DataSerializer<RNGData> serializer;
+    OutputStream fileStream;
+    Prototype<? extends RNG> rng;
     
     public RNGtoFile(String name,
-                           Serializer serializer,
-                           String filePath) throws UserBadDataError, InternalProcessingError {
+                     DataSerializer<RNGData> serializer,
+                     Prototype<? extends RNG> rng,
+                     String filePath) throws UserBadDataError, InternalProcessingError {
         super(name);
-        this.serializer = serializer;
-        this.filePath = filePath;
+        this.serializer = serializer;        
+        this.fileStream = new FileOutputStream(filePath);
+        this.rng = rng;
     }
     
     
 
     @Override
     protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
-       // serializer.saveFile(this, filePath);
-    }
-    
-    public void addSatus(){
+        //MT19937v32Data data = (MT19937v32Data) context.getValue(rng).getData();
+
+        serializer.toString((MT19937v32Data) context.getValue(rng).getData(),fileStream);
         
+        /*for (Integer r : data.state){
+            
+            System.out.println("state : " + r.toString());
+        }*/
+        
+        // serializer.saveFile(this, filePath);
     }
     
 }

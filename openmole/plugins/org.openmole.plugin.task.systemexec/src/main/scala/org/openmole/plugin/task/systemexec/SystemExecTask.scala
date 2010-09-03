@@ -17,75 +17,66 @@
 
 package org.openmole.plugin.task.systemexec
 
-import java.io.File
-import java.io.IOException
-
-import java.util.LinkedList
-
-import org.apache.commons.exec.DefaultExecutor
-import org.apache.commons.exec.launcher.CommandLauncherFactory
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
 import org.openmole.plugin.tools.utils.ProcessUtils._
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
-
-import java.util.logging.Level
-import java.util.logging.Logger
-import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.job.IContext
 import org.openmole.plugin.task.external.ExternalSystemTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
-import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
 
-class SystemExecTask(name: String, val cmd: String, val returnValue: Prototype[Integer], relativeDir: String) extends ExternalSystemTask(name) {
-  if(returnValue != null) addOutput(returnValue)
+class SystemExecTask(name: String, 
+                     cmd: String, 
+                     returnValue: Prototype[Integer], 
+                     relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
   
-  def this(name: String, cmd: String) = {
-    this(name, cmd, null, "")
-  }
+//  def this(name: String, cmd: String) = {
+//    this(name, cmd, null, "")
+//  }
+//  
+//  def this(name: String, cmd: String, relativeDir: String) = {
+//    this(name, cmd, null, relativeDir)
+//  }
+//  
+//  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
+//    this(name, cmd, returnValue, "")
+//  }
+//  
+//  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
+//    this(name, cmd, returnValue, relativeDir)
+//  }
   
-  def this(name: String, cmd: String, relativeDir: String) = {
-    this(name, cmd, null, relativeDir)
-  }
-  
-  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, "")
-  }
-  
-  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, relativeDir)
-  }
-  
-  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
-    try {
-      val tmpDir = workspace.newDir("systemExecTask")
+//  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
+//    try {
+//      val tmpDir = workspace.newDir("systemExecTask")
+//
+//      prepareInputFiles(global, context, progress, tmpDir)
+//      val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
+//      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
+//      
+//      try {                    
+//       // val executor = new DefaultExecutor
+//       // executor.setWorkingDirectory(workDir)
+//       // val ret = executor.execute(commandLine);
+//     
+//        val process = Runtime.getRuntime().exec(commandLine.toString, null, workDir)
+//       // val ret = executeProcess(process, System.out, System.err)
+//        val ret = exeute()
+//        if(returnValue != null) context.setValue[Integer](returnValue, ret)
+//      } catch {
+//        case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
+//      }
+//
+//      fetchOutputFiles(global, context, progress, workDir)
+//
+//    } catch {
+//      case e: IOException => throw new InternalProcessingError(e)
+//    }
+//  }
 
-      prepareInputFiles(global, context, progress, tmpDir)
-      val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
-      
-      try {                    
-       // val executor = new DefaultExecutor
-       // executor.setWorkingDirectory(workDir)
-       // val ret = executor.execute(commandLine);
-     
-        val process = Runtime.getRuntime().exec(commandLine.toString, null, workDir)
-        val ret = executeProcess(process, System.out, System.err)
-        if(returnValue != null) context.setValue[Integer](returnValue, ret)
-      } catch {
-        case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
-      }
-
-      fetchOutputFiles(global, context, progress, workDir)
-
-    } catch {
-      case e: IOException => throw new InternalProcessingError(e)
-    }
+  override protected def execute(process: Process, context: IContext):Int = {    
+        return executeProcess(process,System.out,System.err)
   }
-
+  
 }
