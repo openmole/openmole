@@ -33,6 +33,8 @@
         <module>org.openmole.plugin.task.filemanagement</module>
         <module>org.openmole.plugin.task.datasetdistribution</module>
 	<module>org.openmole.plugin.task.structuregeneration</module>
+	<module>org.openmole.plugin.task.rngtofile</module>
+        <module>org.openmole.plugin.domain.prng</module>
         <module>org.openmole.plugin.domain.interval</module>
         <module>org.openmole.plugin.domain.relativerange</module>
         <module>org.openmole.plugin.domain.uniformintegerdistribution</module>
