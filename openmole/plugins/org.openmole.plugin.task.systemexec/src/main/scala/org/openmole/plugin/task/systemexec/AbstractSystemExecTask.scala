@@ -2,7 +2,7 @@
  * Copyright (C) 2010 mathieu leclaire <mathieu.leclaire@openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -32,26 +32,26 @@ import scala.collection.JavaConversions._
 
 abstract class AbstractSystemExecTask (name: String, 
                                        val cmd: String, 
-                                       val returnValue: Prototype[Integer], 
-                                       relativeDir: String) extends ExternalSystemTask(name) {
+                                       val returnValue: Prototype[Integer] = null, 
+                                       relativeDir: String = "") extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
   
-  def this(name: String, cmd: String) = {
-    this(name, cmd, null, "")
-  }
-  
-  def this(name: String, cmd: String, relativeDir: String) = {
-    this(name, cmd, null, relativeDir)
-  }
-  
-  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, "")
-  }
-  
-  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, relativeDir)
-  }
-  
+//  def this(name: String, cmd: String) = {
+//    this(name, cmd, null, "")
+//  }
+//  
+//  def this(name: String, cmd: String, relativeDir: String) = {
+//    this(name, cmd, null, relativeDir)
+//  }
+//  
+//  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
+//    this(name, cmd, returnValue, "")
+//  }
+//  
+//  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
+//    this(name, cmd, returnValue, relativeDir)
+//  }
+//  
   
   override protected def process(global: IContext, context: IContext, progress: IProgress) = {
     try {

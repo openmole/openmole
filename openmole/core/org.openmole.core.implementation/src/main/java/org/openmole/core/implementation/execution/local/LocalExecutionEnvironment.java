@@ -17,22 +17,15 @@
 
 package org.openmole.core.implementation.execution.local;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.core.model.execution.IExecutionJob;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.implementation.execution.Environment;
 import org.openmole.core.implementation.internal.Activator;
 import org.openmole.core.implementation.job.Job;
@@ -44,7 +37,7 @@ import org.openmole.misc.workspace.ConfigurationLocation;
 public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
 
     final static String ConfigGroup = LocalExecutionEnvironment.class.getSimpleName();
-    final static ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "ThreadNumber");
+    final static public ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "ThreadNumber");
 
     static {
         Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(Runtime.getRuntime().availableProcessors()));
@@ -56,16 +49,11 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
     final private List<LocalExecuter> executers = new LinkedList<LocalExecuter>();
     int nbThread;
 
-    public LocalExecutionEnvironment() throws InternalProcessingError {
-        this(Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads));
-    }
-    
-    public LocalExecutionEnvironment(int nbThread) throws InternalProcessingError {
+    private LocalExecutionEnvironment() throws InternalProcessingError {
         super();
-        this.nbThread = nbThread;
+        this.nbThread = Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads);
         addExecuters(nbThread);
     }
-
 
     void addExecuters(int nbExecuters) {
         for (int i = 0; i < nbExecuters; i++) {

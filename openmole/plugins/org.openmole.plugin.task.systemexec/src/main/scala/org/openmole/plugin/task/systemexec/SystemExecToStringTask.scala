@@ -2,7 +2,7 @@
  * Copyright (C) 2010 mathieu leclaire <mathieu.leclaire@openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -28,14 +28,17 @@ class SystemExecToStringTask(name: String,
                              cmd: String, 
                              returnValue: Prototype[Integer], 
                              relativeDir: String,
-                             val outString: Prototype[String]) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
+                             val outString: Prototype[String] = null,
+                             val errString: Prototype[String] = null) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
   
-  val stringBuilder = new StringBuilder()
-  val stringBuilderOutputStream = new StringBuilderOutputStream(stringBuilder)
     
   override protected def execute(process: Process, context: IContext):Int = {    
-    val ret = executeProcess(process,new PrintStream(stringBuilderOutputStream),System.err)
-    if(!stringBuilder.toString.isEmpty()) context.setValue[String](outString,stringBuilder.toString)
+    val outStringBuilder = new StringBuilder
+    val errStringBuilder = new StringBuilder
+
+    val ret = executeProcess(process,new PrintStream(new StringBuilderOutputStream(outStringBuilder)),new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
+    if(outString != null) context.setValue[String](outString,outStringBuilder.toString)
+    if(errString != null) context.setValue[String](errString,errStringBuilder.toString)
     return ret
   }
 }

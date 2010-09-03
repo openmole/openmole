@@ -40,6 +40,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.ogf.saga.stream.Activity;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.message.RuntimeResult;
@@ -128,8 +129,9 @@ public class SimExplorer implements IApplication {
         IRuntimeResult result = new RuntimeResult();
 
         try {
-            LocalExecutionEnvironment localExecutionEnvironment = new LocalExecutionEnvironment(NumberOfLocalTheads);
-
+            Activator.getWorkspace().setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
+            
+            
             /*--- get execution message and job for runtime---*/
             Map<File, File> usedFiles = new TreeMap<File, File>();
             IURIFile executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
@@ -214,7 +216,7 @@ public class SimExplorer implements IApplication {
                 for (IMoleJob toProcess : jobForRuntime.getMoleJobs()) {
                     Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged);
                     allFinished.registerJob(toProcess);
-                    localExecutionEnvironment.submit(toProcess);
+                    LocalExecutionEnvironment.getInstance().submit(toProcess);
                 }
 
                 allFinished.waitAllFinished();

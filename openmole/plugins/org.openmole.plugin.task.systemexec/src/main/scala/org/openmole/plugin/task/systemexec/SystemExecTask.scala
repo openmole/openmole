@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Romain Reuillon <romain.reuillon at openmole.org>
  * 
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the Affero GNU General Public License as published by
+ *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
@@ -20,7 +20,6 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.job.IContext
-import org.openmole.plugin.task.external.ExternalSystemTask
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
@@ -31,21 +30,21 @@ class SystemExecTask(name: String,
                      returnValue: Prototype[Integer], 
                      relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
   
-//  def this(name: String, cmd: String) = {
-//    this(name, cmd, null, "")
-//  }
-//  
-//  def this(name: String, cmd: String, relativeDir: String) = {
-//    this(name, cmd, null, relativeDir)
-//  }
-//  
-//  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
-//    this(name, cmd, returnValue, "")
-//  }
-//  
-//  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
-//    this(name, cmd, returnValue, relativeDir)
-//  }
+  def this(name: String, cmd: String) = {
+    this(name, cmd, null, "")
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String) = {
+    this(name, cmd, null, relativeDir)
+  }
+  
+  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
+    this(name, cmd, returnValue, "")
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
+    this(name, cmd, returnValue, relativeDir)
+  }
   
 //  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
 //    try {
