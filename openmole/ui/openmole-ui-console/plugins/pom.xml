@@ -121,12 +121,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.rngtofile</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.domain.groovy</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
@@ -134,12 +128,6 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.domain.collection</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.prng</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
