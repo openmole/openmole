@@ -62,7 +62,7 @@ public class Saver implements ISaver, IMoleExecutionObserver {
             if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
         }
         
-        Activator.getSerializer().serializeAsHash(context, dir);
+        Activator.getSerializer().serializeAndGetPluginClassAndFiles(context, dir);
     }
 
     @Override

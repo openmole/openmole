@@ -118,7 +118,7 @@ public class URIFile implements IURIFile {
 
         Task<?, NSEntry> task;
         try {
-            task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL(), 4096);
+            task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL());
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NotImplementedException ex) {
@@ -144,7 +144,7 @@ public class URIFile implements IURIFile {
     private NSDirectory fetchEntryAsDirectory() throws IOException, InterruptedException {
         Task<?, NSDirectory> task;
         try {
-            task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL(), 4096);
+            task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), getSAGAURL());
         } catch (InternalProcessingError ex) {
             throw new IOException(getLocationString(), ex);
         } catch (NotImplementedException ex) {

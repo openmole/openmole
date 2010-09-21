@@ -72,7 +72,7 @@ public class JSAGAJobBuilder {
             }
             
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
-            description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().getSchemeSpecificPart() + ">" + tmpScript.getName()});
+            description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + tmpScript.getName()});
       
             for(Map.Entry<String, String> entry: env.getAttributes().entrySet()) {
                 final String value;
@@ -129,7 +129,7 @@ public class JSAGAJobBuilder {
 
                     hello.setAttribute(JobDescription.EXECUTABLE, "/bin/echo");
                     hello.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{"Hello"});
-                    hello.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{helloFile.toURI().getSchemeSpecificPart() + ">" + helloFile.getName()});
+                    hello.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{helloFile.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + helloFile.getName()});
 
                 } catch (NotImplementedException e) {
                     throw new InternalProcessingError(e);
