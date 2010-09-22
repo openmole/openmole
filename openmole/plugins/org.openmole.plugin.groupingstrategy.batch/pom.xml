@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.molejobgroupingstrategy.onvariable</artifactId>
+    <artifactId>org.openmole.plugin.groupingstrategy.batch</artifactId>
 
     <dependencies>
 	<dependency>
@@ -40,6 +40,7 @@
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
+
 
 </project>
 

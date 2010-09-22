@@ -14,15 +14,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.serializer.internal;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
 import java.io.File;
 import java.io.OutputStream;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import org.openmole.commons.exception.InternalProcessingError;
@@ -31,46 +27,32 @@ import org.openmole.commons.exception.InternalProcessingError;
  *
  * @author reuillon
  */
-public class SerializerWithFileAndPluginListing {
+public class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
 
-  final private XStream xstream = new XStream();   
+    private Set<File> files = null;
 
-  private Set<Class> classes = null; //new HashSet<Class>();
-  private Set<File> files = null; //new TreeSet<File>();
-  
-  SerializerWithFileAndPluginListing() {
-    xstream.registerConverter(new PluginConverter(this, new ReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider())));
-    xstream.registerConverter(new FileConverterNotifier(this));
-  }
-                              
-  void classUsed(Class c) {
-    classes.add(c);
-  }
-  
-  void fileUsed(File file) {
-    files.add(file);
-  }
-  
-  void toXMLAndListPlugableClasses(Object obj, OutputStream outputStream) throws InternalProcessingError {
-      classes = new HashSet<Class>();
-      files = new TreeSet<File>();
-      try {
-          xstream.toXML(obj, outputStream);
-      } catch(XStreamException ex) {
-          throw new InternalProcessingError(ex);
-      }
-  }
+    SerializerWithFileAndPluginListing() {
+        super();
+        registerConverter(new FileConverterNotifier(this));
+    }
 
-  Set<File> getFiles() {
-    return files;
-  }
-  
-  Set<Class> getClasses() {
-    return classes;
-  }
-  
-  void clean() {
-    classes = null;
-    files = null;
-  }
+    void fileUsed(File file) {
+        files.add(file);
+    }
+
+    @Override
+    void toXMLAndListPlugableClasses(Object obj, OutputStream outputStream) throws InternalProcessingError {
+        files = new TreeSet<File>();
+        super.toXMLAndListPlugableClasses(obj, outputStream);
+    }
+
+    Set<File> getFiles() {
+        return files;
+    }
+
+    @Override
+    void clean() {
+        super.clean();
+        files = null;
+    }
 }

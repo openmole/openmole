@@ -21,6 +21,6 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
-public interface IMoleJobGroupingStrategy {
+public interface IGroupingStrategy {
 	IMoleJobCategory getCategory(IContext context) throws InternalProcessingError, UserBadDataError;
 }

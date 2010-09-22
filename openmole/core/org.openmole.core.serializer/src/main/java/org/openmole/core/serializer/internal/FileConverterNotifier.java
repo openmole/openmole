@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.serializer.internal;
 
 import com.thoughtworks.xstream.converters.extended.FileConverter;
@@ -25,19 +24,17 @@ import java.io.File;
  * @author reuillon
  */
 public class FileConverterNotifier extends FileConverter {
-    
+
     final SerializerWithFileAndPluginListing serializer;
 
     public FileConverterNotifier(SerializerWithFileAndPluginListing serializer) {
         this.serializer = serializer;
     }
-    
 
-  @Override
-  public String toString(Object obj) {       
-    File file = (File) obj;
-    serializer.fileUsed(file);
-    return super.toString(obj);
-  }
-
+    @Override
+    public String toString(Object obj) {
+        File file = (File) obj;
+        serializer.fileUsed(file);
+        return super.toString(obj);
+    }
 }

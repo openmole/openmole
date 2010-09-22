@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.molejobgroupingstrategy.batch;
+package org.openmole.plugin.groupingstrategy.batch;
 
 import org.openmole.core.implementation.mole.MoleJobCategory;
 import org.openmole.core.model.execution.IMoleJobCategory;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.execution.IGroupingStrategy;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -28,7 +28,7 @@ import org.openmole.commons.exception.UserBadDataError;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class FixedNumberOfMoleJobsGroupingStrategy implements IMoleJobGroupingStrategy {
+public class FixedNumberOfMoleJobsGroupingStrategy implements IGroupingStrategy {
 
     final private int numberOfMoleJobs;
     private Integer currentBatchNumber = 0;

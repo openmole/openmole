@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.serializer.internal;
 
 import com.thoughtworks.xstream.converters.Converter;
@@ -30,30 +29,27 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  */
 public class PluginConverter implements Converter {
 
-    final SerializerWithFileAndPluginListing serializer;
+    final SerializerWithPluginClassListing serializer;
     final ReflectionConverter reflectionConverter;
 
-    public PluginConverter(SerializerWithFileAndPluginListing serializer, ReflectionConverter reflectionConverter) {
+    public PluginConverter(SerializerWithPluginClassListing serializer, ReflectionConverter reflectionConverter) {
         this.serializer = serializer;
         this.reflectionConverter = reflectionConverter;
     }
-    
-    
-    
-  @Override
-  public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {       
-    serializer.classUsed(o.getClass());
-    reflectionConverter.marshal(o, writer, mc);
-  }
 
-  @Override
-  public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
-    throw new UnsupportedOperationException("Bug: Should never be called.");
-  }
+    @Override
+    public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
+        serializer.classUsed(o.getClass());
+        reflectionConverter.marshal(o, writer, mc);
+    }
 
-  @Override 
-  public boolean canConvert(Class c) {
-    return Activator.getPluginManager().isClassProvidedByAPlugin(c);
-  }
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
+        throw new UnsupportedOperationException("Bug: Should never be called.");
+    }
 
+    @Override
+    public boolean canConvert(Class c) {
+        return Activator.getPluginManager().isClassProvidedByAPlugin(c);
+    }
 }

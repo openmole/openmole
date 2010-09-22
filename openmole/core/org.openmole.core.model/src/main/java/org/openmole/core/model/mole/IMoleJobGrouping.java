@@ -18,13 +18,13 @@
 package org.openmole.core.model.mole;
 
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.execution.IGroupingStrategy;
 
 /**
  *
  * @author reuillon
  */
 public interface IMoleJobGrouping {
-    IMoleJobGroupingStrategy getMoleJobGroupingStrategy(IGenericTaskCapsule capsule);
-    void setMoleJobGroupingStrategy(IGenericTaskCapsule capsule, IMoleJobGroupingStrategy strategy);
+    IGroupingStrategy getGroupingStrategy(IGenericTaskCapsule capsule);
+    void setGroupingStrategy(IGenericTaskCapsule capsule, IGroupingStrategy strategy);
 }

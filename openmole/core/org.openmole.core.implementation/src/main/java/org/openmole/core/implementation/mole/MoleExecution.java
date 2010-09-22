@@ -44,7 +44,7 @@ import org.openmole.core.implementation.job.Job;
 import org.openmole.core.implementation.job.MoleJob;
 import org.openmole.core.implementation.job.MoleJobId;
 import org.openmole.core.model.execution.IMoleJobCategory;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.execution.IGroupingStrategy;
 import org.openmole.core.model.mole.ISubMoleExecution;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IJob;
@@ -173,7 +173,7 @@ public class MoleExecution implements IMoleExecution {
         inProgress.put(moleJob, new Tuple2<ISubMoleExecution, ITicket>(subMole, ticket));
         subMole.incNbJobInProgress();
 
-        IMoleJobGroupingStrategy strategy = moleJobGrouping.getMoleJobGroupingStrategy(capsule);
+        IGroupingStrategy strategy = moleJobGrouping.getGroupingStrategy(capsule);
 
         if (strategy != null) {
             IMoleJobCategory category = strategy.getCategory(moleJob.getContext());

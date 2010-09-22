@@ -19,6 +19,7 @@ package org.openmole.core.serializer.internal;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.extended.FileConverter;
 import java.io.File;
+import org.openmole.core.serializer.internal.DeserializerWithFileInjection;
 
 /**
  *

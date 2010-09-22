@@ -30,6 +30,7 @@ import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.observer.ISaver;
+import org.openmole.core.serializer.ISerializationResult;
 
 /**
  *
@@ -49,7 +50,7 @@ public class Saver implements ISaver, IMoleExecutionObserver {
     }
     
     @Override
-    public void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
+    public synchronized void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
         Set<String> filter = new TreeSet<String>();
         
         for(IData data: moleJob.getTask().getOutput()) {
@@ -62,7 +63,10 @@ public class Saver implements ISaver, IMoleExecutionObserver {
             if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
         }
         
-        Activator.getSerializer().serializeAndGetPluginClassAndFiles(context, dir);
+        ISerializationResult serializationResult = Activator.getSerializer().serializeAndGetPluginClassAndFiles(context, dir);
+        for(File file: serializationResult.getFiles()) {
+            
+        }
     }
 
     @Override

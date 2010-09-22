@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.execution.IGroupingStrategy;
 import org.openmole.core.model.mole.IMoleJobGrouping;
 
 /**
@@ -32,23 +32,23 @@ public class MoleJobGrouping implements IMoleJobGrouping {
 
     static IMoleJobGrouping EMPTY_GROUPING = new MoleJobGrouping(Collections.EMPTY_MAP);
     
-    final private Map<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy> groupers;
+    final private Map<IGenericTaskCapsule<?, ?>, IGroupingStrategy> groupers;
 
     public MoleJobGrouping() {
-        this.groupers = new HashMap<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy>();
+        this.groupers = new HashMap<IGenericTaskCapsule<?, ?>, IGroupingStrategy>();
     }
     
-    private MoleJobGrouping(Map<IGenericTaskCapsule<?, ?>, IMoleJobGroupingStrategy> groupers) {
+    private MoleJobGrouping(Map<IGenericTaskCapsule<?, ?>, IGroupingStrategy> groupers) {
         this.groupers = groupers;
     }
     
     @Override
-    public IMoleJobGroupingStrategy getMoleJobGroupingStrategy(IGenericTaskCapsule capsule) {
+    public IGroupingStrategy getGroupingStrategy(IGenericTaskCapsule capsule) {
         return groupers.get(capsule);
     }
 
     @Override
-    public void setMoleJobGroupingStrategy(IGenericTaskCapsule capsule, IMoleJobGroupingStrategy strategy) {
+    public void setGroupingStrategy(IGenericTaskCapsule capsule, IGroupingStrategy strategy) {
         groupers.put(capsule, strategy);
     }
 

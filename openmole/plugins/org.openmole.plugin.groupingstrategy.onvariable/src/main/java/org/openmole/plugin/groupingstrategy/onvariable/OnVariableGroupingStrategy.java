@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.molejobgroupingstrategy.onvariable;
+package org.openmole.plugin.groupingstrategy.onvariable;
 
 import java.util.LinkedList;
 import java.util.List;
 import org.openmole.core.model.execution.IMoleJobCategory;
-import org.openmole.core.model.execution.IMoleJobGroupingStrategy;
+import org.openmole.core.model.execution.IGroupingStrategy;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.implementation.mole.MoleJobCategory;
 import org.openmole.core.model.data.IPrototype;
@@ -29,7 +29,7 @@ import org.openmole.core.model.data.IPrototype;
  *
  * @author reuillon
  */
-public class OnVariableGroupingStrategy implements IMoleJobGroupingStrategy {
+public class OnVariableGroupingStrategy implements IGroupingStrategy {
 
     IPrototype prototypes[];
 

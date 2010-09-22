@@ -21,8 +21,8 @@
 	<module>org.openmole.plugin.tools.utils</module>
         <module>org.openmole.plugin.environment.jsaga</module>
         <module>org.openmole.plugin.environment.glite</module>
-        <module>org.openmole.plugin.molejobgroupingstrategy.onvariable</module>
-        <module>org.openmole.plugin.molejobgroupingstrategy.batch</module>
+        <module>org.openmole.plugin.groupingstrategy.onvariable</module>
+        <module>org.openmole.plugin.groupingstrategy.batch</module>
 	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogo</module>
         <module>org.openmole.plugin.task.csv</module>
