@@ -37,6 +37,10 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 
 class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
+  def this(name: String) = {
+    this(name, false)
+  }
+  
   val toCopy = new ListBuffer[(IPrototype[File],String)]()
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String)]()
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[List[File]],IPrototype[List[String]],String)]()
