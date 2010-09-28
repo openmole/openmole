@@ -22,6 +22,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -54,10 +56,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
     }
     
-    transient BatchServiceGroup<JS> jobServices;
-    transient BatchServiceGroup<IBatchStorage> storages;
-    transient Lock initJS;
-    transient Lock initST;
+    volatile transient BatchServiceGroup<JS> jobServices;
+    volatile transient BatchServiceGroup<IBatchStorage> storages;
+    volatile transient Lock initJS;
+    volatile transient Lock initST;
     
     final Integer memorySizeForRuntime;
     final File runtime;
@@ -178,6 +180,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
         getInitJS().lock();
         try {
+
             if (jobServices == null || jobServices.isEmpty()) {
                 jobServices = selectWorkingJobServices();
             }
@@ -190,7 +193,6 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
     @Override
     public IBatchServiceGroup<IBatchStorage> getStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
         getInitST().lock();
-
         try {
             if (storages == null || storages.isEmpty()) {
                 storages = selectStorages();

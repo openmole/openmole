@@ -67,8 +67,9 @@ public class BDII {
                 if (!resForPath.isEmpty()) {
                     String path = resForPath.get(0).getAttributes().get("GlueVOInfoPath").get().toString();
                     ids.put(id, path);
+                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Found {0} for {1}", new Object[]{path, id});
                 }
-                /*
+                /*path
                 a = r.getAttributes().get("GlueSAPath");
                 System.out.println(a.get().toString());
                 /*NamingEnumeration<? extends Attribute> e = r.getAttributes().getAll();
@@ -101,7 +102,7 @@ public class BDII {
         res = q.query(searchPhrase, timeOut);
 
 
-        Set<String> srmIds = new TreeSet<String>();
+        //Set<String> srmIds = new TreeSet<String>();
 
         for (SearchResult r : res) {
 
@@ -113,7 +114,7 @@ public class BDII {
 
                 // System.out.println(httpgURI.getHost());
                 if (ids.containsKey(httpgURI.getHost())) {
-
+                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Constructing url for host {0}", httpgURI.getHost());
                     StringBuilder srmURI = new StringBuilder();
 
                     srmURI.append("srm");
@@ -124,15 +125,15 @@ public class BDII {
                         srmURI.append(httpgURI.getPort());
                     }
 
-                    //System.out.println();
+                    //System.outt.println();
                     srmURI.append(ids.get(httpgURI.getHost()));
 
                     String srmURIString = srmURI.toString();
                     srmURIs.add(URI.create(srmURIString));
 
-                    srmIds.add(httpgURI.getHost());
+                  //srm  srmIds.add(httpgURI.getHost());
                 } else {
-                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "No path found in BDII for host " + httpgURI.getHost());
+                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "No path found in BDII for host {0}", httpgURI.getHost());
                 }
 
 
