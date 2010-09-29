@@ -8,14 +8,9 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.misc.fileservice</artifactId>
+    <artifactId>org.openmole.misc.filecache</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 	<dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
@@ -25,16 +20,6 @@
             <artifactId>org.openmole.commons.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.hashservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>               
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.filecache</artifactId>
-            <version>${project.version}</version>
-        </dependency> 
     </dependencies>
 
 
