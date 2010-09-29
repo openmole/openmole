@@ -28,8 +28,8 @@ import org.openmole.commons.tools.cache.ICachable;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
-import org.openmole.misc.fileservice.FileCacheDeleteOnFinalize;
-import org.openmole.misc.fileservice.IFileCache;
+import org.openmole.misc.filecache.FileCacheDeleteOnFinalize;
+import org.openmole.misc.filecache.IFileCache;
 
 public class FileService implements IFileService {
 

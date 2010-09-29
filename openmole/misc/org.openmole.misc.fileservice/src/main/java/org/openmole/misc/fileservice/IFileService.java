@@ -21,6 +21,7 @@ import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.IHash;
+import org.openmole.misc.filecache.IFileCache;
 
 /**
  *

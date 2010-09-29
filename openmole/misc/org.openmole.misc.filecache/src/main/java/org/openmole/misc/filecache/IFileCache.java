@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.fileservice;
+package org.openmole.misc.filecache;
 
 import java.io.File;
 
