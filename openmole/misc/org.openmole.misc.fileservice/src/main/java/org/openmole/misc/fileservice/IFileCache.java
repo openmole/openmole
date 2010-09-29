@@ -15,25 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.filecache;
+package org.openmole.misc.fileservice;
 
-import org.openmole.commons.tools.filecache.IFileCache;
 import java.io.File;
 
-
-public class FileCache implements IFileCache {
-
-    File file;
-
-    public FileCache(File file) {
-        super();
-        this.file = file;
-    }
-
-    @Override
-    public File getFile(boolean persit) {
-        return file;
-    }
-
-    
+public interface IFileCache {
+	File getFile(boolean persist);
 }

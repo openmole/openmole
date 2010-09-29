@@ -23,8 +23,8 @@ import java.io.IOException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.cache.AssociativeCache;
 import org.openmole.commons.tools.cache.ICachable;
-import org.openmole.commons.tools.filecache.FileCacheDeleteOnFinalize;
-import org.openmole.commons.tools.filecache.IFileCache;
+import org.openmole.misc.fileservice.FileCacheDeleteOnFinalize;
+import org.openmole.misc.fileservice.IFileCache;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.file.IURIFile;
 

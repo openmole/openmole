@@ -18,8 +18,8 @@ package org.openmole.runtime;
 
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import org.openmole.commons.tools.io.FileInputStream;
+import org.openmole.commons.tools.io.FileOutputStream;
 
 import java.io.InputStream;
 import java.io.OutputStream;

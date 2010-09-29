@@ -21,27 +21,20 @@ import gnu.crypto.hash.IMessageDigest;
 import gnu.crypto.hash.Sha160;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.SoftReferenceObjectPool;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.hashservice.SHA1Hash;
 import org.openmole.commons.tools.io.ReaderRunnable;
-
+import org.openmole.commons.tools.io.FileInputStream;
 
 public class SHA1Computing implements IHashService {
 
