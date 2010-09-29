@@ -27,7 +27,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.file.GZURIFile;
 import org.openmole.core.file.URIFile;
@@ -50,6 +49,7 @@ import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.replicacatalog.IReplica;
 import org.openmole.core.serializer.ISerializationResult;
+import org.openmole.misc.filecache.IFileCache;
 import scala.Tuple2;
 /**
  *

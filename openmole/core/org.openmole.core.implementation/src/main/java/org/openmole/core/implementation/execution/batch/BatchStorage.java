@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import org.openmole.core.batchservicecontrol.BatchStorageDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.filecache.IFileCache;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.file.URIFileCleaner;
@@ -44,6 +43,7 @@ import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
+import org.openmole.misc.filecache.IFileCache;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
 public class BatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchService<ENV, AUTH> implements IBatchStorage<ENV, AUTH> {
