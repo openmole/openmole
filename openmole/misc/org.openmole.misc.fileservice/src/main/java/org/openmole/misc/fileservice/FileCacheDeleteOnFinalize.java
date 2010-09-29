@@ -14,11 +14,37 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.openmole.commons.tools.filecache;
+package org.openmole.misc.fileservice;
 
 import java.io.File;
+import org.openmole.misc.fileservice.internal.Activator;
 
-public interface IFileCache {
-	File getFile(boolean persist);
+public class FileCacheDeleteOnFinalize implements IFileCache {
+
+    final File cache;
+    boolean persist = false;
+
+    public FileCacheDeleteOnFinalize(File cache) {
+        this.cache = cache;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if(!persist) Activator.getCleanFiles().submit(new Runnable() {
+
+            @Override
+            public void run() {
+                cache.delete();
+            }
+        });
+        
+        super.finalize();
+    }
+
+    @Override
+    public File getFile(boolean persist) {
+        if(persist) this.persist = true;
+        return cache;
+    }
+
 }

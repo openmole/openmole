@@ -19,7 +19,7 @@ package org.openmole.plugin.task.datasetdistribution
 
 import java.io.BufferedOutputStream
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
+import org.openmole.commons.tools.io.FileOutputStream
 import java.io.IOException
 import java.util.ArrayList
 import org.jfree.chart.JFreeChart

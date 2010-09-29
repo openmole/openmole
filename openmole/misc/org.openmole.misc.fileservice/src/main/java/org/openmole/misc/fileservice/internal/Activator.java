@@ -14,9 +14,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.misc.fileservice.internal;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,11 +37,13 @@ public class Activator implements BundleActivator {
     private static BundleContext context;
     private static IHashService hashService;
     private ServiceRegistration regExecutor;
+    private static ExecutorService cleanFiles;
 
     @Override
     public void start(BundleContext context) throws Exception {
         this.context = context;
         regExecutor = context.registerService(IFileService.class.getName(), new FileService(), null);
+
     }
 
     @Override
@@ -49,6 +53,28 @@ public class Activator implements BundleActivator {
 
     public static BundleContext getContext() {
         return context;
+    }
+
+    public static ExecutorService getCleanFiles() {
+        if (cleanFiles != null) {
+            return cleanFiles;
+        }
+
+        synchronized (Activator.class) {
+            if (cleanFiles == null) {
+                cleanFiles = Executors.newSingleThreadExecutor(new ThreadFactory() {
+
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread ret = new Thread(r);
+                        ret.setDaemon(true);
+                        return ret;
+                    }
+                });
+
+            }
+        }
+        return cleanFiles;
     }
 
     public static IWorkspace getWorkspace() {

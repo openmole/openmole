@@ -20,7 +20,7 @@ import fr.in2p3.jsaga.adaptor.base.usage.UDuration;
 import fr.in2p3.jsaga.adaptor.security.VOMSContext;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import org.openmole.commons.tools.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;

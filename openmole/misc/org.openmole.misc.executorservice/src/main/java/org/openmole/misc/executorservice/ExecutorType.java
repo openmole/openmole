@@ -22,7 +22,6 @@ package org.openmole.misc.executorservice;
  */
 public enum ExecutorType {
     OWN,
-    //STORAGE,
     UPLOAD,
     DOWNLOAD,
     SUBMIT,

@@ -593,7 +593,7 @@ public class URIFile implements IURIFile {
     public static void copy(final File src, final IURIFile dest, final IAccessToken token) throws IOException, InterruptedException {
 
         IFailureControl failureControl = Activator.getBatchRessourceControl().getController(dest.getStorageDescription()).getFailureControl();
-        InputStream is = new java.io.FileInputStream(src);
+        InputStream is = new org.openmole.commons.tools.io.FileInputStream(src);
         try {
             OutputStream os = dest.openOutputStream(token);
 

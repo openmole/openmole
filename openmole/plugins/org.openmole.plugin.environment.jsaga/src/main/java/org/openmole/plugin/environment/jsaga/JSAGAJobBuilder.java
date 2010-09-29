@@ -18,7 +18,7 @@ package org.openmole.plugin.environment.jsaga;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import org.openmole.commons.tools.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
