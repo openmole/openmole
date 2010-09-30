@@ -58,10 +58,10 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
     }
     
-    volatile transient BatchServiceGroup<JS> jobServices;
-    volatile transient BatchServiceGroup<IBatchStorage> storages;
-    volatile transient Lock initJS;
-    volatile transient Lock initST;
+    transient BatchServiceGroup<JS> jobServices;
+    transient BatchServiceGroup<IBatchStorage> storages;
+    transient Lock initJS;
+    transient Lock initST;
     
     final Integer memorySizeForRuntime;
     final File runtime;
