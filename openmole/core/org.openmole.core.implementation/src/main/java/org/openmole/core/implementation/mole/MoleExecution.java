@@ -269,7 +269,6 @@ public class MoleExecution implements IMoleExecution {
         if (submiter == null) {
             submiter = new Thread(new Submiter());
             submiter.setDaemon(true);
-            submiter.setPriority(Thread.MAX_PRIORITY);
         }
         return submiter;
     }

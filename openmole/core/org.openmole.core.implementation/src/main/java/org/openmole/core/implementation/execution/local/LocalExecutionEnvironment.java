@@ -61,7 +61,6 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
             synchronized (executers) {
                 Thread thread = new Thread(executer);
                 thread.setDaemon(true);
-                thread.setPriority(Thread.NORM_PRIORITY + 1);
                 thread.start();
                 executers.add(executer);
             }
