@@ -182,7 +182,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
             }
             
             if (jobServices.isEmpty()) {
-                jobServices.addAll(selectWorkingJobServices());
+                selectWorkingJobServices(jobServices);
             }
             return jobServices;
         } finally {
@@ -199,7 +199,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
             }
 
             if (storages.isEmpty()) {
-                storages.addAll(selectStorages());
+                selectStorages(storages);
             }
             return storages;
         } finally {
