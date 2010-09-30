@@ -97,9 +97,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         return memorySizeForRuntime;
     }
 
-    protected Collection<IBatchStorage> selectStorages() throws InternalProcessingError, UserBadDataError, InterruptedException {
-      //  final BatchServiceGroup<IBatchStorage> storages = new BatchServiceGroup<IBatchStorage>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
-        final Collection<IBatchStorage> selectedServices = Collections.synchronizedCollection(new LinkedList<IBatchStorage>());
+    protected void selectStorages(final BatchServiceGroup<IBatchStorage> storages) throws InternalProcessingError, UserBadDataError, InterruptedException {
         
         Collection<IBatchStorage> stors = allStorages();
 
@@ -113,7 +111,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
                 public void run() {
                     try {
                         if (storage.test()) {
-                            selectedServices.add(storage);
+                            storages.add(storage);
                         }
                     } finally {
                         nbLeftRunning.decrementAndGet();
@@ -125,19 +123,16 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
             Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(r);
         }
 
-        while ((selectedServices.isEmpty()) && nbLeftRunning.get() > 0) {
+        while ((storages.isEmpty()) && nbLeftRunning.get() > 0) {
             oneFinished.acquire();
         }
 
-        if (selectedServices.isEmpty()) {
+        if (storages.isEmpty()) {
             throw new InternalProcessingError("No storage available");
         }
-        return selectedServices;
     }
 
-    protected Collection<JS> selectWorkingJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
-       // final BatchServiceGroup<JS> jobServices = new BatchServiceGroup<JS>(Activator.getWorkspace().getPreferenceAsInt(ResourcesExpulseThreshod));
-        final Collection<JS> selectedServices = Collections.synchronizedCollection(new LinkedList<JS>());
+    protected void selectWorkingJobServices(final BatchServiceGroup<JS> jobServices) throws InternalProcessingError, UserBadDataError, InterruptedException {
         Collection<JS> allJobServices = allJobServices();
         final Semaphore done = new Semaphore(0);
         final AtomicInteger nbStillRunning = new AtomicInteger(allJobServices.size());
@@ -150,7 +145,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
                 public void run() {
                     try {
                         if (js.test()) {
-                            selectedServices.add(js);
+                            jobServices.add(js);
                         }
                     } finally {
                         nbStillRunning.decrementAndGet();
@@ -163,15 +158,14 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
         }
 
 
-        while (selectedServices.isEmpty() && nbStillRunning.get() > 0) {
+        while (jobServices.isEmpty() && nbStillRunning.get() > 0) {
             done.acquire();
         }
 
-        if (selectedServices.isEmpty()) {
+        if (jobServices.isEmpty()) {
             throw new InternalProcessingError("No job submission service available");
         }
 
-        return selectedServices;
     }
 
     @Override
