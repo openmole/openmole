@@ -24,6 +24,7 @@ import scala.Tuple2;
 
 public interface IBatchServiceGroup<T extends IBatchService> extends Iterable<T> {
 	public abstract Tuple2<T, IAccessToken> getAService() throws InternalProcessingError, UserBadDataError, InterruptedException;
-	public abstract void put(T e);
+	public abstract void add(T e);
+        public abstract void addAll(Iterable<? extends T> e);
 	public abstract int size();
 }

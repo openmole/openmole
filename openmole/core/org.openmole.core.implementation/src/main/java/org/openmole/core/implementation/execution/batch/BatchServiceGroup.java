@@ -49,10 +49,10 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
 
     final ArrayList<T> resources = new ArrayList<T>();
 
-    transient Semaphore waiting;
-    transient Lock selectingRessource;
+    volatile transient Semaphore waiting;
+    volatile transient Lock selectingRessource;
     
-    private int expulseThreshold;
+    final private int expulseThreshold;
 
     public BatchServiceGroup(int threshold) {
         super();
@@ -132,14 +132,25 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
     }
 
     @Override
-    public void put(T e) {
+    public void add(T service) {
        synchronized (resources) {
-            resources.add(e);
-            IUsageControl usageControl = Activator.getBatchRessourceControl().getController(e.getDescription()).getUsageControl();
+            resources.add(service);
+            IUsageControl usageControl = Activator.getBatchRessourceControl().getController(service.getDescription()).getUsageControl();
             Activator.getEventDispatcher().registerListener(usageControl, Priority.NORMAL.getValue(), new BatchRessourceGroupAdapter(), IUsageControl.resourceReleased);
         }
         ressourceTokenReleased();
     }
+    
+    @Override
+    public void addAll(Iterable<? extends T> services) {
+        synchronized (resources) {
+            for(T service: services) {
+                add(service);
+            }
+        }
+    }
+    
+    
 
     public T get(int index) {
         synchronized (resources) {
