@@ -49,8 +49,8 @@ public class BatchServiceGroup<T extends IBatchService> implements IBatchService
 
     final ArrayList<T> resources = new ArrayList<T>();
 
-    volatile transient Semaphore waiting;
-    volatile transient Lock selectingRessource;
+    transient Semaphore waiting;
+    transient Lock selectingRessource;
     
     final private int expulseThreshold;
 
