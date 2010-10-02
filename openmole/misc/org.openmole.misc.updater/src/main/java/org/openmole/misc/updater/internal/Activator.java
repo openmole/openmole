@@ -54,7 +54,6 @@ public class Activator implements BundleActivator {
 	}
 
 	public static IExecutorService getExecutorService() {
-		
 		if(executorService != null) return executorService;
 
 		synchronized (Activator.class) {

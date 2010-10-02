@@ -217,6 +217,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
     private void clean() {
         if (copyToEnvironmentResult != null) {
             Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true));
+            copyToEnvironmentResult = null;
         }
     }
 
@@ -228,18 +229,21 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
                 if (copy != null) {
                     copy.cancel(true);
+                    copy = null;
                 }
 
                 Future finalize = finalizeExecutionFuture;
 
                 if (finalize != null) {
                     finalize.cancel(true);
+                    finalize = null;
                 }
                 clean();
             } finally {
                 IBatchJob bj = getBatchJob();
                 if (bj != null) {
                     Activator.getExecutorService().getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj));
+                    bj = null;
                 }
             }
         }

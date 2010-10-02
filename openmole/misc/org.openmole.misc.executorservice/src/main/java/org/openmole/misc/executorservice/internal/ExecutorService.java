@@ -62,16 +62,7 @@ public class ExecutorService implements IExecutorService {
             return Executors.newSingleThreadExecutor(threadFactory);
         }
 
-        java.util.concurrent.ExecutorService ret;
-
-        synchronized (executorServices) {
-            ret = executorServices.get(type.name());
-            if (ret == null) {
-                ret = Executors.newFixedThreadPool(nbThreads, threadFactory);
-                executorServices.put(type.name(), ret);
-            }
-        }
-        return ret;
+        return getExecutorService(type.name());
     }
 
     @Override

@@ -30,14 +30,7 @@ public class FileCacheDeleteOnFinalize implements IFileCache {
 
     @Override
     protected void finalize() throws Throwable {
-        if(!persist) Activator.getCleanFiles().submit(new Runnable() {
-
-            @Override
-            public void run() {
-                cache.delete();
-            }
-        });
-        
+        if(!persist) Activator.clean(cache);
         super.finalize();
     }
 

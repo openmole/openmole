@@ -27,7 +27,7 @@ import org.openmole.misc.executorservice.ExecutorType;
 public class Updater implements IUpdater {
 
     boolean shutDown = false;
-    ScheduledExecutorService scheduler;
+    final ScheduledExecutorService scheduler;
 
     public Updater() {
 
