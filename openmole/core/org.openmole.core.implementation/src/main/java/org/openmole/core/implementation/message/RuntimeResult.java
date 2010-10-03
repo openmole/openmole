@@ -28,24 +28,27 @@ import scala.Tuple2;
 
 public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
 
-    IFileMessage stdOut;
-    IFileMessage stdErr;
-    IFileMessage tarResult;
+    final IFileMessage stdOut;
+    final IFileMessage stdErr;
+    final IFileMessage tarResult;
     
-    Throwable exception;
-    Map<String, Tuple2<File, Boolean>> files = new TreeMap<String, Tuple2<File, Boolean>>();
+    final Throwable exception;
+    final Map<String, Tuple2<File, Boolean>> filesInfo;
 
-    IURIFile contextResultURI;
-    
+    final IURIFile contextResultURI;
+
+    public RuntimeResult(IFileMessage stdOut, IFileMessage stdErr, IFileMessage tarResult, Map<String, Tuple2<File, Boolean>> filesInfo, Throwable exception, IURIFile contextResultURI) {
+        this.stdOut = stdOut;
+        this.stdErr = stdErr;
+        this.tarResult = tarResult;
+        this.exception = exception;
+        this.contextResultURI = contextResultURI;
+        this.filesInfo = filesInfo;
+    }
     
     @Override
     public IFileMessage getStdOut() {
         return stdOut;
-    }
-
-    @Override
-    public void setStdOut(IFileMessage stdOut) {
-        this.stdOut = stdOut;
     }
 
     @Override
@@ -54,48 +57,23 @@ public class RuntimeResult extends RuntimeMessage implements IRuntimeResult {
     }
 
     @Override
-    public void setStdErr(IFileMessage stdErr) {
-        this.stdErr = stdErr;
-    }
-
-    @Override
     public Throwable getException() {
         return exception;
-    }
-
-    @Override
-    public void setException(Throwable exception) {
-        this.exception = exception;
     }
 
     @Override
     public IFileMessage getTarResult() {
         return tarResult;
     }
-
+    
     @Override
-    public void setTarResult(IFileMessage tarResult) {
-        this.tarResult = tarResult;
-    }
-
-    @Override
-    public void addFileName(String hash, File filePath, boolean isDirectory) {
-        files.put(hash, new Tuple2<File, Boolean>(filePath, isDirectory));
-    }
-
-    @Override
-    public Tuple2<File, Boolean> getFileInfoForEntry(String hash) {
-        return files.get(hash);
+    public Map<String, Tuple2<File, Boolean>> getFilesInfo() {
+        return filesInfo;
     }
 
     @Override
     public IURIFile getContextResultURI() {
         return contextResultURI;
-    }
-
-    @Override
-    public void setContextResultURI(IURIFile file) {
-       this.contextResultURI = file;
     }
 
 }

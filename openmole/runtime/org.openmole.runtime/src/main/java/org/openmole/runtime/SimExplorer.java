@@ -16,6 +16,7 @@
  */
 package org.openmole.runtime;
 
+import scala.Tuple2;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
 import org.openmole.commons.tools.io.FileInputStream;
@@ -40,7 +41,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.ogf.saga.stream.Activity;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.message.RuntimeResult;
@@ -62,6 +62,7 @@ import org.openmole.core.file.GZURIFile;
 import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.implementation.message.FileMessage;
 import org.openmole.core.model.message.IContextResults;
+import org.openmole.core.model.message.IFileMessage;
 import org.openmole.core.serializer.ISerializationResult;
 
 import static org.openmole.commons.tools.service.Retry.retry;
@@ -126,14 +127,20 @@ public class SimExplorer implements IApplication {
         System.setOut(outSt);
         System.setErr(errSt);
 
-        IRuntimeResult result = new RuntimeResult();
-
+        
+        Throwable exception = null;
+        IFileMessage outputMessage = null;
+        IFileMessage errorMessage = null;
+        IFileMessage tarResultMessage = null;
+        Map<String, Tuple2<File, Boolean>> filesInfo = new TreeMap<String, Tuple2<File, Boolean>>();
+        IURIFile contextResult = null;
+        
         try {
             Activator.getWorkspace().setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
-            
-            
+                        
             /*--- get execution message and job for runtime---*/
             Map<File, File> usedFiles = new TreeMap<File, File>();
+            
             IURIFile executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
             File executionMesageFileCache = executionMessageFile.cache();
             IExecutionMessage executionMessage = Activator.getSerialiser().deserialize(executionMesageFileCache);
@@ -152,8 +159,6 @@ public class SimExplorer implements IApplication {
                 }
 
                 usedFiles.put(plugin.getSrc(), inPluginDirLocalFile);
-
-                //       fileCache.fillInLocalFileCache(plugin.getSrc(), inPluginDirLocalFile);
             }
 
 
@@ -237,7 +242,7 @@ public class SimExplorer implements IApplication {
                     }
                 }, NbRetry);
 
-                result.setContextResultURI(uploadedcontextResults);
+                contextResult = uploadedcontextResults;
                 contextResultFile.delete();
 
                 /*-- Tar the result files --*/
@@ -287,7 +292,7 @@ public class SimExplorer implements IApplication {
                                 tos.closeArchiveEntry();
                             }
 
-                            result.addFileName(entry.getName(), file, file.isDirectory());
+                            filesInfo.put(entry.getName(), new Tuple2<File, Boolean>(file, file.isDirectory()));
                         }
                     } finally {
                         tos.close();
@@ -306,9 +311,9 @@ public class SimExplorer implements IApplication {
                         }
                     }, NbRetry);
 
-                    result.setTarResult(new FileMessage(uploadedTar, Activator.getHashService().computeHash(tarResult)));
+                    tarResultMessage = new FileMessage(uploadedTar, Activator.getHashService().computeHash(tarResult));
                 } else {
-                    result.setTarResult(FileMessage.EMPTY_RESULT);
+                    tarResultMessage = FileMessage.EMPTY_RESULT;
                 }
                 
                 tarResult.delete();
@@ -324,28 +329,30 @@ public class SimExplorer implements IApplication {
                 if (out.length() != 0) {
                     IURIFile output = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("output", ".txt"));
                     URIFile.copy(out, output);
-                    result.setStdOut(new FileMessage(output, Activator.getHashService().computeHash(out)));
+                    outputMessage = new FileMessage(output, Activator.getHashService().computeHash(out));
                 } else {
-                    result.setStdOut(FileMessage.EMPTY_RESULT);
+                    outputMessage = FileMessage.EMPTY_RESULT;
                 }
 
                 if (err.length() != 0) {                    
                     IURIFile errout = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("outputError", ".txt"));
                     URIFile.copy(err, errout);
-                    result.setStdErr(new FileMessage(errout, Activator.getHashService().computeHash(err)));
+                    errorMessage =  new FileMessage(errout, Activator.getHashService().computeHash(err));
                 } else {
-                    result.setStdErr(FileMessage.EMPTY_RESULT);
+                    errorMessage = FileMessage.EMPTY_RESULT;
                 }
 
                 out.delete();
                 err.delete();
             }
         } catch (Throwable t) {
-            result.setException(t);
+            exception = t;
         }
 
+        IRuntimeResult runtimeResult = new RuntimeResult(outputMessage, errorMessage, tarResultMessage, filesInfo, exception, contextResult);
+        
         final File outputLocal = Activator.getWorkspace().newFile("output", ".res");
-        Activator.getSerialiser().serialize(result, outputLocal);
+        Activator.getSerialiser().serialize(runtimeResult, outputLocal);
         try {
             final IURIFile output = new GZURIFile(new URIFile(cmdLine.getOptionValue("o")));
 

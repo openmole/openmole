@@ -17,33 +17,22 @@
 package org.openmole.core.model.message;
 
 import java.io.File;
+import java.util.Map;
 
 import org.openmole.core.model.file.IURIFile;
 import scala.Tuple2;
 
 public interface IRuntimeResult extends IRuntimeMessage {
 
-    void setException(Throwable exception);
-
     Throwable getException();
-
-    void setStdErr(IFileMessage stdErr);
 
     IFileMessage getStdErr();
 
-    void setStdOut(IFileMessage stdOut);
-
     IFileMessage getStdOut();
-    
+
     IFileMessage getTarResult();
 
-    void setTarResult(IFileMessage tarResult);
+    Map<String, Tuple2<File, Boolean>> getFilesInfo();
 
-    void addFileName(String hash, File filePath, boolean isDirectory);
-
-    Tuple2<File, Boolean> getFileInfoForEntry(String hash);
-    
     IURIFile getContextResultURI();
-    
-    void setContextResultURI(IURIFile file);
 }

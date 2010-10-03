@@ -36,6 +36,7 @@ import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.job.IMoleJob;
+import org.openmole.core.model.job.State;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.model.task.IMoleTask;
@@ -49,9 +50,9 @@ public class MoleTask extends Task implements IMoleTask {
         @Override
         public void objectChanged(IMoleExecution t, Object[] os) throws InternalProcessingError, UserBadDataError {
             IMoleJob moleJob = (IMoleJob) os[0];
-            Throwable exception = moleJob.getContext().getValue(GenericTask.Exception.getPrototype());
 
-            if (exception != null) {
+            if (moleJob.getState() == State.FAILED) {
+                Throwable exception = moleJob.getContext().getValue(GenericTask.Exception.getPrototype());
                 throwables.add(exception);
             }
         }
@@ -86,22 +87,20 @@ public class MoleTask extends Task implements IMoleTask {
         ExceptionLister exceptionLister = new ExceptionLister();
         Activator.getEventDispatcher().registerListener(execution, Priority.NORMAL.getValue(), exceptionLister, IMoleExecution.oneJobFinished);
 
-        try {
-            execution.start();
-            execution.waitUntilEnded();
+        execution.start();
+        execution.waitUntilEnded();
 
-            for (IData<?> output : getUserOutput()) {
-                IPrototype p = output.getPrototype();
-                if (globalContext.contains(p)) {
-                    context.putVariable(p, globalContext.getValue(p));
-                }
+        for (IData<?> output : getUserOutput()) {
+            IPrototype p = output.getPrototype();
+            if (globalContext.contains(p)) {
+                context.putVariable(p, globalContext.getValue(p));
             }
-        } finally {
-            Collection<Throwable> exceptions = exceptionLister.getThrowables();
+        }
 
-            if (!exceptions.isEmpty()) {
-                context.putVariable(GenericTask.Exception.getPrototype(), new MultipleException(exceptions));
-            }
+        Collection<Throwable> exceptions = exceptionLister.getThrowables();
+
+        if (!exceptions.isEmpty()) {
+            context.putVariable(GenericTask.Exception.getPrototype(), new MultipleException(exceptions));
         }
     }
 

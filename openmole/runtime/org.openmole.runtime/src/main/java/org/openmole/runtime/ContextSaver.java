@@ -16,6 +16,7 @@
  */
 package org.openmole.runtime;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener;
@@ -26,17 +27,12 @@ import org.openmole.core.model.job.IMoleJobId;
 
 public class ContextSaver implements IObjectChangedSynchronousListener<IMoleJob> {
 
- //   Collection<File> outFiles = new LinkedList<File>();
-    Map<IMoleJobId, IContext> results = new TreeMap<IMoleJobId, IContext>();
+    Map<IMoleJobId, IContext> results = Collections.synchronizedMap(new TreeMap<IMoleJobId, IContext>());
 
     public ContextSaver() {
         super();
     }
 
-/*    public Iterable<File> getOutFiles() {
-        return outFiles;
-    }
-*/
     public Map<IMoleJobId, IContext> getResults() {
         return results;
     }

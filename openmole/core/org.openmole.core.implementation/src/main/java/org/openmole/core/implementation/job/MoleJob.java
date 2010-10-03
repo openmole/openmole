@@ -129,8 +129,8 @@ public class MoleJob implements IMoleJob, Comparable<MoleJob> {
         if (!context.containsVariableWithName(GenericTask.Exception.getPrototype())) {
             setState(State.COMPLETED);
         } else {
-            LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", context.getValue(GenericTask.Exception.getPrototype()));
             setState(State.FAILED);
+            LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", context.getValue(GenericTask.Exception.getPrototype()));
         }
     }
 
