@@ -17,6 +17,8 @@
 
 package org.openmole.core.implementation.mole;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.openmole.core.model.job.IMoleJob;
@@ -27,9 +29,9 @@ import org.openmole.core.model.mole.IMoleExecution;
  * @author reuillon
  */
 public class ExecutionInfoRegistry {
-    private static ExecutionInfoRegistry instance = new ExecutionInfoRegistry();
+    final private static ExecutionInfoRegistry instance = new ExecutionInfoRegistry();
 
-    private Map<IMoleJob, IMoleExecution> registred = new WeakHashMap<IMoleJob, IMoleExecution>();
+    final private Map<IMoleJob, IMoleExecution> registred = Collections.synchronizedMap(new WeakHashMap<IMoleJob, IMoleExecution>());
 
     private ExecutionInfoRegistry(){};
 

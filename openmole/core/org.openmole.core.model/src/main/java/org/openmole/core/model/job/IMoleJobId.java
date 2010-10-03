@@ -19,4 +19,5 @@ package org.openmole.core.model.job;
 
 public interface IMoleJobId extends Comparable<IMoleJobId>{
 	Long getId();
+        String getExecutionId();
 }

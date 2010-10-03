@@ -102,6 +102,8 @@ public class MoleExecution implements IMoleExecution {
 
     final BlockingQueue<Tuple2<IJob, IEnvironment>> jobs = new LinkedBlockingQueue<Tuple2<IJob, IEnvironment>>();
     final Map<IMoleJob, Tuple2<ISubMoleExecution, ITicket>> inProgress = Collections.synchronizedMap(new TreeMap<IMoleJob, Tuple2<ISubMoleExecution, ITicket>>()); 
+
+    final String executionId = UUID.randomUUID().toString();
     
     final AtomicLong ticketNumber = new AtomicLong();
     final AtomicLong currentJobId = new AtomicLong();
@@ -331,7 +333,7 @@ public class MoleExecution implements IMoleExecution {
 
     @Override
     public  ITicket createRootTicket() {
-        return new Ticket(UUID.randomUUID().toString(), ticketNumber.getAndIncrement());
+        return new Ticket(executionId, ticketNumber.getAndIncrement());
     }
     
 
@@ -347,7 +349,7 @@ public class MoleExecution implements IMoleExecution {
 
     @Override
     public IMoleJobId nextJobId() {
-        return new MoleJobId(currentJobId.getAndIncrement());
+        return new MoleJobId(executionId, currentJobId.getAndIncrement());
     }
 
     @Override

@@ -20,42 +20,42 @@ import org.openmole.core.model.job.IMoleJobId;
 
 public class MoleJobId implements IMoleJobId {
 
+    final String executionId;
     final Long id;
 
-    public MoleJobId(Long id) {
+    public MoleJobId(String executionId, Long id) {
         super();
+        this.executionId = executionId;
         this.id = id;
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        MoleJobId other = (MoleJobId) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
+        final MoleJobId other = (MoleJobId) obj;
+        if ((this.executionId == null) ? (other.executionId != null) : !this.executionId.equals(other.executionId)) {
+            return false;
+        }
+        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
             return false;
         }
         return true;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 53 * hash + (this.executionId != null ? this.executionId.hashCode() : 0);
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
+
+ 
 
     @Override
     public String toString() {
@@ -69,6 +69,13 @@ public class MoleJobId implements IMoleJobId {
 
     @Override
     public int compareTo(IMoleJobId o) {
-        return getId().compareTo(o.getId());
+        int compare = getId().compareTo(o.getId());
+        if(compare != 0) return compare;
+        return executionId.compareTo(o.getExecutionId());
+    }
+
+    @Override
+    public String getExecutionId() {
+        return executionId;
     }
 }

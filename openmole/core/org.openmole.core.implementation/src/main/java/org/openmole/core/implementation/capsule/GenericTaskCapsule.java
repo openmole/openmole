@@ -166,7 +166,7 @@ public abstract class GenericTaskCapsule<TOUT extends IGenericTransition, TASK e
         this.task = task;
     }
 
-    public void jobFinished(MoleJob job) throws InternalProcessingError, UserBadDataError {
+    private void jobFinished(MoleJob job) throws InternalProcessingError, UserBadDataError {
         try {
             IMoleExecution execution = ExecutionInfoRegistry.GetInstance().remove(job);
             ISubMoleExecution subMole = execution.getSubMoleExecution(job);
