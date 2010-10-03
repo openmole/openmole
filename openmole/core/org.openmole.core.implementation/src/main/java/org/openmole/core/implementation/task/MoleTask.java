@@ -17,6 +17,7 @@
 package org.openmole.core.implementation.task;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -43,7 +44,7 @@ public class MoleTask extends Task implements IMoleTask {
 
     class ExceptionLister implements IObjectChangedSynchronousListenerWithArgs<IMoleExecution> {
 
-        final Collection<Throwable> throwables = new LinkedList<Throwable>();
+        final Collection<Throwable> throwables = Collections.synchronizedCollection(new LinkedList<Throwable>());
 
         @Override
         public void objectChanged(IMoleExecution t, Object[] os) throws InternalProcessingError, UserBadDataError {
@@ -83,23 +84,24 @@ public class MoleTask extends Task implements IMoleTask {
         IMoleExecution execution = new MoleExecution(mole, globalContext, firstTaskContext);
 
         ExceptionLister exceptionLister = new ExceptionLister();
-
         Activator.getEventDispatcher().registerListener(execution, Priority.NORMAL.getValue(), exceptionLister, IMoleExecution.oneJobFinished);
 
-        execution.start();
-        execution.waitUntilEnded();
+        try {
+            execution.start();
+            execution.waitUntilEnded();
 
-        for (IData<?> output : getUserOutput()) {
-            IPrototype p = output.getPrototype();
-            if (globalContext.contains(p)) {
-                context.putVariable(p, globalContext.getValue(p));
+            for (IData<?> output : getUserOutput()) {
+                IPrototype p = output.getPrototype();
+                if (globalContext.contains(p)) {
+                    context.putVariable(p, globalContext.getValue(p));
+                }
             }
-        }
+        } finally {
+            Collection<Throwable> exceptions = exceptionLister.getThrowables();
 
-        Collection<Throwable> exceptions = exceptionLister.getThrowables();
-
-        if (!exceptions.isEmpty()) {
-            context.putVariable(GenericTask.Exception.getPrototype(), new MultipleException(exceptions));
+            if (!exceptions.isEmpty()) {
+                context.putVariable(GenericTask.Exception.getPrototype(), new MultipleException(exceptions));
+            }
         }
     }
 
@@ -113,5 +115,4 @@ public class MoleTask extends Task implements IMoleTask {
     public IDataSet getInput() throws InternalProcessingError, UserBadDataError {
         return new DataSet(super.getInput(), getMole().getRoot().getAssignedTask().getInput());
     }
-
 }
