@@ -421,7 +421,7 @@ public class URIFile implements IURIFile {
             getFailureControl().success();
             return new JSAGAInputStream(ret);
         } catch (ExecutionException e) {
-            if (!InternalProcessingError.class.isAssignableFrom(e.getCause().getClass()) || !DoesNotExistException.class.isAssignableFrom(e.getCause().getClass())) {
+            if (!InternalProcessingError.class.isAssignableFrom(e.getCause().getClass()) && !DoesNotExistException.class.isAssignableFrom(e.getCause().getClass())) {
                 getFailureControl().failed();
             }
             throw new IOException(getLocationString(), e);
