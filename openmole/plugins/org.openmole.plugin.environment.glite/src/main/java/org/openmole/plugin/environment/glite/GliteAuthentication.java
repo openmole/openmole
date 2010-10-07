@@ -132,8 +132,9 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
             ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
             if(Activator.getWorkspace().isPreferenceSet(GliteEnvironment.MyProxyLocation)) {
+                Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, Activator.getWorkspace().getPreference(GliteEnvironment.MyProxyLocation));
                 ctx.setAttribute(VOMSContext.MYPROXYSERVER, Activator.getWorkspace().getPreference(GliteEnvironment.MyProxyLocation));
-                ctx.setAttribute(VOMSContext.DELEGATION, "full");
+                //ctx.setAttribute(VOMSContext.DELEGATION, "full");
             }
             
             ctx.setAttribute(Context.LIFETIME, getTimeString());
