@@ -69,6 +69,8 @@ public class GliteEnvironment extends JSAGAEnvironment {
     @InteractiveConfiguration(label = "Key password")
     final static ConfigurationLocation PasswordLocation = new ConfigurationLocation(ConfigGroup, "Password", true);
 
+    final static ConfigurationLocation MyProxyLocation = new ConfigurationLocation(ConfigGroup, "MyProxy", true);
+    
     @InteractiveConfiguration(label = "Fqan")
     
     final static ConfigurationLocation FqanLocation = new ConfigurationLocation(ConfigGroup, "Fqan");

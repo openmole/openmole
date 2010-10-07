@@ -299,4 +299,10 @@ public class Workspace implements IWorkspace {
         Period period = formatter.parsePeriod(getPreference(location));
         return period.toStandardSeconds().getSeconds();
     }
+
+    @Override
+    public synchronized boolean isPreferenceSet(ConfigurationLocation location) throws InternalProcessingError, UserBadDataError {
+        Configuration conf = getConfiguration().subset(location.getGroup());
+        return conf.containsKey(location.getName());
+    }
 }

@@ -46,6 +46,8 @@ public interface IWorkspace {
 
         void resetPreferences() throws InternalProcessingError;
 
+        boolean isPreferenceSet(ConfigurationLocation location) throws InternalProcessingError, UserBadDataError;
+        
 	void addToConfigurations(ConfigurationLocation location, ConfigurationElement element);
 	void addToConfigurations(ConfigurationLocation location, String defaultValue);
 	
