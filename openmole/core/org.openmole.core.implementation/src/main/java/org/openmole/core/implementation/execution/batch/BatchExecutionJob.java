@@ -204,6 +204,8 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
         Tuple2<JS, IAccessToken> js = getEnvironment().getAJobService();
         try {
+            if(killed.get()) throw new InternalProcessingError("Job has been killed");
+            //FIXME copyToEnvironmentResult may be null if job killed here
             IBatchJob bj = js._1().submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2());
             setBatchJob(bj);
         } catch (InternalProcessingError e) {

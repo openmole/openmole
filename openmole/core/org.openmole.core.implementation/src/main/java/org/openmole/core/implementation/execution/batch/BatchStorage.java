@@ -54,7 +54,7 @@ public class BatchStorage<ENV extends IBatchEnvironment, AUTH extends IBatchServ
     final static ConfigurationLocation TmpDirRegenerate = new ConfigurationLocation(BatchStorage.class.getSimpleName(), "TmpDirRegenerate");
 
     static {
-        Activator.getWorkspace().addToConfigurations(TmpDirRemoval, "P7D");
+        Activator.getWorkspace().addToConfigurations(TmpDirRemoval, "P30D");
         Activator.getWorkspace().addToConfigurations(TmpDirRegenerate, "P1D");
     }
     public final static String persistent = "persistent/";
