@@ -33,9 +33,9 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
         super(jobServiceURI, environment, authenticationKey, authentication, nbAccess);
     }
 
-/*    @Override
+    @Override
     protected JSAGAJob buildJob(String id) throws InternalProcessingError {
         return new GliteJob(id, this, getAuthentication().getProxyExpiresTime());
     }
-  */  
+  
 }

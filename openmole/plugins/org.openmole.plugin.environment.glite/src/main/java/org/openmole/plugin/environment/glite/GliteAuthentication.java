@@ -59,13 +59,15 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
 
     final private String voName;
     final private String vomsURL;
+    final private String myProxy;
     
     transient private File proxy = null;
     transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
-    public GliteAuthentication(String voName, String vomsURL) {
+    public GliteAuthentication(String voName, String vomsURL, String myProxy) {
         this.voName = voName;
         this.vomsURL = vomsURL;
+        this.myProxy = myProxy;
     }
 
     @Cachable
@@ -131,9 +133,9 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
             ctx.setAttribute(VOMSContext.VOMSDIR, "");
             ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
-            if(Activator.getWorkspace().isPreferenceSet(GliteEnvironment.MyProxyLocation)) {
-                Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, Activator.getWorkspace().getPreference(GliteEnvironment.MyProxyLocation));
-                ctx.setAttribute(VOMSContext.MYPROXYSERVER, Activator.getWorkspace().getPreference(GliteEnvironment.MyProxyLocation));
+            if(!myProxy.isEmpty()) {
+                Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, myProxy);
+                ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy);
              //  ctx.setAttribute(VOMSContext.DELEGATION, "full");
                 ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getTimeString());
                 
@@ -308,6 +310,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     }
 
     public long getProxyExpiresTime() {
+        if(!myProxy.isEmpty()) return Long.MAX_VALUE;
         return proxyExpiresTime;
     }
     

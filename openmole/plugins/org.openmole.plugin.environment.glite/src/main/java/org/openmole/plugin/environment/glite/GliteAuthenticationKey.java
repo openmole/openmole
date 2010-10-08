@@ -21,13 +21,15 @@ import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey;
 
 public class GliteAuthenticationKey implements IBatchServiceAuthenticationKey {
 
-    String voName;
-    String vomsURL;
+    final private String voName;
+    final private String vomsURL;
+    final private String myProxy;
 
-    public GliteAuthenticationKey(String voName, String vomsURL) {
+    public GliteAuthenticationKey(String voName, String vomsURL, String myProxy) {
         super();
         this.voName = voName;
         this.vomsURL = vomsURL;
+        this.myProxy = myProxy;
     }
 
     @Override
@@ -35,35 +37,31 @@ public class GliteAuthenticationKey implements IBatchServiceAuthenticationKey {
         if (obj == null) {
             return false;
         }
-
         if (getClass() != obj.getClass()) {
             return false;
         }
-
         final GliteAuthenticationKey other = (GliteAuthenticationKey) obj;
         if ((this.voName == null) ? (other.voName != null) : !this.voName.equals(other.voName)) {
             return false;
         }
-
         if ((this.vomsURL == null) ? (other.vomsURL != null) : !this.vomsURL.equals(other.vomsURL)) {
             return false;
         }
-
+        if ((this.myProxy == null) ? (other.myProxy != null) : !this.myProxy.equals(other.myProxy)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + (this.voName != null ? this.voName.hashCode() : 0);
-        hash = 71 * hash + (this.vomsURL != null ? this.vomsURL.hashCode() : 0);
+        int hash = 5;
+        hash = 47 * hash + (this.voName != null ? this.voName.hashCode() : 0);
+        hash = 47 * hash + (this.vomsURL != null ? this.vomsURL.hashCode() : 0);
+        hash = 47 * hash + (this.myProxy != null ? this.myProxy.hashCode() : 0);
         return hash;
     }
 
-    @Override
-    public String toString() {
-        return GliteAuthenticationKey.class.getName() + ": " + voName + "," + vomsURL;
-    }
 
 
 

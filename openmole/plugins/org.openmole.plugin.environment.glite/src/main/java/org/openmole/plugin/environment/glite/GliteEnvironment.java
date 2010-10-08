@@ -68,12 +68,10 @@ public class GliteEnvironment extends JSAGAEnvironment {
 
     @InteractiveConfiguration(label = "Key password")
     final static ConfigurationLocation PasswordLocation = new ConfigurationLocation(ConfigGroup, "Password", true);
-
-    final static ConfigurationLocation MyProxyLocation = new ConfigurationLocation(ConfigGroup, "MyProxy");
     
     @InteractiveConfiguration(label = "Fqan")
-    
     final static ConfigurationLocation FqanLocation = new ConfigurationLocation(ConfigGroup, "Fqan");
+    
     final static ConfigurationLocation TimeLocation = new ConfigurationLocation(ConfigGroup, "Time");
     final static ConfigurationLocation FetchRessourcesTimeOutLocation = new ConfigurationLocation(ConfigGroup, "FetchRessourcesTimeOut");
     final static ConfigurationLocation CACertificatesSiteLocation = new ConfigurationLocation(ConfigGroup, "CACertificatesSite");
@@ -139,12 +137,14 @@ public class GliteEnvironment extends JSAGAEnvironment {
     final String voName;
     final String vomsURL;
     final String bdiiURL;
+    final String myProxy;
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
         super(new TreeMap());
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
+        this.myProxy = "";
         init();
     }
 
@@ -153,6 +153,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
+        this.myProxy = "";
         init();
     }
 
@@ -162,6 +163,35 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
+        this.myProxy = "";
+        init();
+    }
+    
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy) throws InternalProcessingError {
+        super(new TreeMap());
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        this.myProxy = myProxy;
+        init();
+    }
+
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, Map<String, String> attributes) throws InternalProcessingError {
+        super(attributes);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        this.myProxy = myProxy;
+        init();
+    }
+
+    
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
+        super(memoryForRuntime, attributes);
+        this.bdiiURL = bdii;
+        this.voName = voName;
+        this.vomsURL = vomsURL;
+        this.myProxy = myProxy;
         init();
     }
 
@@ -188,6 +218,10 @@ public class GliteEnvironment extends JSAGAEnvironment {
         return voName;
     }
 
+    public String getMyProxy() {
+        return myProxy;
+    }
+
     @Override
     public Collection<JSAGAJobService> allJobServices() throws InternalProcessingError, UserBadDataError, InterruptedException {
 
@@ -199,7 +233,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
             try {
                 URI wms = new URI("wms:" + js.getRawSchemeSpecificPart());
 
-                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL), threadsByWMS);
+                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL, myProxy), new GliteAuthentication(voName, vomsURL, myProxy), threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -216,7 +250,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Set<URI> stors = getBDII().querySRMURIs(getVOName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation)).intValue());
 
         for (URI stor : stors) {
-            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL),threadsBySE);
+            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL, myProxy), new GliteAuthentication(voName, vomsURL, myProxy),threadsBySE);
             allStorages.add(storage);
         }
 
@@ -228,5 +262,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     private BDII getBDII() {
         return new BDII(bdiiURL);
     }
+    
+    
     
 }
