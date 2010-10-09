@@ -61,15 +61,17 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     final private String vomsURL;
     final private String myProxy;
     final private String myProxyUserID;
+    final private String myProxyPass;
     
     transient private File proxy = null;
     transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
-    public GliteAuthentication(String voName, String vomsURL, String myProxy, String myProxyUserID) {
+    public GliteAuthentication(String voName, String vomsURL, String myProxy, String myProxyUserID, String myProxyPass) {
         this.voName = voName;
         this.vomsURL = vomsURL;
         this.myProxy = myProxy;
         this.myProxyUserID = myProxyUserID;
+        this.myProxyPass = myProxyPass;
     }
 
     @Cachable
@@ -141,7 +143,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
                 ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy);
                 ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getDelegationTimeString());
                 ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxyUserID);
-                ctx.setAttribute(VOMSContext.MYPROXYPASS, "");
+                ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxyPass);
             } else {
                 ctx.setAttribute(Context.TYPE, "VOMS");
             }

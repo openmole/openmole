@@ -143,6 +143,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     final String bdiiURL;
     final String myProxy;
     final String myProxyUserId;
+    final String myProxyPass;
     
     public GliteEnvironment(String voName, String vomsURL, String bdii) throws InternalProcessingError {
         super(new TreeMap());
@@ -151,6 +152,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this.vomsURL = vomsURL;
         this.myProxy = "";
         this.myProxyUserId = "";
+        this.myProxyPass = "";
         init();
     }
 
@@ -161,6 +163,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this.vomsURL = vomsURL;
         this.myProxy = "";
         this.myProxyUserId = "";
+        this.myProxyPass = "";
         init();
     }
 
@@ -172,37 +175,41 @@ public class GliteEnvironment extends JSAGAEnvironment {
         this.vomsURL = vomsURL;
         this.myProxy = "";
         this.myProxyUserId = "";
+        this.myProxyPass = "";
         init();
     }
     
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass) throws InternalProcessingError {
         super(new TreeMap());
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
         this.myProxy = myProxy;
         this.myProxyUserId = myProxyUserId;
+        this.myProxyPass = myProxyPass;
         init();
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, Map<String, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, Map<String, String> attributes) throws InternalProcessingError {
         super(attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
         this.myProxy = myProxy;
         this.myProxyUserId = myProxyUserId;
+        this.myProxyPass = myProxyPass;
         init();
     }
 
     
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
         super(memoryForRuntime, attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
         this.vomsURL = vomsURL;
         this.myProxy = myProxy;
         this.myProxyUserId = myProxyUserId;
+        this.myProxyPass = myProxyPass;
         init();
     }
 
@@ -248,7 +255,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
             try {
                 URI wms = new URI("wms:" + js.getRawSchemeSpecificPart());
 
-                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy, myProxyUserId), threadsByWMS);
+                JSAGAJobService jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy, myProxyUserId, myProxyPass), threadsByWMS);
                 jobServices.add(jobService);
             } catch (URISyntaxException e) {
                 Logger.getLogger(GliteEnvironment.class.getName()).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -265,7 +272,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Set<URI> stors = getBDII().querySRMURIs(getVOName(), new Long(Activator.getWorkspace().getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation)).intValue());
 
         for (URI stor : stors) {
-            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy, myProxyUserId),threadsBySE);
+            IBatchStorage storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy, myProxyUserId, myProxyPass),threadsBySE);
             allStorages.add(storage);
         }
 
