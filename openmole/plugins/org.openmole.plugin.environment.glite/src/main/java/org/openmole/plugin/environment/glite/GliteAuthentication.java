@@ -131,18 +131,20 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     public void initContext(Context ctx) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
         try {
-            ctx.setAttribute(Context.TYPE, "VOMS");
+            
             ctx.setAttribute(VOMSContext.VOMSDIR, "");
             ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
             if(!myProxy.isEmpty()) {
+                ctx.setAttribute(Context.TYPE, "VOMSMyProxy");
                 Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, myProxy);
                 ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy);
-             //  ctx.setAttribute(VOMSContext.DELEGATION, "full");
                 ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getDelegationTimeString());
                 ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxyUserID);
                 ctx.setAttribute(VOMSContext.MYPROXYPASS, "");
-            } 
+            } else {
+                ctx.setAttribute(Context.TYPE, "VOMS");
+            }
             
             ctx.setAttribute(Context.LIFETIME, getTimeString());
             if(proxy == null) proxy = Activator.getWorkspace().newFile("proxy", ".x509");
