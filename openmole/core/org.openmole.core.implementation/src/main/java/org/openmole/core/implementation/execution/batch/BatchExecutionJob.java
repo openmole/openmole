@@ -119,7 +119,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             switch (state) {
                 case READY:
                     if (asynchonousCopy()) {
-                        initDelay();
+                        delay = null;
                         trySubmit();
                     }
                     break;
