@@ -14,15 +14,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.commons.tools.service;
 
 import java.util.Random;
 
 public class RNG {
-	static Random rng = new Random();
 
-	public static Random getRng() {
-		return rng;
-	}
+    static Random rng = new Random();
+
+    public static Random getRng() {
+        return rng;
+    }
+
 }

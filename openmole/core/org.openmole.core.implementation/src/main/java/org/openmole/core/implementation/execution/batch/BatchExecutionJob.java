@@ -119,6 +119,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
             switch (state) {
                 case READY:
                     if (asynchonousCopy()) {
+                        initDelay();
                         trySubmit();
                     }
                     break;
@@ -137,7 +138,7 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
 
             //Compute new refresh delay
             if (delay == null || oldState != getState()) {
-                this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
+                initDelay();
             } else {
                 long newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
                 if (newDelay <= Activator.getWorkspace().getPreferenceAsDurationInMs(MaxUpdateInterval)) {
@@ -161,6 +162,10 @@ public class BatchExecutionJob<JS extends IBatchJobService> extends ExecutionJob
         return !killed.get();
     }
 
+    private void initDelay() throws InternalProcessingError {
+        this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval);
+    }
+    
     private void tryFinalise() throws InternalProcessingError, UserBadDataError {
          if (finalizeExecutionFuture == null) {
             finalizeExecutionFuture = Activator.getExecutorService().getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.getDescription(), copyToEnvironmentResult.outputFile, getJob(), getEnvironment(), getBatchJob().getLastStatusDurration()));
