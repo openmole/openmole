@@ -23,13 +23,11 @@ public class GliteAuthenticationKey implements IBatchServiceAuthenticationKey {
 
     final private String voName;
     final private String vomsURL;
-    final private String myProxy;
 
-    public GliteAuthenticationKey(String voName, String vomsURL, String myProxy) {
+    public GliteAuthenticationKey(String voName, String vomsURL) {
         super();
         this.voName = voName;
-        this.vomsURL = vomsURL;
-        this.myProxy = myProxy;
+        this.vomsURL = vomsURL;        
     }
 
     @Override
@@ -47,20 +45,17 @@ public class GliteAuthenticationKey implements IBatchServiceAuthenticationKey {
         if ((this.vomsURL == null) ? (other.vomsURL != null) : !this.vomsURL.equals(other.vomsURL)) {
             return false;
         }
-        if ((this.myProxy == null) ? (other.myProxy != null) : !this.myProxy.equals(other.myProxy)) {
-            return false;
-        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 47 * hash + (this.voName != null ? this.voName.hashCode() : 0);
-        hash = 47 * hash + (this.vomsURL != null ? this.vomsURL.hashCode() : 0);
-        hash = 47 * hash + (this.myProxy != null ? this.myProxy.hashCode() : 0);
+        int hash = 3;
+        hash = 23 * hash + (this.voName != null ? this.voName.hashCode() : 0);
+        hash = 23 * hash + (this.vomsURL != null ? this.vomsURL.hashCode() : 0);
         return hash;
     }
+
 
 
 

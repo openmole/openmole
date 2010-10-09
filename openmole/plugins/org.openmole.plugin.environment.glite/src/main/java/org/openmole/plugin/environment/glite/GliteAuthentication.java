@@ -60,14 +60,16 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     final private String voName;
     final private String vomsURL;
     final private String myProxy;
+    final private String myProxyUserID;
     
     transient private File proxy = null;
     transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
-    public GliteAuthentication(String voName, String vomsURL, String myProxy) {
+    public GliteAuthentication(String voName, String vomsURL, String myProxy, String myProxyUserID) {
         this.voName = voName;
         this.vomsURL = vomsURL;
         this.myProxy = myProxy;
+        this.myProxyUserID = myProxyUserID;
     }
 
     @Cachable
@@ -137,14 +139,12 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
                 Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, myProxy);
                 ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy);
              //  ctx.setAttribute(VOMSContext.DELEGATION, "full");
-                ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getTimeString());
-                
-            } else {
-                ctx.setAttribute(Context.LIFETIME, getTimeString());
-            }
+                ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getDelegationTimeString());
+                ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxyUserID);
+                ctx.setAttribute(VOMSContext.MYPROXYPASS, "");
+            } 
             
-            
-
+            ctx.setAttribute(Context.LIFETIME, getTimeString());
             if(proxy == null) proxy = Activator.getWorkspace().newFile("proxy", ".x509");
                 
             ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath());
@@ -223,6 +223,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         return Activator.getWorkspace().getPreference(GliteEnvironment.TimeLocation);
     }
     
+    
     private static long getTime() throws InternalProcessingError, UserBadDataError {
         try {
             return UDuration.toInt(getTimeString()) * 1000L;
@@ -231,6 +232,10 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         }
     }
 
+    
+    private static String getDelegationTimeString() throws InternalProcessingError {
+        return Activator.getWorkspace().getPreference(GliteEnvironment.DelegationTimeLocation);
+    }
 
     static void dowloadCACertificates(URI uri, File dir) throws InternalProcessingError, IOException, InterruptedException {
 
