@@ -39,8 +39,10 @@ public class UpdaterTask implements Runnable {
     @Override
     public void run() {
         try {
-            if(updatable.update())   
+            if(updatable.update()) {
+                System.runFinalization();
                 updater.delay(this);
+            }
         } catch (Throwable e) {
             Logger.getLogger(UpdaterTask.class.getName()).log(Level.WARNING, null, e);
         } 

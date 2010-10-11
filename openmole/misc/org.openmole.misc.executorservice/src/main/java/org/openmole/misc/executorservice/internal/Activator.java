@@ -40,7 +40,8 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        this.context = context;
+        this.context = context; 
+        
         executorService = executorService = new ExecutorService();
         regExecutor = context.registerService(IExecutorService.class.getName(), executorService, null);
     }
