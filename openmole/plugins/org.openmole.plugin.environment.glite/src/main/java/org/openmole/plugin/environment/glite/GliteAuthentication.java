@@ -117,11 +117,10 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     }
 
     private void createContextFromPreferences() throws InternalProcessingError, UserBadDataError, InterruptedException {
-
         Context ctx = Activator.getJSagaSessionService().createContext();
-        initContext(ctx);
+        long proxyDuration = initContext(ctx);
 
-        long interval = (long) (getTime() * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio));
+        long interval = proxyDuration * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio);
 
         Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
         Activator.getUpdater().delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
@@ -129,8 +128,13 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         Activator.getJSagaSessionService().addContext(ctx);
     }
 
-    public void initContext(Context ctx) throws InternalProcessingError, InterruptedException, UserBadDataError {
+    public long initContext(Context ctx) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
+        Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal.");
+
+        
+        long proxyDuration;
+        
         try {
 
             ctx.setAttribute(VOMSContext.VOMSDIR, "");
@@ -143,9 +147,13 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
                 ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getDelegationTimeString());
                 ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxyUserID);
                 ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxyPass);
+                proxyDuration = 12 * 60 * 60 * 1000L;
+                proxyExpiresTime = Long.MAX_VALUE;
             } else {
                 ctx.setAttribute(Context.TYPE, "VOMS");
                 ctx.setAttribute(Context.LIFETIME, getTimeString());
+                proxyDuration = getTime();
+                proxyExpiresTime = System.currentTimeMillis() + getTime();
             }
 
             if (proxy == null) {
@@ -178,8 +186,10 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
             ctx.setAttribute(Context.USERVO, voName);
 
             ctx.getAttribute(Context.USERID);
-            proxyExpiresTime = System.currentTimeMillis() + getTime();
+ 
 
+            return proxyDuration;
+            
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
         } catch (NotImplementedException e) {
@@ -317,9 +327,6 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     }
 
     public long getProxyExpiresTime() {
-        if (!myProxy.isEmpty()) {
-            return Long.MAX_VALUE;
-        }
         return proxyExpiresTime;
     }
 }
