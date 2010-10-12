@@ -120,7 +120,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         Context ctx = Activator.getJSagaSessionService().createContext();
         long proxyDuration = initContext(ctx);
 
-        long interval = proxyDuration * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio);
+        long interval = (long) (proxyDuration * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio));
 
         Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
         Activator.getUpdater().delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
