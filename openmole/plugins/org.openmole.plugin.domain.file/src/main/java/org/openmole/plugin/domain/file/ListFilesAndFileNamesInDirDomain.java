@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.domain.file;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
@@ -35,36 +33,42 @@ import scala.Tuple2;
 public class ListFilesAndFileNamesInDirDomain extends FiniteDomain<Tuple2<File, String>> {
 
     final File dir;
-    final String pattern;
+    final FileFilter filter;
 
     public ListFilesAndFileNamesInDirDomain(File dir) {
-        this(dir, null);
+        this(dir, (FileFilter) null);
     }
-    
-    public ListFilesAndFileNamesInDirDomain(File dir, String pattern) {
+
+    public ListFilesAndFileNamesInDirDomain(File dir, final String pattern) {
+        this(dir, new FileFilter() {
+
+            @Override
+            public boolean accept(File file) {
+                return file.getName().matches(pattern);
+            }
+        });
+    }
+
+    public ListFilesAndFileNamesInDirDomain(File dir, FileFilter pattern) {
         this.dir = dir;
-        this.pattern = pattern;
+        this.filter = pattern;
     }
 
     @Override
     public List<Tuple2<File, String>> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
         File files[];
-        
-        if(pattern == null) files = dir.listFiles();
-        else files = dir.listFiles(new FileFilter() {
-            
-            @Override
-            public boolean accept(File file) {
-                return file.getName().matches(pattern);
-            }
 
-        });
-        
-        List<Tuple2<File, String>> ret = new ArrayList<Tuple2<File, String>>(files.length);
-        for(File f: files) {
-            ret.add(new Tuple2<File,String>(f, f.getName()));
+        if (filter == null) {
+            files = dir.listFiles();
+        } else {
+            files = dir.listFiles(filter);
         }
-        
+
+        List<Tuple2<File, String>> ret = new ArrayList<Tuple2<File, String>>(files.length);
+        for (File f : files) {
+            ret.add(new Tuple2<File, String>(f, f.getName()));
+        }
+
         return ret;
     }
 }

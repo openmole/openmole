@@ -33,28 +33,31 @@ import org.openmole.core.model.job.IContext;
 public class ListFilesInDirDomain extends FiniteDomain<File>{
 
     final File dir;
-    final String pattern;
+    final FileFilter filter;
 
     public ListFilesInDirDomain(File dir) {
-        this(dir, null);
-    }
-    
-    public ListFilesInDirDomain(File dir, String pattern) {
-        this.dir = dir;
-        this.pattern = pattern;
+        this(dir, (FileFilter) null);
     }
 
-    @Override
-    public List<File> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
-        if(pattern == null) return Arrays.asList(dir.listFiles());
-        else return Arrays.asList(dir.listFiles(new FileFilter() {
-            
+    public ListFilesInDirDomain(File dir, final String pattern) {
+        this(dir, new FileFilter() {
+
             @Override
             public boolean accept(File file) {
                 return file.getName().matches(pattern);
             }
+        });
+    }
 
-        }));
+    public ListFilesInDirDomain(File dir, FileFilter filter) {
+        this.dir = dir;
+        this.filter = filter;
+    }
+
+    @Override
+    public List<File> computeValues(IContext global, IContext context) throws InternalProcessingError, UserBadDataError {
+        if(filter == null) return Arrays.asList(dir.listFiles());
+        else return Arrays.asList(dir.listFiles(filter));
     }
 
 
