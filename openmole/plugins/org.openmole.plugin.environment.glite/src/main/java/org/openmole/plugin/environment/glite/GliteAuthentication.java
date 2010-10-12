@@ -62,7 +62,6 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     final private String myProxy;
     final private String myProxyUserID;
     final private String myProxyPass;
-    
     transient private File proxy = null;
     transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
@@ -121,9 +120,9 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
 
         Context ctx = Activator.getJSagaSessionService().createContext();
         initContext(ctx);
-        
+
         long interval = (long) (getTime() * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio));
-       
+
         Logger.getLogger(GliteAuthentication.class.getName()).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
         Activator.getUpdater().delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
 
@@ -133,53 +132,54 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     public void initContext(Context ctx) throws InternalProcessingError, InterruptedException, UserBadDataError {
 
         try {
-            
+
             ctx.setAttribute(VOMSContext.VOMSDIR, "");
             ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir().getCanonicalPath());
 
-            if(!myProxy.isEmpty()) {
+            if (!myProxy.isEmpty()) {
                 ctx.setAttribute(Context.TYPE, "VOMSMyProxy");
                 Logger.getLogger(GliteAuthentication.class.getName()).log(Level.INFO, myProxy);
                 ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy);
-                ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME,  getDelegationTimeString());
+                ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getDelegationTimeString());
                 ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxyUserID);
                 ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxyPass);
             } else {
                 ctx.setAttribute(Context.TYPE, "VOMS");
+                ctx.setAttribute(Context.LIFETIME, getTimeString());
             }
-            
-            ctx.setAttribute(Context.LIFETIME, getTimeString());
-            if(proxy == null) proxy = Activator.getWorkspace().newFile("proxy", ".x509");
-                
+
+            if (proxy == null) {
+                proxy = Activator.getWorkspace().newFile("proxy", ".x509");
+
+                if (getCertType().equalsIgnoreCase("p12")) {
+                    ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath());
+                } else if (getCertType().equalsIgnoreCase("pem")) {
+                    ctx.setAttribute(Context.USERCERT, getCertPath());
+                    ctx.setAttribute(Context.USERKEY, getKeyPath());
+                } else {
+                    throw new UserBadDataError("Unknown certificate type " + getCertType());
+                }
+
+                String keyPassword = Activator.getWorkspace().getPreference(GliteEnvironment.PasswordLocation);
+                if (keyPassword == null) {
+                    keyPassword = "";
+                }
+                ctx.setAttribute(Context.USERPASS, keyPassword);
+
+                String fqan = getFQAN();
+
+                if (!fqan.isEmpty()) {
+                    ctx.setAttribute(VOMSContext.USERFQAN, fqan);
+                }
+            }
+
             ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath());
-
-            if (getCertType().equalsIgnoreCase("p12")) {
-                ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath());
-            } else if (getCertType().equalsIgnoreCase("pem")) {
-                ctx.setAttribute(Context.USERCERT, getCertPath());
-                ctx.setAttribute(Context.USERKEY, getKeyPath());
-            } else {
-                throw new UserBadDataError("Unknown certificate type " + getCertType());
-            }
-
             ctx.setAttribute(Context.SERVER, vomsURL);
             ctx.setAttribute(Context.USERVO, voName);
 
-            String fqan = getFQAN();
-
-            if (!fqan.isEmpty()) {
-                ctx.setAttribute(VOMSContext.USERFQAN, fqan);
-            }
-
-            String keyPassword = Activator.getWorkspace().getPreference(GliteEnvironment.PasswordLocation);
-            if (keyPassword == null) {
-                keyPassword = "";
-            }
-            ctx.setAttribute(Context.USERPASS, keyPassword);
-            
             ctx.getAttribute(Context.USERID);
             proxyExpiresTime = System.currentTimeMillis() + getTime();
-            
+
         } catch (NoSuccessException e) {
             throw new InternalProcessingError(e);
         } catch (NotImplementedException e) {
@@ -226,8 +226,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     private static String getTimeString() throws InternalProcessingError {
         return Activator.getWorkspace().getPreference(GliteEnvironment.TimeLocation);
     }
-    
-    
+
     private static long getTime() throws InternalProcessingError, UserBadDataError {
         try {
             return UDuration.toInt(getTimeString()) * 1000L;
@@ -236,7 +235,6 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
         }
     }
 
-    
     private static String getDelegationTimeString() throws InternalProcessingError {
         return Activator.getWorkspace().getPreference(GliteEnvironment.DelegationTimeLocation);
     }
@@ -319,9 +317,9 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     }
 
     public long getProxyExpiresTime() {
-        if(!myProxy.isEmpty()) return Long.MAX_VALUE;
+        if (!myProxy.isEmpty()) {
+            return Long.MAX_VALUE;
+        }
         return proxyExpiresTime;
     }
-    
-    
 }
