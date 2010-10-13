@@ -68,6 +68,8 @@ public class JSAGAJobBuilder {
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + tmpScript.getName()});
       
             for(Map.Entry<String, String> entry: attributes.entrySet()) {
+                Logger.getLogger(JSAGAJobBuilder.class.getName()).log(Level.FINE, entry.getKey() + " " + entry.getValue());
+                
                 final String value;
                 
                 if(entry.getKey().equals(CPU_TIME)) {
