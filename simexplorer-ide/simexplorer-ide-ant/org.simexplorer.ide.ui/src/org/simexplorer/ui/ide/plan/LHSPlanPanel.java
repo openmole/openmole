@@ -2,7 +2,7 @@
  *  Copyright (c) 2008, 2009, Cemagref
  *
  *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
+ *  modify it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation; either version 3 of
  *  the License, or (at your option) any later version.
  *
@@ -24,7 +24,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import org.openide.util.lookup.ServiceProvider;
 import org.simexplorer.core.workflow.methods.EditorPanel;
-import org.openmole.plugin.plan.lhs.LHSPlan;
+import org.openmole.plugin.sampler.lhs.LHSPlan;
 
 @ServiceProvider(service=EditorPanel.class)
 public class LHSPlanPanel extends EditorPanel<LHSPlan> {

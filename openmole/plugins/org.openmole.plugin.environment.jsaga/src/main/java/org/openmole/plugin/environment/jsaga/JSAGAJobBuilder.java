@@ -57,24 +57,17 @@ public class JSAGAJobBuilder {
     }
     JobDescription hello;
 
-    public JobDescription getJobDescription(URI in, URI out, JSAGAEnvironment env, IRuntime runtime, File tmpScript) throws InternalProcessingError, InterruptedException {
+    public JobDescription getJobDescription(IRuntime runtime, File tmpScript, Map<String, String>  attributes) throws InternalProcessingError, InterruptedException {
         try {
 
             JobDescription description = JobFactory.createJobDescription();
 
             description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
-
-            OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpScript));
-            try {
-                env.getLaunchingScript().generateScript(in.toString(), out.toString(), runtime, env.getMemorySizeForRuntime(), os);
-            } finally {
-                os.close();
-            }
             
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + tmpScript.getName()});
       
-            for(Map.Entry<String, String> entry: env.getAttributes().entrySet()) {
+            for(Map.Entry<String, String> entry: attributes.entrySet()) {
                 final String value;
                 
                 if(entry.getKey().equals(CPU_TIME)) {

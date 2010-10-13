@@ -3,7 +3,7 @@
  *  Copyright (c) 2010, Cemagref
  *
  *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
+ *  modify it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation; either version 3 of
  *  the License, or (at your option) any later version.
  *
@@ -19,7 +19,6 @@
  */
 package org.openmole.ui.plugin.builder;
 
-import org.openmole.core.model.plan.IPlan;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.structuregenerator.ComplexNode;
 import org.openmole.core.structuregenerator.PrototypeNode;
@@ -27,13 +26,11 @@ import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
 import org.openmole.core.implementation.capsule.TaskCapsule;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.mole.Mole;
-import org.openmole.core.implementation.plan.Factor;
 import org.openmole.core.implementation.transition.ExplorationTransition;
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.capsule.IGenericTaskCapsule;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.domain.IDomain;
-import org.openmole.core.model.plan.IFactor;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
 import org.openmole.core.implementation.task.MoleTask;
@@ -52,8 +49,11 @@ import org.openmole.core.implementation.mole.FixedEnvironmentSelection;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.implementation.mole.MoleExecution;
+import org.openmole.core.implementation.sampler.Factor;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.mole.IMoleExecution;
+import org.openmole.core.model.sampler.IFactor;
+import org.openmole.core.model.sampler.ISampler;
 
 /**
  *
@@ -311,13 +311,13 @@ public class Builder {
          * Builds an exploration task, according to a Design of Experiment.
          *
          * @param name, the name of the task,
-         * @param plan, the plan to be explored.
+         * @param sampler, the sampler to be explored.
          * @return an instance of ExplorationTask
          * @throws UserBadDataError
          * @throws InternalProcessingError
          */
-        public IExplorationTask buildExplorationTask(String name, IPlan plan) throws UserBadDataError, InternalProcessingError {
-            return new ExplorationTask(name, plan);
+        public IExplorationTask buildExplorationTask(String name, ISampler sampler) throws UserBadDataError, InternalProcessingError {
+            return new ExplorationTask(name, sampler);
         }
 
         /**
@@ -325,16 +325,16 @@ public class Builder {
          * prototypes.
          *
          * @param name, the name of the task,
-         * @param plan, the plan to be explored.
+         * @param sampler, the sampler to be explored.
          * @param input, a set of prototypes to be set as input of the task
          * @return an instance of ExplorationTask
          * @throws UserBadDataError
          * @throws InternalProcessingError
          */
         public IExplorationTask buildExplorationTask(String name,
-                IPlan plan,
+                ISampler sampler,
                 IDataSet input) throws UserBadDataError, InternalProcessingError {
-            ExplorationTask explo = new ExplorationTask(name, plan);
+            ExplorationTask explo = new ExplorationTask(name, sampler);
             explo.addInput(input);
             return explo;
         }

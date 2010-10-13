@@ -96,5 +96,4 @@ public class BatchServiceController implements IBatchServiceController {
     public IFailureControl getFailureControl() {
         return failureControl;
     }
-
 }

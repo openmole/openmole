@@ -19,8 +19,8 @@ package org.openmole.core.model.transition;
 
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
 import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.plan.IExploredPlan;
-import org.openmole.core.model.plan.IFactorValues;
+import org.openmole.core.model.sampler.ISample;
+import org.openmole.core.model.sampler.IValues;
 
 /**
  *
