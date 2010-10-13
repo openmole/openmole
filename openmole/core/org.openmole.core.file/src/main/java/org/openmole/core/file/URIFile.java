@@ -52,7 +52,6 @@ import org.openmole.core.batchservicecontrol.BatchStorageDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.file.internal.Activator;
 import org.openmole.core.model.file.IURIFile;
-import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 import org.openmole.commons.exception.UserBadDataError;

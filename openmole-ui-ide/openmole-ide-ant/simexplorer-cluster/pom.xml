@@ -108,12 +108,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.complete</artifactId>
+            <artifactId>org.openmole.plugin.sampler.complete</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.plan.lhs</artifactId>
+            <artifactId>org.openmole.plugin.sampler.lhs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

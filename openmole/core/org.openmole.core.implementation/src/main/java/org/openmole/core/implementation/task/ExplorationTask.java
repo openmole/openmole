@@ -22,8 +22,8 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.plan.IExploredPlan;
-import org.openmole.core.model.plan.IPlan;
+import org.openmole.core.model.sampler.ISample;
+import org.openmole.core.model.sampler.ISampler;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.annotations.Output;
 import org.openmole.commons.aspect.caching.ChangeState;
@@ -31,15 +31,15 @@ import org.openmole.commons.aspect.caching.ChangeState;
 public class ExplorationTask extends GenericTask implements IExplorationTask {
 
     @Output
-    final static public IData<IExploredPlan> ExploredPlan = new Data<IExploredPlan>("ExploredPlan", IExploredPlan.class);
+    final static public IData<ISample> ExploredPlan = new Data<ISample>("ExploredPlan", ISample.class);
 
-    private IPlan plan;
+    private ISampler plan;
 
     public ExplorationTask(String name) throws UserBadDataError, InternalProcessingError {
         super(name);
     }
 
-    public ExplorationTask(String name, IPlan plan) throws UserBadDataError, InternalProcessingError {
+    public ExplorationTask(String name, ISampler plan) throws UserBadDataError, InternalProcessingError {
         super(name);
         setPlan(plan);
     }
@@ -54,7 +54,7 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
      * @see org.openmole.methods.task.IExploration#setDesign(org.openmole.core.task.ExperimentalDesign)
      */
     @ChangeState
-    public void setPlan(IPlan plan) {
+    public void setPlan(ISampler plan) {
         this.plan = plan;
     }
 
@@ -62,7 +62,7 @@ public class ExplorationTask extends GenericTask implements IExplorationTask {
      * @see org.openmole.methods.task.IExploration#getDesign()
      */
     @Override
-    public IPlan getPlan() {
+    public ISampler getPlan() {
         return plan;
     }
 

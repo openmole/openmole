@@ -31,8 +31,12 @@ public class BatchServiceControl implements IBatchServiceControl {
     Map<IBatchServiceDescription, IBatchServiceController> ressources = Collections.synchronizedMap(new TreeMap<IBatchServiceDescription, IBatchServiceController>());
 
     @Override
-    public void registerRessouce(IBatchServiceDescription ressource, IUsageControl usageControl, IFailureControl failureControl) {
-        ressources.put(ressource, new BatchServiceController(usageControl, failureControl));
+    public synchronized void registerRessouce(IBatchServiceDescription ressource, IUsageControl usageControl, IFailureControl failureControl) {
+        if(!contains(ressource)) {
+            ressources.put(ressource, new BatchServiceController(usageControl, failureControl));
+        } else {
+            getController(ressource).getFailureControl().reinit();
+        }       
     }
 
     @Override

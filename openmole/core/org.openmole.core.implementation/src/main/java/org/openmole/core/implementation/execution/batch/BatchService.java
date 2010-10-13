@@ -38,14 +38,8 @@ public abstract class BatchService<ENV extends IBatchEnvironment, AUTH extends I
     final private IBatchServiceAuthenticationKey<? extends AUTH> key;
 
     public BatchService(ENV batchEnvironment, IBatchServiceAuthenticationKey<? extends AUTH> key, AUTH authentication, IBatchServiceDescription description, IUsageControl usageControl, IFailureControl failureControl) throws InternalProcessingError, UserBadDataError, InterruptedException {
-
         Activator.getBatchEnvironmentAuthenticationRegistry().initAndRegisterIfNotAllreadyIs(key, authentication);
-        
-        if(!Activator.getBatchRessourceControl().contains(description)) {
-            Activator.getBatchRessourceControl().registerRessouce(description, usageControl, failureControl);
-        } else {
-            Activator.getBatchRessourceControl().getController(description).getFailureControl().reinit();
-        }
+        Activator.getBatchRessourceControl().registerRessouce(description, usageControl, failureControl);
         
         this.description = description;
         this.batchEnvironment = batchEnvironment;
@@ -58,7 +52,7 @@ public abstract class BatchService<ENV extends IBatchEnvironment, AUTH extends I
     }
 
     @Override
-    public ENV getBatchExecutionEnvironment() {
+    public ENV getEnvironment() {
         return batchEnvironment;
     }
 

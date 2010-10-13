@@ -28,8 +28,8 @@ import org.openmole.core.implementation.mole.SubMoleExecution;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.core.implementation.tools.ClonningService;
 import org.openmole.core.model.data.IVariable;
-import org.openmole.core.model.plan.IExploredPlan;
-import org.openmole.core.model.plan.IFactorValues;
+import org.openmole.core.model.sampler.ISample;
+import org.openmole.core.model.sampler.IValues;
 import org.openmole.core.model.job.IContext;
 import org.openmole.core.model.transition.IExplorationTransition;
 import org.openmole.core.model.transition.IGenericTransition;
@@ -54,17 +54,17 @@ public class ExplorationTransition extends GenericTransition<IExplorationTaskCap
         IRegistryWithTicket<IGenericTransition, IContext> registry = moleExecution.getLocalCommunication().getTransitionRegistry();
         registry.register(this, ticket, context);
 
-        IExploredPlan values = context.getValue(ExplorationTask.ExploredPlan.getPrototype());
+        ISample values = context.getValue(ExplorationTask.ExploredPlan.getPrototype());
         context.removeVariable(ExplorationTask.ExploredPlan.getPrototype().getName());
 
         ISubMoleExecution subSubMole = new SubMoleExecution(moleExecution, subMole);
 
         int size = 0;
 
-        Iterator<IFactorValues> factorIt = values.iterator();
+        Iterator<IValues> factorIt = values.iterator();
 
         while(factorIt.hasNext()) {
-            IFactorValues value = factorIt.next();
+            IValues value = factorIt.next();
 
             size++;
             subSubMole.incNbJobInProgress();

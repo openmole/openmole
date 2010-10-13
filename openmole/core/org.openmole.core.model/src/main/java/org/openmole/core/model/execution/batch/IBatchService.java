@@ -23,7 +23,7 @@ public interface IBatchService<ENV extends IBatchEnvironment, AUTH extends IBatc
 
     IBatchServiceDescription getDescription();
 
-    ENV getBatchExecutionEnvironment();
+    ENV getEnvironment();
     
     AUTH getAuthentication();
     

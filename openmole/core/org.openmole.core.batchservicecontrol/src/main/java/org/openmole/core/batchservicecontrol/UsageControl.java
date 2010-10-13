@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.batchservicecontrol;
 
 import java.util.concurrent.TimeUnit;
@@ -28,42 +27,40 @@ import org.openmole.core.model.execution.batch.IAccessTokenPool;
 
 public class UsageControl implements IUsageControl {
 
+    IAccessTokenPool tokenPool;
 
-	IAccessTokenPool tokenPool;
-	
-	public UsageControl(int nbAccess) {
-		super();
-		if(nbAccess != Integer.MAX_VALUE)
-			tokenPool = new AccessTokenPool(nbAccess);
-		else tokenPool = new BotomlessTokenPool();
-	}
+    public UsageControl(int nbAccess) {
+        super();
+        if (nbAccess != Integer.MAX_VALUE) {
+            tokenPool = new AccessTokenPool(nbAccess);
+        } else {
+            tokenPool = new BotomlessTokenPool();
+        }
+    }
 
-	@Override
-	public IAccessToken tryGetToken(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
-		return tokenPool.waitAToken(time, unit);
-	}
-	
-	@Override
-	public IAccessToken waitAToken() throws InterruptedException{
-		return tokenPool.waitAToken();
-	}
+    @Override
+    public IAccessToken tryGetToken(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
+        return tokenPool.waitAToken(time, unit);
+    }
 
-	@Override
-	public IAccessToken getAccessTokenInterruptly() {
-		return tokenPool.getAccessTokenInterruptly();
-	}
-	
-	@ObjectModified(type = resourceReleased)
-	@Override
-	public void releaseToken(IAccessToken token) throws InternalProcessingError, UserBadDataError {
-		tokenPool.releaseToken(token);
-	}
+    @Override
+    public IAccessToken waitAToken() throws InterruptedException {
+        return tokenPool.waitAToken();
+    }
 
-	@Override
-	public int getLoad() {
-		return tokenPool.getLoad();
-	}
-	
-	
+    @Override
+    public IAccessToken getAccessTokenInterruptly() {
+        return tokenPool.getAccessTokenInterruptly();
+    }
 
+    @ObjectModified(type = resourceReleased)
+    @Override
+    public void releaseToken(IAccessToken token) throws InternalProcessingError, UserBadDataError {
+        tokenPool.releaseToken(token);
+    }
+
+    @Override
+    public int getLoad() {
+        return tokenPool.getLoad();
+    }
 }

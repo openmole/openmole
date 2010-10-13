@@ -16,7 +16,12 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -129,11 +134,20 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
         File script;
         script = Activator.getWorkspace().newFile("script", ".sh");
         try {
-            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(inputFile.getLocation(), outputFile.getLocation(), getBatchExecutionEnvironment(), runtime, script);
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(script));
+            try {
+                getEnvironment().getLaunchingScript().generateScript(inputFile.toString(), outputFile.toString(), runtime, getEnvironment().getMemorySizeForRuntime(), os);
+            } finally {
+                os.close();
+            }
+            
+            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(runtime, script, getEnvironment().getAttributes());
             Job job = getJobServiceCache().createJob(jobDescription);
             job.run();
             
             return buildJob(job.getAttribute(Job.JOBID));
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
         } catch (DoesNotExistException ex) {
             throw new InternalProcessingError(ex);
         } catch (IncorrectStateException ex) {
