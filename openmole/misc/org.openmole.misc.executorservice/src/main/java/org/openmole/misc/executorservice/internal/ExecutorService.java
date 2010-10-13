@@ -37,6 +37,7 @@ public class ExecutorService implements IExecutorService {
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
                     t.setDaemon(true);
+                    t.setPriority(Thread.MIN_PRIORITY);
                     return t;
                 }
             };

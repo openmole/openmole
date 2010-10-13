@@ -201,7 +201,7 @@
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
 	<lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
 	<lib.org.apache.commons.cli.version>1.2.0</lib.org.apache.commons.cli.version>
-        <lib.org.codehaus.groovy.version>1.7.4</lib.org.codehaus.groovy.version>
+        <lib.org.codehaus.groovy.version>1.7.5</lib.org.codehaus.groovy.version>
         <lib.org.ogf.saga.version>1.0</lib.org.ogf.saga.version>
         <lib.uk.com.robust-it.cloning.version>1.7.1</lib.uk.com.robust-it.cloning.version>
         <lib.org.nuiton.j2r.version>1.0.0</lib.org.nuiton.j2r.version>
