@@ -16,13 +16,9 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import org.openmole.commons.tools.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.URI;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,8 +64,6 @@ public class JSAGAJobBuilder {
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + tmpScript.getName()});
       
             for(Map.Entry<String, String> entry: attributes.entrySet()) {
-                Logger.getLogger(JSAGAJobBuilder.class.getName()).log(Level.FINE, entry.getKey() + " " + entry.getValue());
-                
                 final String value;
                 
                 if(entry.getKey().equals(CPU_TIME)) {
