@@ -32,7 +32,6 @@ import org.osgi.framework.ServiceReference;
 
 public class Activator implements BundleActivator {
 
-
     static BundleContext context;
     static String JSAGAConfigFile = "jsaga-universe.xml";
     static String JSAGATimeOutFile = "jsaga-timeout.properties";
@@ -46,7 +45,7 @@ public class Activator implements BundleActivator {
         System.setProperty("JSAGA_VAR", getWorkspace().newDir().getAbsolutePath());
         System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl");
 
-        org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
+       // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
         org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.FATAL);
 
         java.net.URL universe = this.getClass().getClassLoader().getResource(JSAGAConfigFile);
