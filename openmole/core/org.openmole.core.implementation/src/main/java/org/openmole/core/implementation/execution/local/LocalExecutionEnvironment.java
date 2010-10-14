@@ -40,7 +40,8 @@ public class LocalExecutionEnvironment extends Environment<IExecutionJob> {
     final static public ConfigurationLocation DefaultNumberOfThreads = new ConfigurationLocation(ConfigGroup, "ThreadNumber");
 
     static {
-        Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(Runtime.getRuntime().availableProcessors()));
+        int halfOfTheCores = Runtime.getRuntime().availableProcessors() / 2;
+        Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(halfOfTheCores > 0?halfOfTheCores:1));
     }
 
     private static LocalExecutionEnvironment instance;
