@@ -28,11 +28,9 @@ import static org.openmole.plugin.environment.jsaga.JSAGAAttributes.*;
 
 public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService> {
     
-    final static ConfigurationLocation DefaultRequieredCPUTime  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredCPUTime");
     final static ConfigurationLocation DefaultRequieredMemory  = new ConfigurationLocation(JSAGAEnvironment.class.getSimpleName(), "RequieredMemory");
 
     static  {
-        Activator.getWorkspace().addToConfigurations(DefaultRequieredCPUTime, "PT12H");
         Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "1024");
     }
 
@@ -52,7 +50,6 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
     
     private void initDefault(Map<String, String> attributes) throws InternalProcessingError {
         if(!attributes.containsKey(MEMORY)) attributes.put(MEMORY, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
-        if(!attributes.containsKey(CPU_TIME)) attributes.put(CPU_TIME, Activator.getWorkspace().getPreference(DefaultRequieredCPUTime));
     }
 
     public Map<String, String> getAttributes() {
