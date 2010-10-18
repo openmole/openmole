@@ -18,10 +18,13 @@ package org.openmole.plugin.environment.jsaga;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -48,6 +51,8 @@ import org.openmole.core.batchservicecontrol.BatchJobServiceDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.aspect.caching.Cachable;
+import org.openmole.commons.tools.io.FileUtil;
+import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.implementation.execution.batch.BatchJobService;
 import org.openmole.core.model.execution.batch.IAccessToken;
 import org.openmole.plugin.environment.jsaga.internal.Activator;
@@ -58,7 +63,7 @@ import org.openmole.core.model.file.IURIFile;
 import org.openmole.core.model.execution.batch.IRuntime;
 import org.openmole.misc.workspace.ConfigurationLocation;
 
-public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchJobService<ENV, AUTH> {
+public abstract class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchServiceAuthentication> extends BatchJobService<ENV, AUTH> {
 
     final static ConfigurationLocation CreationTimout = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "CreationTimout");
     final static ConfigurationLocation TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.class.getSimpleName(), "TestJobDoneTimeOut");
@@ -128,19 +133,19 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
     }
 
     @Override
-    public IBatchJob submit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
+    protected IBatchJob doSubmit(IURIFile inputFile, IURIFile outputFile, IRuntime runtime, IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException {
 
         File script;
         script = Activator.getWorkspace().newFile("script", ".sh");
         try {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(script));
             try {
-                getEnvironment().getLaunchingScript().generateScript(inputFile.toString(), outputFile.toString(), runtime, getEnvironment().getMemorySizeForRuntime(), os);
+                generateScriptString(inputFile.toString(), outputFile.toString(), runtime, getEnvironment().getMemorySizeForRuntime(), os);
             } finally {
                 os.close();
             }
-            
-            JobDescription jobDescription = JSAGAJobBuilder.GetInstance().getJobDescription(runtime, script, getEnvironment().getAttributes());
+                      
+            JobDescription jobDescription = buildJobDescription(runtime, script, getEnvironment().getAttributes());
             Job job = getJobServiceCache().createJob(jobDescription);
             job.run();
             
@@ -203,5 +208,11 @@ public class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends IBatchSe
     protected JSAGAJob buildJob(String id) throws InternalProcessingError {
         return new JSAGAJob(id, this);
     }
+    
+    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
+        return JSAGAJobBuilder.GetInstance().getJobDescription(runtime, script, attributes);
+    }
+    
+    protected abstract void generateScriptString (String in, String out, IRuntime runtime, int memorySizeForRuntime, OutputStream os) throws IOException, InternalProcessingError;
     
 }

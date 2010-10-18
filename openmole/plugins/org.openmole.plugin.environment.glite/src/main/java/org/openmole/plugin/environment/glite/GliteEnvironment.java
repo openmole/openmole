@@ -20,7 +20,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent;
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy;
-import org.openmole.plugin.environment.glite.internal.GliteLaunchingScript;
 import org.openmole.plugin.environment.glite.internal.WorkloadOnAverages;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -223,13 +222,6 @@ public class GliteEnvironment extends JSAGAEnvironment {
         Integer minJobs = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionMinJob);
         Integer numberOfJobUnderMin = Activator.getWorkspace().getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin);
         Activator.getUpdater().registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval);
-    }
-
-
-    @Cachable
-    @Override
-    public IJSAGALaunchingScript getLaunchingScript() {
-        return new GliteLaunchingScript(this);
     }
 
     public String getVOName() {

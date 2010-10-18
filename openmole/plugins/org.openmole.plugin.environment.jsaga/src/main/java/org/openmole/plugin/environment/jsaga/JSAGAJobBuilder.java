@@ -16,9 +16,12 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,10 +62,10 @@ public class JSAGAJobBuilder {
             JobDescription description = JobFactory.createJobDescription();
 
             description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
-            
+   
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
-            description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + tmpScript.getName()});
-      
+            description.setVectorAttribute(JobDescription.FILETRANSFER, new String[] {tmpScript.toURI().toURL() + ">" + tmpScript.getName()});
+            
             for(Map.Entry<String, String> entry: attributes.entrySet()) {
                 final String value;
                 

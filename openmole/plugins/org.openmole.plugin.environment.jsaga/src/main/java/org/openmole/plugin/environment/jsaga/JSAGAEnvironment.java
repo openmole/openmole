@@ -56,5 +56,4 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
         return attributes;
     }
     
-    abstract public IJSAGALaunchingScript getLaunchingScript();
 }
