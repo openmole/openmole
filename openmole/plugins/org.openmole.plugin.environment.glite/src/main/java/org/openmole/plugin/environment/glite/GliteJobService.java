@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;
@@ -141,6 +142,9 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
             }
 
             String requirement = attributes.get(GliteAttributes.values()[i].value);
+            
+            Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
+            
             if (requirement != null) {
                 requirements.append(GliteAttributes.values()[i].value);
                 requirements.append(requirement);
