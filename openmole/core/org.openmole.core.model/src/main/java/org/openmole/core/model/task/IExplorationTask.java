@@ -18,7 +18,7 @@
 package org.openmole.core.model.task;
 
 import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.sampler.ISampler;
+import org.openmole.core.model.sampling.ISampling;
 
 /**
  *
@@ -34,5 +34,5 @@ public interface IExplorationTask extends IGenericTask {
      *
      * @return the plan used by this exploration task
      */
-    ISampler getPlan();
+    ISampling getPlan();
 }

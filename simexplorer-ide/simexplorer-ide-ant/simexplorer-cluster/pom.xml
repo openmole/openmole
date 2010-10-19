@@ -113,17 +113,17 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.complete</artifactId>
+            <artifactId>org.openmole.plugin.sampling.complete</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.lhs</artifactId>
+            <artifactId>org.openmole.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.plugin.sampler.csv</artifactId>
+            <artifactId>org.openmole.plugin.sampling.csv</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

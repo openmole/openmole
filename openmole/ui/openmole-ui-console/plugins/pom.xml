@@ -139,25 +139,25 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.csv</artifactId>
+            <artifactId>org.openmole.plugin.sampling.csv</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.complete</artifactId>
+            <artifactId>org.openmole.plugin.sampling.complete</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.lhs</artifactId>
+            <artifactId>org.openmole.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.combine</artifactId>
+            <artifactId>org.openmole.plugin.sampling.combine</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -181,7 +181,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.sampler.filter</artifactId>
+            <artifactId>org.openmole.plugin.sampling.filter</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

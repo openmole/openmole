@@ -49,11 +49,11 @@ import org.openmole.core.implementation.mole.FixedEnvironmentSelection;
 import org.openmole.core.model.mole.IEnvironmentSelection;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.core.implementation.mole.MoleExecution;
-import org.openmole.core.implementation.sampler.Factor;
+import org.openmole.core.implementation.sampling.Factor;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.mole.IMoleExecution;
-import org.openmole.core.model.sampler.IFactor;
-import org.openmole.core.model.sampler.ISampler;
+import org.openmole.core.model.sampling.IFactor;
+import org.openmole.core.model.sampling.ISampling;
 
 /**
  *
@@ -316,7 +316,7 @@ public class Builder {
          * @throws UserBadDataError
          * @throws InternalProcessingError
          */
-        public IExplorationTask buildExplorationTask(String name, ISampler sampler) throws UserBadDataError, InternalProcessingError {
+        public IExplorationTask buildExplorationTask(String name, ISampling sampler) throws UserBadDataError, InternalProcessingError {
             return new ExplorationTask(name, sampler);
         }
 
@@ -332,7 +332,7 @@ public class Builder {
          * @throws InternalProcessingError
          */
         public IExplorationTask buildExplorationTask(String name,
-                ISampler sampler,
+                ISampling sampler,
                 IDataSet input) throws UserBadDataError, InternalProcessingError {
             ExplorationTask explo = new ExplorationTask(name, sampler);
             explo.addInput(input);

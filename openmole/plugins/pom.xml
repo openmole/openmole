@@ -39,11 +39,11 @@
         <module>org.openmole.plugin.domain.groovy</module>
 	<module>org.openmole.plugin.domain.collection</module>
 	<module>org.openmole.plugin.domain.file</module>
-        <module>org.openmole.plugin.sampler.csv</module>
-        <module>org.openmole.plugin.sampler.complete</module>
-        <module>org.openmole.plugin.sampler.lhs</module>
-        <module>org.openmole.plugin.sampler.combine</module>
-        <module>org.openmole.plugin.sampler.filter</module>
+        <module>org.openmole.plugin.sampling.csv</module>
+        <module>org.openmole.plugin.sampling.complete</module>
+        <module>org.openmole.plugin.sampling.lhs</module>
+        <module>org.openmole.plugin.sampling.combine</module>
+        <module>org.openmole.plugin.sampling.filter</module>
         <module>org.openmole.plugin.profiler.csv</module>
     </modules>
 
