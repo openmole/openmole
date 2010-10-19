@@ -16,9 +16,6 @@
  */
 package org.openmole.plugin.environment.jsaga;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;

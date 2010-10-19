@@ -66,16 +66,16 @@ public class JSAGAJobBuilder {
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[] {tmpScript.toURI().toURL() + ">" + tmpScript.getName()});
             
-            for(Map.Entry<String, String> entry: attributes.entrySet()) {
-                final String value;
+            for(JSAGAAttributes attribute: JSAGAAttributes.values()) {
+                String value = attributes.get(attribute.value);
                 
-                if(entry.getKey().equals(CPU_TIME)) {
-                     value = new Integer(ISOPeriodFormat.standard().parsePeriod(entry.getValue()).toStandardSeconds().getSeconds()).toString();
-                } else value = entry.getValue();
+                if(attribute.value.equals(CPU_TIME.value)) {
+                     value = new Integer(ISOPeriodFormat.standard().parsePeriod(value).toStandardSeconds().getSeconds()).toString();
+                }
                   
-                description.setAttribute(entry.getKey(), value);
+                description.setAttribute(attribute.value, value);
             }
-                
+
             return description;
 
         } catch (IOException e) {

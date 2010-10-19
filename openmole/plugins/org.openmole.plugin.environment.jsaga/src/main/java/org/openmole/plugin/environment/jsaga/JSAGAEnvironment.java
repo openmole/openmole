@@ -49,7 +49,7 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
     }
     
     private void initDefault(Map<String, String> attributes) throws InternalProcessingError {
-        if(!attributes.containsKey(MEMORY)) attributes.put(MEMORY, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
+        if(!attributes.containsKey(MEMORY.value)) attributes.put(MEMORY.value, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
     }
 
     public Map<String, String> getAttributes() {

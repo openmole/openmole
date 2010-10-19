@@ -17,10 +17,24 @@
 
 package org.openmole.plugin.environment.glite;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ogf.saga.error.AuthenticationFailedException;
+import org.ogf.saga.error.AuthorizationFailedException;
+import org.ogf.saga.error.BadParameterException;
+import org.ogf.saga.error.DoesNotExistException;
+import org.ogf.saga.error.IncorrectStateException;
+import org.ogf.saga.error.NoSuccessException;
+import org.ogf.saga.error.NotImplementedException;
+import org.ogf.saga.error.PermissionDeniedException;
+import org.ogf.saga.error.TimeoutException;
+import org.ogf.saga.job.JobDescription;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IRuntime;
@@ -112,4 +126,45 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
         return timeOut;
     }
 
+    @Override
+    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
+        try {
+            JobDescription description = super.buildJobDescription(runtime, script, attributes);
+            
+            StringBuilder requirements = new StringBuilder();
+            int i = 0;
+            
+            while(i < GliteAttributes.values().length - 1) {
+                requirements.append(attributes.get(GliteAttributes.values()[i].value));
+                requirements.append("&&");   
+                i++;
+            }
+            
+            requirements.append(attributes.get(GliteAttributes.values()[i].value));
+            description.setVectorAttribute("ServiceAttributes", new String[]{"wms.requirements", requirements.toString()});
+
+            return description;
+        } catch (NotImplementedException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (AuthenticationFailedException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (AuthorizationFailedException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (PermissionDeniedException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (IncorrectStateException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (BadParameterException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (DoesNotExistException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (TimeoutException ex) {
+            throw new InternalProcessingError(ex);
+        } catch (NoSuccessException ex) {
+            throw new InternalProcessingError(ex);
+        }
+    }
+
+    
+    
 }
