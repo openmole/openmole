@@ -56,7 +56,7 @@ public class JSAGAJobBuilder {
     }
     JobDescription hello;
 
-    public JobDescription getJobDescription(IRuntime runtime, File tmpScript, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
+    public JobDescription getJobDescription(IRuntime runtime, File tmpScript, Map<Enum, String> attributes) throws InternalProcessingError, InterruptedException {
         try {
 
             JobDescription description = JobFactory.createJobDescription();
@@ -66,12 +66,8 @@ public class JSAGAJobBuilder {
             description.setVectorAttribute(JobDescription.ARGUMENTS, new String[]{tmpScript.getName()});
             description.setVectorAttribute(JobDescription.FILETRANSFER, new String[]{tmpScript.toURI().toURL() + ">" + tmpScript.getName()});
 
-            for(Map.Entry<String, String> e: attributes.entrySet()) {
-                Logger.getLogger(JSAGAJobBuilder.class.getName()).info(e.getKey() + " "+ e.getValue());
-            }
-            
             for (JSAGAAttributes attribute : JSAGAAttributes.values()) {
-                String value = attributes.get(attribute.value);
+                String value = attributes.get(attribute);
                 
                 Logger.getLogger(JSAGAJobBuilder.class.getName()).info(attribute.value + " "  + value);
                 

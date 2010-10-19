@@ -34,25 +34,25 @@ public abstract class JSAGAEnvironment extends BatchEnvironment<JSAGAJobService>
         Activator.getWorkspace().addToConfigurations(DefaultRequieredMemory, "1024");
     }
 
-    final private Map<String, String> attributes;
+    final private Map<Enum, String> attributes;
 
-    public JSAGAEnvironment(Map<String, String> attributes) throws InternalProcessingError {
+    public JSAGAEnvironment(Map<Enum, String> attributes) throws InternalProcessingError {
         super();    
         initDefault(attributes);
         this.attributes = attributes;
     }
 
-    public JSAGAEnvironment(int requieredMemory, Map<String, String> attributes) throws InternalProcessingError {
+    public JSAGAEnvironment(int requieredMemory, Map<Enum, String> attributes) throws InternalProcessingError {
         super(requieredMemory);       
         initDefault(attributes);
         this.attributes = attributes;
     }
     
-    private void initDefault(Map<String, String> attributes) throws InternalProcessingError {
-        if(!attributes.containsKey(MEMORY.value)) attributes.put(MEMORY.value, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
+    private void initDefault(Map<Enum, String> attributes) throws InternalProcessingError {
+        if(!attributes.containsKey(MEMORY)) attributes.put(MEMORY, Activator.getWorkspace().getPreference(DefaultRequieredMemory));
     }
 
-    public Map<String, String> getAttributes() {
+    public Map<Enum, String> getAttributes() {
         return attributes;
     }
     
