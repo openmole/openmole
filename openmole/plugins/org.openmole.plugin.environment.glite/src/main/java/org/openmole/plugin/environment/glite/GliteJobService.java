@@ -133,6 +133,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
             while (i < GliteAttributes.values().length - 1) {
                 String requirement = attributes.get(GliteAttributes.values()[i].value);
                 if (requirement != null) {
+                    requirements.append(GliteAttributes.values()[i].value);
                     requirements.append(requirement);
                     requirements.append("&&");
                 }
@@ -141,6 +142,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
 
             String requirement = attributes.get(GliteAttributes.values()[i].value);
             if (requirement != null) {
+                requirements.append(GliteAttributes.values()[i].value);
                 requirements.append(requirement);
             }
 
