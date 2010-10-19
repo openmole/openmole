@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.environment.glite;
 
 import java.io.File;
@@ -23,8 +22,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ogf.saga.error.AuthenticationFailedException;
 import org.ogf.saga.error.AuthorizationFailedException;
 import org.ogf.saga.error.BadParameterException;
@@ -56,8 +53,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
     static {
         Activator.getWorkspace().addToConfigurations(LCGCPTimeOut, "PT2M");
     }
-    
-    
+
     public GliteJobService(URI jobServiceURI, GliteEnvironment environment, GliteAuthenticationKey authenticationKey, GliteAuthentication authentication, int nbAccess) throws InternalProcessingError, UserBadDataError, InterruptedException {
         super(jobServiceURI, environment, authenticationKey, authentication, nbAccess);
     }
@@ -70,18 +66,18 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
     @Override
     protected void generateScriptString(String in, String out, IRuntime runtime, int memorySizeForRuntime, OutputStream os) throws IOException, InternalProcessingError {
         PrintStream writter = new PrintStream(os);
-        
+
         writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ");
         writter.print(mkLcgCpGunZipCmd(getEnvironment(), runtime.getRuntime().getLocationString(), "$PWD/openmole.tar.bz2"));
         writter.print(" tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; ");
         writter.print("mkdir envplugins; PLUGIN=0;");
 
-        for(IURIFile plugin: runtime.getEnvironmentPlugins()) {
+        for (IURIFile plugin : runtime.getEnvironmentPlugins()) {
             writter.print(mkLcgCpGunZipCmd(getEnvironment(), plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"));
             writter.print("PLUGIN=`expr $PLUGIN + 1`; ");
         }
 
-        writter.print(mkLcgCpGunZipCmd(getEnvironment(), runtime.getEnvironmentAuthenticationFile().getLocationString(),"$CUR/authentication.xml"));
+        writter.print(mkLcgCpGunZipCmd(getEnvironment(), runtime.getEnvironmentAuthenticationFile().getLocationString(), "$CUR/authentication.xml"));
 
         writter.print("cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ");
         writter.print(Integer.toString(memorySizeForRuntime));
@@ -95,7 +91,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
         writter.print(" -w $CUR ; cd .. ; rm -rf $CUR");
 
     }
-    
+
     String mkLcgCpGunZipCmd(GliteEnvironment env, String from, String to) throws InternalProcessingError {
         StringBuilder builder = new StringBuilder();
 
@@ -120,7 +116,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
         String cp = builder.toString();
         return cp;
     }
-    
+
     private String getTimeOut() throws InternalProcessingError {
         String timeOut = new Integer(Activator.getWorkspace().getPreferenceAsDurationInS(LCGCPTimeOut)).toString();
         return timeOut;
@@ -130,17 +126,24 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
     protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
         try {
             JobDescription description = super.buildJobDescription(runtime, script, attributes);
-            
+
             StringBuilder requirements = new StringBuilder();
             int i = 0;
-            
-            while(i < GliteAttributes.values().length - 1) {
-                requirements.append(attributes.get(GliteAttributes.values()[i].value));
-                requirements.append("&&");   
+
+            while (i < GliteAttributes.values().length - 1) {
+                String requirement = attributes.get(GliteAttributes.values()[i].value);
+                if (requirement != null) {
+                    requirements.append(requirement);
+                    requirements.append("&&");
+                }
                 i++;
             }
-            
-            requirements.append(attributes.get(GliteAttributes.values()[i].value));
+
+            String requirement = attributes.get(GliteAttributes.values()[i].value);
+            if (requirement != null) {
+                requirements.append(requirement);
+            }
+
             description.setVectorAttribute("ServiceAttributes", new String[]{"wms.requirements", requirements.toString()});
 
             return description;
@@ -164,7 +167,4 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
             throw new InternalProcessingError(ex);
         }
     }
-
-    
-    
 }
