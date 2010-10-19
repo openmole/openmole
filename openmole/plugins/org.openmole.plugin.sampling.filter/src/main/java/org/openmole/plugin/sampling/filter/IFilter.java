@@ -15,21 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition;
+package org.openmole.plugin.sampling.filter;
 
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.sampling.ISample;
+import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.sampling.IValues;
 
-/**
- *
- * A transition from a {@link IExplorationTaskCapsule} to a {@link IGenericTaskCapsule}.
- * It create one {@link IMoleJob} for each {@link IFactorValues} of the {@link IExploredPlan}
- * built from the starting {@link IExplorationTaskCapsule}.
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public interface IExplorationTransition extends IGenericTransition<IExplorationTaskCapsule> {
-
+public interface IFilter {
+	boolean accept(IValues factorsValues) throws UserBadDataError, InternalProcessingError;
 }

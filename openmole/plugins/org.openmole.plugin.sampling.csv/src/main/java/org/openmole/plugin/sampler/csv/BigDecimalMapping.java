@@ -1,6 +1,5 @@
-
 /*
- *  Copyright (C) 2010 Romain Reuillon
+ *  Copyright (C) 2010 leclaire
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
@@ -15,24 +14,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.model.task;
+package org.openmole.plugin.sampling.csv;
 
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.sampling.ISampling;
+import java.math.BigDecimal;
 
 /**
  *
- * The interface representing a task for exploring a space of parameter. This task is contained in a {@link IExplorationTaskCapsule}.
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author Mathieu Leclaire <mathieu.leclaire@iscpif.fr>
  */
-public interface IExplorationTask extends IGenericTask {
+public class BigDecimalMapping implements IStringMapping {
 
-    /**
-     *
-     * Get the plan explored by this exploration task.
-     *
-     * @return the plan used by this exploration task
-     */
-    ISampling getPlan();
+    @Override
+    public Object convert(String stringToBeConverted) {
+        return new BigDecimal(stringToBeConverted);
+    }
 }

@@ -24,7 +24,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import org.openide.util.lookup.ServiceProvider;
 import org.simexplorer.core.workflow.methods.EditorPanel;
-import org.openmole.plugin.sampler.lhs.LHSPlan;
+import org.openmole.plugin.sampling.lhs.LHSPlan;
 
 @ServiceProvider(service=EditorPanel.class)
 public class LHSPlanPanel extends EditorPanel<LHSPlan> {

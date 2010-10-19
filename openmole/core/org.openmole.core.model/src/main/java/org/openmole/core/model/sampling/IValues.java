@@ -14,22 +14,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.model.sampling;
 
-package org.openmole.core.model.transition;
+import org.openmole.core.model.data.IPrototype;
 
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
-import org.openmole.core.model.job.IMoleJob;
-import org.openmole.core.model.sampling.ISample;
-import org.openmole.core.model.sampling.IValues;
+public interface IValues {
 
-/**
- *
- * A transition from a {@link IExplorationTaskCapsule} to a {@link IGenericTaskCapsule}.
- * It create one {@link IMoleJob} for each {@link IFactorValues} of the {@link IExploredPlan}
- * built from the starting {@link IExplorationTaskCapsule}.
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
-public interface IExplorationTransition extends IGenericTransition<IExplorationTaskCapsule> {
+    <T> T getValue(IPrototype<? super T> factorPrototype);
 
+    Object getValue(String name);
+
+    Iterable<String> getNames();
 }
