@@ -206,7 +206,7 @@ public class Serializer implements ISerializer {
             DeserializerWithFileInjectionFromPathHash deserializer = DeserializerWithFileInjectionFromPathHashFactory.instance.borrowObject();
             try {
                 deserializer.setFiles(files);
-                return deserializer.fromXMLInjectFiles(it);
+                return deserializer.<T>fromXMLInjectFiles(it);
             } finally {
                 DeserializerWithFileInjectionFromPathHashFactory.instance.returnObject(deserializer);
             }
