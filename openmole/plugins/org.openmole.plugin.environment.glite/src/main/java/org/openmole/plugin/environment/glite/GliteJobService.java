@@ -129,6 +129,8 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
             JobDescription description = super.buildJobDescription(runtime, script, attributes);
 
             StringBuilder requirements = new StringBuilder();
+            requirements.append("JDLRequirements=(");
+            
             int i = 0;
 
             while (i < GliteAttributes.values().length - 1) {
@@ -143,14 +145,16 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
 
             String requirement = attributes.get(GliteAttributes.values()[i]);
             
-            Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
+            //Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
             
             if (requirement != null) {
                 requirements.append(GliteAttributes.values()[i].value);
                 requirements.append(requirement);
             }
 
-            description.setVectorAttribute("ServiceAttributes", new String[]{"wms.requirements", requirements.toString()});
+            requirements.append(')');
+            
+            description.setVectorAttribute("Extension", new String[]{requirements.toString()});
 
             return description;
         } catch (NotImplementedException ex) {
