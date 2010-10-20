@@ -47,7 +47,7 @@ public class Serializer implements ISerializer {
         try {
             InputStream is = new FileInputStream(file);
             try {
-                return (T) deserialize(is);
+                return (T) this.<T>deserialize(is);
             } finally {
                 is.close();
             }
