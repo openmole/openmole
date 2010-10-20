@@ -16,6 +16,7 @@
  */
 package org.openmole.runtime;
 
+import java.util.Collection;
 import scala.Tuple2;
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
@@ -63,7 +64,6 @@ import org.openmole.core.implementation.message.ContextResults;
 import org.openmole.core.implementation.message.FileMessage;
 import org.openmole.core.model.message.IContextResults;
 import org.openmole.core.model.message.IFileMessage;
-import org.openmole.core.serializer.ISerializationResult;
 
 import static org.openmole.commons.tools.service.Retry.retry;
 
@@ -229,7 +229,7 @@ public class SimExplorer implements IApplication {
                 IContextResults contextResults = new ContextResults(saver.getResults());
                 final File contextResultFile = Activator.getWorkspace().newFile();
 
-                final ISerializationResult serializationResult = Activator.getSerialiser().serializeAndGetPluginClassAndFiles(contextResults, contextResultFile);
+                final Tuple2<Collection<File>, Collection<Class>> serializationResult = Activator.getSerialiser().serializeGetPluginClassAndFiles(contextResults, contextResultFile);
 
                 final IURIFile uploadedcontextResults = new GZURIFile(executionMessage.getCommunicationDir().newFileInDir("uplodedTar", ".tgz"));
 
@@ -253,10 +253,10 @@ public class SimExplorer implements IApplication {
                 tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
                 
-                if (!serializationResult.getFiles().isEmpty()) {
+                if (!serializationResult._1.isEmpty()) {
                     
                     try {
-                        for (File file : serializationResult.getFiles()) {
+                        for (File file : serializationResult._1) {
                             StringInputStream is = new StringInputStream(file.getCanonicalPath());
 
                             IHash hash;

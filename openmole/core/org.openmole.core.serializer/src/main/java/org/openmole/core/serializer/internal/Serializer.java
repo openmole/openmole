@@ -16,6 +16,7 @@
  */
 package org.openmole.core.serializer.internal;
 
+import scala.Tuple2;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import java.io.File;
@@ -24,10 +25,11 @@ import org.openmole.commons.tools.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.serializer.ISerializationResult;
+import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.serializer.ISerializer;
 import static org.openmole.commons.tools.io.FileUtil.*;
 
@@ -63,24 +65,37 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj, File dir) throws InternalProcessingError, UserBadDataError {
+    public Tuple2<Map<File, IHash>, Collection<Class>> serializeFilePathAsHashGetPluginClassAndFiles(Object obj, File dir) throws InternalProcessingError, UserBadDataError {
         try {
-            File serialized = Activator.getWorkspace().newFile();
-            ISerializationResult ret = serializeAndGetPluginClassAndFiles(obj, serialized);
-            File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
-            move(serialized, hashName);
-            return ret;
-        } catch (IOException ex) {
+            SerializerWithPathHashInjectionAndPluginListing serializer = SerializerWithPathHashInjectionAndPluginListingFactory.instance.borrowObject();
+            try {
+                File serialized = Activator.getWorkspace().newFile();
+
+                OutputStream os = new FileOutputStream(serialized);
+                try {
+                    serializer.toXMLAndListPlugableClasses(obj, os);
+                } finally {
+                    os.close();
+                }
+
+                File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
+                move(serialized, hashName);
+
+                return new Tuple2<Map<File, IHash>, Collection<Class>>(serializer.getFiles(), serializer.getClasses());
+            } finally {
+                SerializerWithPathHashInjectionAndPluginListingFactory.instance.returnObject(serializer);
+            }
+        } catch (Exception ex) {
             throw new InternalProcessingError(ex);
         }
     }
 
     @Override
-    public ISerializationResult serializeAndGetPluginClassAndFiles(Object obj, File file) throws InternalProcessingError {
+    public Tuple2<Collection<File>, Collection<Class>> serializeGetPluginClassAndFiles(Object obj, File file) throws InternalProcessingError {
         try {
             OutputStream os = new FileOutputStream(file);
             try {
-                return serializeAndGetPluginClassAndFiles(obj, os);
+                return serializeGetPluginClassAndFiles(obj, os);
             } finally {
                 os.close();
             }
@@ -90,14 +105,14 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public ISerializationResult serializeAndGetPluginClassAndFiles(Object obj, OutputStream os) throws InternalProcessingError {
+    public Tuple2<Collection<File>, Collection<Class>> serializeGetPluginClassAndFiles(Object obj, OutputStream os) throws InternalProcessingError {
         try {
-            SerializerWithFileAndPluginListing serializer = SerializerFactory.borrowObject();
+            SerializerWithFileAndPluginListing serializer = SerializerWithFileAndPluginListingFactory.instance.borrowObject();
             try {
                 serializer.toXMLAndListPlugableClasses(obj, os);
-                return new SerializationResult(serializer.getClasses(), serializer.getFiles());
+                return new Tuple2<Collection<File>, Collection<Class>>(serializer.getFiles(), serializer.getClasses());
             } finally {
-                SerializerFactory.returnObject(serializer);
+                SerializerWithFileAndPluginListingFactory.instance.returnObject(serializer);
             }
         } catch (Exception ex) {
             throw new InternalProcessingError(ex);
@@ -122,12 +137,12 @@ public class Serializer implements ISerializer {
     @Override
     public <T> T deserializeReplaceFiles(InputStream is, Map<File, File> files) throws InternalProcessingError, InternalProcessingError {
         try {
-            DeserializerWithFileInjection serializer = DeserializerFactory.borrowObject();
+            DeserializerWithFileInjectionFromFile serializer = DeserializerWithFileInjectionFromFileFactory.instance.borrowObject();
             try {
                 serializer.setFiles(files);
                 return serializer.<T>fromXMLInjectFiles(is);
             } finally {
-                DeserializerFactory.returnObject(serializer);
+                DeserializerWithFileInjectionFromFileFactory.instance.returnObject(serializer);
             }
         } catch (Exception ex) {
             throw new InternalProcessingError(ex);
@@ -165,6 +180,35 @@ public class Serializer implements ISerializer {
             File hashName = new File(dir, Activator.getHashService().computeHash(serialized).toString());
             move(serialized, hashName);
         } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
+    }
+
+    @Override
+    public <T> T deserializeReplacePathHash(File file, Map<IHash, File> files) throws InternalProcessingError {
+        try {
+            InputStream is = new FileInputStream(file);
+            try {
+                return this.<T>deserializeReplacePathHash(is, files);
+            } finally {
+                is.close();
+            }
+        } catch (IOException ex) {
+            throw new InternalProcessingError(ex);
+        }
+    }
+
+    @Override
+    public <T> T deserializeReplacePathHash(InputStream it, Map<IHash, File> files) throws InternalProcessingError {
+        try {
+            DeserializerWithFileInjectionFromPathHash deserializer = DeserializerWithFileInjectionFromPathHashFactory.instance.borrowObject();
+            try {
+                deserializer.setFiles(files);
+                return deserializer.fromXMLInjectFiles(it);
+            } finally {
+                DeserializerWithFileInjectionFromPathHashFactory.instance.returnObject(deserializer);
+            }
+        } catch (Exception ex) {
             throw new InternalProcessingError(ex);
         }
     }

@@ -17,10 +17,32 @@
 
 package org.openmole.core.serializer.internal;
 
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.converters.extended.FileConverter;
+import java.io.File;
+import java.io.IOException;
+
 /**
  *
  * @author reuillon
  */
-public interface FileToHashConverter {
+public class FilePathHashNotifier extends FileConverter {
 
+    final SerializerWithPathHashInjectionAndPluginListing serializer;
+    
+    public FilePathHashNotifier(SerializerWithPathHashInjectionAndPluginListing serializer) {
+        this.serializer = serializer;
+    }
+
+    @Override
+    public String toString(Object obj) {
+        File file = (File) obj;
+        try {
+            return serializer.fileUsed(file).toString();
+        } catch (IOException ex) {
+            throw new XStreamException(ex);
+        }
+
+    }
+    
 }

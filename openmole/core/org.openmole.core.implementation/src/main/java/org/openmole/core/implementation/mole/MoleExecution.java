@@ -218,11 +218,9 @@ public class MoleExecution implements IMoleExecution {
 
     class Submiter implements Runnable {
 
-        boolean stop = false;
-
         @Override
         public void run() {
-            while (!stop) {
+            while (true) {
                 Tuple2<IJob, IEnvironment> p;
                 try {
                     p = jobs.take();
@@ -313,6 +311,8 @@ public class MoleExecution implements IMoleExecution {
 
         //inProgress.remove(job);
 
+        LOGGER.log(Level.INFO, "Nb in progress {0}", inProgress.size());
+        
         if (isFinished()) {
             getSubmiter().interrupt();
             Object[] args = {job};

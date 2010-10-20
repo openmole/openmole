@@ -17,10 +17,29 @@
 
 package org.openmole.core.serializer.internal;
 
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.converters.extended.FileConverter;
+import java.io.File;
+import org.openmole.commons.tools.io.IHash;
+
 /**
  *
  * @author reuillon
  */
-public class SerializerWithHashInjectionPluginAndFileListing {
+public class FilePathHashInjecter extends FileConverter {
 
+    final DeserializerWithFileInjectionFromPathHash deserializer;
+
+    public FilePathHashInjecter(DeserializerWithFileInjectionFromPathHash deserializer) {
+        this.deserializer = deserializer;
+    }
+
+    @Override
+    public Object fromString(String str) {
+        IHash hash = (IHash) super.fromString(str);
+        File ret = deserializer.getMatchingFile(hash);
+        if(ret == null) throw new XStreamException("No matching file for " + hash.toString());
+        return ret;
+    }
+    
 }

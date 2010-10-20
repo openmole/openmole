@@ -18,12 +18,15 @@
 package org.openmole.core.serializer;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.io.IHash;
+import scala.Tuple2;
 
 /**
  *
@@ -31,17 +34,20 @@ import org.openmole.commons.exception.UserBadDataError;
  */
 public interface ISerializer {
 
-  ISerializationResult serializeAsHashAndGetPluginClassAndFiles(Object obj,File dir) throws InternalProcessingError, UserBadDataError;
-  ISerializationResult serializeAndGetPluginClassAndFiles(Object obj,File file) throws InternalProcessingError;
-  ISerializationResult serializeAndGetPluginClassAndFiles(Object obj, OutputStream os) throws InternalProcessingError;    
+  Tuple2<Map<File, IHash>, Collection<Class>> serializeFilePathAsHashGetPluginClassAndFiles(Object obj, File file) throws InternalProcessingError, UserBadDataError;
   
+  Tuple2<Collection<File>, Collection<Class>> serializeGetPluginClassAndFiles(Object obj, File file) throws InternalProcessingError;
+  Tuple2<Collection<File>, Collection<Class>> serializeGetPluginClassAndFiles(Object obj, OutputStream os) throws InternalProcessingError;    
+  
+  <T> T deserializeReplacePathHash(File file, Map<IHash, File> files)  throws InternalProcessingError;
+  <T> T deserializeReplacePathHash(InputStream it, Map<IHash, File> files) throws InternalProcessingError;
+
   <T> T deserializeReplaceFiles(File file, Map<File,File> files)  throws InternalProcessingError;
   <T> T deserializeReplaceFiles(InputStream it, Map<File, File> files) throws InternalProcessingError;
  
   <T> T deserialize(File file) throws InternalProcessingError;
   <T> T deserialize(InputStream is) throws InternalProcessingError;
-    
-  
+
   void serialize(Object obj, File file) throws InternalProcessingError;
   void serialize(Object obj, OutputStream os) throws InternalProcessingError;
     

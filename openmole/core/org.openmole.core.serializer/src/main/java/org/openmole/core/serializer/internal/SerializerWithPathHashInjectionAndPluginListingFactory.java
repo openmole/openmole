@@ -17,33 +17,18 @@
 
 package org.openmole.core.serializer.internal;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.SoftReferenceObjectPool;
 
 /**
  *
  * @author reuillon
  */
-public class SerializerFactory {
+public class SerializerWithPathHashInjectionAndPluginListingFactory extends Factory<SerializerWithPathHashInjectionAndPluginListing> {
     
-    final static private ObjectPool pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
+    static final SerializerWithPathHashInjectionAndPluginListingFactory instance = new SerializerWithPathHashInjectionAndPluginListingFactory();
 
-        @Override
-        public SerializerWithFileAndPluginListing makeObject() throws Exception {
-            return new SerializerWithFileAndPluginListing();
-        }
-
-    });
-
-    static SerializerWithFileAndPluginListing borrowObject() throws Exception {
-        return (SerializerWithFileAndPluginListing) pool.borrowObject();
-    }
-    
-    static void returnObject(SerializerWithFileAndPluginListing serial) throws Exception {
-        serial.clean();
-        pool.returnObject(serial);
+    @Override
+    protected SerializerWithPathHashInjectionAndPluginListing makeObject() throws Exception {
+        return new SerializerWithPathHashInjectionAndPluginListing();
     }
 
-   
 }

@@ -29,7 +29,7 @@ import org.openmole.commons.exception.InternalProcessingError;
  *
  * @author reuillon
  */
-public class SerializerWithPluginClassListing {
+public class SerializerWithPluginClassListing implements ICleanable {
 
     final private XStream xstream = new XStream();
     private Set<Class> classes = null;
@@ -59,7 +59,7 @@ public class SerializerWithPluginClassListing {
         return classes;
     }
 
-    void clean() {
+    public void clean() {
         classes = null;
     }
 }

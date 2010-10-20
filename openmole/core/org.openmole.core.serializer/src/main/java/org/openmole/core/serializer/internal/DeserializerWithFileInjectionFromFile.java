@@ -16,8 +16,6 @@
  */
 package org.openmole.core.serializer.internal;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
@@ -27,31 +25,29 @@ import org.openmole.commons.exception.InternalProcessingError;
  *
  * @author reuillon
  */
-public class DeserializerWithFileInjection {
+public class DeserializerWithFileInjectionFromFile extends Deserializer implements ICleanable {
 
-    final private XStream xstream = new XStream();
     private Map<File, File> files = null;
 
-    DeserializerWithFileInjection() {
-        xstream.registerConverter(new FileConverterInjecter(this));
+    DeserializerWithFileInjectionFromFile() {
+        super();
+        registerConverter(new FileConverterInjecter(this));
     }
 
     void setFiles(Map<File, File> files) {
         this.files = files;
     }
 
+    @Override
     <T> T fromXMLInjectFiles(InputStream is) throws InternalProcessingError {
         if (files == null) {
             throw new InternalProcessingError("File map has not been initialized");
         }
-        try {
-            return (T) xstream.fromXML(is);
-        } catch (XStreamException ex) {
-            throw new InternalProcessingError(ex);
-        }
+        return super.fromXMLInjectFiles(is);
     }
 
-    void clean() {
+    @Override
+    public void clean() {
         files = null;
     }
     

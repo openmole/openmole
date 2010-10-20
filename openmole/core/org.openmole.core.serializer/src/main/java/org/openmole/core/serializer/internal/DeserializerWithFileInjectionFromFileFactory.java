@@ -15,16 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer;
+package org.openmole.core.serializer.internal;
 
-import java.io.File;
-import java.util.Collection;
 
 /**
  *
  * @author reuillon
  */
-public interface ISerializationResult {
-    Collection<Class> getClassesFromPlugin();
-    Collection<File> getFiles();
+public class DeserializerWithFileInjectionFromFileFactory extends Factory<DeserializerWithFileInjectionFromFile>{
+        
+    final static DeserializerWithFileInjectionFromFileFactory instance = new DeserializerWithFileInjectionFromFileFactory();
+    
+    @Override
+    protected DeserializerWithFileInjectionFromFile makeObject() throws Exception {
+        return new DeserializerWithFileInjectionFromFile();
+    }
+
 }

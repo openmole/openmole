@@ -17,33 +17,18 @@
 
 package org.openmole.core.serializer.internal;
 
-import java.io.File;
-import java.util.Collection;
-import org.openmole.core.serializer.ISerializationResult;
 
 /**
  *
  * @author reuillon
  */
-public class SerializationResult implements ISerializationResult {
-
-    final Collection<Class> classesFromPlugin;
-    final Collection<File> files;
-
-    public SerializationResult(Collection<Class> classesFromPlugin, Collection<File> files) {
-        this.classesFromPlugin = classesFromPlugin;
-        this.files = files;
-    }
+public class SerializerWithFileAndPluginListingFactory extends Factory<SerializerWithFileAndPluginListing> {
+    
+    final static SerializerWithFileAndPluginListingFactory instance = new SerializerWithFileAndPluginListingFactory();
 
     @Override
-    public Collection<Class> getClassesFromPlugin() {
-        return classesFromPlugin;
+    protected SerializerWithFileAndPluginListing makeObject() throws Exception {
+        return new SerializerWithFileAndPluginListing();
     }
-
-    @Override
-    public Collection<File> getFiles() {
-        return files;
-    }
-    
-    
+ 
 }

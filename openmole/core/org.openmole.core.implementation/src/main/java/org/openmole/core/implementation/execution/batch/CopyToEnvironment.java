@@ -48,7 +48,6 @@ import org.openmole.core.model.message.IJobForRuntime;
 import org.openmole.core.model.message.IReplicatedFile;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.core.replicacatalog.IReplica;
-import org.openmole.core.serializer.ISerializationResult;
 import org.openmole.misc.filecache.IFileCache;
 import scala.Tuple2;
 /**
@@ -160,7 +159,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
     IExecutionMessage createExecutionMessage(IJobForRuntime jobForRuntime, IAccessToken token, IBatchStorage communicationStorage, IURIFile communicationDir) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
         File jobFile = Activator.getWorkspace().newFile("job", ".xml");
-        ISerializationResult serializationResult = Activator.getSerializer().serializeAndGetPluginClassAndFiles(jobForRuntime, jobFile);
+        Tuple2<Collection<File>, Collection<Class>> serializationResult = Activator.getSerializer().serializeGetPluginClassAndFiles(jobForRuntime, jobFile);
         
         IURIFile jobURIFile = new URIFile(jobFile);
         IURIFile jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"));
@@ -174,7 +173,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
         List<IReplicatedFile> pluginReplicas = new LinkedList<IReplicatedFile>();
 
         
-        for (Class c: serializationResult.getClassesFromPlugin()) {
+        for (Class c: serializationResult._2) {
             for (File f : Activator.getPluginManager().getPluginAndDependanciesForClass(c)) {
                 plugins.add(f);
             }
@@ -187,7 +186,7 @@ class CopyToEnvironment implements Callable<CopyToEnvironmentResult> {
         
         List<IReplicatedFile> files = new LinkedList<IReplicatedFile>();
         
-        for(File file: serializationResult.getFiles()) {
+        for(File file: serializationResult._1) {
             files.add(toReplicatedFile(file, communicationStorage, token));
         }
 

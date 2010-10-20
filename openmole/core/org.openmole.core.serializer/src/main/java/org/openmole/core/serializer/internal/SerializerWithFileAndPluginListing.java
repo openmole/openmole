@@ -16,7 +16,6 @@
  */
 package org.openmole.core.serializer.internal;
 
-import com.thoughtworks.xstream.XStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.Set;
@@ -27,7 +26,7 @@ import org.openmole.commons.exception.InternalProcessingError;
  *
  * @author reuillon
  */
-public class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
+public class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing implements ICleanable {
 
     private Set<File> files = null;
 
@@ -51,7 +50,7 @@ public class SerializerWithFileAndPluginListing extends SerializerWithPluginClas
     }
 
     @Override
-    void clean() {
+    public void clean() {
         super.clean();
         files = null;
     }

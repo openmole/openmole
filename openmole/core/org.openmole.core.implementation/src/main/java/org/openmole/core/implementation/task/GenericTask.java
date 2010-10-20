@@ -105,11 +105,11 @@ public abstract class GenericTask implements IGenericTask {
                 if (p.getType().isAssignableFrom(var.getValue().getClass())) {
                     vars.add(var);
                 } else {
-                    Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " has been found but type doesn't match : " + var.getPrototype().getType().getName() + " in task " + getName() + ".");
+                    Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable {0} of type {1} has been found but type doesn''t match : {2} in task {3}.", new Object[]{p.getName(), p.getType().getName(), var.getPrototype().getType().getName(), getName()});
                 }
             } else {
                 if (!d.getMode().isOptional()) {
-                    Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable " + p.getName() + " of type " + p.getType().getName() + " not found in output of task " + getName() + ".");
+                    Logger.getLogger(GenericTask.class.getName()).log(Level.WARNING, "Variable {0} of type {1} not found in output of task {2}.", new Object[]{p.getName(), p.getType().getName(), getName()});
                 }
             }
         }
