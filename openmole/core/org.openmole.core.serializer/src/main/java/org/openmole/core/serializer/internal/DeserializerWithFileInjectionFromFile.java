@@ -40,14 +40,6 @@ public class DeserializerWithFileInjectionFromFile extends Deserializer implemen
     }
 
     @Override
-    <T> T fromXMLInjectFiles(InputStream is) throws InternalProcessingError {
-        if (files == null) {
-            throw new InternalProcessingError("File map has not been initialized");
-        }
-        return super.fromXMLInjectFiles(is);
-    }
-
-    @Override
     public void clean() {
         files = null;
     }
