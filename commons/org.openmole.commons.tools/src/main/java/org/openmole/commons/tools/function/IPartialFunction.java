@@ -15,35 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.internal;
-
-import java.io.File;
-import org.openmole.commons.tools.function.IPartialFunction;
-import org.openmole.commons.tools.io.IHash;
+package org.openmole.commons.tools.function;
 
 /**
  *
  * @author reuillon
  */
-public class DeserializerWithFileInjectionFromPathHash extends Deserializer {
-
-    private IPartialFunction<IHash, File> files = null;
-
-    DeserializerWithFileInjectionFromPathHash() {
-        super();
-        registerConverter(new FilePathHashInjecter(this));
-    }
-
-    void setFiles(IPartialFunction<IHash, File> files) {
-        this.files = files;
-    }
-
-    @Override
-    public void clean() {
-        files = null;
-    }
-    
-    File getMatchingFile(IHash file) {
-        return files.apply(file);
-    }
+public interface IPartialFunction<A, R> {
+    boolean isDefinedAt(A arg);
+    R apply(A arg);
 }

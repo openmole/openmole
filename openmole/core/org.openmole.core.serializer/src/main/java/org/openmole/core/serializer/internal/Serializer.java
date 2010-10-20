@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.function.IPartialFunction;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.core.serializer.ISerializer;
 import static org.openmole.commons.tools.io.FileUtil.*;
@@ -120,7 +121,7 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public <T> T deserializeReplaceFiles(File file, Map<File, File> files) throws InternalProcessingError, InternalProcessingError, InternalProcessingError {
+    public <T> T deserializeReplaceFiles(File file, IPartialFunction<File, File> files) throws InternalProcessingError, InternalProcessingError, InternalProcessingError {
         try {
             InputStream is = new FileInputStream(file);
             try {
@@ -135,10 +136,11 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public <T> T deserializeReplaceFiles(InputStream is, Map<File, File> files) throws InternalProcessingError, InternalProcessingError {
+    public <T> T deserializeReplaceFiles(InputStream is, IPartialFunction<File, File> files) throws InternalProcessingError, InternalProcessingError {
         try {
             DeserializerWithFileInjectionFromFile serializer = DeserializerWithFileInjectionFromFileFactory.instance.borrowObject();
             try {
+
                 serializer.setFiles(files);
                 return serializer.<T>fromXMLInjectFiles(is);
             } finally {
@@ -185,7 +187,7 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public <T> T deserializeReplacePathHash(File file, Map<IHash, File> files) throws InternalProcessingError {
+    public <T> T deserializeReplacePathHash(File file, IPartialFunction<IHash, File> files) throws InternalProcessingError {
         try {
             InputStream is = new FileInputStream(file);
             try {
@@ -199,7 +201,7 @@ public class Serializer implements ISerializer {
     }
 
     @Override
-    public <T> T deserializeReplacePathHash(InputStream it, Map<IHash, File> files) throws InternalProcessingError {
+    public <T> T deserializeReplacePathHash(InputStream it, IPartialFunction<IHash, File> files) throws InternalProcessingError {
         try {
             DeserializerWithFileInjectionFromPathHash deserializer = DeserializerWithFileInjectionFromPathHashFactory.instance.borrowObject();
             try {

@@ -44,6 +44,7 @@
         <module>org.openmole.plugin.sampling.lhs</module>
         <module>org.openmole.plugin.sampling.combine</module>
         <module>org.openmole.plugin.sampling.filter</module>
+	<module>org.openmole.plugin.sampling.loader</module>
         <module>org.openmole.plugin.profiler.csv</module>
     </modules>
 

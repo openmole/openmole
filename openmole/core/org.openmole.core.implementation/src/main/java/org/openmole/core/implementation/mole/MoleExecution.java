@@ -309,10 +309,6 @@ public class MoleExecution implements IMoleExecution {
             Activator.getEventDispatcher().objectChanged(subMole, ISubMoleExecution.finished, args);
         }
 
-        //inProgress.remove(job);
-
-        LOGGER.log(Level.INFO, "Nb in progress {0}", inProgress.size());
-        
         if (isFinished()) {
             getSubmiter().interrupt();
             Object[] args = {job};

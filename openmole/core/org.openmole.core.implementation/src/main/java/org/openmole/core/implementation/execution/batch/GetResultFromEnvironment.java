@@ -19,6 +19,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.openmole.commons.exception.ExecutionException;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.commons.tools.function.IPartialFunction;
+import org.openmole.commons.tools.function.MapPartialFunction;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.IHash;
 import org.openmole.commons.tools.io.TarArchiver;
@@ -238,7 +240,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
         return fileReplacement;
     }
 
-    private IContextResults getContextResults(IURIFile uriFile, Map<File, File> fileReplacement, IAccessToken token) throws InternalProcessingError, IOException, InterruptedException {
+    private IContextResults getContextResults(IURIFile uriFile, final Map<File, File> fileReplacement, IAccessToken token) throws InternalProcessingError, IOException, InterruptedException {
 
         //Download and deserialize the context results
 
@@ -249,7 +251,7 @@ public class GetResultFromEnvironment implements Callable<Void> {
         File contextResutsFileCache = uriFile.cache(token);
 
         try {
-            return Activator.getSerializer().deserializeReplaceFiles(contextResutsFileCache, fileReplacement);
+            return Activator.getSerializer().deserializeReplaceFiles(contextResutsFileCache, new MapPartialFunction<File, File>(fileReplacement));
         } finally {
             contextResutsFileCache.delete();
         }

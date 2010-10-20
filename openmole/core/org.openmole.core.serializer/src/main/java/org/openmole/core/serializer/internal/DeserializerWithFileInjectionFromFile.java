@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.tools.function.IPartialFunction;
 
 /**
  *
@@ -27,14 +28,14 @@ import org.openmole.commons.exception.InternalProcessingError;
  */
 public class DeserializerWithFileInjectionFromFile extends Deserializer implements ICleanable {
 
-    private Map<File, File> files = null;
+    private IPartialFunction<File, File> files = null;
 
     DeserializerWithFileInjectionFromFile() {
         super();
         registerConverter(new FileConverterInjecter(this));
     }
 
-    void setFiles(Map<File, File> files) {
+    void setFiles(IPartialFunction<File, File> files) {
         this.files = files;
     }
 
@@ -52,6 +53,6 @@ public class DeserializerWithFileInjectionFromFile extends Deserializer implemen
     }
     
     File getMatchingFile(File file) {
-        return files.get(file);
+        return files.apply(file);
     }
 }

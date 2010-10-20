@@ -16,6 +16,12 @@
  */
 package org.openmole.core.implementation.observer;
 
+import org.openmole.core.model.data.IVariable;
+import org.openmole.core.model.job.IContext;
+import org.openmole.core.implementation.job.Context;
+import org.openmole.core.model.data.IData;
+import java.util.TreeSet;
+import java.util.Set;
 import java.util.Collection;
 import java.io.File;
 import java.io.IOException;
@@ -56,19 +62,19 @@ public class Saver implements ISaver, IMoleExecutionObserver {
 
     @Override
     public synchronized void moleJobFinished(IMoleJob moleJob) throws InternalProcessingError, UserBadDataError {
-/*      Set<String> filter = new TreeSet<String>();
+        Set<String> filter = new TreeSet<String>();
         
         for(IData data: moleJob.getTask().getOutput()) {
-        if(data.getMode().isSystem()) filter.add(data.getPrototype().getName());
+            if(data.getMode().isSystem()) filter.add(data.getPrototype().getName());
         }
         
         IContext context = new Context();
         
         for(IVariable variable: moleJob.getContext()) {
-        if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
-        }*/
+            if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
+        }
 
-        Tuple2<Map<File, IHash>, Collection<Class>> serialization = Activator.getSerializer().serializeFilePathAsHashGetPluginClassAndFiles(moleJob.getContext(), new File(dir, CONTEXTS));
+        Tuple2<Map<File, IHash>, Collection<Class>> serialization = Activator.getSerializer().serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXTS));
 
         try {
             File files = new File(dir, FILES);

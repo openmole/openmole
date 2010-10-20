@@ -43,6 +43,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.commons.tools.function.MapPartialFunction;
 import org.openmole.core.file.URIFile;
 import org.openmole.core.implementation.message.RuntimeResult;
 import org.openmole.core.model.file.IURIFile;
@@ -208,7 +209,7 @@ public class SimExplorer implements IApplication {
                 throw new InternalProcessingError("Hash of the execution job does't match.");
             }
 
-            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserializeReplaceFiles(jobForRuntimeFileCache, usedFiles);
+            IJobForRuntime jobForRuntime = Activator.getSerialiser().deserializeReplaceFiles(jobForRuntimeFileCache, new MapPartialFunction<File, File>(usedFiles));
             jobForRuntimeFileCache.delete();
             
             try {
