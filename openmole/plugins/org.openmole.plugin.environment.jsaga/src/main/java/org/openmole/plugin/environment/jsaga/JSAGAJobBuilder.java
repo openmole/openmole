@@ -69,7 +69,7 @@ public class JSAGAJobBuilder {
             for (JSAGAAttributes attribute : JSAGAAttributes.values()) {
                 String value = attributes.get(attribute);
                 
-                Logger.getLogger(JSAGAJobBuilder.class.getName()).info(attribute.value + " "  + value);
+                //Logger.getLogger(JSAGAJobBuilder.class.getName()).info(attribute.value + " "  + value);
                 
                 if (value != null) {
                     if (attribute.value.equals(CPU_TIME.value)) {
