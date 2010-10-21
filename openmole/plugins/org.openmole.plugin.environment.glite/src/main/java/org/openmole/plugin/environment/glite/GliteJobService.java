@@ -124,7 +124,7 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
     }
 
     @Override
-    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<Enum, String> attributes) throws InternalProcessingError, InterruptedException {
+    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
         try {
             JobDescription description = super.buildJobDescription(runtime, script, attributes);
 
@@ -133,22 +133,22 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
             
             int i = 0;
 
-            while (i < GliteAttributes.values().length - 1) {
-                String requirement = attributes.get(GliteAttributes.values()[i]);
+            while (i < GliteAttributes.values.length - 1) {
+                String requirement = attributes.get(GliteAttributes.values[i]);
                 if (requirement != null) {
-                    requirements.append(GliteAttributes.values()[i].value);
+                    requirements.append(GliteAttributes.values[i]);
                     requirements.append(requirement);
                     requirements.append("&&");
                 }
                 i++;
             }
 
-            String requirement = attributes.get(GliteAttributes.values()[i]);
+            String requirement = attributes.get(GliteAttributes.values[i]);
             
             //Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
             
             if (requirement != null) {
-                requirements.append(GliteAttributes.values()[i].value);
+                requirements.append(GliteAttributes.values[i]);
                 requirements.append(requirement);
             }
 

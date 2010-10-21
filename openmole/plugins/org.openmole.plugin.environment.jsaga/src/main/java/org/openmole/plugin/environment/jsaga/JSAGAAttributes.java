@@ -23,21 +23,12 @@ import org.ogf.saga.job.JobDescription;
  *
  * @author reuillon
  */
-public enum JSAGAAttributes {
+public class JSAGAAttributes {
  
-    MEMORY(JobDescription.TOTALPHYSICALMEMORY),
-    CPU_TIME(JobDescription.TOTALCPUTIME),
-    CPU_ARCHITECTURE(JobDescription.CPUARCHITECTURE);
+    final public static String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
+    final public static String CPU_TIME = JobDescription.TOTALCPUTIME;
+    final public static String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
 
-    final String value;
-
-    private JSAGAAttributes(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return value;
-    }
+    final public static String[] values = {MEMORY, CPU_TIME, CPU_ARCHITECTURE};
   
 }

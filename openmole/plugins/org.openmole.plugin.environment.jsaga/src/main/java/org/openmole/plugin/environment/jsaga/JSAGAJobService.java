@@ -205,7 +205,7 @@ public abstract class JSAGAJobService<ENV extends JSAGAEnvironment, AUTH extends
         return new JSAGAJob(id, this);
     }
     
-    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<Enum, String> attributes) throws InternalProcessingError, InterruptedException {
+    protected JobDescription buildJobDescription(IRuntime runtime, File script, Map<String, String> attributes) throws InternalProcessingError, InterruptedException {
         return JSAGAJobBuilder.GetInstance().getJobDescription(runtime, script, attributes);
     }
     

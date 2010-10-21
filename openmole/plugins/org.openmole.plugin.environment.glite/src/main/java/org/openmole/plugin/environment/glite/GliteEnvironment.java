@@ -45,7 +45,6 @@ import org.openmole.plugin.environment.glite.internal.Activator;
 import org.openmole.plugin.environment.glite.internal.BDII;
 
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment;
-import org.openmole.plugin.environment.jsaga.IJSAGALaunchingScript;
 import org.openmole.plugin.environment.jsaga.JSAGAJobService;
 
 public class GliteEnvironment extends JSAGAEnvironment {
@@ -154,7 +153,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         init();
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String bdii, Map<Enum, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, Map<String, String> attributes) throws InternalProcessingError {
         super(attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
@@ -166,7 +165,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     }
 
     
-    public GliteEnvironment(String voName, String vomsURL, String bdii, int memoryForRuntime, Map<Enum, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
         super(memoryForRuntime, attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
@@ -188,7 +187,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
         init();
     }
 
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, Map<Enum, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, Map<String, String> attributes) throws InternalProcessingError {
         super(attributes);
         this.bdiiURL = bdii;
         this.voName = voName;
@@ -200,7 +199,7 @@ public class GliteEnvironment extends JSAGAEnvironment {
     }
 
     
-    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, int memoryForRuntime, Map<Enum, String> attributes) throws InternalProcessingError {
+    public GliteEnvironment(String voName, String vomsURL, String bdii, String myProxy, String myProxyUserId, String myProxyPass, int memoryForRuntime, Map<String, String> attributes) throws InternalProcessingError {
         super(memoryForRuntime, attributes);
         this.bdiiURL = bdii;
         this.voName = voName;

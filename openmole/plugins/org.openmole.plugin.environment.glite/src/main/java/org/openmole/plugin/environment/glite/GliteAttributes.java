@@ -21,19 +21,10 @@ package org.openmole.plugin.environment.glite;
  *
  * @author reuillon
  */
-public enum GliteAttributes {
+public class GliteAttributes {
     
-    OS_RELEASE("other.GlueHostOperatingSystemRelease");
+    final public static String OS_RELEASE = "other.GlueHostOperatingSystemRelease";
 
-    final String value;
-
-    private GliteAttributes(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return value;
-    }
+    final public static String[] values = {OS_RELEASE};
     
 }
