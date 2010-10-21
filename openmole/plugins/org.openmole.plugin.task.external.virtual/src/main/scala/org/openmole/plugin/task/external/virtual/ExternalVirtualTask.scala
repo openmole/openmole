@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.external
+package org.openmole.plugin.task.external.virtual
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
@@ -27,8 +27,9 @@ import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
+import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.plugin.resource.virtual.IVirtualMachine
-import org.openmole.plugin.task.external.internal.Activator._
+import org.openmole.plugin.task.external.virtual.internal.Activator._
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.tools.VariableExpansion._
 

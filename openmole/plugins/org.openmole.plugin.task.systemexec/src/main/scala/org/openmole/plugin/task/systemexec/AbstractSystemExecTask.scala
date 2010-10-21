@@ -22,7 +22,7 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
-import org.openmole.plugin.task.external.ExternalSystemTask
+import org.openmole.plugin.task.external.system.ExternalSystemTask
 import java.io.IOException
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._

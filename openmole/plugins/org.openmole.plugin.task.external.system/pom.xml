@@ -8,7 +8,7 @@
         <version>0.3</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.task.code</artifactId>
+    <artifactId>org.openmole.plugin.task.external.system</artifactId>
 
     <dependencies>
         <dependency>
@@ -18,12 +18,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.external.system</artifactId>
+            <artifactId>org.openmole.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -33,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.tools.code</artifactId>
+            <artifactId>org.openmole.plugin.task.external</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -56,10 +51,6 @@
     </properties>
 
 </project>
-
-
-
-
 
 
 

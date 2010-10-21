@@ -85,6 +85,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.virtualsystemexec</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.groovy</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
@@ -98,6 +104,18 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.external</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.external.system</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.external.virtual</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -158,6 +176,12 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.sampling.combine</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.sampling.loadcontext</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

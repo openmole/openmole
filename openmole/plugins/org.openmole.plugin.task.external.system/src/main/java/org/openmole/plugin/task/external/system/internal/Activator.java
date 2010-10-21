@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.openmole.plugin.task.external.internal;
+package org.openmole.plugin.task.external.system.internal;
 
 import org.openmole.commons.aspect.caching.SoftCachable;
-import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.workspace.IWorkspace;
+import org.openmole.misc.workspace.internal.Workspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,20 +30,20 @@ import org.osgi.framework.ServiceReference;
 public class Activator implements BundleActivator {
 
     static Activator instance = new Activator();
-
+    private IWorkspace workspace = null;
     BundleContext context = null;
 
     public static IWorkspace workspace() {
         return instance.getWorkspace();
     }
 
-    @SoftCachable
-    private IWorkspace getWorkspace()
-    {
-      ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
-      return (IWorkspace) context.getService(ref);
+    public synchronized IWorkspace getWorkspace() {
+        if (workspace == null) {
+            ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
+            workspace = (IWorkspace) context.getService(ref);
+        }
+        return workspace;
     }
-
 
     @Override
     public void start(BundleContext bc) throws Exception {

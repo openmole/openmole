@@ -29,7 +29,7 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.plugin.task.external.ExternalSystemTask;
+import org.openmole.plugin.task.external.system.ExternalSystemTask;
 import org.openmole.plugin.task.netlogo.internal.Activator;
 import scala.Tuple2;
 

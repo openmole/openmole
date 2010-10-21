@@ -26,21 +26,6 @@
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.tools.utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.resource.virtual</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>ch.ethz.ssh2</artifactId>
-            <version>${lib.ch.ethz.ssh2.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -55,10 +40,6 @@
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
-
-    <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-    </properties>
 
 </project>
 

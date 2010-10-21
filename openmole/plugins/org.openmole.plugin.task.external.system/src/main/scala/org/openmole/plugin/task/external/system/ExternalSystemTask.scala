@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.external
+package org.openmole.plugin.task.external.system
 
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
@@ -27,8 +27,9 @@ import org.openmole.core.model.job.IContext
 import java.util.TreeSet
 import scala.collection.mutable.ListBuffer
 
+import org.openmole.plugin.task.external.ExternalTask
 import scala.collection.JavaConversions._
-import org.openmole.plugin.task.external.internal.Activator._
+import org.openmole.plugin.task.external.system.internal.Activator._
 
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {

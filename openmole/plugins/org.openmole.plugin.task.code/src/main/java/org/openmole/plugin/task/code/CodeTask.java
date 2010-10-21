@@ -34,7 +34,7 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.aspect.caching.ChangeState;
 import org.openmole.plugin.task.code.internal.Activator;
-import org.openmole.plugin.task.external.ExternalSystemTask;
+import org.openmole.plugin.task.external.system.ExternalSystemTask;
 
 public abstract class CodeTask<T extends IContextToCode> extends ExternalSystemTask {
 

@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.systemexec
+package org.openmole.plugin.task.virtualsystemexec
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import org.openmole.core.model.task.annotations.Resource
 import org.openmole.plugin.resource.virtual.VirtualMachineResource
-import org.openmole.plugin.task.external.ExternalVirtualTask
-import org.openmole.plugin.task.systemexec.internal.Activator._
+import org.openmole.plugin.task.external.virtual.ExternalVirtualTask
 
 import scala.collection.JavaConversions._
 
