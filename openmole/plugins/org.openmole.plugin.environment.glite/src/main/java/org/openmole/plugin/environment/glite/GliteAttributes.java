@@ -23,8 +23,8 @@ package org.openmole.plugin.environment.glite;
  */
 public class GliteAttributes {
     
-    final public static String OS_RELEASE = "other.GlueHostOperatingSystemRelease";
+    final public static String REQUIREMENTS = "GLITE.REQUIREMENTS";
 
-    final public static String[] values = {OS_RELEASE};
+    final public static String[] values = {REQUIREMENTS};
     
 }
