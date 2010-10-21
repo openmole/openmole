@@ -17,9 +17,6 @@
 
 package org.openmole.plugin.task.external
 
-import java.util.logging.Level
-import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._

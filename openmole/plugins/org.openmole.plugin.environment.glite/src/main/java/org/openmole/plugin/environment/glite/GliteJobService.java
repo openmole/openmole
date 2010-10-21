@@ -128,34 +128,37 @@ public class GliteJobService extends JSAGAJobService<GliteEnvironment, GliteAuth
         try {
             JobDescription description = super.buildJobDescription(runtime, script, attributes);
 
-            StringBuilder requirements = new StringBuilder();
-            requirements.append("JDLRequirements=(");
-            
-            int i = 0;
+            if (!attributes.isEmpty()) {
 
-            while (i < GliteAttributes.values.length - 1) {
+                StringBuilder requirements = new StringBuilder();
+                requirements.append("JDLRequirements=(");
+
+                int i = 0;
+
+                while (i < GliteAttributes.values.length - 1) {
+                    String requirement = attributes.get(GliteAttributes.values[i]);
+                    if (requirement != null) {
+                        requirements.append(GliteAttributes.values[i]);
+                        requirements.append(requirement);
+                        requirements.append("&&");
+                    }
+                    i++;
+                }
+
                 String requirement = attributes.get(GliteAttributes.values[i]);
+
+                //Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
+
                 if (requirement != null) {
                     requirements.append(GliteAttributes.values[i]);
                     requirements.append(requirement);
-                    requirements.append("&&");
                 }
-                i++;
+
+                requirements.append(')');
+
+                description.setVectorAttribute("Extension", new String[]{requirements.toString()});
             }
-
-            String requirement = attributes.get(GliteAttributes.values[i]);
             
-            //Logger.getLogger(GliteJobService.class.getName()).info(GliteAttributes.values()[i].value + " " + requirement);
-            
-            if (requirement != null) {
-                requirements.append(GliteAttributes.values[i]);
-                requirements.append(requirement);
-            }
-
-            requirements.append(')');
-            
-            description.setVectorAttribute("Extension", new String[]{requirements.toString()});
-
             return description;
         } catch (NotImplementedException ex) {
             throw new InternalProcessingError(ex);
