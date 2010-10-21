@@ -210,7 +210,7 @@
                                 <artifactItem>
                                     <groupId>com.sun.java</groupId>
                                     <artifactId>java-jre</artifactId>
-                                    <version>1.6.0_14-b08</version>
+                                    <version>6u22</version>
                                     <type>tgz</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${product.directory}</outputDirectory>

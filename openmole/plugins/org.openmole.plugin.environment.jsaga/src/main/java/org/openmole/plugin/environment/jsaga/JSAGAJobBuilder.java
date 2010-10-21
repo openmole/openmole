@@ -69,8 +69,6 @@ public class JSAGAJobBuilder {
             for (String attribute : JSAGAAttributes.values) {
                 String value = attributes.get(attribute);
                 
-                Logger.getLogger(JSAGAJobBuilder.class.getName()).info(attribute + " "  + value);
-                
                 if (value != null) {
                     if (attribute.equals(CPU_TIME)) {
                         value = new Integer(ISOPeriodFormat.standard().parsePeriod(value).toStandardSeconds().getSeconds()).toString();
