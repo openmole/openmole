@@ -21,9 +21,7 @@ package org.openmole.core.implementation.job;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.core.implementation.data.Variable;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 

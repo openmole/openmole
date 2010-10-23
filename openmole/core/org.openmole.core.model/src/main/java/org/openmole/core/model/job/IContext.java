@@ -23,7 +23,7 @@ import org.openmole.commons.tools.pattern.IVisitable;
 
 import org.openmole.core.model.data.IVariable;
 
-public interface IContext extends IVisitable<IVariable>, Iterable<IVariable> {
+public interface IContext extends IVisitable<IVariable<?>>, Iterable<IVariable<?>> {
 
     void putVariables(Iterable<? extends IVariable> variables);
 

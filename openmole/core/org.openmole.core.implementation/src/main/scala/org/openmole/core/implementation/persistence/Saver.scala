@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution.batch.persistence
+package org.openmole.core.implementation.persistence
 
 import java.io.File
 import java.io.IOException
@@ -26,11 +26,12 @@ import org.openmole.core.implementation.job.Context
 import org.openmole.core.implementation.observer.IMoleExecutionObserver
 import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
 import org.openmole.core.model.capsule.IGenericTaskCapsule
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.core.model.persistence.IPersistentContext._
-
+import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
 class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_], dir: File) extends IMoleExecutionObserver {
@@ -55,8 +56,8 @@ class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_],
       }
         
       val context = new Context
-        
-      for(variable <- moleJob.getContext) {
+       
+      for(variable <- moleJob.getContext.asInstanceOf[Iterable[IVariable[_]]]) {
         if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
       }
 
