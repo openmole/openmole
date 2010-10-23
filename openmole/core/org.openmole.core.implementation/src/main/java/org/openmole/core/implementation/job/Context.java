@@ -28,12 +28,11 @@ import java.util.TreeMap;
 
 import org.openmole.core.model.job.IContext;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.pattern.IVisitable;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.model.data.IVariable;
 import org.openmole.core.model.data.IPrototype;
 
-public class Context implements IVisitable<IVariable>, IContext {
+public class Context implements IContext {
 
     final Map<String, IVariable> variables;
  
