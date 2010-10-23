@@ -18,7 +18,6 @@
 package org.openmole.core.implementation.execution.batch
 
 import java.io.File
-import java.io.IOException
 import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.Callable
@@ -39,6 +38,7 @@ import org.openmole.core.model.job.IMoleJob
 import scala.collection.mutable.LinkedList
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Callable[CopyToEnvironmentResult] {
 
@@ -100,7 +100,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
 
 
   def replicateTheRuntime(token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): IRuntime = {
-    val environmentPluginReplica = new LinkedList[IURIFile]
+    val environmentPluginReplica = new ListBuffer[IURIFile]
 
     val environmentPlugins = Activator.getPluginManager().getPluginAndDependanciesForClass(environment.getClass)
     val runtimeFile = environment.getRuntime();
@@ -109,7 +109,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
       val replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token)
       val pluginURIFile = replicatedFile.replica
              
-      environmentPluginReplica.add(pluginURIFile)
+      environmentPluginReplica += pluginURIFile
     }
 
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
@@ -118,9 +118,9 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     Activator.getSerializer().serialize(communicationStorage.getRemoteAuthentication(), authenticationFile)
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     URIFile.copy(authenticationFile, authenticationURIFile, token)
-    authenticationFile.delete();
+    authenticationFile.delete
         
-    return new Runtime(runtimeReplica, environmentPluginReplica, authenticationURIFile)
+    return new Runtime(runtimeReplica, environmentPluginReplica.toList, authenticationURIFile)
   }
 
   def createExecutionMessage(jobForRuntime: JobForRuntime, token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): ExecutionMessage = {
