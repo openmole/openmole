@@ -30,7 +30,7 @@ public class FileCacheDeleteOnFinalize implements IFileCache {
 
     @Override
     protected void finalize() throws Throwable {
-        if(!persist) Activator.clean(cache);
+        if(!persist) Activator.getFileDeleter().assynchonousRemove(cache);
         super.finalize();
     }
 

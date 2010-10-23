@@ -17,7 +17,6 @@
 
 package org.openmole.misc.filecache;
 
-import org.openmole.misc.filecache.IFileCache;
 import java.io.File;
 
 

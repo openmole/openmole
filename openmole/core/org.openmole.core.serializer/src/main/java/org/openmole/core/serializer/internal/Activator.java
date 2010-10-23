@@ -78,4 +78,5 @@ public class Activator implements BundleActivator {
         }
         return hashService;
     }
+    
 }

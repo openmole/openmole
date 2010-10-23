@@ -45,7 +45,6 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import com.db4o.ta.TransparentPersistenceSupport;
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

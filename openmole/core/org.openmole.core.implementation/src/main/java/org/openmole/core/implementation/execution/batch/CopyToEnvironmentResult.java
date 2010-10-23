@@ -26,7 +26,7 @@ import org.openmole.core.model.file.IURIFile;
  */
 public class CopyToEnvironmentResult {
 
-    public CopyToEnvironmentResult(IBatchStorage communicationStorage, IURIFile communicationDir, IURIFile inputFile, IURIFile outputFile, IRuntime runtime) {
+    public CopyToEnvironmentResult(IBatchStorage<?,?> communicationStorage, IURIFile communicationDir, IURIFile inputFile, IURIFile outputFile, IRuntime runtime) {
         this.communicationStorage = communicationStorage;
         this.communicationDir = communicationDir;
         this.inputFile = inputFile;

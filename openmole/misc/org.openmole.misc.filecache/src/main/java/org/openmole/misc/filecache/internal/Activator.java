@@ -16,16 +16,10 @@
  */
 package org.openmole.misc.filecache.internal;
 
-import java.io.File;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.openmole.misc.filedeleter.IFileDeleter;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  *
@@ -33,46 +27,31 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
-
     private static BundleContext context;
-    final private static BlockingQueue<File> cleanFiles = new LinkedBlockingQueue<File>();
-    private Thread thread;
-    
+    private static IFileDeleter fileDeleter;
+   
     
     @Override
     public void start(BundleContext context) throws Exception {
         this.context = context;
-        thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                boolean finished = false;
-                
-                while(!finished) {
-                    try {
-                        cleanFiles.take().delete();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Activator.class.getName()).log(Level.INFO, "File deleter interupted", ex);
-                        finished = true;
-                    }
-                }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     @Override
     public void stop(BundleContext arg0) throws Exception {
-        thread.interrupt();
-        thread = null;
+        context = null;
     }
 
     public static BundleContext getContext() {
         return context;
     }
-
-    public static void clean(File file) {
-        cleanFiles.add(file);
+    
+    
+    public static synchronized IFileDeleter getFileDeleter() {
+        if (fileDeleter == null) {
+            ServiceReference ref = getContext().getServiceReference(IFileDeleter.class.getName());
+            fileDeleter = (IFileDeleter) getContext().getService(ref);
+        }
+        return fileDeleter;
     }
+
 }

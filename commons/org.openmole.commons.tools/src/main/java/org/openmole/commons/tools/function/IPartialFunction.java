@@ -23,5 +23,5 @@ package org.openmole.commons.tools.function;
  */
 public interface IPartialFunction<A, R> {
     boolean isDefinedAt(A arg);
-    R apply(A arg);
+    R apply(A arg) throws Exception;
 }

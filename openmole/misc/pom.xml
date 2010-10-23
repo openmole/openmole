@@ -25,6 +25,7 @@
 	<module>org.openmole.misc.logging</module>
         <module>org.openmole.misc.fileservice</module>
 	<module>org.openmole.misc.filecache</module>
+	<module>org.openmole.misc.filedeleter</module>
     </modules>
 
     <!-- ************************************************************* -->

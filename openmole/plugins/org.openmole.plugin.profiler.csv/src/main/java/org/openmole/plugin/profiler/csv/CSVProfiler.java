@@ -16,6 +16,7 @@
  */
 package org.openmole.plugin.profiler.csv;
 
+import org.openmole.core.implementation.mole.Profiler;
 import au.com.bytecode.opencsv.CSVWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,7 +25,6 @@ import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.observer.Profiler;
 
 import static org.openmole.plugin.profiler.csv.internal.MoleJobInfoToColumns.toColumns;
 
