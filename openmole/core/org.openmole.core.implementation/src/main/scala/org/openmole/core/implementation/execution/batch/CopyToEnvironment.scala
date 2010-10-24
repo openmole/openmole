@@ -35,7 +35,6 @@ import org.openmole.core.model.execution.batch.IRuntime
 import org.openmole.core.model.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
-import scala.collection.mutable.LinkedList
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -137,24 +136,23 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     jobURIFile.remove(false);
 
     val plugins = new TreeSet[File]
-    val pluginReplicas = new LinkedList[ReplicatedFile]
+    val pluginReplicas = new ListBuffer[ReplicatedFile]
 
-        
     for (c <- serializationResult._2) {
       for (f <- Activator.getPluginManager().getPluginAndDependanciesForClass(c)) {
-        plugins.add(f);
+        plugins += f
       }
     }
 
     for (f <- plugins) {
-      val replicatedPlugin = toReplicatedFile(f, communicationStorage, token);
-      pluginReplicas.add(replicatedPlugin);
+      val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
+      pluginReplicas += replicatedPlugin
     }
         
-    val files = new LinkedList[ReplicatedFile]
+    val files = new ListBuffer[ReplicatedFile]
         
     for(file <- serializationResult._1) {
-      files.add(toReplicatedFile(file, communicationStorage, token));
+      files += toReplicatedFile(file, communicationStorage, token)
     }
 
     new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir);
@@ -162,16 +160,16 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
 
   def createJobForRuntime(token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): JobForRuntime = {
        
-    val jobs = new LinkedList[IMoleJob]
+    val jobs = new ListBuffer[IMoleJob]
 
     for (moleJob <- job.getMoleJobs()) {
       moleJob.synchronized {
         if (!moleJob.isFinished()) {
-          jobs.add(moleJob)
+          jobs += moleJob
         }
       }
     }
 
-    new JobForRuntime(jobs)
+    new JobForRuntime(jobs.toList)
   }
 }
