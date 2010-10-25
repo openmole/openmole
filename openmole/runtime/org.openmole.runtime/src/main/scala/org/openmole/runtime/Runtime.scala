@@ -60,8 +60,8 @@ class Runtime {
     val oldOut = System.out
     val oldErr = System.err
 
-    val out = Activator.getWorkspace().newFile("openmole", ".out")
-    val err = Activator.getWorkspace().newFile("openmole", ".err")
+    val out = Activator.getWorkspace.newFile("openmole", ".out")
+    val err = Activator.getWorkspace.newFile("openmole", ".err")
 
     val outSt = new PrintStream(out)
     val errSt = new PrintStream(err)
@@ -96,7 +96,7 @@ class Runtime {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
         replicaFileCache.renameTo(inPluginDirLocalFile)
 
-        if (!Activator.getHashService().computeHash(inPluginDirLocalFile).equals(plugin.hash)) {
+        if (!Activator.getHashService.computeHash(inPluginDirLocalFile).equals(plugin.hash)) {
           throw new InternalProcessingError("Hash of a plugin does't match.")
         }
 
@@ -120,15 +120,15 @@ class Runtime {
           val cacheHash = Activator.getHashService().computeHash(cache)
 
           if (!cacheHash.equals(repliURI.hash)) {
-            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString() + " replicated at " + repliURI.replica.toString());
+            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.replica.toString)
           }
 
           val local = if (repliURI.directory) {
-            val local = Activator.getWorkspace().newDir("dirReplica");
+            val local = Activator.getWorkspace().newDir("dirReplica")
             val is = new FileInputStream(cache)
 
             try {
-              archiver.extractDirArchiveWithRelativePath(local, is);
+              archiver.extractDirArchiveWithRelativePath(local, is)
             } finally {
               is.close
             }
@@ -137,8 +137,7 @@ class Runtime {
             cache;
           }
 
-          usedFiles.put(repliURI.src, local);
-          //fileCache.fillInLocalFileCache(repliURI.getSrc(), local);
+          usedFiles.put(repliURI.src, local)
         }
       }
 
@@ -146,11 +145,11 @@ class Runtime {
       val jobForRuntimeFile = executionMessage.jobForRuntime.file
       val jobForRuntimeFileCache = jobForRuntimeFile.cache
 
-      if (!Activator.getHashService().computeHash(jobForRuntimeFileCache).equals(executionMessage.jobForRuntime.hash)) {
+      if (!Activator.getHashService.computeHash(jobForRuntimeFileCache).equals(executionMessage.jobForRuntime.hash)) {
         throw new InternalProcessingError("Hash of the execution job does't match.");
       }
 
-      val jobForRuntime = Activator.getSerialiser().deserializeReplaceFiles[JobForRuntime](jobForRuntimeFileCache, usedFiles)
+      val jobForRuntime = Activator.getSerialiser.deserializeReplaceFiles[JobForRuntime](jobForRuntimeFileCache, usedFiles)
       jobForRuntimeFileCache.delete
             
       try {
@@ -161,12 +160,12 @@ class Runtime {
         val saver = new ContextSaver
 
         for (toProcess <- jobForRuntime.moleJobs) {
-          Activator.getEventDispatcher().registerListener(toProcess, Priority.HIGH.getValue(), saver, IMoleJob.StateChanged)
-          allFinished.registerJob(toProcess);
-          LocalExecutionEnvironment.getInstance().submit(toProcess);
+          Activator.getEventDispatcher.registerListener(toProcess, Priority.HIGH.getValue, saver, IMoleJob.StateChanged)
+          allFinished.registerJob(toProcess)
+          LocalExecutionEnvironment.getInstance.submit(toProcess)
         }
 
-        allFinished.waitAllFinished();
+        allFinished.waitAllFinished
 
         val contextResults = new ContextResults(saver.getResults)
         val contextResultFile = Activator.getWorkspace.newFile
@@ -183,36 +182,36 @@ class Runtime {
           }, NbRetry)
 
         contextResult = uploadedcontextResults;
-        contextResultFile.delete();
+        contextResultFile.delete
 
         /*-- Tar the result files --*/
 
-        val tarResult = Activator.getWorkspace().newFile("result", ".tar");
+        val tarResult = Activator.getWorkspace.newFile("result", ".tar");
 
         val tos = new TarArchiveOutputStream(new FileOutputStream(tarResult))
-        tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+        tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
 
                 
-        if (!serializationResult._1.isEmpty()) {
+        if (!serializationResult._1.isEmpty) {
                     
           try {
             for (file <- serializationResult._1) {
               val is = new StringInputStream(file.getCanonicalPath)
 
               val hash = try {
-                Activator.getHashService().computeHash(is);
+                Activator.getHashService.computeHash(is);
               } finally {
-                is.close();
+                is.close
               }
                             
               val entry = new TarArchiveEntry(hash.toString())
 
-              val toArchive =  if (file.isDirectory()) {
-                val toArchive = Activator.getWorkspace().newFile();
-                val outputStream = new FileOutputStream(toArchive);
+              val toArchive =  if (file.isDirectory) {
+                val toArchive = Activator.getWorkspace.newFile
+                val outputStream = new FileOutputStream(toArchive)
 
                 try {
-                  archiver.createDirArchiveWithRelativePath(file, outputStream);
+                  archiver.createDirArchiveWithRelativePath(file, outputStream)
                 } finally {
                   outputStream.close
                 }
@@ -233,7 +232,7 @@ class Runtime {
               filesInfo.put(entry.getName, (file, file.isDirectory))
             }
           } finally {
-            tos.close();
+            tos.close
           }
 
           val uploadedTar = new GZURIFile(executionMessage.communicationDir.newFileInDir("uplodedTar", ".tgz"))
@@ -263,17 +262,17 @@ class Runtime {
 
 
         outputMessage = if (out.length() != 0) {
-          val output = new GZURIFile(executionMessage.communicationDir.newFileInDir("output", ".txt"));
-          URIFile.copy(out, output);
-          new FileMessage(output, Activator.getHashService().computeHash(out));
+          val output = new GZURIFile(executionMessage.communicationDir.newFileInDir("output", ".txt"))
+          URIFile.copy(out, output)
+          new FileMessage(output, Activator.getHashService().computeHash(out))
         } else {
-          FileMessage.EMPTY_RESULT;
+          FileMessage.EMPTY_RESULT
         }
 
         errorMessage = if (err.length != 0) {                    
-          val errout = new GZURIFile(executionMessage.communicationDir.newFileInDir("outputError", ".txt"));
+          val errout = new GZURIFile(executionMessage.communicationDir.newFileInDir("outputError", ".txt"))
           URIFile.copy(err, errout)
-          new FileMessage(errout, Activator.getHashService().computeHash(err));
+          new FileMessage(errout, Activator.getHashService().computeHash(err))
         } else {
           FileMessage.EMPTY_RESULT
         }
@@ -290,12 +289,11 @@ class Runtime {
     val outputLocal = Activator.getWorkspace().newFile("output", ".res")
     Activator.getSerialiser().serialize(runtimeResult, outputLocal)
     try {
-      val output = new GZURIFile(new URIFile(resultMessageURI));
+      val output = new GZURIFile(new URIFile(resultMessageURI))
 
       retry(new Callable[Unit] {
-
           override def call = {
-            URIFile.copy(outputLocal, output);
+            URIFile.copy(outputLocal, output)
           }
         }, NbRetry)
 
