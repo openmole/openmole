@@ -53,7 +53,7 @@ public class UsageControl implements IUsageControl {
         return tokenPool.getAccessTokenInterruptly();
     }
 
-    @ObjectModified(type = resourceReleased)
+    @ObjectModified(name = resourceReleased)
     @Override
     public void releaseToken(IAccessToken token) throws InternalProcessingError, UserBadDataError {
         tokenPool.releaseToken(token);

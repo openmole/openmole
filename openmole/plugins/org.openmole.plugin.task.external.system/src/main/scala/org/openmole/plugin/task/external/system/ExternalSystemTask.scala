@@ -21,7 +21,6 @@ import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.io.IFileOperation
-import java.net.URI
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IContext
 import java.util.TreeSet

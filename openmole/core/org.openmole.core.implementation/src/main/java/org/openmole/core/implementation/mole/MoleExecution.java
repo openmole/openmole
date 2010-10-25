@@ -244,7 +244,7 @@ public class MoleExecution implements IMoleExecution {
     }
 
     @Override
-    @BeforeObjectModified(type=starting)
+    @BeforeObjectModified(name = starting)
     public void start() throws InternalProcessingError, UserBadDataError {
         if (getSubmiter().getState().equals(Thread.State.NEW)) {
             getSubmiter().start();

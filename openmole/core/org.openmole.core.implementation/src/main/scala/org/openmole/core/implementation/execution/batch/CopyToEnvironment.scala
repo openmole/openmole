@@ -49,7 +49,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val token = storage._2
 
     try {
-      val communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID().toString() + '/', token)
+      val communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
             
       val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
       val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
@@ -61,21 +61,21 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
 
       /* ---- upload the execution message ----*/
 
-      val executionMessageFile = Activator.getWorkspace().newFile("job", ".xml");
-      Activator.getSerializer().serialize(executionMessage, executionMessageFile);
+      val executionMessageFile = Activator.getWorkspace.newFile("job", ".xml")
+      Activator.getSerializer.serialize(executionMessage, executionMessageFile)
 
       val executionMessageURIFile = new URIFile(executionMessageFile)
       URIFile.copy(executionMessageURIFile, inputFile, token)
 
       executionMessageFile.delete
             
-      return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime);
+      return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
     } finally {
-      Activator.getBatchRessourceControl().getController(communicationStorage.getDescription()).getUsageControl().releaseToken(token);
+      Activator.getBatchRessourceControl.getController(communicationStorage.getDescription).getUsageControl.releaseToken(token)
     }
   }
 
-  override def call(): CopyToEnvironmentResult = {
+  override def call: CopyToEnvironmentResult = {
     initCommunication
   }
 
@@ -92,7 +92,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
       cache
     } else null
 
-    val hash = Activator.getFileService().getHashForFile(toReplicate, moleExecution)
+    val hash = Activator.getFileService.getHashForFile(toReplicate, moleExecution)
     val replica = Activator.getReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.getDestination)
   }
@@ -113,8 +113,8 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
 
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
         
-    val authenticationFile = Activator.getWorkspace().newFile("envrionmentAuthentication", ".xml")
-    Activator.getSerializer().serialize(communicationStorage.getRemoteAuthentication(), authenticationFile)
+    val authenticationFile = Activator.getWorkspace.newFile("envrionmentAuthentication", ".xml")
+    Activator.getSerializer.serialize(communicationStorage.getRemoteAuthentication, authenticationFile)
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     URIFile.copy(authenticationFile, authenticationURIFile, token)
     authenticationFile.delete
@@ -124,22 +124,22 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
 
   def createExecutionMessage(jobForRuntime: JobForRuntime, token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): ExecutionMessage = {
 
-    val jobFile = Activator.getWorkspace().newFile("job", ".xml");
-    val serializationResult = Activator.getSerializer().serializeGetPluginClassAndFiles(jobForRuntime, jobFile);
+    val jobFile = Activator.getWorkspace.newFile("job", ".xml")
+    val serializationResult = Activator.getSerializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
         
-    val jobURIFile = new URIFile(jobFile);
-    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"));
+    val jobURIFile = new URIFile(jobFile)
+    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
 
-    URIFile.copy(jobURIFile, jobForRuntimeFile, token);
-    val jobHash = Activator.getHashService().computeHash(jobFile);
+    URIFile.copy(jobURIFile, jobForRuntimeFile, token)
+    val jobHash = Activator.getHashService.computeHash(jobFile)
 
-    jobURIFile.remove(false);
+    jobURIFile.remove(false)
 
     val plugins = new TreeSet[File]
     val pluginReplicas = new ListBuffer[ReplicatedFile]
 
     for (c <- serializationResult._2) {
-      for (f <- Activator.getPluginManager().getPluginAndDependanciesForClass(c)) {
+      for (f <- Activator.getPluginManager.getPluginAndDependanciesForClass(c)) {
         plugins += f
       }
     }
@@ -162,9 +162,9 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
        
     val jobs = new ListBuffer[IMoleJob]
 
-    for (moleJob <- job.getMoleJobs()) {
+    for (moleJob <- job.getMoleJobs) {
       moleJob.synchronized {
-        if (!moleJob.isFinished()) {
+        if (!moleJob.isFinished) {
           jobs += moleJob
         }
       }
