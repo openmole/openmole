@@ -14,12 +14,12 @@ public aspect EventAspect {
 
 	before() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified) {
 
-		Object object = thisJoinPoint.getThis();
+		Object object = thisJoinPoint.getTarget();
 
                 Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                 BeforeObjectModified annotation = method.getAnnotation(BeforeObjectModified.class);
 
-                String type = annotation.type();
+                String type = annotation.name();
                 Object[] args = thisJoinPoint.getArgs();
 
                 Activator.getEventDispatcher().objectChanged(object,type, args);
@@ -28,18 +28,18 @@ public aspect EventAspect {
 
 	after() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectModified) {
 		
-		Object object = thisJoinPoint.getThis();
+		Object object = thisJoinPoint.getTarget();
 
                 Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                 ObjectModified annotation = method.getAnnotation(ObjectModified.class);
 
-                Activator.getEventDispatcher().objectChanged(object,annotation.type(), thisJoinPoint.getArgs());
+                Activator.getEventDispatcher().objectChanged(object,annotation.name(), thisJoinPoint.getArgs());
 	}
 
         after() : execution(*.new(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectConstructed) {
 
 		// construct genericIdentifier
-		Object object = thisJoinPoint.getThis();
+		Object object = thisJoinPoint.getTarget();
 		//Object ret = proceed();
 
                // Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
