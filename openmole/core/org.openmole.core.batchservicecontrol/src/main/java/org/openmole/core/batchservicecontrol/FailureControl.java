@@ -16,29 +16,29 @@
  */
 package org.openmole.core.batchservicecontrol;
 
-import org.openmole.commons.tools.stat.FailureRate;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FailureControl implements IFailureControl {
 
-    final FailureRate failureRate = new FailureRate();
+    final AtomicInteger failureRate = new AtomicInteger();
 
     @Override
     public void failed() {
-        failureRate.failed();
+        failureRate.incrementAndGet();
     }
 
     @Override
     public void success() {
-        failureRate.success();
+        failureRate.decrementAndGet();
     }
 
     @Override
     public double getFailureRate() {
-        return failureRate.getFailureRate();
+        return failureRate.get();
     }
 
     @Override
     public void reinit() {
-        failureRate.reinit();
+        failureRate.set(0);
     }
 }

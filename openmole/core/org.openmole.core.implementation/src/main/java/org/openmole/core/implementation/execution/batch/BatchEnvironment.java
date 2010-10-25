@@ -50,7 +50,7 @@ public abstract class BatchEnvironment<JS extends IBatchJobService> extends Envi
 
     static {
         Activator.getWorkspace().addToConfigurations(MemorySizeForRuntime, "512");
-        Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "20");
+        Activator.getWorkspace().addToConfigurations(ResourcesExpulseThreshod, "100");
         Activator.getWorkspace().addToConfigurations(CheckInterval, "PT2M");
     }
     
