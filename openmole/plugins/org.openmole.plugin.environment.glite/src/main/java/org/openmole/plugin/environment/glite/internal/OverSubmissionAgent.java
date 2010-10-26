@@ -17,7 +17,6 @@
 package org.openmole.plugin.environment.glite.internal;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,13 +29,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 
-import org.openmole.core.implementation.execution.Statistic;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.misc.updater.IUpdatable;
 import org.openmole.core.model.execution.ExecutionState;
-import org.openmole.core.model.execution.IStatistic;
 import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
 import org.openmole.commons.tools.cache.AssociativeCache;

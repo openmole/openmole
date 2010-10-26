@@ -62,6 +62,7 @@ public class GliteAuthentication implements IBatchServiceAuthentication {
     final private String myProxy;
     final private String myProxyUserID;
     final private String myProxyPass;
+    
     transient private File proxy = null;
     transient volatile private long proxyExpiresTime = Long.MAX_VALUE;
 
