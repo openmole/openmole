@@ -27,7 +27,7 @@ package org.codehaus.mojo.aspectj;
 /**
  * Module to be referenced through AJC-mojo 
  * 
- * @author <a href="mailto:tel@objectnet.no">Thor �ge Eldby</a>
+ * @author <a href="mailto:tel@objectnet.no">Thor ge Eldby</a>
  */
 public class Module
 {
