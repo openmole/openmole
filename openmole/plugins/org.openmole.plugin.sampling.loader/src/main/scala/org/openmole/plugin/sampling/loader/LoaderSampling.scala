@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.persistence;
+package org.openmole.plugin.sampling.loader
 
-/**
- *
- * @author reuillon
- */
-public interface IPersistentContext {
-    final static public String LINK = "link";
-    final static public String FILE = "file";
-    final static public String CONTEXT = "context";
-    final static public String CONTEXT_LINK = CONTEXT + LINK;
-    final static public String SEPARATOR = "_";
+import java.io.File
+import org.openmole.core.model.sampling.ISampling
+
+abstract class LoaderSampling(dir: File) extends ISampling {
+  
+  def this(dir: String) = {
+    this(new File(dir))
+  }
+  
+  
 }

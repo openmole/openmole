@@ -37,10 +37,8 @@ import scala.collection.JavaConversions._
 class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_], dir: File) extends IMoleExecutionObserver {
 
   new MoleExecutionObserverAdapter(moleExection, this)
-  dir.mkdirs
-  new File(dir, FILES).mkdir
-  new File(dir, CONTEXTS).mkdir
-  new File(dir, CONTEXTS_LINK).mkdir
+  var ordinal: Int = 0;
+
 
   def this(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_], dir: String) = {
     this(moleExection, taskCapsule, new File(dir));
@@ -61,10 +59,16 @@ class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_],
         if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
       }
 
-      val serialization = Activator.getSerializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXTS))
+      val serialization = Activator.getSerializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))
 
+      val ctxLink = new File(dir, CONTEXT_LINK)
+      val link = new File(ctxLink,  serialization._3 + SEPARATOR + ordinal.toString)
+      link.createNewFile
+      
+      ordinal += 1
+      
       try {
-        val files = new File(dir, FILES)
+        val files = new File(dir, FILE)
         for (f <- serialization._1) {         
           val file = new File(files, f._2.fileHash.toString)
           if (!file.exists) {
@@ -78,9 +82,11 @@ class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_],
   }
 
   override def moleExecutionStarting = {
-    if (!dir.exists) {
       dir.mkdirs
-    }
+      new File(dir, FILE).mkdir
+      new File(dir, CONTEXT).mkdir
+      new File(dir, CONTEXT_LINK).mkdir
+      ordinal = 0
   }
 
   override def moleExecutionFinished = {}

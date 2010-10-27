@@ -13,10 +13,9 @@ public aspect CachingAspect {
         LockRepository<Object> objectLockRepository = new LockRepository<Object>();
 
 	Object around(): execution(* *(..)) && @annotation(org.openmole.commons.aspect.caching.Cachable) {
-		
-		Object object = thisJoinPoint.getThis();
+		Object object = thisJoinPoint.getTarget();
 		String method = thisJoinPointStaticPart.getSignature().toString();
-
+               
 		Object ret = methodCache.getCachedMethodResult(object, method);
 		
 		if(ret !=  null) return ret;
@@ -44,7 +43,7 @@ public aspect CachingAspect {
 	}
 
 	Object around(): execution(* *(..)) && @annotation(org.openmole.commons.aspect.caching.SoftCachable) {
-		Object object = thisJoinPoint.getThis();
+		Object object = thisJoinPoint.getTarget();
 		String method = thisJoinPointStaticPart.getSignature().toString();
 
 		
@@ -80,7 +79,7 @@ public aspect CachingAspect {
 
 
         before() : execution(* *(..)) && @annotation(org.openmole.commons.aspect.caching.ChangeState) {
-             Object object = thisJoinPoint.getThis();
+             Object object = thisJoinPoint.getTarget();
              objectLockRepository.lock(object);
 
               try {

@@ -27,7 +27,7 @@ trait ISerializer {
   
   @throws(classOf[InternalProcessingError])
   @throws(classOf[UserBadDataError])
-  def serializeFilePathAsHashGetPluginClassAndFiles(obj: Object, file: File): (Iterable[(File, FileInfoHash)], Iterable[Class[_]])
+  def serializeFilePathAsHashGetPluginClassAndFiles(obj: Object, file: File): (Iterable[(File, FileInfoHash)], Iterable[Class[_]], File)
   
   @throws(classOf[InternalProcessingError])
   @throws(classOf[UserBadDataError])

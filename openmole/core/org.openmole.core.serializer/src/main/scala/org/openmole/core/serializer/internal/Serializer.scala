@@ -57,7 +57,7 @@ class Serializer extends ISerializer {
     }
   }
 
-  override def serializeFilePathAsHashGetPluginClassAndFiles(obj: Object, dir: File): (Iterable[(File, FileInfoHash)], Iterable[Class[_]]) = {
+  override def serializeFilePathAsHashGetPluginClassAndFiles(obj: Object, dir: File): (Iterable[(File, FileInfoHash)], Iterable[Class[_]], File) = {
     try {
       val serializer = SerializerWithPathHashInjectionAndPluginListingFactory.borrowObject
       try {
@@ -71,9 +71,9 @@ class Serializer extends ISerializer {
         }
 
         val hashName = new File(dir, Activator.getHashService.computeHash(serialized).toString)
-        move(serialized, hashName)
+        if(!hashName.exists) move(serialized, hashName)
 
-        (serializer.files, serializer.classes)
+        (serializer.files, serializer.classes, hashName)
       } finally {
         SerializerWithPathHashInjectionAndPluginListingFactory.returnObject(serializer)
       }
