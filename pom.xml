@@ -15,7 +15,6 @@
         <module>openmole</module>
         <module>commons</module>
         <module>libraries</module>
-        <module>simexplorer-ide</module>
     </modules>
 
     <dependencyManagement>
