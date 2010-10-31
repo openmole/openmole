@@ -21,6 +21,7 @@ import java.io.File
 import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.Callable
+import java.util.logging.Logger
 import org.openmole.core.file.GZURIFile
 import org.openmole.core.file.URIFile
 import org.openmole.core.implementation.execution.JobRegistry
@@ -49,7 +50,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val token = storage._2
 
     try {
-      val communicationDir = communicationStorage.getTmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
+      val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
             
       val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
       val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
@@ -71,7 +72,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
             
       return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
     } finally {
-      Activator.getBatchRessourceControl.getController(communicationStorage.getDescription).getUsageControl.releaseToken(token)
+      Activator.getBatchRessourceControl.getController(communicationStorage.description).getUsageControl.releaseToken(token)
     }
   }
 
@@ -102,9 +103,9 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val environmentPluginReplica = new ListBuffer[IURIFile]
 
     val environmentPlugins = Activator.getPluginManager().getPluginAndDependanciesForClass(environment.getClass)
-    val runtimeFile = environment.getRuntime();
+    val runtimeFile = environment.runtime
 
-    for (environmentPlugin <- environmentPlugins) {
+    for (environmentPlugin <- environmentPlugins) {     
       val replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token)
       val pluginURIFile = replicatedFile.replica
              
@@ -114,7 +115,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
         
     val authenticationFile = Activator.getWorkspace.newFile("envrionmentAuthentication", ".xml")
-    Activator.getSerializer.serialize(communicationStorage.getRemoteAuthentication, authenticationFile)
+    Activator.getSerializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     URIFile.copy(authenticationFile, authenticationURIFile, token)
     authenticationFile.delete

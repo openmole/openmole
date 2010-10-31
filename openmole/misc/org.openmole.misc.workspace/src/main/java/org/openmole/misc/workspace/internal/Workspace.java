@@ -303,6 +303,6 @@ public class Workspace implements IWorkspace {
     @Override
     public synchronized boolean isPreferenceSet(ConfigurationLocation location) throws InternalProcessingError, UserBadDataError {
         Configuration conf = getConfiguration().subset(location.getGroup());
-        return conf.containsKey(location.getName());
+        return (conf.getString(location.getName()) != null);
     }
 }

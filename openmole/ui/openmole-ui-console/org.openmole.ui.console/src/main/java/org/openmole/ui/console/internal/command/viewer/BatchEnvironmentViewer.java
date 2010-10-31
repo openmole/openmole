@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.console.internal.command.viewer;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,16 +38,18 @@ import org.openmole.core.model.execution.batch.IBatchExecutionJob;
 import org.openmole.core.model.execution.batch.IBatchJob;
 import org.openmole.core.model.execution.batch.IBatchServiceDescription;
 
+import scala.collection.Iterator;
+
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
+public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment<?>> {
 
     EnvironmentViewer environmentViewer = new EnvironmentViewer();
 
     @Override
-    public void view(IBatchEnvironment object, String[] args) {
+    public void view(IBatchEnvironment<?> object, String[] args) {
         Option verbosity = OptionBuilder.withLongOpt("verbose").withDescription("level of verbosity").hasArgs(1).withArgName("level").withType(Integer.class).isRequired(false).create("v");
         Options options = new Options().addOption(verbosity);
 
@@ -64,19 +67,21 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
             if (v >= 1) {
                 System.out.println(Separator);
                 Map<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>> jobServices = new HashMap<IBatchServiceDescription, Map<ExecutionState, AtomicInteger>>();
-                IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
-                for (IBatchExecutionJob executionJob : executionJobRegistry.getAllExecutionJobs()) {
-                    IBatchJob batchJob = executionJob.getBatchJob();
+                IExecutionJobRegistry<? extends IBatchExecutionJob> executionJobRegistry = object.jobRegistry();
+                Iterator<? extends IBatchExecutionJob> it = executionJobRegistry.getAllExecutionJobs().iterator();
+                while (it.hasNext()) {
+                    IBatchExecutionJob executionJob = it.next();
+                    IBatchJob batchJob = executionJob.batchJob();
                     if (batchJob != null) {
-                        Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(batchJob.getBatchJobServiceDescription());
+                        Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(batchJob.jobServiceDescription());
                         if (jobServiceInfo == null) {
-                            jobServiceInfo = new TreeMap<ExecutionState, AtomicInteger>();
-                            jobServices.put(batchJob.getBatchJobServiceDescription(), jobServiceInfo);
+                            jobServiceInfo = new EnumMap<ExecutionState, AtomicInteger>(ExecutionState.class);
+                            jobServices.put(batchJob.jobServiceDescription(), jobServiceInfo);
                         }
-                        AtomicInteger nb = jobServiceInfo.get(batchJob.getState());
+                        AtomicInteger nb = jobServiceInfo.get(batchJob.state());
                         if (nb == null) {
                             nb = new AtomicInteger();
-                            jobServiceInfo.put(batchJob.getState(), nb);
+                            jobServiceInfo.put(batchJob.state(), nb);
                         }
                         nb.incrementAndGet();
                     }
@@ -96,12 +101,13 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
             if (v >= 2) {
                 System.out.println(Separator);
 
-                IExecutionJobRegistry<IBatchExecutionJob> executionJobRegistry = object.getJobRegistry();
-
-                for (IBatchExecutionJob executionJob : executionJobRegistry.getAllExecutionJobs()) {
-                    IBatchJob batchJob = executionJob.getBatchJob();
+                IExecutionJobRegistry<? extends IBatchExecutionJob> executionJobRegistry = object.jobRegistry();
+                Iterator<? extends IBatchExecutionJob> it = executionJobRegistry.getAllExecutionJobs().iterator();
+                while (it.hasNext()) {
+                    IBatchExecutionJob executionJob = it.next();
+                    IBatchJob batchJob = executionJob.batchJob();
                     if (batchJob != null) {
-                        System.out.println(batchJob.toString() + " " + batchJob.getState().toString());
+                        System.out.println(batchJob.toString() + " " + batchJob.state().toString());
                     }
                 }
             }

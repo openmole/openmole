@@ -17,7 +17,9 @@
 package org.openmole.ui.console.internal.command.initializer;
 
 import java.io.IOException;
+import java.lang.Class;
 import java.lang.reflect.Field;
+import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.tools.object.SuperClassesLister;
@@ -31,6 +33,12 @@ import org.openmole.ui.console.internal.Activator;
  */
 public class EnvironmentInitializer implements IInitializer<IEnvironment> {
 
+    final Shell shell;
+
+    public EnvironmentInitializer(Shell shell) {
+        this.shell = shell;
+    }
+    
     static private boolean isValueInArray(String value, String[] values) {
         boolean ret = false;
         for (String v : values) {
@@ -44,17 +52,27 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
     @Override
     public void initialize(IEnvironment environment, Class object) {
         //BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
         for (Class c : SuperClassesLister.listSuperClasses(object)) {
 
-            for (Field f : c.getDeclaredFields()) {
+            //Look for companion object
+            Class toSearch = c;
+            Object obj = null;
+            try {
+                toSearch = org.codehaus.groovy.tools.shell.Groovysh.class.getClassLoader().loadClass(c.getName() + "$");
+                obj = shell.execute(c.getName()+"$.MODULE$");
+            } catch(ClassNotFoundException e) {
+                System.out.println(c.getName() + "$ not found.");
+            }
+                    
+            
+            for (Field f : toSearch.getDeclaredFields()) {
                 InteractiveConfiguration interactiveConfiguration = f.getAnnotation(InteractiveConfiguration.class);
                 if (interactiveConfiguration != null) {
                     if (ConfigurationLocation.class.isAssignableFrom(f.getType())) {
                         try {
                             boolean accessible = f.isAccessible();
                             f.setAccessible(true);
-                            ConfigurationLocation location = (ConfigurationLocation) f.get(null);
+                            ConfigurationLocation location = (ConfigurationLocation) f.get(obj);
                             f.setAccessible(accessible);
 
                             boolean enabled;

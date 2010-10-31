@@ -17,6 +17,7 @@
 package org.openmole.ui.console;
 
 import org.codehaus.groovy.tools.shell.Command;
+import org.codehaus.groovy.tools.shell.Groovysh;
 
 /**
  *
@@ -24,9 +25,10 @@ import org.codehaus.groovy.tools.shell.Command;
  */
 public interface IConsole {
 
-    public abstract void setVariable(String name, Object value);
+    public void setVariable(String name, Object value);
 
-    public abstract void run(String command);
+    public void run(String command);
 
     public Object leftShift(Command cmnd);
+    
 }

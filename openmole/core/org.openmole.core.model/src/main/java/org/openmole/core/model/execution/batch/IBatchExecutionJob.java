@@ -20,7 +20,7 @@ package org.openmole.core.model.execution.batch;
 import org.openmole.core.model.execution.IExecutionJob;
 
 public interface IBatchExecutionJob<ENV extends IBatchEnvironment<?>> extends IExecutionJob<ENV> {
-        IBatchJob getBatchJob();
+        IBatchJob batchJob();
 	void kill();
         void retry();
 }

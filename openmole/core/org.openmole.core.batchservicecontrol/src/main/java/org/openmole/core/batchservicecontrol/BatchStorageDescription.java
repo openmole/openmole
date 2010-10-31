@@ -24,7 +24,7 @@ import org.openmole.core.model.execution.batch.IBatchStorage;
 public class BatchStorageDescription extends BatchServiceDescription {
 	
 	public BatchStorageDescription(IBatchStorage storage) {
-		this(storage.getURI());
+		this(storage.URI());
 	}
 
 	public BatchStorageDescription(URI uri) {

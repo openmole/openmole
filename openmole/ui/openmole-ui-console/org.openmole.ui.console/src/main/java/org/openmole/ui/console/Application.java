@@ -54,8 +54,9 @@ public class Application implements IApplication {
         console.setVariable(workspace, Activator.getWorkspace());
 
         Groovysh g = console.getGroovysh();
+        Groovysh muteShell = console.getMuteGroovysh();
         g.leftShift(new Print(g, "print", "\\pr"));
-        g.leftShift(new Init(g, "init", "\\in"));
+        g.leftShift(new Init(g, muteShell, "init", "\\in"));
 
         console.run("init " + workspace);
         

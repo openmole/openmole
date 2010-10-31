@@ -1,0 +1,88 @@
+/*
+ * Copyright (C) 2010 reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.core.implementation.execution.local
+
+import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.SampleType
+import org.openmole.core.model.job.State
+import java.util.logging.Level
+import java.util.logging.Logger
+
+import org.openmole.core.model.task.IMoleTask
+import scala.collection.JavaConversions._
+
+object LocalExecuter {
+     val LOGGER = Logger.getLogger(LocalExecuter.getClass.getName)
+ 
+  
+}
+
+
+class LocalExecuter extends Runnable {
+
+  import LocalExecuter. _
+  
+    var stop: Boolean = false;
+
+    override def run = {
+
+        while (!stop) {
+            try {
+                val executionJob = LocalExecutionEnvironment.takeNextjob
+                val job = executionJob.job
+
+                try {
+                    executionJob.state = ExecutionState.RUNNING
+                    val running = System.currentTimeMillis
+                    executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
+
+                    for (moleJob <- job.getMoleJobs) {
+                        if (moleJob.getState() != State.CANCELED) {
+                            LOGGER.log(Level.FINER, "New job group taken for execution: {0}", moleJob)
+
+                            if (classOf[IMoleTask].isAssignableFrom(moleJob.getTask().getClass)) {
+                                jobGoneIdle
+                            }
+                            moleJob.perform();
+                            moleJob.finished(moleJob.getContext());
+                            LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);
+                        }
+                    }
+                    executionJob.state = ExecutionState.DONE
+                    executionJob.environment.sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
+                } finally {
+                    LocalExecutionEnvironment.jobRegistry.removeJob(job);
+                }
+            } catch {
+              case (e: InterruptedException) => 
+                if (!stop) {
+                    LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e);
+                }
+            
+              case (e: Throwable) =>
+                LOGGER.log(Level.SEVERE, null, e);
+            }
+        }
+
+    }
+
+    def jobGoneIdle {
+        LocalExecutionEnvironment.addExecuters(1)
+        stop = true
+    }
+}

@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.console.internal.command.viewer;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,6 +26,7 @@ import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.execution.IExecutionJob;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
 
+import scala.collection.Iterator;
 
 /**
  *
@@ -35,21 +36,21 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
 
     @Override
     public void view(IEnvironment object, String[] args) {
-        Map<ExecutionState, AtomicInteger> accounting = new TreeMap<ExecutionState, AtomicInteger>();
+        Map<ExecutionState, AtomicInteger> accounting = new EnumMap<ExecutionState, AtomicInteger>(ExecutionState.class);
 
-        for(ExecutionState state : ExecutionState.values()) {
+        for (ExecutionState state : ExecutionState.values()) {
             accounting.put(state, new AtomicInteger());
         }
 
-        IExecutionJobRegistry<IExecutionJob> executionJobRegistry = object.getJobRegistry();
+        Iterator<IExecutionJob> it = object.jobRegistry().getAllExecutionJobs().iterator();
 
-        for(IExecutionJob executionJob: executionJobRegistry.getAllExecutionJobs()) {
-            accounting.get(executionJob.getState()).incrementAndGet();
+        while (it.hasNext()) {
+            IExecutionJob executionJob = it.next();
+            accounting.get(executionJob.state()).incrementAndGet();
         }
 
-        for(ExecutionState state : ExecutionState.values()) {
+        for (ExecutionState state : ExecutionState.values()) {
             System.out.println(state.name() + ": " + accounting.get(state));
         }
     }
-
 }

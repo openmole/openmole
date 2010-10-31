@@ -34,10 +34,10 @@ public class Init extends CommandSupport {
 
     private HierarchicalRegistry<IInitializer> initializers = new HierarchicalRegistry<IInitializer>();
 
-    public Init(Shell shell, String string, String string1) {
+    public Init(Shell shell,Shell muteShell, String string, String string1) {
         super(shell, string, string1);
         initializers.register(IWorkspace.class, new WorkspaceInitializer());
-        initializers.register(IEnvironment.class, new EnvironmentInitializer());
+        initializers.register(IEnvironment.class, new EnvironmentInitializer(muteShell));
     }
 
     @Override

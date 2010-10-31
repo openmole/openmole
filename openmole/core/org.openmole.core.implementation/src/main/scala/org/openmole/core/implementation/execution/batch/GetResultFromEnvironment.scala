@@ -40,7 +40,7 @@ import org.openmole.core.model.execution.batch.IAccessToken
 import org.openmole.core.model.execution.batch.IBatchServiceDescription
 import org.openmole.core.model.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.core.model.execution.batch.SampleType
+import org.openmole.core.model.execution.SampleType
 
 import scala.collection.JavaConversions._
 import scala.Boolean._

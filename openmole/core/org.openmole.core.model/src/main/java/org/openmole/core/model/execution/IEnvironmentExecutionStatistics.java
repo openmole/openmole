@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.execution;
 
-import org.openmole.core.model.execution.batch.SampleType;
 import org.openmole.core.model.job.IJob;
 
 public interface IEnvironmentExecutionStatistics {

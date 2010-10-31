@@ -18,6 +18,9 @@
 package org.openmole.ui.console.internal;
 
 import groovy.lang.Binding;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.codehaus.groovy.ant.Groovy;
 import org.codehaus.groovy.tools.shell.Command;
 import org.codehaus.groovy.tools.shell.Groovysh;
@@ -30,8 +33,9 @@ import org.openmole.ui.console.IConsole;
  */
 public class Console implements IConsole {
 
-    private Groovysh groovysh;
-    private Binding binding;
+    final private Groovysh groovysh;
+    final private Binding binding;
+    final private Groovysh muteGroovysh;
 
     public Binding getBinding() {
         return binding;
@@ -44,6 +48,19 @@ public class Console implements IConsole {
     public Console() {
         this.binding = new Binding();
         this.groovysh = new Groovysh(Groovy.class.getClassLoader(), binding, new IO());
+        this.muteGroovysh = new Groovysh(Groovy.class.getClassLoader(), binding, new IO(new InputStream() {
+
+            @Override
+            public int read() throws IOException {return 0;}
+        }, new OutputStream() {
+
+            @Override
+            public void write(int b) throws IOException {}
+        }, new OutputStream() {
+
+            @Override
+            public void write(int b) throws IOException {}
+        }));
     }
 
     @Override
@@ -60,5 +77,11 @@ public class Console implements IConsole {
     public Object leftShift(Command cmnd) {
         return groovysh.leftShift(cmnd);
     }
+    
+    public Groovysh getMuteGroovysh() {
+        return muteGroovysh;
+    }
 
+    
+    
 }

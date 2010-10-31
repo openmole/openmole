@@ -110,7 +110,6 @@ public class MoleExecution implements IMoleExecution {
 
     final ILocalCommunication localCommunication;
     final IEnvironmentSelection environmentSelectionStrategy;
-    final IEnvironment defaultEnvironment;
     
     final BidiMap<Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job> categorizer = new DualHashBidiMap<Tuple3<ISubMoleExecution, IGenericTaskCapsule, IMoleJobCategory>, Job>();
     final MultiMap<ISubMoleExecution, Job> jobsGrouping = new MultiHashMap<ISubMoleExecution, Job>();
@@ -142,7 +141,6 @@ public class MoleExecution implements IMoleExecution {
         this.moleJobGrouping = moleJobGrouping;
         this.localCommunication = new LocalCommunication();
         this.environmentSelectionStrategy = environmentSelectionStrategy;
-        this.defaultEnvironment = LocalExecutionEnvironment.getInstance();
 
         ITicket ticket = nextTicket(createRootTicket());
 
@@ -201,7 +199,7 @@ public class MoleExecution implements IMoleExecution {
     private void submit(Job job, IGenericTaskCapsule capsule) {
         JobRegistry.getInstance().register(job, this);
         IEnvironment environment = environmentSelectionStrategy.selectEnvironment(capsule);
-        environment = environment!=null?environment:defaultEnvironment;
+        environment = environment!=null?environment:LocalExecutionEnvironment.instance();
         jobs.add(new Tuple2<IJob, IEnvironment>(job, environment));
     }
 
@@ -230,11 +228,6 @@ public class MoleExecution implements IMoleExecution {
                 }
                 try {
                     p._2().submit(p._1());
-                } catch (UserBadDataError e) {
-                    LOGGER.log(Level.SEVERE, "Error durring scheduling", e);
-                } catch (InternalProcessingError e) {
-                    LOGGER.log(Level.SEVERE, "Error durring scheduling", e);
-
                 } catch (Throwable t) {
                     LOGGER.log(Level.SEVERE, "Error durring scheduling", t);
                 }

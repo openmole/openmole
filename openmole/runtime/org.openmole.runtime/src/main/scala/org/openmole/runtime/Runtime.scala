@@ -162,7 +162,7 @@ class Runtime {
         for (toProcess <- jobForRuntime.moleJobs) {
           Activator.getEventDispatcher.registerListener(toProcess, Priority.HIGH.getValue, saver, IMoleJob.StateChanged)
           allFinished.registerJob(toProcess)
-          LocalExecutionEnvironment.getInstance.submit(toProcess)
+          LocalExecutionEnvironment.submit(toProcess)
         }
 
         allFinished.waitAllFinished

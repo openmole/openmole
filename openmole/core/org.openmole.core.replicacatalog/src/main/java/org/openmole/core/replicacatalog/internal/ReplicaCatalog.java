@@ -180,14 +180,14 @@ public class ReplicaCatalog implements IReplicaCatalog {
     @Override
     public IReplica uploadAndGet(final File src, final File srcPath, final IHash hash, final IBatchStorage storage, final IAccessToken token) throws InternalProcessingError, UserBadDataError, InterruptedException, IOException {
 
-        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.getDescription(), storage.getAuthenticationKey());
+        final ReplicaCatalogKey key = new ReplicaCatalogKey(hash, storage.description(), storage.authenticationKey());
 
         locks.lock(key);
 
         Replica replica;
         try {
-            IBatchServiceDescription storageDescription = storage.getDescription();
-            IBatchServiceAuthenticationKey authenticationKey = storage.getAuthenticationKey();
+            IBatchServiceDescription storageDescription = storage.description();
+            IBatchServiceAuthenticationKey authenticationKey = storage.authenticationKey();
 
             replica = getReplica(srcPath, hash, storageDescription, authenticationKey);
         
@@ -205,12 +205,12 @@ public class ReplicaCatalog implements IReplicaCatalog {
                 } else {
                     IURIFile newFile;
                     try {
-                        newFile = storage.getPersistentSpace(token).newFileInDir("replica", ".rep");
+                        newFile = storage.persistentSpace(token).newFileInDir("replica", ".rep");
                         newFile = new GZURIFile(newFile);                        
 
                         URIFile.copy(src, newFile, token);
 
-                        replica = new Replica(srcPath, hash, storage.getDescription(), storage.getAuthenticationKey(), newFile);
+                        replica = new Replica(srcPath, hash, storage.description(), storage.authenticationKey(), newFile);
                         insert(replica);              
                     } catch (IOException e) {
                         throw new InternalProcessingError(e);
