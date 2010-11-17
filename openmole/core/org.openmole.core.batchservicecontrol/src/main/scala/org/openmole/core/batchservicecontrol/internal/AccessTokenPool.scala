@@ -91,15 +91,15 @@ class AccessTokenPool extends IAccessTokenPool {
     _load.decrementAndGet
   }
 
-  override def getAccessTokenInterruptly: IAccessToken = {
+  override def tryGetToken: Option[IAccessToken] = {
     _load.incrementAndGet
-    val token = tokens.poll
-    if (token != null) {
-      taken.add(token)
-    } else {
-      _load.decrementAndGet
+    tokens.poll match {
+      case null => _load.decrementAndGet
+        return None
+        case token => 
+          taken.add(token)
+          return Some(token)
     }
-    token
   }
 
   override def load: Int = {

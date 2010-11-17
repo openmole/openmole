@@ -37,14 +37,11 @@ object UsageControl {
 
 class UsageControl(tokenPool: IAccessTokenPool) extends IUsageControl {
 
-  
-  override def tryGetToken(time: Long, unit: TimeUnit): IAccessToken = {
-    tokenPool.waitAToken(time, unit)
-  }
+  override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = tokenPool.waitAToken(time, unit)
 
   override def waitAToken: IAccessToken = tokenPool.waitAToken
 
-  override def getAccessTokenInterruptly:IAccessToken = tokenPool.getAccessTokenInterruptly
+  override def tryGetToken: Option[IAccessToken] = tokenPool.tryGetToken
   
   @ObjectModified(name = IUsageControl.ResourceReleased)
   override def releaseToken(token: IAccessToken) = tokenPool.releaseToken(token)

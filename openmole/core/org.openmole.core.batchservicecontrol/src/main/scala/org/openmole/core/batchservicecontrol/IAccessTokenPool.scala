@@ -25,5 +25,5 @@ trait IAccessTokenPool {
   def waitAToken(time: Long, unit: TimeUnit): IAccessToken
   def releaseToken(token: IAccessToken)
   def load: Int
-  def getAccessTokenInterruptly: IAccessToken
+  def tryGetToken: Option[IAccessToken]
 }

@@ -25,19 +25,19 @@ import java.util.concurrent.TimeUnit
 
 object BotomlessTokenPool extends IAccessTokenPool {
 
-    val token = new AccessToken
+  val token = new AccessToken
 
-    override def load: Int = -1
+  override def load: Int = -1
 
-    override def releaseToken(token: IAccessToken) = {
-        if (!this.token.equals(token)) {
-            throw new InternalProcessingError("The token doesn't belong to this pool");
-        }
+  override def releaseToken(token: IAccessToken) = {
+    if (!this.token.equals(token)) {
+      throw new InternalProcessingError("The token doesn't belong to this pool");
     }
+  }
 
-    override def waitAToken: IAccessToken = token
+  override def waitAToken: IAccessToken = token
 
-    override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = token
+  override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = token
 
-    override def getAccessTokenInterruptly: IAccessToken = token
+  override def tryGetToken: Option[IAccessToken] = Some(token)
 }

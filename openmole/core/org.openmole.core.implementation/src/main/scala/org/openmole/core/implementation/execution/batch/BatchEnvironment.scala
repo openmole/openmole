@@ -50,14 +50,14 @@ object BatchEnvironment {
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
   val JSRunnigBonnus = new ConfigurationLocation("BatchEnvironment", "JSRunnigBonnus")
   val JSSubmittedMalus = new ConfigurationLocation("BatchEnvironment", "JSSubmittedMalus")
+  val JSBestSelectionQuota = new ConfigurationLocation("BatchEnvironment", "JSBestSelectionQuota")
 
   Activator.getWorkspace.addToConfigurations(MemorySizeForRuntime, "512")
   Activator.getWorkspace.addToConfigurations(ResourcesExpulseThreshod, "100")
   Activator.getWorkspace.addToConfigurations(CheckInterval, "PT2M")
   Activator.getWorkspace.addToConfigurations(JSRunnigBonnus, "10")
   Activator.getWorkspace.addToConfigurations(JSSubmittedMalus, "1")
- 
-    
+  Activator.getWorkspace.addToConfigurations(JSBestSelectionQuota, "0.5")
 }
 
 

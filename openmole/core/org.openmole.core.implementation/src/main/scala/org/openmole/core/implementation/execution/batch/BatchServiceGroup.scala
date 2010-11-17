@@ -40,38 +40,16 @@ import scala.collection.JavaConversions._
 class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends IBatchServiceGroup[T] {
 
   class BatchRessourceGroupAdapter extends IObjectListener[IUsageControl] {
-
-    override def eventOccured(obj: IUsageControl) = {
-      ressourceTokenReleased
-    }
-        
+    override def eventOccured(obj: IUsageControl) = waiting.release
   }
 
   private val resources = new LinkedList[T]
 
-  @transient
-  var waiting: Semaphore = null
-    
-  @transient
-  var selectingRessource: Lock = null
-
-
-  private def getWaiting: Semaphore = {
-    synchronized {
-      if (waiting == null) {
-        waiting = new Semaphore(0)
-      }
-      return waiting
-    }
-  }
-
-  private def waitForRessourceReleased = {
-    getWaiting.acquire
-  }
+  @transient lazy val waiting: Semaphore = new Semaphore(0)
+  @transient lazy val selectingRessource: Lock = new ReentrantLock
 
   override def selectAService: (T, IAccessToken) = {
-
-    getSelectingRessource.lock
+    selectingRessource.lock
     try {
       var ret: (T, IAccessToken) = null;
 
@@ -100,16 +78,15 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
 
         //Among them select one not over loaded
         val bestResourcesIt = resourcesCopy.iterator
-        val notLoaded = new ArrayList[(T, IAccessToken)]
+        val notLoaded = new ArrayBuffer[(T, IAccessToken)]
 
-        while (bestResourcesIt.hasNext()) {
+        while (bestResourcesIt.hasNext) {
                     
-          val cur = bestResourcesIt.next();
+          val cur = bestResourcesIt.next
 
-          val token = Activator.getBatchRessourceControl.usageControl(cur.description).getAccessTokenInterruptly
-
-          if (token != null) {
-            notLoaded.add((cur, token));
+          Activator.getBatchRessourceControl.usageControl(cur.description).tryGetToken match {
+              case None =>
+              case Some(token) => notLoaded += ((cur, token))
           }
         }
                
@@ -120,13 +97,12 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
             Activator.getBatchRessourceControl().usageControl(other._1.description).releaseToken(other._2) 
           }
         } else {
-          waitForRessourceReleased
+          waiting.acquire
         }
-
       }
       return ret
     } finally {
-      getSelectingRessource.unlock
+      selectingRessource.unlock
     }
   }
 
@@ -136,7 +112,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
       val usageControl = Activator.getBatchRessourceControl.usageControl(service.description)
       Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapter, IUsageControl.ResourceReleased)
     }
-    ressourceTokenReleased
+    waiting.release
   }
     
   override def addAll(services: Iterable[T]) {
@@ -146,8 +122,6 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
       }
     }
   }
-    
-    
 
   def get(index: Int): T = {
     resources.synchronized {
@@ -155,32 +129,10 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
     }
   }
 
-  override def isEmpty: Boolean = {
-    resources.isEmpty
-  }
+  override def isEmpty: Boolean = resources.isEmpty
 
-  override def size: Int = {
-    resources.size
-  }
+  override def size: Int = resources.size
 
-  override def iterator: Iterator[T] = {
-    resources.iterator
-  }
+  override def iterator: Iterator[T] = resources.iterator
 
-  private def  getSelectingRessource: Lock = {
-    if (selectingRessource != null) {
-      return selectingRessource
-    }
-    synchronized {
-      if (selectingRessource == null) {
-        selectingRessource = new ReentrantLock
-      }
-    }
-    selectingRessource
-  }
-
-
-  private def ressourceTokenReleased = {
-    getWaiting.release
-  }
 }

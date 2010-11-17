@@ -38,13 +38,13 @@ object IUsageControl {
 
 trait IUsageControl {
 
-    def tryGetToken(time: Long, unit: TimeUnit): IAccessToken 
+    def waitAToken(time: Long, unit: TimeUnit): IAccessToken
 
     def waitAToken: IAccessToken
 
     def releaseToken(token: IAccessToken)
 
-    def getAccessTokenInterruptly: IAccessToken
+    def tryGetToken: Option[IAccessToken]
 
     def load: Int
 }

@@ -80,11 +80,6 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
 
   }
 
- 
-  /*private IFailureControl getFailureControl() {
-   return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
-   }*/
-
   def deleteJob
   def updateState: ExecutionState
 
