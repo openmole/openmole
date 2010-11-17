@@ -27,7 +27,7 @@ public class Activator implements BundleActivator {
 
     private static IEventDispatcher eventDispatcher;
     private static BundleContext context;
-    IBatchServiceControl ressourceControl;
+    private static IBatchServiceControl ressourceControl;
     private ServiceRegistration reg;
 
     /*
@@ -62,6 +62,12 @@ public class Activator implements BundleActivator {
         }
     }
 
+    public static IBatchServiceControl getRessourceControl() {
+        return ressourceControl;
+    }
+
+    
+    
     public static BundleContext getContext() {
         return context;
     }

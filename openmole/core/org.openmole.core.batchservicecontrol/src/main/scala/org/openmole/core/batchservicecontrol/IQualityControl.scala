@@ -17,14 +17,36 @@
 
 package org.openmole.core.batchservicecontrol
 
+import org.openmole.core.batchservicecontrol.internal.Activator
 import org.openmole.core.model.execution.batch.BatchServiceDescription
 
-trait IBatchServiceControl {
-  
-  def registerRessouce(ressource: BatchServiceDescription, usageControl: IUsageControl, failureControl: IQualityControl)
+object IQualityControl {
+  def withFailureControl[A](desc: BatchServiceDescription, op: => A): A = {
+    val qualityControl = Activator.getRessourceControl.qualityControl(desc)
+    try {
+      val ret = op
+      qualityControl match {
+        case Some(f) => f.success
+        case None => 
+      }
+      ret
+    } catch {
+      case e =>
+        qualityControl match {
+          case Some(f) => f.failed
+          case None =>
+        }
+        throw e
+    }
+  }
+}
 
-  def usageControl(ressource: BatchServiceDescription): IUsageControl
-    
-  def qualityControl(ressource: BatchServiceDescription): Option[IQualityControl]
-
+trait IQualityControl {
+    def failed
+    def success
+    def failureRate: Int
+    def reinit
+    def increaseQuality(value: Int)
+    def decreaseQuality(value: Int)
+    def quality: Long
 }

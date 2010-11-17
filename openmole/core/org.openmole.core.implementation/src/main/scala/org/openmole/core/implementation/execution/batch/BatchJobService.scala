@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.execution.batch
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batchservicecontrol.FailureControl
+import org.openmole.core.batchservicecontrol.QualityControl
 import org.openmole.core.batchservicecontrol.UsageControl
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.model.execution.batch.IAccessToken
@@ -31,19 +31,19 @@ import org.openmole.core.model.execution.batch.BatchServiceDescription
 import org.openmole.core.model.execution.batch.IRuntime
 import org.openmole.core.model.file.IURIFile
 
-abstract class BatchJobService[ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, description: BatchServiceDescription, nbAccess: Int) extends BatchService[ENV, AUTH](description, environment, authenticationKey, authentication, UsageControl(nbAccess), new FailureControl()) with IBatchJobService[ENV, AUTH] {
+abstract class BatchJobService[ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, description: BatchServiceDescription, nbAccess: Int) extends BatchService[ENV, AUTH](description, environment, authenticationKey, authentication, UsageControl(nbAccess), new QualityControl) with IBatchJobService[ENV, AUTH] {
 
     override def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob = {
         try {
             val ret = doSubmit(inputFile, outputFile, runtime, token)
-            Activator.getBatchRessourceControl.failureControl(description) match {
+            Activator.getBatchRessourceControl.qualityControl(description) match {
               case Some(f) => f.success
               case None =>
             }
             return ret
         } catch {
           case (e: InternalProcessingError) =>
-            Activator.getBatchRessourceControl().failureControl(description) match {
+            Activator.getBatchRessourceControl.qualityControl(description) match {
               case Some(f) => f.failed
               case None =>
             }

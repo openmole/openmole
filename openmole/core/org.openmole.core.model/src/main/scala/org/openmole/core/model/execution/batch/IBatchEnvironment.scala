@@ -25,9 +25,9 @@ trait IBatchEnvironment extends IEnvironment {
     def runtime: File
     def allJobServices: Iterable[IBatchJobService[_,_]]
     def allStorages: Iterable[IBatchStorage[_,_]]
-    def getJobServices: IBatchServiceGroup[IBatchJobService[_,_]] 
-    def getStorages: IBatchServiceGroup[IBatchStorage[_,_]]
-    def getAJobService: (IBatchJobService[_,_], IAccessToken)
-    def getAStorage: (IBatchStorage[_,_], IAccessToken)
+    def jobServices: IBatchServiceGroup[IBatchJobService[_,_]] 
+    def storages: IBatchServiceGroup[IBatchStorage[_,_]]
+    def selectAJobService: (IBatchJobService[_,_], IAccessToken)
+    def selectAStorage: (IBatchStorage[_,_], IAccessToken)
     override def jobRegistry: IExecutionJobRegistry[IBatchExecutionJob]
 }

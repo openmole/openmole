@@ -17,11 +17,23 @@
 
 package org.openmole.core.batchservicecontrol
 
+import org.openmole.core.batchservicecontrol.internal.Activator
+import org.openmole.core.model.execution.batch.BatchServiceDescription
 import org.openmole.core.model.execution.batch.IAccessToken
 import java.util.concurrent.TimeUnit
 
 object IUsageControl {
   final val ResourceReleased = "ResourceReleased"
+  
+ def withToken[B]( desc: BatchServiceDescription, f: (IAccessToken => B)): B = {
+    val usageControl = Activator.getRessourceControl.usageControl(desc)
+    val token = usageControl.waitAToken
+    try {
+      f(token)
+    } finally {
+      usageControl.releaseToken(token)
+    }
+  }
 }
 
 trait IUsageControl {

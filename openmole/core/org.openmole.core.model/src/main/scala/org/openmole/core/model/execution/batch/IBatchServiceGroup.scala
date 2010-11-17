@@ -18,7 +18,7 @@
 package org.openmole.core.model.execution.batch
 
 trait IBatchServiceGroup [T <: IBatchService[_,_]] extends Iterable[T] {
-  def getAService: (T, IAccessToken)
+  def selectAService: (T, IAccessToken)
   def add(e: T)
   def addAll(e: Iterable[T])
   def size: Int

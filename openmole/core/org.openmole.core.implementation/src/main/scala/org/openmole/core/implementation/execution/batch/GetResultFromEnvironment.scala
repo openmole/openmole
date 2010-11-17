@@ -57,21 +57,21 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
   }
 
   override def call: Unit = {
-    val token = Activator.getBatchRessourceControl().usageControl(communicationStorageDescription).waitAToken
+    val token = Activator.getBatchRessourceControl.usageControl(communicationStorageDescription).waitAToken
 
     try {
-      val result = getRuntimeResult(outputFile, token);
+      val result = getRuntimeResult(outputFile, token)
 
       if (result.exception != null) {
         throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node");
       }
 
-      display(result.stdOut, "Output", token);
-      display(result.stdErr, "Error output", token);
+      display(result.stdOut, "Output", token)
+      display(result.stdErr, "Error output", token)
 
       val fileReplacement = getFiles(result.tarResult, result.filesInfo, token)
 
-      val contextResults = getContextResults(result.contextResultURI, fileReplacement, token);
+      val contextResults = getContextResults(result.contextResultURI, fileReplacement, token)
 
       var successfull = 0
 
@@ -107,7 +107,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
       }
 
     } finally {
-      Activator.getBatchRessourceControl().usageControl(communicationStorageDescription).releaseToken(token)
+      Activator.getBatchRessourceControl.usageControl(communicationStorageDescription).releaseToken(token)
     }
   }
 
@@ -115,108 +115,103 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
   private def getRuntimeResult(outputFile: IURIFile, token: IAccessToken): RuntimeResult = {
     val resultFile = outputFile.cache(token)
     try {
-      return Activator.getSerializer().deserialize(resultFile);
+      return Activator.getSerializer.deserialize(resultFile)
     } finally {
-      resultFile.delete();
+      resultFile.delete
     }
   }
 
   private def display(message: FileMessage, description: String, token: IAccessToken) = {
     if (message == null) {
-      LOGGER.log(Level.WARNING, "{0} is null.", description);
+      LOGGER.log(Level.WARNING, "{0} is null.", description)
     } else {
-    try {
-      if (!message.isEmpty) {
-        val stdOutFile = message.file.cache(token)
-        try {
-          val stdOutHash = Activator.getHashService().computeHash(stdOutFile);
-          if (!stdOutHash.equals(message.hash)) {
-            LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.");
-          }
-
-          System.out.synchronized {
-            System.out.println("-----------------" + description + " on remote host-----------------");
-            val fis = new FileInputStream(stdOutFile)
-            try {
-              FileUtil.copy(fis, System.out);
-            } finally {
-              fis.close
+      try {
+        if (!message.isEmpty) {
+          val stdOutFile = message.file.cache(token)
+          try {
+            val stdOutHash = Activator.getHashService.computeHash(stdOutFile)
+            if (!stdOutHash.equals(message.hash)) {
+              LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.")
             }
-            System.out.println("-------------------------------------------------------");
+
+            System.out.synchronized {
+              System.out.println("-----------------" + description + " on remote host-----------------")
+              val fis = new FileInputStream(stdOutFile)
+              try {
+                FileUtil.copy(fis, System.out);
+              } finally {
+                fis.close
+              }
+              System.out.println("-------------------------------------------------------")
+            }
+          } finally {
+            stdOutFile.delete
           }
-        } finally {
-          stdOutFile.delete();
         }
+      } catch {
+        case(e: IOException) => LOGGER.log(Level.WARNING, description + " transfer has failed.", e);
       }
-    } catch {
-      case(e: IOException) => LOGGER.log(Level.WARNING, description + " transfer has failed.", e);
-    }
     }
   }
 
   private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: IAccessToken): Map[File, File] = {
     if (tarResult == null) {
-      throw new InternalProcessingError("TarResult uri result is null.");
+      throw new InternalProcessingError("TarResult uri result is null.")
     }
 
     val fileReplacement = new TreeMap[File, File]
 
     if (!tarResult.isEmpty) {
       val tarResultURIFile = tarResult.file
-      val tarResultFile = tarResultURIFile.cache(token);
+      val tarResultFile = tarResultURIFile.cache(token)
 
       try {
-        val tarResulHash = Activator.getHashService().computeHash(tarResultFile);
+        val tarResulHash = Activator.getHashService().computeHash(tarResultFile)
         if (!tarResulHash.equals(tarResult.hash)) {
-          throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.");
+          throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
         }
 
+        val tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
+
         try {
-          val tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
+          val destDir = Activator.getWorkspace.newDir("tarResult")
 
-          try {
-            val destDir = Activator.getWorkspace().newDir("tarResult")
+          var te: ArchiveEntry = tis.getNextEntry
 
-            var te: ArchiveEntry = tis.getNextEntry
+          while (te != null) {
+            val dest = new File(destDir, te.getName)
+            val os = new FileOutputStream(dest)
 
-            while (te != null) {
-              val dest = new File(destDir, te.getName())
-              val os = new FileOutputStream(dest)
-
-              try {
-                FileUtil.copy(tis, os);
-              } finally {
-                os.close
-              }
-
-              val fileInfo = filesInfo(te.getName())
-              if (fileInfo == null) {
-                throw new InternalProcessingError("Filename not found for entry " + te.getName() + '.');
-              }
-
-              val file = if (fileInfo._2) {
-                val file = Activator.getWorkspace().newDir("tarResult");
-
-                val destIn = new FileInputStream(dest)
-                try {
-                  TarArchiver.extractDirArchiveWithRelativePath(file, destIn);
-                } finally {
-                  destIn.close
-                }
-                file
-              } else {
-                dest
-              }
-
-              fileReplacement(fileInfo._1) = file
-              te = tis.getNextEntry
+            try {
+              FileUtil.copy(tis, os);
+            } finally {
+              os.close
             }
 
-          } finally {
-            tis.close
+            val fileInfo = filesInfo(te.getName)
+            if (fileInfo == null) {
+              throw new InternalProcessingError("Filename not found for entry " + te.getName + '.')
+            }
+
+            val file = if (fileInfo._2) {
+              val file = Activator.getWorkspace().newDir("tarResult")
+
+              val destIn = new FileInputStream(dest)
+              try {
+                TarArchiver.extractDirArchiveWithRelativePath(file, destIn);
+              } finally {
+                destIn.close
+              }
+              file
+            } else {
+              dest
+            }
+            fileReplacement(fileInfo._1) = file
+            te = tis.getNextEntry
           }
-        } catch {
-          case(e: IOException) => throw new InternalProcessingError(e)
+
+        } finally {
+          tis.close
         }
       } finally {
         tarResultFile.delete
@@ -236,9 +231,9 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
     val contextResutsFileCache = uriFile.cache(token)
 
     try {
-      return Activator.getSerializer().deserializeReplaceFiles(contextResutsFileCache, fileReplacement);
+      return Activator.getSerializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement);
     } finally {
-      contextResutsFileCache.delete();
+      contextResutsFileCache.delete
     }
   }
 }

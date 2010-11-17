@@ -17,12 +17,23 @@
 
 package org.openmole.core.batchservicecontrol
 
-trait IFailureControl {
-    def failed
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
-    def success
+class QualityControl extends IQualityControl {
 
-    def getFailureRate: Int
+  val _failureRate = new AtomicInteger
+  val _quality = new AtomicLong
 
-    def reinit
+  override def failed = _failureRate.incrementAndGet
+    
+  override def success = _failureRate.decrementAndGet
+    
+  override def failureRate: Int = _failureRate.get
+    
+  override def reinit = _failureRate.set(0)
+    
+  override def increaseQuality(value: Int) = _quality.addAndGet(value)
+  override def decreaseQuality(value: Int) = _quality.addAndGet(-value)
+  override def quality: Long = _quality.get
 }

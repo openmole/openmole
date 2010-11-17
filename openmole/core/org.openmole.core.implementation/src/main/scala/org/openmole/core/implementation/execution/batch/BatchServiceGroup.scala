@@ -69,7 +69,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
     getWaiting.acquire
   }
 
-  override def getAService: (T, IAccessToken) = {
+  override def selectAService: (T, IAccessToken) = {
 
     getSelectingRessource.lock
     try {
@@ -85,8 +85,8 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
           while (resourcesIt.hasNext) {
             val resource = resourcesIt.next
 
-            Activator.getBatchRessourceControl.failureControl(resource.description) match {
-                case Some(f) => if(f.getFailureRate > expulseThreshold) resourcesIt.remove
+            Activator.getBatchRessourceControl.qualityControl(resource.description) match {
+                case Some(f) => if(f.failureRate > expulseThreshold) resourcesIt.remove
                 case None => 
             }
           }
@@ -142,7 +142,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
   override def addAll(services: Iterable[T]) {
     resources.synchronized {
       for(service <- services) {
-        add(service);
+        add(service)
       }
     }
   }

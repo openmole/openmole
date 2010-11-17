@@ -46,7 +46,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
   private def initCommunication(): CopyToEnvironmentResult = {
         
-    val storage = environment.getAStorage
+    val storage = environment.selectAStorage
 
     val communicationStorage = storage._1
     val token = storage._2
@@ -104,7 +104,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   def replicateTheRuntime(token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): IRuntime = {
     val environmentPluginReplica = new ListBuffer[IURIFile]
 
-    val environmentPlugins = Activator.getPluginManager().getPluginAndDependanciesForClass(environment.getClass)
+    val environmentPlugins = Activator.getPluginManager.getPluginAndDependanciesForClass(environment.getClass)
     val runtimeFile = environment.runtime
 
     for (environmentPlugin <- environmentPlugins) {     

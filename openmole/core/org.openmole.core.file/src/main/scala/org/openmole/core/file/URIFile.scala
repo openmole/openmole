@@ -21,6 +21,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.FileInputStream
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.ExecutionException
@@ -40,8 +41,6 @@ import org.ogf.saga.namespace.Flags
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.batchservicecontrol.BatchStorageDescription
-import org.openmole.core.batchservicecontrol.IFailureControl
-import org.openmole.core.batchservicecontrol.IUsageControl
 import org.openmole.core.file.internal.Activator
 import org.openmole.core.file.internal.JSAGAInputStream
 import org.openmole.core.file.internal.JSAGAOutputStream
@@ -51,6 +50,8 @@ import org.openmole.core.model.file.IURIFile
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.commons.tools.io.Network._
 
+import org.openmole.core.batchservicecontrol.IUsageControl._
+import org.openmole.core.batchservicecontrol.IQualityControl._
 import scala.collection.JavaConversions._
 
 object URIFile {
@@ -77,14 +78,8 @@ object URIFile {
 
     val same = sameRessource(srcDescrption, destDescrption)
 
-    val usageControl = Activator.getBatchRessourceControl.usageControl(destDescrption);
-    val destToken = if (same) srcToken else usageControl.waitAToken
- 
-    try {
-      copy(src, dest, srcToken, destToken)
-    } finally {
-      if (!same) usageControl.releaseToken(destToken)
-    }
+    if(same) copy(src, dest, srcToken, srcToken)
+    else withToken(destDescrption,copy(src, dest, srcToken,_))
   }
 
   def copy(src: IURIFile, dest: IURIFile, destToken: IAccessToken): Unit = {
@@ -93,45 +88,18 @@ object URIFile {
 
     val same = sameRessource(srcDescrption, destDescrption)
 
-    val usageControl = Activator.getBatchRessourceControl.usageControl(srcDescrption)
-    val srcToken = if (same) destToken else usageControl.waitAToken
-
-    try {
-      copy(src, dest, srcToken, destToken)
-    } finally {
-      if (!same) usageControl.releaseToken(srcToken)
-    }
+    if(same) copy(src, dest, destToken, destToken)
+    else withToken(srcDescrption, copy(src, dest, _, destToken))
   }
 
-  def copy(src: File, dest: IURIFile): Unit = {
-    val usageControl = Activator.getBatchRessourceControl.usageControl(dest.storageDescription)
-    val token = usageControl.waitAToken
+  def copy(src: File, dest: IURIFile): Unit =  withToken(dest.storageDescription, copy(src, dest,_))
 
+  def copy(src: File, dest: IURIFile, token: IAccessToken): Unit =  {
+    val is = new FileInputStream(src)
     try {
-      copy(src, dest, token)
-    } finally {
-      usageControl.releaseToken(token);
-    }
-  }
-
-  def copy(src: File, dest: IURIFile, token: IAccessToken): Unit = {
-    val failureControl = Activator.getBatchRessourceControl().failureControl(dest.storageDescription)
-    val is = new org.openmole.commons.tools.io.FileInputStream(src)
-    try {
-      val os = dest.openOutputStream(token);
-
+      val os = dest.openOutputStream(token)
       try {
-        FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
-        failureControl match {
-          case Some(f) => f.success
-          case None =>
-        }
-      } catch  {
-        case e => failureControl  match {
-            case Some(f) => f.failed
-            case None =>
-          }
-          throw e
+        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)))
       } finally {
         os.close
       }
@@ -145,22 +113,11 @@ object URIFile {
     val destDescrption = dest.storageDescription
 
     val same = sameRessource(srcDescrption, destDescrption)
-
-    val srcUsageControl = Activator.getBatchRessourceControl.usageControl(srcDescrption)
-    val destUsageControl = Activator.getBatchRessourceControl.usageControl(destDescrption)
-
-    val srcToken = srcUsageControl.waitAToken
-    try {
-      val destToken = if (!same) destUsageControl.waitAToken else srcToken
-
-      try {
-        copy(src, dest, srcToken, destToken)
-      } finally {
-        if (!same) destUsageControl.releaseToken(destToken)
-      }
-    } finally {
-      srcUsageControl.releaseToken(srcToken)
-    }
+        withToken(srcDescrption,
+          srcToken =>
+          if(!same) withToken(destDescrption, copy(src, dest, srcToken, _))
+          else copy(src, dest, srcToken, srcToken)
+        )
   }
 
   private def copy(src: IURIFile, dest: IURIFile, srcToken: IAccessToken, destToken: IAccessToken): Unit = {
@@ -168,39 +125,15 @@ object URIFile {
     val destDesc = dest.storageDescription
     val same = sameRessource(srcDesc, destDesc)
 
-    val srcFailureControl = Activator.getBatchRessourceControl.failureControl(srcDesc)
-    val destFailureControl = Activator.getBatchRessourceControl.failureControl(destDesc)
-
     val is = src.openInputStream(srcToken)
     try {
       val os = dest.openOutputStream(destToken)
 
       try {
-        FileUtil.copy(is, os, Activator.getWorkspace().getPreferenceAsInt(BufferSize), Activator.getWorkspace().getPreferenceAsDurationInMs(CopyTimeout));
-        srcFailureControl match {
-          case Some(f) => f.success
-          case None =>
-        }
-      
-        if (!same) {
-          destFailureControl match {
-            case Some(f) => f.success
-            case None =>
-          }
-        }
-      } catch {
-        case e => 
-          srcFailureControl match {
-            case Some(f) => f.failed
-            case None =>
-          }
-          if (!same) {
-            destFailureControl match {
-              case Some(f) => f.failed
-              case None =>
-            }
-          }
-          throw e
+        withFailureControl(srcDesc,
+          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)))
+          else FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)) 
+        )              
       } finally {
         os.close
       }
@@ -215,7 +148,7 @@ object URIFile {
 class URIFile(val location: String) extends IURIFile {
   
   import URIFile._
-  
+ 
   private def this(location: URL) = this(location.toString)
  
   def this(file: File) = this(file.getCanonicalFile.toURI.toString)
@@ -223,13 +156,16 @@ class URIFile(val location: String) extends IURIFile {
   def this(uriFile: IURIFile, childVal: String) = this(URIFile.child(URIFile.fromLocation(uriFile.location), childVal))
     
     
-  def this(location: URI) =  this(if (location.getScheme() == null) 
-    new File(location.getPath()).toURI().toString
-                                  else location.toString)
+  def this(location: URI) =  this(if (location.getScheme == null) 
+    new File(location.getPath).toURI.toString else location.toString)
     
 
   def this(file: IURIFile) = this(file.location)
     
+  private def withToken[A](a: (IAccessToken) => A): A = org.openmole.core.batchservicecontrol.IUsageControl.withToken(storageDescription,a)
+  private def withFailureControl[A](a: => A): A = org.openmole.core.batchservicecontrol.IQualityControl.withFailureControl(storageDescription,a)
+
+  
   private def trycatch[A](f: => A): A = {
     try {
       f
@@ -252,7 +188,7 @@ class URIFile(val location: String) extends IURIFile {
   }
   
   private def fetchEntry: NSEntry = trycatch {
-    val task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), SAGAURL)
+    val task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL)
     trycatch(
       task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
       , task)
@@ -260,25 +196,16 @@ class URIFile(val location: String) extends IURIFile {
     
 
   private def fetchEntryAsDirectory: NSDirectory = trycatch {
-    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), SAGAURL)
-    trycatch(task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL)
+    trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def close(entry: NSEntry) = trycatch {
     val task = entry.close(TaskMode.ASYNC)
-    trycatch(task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def SAGAURL: URL = trycatch(fromLocation(location))
-  
-  private def withToken[B](f: (IAccessToken => B)): B = {
-    val token = getAToken
-    try {
-      f(token)
-    } finally {
-      releaseToken(token)
-    }
-  }
   
   
   /*-------------------- is a directory ---------------------------*/
@@ -321,26 +248,18 @@ class URIFile(val location: String) extends IURIFile {
       close(dir)
     }
   }
-
+  
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))
-
 
   override def mkdirIfNotExist(name: String, token: IAccessToken): IURIFile = {
     try {
-      mkdir(name, token);
+      mkdir(name, token)
     } catch {
       case (e: IOException) =>
-        try {
+        withFailureControl {
           val childVal = child(name)
           if (!childVal.isDirectory(token)) throw new IOException("Could not create dir " + location, e);
           childVal
-        } catch  {
-          case (e: IOException) => 
-            failureControl match {
-              case Some(f) => f.failed
-              case None =>
-            }
-            throw e
         }
     }
   }
@@ -372,34 +291,9 @@ class URIFile(val location: String) extends IURIFile {
     val task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL);
 
     trycatch(
-      try {
+      withFailureControl {
         val ret = task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        failureControl match {
-          case Some(f) => f.success
-          case None => 
-        }
         new JSAGAInputStream(ret)
-      } catch {
-        case e =>
-          failureControl match {
-            case Some(f) => f.failed
-            case None =>
-          }
-          throw e
-          /* case (e: ExecutionException) => 
-           if (!classOf[InternalProcessingError].isAssignableFrom(e.getCause.getClass) && !classOf[DoesNotExistException].isAssignableFrom(e.getCause().getClass())) {
-           failureControl match {
-           case Some(f) => f.failed
-           case None =>
-           }
-           }
-           throw e
-           case (e: TimeoutException) => 
-           failureControl match {
-           case Some(f) => f.failed
-           case None =>
-           }
-           throw e*/
       }, task)
   }
 
@@ -408,35 +302,10 @@ class URIFile(val location: String) extends IURIFile {
   override def openOutputStream(token: IAccessToken): OutputStream = trycatch {
 
     val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL, false)
-    trycatch(try {
+    trycatch(
+      withFailureControl {
         val ret = task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        failureControl match {
-          case Some(f) => f.success
-          case None =>
-        }
-
         new JSAGAOutputStream(ret)
-      } catch {
-        case e => 
-          failureControl match {
-            case Some(f) => f.failed
-            case None =>
-          }
-          throw e
-          /*
-           if (!classOf[InternalProcessingError].isAssignableFrom(e.getCause.getClass)) {
-           failureControl match {
-           case Some(f) => f.success
-           case None =>
-           }
-           }
-           throw  e
-           case (e: TimeoutException) =>
-           failureControl match {
-           case Some(f) => f.success
-           case None =>
-           }
-           throw e*/
       }, task)
   }
 
@@ -497,9 +366,9 @@ class URIFile(val location: String) extends IURIFile {
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)
  
-  def getAToken: IAccessToken = usageControl.waitAToken
+  //def getAToken: IAccessToken = usageControl.waitAToken
 
-  def releaseToken(token: IAccessToken) = usageControl.releaseToken(token)
+  //def releaseToken(token: IAccessToken) = usageControl.releaseToken(token)
 
   override def storageDescription: BatchServiceDescription =  new BatchStorageDescription(location)
   override def URI: URI = new URI(location)
@@ -518,7 +387,4 @@ class URIFile(val location: String) extends IURIFile {
     var hash = 3
     97 * hash + (if(location != null) location.hashCode else 0)
   }
-
-  private def usageControl: IUsageControl = Activator.getBatchRessourceControl.usageControl(storageDescription)
-  private def failureControl: Option[IFailureControl] = Activator.getBatchRessourceControl.failureControl(storageDescription)
 }

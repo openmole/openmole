@@ -26,7 +26,7 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batchservicecontrol.BatchStorageDescription
-import org.openmole.core.batchservicecontrol.FailureControl
+import org.openmole.core.batchservicecontrol.QualityControl
 import org.openmole.core.batchservicecontrol.UsageControl
 import org.openmole.core.file.URIFile
 import org.openmole.core.file.URIFileCleaner
@@ -56,7 +56,7 @@ object BatchStorage {
   val tmp = "tmp/"
 }
 
-class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val URI: URI, environment: ENV,  authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, nbAccess: Int) extends BatchService[ENV, AUTH](new BatchStorageDescription(URI), environment, authenticationKey, authentication, UsageControl(nbAccess), new FailureControl()) with IBatchStorage[ENV, AUTH] {
+class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val URI: URI, environment: ENV,  authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, nbAccess: Int) extends BatchService[ENV, AUTH](new BatchStorageDescription(URI), environment, authenticationKey, authentication, UsageControl(nbAccess), new QualityControl) with IBatchStorage[ENV, AUTH] {
 
   import BatchStorage._
   
@@ -72,71 +72,55 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
   @transient 
   var time = System.currentTimeMillis
  
-  override def persistentSpace(token: IAccessToken): IURIFile = {
-        
-    synchronized {
-      if (persistentSpaceVar == null) {
-        try {
-          persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token);
-        } catch  {
-          case(e: IOException) => throw new InternalProcessingError(e)
-        }
-      }
-      persistentSpaceVar
+  override def persistentSpace(token: IAccessToken): IURIFile = synchronized {
+    if (persistentSpaceVar == null) {
+      persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
     }
+    persistentSpaceVar
   }
 
-  override def tmpSpace(token: IAccessToken): IURIFile = {
-    
-    synchronized {
-      if (tmpSpaceVar == null || time + Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
-        time = System.currentTimeMillis
+  override def tmpSpace(token: IAccessToken): IURIFile = synchronized {
 
-        try {
-          val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
+    if (tmpSpaceVar == null || time + Activator.getWorkspace.getPreferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
+      time = System.currentTimeMillis
 
-          val service = Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE);
-          val removalDate = System.currentTimeMillis() - Activator.getWorkspace().getPreferenceAsDurationInMs(TmpDirRemoval);
+      val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
 
-          for (dir <- tmpNoTime.list(token)) {
-            val child = new URIFile(tmpNoTime, dir)
-            if (child.URLRepresentsADirectory) {
-              try {
-                val timeOfDir = dir.substring(0, dir.length - 1).toLong
+      val service = Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE);
+      val removalDate = System.currentTimeMillis - Activator.getWorkspace.getPreferenceAsDurationInMs(TmpDirRemoval);
 
-                if (timeOfDir < removalDate) {
-                  LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir);
-                  service.submit(new URIFileCleaner(child, true, false));
-                }
-              } catch  {
-                case (ex: NumberFormatException) =>
-                  LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir);
-                  service.submit(new URIFileCleaner(child, true, false));
-              }
-            } else {
-              service.submit(new URIFileCleaner(child, false, false));
+      for (dir <- tmpNoTime.list(token)) {
+        val child = new URIFile(tmpNoTime, dir)
+        if (child.URLRepresentsADirectory) {
+          try {
+            val timeOfDir = dir.substring(0, dir.length - 1).toLong
+
+            if (timeOfDir < removalDate) {
+              LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir)
+              service.submit(new URIFileCleaner(child, true, false));
             }
+          } catch  {
+            case (ex: NumberFormatException) =>
+              LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir)
+              service.submit(new URIFileCleaner(child, true, false));
           }
-
-          val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
-          tmpSpaceVar = tmpTmpDir;
-        } catch {
-          case(e: IOException) => throw new InternalProcessingError(e)
+        } else {
+          service.submit(new URIFileCleaner(child, false, false));
         }
       }
+
+      val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
+      tmpSpaceVar = tmpTmpDir
     }
+    
     tmpSpaceVar
   }
 
   override def baseDir(token: IAccessToken): IURIFile = {
     synchronized {
       if (baseSpaceVar == null) {
-        try {
-          val storeFile = new URIFile(URI.toString)
-          baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace().getPreference(IWorkspace.UniqueID) + '/', token);
-        } catch {
-          case(e: IOException) => throw new InternalProcessingError(e)
-        }
+        val storeFile = new URIFile(URI.toString)
+        baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.getPreference(IWorkspace.UniqueID) + '/', token)
       }
       baseSpaceVar
     }
@@ -194,13 +178,12 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
         Activator.getBatchRessourceControl.usageControl(description).releaseToken(token)
       }
     } catch {
-      case (e) => LOGGER.log(Level.FINE, URI.toString(), e);
+      case e => LOGGER.log(Level.FINE, URI.toString(), e);
     }
     return false
   }
 
-  override def toString: String = {
-    URI.toString
-  }
+  override def toString: String = URI.toString
+  
     
 }

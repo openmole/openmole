@@ -19,7 +19,7 @@ package org.openmole.core.batchservicecontrol.internal
 
 import org.openmole.core.batchservicecontrol.AccessToken
 import org.openmole.core.batchservicecontrol.IBatchServiceControl
-import org.openmole.core.batchservicecontrol.IFailureControl
+import org.openmole.core.batchservicecontrol.IQualityControl
 import org.openmole.core.batchservicecontrol.IUsageControl
 import org.openmole.core.batchservicecontrol.UsageControl
 import org.openmole.core.model.execution.batch.BatchServiceDescription
@@ -31,18 +31,16 @@ object BatchServiceControl {
 
 class BatchServiceControl extends IBatchServiceControl {
  
-  val ressources = new TreeMap[BatchServiceDescription, (IUsageControl, IFailureControl)]
+  val ressources = new TreeMap[BatchServiceDescription, (IUsageControl, IQualityControl)]
 
-  override def registerRessouce(ressource: BatchServiceDescription, usageControl: IUsageControl, failureControl: IFailureControl) = {
-    synchronized {  
-      ressources.get(ressource) match {
-        case Some(ctrl) => ctrl._2.reinit
-        case None => ressources(ressource) = (ressource -> (usageControl, failureControl))
-      }  
-    }
+  override def registerRessouce(ressource: BatchServiceDescription, usageControl: IUsageControl, failureControl: IQualityControl) = synchronized {
+    ressources.get(ressource) match {
+      case Some(ctrl) => ctrl._2.reinit
+      case None => ressources(ressource) = (ressource -> (usageControl, failureControl))
+    }  
   }
 
-  override def failureControl(ressource: BatchServiceDescription): Option[IFailureControl] = {
+  override def qualityControl(ressource: BatchServiceDescription): Option[IQualityControl] = {
     ressources.get(ressource) match {
       case Some(ctrl) => Some(ctrl._2)
       case None => None

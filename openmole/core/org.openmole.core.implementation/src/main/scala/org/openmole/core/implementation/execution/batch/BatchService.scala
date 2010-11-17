@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.execution.batch
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batchservicecontrol.IFailureControl
+import org.openmole.core.batchservicecontrol.IQualityControl
 import org.openmole.core.batchservicecontrol.IUsageControl
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.model.execution.batch.IBatchEnvironment
@@ -30,7 +30,7 @@ import org.openmole.core.model.execution.batch.BatchServiceDescription
 
 abstract class BatchService [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val description: BatchServiceDescription, val environment: ENV, val authenticationKey: IBatchServiceAuthenticationKey[AUTH]) extends IBatchService[ENV, AUTH] {
 
-  def this(description: BatchServiceDescription, environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, usageControl: IUsageControl, failureControl: IFailureControl) = {
+  def this(description: BatchServiceDescription, environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, usageControl: IUsageControl, failureControl: IQualityControl) = {
     this(description, environment, authenticationKey)
     Activator.getBatchEnvironmentAuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
     Activator.getBatchRessourceControl.registerRessouce(description, usageControl, failureControl)      
@@ -43,8 +43,6 @@ abstract class BatchService [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuth
     }
   }
 
-  override def toString: String = {
-    description.toString
-  }
+  override def toString: String = description.toString
     
 }

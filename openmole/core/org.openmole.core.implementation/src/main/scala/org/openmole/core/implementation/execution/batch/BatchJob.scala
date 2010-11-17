@@ -25,7 +25,7 @@ import org.openmole.core.model.execution.batch.IAccessToken
 import org.openmole.core.model.execution.batch.IBatchJob
 import org.openmole.core.model.execution.batch.IBatchJobService
 import org.openmole.core.model.execution.batch.BatchServiceDescription
-import org.openmole.core.batchservicecontrol.IUsageControl
+import org.openmole.core.batchservicecontrol.IUsageControl._
 
 
 abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) extends IBatchJob {
@@ -48,15 +48,8 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
     state.compareTo(SUBMITED) >= 0
   }
 
-  override def kill = {
-    val token = usageControl.waitAToken
-    try {
-      kill(token)
-    } finally {
-      usageControl.releaseToken(token)
-    }
-  }
-
+  override def kill = withToken(jobServiceDescription,kill(_))
+  
   override def kill(token: IAccessToken)= synchronized {
     try {
       deleteJob
@@ -65,14 +58,8 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
     }
   }
 
-  override def updatedState: ExecutionState = {
-    val token = usageControl.waitAToken
-    try {
-      updatedState(token)
-    } finally {
-      usageControl.releaseToken(token)
-    }
-  }
+  override def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
+
 
   override def updatedState(token: IAccessToken): ExecutionState = synchronized {
     state = updateState
@@ -93,8 +80,7 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
 
   }
 
-  private def usageControl: IUsageControl = Activator.getBatchRessourceControl.usageControl(jobServiceDescription)
-
+ 
   /*private IFailureControl getFailureControl() {
    return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();
    }*/
