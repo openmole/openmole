@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -27,20 +27,26 @@ import org.openmole.core.model.execution.batch.IBatchJob
 import org.openmole.core.model.execution.batch.IBatchJobService
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication
 import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey
-import org.openmole.core.model.execution.batch.IBatchServiceDescription
+import org.openmole.core.model.execution.batch.BatchServiceDescription
 import org.openmole.core.model.execution.batch.IRuntime
 import org.openmole.core.model.file.IURIFile
 
-abstract class BatchJobService[ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentication](environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, description: IBatchServiceDescription, nbAccess: Int) extends BatchService[ENV, AUTH](description, environment, authenticationKey, authentication, new UsageControl(nbAccess), new FailureControl()) with IBatchJobService[ENV, AUTH] {
+abstract class BatchJobService[ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, description: BatchServiceDescription, nbAccess: Int) extends BatchService[ENV, AUTH](description, environment, authenticationKey, authentication, UsageControl(nbAccess), new FailureControl()) with IBatchJobService[ENV, AUTH] {
 
     override def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob = {
         try {
             val ret = doSubmit(inputFile, outputFile, runtime, token)
-            Activator.getBatchRessourceControl.getController(description).getFailureControl().success();
+            Activator.getBatchRessourceControl.failureControl(description) match {
+              case Some(f) => f.success
+              case None =>
+            }
             return ret
         } catch {
           case (e: InternalProcessingError) =>
-            Activator.getBatchRessourceControl().getController(description).getFailureControl().failed();
+            Activator.getBatchRessourceControl().failureControl(description) match {
+              case Some(f) => f.failed
+              case None =>
+            }
             throw e
         }
     }

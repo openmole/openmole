@@ -21,7 +21,7 @@ package org.simexplorer.ide.ui.domain;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 import javax.swing.SpinnerNumberModel;
 import org.openide.util.lookup.ServiceProvider;
-import org.openmole.plugin.domain.relativerange.RelativeRangeDouble;
+import org.openmole.plugin.domain.relative.RelativeRangeDouble;
 
 @ServiceProvider(service=EditorPanel.class)
 public class RelativeRangeDoublePanel extends EditorPanel<RelativeRangeDouble> {

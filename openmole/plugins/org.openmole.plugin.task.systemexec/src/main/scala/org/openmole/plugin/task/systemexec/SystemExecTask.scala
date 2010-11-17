@@ -19,9 +19,10 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
+import java.lang.Integer
 import scala.collection.JavaConversions._
 
 
@@ -74,8 +75,8 @@ class SystemExecTask(name: String,
 //    }
 //  }
 
-  override protected def execute(process: Process, context: IContext):Int = {    
-        return executeProcess(process,System.out,System.err)
+  override protected def execute(process: Process, context: IContext):Integer = {    
+        executeProcess(process,System.out,System.err)
   }
   
 }

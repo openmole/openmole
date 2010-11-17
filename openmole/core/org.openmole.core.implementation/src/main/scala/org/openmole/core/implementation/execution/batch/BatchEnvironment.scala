@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -56,10 +56,10 @@ object BatchEnvironment {
 }
 
 
-abstract class BatchEnvironment[JS <: IBatchJobService[_,_]](inMemorySizeForRuntime: Option[Int]) extends Environment[IBatchExecutionJob[_]] with IBatchEnvironment[JS] {
+abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment[IBatchExecutionJob] with IBatchEnvironment {
 
   @transient
-  var jobServices: BatchServiceGroup[JS] = null
+  var jobServices: BatchServiceGroup[IBatchJobService[_,_]] = null
     
   @transient
   var storages: BatchServiceGroup[IBatchStorage[_,_]] = null
@@ -76,10 +76,10 @@ abstract class BatchEnvironment[JS <: IBatchJobService[_,_]](inMemorySizeForRunt
     case None => Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
   }
   
-  Activator.getUpdater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchEnvironment.CheckInterval));
+  Activator.getUpdater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchEnvironment.CheckInterval))
     
   override def submit(job: IJob) = {
-    val bej = new BatchExecutionJob[JS](this, job, nextExecutionJobId)
+    val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
 
     Activator.getUpdater.delay(bej, ExecutorType.UPDATE)
 
@@ -124,7 +124,7 @@ abstract class BatchEnvironment[JS <: IBatchJobService[_,_]](inMemorySizeForRunt
     }
   }
 
-  protected def selectWorkingJobServices(jobServices: BatchServiceGroup[JS]) = {
+  protected def selectWorkingJobServices(jobServices: BatchServiceGroup[IBatchJobService[_,_]]) = {
     val allJobServicesList = allJobServices
     val done = new Semaphore(0)
     val nbStillRunning = new AtomicInteger(allJobServicesList.size)
@@ -163,11 +163,11 @@ abstract class BatchEnvironment[JS <: IBatchJobService[_,_]](inMemorySizeForRunt
     getStorages.getAService
   }
 
-  override def getJobServices: IBatchServiceGroup[JS] = {
+  override def getJobServices: IBatchServiceGroup[IBatchJobService[_,_]] = {
     getInitJS.lock
     try {
       if(jobServices == null) {
-        jobServices = new BatchServiceGroup[JS](Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+        jobServices = new BatchServiceGroup[IBatchJobService[_,_]](Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
       }
             
       if (jobServices.isEmpty) {
@@ -195,7 +195,7 @@ abstract class BatchEnvironment[JS <: IBatchJobService[_,_]](inMemorySizeForRunt
     }
   }
 
-  override def getAJobService: (JS, IAccessToken) = {
+  override def getAJobService: (IBatchJobService[_,_], IAccessToken) = {
     getJobServices.getAService
   }
 

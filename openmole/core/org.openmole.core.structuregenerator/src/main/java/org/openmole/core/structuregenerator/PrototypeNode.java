@@ -11,30 +11,29 @@ import org.openmole.core.implementation.data.Prototype;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class PrototypeNode<T> implements StructureNode {
+public class PrototypeNode implements StructureNode {
 
-    Prototype<T> prototype;
+    Prototype prototype;
 
-    public PrototypeNode(Prototype<T> prototype) {
+    public PrototypeNode(Prototype prototype) {
         this.prototype = prototype;
     }
 
     @Override
-    public String getName() {
-        return prototype.getName();
+    public String name() {
+        return prototype.name();
     }
 
-    public Prototype<T> getPrototype() {
+    public Prototype prototype() {
         return prototype;
     }
 
     @Override
     public void setName(String name) {
-        prototype = new Prototype<T>(prototype, name);
+        prototype = new Prototype(name, prototype.type());
     }
-
-    public void setType(Class<? extends T> type) {
-        prototype = new Prototype<T>(prototype, type);
+   
+    public void setType(Class type) {
+        prototype = new Prototype(prototype.name(), type);
     }
-
 }

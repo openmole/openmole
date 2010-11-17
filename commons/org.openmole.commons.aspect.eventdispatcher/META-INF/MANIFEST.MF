@@ -9,5 +9,5 @@ Bundle-ManifestVersion: 2
 Bundle-Activator: org.openmole.commons.aspect.eventdispatcher.internal.Activator
 Bundle-License: http://www.gnu.org/copyleft/gpl.html
 Bundle-SymbolicName: org.openmole.commons.aspect.eventdispatcher;singleton:=true
-Import-Package: org.osgi.framework;version="1.5", org.openmole.commons.exception, org.aspectj.lang, org.aspectj.lang.reflect, org.aspectj.lang.annotation, org.aspectj.runtime.internal, org.openmole.commons.tools.pattern, scala, org.openmole.commons.tools.object
+Import-Package: org.osgi.framework;version="1.5",org.openmole.commons.exception,org.aspectj.lang,org.aspectj.lang.reflect,org.aspectj.lang.annotation,org.aspectj.runtime.internal,org.openmole.commons.tools.pattern,org.openmole.commons.tools.object,scala,scala.collection,scala.collection.generic,scala.collection.immutable,scala.collection.mutable,scala.collection.script,scala.math,scala.reflect,scala.runtime,scala.util
 

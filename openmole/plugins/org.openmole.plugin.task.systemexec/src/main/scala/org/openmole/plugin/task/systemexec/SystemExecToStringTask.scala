@@ -20,9 +20,10 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.commons.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import java.io.PrintStream
 import java.lang.StringBuilder
+import java.lang.Integer
 
 class SystemExecToStringTask(name: String, 
                              cmd: String, 
@@ -32,13 +33,13 @@ class SystemExecToStringTask(name: String,
                              val errString: Prototype[String] = null) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
   
     
-  override protected def execute(process: Process, context: IContext):Int = {    
+  override protected def execute(process: Process, context: IContext):Integer = {    
     val outStringBuilder = new StringBuilder
     val errStringBuilder = new StringBuilder
 
     val ret = executeProcess(process,new PrintStream(new StringBuilderOutputStream(outStringBuilder)),new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
-    if(outString != null) context.setValue[String](outString,outStringBuilder.toString)
-    if(errString != null) context.setValue[String](errString,errStringBuilder.toString)
+    if(outString != null) context += (outString,outStringBuilder.toString)
+    if(errString != null) context += (errString,errStringBuilder.toString)
     return ret
   }
 }

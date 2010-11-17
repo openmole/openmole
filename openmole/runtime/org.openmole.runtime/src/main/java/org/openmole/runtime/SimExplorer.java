@@ -18,6 +18,7 @@ package org.openmole.runtime;
 
 import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
 import java.io.File;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 import org.apache.commons.cli.BasicParser;
@@ -35,57 +36,69 @@ public class SimExplorer implements IApplication {
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
-        
-        String args[] = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
-
-        Options options = new Options();
-
-        options.addOption("a", true, "Path to a serialized authentication to initialize.");
-        options.addOption("w", true, "Path for the workspace.");
-        options.addOption("i", true, "Path for the input message.");
-        options.addOption("o", true, "Path for the output message.");
-        options.addOption("p", true, "Path for plugin dir to preload.");
-        
-        CommandLineParser parser = new BasicParser();
-        CommandLine cmdLine;
-        
         try {
-            cmdLine = parser.parse(options, args);
-        } catch (ParseException e) {
-            Logger.getLogger(SimExplorer.class.getName()).severe("Error while parsing command line arguments");
-            new HelpFormatter().printHelp(" ", options);
-            return IApplication.EXIT_OK;
+            String args[] = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
+
+            Options options = new Options();
+
+            options.addOption("a", true, "Path to a serialized authentication to initialize.");
+            options.addOption("w", true, "Path for the workspace.");
+            options.addOption("i", true, "Path for the input message.");
+            options.addOption("o", true, "Path for the output message.");
+            options.addOption("p", true, "Path for plugin dir to preload.");
+            options.addOption("l", true, "Local authentication mode for debug.");
+
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmdLine;
+
+            boolean debug = false;
+            
+            try {
+                cmdLine = parser.parse(options, args);
+            } catch (ParseException e) {
+                Logger.getLogger(SimExplorer.class.getName()).severe("Error while parsing command line arguments");
+                new HelpFormatter().printHelp(" ", options);
+                return IApplication.EXIT_OK;
+            }
+
+            Activator.getWorkspace().setLocation(new File(cmdLine.getOptionValue("w")));
+
+            //init jsaga
+            Activator.getJSagaSessionService();
+
+            String environmentPluginDirPath = cmdLine.getOptionValue("p");
+            String executionMessageURI = cmdLine.getOptionValue("i");
+
+            File environmentPluginDir = new File(environmentPluginDirPath);
+            Activator.getPluginManager().loadDir(environmentPluginDir);
+
+            
+            if ( cmdLine.hasOption("l") ) {
+                Activator.getWorkspace().providePassword(cmdLine.getOptionValue("l"));
+                debug = true;
+            }
+            
+            if (cmdLine.hasOption("a")) {
+                /* get env and init */
+                File envFile = new File(cmdLine.getOptionValue("a"));
+                IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);
+                authentication.initialize();
+                if(!debug) envFile.delete();
+            }
+
+
+            String outMesseageURI = cmdLine.getOptionValue("o");
+
+            new Runtime().apply(executionMessageURI, outMesseageURI, debug);
+
+
+        } catch (Throwable t) {
+            Logger.getLogger(SimExplorer.class.getName()).log(Level.SEVERE, "Error durring runtime execution", t);
         }
-        
-        Activator.getWorkspace().setLocation(new File(cmdLine.getOptionValue("w")));
-
-        //init jsaga
-        Activator.getJSagaSessionService();
-
-        String environmentPluginDirPath = cmdLine.getOptionValue("p");
-        String executionMessageURI = cmdLine.getOptionValue("i");
-
-        File environmentPluginDir = new File(environmentPluginDirPath);
-        Activator.getPluginManager().loadDir(environmentPluginDir);
-        
-        if (cmdLine.hasOption("a")) {
-            /* get env and init */
-            File envFile = new File(cmdLine.getOptionValue("a"));
-            IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);            
-            authentication.initialize();
-            envFile.delete();
-        }
-        
-        
-        String outMesseageURI= cmdLine.getOptionValue("o");
-
-        new Runtime().apply(executionMessageURI, outMesseageURI);
- 
         return IApplication.EXIT_OK;
     }
 
     @Override
     public void stop() {
     }
-
 }

@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.external.virtual
 
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import ch.ethz.ssh2._
 import org.openmole.plugin.tools.utils.SSHUtils._
 import java.io.File

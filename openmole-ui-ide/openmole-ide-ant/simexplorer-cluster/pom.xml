@@ -68,12 +68,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.interval</artifactId>
+            <artifactId>org.openmole.plugin.domain.range</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.relativerange</artifactId>
+            <artifactId>org.openmole.plugin.domain.relative</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -18,19 +18,19 @@
 package org.openmole.core.implementation.persistence
 
 import java.io.File
-import org.openmole.core.model.job.IContext
-import org.openmole.core.model.persistence.IPersistentContext._
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.persistence.PersistentContext
 
 class Loader(dir: File) extends Iterable[IContext] {
   
   def iterator(): Iterator[IContext] = new Iterator[IContext] {
-    val contextLinks = new File(dir, CONTEXT_LINK).listFiles.iterator
+    val contextLinks = new File(dir, PersistentContext.CONTEXT_LINK).listFiles.iterator
     
     override def hasNext = contextLinks.hasNext
     override def next = {
       val contextLink = contextLinks.next
-      val contextHash = contextLink.getName.substring(0, contextLink.getName.indexOf(SEPARATOR))
-      val contextFile = new File(new File(dir, CONTEXT), contextHash)
+      val contextHash = contextLink.getName.substring(0, contextLink.getName.indexOf(PersistentContext.SEPARATOR))
+      val contextFile = new File(new File(dir, PersistentContext.CONTEXT), contextHash)
       null
     }
       

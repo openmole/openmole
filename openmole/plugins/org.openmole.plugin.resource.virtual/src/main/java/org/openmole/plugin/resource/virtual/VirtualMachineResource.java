@@ -38,7 +38,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.io.FileUtil;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
-import org.openmole.core.model.resource.IResource;
+import org.openmole.core.model.task.IResource;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.plugin.resource.virtual.internal.Activator;

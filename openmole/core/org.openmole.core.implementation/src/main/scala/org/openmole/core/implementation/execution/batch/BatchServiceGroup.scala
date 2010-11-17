@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -22,8 +22,8 @@ import java.util.LinkedList
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import org.openmole.commons.aspect.eventdispatcher.IObjectChangedSynchronousListener
 
+import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.RNG
 import org.openmole.commons.tools.service.Priority
@@ -39,9 +39,9 @@ import scala.collection.JavaConversions._
 
 class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends IBatchServiceGroup[T] {
 
-  class BatchRessourceGroupAdapter extends IObjectChangedSynchronousListener[IUsageControl] {
+  class BatchRessourceGroupAdapter extends IObjectListener[IUsageControl] {
 
-    override def objectChanged(obj: IUsageControl) = {
+    override def eventOccured(obj: IUsageControl) = {
       ressourceTokenReleased
     }
         
@@ -85,8 +85,9 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
           while (resourcesIt.hasNext) {
             val resource = resourcesIt.next
 
-            if (Activator.getBatchRessourceControl.getController(resource.description).getFailureControl().getFailureRate() > expulseThreshold) {
-              resourcesIt.remove
+            Activator.getBatchRessourceControl.failureControl(resource.description) match {
+                case Some(f) => if(f.getFailureRate > expulseThreshold) resourcesIt.remove
+                case None => 
             }
           }
 
@@ -105,7 +106,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
                     
           val cur = bestResourcesIt.next();
 
-          val token = Activator.getBatchRessourceControl().getController(cur.description).getUsageControl().getAccessTokenInterruptly
+          val token = Activator.getBatchRessourceControl.usageControl(cur.description).getAccessTokenInterruptly
 
           if (token != null) {
             notLoaded.add((cur, token));
@@ -113,10 +114,10 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
         }
                
         if (notLoaded.size > 0) {
-          ret = notLoaded.remove(RNG.getRng().nextInt(notLoaded.size()));
+          ret = notLoaded.remove(RNG.nextInt(notLoaded.size))
 
           for (other <- notLoaded) {                    
-            Activator.getBatchRessourceControl().getController(other._1.description).getUsageControl().releaseToken(other._2) 
+            Activator.getBatchRessourceControl().usageControl(other._1.description).releaseToken(other._2) 
           }
         } else {
           waitForRessourceReleased
@@ -132,8 +133,8 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
   override def add(service: T) = {
     resources.synchronized {
       resources.add(service)
-      val usageControl = Activator.getBatchRessourceControl.getController(service.description).getUsageControl
-      Activator.getEventDispatcher().registerListener(usageControl, Priority.NORMAL.getValue, new BatchRessourceGroupAdapter, IUsageControl.resourceReleased)
+      val usageControl = Activator.getBatchRessourceControl.usageControl(service.description)
+      Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapter, IUsageControl.ResourceReleased)
     }
     ressourceTokenReleased
   }

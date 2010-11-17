@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.groupingstrategy.batch;
 
-import org.openmole.core.implementation.mole.MoleJobCategory;
-import org.openmole.core.model.execution.IMoleJobCategory;
-import org.openmole.core.model.execution.IGroupingStrategy;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.implementation.mole.MoleJobGroup;
+import org.openmole.core.model.mole.IMoleJobGroup;
+import org.openmole.core.model.mole.IGroupingStrategy;
+import org.openmole.core.model.data.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 
@@ -39,9 +39,9 @@ public class FixedNumberOfMoleJobsGroupingStrategy implements IGroupingStrategy 
     }
 
     @Override
-    public IMoleJobCategory getCategory(IContext context) throws InternalProcessingError, UserBadDataError {
+    public IMoleJobGroup group(IContext context) throws InternalProcessingError, UserBadDataError {
         Object[] args = {currentBatchNumber};
-        IMoleJobCategory ret = new MoleJobCategory(args);
+        IMoleJobGroup ret = new MoleJobGroup(args);
 
         currentNumberOfJobs++;
         if(currentNumberOfJobs >= numberOfMoleJobs) {

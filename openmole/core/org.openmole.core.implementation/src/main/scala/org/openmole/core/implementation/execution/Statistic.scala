@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -20,6 +20,7 @@ package org.openmole.core.implementation.execution
 import org.openmole.core.model.execution.IStatistic
 import scala.collection.mutable.HashMap
 import org.openmole.core.model.execution.SampleType
+import scala.collection.mutable.ListBuffer
 
 object Statistic {
   val empty = new Statistic(0)
@@ -27,7 +28,7 @@ object Statistic {
 
 class Statistic(historySize: Int) extends IStatistic {
  
-  val averages = new HashMap[SampleType, List[Long]]
+  val averages = new HashMap[SampleType, ListBuffer[Long]]
 
   override def apply(sample: SampleType): Iterable[Long] = {
     averages.get(sample) match {
@@ -36,14 +37,12 @@ class Statistic(historySize: Int) extends IStatistic {
     }
   }
 
-  override def add (sample: SampleType, length: Long) = {
-    synchronized {
-      averages(sample) = averages.get(sample) match {
+  override def add (sample: SampleType, length: Long) = synchronized {
+      averages.get(sample) match {
         case Some(histo) => 
-          if(histo.size < historySize) histo :+ length 
-          else histo.tail :+ length
-        case None => List(length)
+          if(histo.size < historySize) histo += length 
+          else histo.tail += length
+        case None => ListBuffer(length)
       }
-    }
   }
 }

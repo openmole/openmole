@@ -1,0 +1,32 @@
+/*
+ * Copyright (C) 2010 reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.plugin.domain.range
+
+import org.openmole.core.model.data.IContext
+
+trait IRangeConverter[A, B] extends IRange[B] {
+  def convert(e: A): B
+  def underlyingRange: IRange[A]
+  
+  override def computeValues(global: IContext, context: IContext): Iterable[B] = underlyingRange.computeValues(global, context).map{convert(_)}
+  override def step(global: IContext, context: IContext): B = convert(underlyingRange.step(global, context))
+  override def min(global: IContext, context: IContext): B = convert(underlyingRange.min(global, context))
+  override def max(global: IContext, context: IContext): B = convert(underlyingRange.max(global, context))
+  override def range(global: IContext, context: IContext): B = convert(underlyingRange.range(global, context))
+  override def center(global: IContext, context: IContext): B = convert(underlyingRange.center(global, context))
+}

@@ -58,7 +58,7 @@ public enum DataModeMask {
      *
      * @return the value of the mask
      */
-    public int getMask() {
+    public int mask() {
         return mask;
     }
 }

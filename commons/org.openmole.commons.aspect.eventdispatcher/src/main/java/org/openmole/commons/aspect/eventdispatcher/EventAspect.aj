@@ -3,8 +3,6 @@ package org.openmole.commons.aspect.eventdispatcher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.commons.aspect.eventdispatcher.internal.Activator;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import java.lang.InterruptedException;
 import java.lang.reflect.Method;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -12,7 +10,7 @@ import java.lang.annotation.Annotation;
 
 public aspect EventAspect {
 
-	before() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified) {
+	before() : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified) {
 
 		Object object = thisJoinPoint.getTarget();
 
@@ -26,7 +24,7 @@ public aspect EventAspect {
 	}
 
 
-	after() throws InternalProcessingError, UserBadDataError : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectModified) {
+	after() : execution(* *(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectModified) {
 		
 		Object object = thisJoinPoint.getTarget();
 

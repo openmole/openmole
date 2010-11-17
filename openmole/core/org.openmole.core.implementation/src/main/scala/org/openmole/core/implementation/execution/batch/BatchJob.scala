@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -20,40 +20,32 @@ package org.openmole.core.implementation.execution.batch
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.batch.IAccessToken
 import org.openmole.core.model.execution.batch.IBatchJob
 import org.openmole.core.model.execution.batch.IBatchJobService
-import org.openmole.core.model.execution.batch.IBatchServiceDescription
+import org.openmole.core.model.execution.batch.BatchServiceDescription
 import org.openmole.core.batchservicecontrol.IUsageControl
 
 
-abstract class BatchJob(val jobServiceDescription: IBatchServiceDescription) extends IBatchJob {
+abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) extends IBatchJob {
   
-  def this(jobService: IBatchJobService[_,_]) = {
-    this(jobService.description)
-  }
+  def this(jobService: IBatchJobService[_,_]) = this(jobService.description)
   
-  val timeStemps = new Array[Long](ExecutionState.values().length)
+  val timeStemps = new Array[Long](ExecutionState.values.length)
 
   var _state: ExecutionState = null
-  state = ExecutionState.SUBMITED
+  state = SUBMITED
 
-  def state_=(state: ExecutionState): Unit = {
-    setStateAndUpdateIntervals(state)
-  }
-
-  private def setStateAndUpdateIntervals(state: ExecutionState) = {
-    synchronized {    
-      if (this.state != state) {
-        val curDate = System.currentTimeMillis
-        timeStemps(state.ordinal) = curDate
-        _state = state
-      }
+  private def state_=(state: ExecutionState) = synchronized {  
+    if (_state != state) {
+      timeStemps(state.ordinal) = System.currentTimeMillis
+      _state = state
     }
   }
 
   override def hasBeenSubmitted: Boolean = {
-    state.compareTo(ExecutionState.SUBMITED) >= 0
+    state.compareTo(SUBMITED) >= 0
   }
 
   override def kill = {
@@ -65,41 +57,33 @@ abstract class BatchJob(val jobServiceDescription: IBatchServiceDescription) ext
     }
   }
 
-  override def kill(token: IAccessToken)= {
-    synchronized { 
-      try {
-        deleteJob
-      } finally {
-        state = ExecutionState.KILLED
-      }
+  override def kill(token: IAccessToken)= synchronized {
+    try {
+      deleteJob
+    } finally {
+      state = KILLED
     }
   }
 
   override def updatedState: ExecutionState = {
     val token = usageControl.waitAToken
     try {
-      return getUpdatedState(token)
+      updatedState(token)
     } finally {
       usageControl.releaseToken(token)
     }
   }
 
-  override def getUpdatedState(token: IAccessToken): ExecutionState = {
-    synchronized {
-      state = updateState
-      return state
-    }
+  override def updatedState(token: IAccessToken): ExecutionState = synchronized {
+    state = updateState
+    state
   }
 
-  override def state: ExecutionState = {
-    _state
-  }
+  override def state: ExecutionState =  _state
 
-  override def timeStemp(state: ExecutionState): Long = {
-    timeStemps(state.ordinal())
-  }
-
-  override def lastStatusDurration: Long = {
+  override def timeStemp(state: ExecutionState): Long = timeStemps(state.ordinal)
+  
+  override def lastStateDurration: Long = {
     val currentState = state
     var previous: Long = 0
     timeStemps.slice(0, currentState.ordinal).reverse.find( _ != 0 ) match {
@@ -109,9 +93,7 @@ abstract class BatchJob(val jobServiceDescription: IBatchServiceDescription) ext
 
   }
 
-  private def usageControl: IUsageControl = {
-    Activator.getBatchRessourceControl().getController(jobServiceDescription).getUsageControl();
-  }
+  private def usageControl: IUsageControl = Activator.getBatchRessourceControl.usageControl(jobServiceDescription)
 
   /*private IFailureControl getFailureControl() {
    return Activator.getBatchRessourceControl().getController(jobServiceDescription).getFailureControl();

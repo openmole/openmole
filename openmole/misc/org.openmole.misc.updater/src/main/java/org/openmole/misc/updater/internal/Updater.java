@@ -74,7 +74,7 @@ public class Updater implements IUpdater {
                 public void run() {
                     Activator.getExecutorService().getExecutorService(updaterTask.getExecutorType()).submit(updaterTask);
                 }
-            }, updaterTask.getDelay(), TimeUnit.MILLISECONDS);
+            }, updaterTask.delay(), TimeUnit.MILLISECONDS);
 
         }
 

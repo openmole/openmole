@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -19,10 +19,9 @@ package org.openmole.core.model.execution
 
 import org.openmole.core.model.job.IJob
 
-trait IExecutionJob[+ENV <: IEnvironment[_]] {
-  
+trait IExecutionJob {  
   def state: ExecutionState
-  def environment: ENV
+  def environment: IEnvironment
   def job: IJob
   def creationTime: Long
   def id: IExecutionJobId

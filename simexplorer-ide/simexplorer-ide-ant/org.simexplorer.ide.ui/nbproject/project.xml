@@ -143,7 +143,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.domain.interval</code-name-base>
+                    <code-name-base>org.openmole.plugin.domain.range</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -151,7 +151,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openmole.plugin.domain.relativerange</code-name-base>
+                    <code-name-base>org.openmole.plugin.domain.relative</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

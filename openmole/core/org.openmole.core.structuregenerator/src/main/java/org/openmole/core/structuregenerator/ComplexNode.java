@@ -47,14 +47,14 @@ public class ComplexNode implements StructureNode, Iterable<StructureNode> {
         setParent(parent);
     }
 
-    public <T> PrototypeNode<T> addPrototype(String name, Class<? extends T> type) {
-        PrototypeNode<T> node = new PrototypeNode(new Prototype(new String(name), type));
+    public PrototypeNode addPrototype(String name, Class type) {
+        PrototypeNode node = new PrototypeNode(new Prototype(new String(name), type));
         add(node);
         return node;
     }
 
-    public <T> SequenceNode<PrototypeNode<T>> addPrototypeSequence(String name, Class<? extends T> type) {
-        SequenceNode<PrototypeNode<T>> node = new SequenceNode<PrototypeNode<T>>(new PrototypeNode(new Prototype(new String(name), type)));
+    public SequenceNode<PrototypeNode> addPrototypeSequence(String name, Class type) {
+        SequenceNode<PrototypeNode> node = new SequenceNode<PrototypeNode>(new PrototypeNode(new Prototype(new String(name), type)));
         add(node);
         return node;
     }
@@ -72,7 +72,7 @@ public class ComplexNode implements StructureNode, Iterable<StructureNode> {
     }
 
     public void add(StructureNode element) {
-        getChildrenContent().put(element.getName(), element);
+        getChildrenContent().put(element.name(), element);
     }
 
     public StructureNode get(String name) throws InternalProcessingError {
@@ -89,7 +89,7 @@ public class ComplexNode implements StructureNode, Iterable<StructureNode> {
      * @return
      */
     public String getName(int index) {
-        return childrenContent.get(index).getName();
+        return childrenContent.get(index).name();
     }
 
     public void clear() {
@@ -110,7 +110,7 @@ public class ComplexNode implements StructureNode, Iterable<StructureNode> {
     }
 
     public void remove(StructureNode element) {
-        remove(element.getName());
+        remove(element.name());
     }
 
     public void remove(String name) {
@@ -122,10 +122,11 @@ public class ComplexNode implements StructureNode, Iterable<StructureNode> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
-
+    
+    @Override
     public void setName(String name) {
         this.name = name;
     }

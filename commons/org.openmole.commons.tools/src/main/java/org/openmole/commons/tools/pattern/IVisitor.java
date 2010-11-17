@@ -17,9 +17,7 @@
 
 package org.openmole.commons.tools.pattern;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 
 public interface IVisitor<T> {
-	void action(T visited) throws InternalProcessingError, UserBadDataError;
+	void action(T visited) throws Throwable;
 }

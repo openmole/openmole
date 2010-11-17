@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -28,7 +28,6 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.SampleType
 import org.openmole.core.model.job.IJob
 import org.openmole.commons.tools.cache.AssociativeCache
-import org.openmole.commons.tools.cache.ICachable
 import org.openmole.core.implementation.execution.JobStatisticCategory
 import org.openmole.core.model.execution.IExecutionJobRegistry
 import org.openmole.core.model.execution.IJobStatisticCategory
@@ -53,11 +52,11 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
       val curTime = System.currentTimeMillis
       val timeCache = new AssociativeCache[(IJobStatisticCategory, SampleType), Long](AssociativeCache.HARD, AssociativeCache.HARD)
 
-      for (job <- registry.getAllJobs) {
-        if (!job.allMoleJobsFinished()) {
+      for (job <- registry.allJobs) {
+        if (!job.allMoleJobsFinished) {
 
           val jobStatisticCategory = new JobStatisticCategory(job)
-          registry.getLastExecutionJobForJob(job) match {
+          registry.lastExecutionJob(job) match {
             case Some(lastJob) => 
                         
               val executionState = lastJob.state
@@ -67,14 +66,11 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
 
                   val key = (jobStatisticCategory, sampleType)
                   try {
-                    val limitTime = timeCache.getCache(this, key, new ICachable[Long] {
-
-                        override def compute: Long = {
-                          val finishedStat = environment.statistics.getStatFor(job)(sampleType)
-                          val runningStat = computeStat(sampleType, registry.getExecutionJobsForTheCategory(jobStatisticCategory));
-                          return strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
-                        }
-                      })
+                    val limitTime = timeCache.cache(this, key, {
+                        val finishedStat = environment.statistic.statistic(job)(sampleType)
+                          val runningStat = computeStat(sampleType, registry.executionJobs(jobStatisticCategory))
+                          strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
+                        })
 
 
                     if (jobTime > limitTime) {
@@ -89,7 +85,7 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
           
               nbJobsByCategory(jobStatisticCategory) = nbJobsByCategory.get(jobStatisticCategory) match {
                 case Some(nb) => nb + 1
-                case None => 0
+                case None => 1
               }
             case None =>
           }
@@ -97,23 +93,29 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
                     
       }
 
-
-      for (val entry <- nbJobsByCategory.entrySet()) {
-        var nbRessub = minNumberOfJobsByCategory - entry.getValue()
+      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"Entry set size " + nbJobsByCategory.entrySet.size)
+      for (val entry <- nbJobsByCategory.entrySet) {
+        var nbRessub = minNumberOfJobsByCategory - entry.getValue
         val jobStatisticCategory = entry.getKey
-        //Logger.getLogger(OverSubmissionAgent.class.getName()).log(Level.INFO,nbRessub + " " + entry.getValue().get());
+        Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,nbRessub + " " + entry.getValue);
 
         if (nbRessub > 0) {
           // Resubmit nbRessub jobs in a fair manner
           val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
           var keys = new TreeSet[Int]
 
-          for (job <- registry.getJobsForTheCategory(jobStatisticCategory)) {
-            val nb = registry.getNbExecutionJobsForJob(job)
+          for (job <- registry.jobs(jobStatisticCategory)) {
+            val nb = registry.nbExecutionJobs(job)
             if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-              if(!order.contains(nb)) order.put(nb, new HashSet[IJob])
-              order(nb) += job
-              keys = keys + nb
+             val set = order.get(nb) match {
+                case None => 
+                  val set = new HashSet[IJob]
+                  order += ((nb, set))
+                  set
+                case Some(set) => set
+              } 
+              set += job
+              keys += nb
             }
           }
 
@@ -129,7 +131,7 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
               try {
                 environment.submit(job)
               } catch {
-                case (e: Throwable) => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
+                case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
               }
 
               jobs -= job
@@ -154,7 +156,7 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
   }
    
     
-  private def computeStat(sample: SampleType, allExecutionjobs: Iterable[IBatchExecutionJob[_]] ): List[Long] = {
+  private def computeStat(sample: SampleType, allExecutionjobs: Iterable[IBatchExecutionJob] ): List[Long] = {
                   
     val curTime = System.currentTimeMillis
     val stat = new ListBuffer[Long]

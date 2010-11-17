@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -52,7 +52,7 @@ object GliteAuthentication {
     Activator.getWorkspace().getPreference(GliteEnvironment.P12CertificateLocation)
   }
 
-  def  getCertPath: String = {
+  def getCertPath: String = {
     Activator.getWorkspace().getPreference(GliteEnvironment.CertificatePathLocation)
   }
 
@@ -86,7 +86,7 @@ object GliteAuthentication {
 
     for (tarUrl <- site.list) {
       try {
-        val child = site.getChild(tarUrl)
+        val child = site.child(tarUrl)
         val is = child.openInputStream
 
         val tis = new TarArchiveInputStream(new GZIPInputStream(new BufferedInputStream(is)))
@@ -124,9 +124,7 @@ object GliteAuthentication {
       }
     }
   }
-  
 }
-
 
 
 class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy]) extends IBatchServiceAuthentication {
@@ -141,38 +139,31 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   
   def proxyExpiresTime = _proxyExpiresTime
 
-  @Cachable
-  private def getCACertificatesDir: File = {
-    try {
-      val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+  //FIXME lazy val in scala 2.9.0 
+  //@transient lazy val 
+  def CACertificatesDir: File = {
+    val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
             
-      if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists){
-        return new File(X509_CERT_DIR)
+    if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists){
+      new File(X509_CERT_DIR)
+    } else {
+      val caDir = new File("/etc/grid-security/certificates/")
+      if (caDir.exists) {
+        caDir
       } else {
-        val caDir = new File("/etc/grid-security/certificates/")
-        if (caDir.exists) {
-          return caDir
-        } else {
-          val tmp = Activator.getWorkspace.getFile("CACertificates")
+        val tmp = Activator.getWorkspace.getFile("CACertificates")
 
-          if (!tmp.exists() || !new File(tmp, ".complete").exists()) {
-            tmp.mkdir();
-            dowloadCACertificates(new URI(Activator.getWorkspace().getPreference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
-            new File(tmp, ".complete").createNewFile();
-          }
-          return tmp;
+        if (!tmp.exists || !new File(tmp, ".complete").exists) {
+          tmp.mkdir();
+          dowloadCACertificates(new URI(Activator.getWorkspace().getPreference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
+          new File(tmp, ".complete").createNewFile
         }
+        tmp
       }
-
-    } catch {
-      case (e: Throwable) => throw new InternalProcessingError(e)
     }
-
   }
 
   override def initialize = {
-
-
     if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) {
       createContextFromFile(new File(System.getenv.get("X509_USER_PROXY")))
     } else {
@@ -186,91 +177,73 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
     val interval = (proxyDuration * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
 
-    Logger.getLogger(classOf[GliteAuthentication].getName).log(Level.FINE, "Proxy renewal in {0} ms.", interval);
     Activator.getUpdater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
-
-    Activator.getJSagaSessionService().addContext(ctx)
+    Activator.getJSagaSessionService.addContext(ctx)
   }
 
   def initContext(ctx: Context): Long = {
-
-    Logger.getLogger(classOf[GliteAuthentication].getName()).log(Level.FINE, "Proxy renewal.")
-        
-    try {
-      ctx.setAttribute(VOMSContext.VOMSDIR, "")
-      ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir.getCanonicalPath)
-      
-      val proxyDuration = myProxy match {
-        case Some(proxy) => 
-          ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
-          Logger.getLogger(classOf[GliteAuthentication].getName).log(Level.INFO, proxy.url)
-          ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
-          ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getDelegationTimeString)
-          ctx.setAttribute(VOMSContext.MYPROXYUSERID,proxy.userId)
-          ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
-          _proxyExpiresTime = Long.MaxValue
-          12 * 60 * 60 * 1000
-        case None =>
-          ctx.setAttribute(Context.TYPE, "VOMS")
-          ctx.setAttribute(Context.LIFETIME, getTimeString)
-          _proxyExpiresTime = System.currentTimeMillis + getTime
-          getTime
-      }
-            
-
-      if (proxy == null) {
-        proxy = Activator.getWorkspace().newFile("proxy", ".x509")
-
-        if (getCertType.equalsIgnoreCase("p12")) {
-          ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath)
-        } else if (getCertType.equalsIgnoreCase("pem")) {
-          ctx.setAttribute(Context.USERCERT, getCertPath);
-          ctx.setAttribute(Context.USERKEY, getKeyPath);
-        } else {
-          throw new UserBadDataError("Unknown certificate type " + getCertType)
-        }
-
-        val keyPassword = {
-          val pass = Activator.getWorkspace().getPreference(GliteEnvironment.PasswordLocation)
-          if(pass == null) "" else pass
-        }
-
-        ctx.setAttribute(Context.USERPASS, keyPassword);
-
-        val fqan = getFQAN
-
-        if (!fqan.isEmpty()) {
-          ctx.setAttribute(VOMSContext.USERFQAN, fqan);
-        }
-      }
-
-      Logger.getLogger(classOf[GliteAuthentication].getName).log(Level.INFO, proxy.getAbsolutePath)
-      ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath)
-      ctx.setAttribute(Context.SERVER, vomsURL)
-      ctx.setAttribute(Context.USERVO, voName)
-
-      ctx.getAttribute(Context.USERID)
- 
-
-      return proxyDuration;
-            
-    } catch {
-      case (e: Throwable) => throw new InternalProcessingError(e) 
+    ctx.setAttribute(VOMSContext.VOMSDIR, "")
+    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+  
+    val proxyDuration = myProxy match {
+      case Some(proxy) => 
+        ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
+        ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
+        ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getDelegationTimeString)
+        ctx.setAttribute(VOMSContext.MYPROXYUSERID,proxy.userId)
+        ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
+        _proxyExpiresTime = Long.MaxValue
+        12 * 60 * 60 * 1000
+      case None =>
+        ctx.setAttribute(Context.TYPE, "VOMS")
+        ctx.setAttribute(Context.LIFETIME, getTimeString)
+        _proxyExpiresTime = System.currentTimeMillis + getTime
+        getTime
     }
+            
+    if (proxy == null) {
+      proxy = Activator.getWorkspace().newFile("proxy", ".x509")
+
+      if (getCertType.equalsIgnoreCase("p12")) {
+        ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath)
+      } else if (getCertType.equalsIgnoreCase("pem")) {
+        ctx.setAttribute(Context.USERCERT, getCertPath)
+        ctx.setAttribute(Context.USERKEY, getKeyPath)
+      } else {
+        throw new UserBadDataError("Unknown certificate type " + getCertType)
+      }
+
+      val keyPassword = {
+        val pass = Activator.getWorkspace.getPreference(GliteEnvironment.PasswordLocation)
+        if(pass == null) "" else pass
+      }
+
+      ctx.setAttribute(Context.USERPASS, keyPassword)
+
+      val fqan = getFQAN
+
+      if (!fqan.isEmpty)  ctx.setAttribute(VOMSContext.USERFQAN, fqan)
+      
+    }
+
+    ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath)
+    ctx.setAttribute(Context.SERVER, vomsURL)
+    ctx.setAttribute(Context.USERVO, voName)
+
+    ctx.getAttribute(Context.USERID)
+ 
+    proxyDuration
+
   }
 
   private def createContextFromFile(proxyFile: File) = {
-    try {
-      val ctx = Activator.getJSagaSessionService.createContext
-      ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
-      ctx.setAttribute(Context.CERTREPOSITORY, getCACertificatesDir.getCanonicalPath)
-      ctx.setAttribute(VOMSContext.VOMSDIR, "")
-      ctx.setAttribute(Context.TYPE, "GlobusLegacy")
+    val ctx = Activator.getJSagaSessionService.createContext
+    ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
+    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+    ctx.setAttribute(VOMSContext.VOMSDIR, "")
+    ctx.setAttribute(Context.TYPE, "GlobusLegacy")
 
-      Activator.getJSagaSessionService().addContext(ctx)
-    } catch  {
-      case (e: Throwable) => throw new InternalProcessingError(e)
-    } 
+    Activator.getJSagaSessionService.addContext(ctx)
   }
 
 }

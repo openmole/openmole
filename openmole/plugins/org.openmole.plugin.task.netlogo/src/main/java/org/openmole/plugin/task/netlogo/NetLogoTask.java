@@ -26,7 +26,7 @@ import org.nlogo.headless.HeadlessWorkspace;
 import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.data.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.plugin.task.external.system.ExternalSystemTask;
@@ -65,7 +65,7 @@ public class NetLogoTask extends ExternalSystemTask {
 
 
     @Override
-    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
             File tmpDir = Activator.getWorkspace().newDir("netLogoTask");
             prepareInputFiles(global, context, progress, tmpDir);
@@ -76,7 +76,7 @@ public class NetLogoTask extends ExternalSystemTask {
                 workspace.open(script.getAbsolutePath());
                 
                 for (Tuple2<IPrototype, String> inBinding : getInputBinding()) {
-                    Object val = context.getValue(inBinding._1());
+                    Object val = context.value(inBinding._1()).get();
                     workspace.command("set " + inBinding._2() + " " + val.toString());
                 }
 
@@ -85,7 +85,7 @@ public class NetLogoTask extends ExternalSystemTask {
                 }
 
                 for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
-                    context.setValue(outBinding._2(), workspace.report(outBinding._1()));
+                    context.add(outBinding._2(), workspace.report(outBinding._1()));
                 }
 
                 fetchOutputFiles(global, context, progress, tmpDir);

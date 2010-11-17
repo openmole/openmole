@@ -9,7 +9,7 @@ import java.io.File;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.data.IContext;
 
 /**
  *

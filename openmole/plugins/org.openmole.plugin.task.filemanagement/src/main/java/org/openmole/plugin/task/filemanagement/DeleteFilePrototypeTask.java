@@ -27,7 +27,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.data.IContext;
 
 public class DeleteFilePrototypeTask extends Task {
 
@@ -39,14 +39,14 @@ public class DeleteFilePrototypeTask extends Task {
 	}
 
 	@Override
-	protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
+	public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
 		for(IPrototype<File> p : toDelete) {
-			File f = context.getValue(p);
+			File f = context.value(p).get();
 			f.delete();
 		}
 
                 for(IPrototype<List<File>> p : toDeleteList){
-                    for(File f : context.getValue(p)) {
+                    for(File f : context.value(p).get()) {
                         f.delete();
                     }
                 }

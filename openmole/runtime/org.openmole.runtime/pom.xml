@@ -172,9 +172,9 @@
         <product.plugins.directory>${product.directory}/plugins/</product.plugins.directory>
         <product.configuration.directory>${product.directory}/configuration/</product.configuration.directory>
         <import.packages>*</import.packages>
-        <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
+        <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${project.version}"</export.packages>
         <include.resources>src/main/resources/plugin.xml</include.resources>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
+        <symbolic.name>${project.artifactId};singleton:=true</symbolic.name>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>

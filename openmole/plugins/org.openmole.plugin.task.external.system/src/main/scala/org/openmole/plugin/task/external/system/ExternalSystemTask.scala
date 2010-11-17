@@ -20,10 +20,9 @@ package org.openmole.plugin.task.external.system
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._
-import org.openmole.commons.tools.io.IFileOperation
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
-import java.util.TreeSet
+import org.openmole.core.model.data.IContext
+import scala.collection.immutable.TreeSet
 import scala.collection.mutable.ListBuffer
 
 import org.openmole.plugin.task.external.ExternalTask
@@ -40,39 +39,35 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
         copy(f.file, to)
 
-        applyRecursive(to, new IFileOperation() {
-            override def execute(file: File) =  {
-              if (file.isFile()) {
+        applyRecursive(to, (file: File) => {
+              if (file.isFile) {
                 file.setExecutable(true)
               }
               file.deleteOnExit
-            }
-          })
+            })
       }
     )
   }
 
 
   def fetchOutputFiles(global: IContext, context: IContext, progress: IProgress, localDir: File) = {
-    val usedFiles = new TreeSet[File]
+    var usedFiles = new TreeSet[File]
 
     setOutputFilesVariables(global, context,progress,localDir).foreach( f => {
         if (!f.file.exists) {
-          throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + getName + " doesn't exist")
+          throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
         }
-        usedFiles add (f.file)
+        usedFiles += (f.file)
       }
     )
 
     val unusedFiles = new ListBuffer[File]
     val unusedDirs = new ListBuffer[File]
 
-    applyRecursive(localDir, new IFileOperation() {
-        override def execute(file: File) =  {
+    applyRecursive(localDir, (file: File) => {
           if(file.isFile) unusedFiles += (file)
           else unusedDirs += (file)
-        }
-      }, usedFiles)
+        }, usedFiles)
 
     unusedFiles.foreach( f => {
       f.delete

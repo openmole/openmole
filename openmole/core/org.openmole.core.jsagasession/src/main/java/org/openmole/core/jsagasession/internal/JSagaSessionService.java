@@ -16,6 +16,8 @@
  */
 package org.openmole.core.jsagasession.internal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ogf.saga.context.Context;
 import org.ogf.saga.context.ContextFactory;
 import org.ogf.saga.error.IncorrectStateException;
@@ -35,7 +37,7 @@ public class JSagaSessionService implements IJSagaSessionService {
     public void addContext(Context context) throws InternalProcessingError {
         try {
             getSession().addContext(context);
-        } catch (NotImplementedException e) {
+        } catch (Exception e) {
             throw new InternalProcessingError(e);
         }
     }
@@ -44,13 +46,7 @@ public class JSagaSessionService implements IJSagaSessionService {
     public Context createContext() throws InternalProcessingError {
         try {
             return ContextFactory.createContext();
-        } catch (NotImplementedException e) {
-            throw new InternalProcessingError(e);
-        } catch (IncorrectStateException e) {
-            throw new InternalProcessingError(e);
-        } catch (TimeoutException e) {
-            throw new InternalProcessingError(e);
-        } catch (NoSuccessException e) {
+        } catch (Exception e) {
             throw new InternalProcessingError(e);
         }
     }
@@ -65,9 +61,7 @@ public class JSagaSessionService implements IJSagaSessionService {
             if (session == null) {
                 try {
                     session = SessionFactory.createSession(false);
-                } catch (NotImplementedException e) {
-                    throw new InternalProcessingError(e);
-                } catch (NoSuccessException e) {
+                } catch (Exception e) {
                     throw new InternalProcessingError(e);
                 }
             }

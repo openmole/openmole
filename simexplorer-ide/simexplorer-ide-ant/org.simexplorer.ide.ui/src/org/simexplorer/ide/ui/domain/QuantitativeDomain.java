@@ -20,10 +20,10 @@ package org.simexplorer.ide.ui.domain;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.plugin.domain.interval.RangeDouble;
-import org.openmole.plugin.domain.interval.RangeInteger;
-import org.openmole.plugin.domain.relativerange.RelativeRangeInteger;
-import org.openmole.plugin.domain.relativerange.RelativeRangeDouble;
+import org.openmole.plugin.domain.range.RangeDouble;
+import org.openmole.plugin.domain.range.RangeInteger;
+import org.openmole.plugin.domain.relative.RelativeRangeInteger;
+import org.openmole.plugin.domain.relative.RelativeRangeDouble;
 import org.openmole.core.implementation.domain.FiniteDomain;
 import org.openmole.core.model.job.IContext;
 import java.util.ArrayList;

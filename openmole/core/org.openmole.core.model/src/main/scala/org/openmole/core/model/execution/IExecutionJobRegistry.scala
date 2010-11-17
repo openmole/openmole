@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -19,21 +19,21 @@ package org.openmole.core.model.execution
 
 import org.openmole.core.model.job.IJob
 
-trait IExecutionJobRegistry  [EXECUTIONJOB <: IExecutionJob[_]] {
+trait IExecutionJobRegistry  [EXECUTIONJOB <: IExecutionJob] {
 
-    def getExecutionJobsForTheCategory(category: IJobStatisticCategory): Iterable[EXECUTIONJOB]
+    def executionJobs(category: IJobStatisticCategory): Iterable[EXECUTIONJOB]
     
-    def getJobsForTheCategory(category: IJobStatisticCategory): Iterable[IJob]
+    def jobs(category: IJobStatisticCategory): Iterable[IJob]
 
-    def getAllExecutionJobs: Iterable[EXECUTIONJOB]
+    def allExecutionJobs: Iterable[EXECUTIONJOB]
 
-    def getAllJobs: Iterable[IJob]
+    def allJobs: Iterable[IJob]
 
-    def getExecutionJobsFor(job: IJob): Iterable[EXECUTIONJOB]
+    def executionJobs(job: IJob): Iterable[EXECUTIONJOB]
 
-    def getLastExecutionJobForJob(job: IJob): Option[EXECUTIONJOB]
+    def lastExecutionJob(job: IJob): Option[EXECUTIONJOB]
 
-    def getNbExecutionJobsForJob(job: IJob): Int
+    def nbExecutionJobs(job: IJob): Int
 
     def isEmpty: Boolean
 

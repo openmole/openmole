@@ -58,7 +58,7 @@ public class UpdaterTask implements Runnable {
         return type;
     }
 
-    public long getDelay() {
-        return updatable.getDelay();
+    public long delay() {
+        return updatable.delay();
     }
 }

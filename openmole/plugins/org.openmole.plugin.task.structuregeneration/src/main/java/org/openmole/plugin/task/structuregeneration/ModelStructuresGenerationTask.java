@@ -22,8 +22,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.task.annotations.Output;
+import org.openmole.core.model.data.IContext;
 
 /**
  *
@@ -31,10 +30,8 @@ import org.openmole.core.model.task.annotations.Output;
  */
 public class ModelStructuresGenerationTask extends Task {
 
-    @Output
     public final static Data<Object> InputData = new Data<Object>("input", Object.class);
     
-    @Output
     public final static Data<Object> OutputData = new Data<Object>("output", Object.class);
 
     private Class<?> inputDataStructureClass;
@@ -44,6 +41,8 @@ public class ModelStructuresGenerationTask extends Task {
         super(name);
         this.inputDataStructureClass = inputDataStructure;
         this.outputDataStructureClass = outputDataStructure;
+        addOutput(InputData);
+        addOutput(OutputData);
     }
 
     /* (non-Javadoc)
@@ -61,10 +60,10 @@ public class ModelStructuresGenerationTask extends Task {
     }
 
     @Override
-    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
-            context.putVariable(InputData.getPrototype(), getInputDataStructureClass().newInstance());
-            context.putVariable(OutputData.getPrototype(), getOutputDataStructureClass().newInstance());
+            context.add(InputData.prototype(), getInputDataStructureClass().newInstance());
+            context.add(OutputData.prototype(), getOutputDataStructureClass().newInstance());
         } catch (InstantiationException e) {
             throw new InternalProcessingError(e);
         } catch (IllegalAccessException e) {

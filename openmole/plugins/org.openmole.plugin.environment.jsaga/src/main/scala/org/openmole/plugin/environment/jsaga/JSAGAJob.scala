@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.jsaga
 
 import fr.in2p3.jsaga.adaptor.job.SubState
+import java.util.logging.Logger
 import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.job.Job
 import org.openmole.commons.exception.InternalProcessingError
@@ -29,15 +30,7 @@ import org.ogf.saga.task.State
 
 class JSAGAJob(jobId: String, jobService: JSAGAJobService[_,_]) extends BatchJob(jobService) {
    
-  def job: Job = {
-    synchronized {
-      try {
-        return jobService.getJobServiceCache.getJob(jobId)
-      } catch {
-        case (e: Exception) => throw new InternalProcessingError(e)
-      } 
-    }
-  }
+  def job: Job = jobService.jobServiceCache.getJob(jobId)
 
   private def translateStatus(job: Job, state: State): ExecutionState = {
     import State._
@@ -45,46 +38,38 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService[_,_]) extends BatchJob
     state match {
       case NEW => ExecutionState.SUBMITED
       case RUNNING =>
-        val subState = try {
-          job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
-        } catch {
+        val subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
+        /*} catch {
           case (e: Exception) => throw new InternalProcessingError(e)
-        }
+        }*/
 
-        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) {
-          ExecutionState.SUBMITED
-        } else {
-          ExecutionState.RUNNING
-        }
+        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITED
+        else ExecutionState.RUNNING
+        
       case DONE => ExecutionState.DONE
       case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
     }
   }
 
   override def deleteJob =  {
-    try {
-      if (state == ExecutionState.SUBMITED || state == ExecutionState.RUNNING) {
-        job.cancel
-      }
-    } catch {
-      case (e: Exception) => throw new InternalProcessingError(e)
+    if (state == ExecutionState.SUBMITED || state == ExecutionState.RUNNING) {
+      job.cancel
     }
   }
 
-  
   override def updateState: ExecutionState = {
-    try {
+   // try {
       val curjob = job
       return translateStatus(curjob, curjob.getState)
-    } catch {
+    /*} catch {
       case (e: TimeoutException) => //setState(ExecutionState.FAILED);
-        throw new InternalProcessingError(e);
-      case (e: Exception) => state = ExecutionState.FAILED
-        throw new InternalProcessingError(e);
-    }
+        throw e
+      case (e: Exception) => 
+        state = ExecutionState.FAILED
+        throw e
+    }*/
   }
 
-  override def toString: String = {
-    jobId
-  }
+  override def toString: String = jobId
+  
 }

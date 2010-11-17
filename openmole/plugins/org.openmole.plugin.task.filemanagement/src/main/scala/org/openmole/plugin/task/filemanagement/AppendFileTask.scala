@@ -21,7 +21,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import java.io.File
 import org.openmole.commons.tools.io.FileInputStream
 import org.openmole.commons.tools.io.FileOutputStream
@@ -35,31 +35,29 @@ import org.openmole.commons.exception.UserBadDataError
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileTask(name: String,
-                                       toBeDumpedPrototype: IPrototype[File],
-                                       outputFile: String) extends Task(name) {
+class AppendFileTask(name: String, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends Task(name) {
  
-  override def process(global: IContext, context: IContext, progress: IProgress){
-    val from = context getValue(toBeDumpedPrototype)
+  override def process(global: IContext, context: IContext, progress: IProgress) = {
+    val from = context value(toBeDumpedPrototype) get
     val to = new File(VariableExpansion.expandData(global,context,outputFile))
-    if (!from.exists()){
+    if (!from.exists){
       throw new UserBadDataError("The file "+from+" does not exist.")
     }
     
-    if (!to.exists()){
+    if (!to.exists){
       throw new UserBadDataError("The file "+to+" does not exist.")
     }
     
     if (from.isDirectory() && to.isDirectory()){
       val toFiles = to.list
-      from.list() foreach ( f => {
+      from.list foreach ( f => {
           if (!toFiles.contains(f)){
             new File(f).createNewFile()
           }
           lockAndAppendFile(new File(from,f),new File(to,f))
         })
     }
-    else if (from.isFile() && to.isFile()){
+    else if (from.isFile && to.isFile){
       lockAndAppendFile(from,to)    
     }
     else {
@@ -67,14 +65,10 @@ class AppendFileTask(name: String,
     }
   }
   
-  def lockAndAppendFile(from: String,
-                        to: String){
-    lockAndAppendFile(new File(from), 
-                      new File(to))
-  }
+  def lockAndAppendFile(from: String, to: String): Unit = lockAndAppendFile(new File(from), new File(to))
   
-  def lockAndAppendFile(from: File,
-                        to: File){
+  
+  def lockAndAppendFile(from: File,to: File): Unit = {
     val channelI = new FileInputStream(from) getChannel()
     try{
       val channelO = new FileOutputStream(to,true) getChannel()

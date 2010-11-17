@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -19,6 +19,7 @@ package org.openmole.core.implementation.execution.local
 
 import java.util.LinkedList
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.implementation.job.Job
@@ -28,22 +29,20 @@ import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.workspace.ConfigurationLocation
 
-object LocalExecutionEnvironment extends Environment[IExecutionJob[_]] {
-
-  def instance = this
+object LocalExecutionEnvironment extends Environment[IExecutionJob] {
+  
   
   val DefaultNumberOfThreads = new ConfigurationLocation(LocalExecutionEnvironment.getClass.getSimpleName, "ThreadNumber")
 
-  Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(1));
+  Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(1))
     
   private val jobs = new LinkedBlockingQueue[LocalExecutionJob]
   private val executers = new LinkedList[LocalExecuter]
-  private var nbThreadVar = Activator.getWorkspace().getPreferenceAsInt(DefaultNumberOfThreads);
+  private var nbThreadVar = Activator.getWorkspace.getPreferenceAsInt(DefaultNumberOfThreads)
        
   addExecuters(nbThread)
     
-
-  def addExecuters(nbExecuters: Int) = {
+  private[local] def addExecuters(nbExecuters: Int) = {
     for (i <- 0 until nbExecuters) {
       val executer = new LocalExecuter
       executers.synchronized {
@@ -55,22 +54,20 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob[_]] {
     }
   }
 
-  def nbThread: Int = {
-    nbThreadVar
-  }
+  def nbThread: Int = nbThreadVar
 
   def setNbThread(newNbThread: Int) = {
     synchronized {
       if (nbThread != newNbThread) {
  
         if (newNbThread > nbThread) {
-          addExecuters(newNbThread - nbThread);
+          addExecuters(newNbThread - nbThread)
         } else {
           var toStop = nbThread - newNbThread
           executers.synchronized {
-            val it = executers.iterator()
+            val it = executers.iterator
 
-            while (it.hasNext() && toStop > 0) {
+            while (it.hasNext && toStop > 0) {
               val exe = it.next
               if (!exe.stop) {
                 exe.stop = true
@@ -94,17 +91,16 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob[_]] {
 
   def submit(moleJob: IMoleJob): Unit = {
     val job = new Job
-    job.addMoleJob(moleJob);
+    job += moleJob
     submit(job)
   }
 
-  def submit(ejob: LocalExecutionJob) = {
+  private def submit(ejob: LocalExecutionJob) = {
     ejob.state = ExecutionState.SUBMITED
     jobs.add(ejob)
   }
 
-  def takeNextjob: LocalExecutionJob = {
-    jobs.take
-  }
+  private[local] def takeNextjob: LocalExecutionJob = jobs.take
+  
    
 }

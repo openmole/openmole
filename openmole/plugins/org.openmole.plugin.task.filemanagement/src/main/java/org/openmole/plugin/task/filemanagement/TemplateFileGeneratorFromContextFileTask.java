@@ -11,8 +11,8 @@ import org.openmole.core.model.data.IPrototype;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Data;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.task.annotations.Input;
+import org.openmole.core.model.data.IContext;
+
 
 /**
  *
@@ -20,17 +20,17 @@ import org.openmole.core.model.task.annotations.Input;
  */
 public class TemplateFileGeneratorFromContextFileTask extends TemplateFileGeneratorTask {
 
-    @Input
     final IData<File> templateFile;
 
     public TemplateFileGeneratorFromContextFileTask(String name, IPrototype<File> templateFile, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
         super(name,outputPrototype);
         this.templateFile = new Data<File>(templateFile);
+        addInput(templateFile);
     }
 
     @Override
     File getFile(IContext context) {
-        return context.getValue(templateFile.getPrototype());
+        return context.value(templateFile.prototype()).get();
     }
 
 }

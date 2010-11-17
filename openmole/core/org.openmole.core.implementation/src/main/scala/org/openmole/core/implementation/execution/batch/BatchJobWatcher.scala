@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -28,27 +28,27 @@ import org.openmole.core.model.job.IJob
 import org.openmole.misc.updater.IUpdatable
 import scala.collection.mutable.ListBuffer
 
-class BatchJobWatcher(environment: IBatchEnvironment[_]) extends IUpdatable {
+class BatchJobWatcher(environment: IBatchEnvironment) extends IUpdatable {
 
     override def update: Boolean = {
         val registry = environment.jobRegistry
         val jobGroupsToRemove = new ListBuffer[IJob]
         
         registry.synchronized  {
-            for (val job <- registry.getAllJobs) {
+            for (val job <- registry.allJobs) {
 
-                if (job.allMoleJobsFinished()) {
+                if (job.allMoleJobsFinished) {
 
-                    for (val ej <- registry.getExecutionJobsFor(job)) {
+                    for (val ej <- registry.executionJobs(job)) {
                         ej.kill
                     }
 
                     jobGroupsToRemove += job
                 } else {
 
-                    val executionJobsToRemove = new ListBuffer[IBatchExecutionJob[_]]
+                    val executionJobsToRemove = new ListBuffer[IBatchExecutionJob]
 
-                    for (ej <- registry.getExecutionJobsFor(job)) {
+                    for (ej <- registry.executionJobs(job)) {
                         ej.state match {
                             case KILLED => executionJobsToRemove += ej
                             case _ =>
@@ -59,7 +59,7 @@ class BatchJobWatcher(environment: IBatchEnvironment[_]) extends IUpdatable {
                         registry.remove(ej)
                     }
 
-                    if (registry.getNbExecutionJobsForJob(job) == 0) {
+                    if (registry.nbExecutionJobs(job) == 0) {
                         try {
                             environment.submit(job)
                         } catch {

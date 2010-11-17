@@ -19,11 +19,12 @@ package org.openmole.plugin.groupingstrategy.onvariable;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.openmole.core.model.execution.IMoleJobCategory;
-import org.openmole.core.model.execution.IGroupingStrategy;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.implementation.mole.MoleJobCategory;
+import org.openmole.core.implementation.mole.MoleJobGroup;
+import org.openmole.core.model.mole.IMoleJobGroup;
+import org.openmole.core.model.mole.IGroupingStrategy;
+import org.openmole.core.model.data.IContext;
 import org.openmole.core.model.data.IPrototype;
+import scala.Option;
 
 /**
  *
@@ -38,18 +39,18 @@ public class OnVariableGroupingStrategy implements IGroupingStrategy {
     }
 
     @Override
-    public IMoleJobCategory getCategory(IContext context) {
+    public IMoleJobGroup group(IContext context) {
         List vals = new LinkedList();
 
         for(IPrototype prototype : prototypes) {
-            Object val = context.getValue(prototype);
+            Option<Object> val = context.value(prototype);
 
-            if(val != null) {
-                vals.add(val);
+            if(val.isDefined()) {
+                vals.add(val.get());
             }
         }
 
-        return new MoleJobCategory(vals.toArray());
+        return new MoleJobGroup(vals.toArray());
     }
     
 }

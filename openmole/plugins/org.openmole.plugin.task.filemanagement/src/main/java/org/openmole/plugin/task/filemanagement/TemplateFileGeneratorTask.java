@@ -34,24 +34,23 @@ import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
-import org.openmole.core.model.task.annotations.Output;
+import org.openmole.core.model.data.IContext;
 import org.openmole.plugin.task.filemanagement.internal.Activator;
 
 import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
 public abstract class TemplateFileGeneratorTask extends Task {
 
-    @Output
     final IData<File> output;
      
     public TemplateFileGeneratorTask(String name, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
         super(name);
         this.output = new Data(outputPrototype);
+        addOutput(output);
     }
 
     @Override
-    protected void process(IContext global, IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError {
+    public void process(IContext global, IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError {
         try {
 
             File templateFile = getFile(context);
@@ -73,7 +72,7 @@ public abstract class TemplateFileGeneratorTask extends Task {
                 reader.close();
             }
 
-            context.setValue(output.getPrototype(), outputFile);
+            context.add(output.prototype(), outputFile);
         } catch (IOException ex) {
             throw new UserBadDataError(ex);
         }

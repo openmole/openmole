@@ -30,7 +30,7 @@ import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.data.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import scala.Tuple2;
@@ -107,7 +107,7 @@ public class StoreIntoCSVTask extends Task {
      * @param prototype
      */
     public void addColumn(IPrototype<? extends Collection> prototype) {
-        addColumn(prototype, prototype.getName());
+        addColumn(prototype, prototype.name());
     }
 
     /**
@@ -122,7 +122,7 @@ public class StoreIntoCSVTask extends Task {
     }
 
     @Override
-    protected void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
         try {
             List<Iterator<Object>> valueList = new ArrayList<Iterator<Object>>();
@@ -141,7 +141,7 @@ public class StoreIntoCSVTask extends Task {
                     Tuple2<IPrototype<? extends Collection>, String> column = columnIt.next();
                     header[ind] = column._2();
 
-                    Collection li = context.getValue(column._1());
+                    Collection li = context.value(column._1()).get();
 
                     if (listSize < li.size()) {
                         listSize = li.size();

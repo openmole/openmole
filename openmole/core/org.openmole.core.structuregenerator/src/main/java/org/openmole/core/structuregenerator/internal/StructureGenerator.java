@@ -304,7 +304,7 @@ public class StructureGenerator implements IStructureGenerator {
                 n = buildComplexNodeAttribute(new NodePath<ComplexNode>(node.getClassName(), s));
             }
 
-            typeDeclaration.append("  public " + n + " " + child.getName() + ";\n");
+            typeDeclaration.append("  public " + n + " " + child.name() + ";\n");
 
         }
 
@@ -329,7 +329,7 @@ public class StructureGenerator implements IStructureGenerator {
 
         res.append("List<");
         if (node.getInnerNode() instanceof PrototypeNode) {
-            res.append(((PrototypeNode<?>) node.getInnerNode()).getPrototype().getType().getCanonicalName());
+            res.append(((PrototypeNode) node.getInnerNode()).prototype().type().getCanonicalName());
         } else if (node.getInnerNode() instanceof SequenceNode) {
             SequenceNode<?> inner = (SequenceNode<?>) node.getInnerNode();
             String n = buildSequenceNodeAttribute(new NodePath<SequenceNode<?>>(nodePath.getPath(), inner), toBuild);
@@ -348,7 +348,7 @@ public class StructureGenerator implements IStructureGenerator {
     }
 
     private String buildPrototypeAttribute(Prototype<?> node) {
-        return node.getType().getCanonicalName();
+        return node.type().getCanonicalName();
     }
 
     class NodePath<T extends StructureNode> implements Comparable<NodePath> {
@@ -370,7 +370,7 @@ public class StructureGenerator implements IStructureGenerator {
         }
 
         String getClassName() {
-            return path + classPrefix + node.getName();
+            return path + classPrefix + node.name();
         }
 
         @Override

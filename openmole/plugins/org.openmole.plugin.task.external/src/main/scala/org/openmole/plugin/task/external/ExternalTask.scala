@@ -33,9 +33,8 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.commons.tools.io.FileUtil
-import org.openmole.commons.tools.io.IFileOperation
 
 import org.openmole.core.implementation.tools.VariableExpansion._
 
@@ -65,45 +64,42 @@ abstract class ExternalTask(name: String) extends Task(name) {
   protected class ToGet(val name: String, val file: File)
 
   protected def listInputFiles(global: IContext, context: IContext, progress: IProgress): List[ToPut] = {
-    try {
-      var ret = new ListBuffer[ToPut]
+    var ret = new ListBuffer[ToPut]
 
-      inFileNames.entrySet().foreach(entry => {
-          val localFile = entry.getKey         
-          ret += (new ToPut(localFile, expandData(global, context, entry.getValue)))
-        })
+    inFileNames.entrySet().foreach(entry => {
+        val localFile = entry.getKey         
+        ret += (new ToPut(localFile, expandData(global, context, entry.getValue)))
+      })
 
-      inContextFiles.foreach( p => {
-          val f = context.getValue(p._1)
+    inContextFiles.foreach( p => {
+        context.value(p._1) match {
+          case None => throw new UserBadDataError("File supposed to be present in variable \"" + p._1.name + "\" at the beging of the task \"" + name + "\" and is not.")
+          case Some(f) => ret += (new ToPut(f, expandData(global, context, p._2)))
+        }
+      })
 
-          if (f == null) {
-            throw new UserBadDataError("File supposed to be present in variable \"" + p._1.getName + "\" at the beging of the task \"" + getName + "\" and is not.")
-          }
+    inContextFileList.foreach( p => {
+        context.value(p._1) match {
+          case None =>
+          case Some(lstFile) =>
+            context.value(p._2) match {
+              case None =>
+              case Some(lstName) => {
+                  val fIt = lstFile.iterator
+                  val sIt = lstName.iterator
 
-          ret += (new ToPut(f, expandData(global, context, p._2)))
-        })
+                  while (fIt.hasNext && sIt.hasNext) {
+                    val f = fIt.next
+                    val name = sIt.next
 
-      inContextFileList.foreach( p => {
-          val lstFile = context.getValue(p._1)
-          val lstName = context.getValue(p._2)
-
-          if (lstFile != null && lstName != null) {
-            val fIt = lstFile.iterator
-            val sIt = lstName.iterator
-
-            while (fIt.hasNext && sIt.hasNext) {
-              val f = fIt.next
-              val name = sIt.next
-
-              ret += (new ToPut(f, expandData(global, context, name)))
+                    ret += (new ToPut(f, expandData(global, context, name)))
+                  }
+                }
             }
-          }
-        })
-      return ret.toList
-
-    } catch {
-      case e: IOException => throw new InternalProcessingError(e)
-    }
+         
+        }
+      })
+    ret.toList
   }
 
 
@@ -117,23 +113,22 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
         ret += (new ToGet(filename, fo))
 
-        context.putVariable(p._1, fo)
+        context += (p._1, fo)
         if (outFileNamesVar.containsKey(p._1)) {
-          context putVariable (outFileNamesVar.get(p._1), filename)
+          context += (outFileNamesVar.get(p._1), filename)
         }
       })
 
     outFileNamesFromVar foreach ( p => {
+        context.value(p._2) match  {
+          case None => throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + name)
+          case Some(filename) =>
+            val fo = new File(localDir, filename)
+            ret += (new ToGet(filename, fo))
 
-        if (!context.contains(p._2)) {
-          throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + getName)
+            context += (p._1, fo)
         }
 
-        val filename = context getValue (p._2);
-        val fo = new File(localDir, filename)
-        ret += (new ToGet(filename, fo))
-
-        context putVariable (p._1, fo)
       })
 
     return ret.toList

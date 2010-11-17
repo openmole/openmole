@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -21,26 +21,26 @@ import java.io.File
 import java.io.IOException
 import java.util.TreeSet
 import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.internal.Activator
-import org.openmole.core.implementation.job.Context
 import org.openmole.core.implementation.observer.IMoleExecutionObserver
 import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
-import org.openmole.core.model.capsule.IGenericTaskCapsule
+import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.commons.tools.io.FileUtil._
-import org.openmole.core.model.persistence.IPersistentContext._
+import org.openmole.core.model.persistence.PersistentContext._
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
-class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_], dir: File) extends IMoleExecutionObserver {
+class Saver(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) extends IMoleExecutionObserver {
 
-  new MoleExecutionObserverAdapter(moleExection, this)
+  MoleExecutionObserverAdapter(moleExection, this)
   var ordinal: Int = 0;
 
 
-  def this(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_], dir: String) = {
+  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = {
     this(moleExection, taskCapsule, new File(dir));
   }
 
@@ -48,15 +48,15 @@ class Saver(moleExection: IMoleExecution, taskCapsule: IGenericTaskCapsule[_,_],
   override def moleJobFinished(moleJob: IMoleJob) = {
     synchronized {
       val filter = new TreeSet[String]
-        
-      for(data <- moleJob.getTask.getOutput) {
-        if(data.getMode().isSystem()) filter.add(data.getPrototype().getName());
+      
+      for(data <- moleJob.task.userOutputs) {
+        filter.add(data.prototype.name)
       }
         
       val context = new Context
        
-      for(variable <- moleJob.getContext.asInstanceOf[Iterable[IVariable[_]]]) {
-        if(!filter.contains(variable.getPrototype().getName())) context.putVariable(variable);
+      for(variable <- moleJob.context) {
+        if(!filter.contains(variable.prototype.name)) context += variable
       }
 
       val serialization = Activator.getSerializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))

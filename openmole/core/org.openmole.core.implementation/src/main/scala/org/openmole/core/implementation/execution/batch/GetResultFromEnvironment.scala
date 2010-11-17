@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -21,11 +21,11 @@ import java.io.File
 import java.io.IOException
 import java.util.TreeMap
 import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.apache.commons.compress.archivers.ArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.openmole.commons.exception.ExecutionException
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileInputStream
@@ -36,8 +36,8 @@ import org.openmole.core.implementation.message.ContextResults
 import org.openmole.core.implementation.message.FileMessage
 import org.openmole.core.implementation.message.RuntimeResult
 import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.model.execution.batch.BatchServiceDescription
 import org.openmole.core.model.execution.batch.IAccessToken
-import org.openmole.core.model.execution.batch.IBatchServiceDescription
 import org.openmole.core.model.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.execution.SampleType
@@ -49,16 +49,15 @@ object GetResultFromEnvironment {
   private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
 }
 
-class GetResultFromEnvironment(communicationStorageDescription: IBatchServiceDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment[_], lastStatusChangeInterval: Long) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, lastStatusChangeInterval: Long) extends Callable[Unit] {
   import GetResultFromEnvironment._
 
-  
   private def successFullFinish = {
     environment.sample(SampleType.RUNNING, lastStatusChangeInterval, job)
   }
 
   override def call: Unit = {
-    val token = Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().waitAToken();
+    val token = Activator.getBatchRessourceControl().usageControl(communicationStorageDescription).waitAToken
 
     try {
       val result = getRuntimeResult(outputFile, token);
@@ -77,13 +76,13 @@ class GetResultFromEnvironment(communicationStorageDescription: IBatchServiceDes
       var successfull = 0
 
       //Try to download the results for all the jobs of the group
-      for (moleJob <- job.getMoleJobs()) {
-        if (contextResults.results.isDefinedAt(moleJob.getId)) {
-          val context = contextResults.results(moleJob.getId)
+      for (moleJob <- job.moleJobs) {
+        if (contextResults.results.isDefinedAt(moleJob.id)) {
+          val context = contextResults.results(moleJob.id)
           //  FileMigrator.initFilesInVariables(context, fileCache);
 
           moleJob.synchronized {
-            if (!moleJob.isFinished()) {
+            if (!moleJob.isFinished) {
               try {
                 moleJob.rethrowException(context);
                 try {
@@ -103,12 +102,12 @@ class GetResultFromEnvironment(communicationStorageDescription: IBatchServiceDes
       }
 
       //If sucessfull for full group update stats
-      if (successfull == job.size()) {
+      if (successfull == job.moleJobs.size) {
         successFullFinish
       }
 
     } finally {
-      Activator.getBatchRessourceControl().getController(communicationStorageDescription).getUsageControl().releaseToken(token);
+      Activator.getBatchRessourceControl().usageControl(communicationStorageDescription).releaseToken(token)
     }
   }
 
@@ -178,7 +177,6 @@ class GetResultFromEnvironment(communicationStorageDescription: IBatchServiceDes
           try {
             val destDir = Activator.getWorkspace().newDir("tarResult")
 
-            val unZip = new TarArchiver
             var te: ArchiveEntry = tis.getNextEntry
 
             while (te != null) {
@@ -201,7 +199,7 @@ class GetResultFromEnvironment(communicationStorageDescription: IBatchServiceDes
 
                 val destIn = new FileInputStream(dest)
                 try {
-                  unZip.extractDirArchiveWithRelativePath(file, destIn);
+                  TarArchiver.extractDirArchiveWithRelativePath(file, destIn);
                 } finally {
                   destIn.close
                 }

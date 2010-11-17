@@ -31,7 +31,7 @@ import org.jfree.data.statistics.HistogramDataset
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 import org.jfree.chart.ChartUtilities._
@@ -79,7 +79,7 @@ class  MultiDatasetDistributionTask(name: String,
     try {
       val dataset = new DefaultCategoryDataset();
       charts foreach ( chart => {
-          val data = context getValue(chart._1)
+          val data = context.value(chart._1).get
            val array = new Array[Double](data.size)
           var i = 0
           data foreach ( v => {

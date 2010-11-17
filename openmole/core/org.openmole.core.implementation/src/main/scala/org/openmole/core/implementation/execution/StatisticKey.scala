@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -26,7 +26,7 @@ import scala.collection.JavaConversions._
 class StatisticKey(val key: Array[IGenericTask]) {
 
     def this(job: IJob) = {
-      this(job.getMoleJobs.map( _.getTask ).toArray)
+      this(job.moleJobs.map( _.task ).toArray)
     }
 
     override def hashCode: Int = {

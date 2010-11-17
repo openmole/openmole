@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -37,10 +37,12 @@ import org.openmole.core.model.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 
+
+import scala.io.Source._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
-class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Callable[CopyToEnvironmentResult] {
+class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[CopyToEnvironmentResult] {
 
   private def initCommunication(): CopyToEnvironmentResult = {
         
@@ -72,7 +74,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
             
       return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
     } finally {
-      Activator.getBatchRessourceControl.getController(communicationStorage.description).getUsageControl.releaseToken(token)
+      Activator.getBatchRessourceControl.usageControl(communicationStorage.description).releaseToken(token)
     }
   }
 
@@ -84,18 +86,18 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val isDir = file.isDirectory
     var toReplicate = file
     val toReplicatePath = file.getAbsoluteFile
-    val moleExecution = JobRegistry.getInstance.getMoleExecutionForJob(job)
+    val moleExecution = JobRegistry(job)
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      val cache = Activator.getFileService.getArchiveForDir(file, moleExecution)
-      toReplicate = cache.getFile(false)
+      val cache = Activator.getFileService.archiveForDir(file, moleExecution)
+      toReplicate = cache.file(false)
       cache
     } else null
 
-    val hash = Activator.getFileService.getHashForFile(toReplicate, moleExecution)
+    val hash = Activator.getFileService.hash(toReplicate, moleExecution)
     val replica = Activator.getReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
-    new ReplicatedFile(file, isDir, hash, replica.getDestination)
+    new ReplicatedFile(file, isDir, hash, replica.destination)
   }
 
 
@@ -115,7 +117,11 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
         
     val authenticationFile = Activator.getWorkspace.newFile("envrionmentAuthentication", ".xml")
+     
     Activator.getSerializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
+    
+    //println("Authentication " + authenticationFile.getAbsolutePath)
+  
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     URIFile.copy(authenticationFile, authenticationURIFile, token)
     authenticationFile.delete
@@ -163,7 +169,7 @@ class CopyToEnvironment(environment: BatchEnvironment[_], job: IJob) extends Cal
        
     val jobs = new ListBuffer[IMoleJob]
 
-    for (moleJob <- job.getMoleJobs) {
+    for (moleJob <- job.moleJobs) {
       moleJob.synchronized {
         if (!moleJob.isFinished) {
           jobs += moleJob

@@ -29,7 +29,7 @@ import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.data.statistics.HistogramDataset
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import Utils._
@@ -89,7 +89,7 @@ class DatasetDistributionTask (name: String,
   override def process(global: IContext, context: IContext, progress: IProgress) = {
     try {
       charts foreach ( chart => {
-          val data = context getValue(chart._1)
+          val data = context.value(chart._1).get
           val array = new Array[Double](data.size)
           var i = 0
           data foreach ( v => {

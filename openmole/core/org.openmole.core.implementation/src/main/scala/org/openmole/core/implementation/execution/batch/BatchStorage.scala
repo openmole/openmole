@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -56,7 +56,7 @@ object BatchStorage {
   val tmp = "tmp/"
 }
 
-class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentication](val URI: URI, environment: ENV,  authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, nbAccess: Int) extends BatchService[ENV, AUTH](new BatchStorageDescription(URI), environment, authenticationKey, authentication, new UsageControl(nbAccess), new FailureControl()) with IBatchStorage[ENV, AUTH] {
+class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val URI: URI, environment: ENV,  authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, nbAccess: Int) extends BatchService[ENV, AUTH](new BatchStorageDescription(URI), environment, authenticationKey, authentication, UsageControl(nbAccess), new FailureControl()) with IBatchStorage[ENV, AUTH] {
 
   import BatchStorage._
   
@@ -100,7 +100,7 @@ class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentica
 
           for (dir <- tmpNoTime.list(token)) {
             val child = new URIFile(tmpNoTime, dir)
-            if (child.URLRepresentsADirectory()) {
+            if (child.URLRepresentsADirectory) {
               try {
                 val timeOfDir = dir.substring(0, dir.length - 1).toLong
 
@@ -118,7 +118,7 @@ class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentica
             }
           }
 
-          val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token);
+          val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
           tmpSpaceVar = tmpTmpDir;
         } catch {
           case(e: IOException) => throw new InternalProcessingError(e)
@@ -146,14 +146,14 @@ class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentica
 
     try {
 
-      val token = Activator.getBatchRessourceControl().getController(description).getUsageControl().waitAToken();
+      val token = Activator.getBatchRessourceControl.usageControl(description).waitAToken
 
       try {
         val lenght = 10;
 
         val rdm = new Array[Byte](lenght)
 
-        RNG.getRng().nextBytes(rdm)
+        RNG.nextBytes(rdm)
 
         val testFile = tmpSpace(token).newFileInDir("test", ".bin")
         val tmpFile = Activator.getWorkspace().newFile("test", ".bin");
@@ -173,8 +173,8 @@ class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentica
         }
 
         try {
-          val fileCache = Activator.getURIFileCache().getURIFileCache(testFile, token);
-          val local = fileCache.getFile(false);
+          val fileCache = Activator.getURIFileCache()(testFile, token)
+          val local = fileCache.file(false)
           val input = new FileInputStream(local)
           val resRdm = new Array[Byte](lenght)
         
@@ -188,10 +188,10 @@ class BatchStorage [ENV <: IBatchEnvironment[_], AUTH <: IBatchServiceAuthentica
             return true;
           }
         } finally {
-          Activator.getExecutorService().getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false));
+          Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
         }
       } finally {
-        Activator.getBatchRessourceControl().getController(description).getUsageControl().releaseToken(token);
+        Activator.getBatchRessourceControl.usageControl(description).releaseToken(token)
       }
     } catch {
       case (e) => LOGGER.log(Level.FINE, URI.toString(), e);

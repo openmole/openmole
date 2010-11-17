@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -27,24 +27,21 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.core.model.execution.SampleType
 
 object Environment {
-   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
+  val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
-   Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "100")
+  Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "100")
 }
 
 
-abstract class Environment[EXECUTIONJOB <: IExecutionJob[_]] extends IEnvironment[EXECUTIONJOB] {
+abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
    
-    val statistics = new EnvironmentExecutionStatistics(Activator.getWorkspace.getPreferenceAsInt(Environment.StatisticsHistorySize))
-    val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
-    val id = UUID.randomUUID.toString
-    val executionJobId = new AtomicLong
+  val statistic = new EnvironmentStatistic(Activator.getWorkspace.getPreferenceAsInt(Environment.StatisticsHistorySize))
+  val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
+  val id = UUID.randomUUID.toString
+  val executionJobId = new AtomicLong
 
-    def sample(sample: SampleType, value: Long, job: IJob) = {
-         statistics.statusJustChanged(sample, value, job)
-    }
-    
-  def nextExecutionJobId = {
-    new ExecutionJobId(id, executionJobId.getAndIncrement)
-  }
+  def sample(sample: SampleType, value: Long, job: IJob) = statistic.statusJustChanged(sample, value, job)
+
+  def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
+  
 }

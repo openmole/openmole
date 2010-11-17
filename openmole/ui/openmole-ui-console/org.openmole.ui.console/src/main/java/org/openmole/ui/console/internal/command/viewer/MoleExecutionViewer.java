@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.console.internal.command.viewer;
 
 import java.util.List;
@@ -25,27 +24,28 @@ import org.openmole.core.model.job.IMoleJob;
 import org.openmole.core.model.job.State;
 import org.openmole.core.model.mole.IMoleExecution;
 
+import scala.collection.JavaConversions;
+
 /**
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class MoleExecutionViewer implements IViewer<IMoleExecution>{
+public class MoleExecutionViewer implements IViewer<IMoleExecution> {
 
     @Override
     public void view(IMoleExecution object, String[] args) {
-        Map<State,AtomicInteger> toDisplay = new TreeMap<State, AtomicInteger>();
+        Map<State, AtomicInteger> toDisplay = new TreeMap<State, AtomicInteger>();
 
-        for(State state : State.values()) {
+        for (State state : State.values()) {
             toDisplay.put(state, new AtomicInteger());
         }
 
-        for(IMoleJob job : object.getAllMoleJobs()) {
-            toDisplay.get(job.getState()).incrementAndGet();
+        for (IMoleJob job : JavaConversions.asJavaIterable(object.moleJobs())) {
+            toDisplay.get(job.state()).incrementAndGet();
         }
 
-        for(State state : State.values()) {
+        for (State state : State.values()) {
             System.out.println(state.name() + ": " + toDisplay.get(state));
         }
     }
-
 }

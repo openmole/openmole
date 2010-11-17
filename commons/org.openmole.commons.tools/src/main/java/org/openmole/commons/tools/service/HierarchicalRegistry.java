@@ -39,7 +39,7 @@ public class HierarchicalRegistry<T> {
     Map<Class, Tuple2<T, Integer>> registry = new HashMap<Class, Tuple2<T, Integer>>();
 
     public void register(Class c, T t) {
-        register(c, t, Priority.NORMAL.getValue());
+        register(c, t, Priority.NORMAL());
     }
 
     public void register(Class c, T t, Integer priority) {

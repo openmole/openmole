@@ -20,7 +20,7 @@ package org.simexplorer.ide.ui.domain;
 
 import javax.swing.SpinnerNumberModel;
 import org.openide.util.lookup.ServiceProvider;
-import org.openmole.plugin.domain.relativerange.RelativeRangeInteger;
+import org.openmole.plugin.domain.relative.RelativeRangeInteger;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 
 @ServiceProvider(service=EditorPanel.class)

@@ -43,7 +43,7 @@ abstract class GenericDatasetDistribution(name: String,
    */
   def addChart(prototype: IPrototype[Collection[Number]]) {
     // addChart(prototype, prototype.getName() + Extension.image);
-    addChart(prototype, prototype.getName() + imageExtension);
+    addChart(prototype, prototype.name + imageExtension);
   }
 
   /**

@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.interval</artifactId>
+            <artifactId>org.openmole.plugin.domain.range</artifactId>
             <version>${project.version}</version>
 	    <scope>test</scope>
         </dependency>

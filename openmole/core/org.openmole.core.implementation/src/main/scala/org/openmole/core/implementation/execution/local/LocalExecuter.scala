@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -27,9 +27,7 @@ import org.openmole.core.model.task.IMoleTask
 import scala.collection.JavaConversions._
 
 object LocalExecuter {
-     val LOGGER = Logger.getLogger(LocalExecuter.getClass.getName)
- 
-  
+  val LOGGER = Logger.getLogger(LocalExecuter.getClass.getName) 
 }
 
 
@@ -37,52 +35,53 @@ class LocalExecuter extends Runnable {
 
   import LocalExecuter. _
   
-    var stop: Boolean = false;
+  var stop: Boolean = false;
 
-    override def run = {
+  override def run = {
 
-        while (!stop) {
-            try {
-                val executionJob = LocalExecutionEnvironment.takeNextjob
-                val job = executionJob.job
+    while (!stop) {
+      try {
+        val executionJob = LocalExecutionEnvironment.takeNextjob
+        
+        val job = executionJob.job
 
-                try {
-                    executionJob.state = ExecutionState.RUNNING
-                    val running = System.currentTimeMillis
-                    executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
+        
+        try {
+          executionJob.state = ExecutionState.RUNNING
+          val running = System.currentTimeMillis
+          executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
 
-                    for (moleJob <- job.getMoleJobs) {
-                        if (moleJob.getState() != State.CANCELED) {
-                            LOGGER.log(Level.FINER, "New job group taken for execution: {0}", moleJob)
+          for (moleJob <- job.moleJobs) {
+            if (moleJob.state != State.CANCELED) {
+//              LOGGER.log(Level.FINER, "New job group taken for execution: {0}", moleJob)
 
-                            if (classOf[IMoleTask].isAssignableFrom(moleJob.getTask().getClass)) {
-                                jobGoneIdle
-                            }
-                            moleJob.perform();
-                            moleJob.finished(moleJob.getContext());
-                            LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);
-                        }
-                    }
-                    executionJob.state = ExecutionState.DONE
-                    executionJob.environment.sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
-                } finally {
-                    LocalExecutionEnvironment.jobRegistry.removeJob(job);
-                }
-            } catch {
-              case (e: InterruptedException) => 
-                if (!stop) {
-                    LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e);
-                }
-            
-              case (e: Throwable) =>
-                LOGGER.log(Level.SEVERE, null, e);
+              if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
+                jobGoneIdle
+              }
+              moleJob.perform
+              moleJob.finished(moleJob.context)
+//              LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);
             }
+          }
+          executionJob.state = ExecutionState.DONE
+          executionJob.environment.sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
+        } finally {
+          LocalExecutionEnvironment.jobRegistry.removeJob(job);
         }
-
+      } catch {
+        case (e: InterruptedException) => 
+          if (!stop) {
+            LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e);
+          }
+            
+        case e => LOGGER.log(Level.SEVERE, null, e);
+      }
     }
 
-    def jobGoneIdle {
-        LocalExecutionEnvironment.addExecuters(1)
-        stop = true
-    }
+  }
+
+  def jobGoneIdle {
+    LocalExecutionEnvironment.addExecuters(1)
+    stop = true
+  }
 }

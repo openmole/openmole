@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -134,35 +134,22 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
        
   Activator.getUpdater.registerForUpdate(new OverSubmissionAgent(this, DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval)
     
-  def this(voName: String, vomsURL: String, bdii: String) = {
-    this(voName, vomsURL, bdii, None, None, None)
-  }
+  def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
 
-  def this(voName: String, vomsURL: String, bdii: String, attributes: java.util.Map[String, String]) = {
-    this(voName, vomsURL, bdii, None, Some(attributes.toMap), None)
-  }
+  def this(voName: String, vomsURL: String, bdii: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), None)
+ 
+  def this(voName: String, vomsURL: String, bdii: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), Some(memoryForRuntime))
+  
+  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), None, None)
 
-    
-  def this(voName: String, vomsURL: String, bdii: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = {
-    this(voName, vomsURL, bdii, None, Some(attributes.toMap), Some(memoryForRuntime))
-  }
-    
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String) = {
-    this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), None, None)
-  }
-
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String, attributes: java.util.Map[String, String]) = {
-    this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), None)
-  }
-
-    
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = {
-    this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime))
-  }
+  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), None)
+ 
+  def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime))
+  
 
   override def allJobServices: Iterable[JSAGAJobService[_,_]] = {
 
-    val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt);
+    val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
     val jobServices = new ListBuffer[JSAGAJobService[_,_]]
 

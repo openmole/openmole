@@ -35,7 +35,7 @@ public class UpdatableWithFixedDelay implements IUpdatableWithVariableDelay {
     }
 
     @Override
-    public long getDelay() {
+    public long delay() {
         return delay;
     }
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,11 +17,11 @@
 
 package org.openmole.core.model.execution.batch
 
-trait IBatchService [+ENV <: IBatchEnvironment[_], +AUTH <: IBatchServiceAuthentication] {
+trait IBatchService [+ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication] {
 
     def test: Boolean
 
-    def description: IBatchServiceDescription
+    def description: BatchServiceDescription
 
     def environment: ENV
     

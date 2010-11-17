@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -29,7 +29,7 @@ import scala.collection.mutable.HashSet
 import scala.collection.immutable.TreeSet
 
 
-class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob[_]] extends IExecutionJobRegistry[EXECUTIONJOB] {
+class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJobRegistry[EXECUTIONJOB] {
 
   private def ExecutionJobOrderOnTime = new Ordering[EXECUTIONJOB] {
     
@@ -43,11 +43,9 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob[_]] extends IExecution
   var jobs = new HashMap[IJob, TreeSet[EXECUTIONJOB]]
   var categories = new HashMap[IJobStatisticCategory, HashSet[IJob]]
 
-  override def getAllJobs: Iterable[IJob] = {
-    return jobs.keySet
-  }
+  override def allJobs: Iterable[IJob] = jobs.keySet
       
-  override def getExecutionJobsFor(job: IJob): Iterable[EXECUTIONJOB] = {
+  override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = {
     jobs.get(job) match {
       case Some(ejobs) => ejobs
       case None => Iterable.empty
@@ -66,60 +64,54 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob[_]] extends IExecution
     jobs.isEmpty
   }
 
-  override def register(ejob: EXECUTIONJOB) = {
-    synchronized {  
-     jobs(ejob.job) = jobs.get(ejob.job) match {
-        case Some(ejobs) => ejobs + ejob
-        case None => TreeSet[EXECUTIONJOB](ejob)(ExecutionJobOrderOnTime)
-      }  
-      val category = new JobStatisticCategory(ejob.job)
-      categories(category) = categories.get(category) match {
-        case Some(jobs) => jobs + ejob.job
-        case None => HashSet(ejob.job)
-      }
+  override def register(ejob: EXECUTIONJOB) = synchronized {
+    jobs(ejob.job) = jobs.get(ejob.job) match {
+      case Some(ejobs) => ejobs + ejob
+      case None => TreeSet[EXECUTIONJOB](ejob)(ExecutionJobOrderOnTime)
+    }  
+    val category = new JobStatisticCategory(ejob.job)
+    categories(category) = categories.get(category) match {
+      case Some(jobs) => jobs + ejob.job
+      case None => HashSet(ejob.job)
     }
   }
 
     
-  override def getNbExecutionJobsForJob(job: IJob): Int = {
-    getExecutionJobsFor(job).size
-  }
+  override def nbExecutionJobs(job: IJob): Int =  executionJobs(job).size
 
-  override def removeJob(job: IJob) = {
-    synchronized {
-      jobs -= job
+  override def removeJob(job: IJob) = synchronized {
+    jobs -= job
 
-      val category = new JobStatisticCategory(job)
-      categories.get(category) match {
-        case Some(jobs) => {
-            val newJobs = jobs - job
-            if(newJobs.isEmpty) categories -= category
-            else categories(category) = newJobs
-          }
-        case None =>
-      }
+    val category = new JobStatisticCategory(job)
+    categories.get(category) match {
+      case Some(jobs) => {
+          val newJobs = jobs - job
+          if(newJobs.isEmpty) categories -= category
+          else categories(category) = newJobs
+        }
+      case None =>
     }
   }
 
-  override def getAllExecutionJobs:  Iterable[EXECUTIONJOB] = {
-    for (job <- getAllJobs ; if jobs.contains(job) ; ejob <- jobs(job)) yield ejob
+  override def allExecutionJobs:  Iterable[EXECUTIONJOB] = {
+    for (job <- allJobs ; if jobs.contains(job) ; ejob <- jobs(job)) yield ejob
   }
 
-  override def getLastExecutionJobForJob(job: IJob): Option[EXECUTIONJOB] = {
+  override def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] = {
     jobs.get(job) match {
       case None => None
       case Some(ejobs) => ejobs.headOption
     }
   }
 
-  override def getExecutionJobsForTheCategory(category: IJobStatisticCategory): Iterable[EXECUTIONJOB] = {
+  override def executionJobs(category: IJobStatisticCategory): Iterable[EXECUTIONJOB] = {
     categories.get(category) match {
       case Some(js) => for(j <- js; if jobs.contains(j); ejob <- jobs(j)) yield ejob
       case None => Iterable.empty
     }  
   }
 
-  override def getJobsForTheCategory(category: IJobStatisticCategory): Iterable[IJob] = {
+  override def jobs(category: IJobStatisticCategory): Iterable[IJob] = {
     categories.get(category) match {
       case None => Iterable.empty
       case Some(jobs) => jobs

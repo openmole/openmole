@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -19,13 +19,15 @@ package org.openmole.core.model.execution.batch
 
 import java.io.File
 import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.IExecutionJobRegistry
 
-trait IBatchEnvironment[JS <: IBatchJobService[_,_]] extends IEnvironment[IBatchExecutionJob[_]] {
+trait IBatchEnvironment extends IEnvironment {
     def runtime: File
-    def allJobServices: Iterable[JS]
+    def allJobServices: Iterable[IBatchJobService[_,_]]
     def allStorages: Iterable[IBatchStorage[_,_]]
-    def getJobServices: IBatchServiceGroup[JS] 
+    def getJobServices: IBatchServiceGroup[IBatchJobService[_,_]] 
     def getStorages: IBatchServiceGroup[IBatchStorage[_,_]]
-    def getAJobService: (JS, IAccessToken)
+    def getAJobService: (IBatchJobService[_,_], IAccessToken)
     def getAStorage: (IBatchStorage[_,_], IAccessToken)
+    override def jobRegistry: IExecutionJobRegistry[IBatchExecutionJob]
 }

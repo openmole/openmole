@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -44,24 +44,22 @@ object BatchExecutionJob {
   val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
-  val LOGGER = Logger.getLogger(BatchExecutionJob.getClass.getName)
-    
+  val LOGGER = Logger.getLogger(classOf[BatchExecutionJob].getName)
 
-  Activator.getWorkspace().addToConfigurations(MinUpdateInterval, "PT2M")
-  Activator.getWorkspace().addToConfigurations(MaxUpdateInterval, "PT30M")
-  Activator.getWorkspace().addToConfigurations(IncrementUpdateInterval, "PT2M")
-
+  Activator.getWorkspace.addToConfigurations(MinUpdateInterval, "PT2M")
+  Activator.getWorkspace.addToConfigurations(MaxUpdateInterval, "PT30M")
+  Activator.getWorkspace.addToConfigurations(IncrementUpdateInterval, "PT2M")
 }
 
 
-class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: BatchEnvironment[JS], job: IJob, id: IExecutionJobId) extends ExecutionJob[BatchEnvironment[JS]](executionEnvironment, job, id) with IBatchExecutionJob[BatchEnvironment[JS]] with IUpdatableWithVariableDelay {
+class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IBatchExecutionJob with IUpdatableWithVariableDelay {
 
   import BatchExecutionJob._
     
   var batchJob: IBatchJob = null
   val killed = new AtomicBoolean(false)
   var copyToEnvironmentResult: CopyToEnvironmentResult = null
-  var delay: Long = 0//Activator.getWorkspace().getPreferenceAsDurationInMs(BatchExecutionJob.MinUpdateInterval)
+  var _delay: Long = Activator.getWorkspace.getPreferenceAsDurationInMs(MinUpdateInterval)
  
   @transient
   var copyToEnvironmentExecFuture: Future[CopyToEnvironmentResult] = null
@@ -69,26 +67,19 @@ class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: Batc
   @transient
   var finalizeExecutionFuture: Future[_] = null
 
-
-  asynchonousCopy()
+  asynchonousCopy
     
-
   private def updateAndGetState: ExecutionState = {
-    if (killed.get) {
-      return KILLED
-    }
-
-    if (batchJob == null) {
-      return READY;
-    }
-
+    if (killed.get) return KILLED
+    if (batchJob == null) return READY
+    
     val oldState = batchJob.state
 
     if (!oldState.isFinal) {
       val newState = batchJob.updatedState
 
       if (oldState == SUBMITED && newState == RUNNING) {
-        executionEnvironment.sample(SampleType.WAITING, batchJob.lastStatusDurration, job)
+        executionEnvironment.sample(SampleType.WAITING, batchJob.lastStateDurration, job)
       }
     }
       
@@ -96,12 +87,10 @@ class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: Batc
   }
 
   override def state: ExecutionState = {
-    if (killed.get) {
-      return KILLED
-    }
-    if (batchJob == null) {
-      return READY
-    }
+    //LOGGER.info("Get the state " + killed.get)
+    if (killed.get) return KILLED
+    if (batchJob == null) return READY
+    
     return batchJob.state
   }
 
@@ -112,22 +101,22 @@ class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: Batc
 
       newState match {
         case READY =>
-          if (asynchonousCopy()) {
-            delay = 0
+          if (asynchonousCopy) {
+            _delay = 0
             trySubmit
           }
         case (SUBMITED | RUNNING | KILLED) => {}
-        case FAILED => retry()
+        case FAILED => retry
         case DONE => tryFinalise
       }
 
       //Compute new refresh delay
-      if (delay == 0 || oldState != state) {
+      if (oldState != state) {
         initDelay
       } else {
-        val newDelay = delay + Activator.getWorkspace().getPreferenceAsDurationInMs(IncrementUpdateInterval);
-        if (newDelay <= Activator.getWorkspace().getPreferenceAsDurationInMs(MaxUpdateInterval)) {
-          this.delay = newDelay;
+        val newDelay = _delay + Activator.getWorkspace.getPreferenceAsDurationInMs(IncrementUpdateInterval)
+        if (newDelay <= Activator.getWorkspace.getPreferenceAsDurationInMs(MaxUpdateInterval)) {
+          _delay = newDelay
         }
       }
             
@@ -135,71 +124,57 @@ class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: Batc
 
 
     } catch {
-      case (e: CancellationException) => 
-        LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
+      case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
       case e =>
         kill
-        LOGGER.log(Level.WARNING, "Error in job update", e);
+        LOGGER.log(Level.WARNING, "Error in job update", e)
     }
 
     return !killed.get
   }
 
   private def initDelay = {
-    this.delay = Activator.getWorkspace().getPreferenceAsDurationInMs(MinUpdateInterval)
+    _delay = Activator.getWorkspace.getPreferenceAsDurationInMs(MinUpdateInterval)
   }
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = Activator.getExecutorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob.lastStatusDurration))
+      finalizeExecutionFuture = Activator.getExecutorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob.lastStateDurration))
     }
-    try {
-      if (finalizeExecutionFuture.isDone) {
-        finalizeExecutionFuture.get
-        finalizeExecutionFuture = null
-        kill
-      }
-    } catch {
-      case (e: ExecutionException) => throw new InternalProcessingError(e)
-      case (e: InterruptedException) => throw new InternalProcessingError(e)
-    } 
+    if (finalizeExecutionFuture.isDone) {
+      finalizeExecutionFuture.get
+      finalizeExecutionFuture = null
+      kill
+    }
   }
 
-  private def asynchonousCopy(): Boolean = {
+  private def asynchonousCopy: Boolean = {
     if (copyToEnvironmentResult == null) {
       if (copyToEnvironmentExecFuture == null) {
         copyToEnvironmentExecFuture = Activator.getExecutorService.getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
       }
 
-      try {
-        if (copyToEnvironmentExecFuture.isDone()) {
-          copyToEnvironmentResult = copyToEnvironmentExecFuture.get();
-          copyToEnvironmentExecFuture = null;
-        }
-
-      } catch {
-        case (ex: ExecutionException) => throw new InternalProcessingError(ex)
-        case (ex: InterruptedException) => throw new InternalProcessingError(ex)
+      if (copyToEnvironmentExecFuture.isDone) {
+        copyToEnvironmentResult = copyToEnvironmentExecFuture.get
+        copyToEnvironmentExecFuture = null
       }
     }
 
-    return copyToEnvironmentResult != null;
+    return copyToEnvironmentResult != null
   }
 
-  private def trySubmit() = {
-
+  private def trySubmit = {
     val js = executionEnvironment.getAJobService
     try {
-      if(killed.get()) throw new InternalProcessingError("Job has been killed")
+      if(killed.get) throw new InternalProcessingError("Job has been killed")
       //FIXME copyToEnvironmentResult may be null if job killed here
       val bj = js._1.submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2)
       batchJob = bj
     } catch {
       case(e: InternalProcessingError) => LOGGER.log(Level.FINE, "Error durring job submission.", e)
     } finally {
-      Activator.getBatchRessourceControl().getController(js._1.description).getUsageControl.releaseToken(js._2)
+      Activator.getBatchRessourceControl.usageControl(js._1.description).releaseToken(js._2)
     }
-
   }
 
   private def clean = {
@@ -210,35 +185,30 @@ class BatchExecutionJob [JS <: IBatchJobService[_,_]](executionEnvironment: Batc
   }
 
   override def kill = {
+    
     if (!killed.getAndSet(true)) {
       try {
         val copy = copyToEnvironmentExecFuture
-
-        if (copy != null) {
-          copy.cancel(true)
-        }
-
+        if (copy != null) copy.cancel(true)
+        
         val finalize = finalizeExecutionFuture
-
-        if (finalize != null) {
-          finalize.cancel(true)
-        }
+        if (finalize != null) finalize.cancel(true)
+        
         clean
       } finally {
         val bj = batchJob
         if (bj != null) {
-          Activator.getExecutorService().getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          Activator.getExecutorService.getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
         }
       }
     }
   }
 
-  override def retry() = {
+  override def retry = {
     batchJob = null
-    delay = 0
+    _delay = 0
   }
 
-  override def getDelay: Long = {
-    return delay
-  }
+  override def delay: Long =  _delay
+
 }

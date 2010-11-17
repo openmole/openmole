@@ -29,9 +29,9 @@
  * </pre>
  *
  * <pre>{@code
- * import org.openmole.plugin.domain.interval.LogarithmRangeDouble
- * import org.openmole.plugin.domain.interval.RangeBigDecimal
- * import org.openmole.plugin.domain.interval.RangeInteger
+ * import org.openmole.plugin.domain.range.LogarithmRangeDouble
+ * import org.openmole.plugin.domain.range.RangeBigDecimal
+ * import org.openmole.plugin.domain.range.RangeInteger
  * import org.openmole.plugin.sampling.complete.CompletePlan
  * import org.openmole.plugin.task.groovy.GroovyTask
  * import static org.openmole.ui.plugin.transitionfactory.TransitionFactory.*;

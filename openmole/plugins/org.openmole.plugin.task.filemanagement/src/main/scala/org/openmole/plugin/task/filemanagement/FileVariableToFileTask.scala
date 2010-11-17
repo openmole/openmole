@@ -27,7 +27,7 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import scala.collection.mutable.ListBuffer
@@ -49,7 +49,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
   override def process(global: IContext, context: IContext, progress: IProgress)  {
     try{
       toCopy foreach( p => {
-          val from = context.getValue(p._1)
+          val from = context.value(p._1).get
           val to = new File(expandData(global, context, p._2))
           copy(from, to)
 
@@ -58,9 +58,9 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
         })
 
       toCopyWithNameInVariable foreach( p => {
-          val from = context.getValue(p._1)
+          val from = context.value(p._1).get
 
-          val name = context.getValue(p._2)
+          val name = context.value(p._2).get
           val to = new File(expandData(global, context, p._3), name)
           copy(from, to)
 
@@ -68,8 +68,8 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
         })
 
       listToCopyWithNameInVariable foreach ( cpList => {
-          val files = context.getValue(cpList._1)
-          val names = context.getValue(cpList._2)
+          val files = context.value(cpList._1).get
+          val names = context.value(cpList._2).get
           val urlDir = cpList._3;
 
           if(files != null && names != null) {

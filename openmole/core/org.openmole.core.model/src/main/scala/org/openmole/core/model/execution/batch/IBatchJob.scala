@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -20,22 +20,22 @@ package org.openmole.core.model.execution.batch
 import org.openmole.core.model.execution.ExecutionState
 
 trait IBatchJob {
-        def hasBeenSubmitted: Boolean
-	//def state_= (state: ExecutionState);
-        def state: ExecutionState
+  def hasBeenSubmitted: Boolean
+  //def state_= (state: ExecutionState);
+  def state: ExecutionState
         
-        def lastStatusDurration: Long
+  def lastStateDurration: Long
 
-        def timeStemp(state: ExecutionState): Long
+  def timeStemp(state: ExecutionState): Long
 
-        def jobServiceDescription: IBatchServiceDescription
+  def jobServiceDescription: BatchServiceDescription
         
-	def kill
-	def kill(token: IAccessToken)
+  def kill
+  def kill(token: IAccessToken)
 	
-	//void submit() throws InternalProcessingError, UserBadDataError, InterruptedException;	
-	//void submit(IAccessToken token) throws InternalProcessingError, InterruptedException;
+  //void submit() throws InternalProcessingError, UserBadDataError, InterruptedException;	
+  //void submit(IAccessToken token) throws InternalProcessingError, InterruptedException;
 	
-	def updatedState: ExecutionState
-	def getUpdatedState(token: IAccessToken): ExecutionState
+  def updatedState: ExecutionState
+  def updatedState(token: IAccessToken): ExecutionState
 }

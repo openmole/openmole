@@ -42,7 +42,7 @@ public class EnvironmentViewer implements IViewer<IEnvironment> {
             accounting.put(state, new AtomicInteger());
         }
 
-        Iterator<IExecutionJob> it = object.jobRegistry().getAllExecutionJobs().iterator();
+        Iterator<? extends IExecutionJob> it = object.jobRegistry().allExecutionJobs().iterator();
 
         while (it.hasNext()) {
             IExecutionJob executionJob = it.next();

@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -22,6 +22,6 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
 
-abstract class ExecutionJob[ENV <: IEnvironment[_]](val environment: ENV, val job: IJob, val id: IExecutionJobId) extends IExecutionJob[ENV] {
+abstract class ExecutionJob[ENV <: IEnvironment](val environment: ENV, val job: IJob, val id: IExecutionJobId) extends IExecutionJob {
   val creationTime = System.currentTimeMillis
 }

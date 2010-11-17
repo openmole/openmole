@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -49,16 +49,16 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authent
     val writter = new PrintStream(os)
 
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.getLocationString(), "$PWD/openmole.tar.bz2"))
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.location, "$PWD/openmole.tar.bz2"))
     writter.print(" tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; ")
     writter.print("mkdir envplugins; PLUGIN=0;");
 
     for (plugin <- runtime.environmentPlugins) {
-      writter.print(mkLcgCpGunZipCmd(environment, plugin.getLocationString(), "$CUR/envplugins/plugin$PLUGIN.jar"))
-      writter.print("PLUGIN=`expr $PLUGIN + 1`; ");
+      writter.print(mkLcgCpGunZipCmd(environment, plugin.location, "$CUR/envplugins/plugin$PLUGIN.jar"))
+      writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
 
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.getLocationString(), "$CUR/authentication.xml"))
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.location, "$CUR/authentication.xml"))
 
     writter.print("cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))

@@ -69,7 +69,7 @@ public class SSHUtils {
     }
 
     private static void copyTo(final SFTPv3Client client, final FileInputStream local, final SFTPv3FileHandle remote) throws IOException {
-        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
+        final byte[] buffer = new byte[FileUtil.DefaultBufferSize()];
         /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (Exception ex) {
@@ -126,7 +126,7 @@ public class SSHUtils {
     }
 
     private static void copyFrom(SFTPv3Client client, SFTPv3FileHandle remote, OutputStream local) throws IOException {
-        final byte[] buffer = new byte[FileUtil.DEFAULT_BUFF_SIZE];
+        final byte[] buffer = new byte[FileUtil.DefaultBufferSize()];
         /*try {
             buffer = BufferFactory.GetInstance().borrowObject();
         } catch (Exception ex) {

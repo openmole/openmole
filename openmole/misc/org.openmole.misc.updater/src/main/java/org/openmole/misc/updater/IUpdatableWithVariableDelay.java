@@ -22,5 +22,5 @@ package org.openmole.misc.updater;
  * @author reuillon
  */
 public interface IUpdatableWithVariableDelay extends IUpdatable {
-    long getDelay();
+    long delay();
 }

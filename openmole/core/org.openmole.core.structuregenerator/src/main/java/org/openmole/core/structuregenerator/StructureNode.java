@@ -20,6 +20,6 @@ package org.openmole.core.structuregenerator;
 
 
 public interface StructureNode {
-    String getName();
+    String name();
     void setName(String name);
 }

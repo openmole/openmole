@@ -37,8 +37,8 @@ public class SequenceNode<T extends StructureNode> implements StructureNode {
     }
 
     @Override
-    public String getName() {
-        return innerNode.getName();
+    public String name() {
+        return innerNode.name();
     }
 
     @Override

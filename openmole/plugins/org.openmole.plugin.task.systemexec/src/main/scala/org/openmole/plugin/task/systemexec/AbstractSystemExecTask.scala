@@ -20,8 +20,9 @@ package org.openmole.plugin.task.systemexec
 import java.io.File
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
+import org.openmole.core.model.data.IContext
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import java.io.IOException
 import org.openmole.plugin.task.systemexec.internal.Activator._
@@ -29,10 +30,11 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import scala.collection.JavaConversions._
+import java.lang.Integer
 
 abstract class AbstractSystemExecTask (name: String, 
                                        val cmd: String, 
-                                       val returnValue: Prototype[Integer] = null, 
+                                       val returnValue: IPrototype[Integer] = null, 
                                        relativeDir: String = "") extends ExternalSystemTask(name) {
   if(returnValue != null) addOutput(returnValue)
   
@@ -54,7 +56,6 @@ abstract class AbstractSystemExecTask (name: String,
 //  
   
   override protected def process(global: IContext, context: IContext, progress: IProgress) = {
-    try {
       val tmpDir = workspace.newDir("systemExecTask")
 
       prepareInputFiles(global, context, progress, tmpDir)
@@ -66,20 +67,16 @@ abstract class AbstractSystemExecTask (name: String,
         // executor.setWorkingDirectory(workDir)
         // val ret = executor.execute(commandLine);
      
-        val process = Runtime.getRuntime().exec(commandLine.toString, null, workDir)
+        val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
         val ret = execute(process,context)
-        if(returnValue != null) context.setValue[Integer](returnValue, ret)
+        if(returnValue != null) context += (returnValue, ret)
         // if(returnValue != null) context.setValue[Integer](returnValue, ret)
       } catch {
         case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }
 
       fetchOutputFiles(global, context, progress, workDir)
-
-    } catch {
-      case e: IOException => throw new InternalProcessingError(e)
-    }
   }
   
-  protected def execute(process: Process, context: IContext):Int{}
+  protected def execute(process: Process, context: IContext):Integer
 }

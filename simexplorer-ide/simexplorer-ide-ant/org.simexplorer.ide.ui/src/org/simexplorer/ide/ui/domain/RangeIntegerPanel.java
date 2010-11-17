@@ -21,7 +21,7 @@ package org.simexplorer.ide.ui.domain;
 import org.simexplorer.core.workflow.methods.EditorPanel;
 import javax.swing.SpinnerNumberModel;
 import org.openide.util.lookup.ServiceProvider;
-import org.openmole.plugin.domain.interval.RangeInteger;
+import org.openmole.plugin.domain.range.RangeInteger;
 
 @ServiceProvider(service=EditorPanel.class)
 public class RangeIntegerPanel extends EditorPanel<RangeInteger> {

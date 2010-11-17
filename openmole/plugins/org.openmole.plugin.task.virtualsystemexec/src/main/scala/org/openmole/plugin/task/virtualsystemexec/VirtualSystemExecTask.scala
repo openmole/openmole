@@ -18,22 +18,22 @@
 package org.openmole.plugin.task.virtualsystemexec
 
 import org.openmole.core.model.execution.IProgress
-import org.openmole.core.model.job.IContext
-import org.openmole.core.model.task.annotations.Resource
+import org.openmole.core.model.data.IContext
 import org.openmole.plugin.resource.virtual.VirtualMachineResource
 import org.openmole.plugin.task.external.virtual.ExternalVirtualTask
 
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 
-class VirtualSystemExecTask(name: String, virtualMachineResourceArg: VirtualMachineResource, val cmd: String, relativeDir: String) extends ExternalVirtualTask(name, relativeDir) {
+class VirtualSystemExecTask(name: String, val virtualMachineResource: VirtualMachineResource, val cmd: String, relativeDir: String) extends ExternalVirtualTask(name, relativeDir) {
 
   def this(name: String, virtualMachineResourceArg: VirtualMachineResource, cmd: String) {
     this(name, virtualMachineResourceArg, cmd, "")
   }
   
-  @Resource
-  val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
+  //val virtualMachineResource: VirtualMachineResource = virtualMachineResourceArg
 
+  addResource(virtualMachineResource)
+  
   override protected def process(global: IContext, context: IContext, progress: IProgress) {
     val pool = virtualMachineResource.getVirtualMachineShared
     val virtualMachine = pool.borrowAVirtualMachine
