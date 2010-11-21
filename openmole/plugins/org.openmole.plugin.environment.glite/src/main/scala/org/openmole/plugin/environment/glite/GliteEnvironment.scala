@@ -55,10 +55,7 @@ object GliteEnvironment {
 
   @field @InteractiveConfiguration(label = "Key password")
   val PasswordLocation = new ConfigurationLocation("GliteEnvironment", "Password", true)
-    
-  @field @InteractiveConfiguration(label = "Fqan")
-  val FqanLocation = new ConfigurationLocation("GliteEnvironment", "Fqan")
-    
+       
   val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
   val DelegationTimeLocation = new ConfigurationLocation("GliteEnvironment", "DelegationTime")
 
@@ -102,7 +99,6 @@ object GliteEnvironment {
 
   Activator.getWorkspace.addToConfigurations(FetchRessourcesTimeOutLocation, "PT2M");
   Activator.getWorkspace.addToConfigurations(CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/");
-  Activator.getWorkspace.addToConfigurations(FqanLocation, "");
 
   Activator.getWorkspace.addToConfigurations(LocalThreadsBySELocation, "10");
   Activator.getWorkspace.addToConfigurations(LocalThreadsByWMSLocation, "10");
@@ -119,7 +115,7 @@ object GliteEnvironment {
     
 }
 
-class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], memoryForRuntime: Option[Int]) extends JSAGAEnvironment(attributes, memoryForRuntime) {
+class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes, memoryForRuntime) {
 
   import GliteEnvironment._
 
@@ -146,7 +142,18 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
  
   def this(voName: String, vomsURL: String, bdii: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime))
   
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String) = this(voName, vomsURL, bdii, None, None, None)
 
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), None, fqan)
+ 
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), Some(memoryForRuntime), fqan)
+  
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), None, None, fqan)
+
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), None, fqan)
+ 
+  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime), fqan)
+  
   override def allJobServices: Iterable[JSAGAJobService[_,_]] = {
 
     val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
@@ -157,7 +164,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
       try {
         val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
 
-        val jobService = new GliteJobService(wms, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy), threadsByWMS);
+        val jobService = new GliteJobService(wms, this, authenticationKey, authentication, threadsByWMS)
         jobServices += jobService
       } catch {
         case (e: URISyntaxException) => Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -173,13 +180,15 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
     val stors = getBDII.querySRMURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
 
     for (stor <- stors) {
-      val storage = new BatchStorage(stor, this, new GliteAuthenticationKey(voName, vomsURL), new GliteAuthentication(voName, vomsURL, myProxy),threadsBySE);
+      val storage = new BatchStorage(stor, this, authenticationKey, authentication,threadsBySE)
       allStorages += storage
     }
 
     allStorages
   }
 
+  @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
+  @transient lazy val authenticationKey = new GliteAuthenticationKey(voName, vomsURL)
 
   private def getBDII: BDII = {
     new BDII(bdii)

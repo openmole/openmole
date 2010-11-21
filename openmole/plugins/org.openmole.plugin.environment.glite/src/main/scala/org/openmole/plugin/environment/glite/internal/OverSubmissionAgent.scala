@@ -96,7 +96,7 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
       for (val entry <- nbJobsByCategory.entrySet) {
         var nbRessub = minNumberOfJobsByCategory - entry.getValue
         val jobStatisticCategory = entry.getKey
-        Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,nbRessub + " " + entry.getValue);
+        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,nbRessub + " " + entry.getValue);
 
         if (nbRessub > 0) {
           // Resubmit nbRessub jobs in a fair manner

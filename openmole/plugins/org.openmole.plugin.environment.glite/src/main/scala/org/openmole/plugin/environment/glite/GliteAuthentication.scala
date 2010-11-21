@@ -60,17 +60,13 @@ object GliteAuthentication {
     Activator.getWorkspace().getPreference(GliteEnvironment.KeyPathLocation)
   }
 
-  def getFQAN: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.FqanLocation)
-  }
-
   def getTimeString: String = {
     Activator.getWorkspace().getPreference(GliteEnvironment.TimeLocation)
   }
 
   def getTime: Long = {
     try {
-      return UDuration.toInt(getTimeString) * 1000L;
+      return UDuration.toInt(getTimeString) * 1000L
     } catch {
       case (ex: ParseException) => throw new UserBadDataError(ex)
     }
@@ -127,7 +123,7 @@ object GliteAuthentication {
 }
 
 
-class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy]) extends IBatchServiceAuthentication {
+class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy], fqan: String) extends IBatchServiceAuthentication {
 
   import GliteAuthentication._
     
@@ -219,8 +215,6 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       }
 
       ctx.setAttribute(Context.USERPASS, keyPassword)
-
-      val fqan = getFQAN
 
       if (!fqan.isEmpty)  ctx.setAttribute(VOMSContext.USERFQAN, fqan)
       

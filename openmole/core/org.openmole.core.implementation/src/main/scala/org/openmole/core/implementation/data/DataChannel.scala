@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.data
 
-import java.util.logging.Logger
+
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.CloningService
 import org.openmole.core.implementation.tools.ContextBuffer
@@ -30,7 +30,6 @@ import org.openmole.core.model.task.IGenericTask
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.ArraySeq
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.data.Util._
 
 class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val variableNames: Set[String]) extends IDataChannel {
 
@@ -97,8 +96,6 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
       else {
         var workingOnTicket = ticket
         for (i <- startLevel until endLevel) {
-          Logger.getLogger(getClass.getName).info("Up one level")
- 
           workingOnTicket = workingOnTicket.parent match {
             case None => throw new InternalProcessingError("Bug should never get to root.")
             case Some(p) => p
