@@ -93,7 +93,6 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
                     
       }
 
-      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"Entry set size " + nbJobsByCategory.entrySet.size)
       for (val entry <- nbJobsByCategory.entrySet) {
         var nbRessub = minNumberOfJobsByCategory - entry.getValue
         val jobStatisticCategory = entry.getKey
