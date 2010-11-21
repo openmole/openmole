@@ -51,6 +51,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
       toCopy foreach( p => {
           val from = context.value(p._1).get
           val to = new File(expandData(global, context, p._2))
+          to.getParentFile.mkdirs
           copy(from, to)
 
           if(remove) from.delete()
@@ -59,9 +60,12 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
 
       toCopyWithNameInVariable foreach( p => {
           val from = context.value(p._1).get
-
           val name = context.value(p._2).get
-          val to = new File(expandData(global, context, p._3), name)
+          
+          val dir = new File(expandData(global, context, p._3))
+          dir.mkdirs
+          
+          val to = new File(dir, name)
           copy(from, to)
 
           if(remove) from.delete()
@@ -75,7 +79,8 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
           if(files != null && names != null) {
 
             val toDir = new File(expandData(global, context, urlDir))
-
+            toDir.mkdirs
+            
             val itFile = files.iterator()
             val itName = names.iterator()
 

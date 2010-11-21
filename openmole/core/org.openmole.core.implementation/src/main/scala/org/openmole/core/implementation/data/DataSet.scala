@@ -20,6 +20,7 @@ package org.openmole.core.implementation.data
 import org.openmole.core.model.data.{IData,IDataSet,IPrototype}
 import scala.collection.Iterator
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable.ListBuffer
 
 
 object DataSet {
@@ -41,7 +42,7 @@ class DataSet(_data: Map[String, IData[_]]) extends IDataSet {
   
   def this(head: IData[_], data: Array[IData[_]]) =  this(List(head) ++ data)
   
-  def this(head: IDataSet, dataSets: Iterable[IDataSet]) = this(DataSet.toMap(dataSets.flatten.map{ d => (d.prototype.name,d)}))
+  def this(head: IDataSet, dataSets: Iterable[IDataSet]) = this(DataSet.fromIterable2Map(head ++ dataSets.flatten))
  
   def this(head: IDataSet, dataSets: Array[IDataSet]) = this(head, dataSets.toIterable)
   
