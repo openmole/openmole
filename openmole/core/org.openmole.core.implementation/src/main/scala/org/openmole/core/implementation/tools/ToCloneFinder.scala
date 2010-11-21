@@ -18,44 +18,45 @@
 package org.openmole.core.implementation.tools
 
 import java.util.concurrent.atomic.AtomicInteger
+import org.openmole.core.model.data.IData
+import org.openmole.core.model.mole.IMoleExecution
+import java.util.logging.Logger
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet
+import MutableComputing.Mutable._
 
 
 object ToCloneFinder {
 
-  //TODO Improvement condition are evaluated several times
-  def variablesToClone(caps: IGenericCapsule, global: IContext, context: IContext): Set[String] = {
+  private class DataInfo {
+    var nbUsage = 0
+    var nbMutable = 0
+    var forceCloning = false
+  }
 
-    class DataInfo {
-      val nbUsage = new AtomicInteger
-      val nbMutable = new AtomicInteger
-    }
+  //TODO Improvement condition are evaluated several times
+  def variablesToClone(caps: IGenericCapsule, global: IContext, context: IContext, moleExecution: IMoleExecution): Set[String] = {
 
     var counters = new TreeMap[String, DataInfo]
-
+    val levelComputing = LevelComputing(moleExecution)
     for (transition <- caps.outputTransitions) {
       if (transition.isConditionTrue(global, context)) {
         transition.end.capsule.task match {
           case Some(t) =>
-              
             for (data <- t.inputs) {
               val name = data.prototype.name
 
               val info = counters.get(name) match {
                 case None => 
-                  val i = new DataInfo
-                  counters += ((name, i))
-                  i
-                case Some(i) => i
+                  val info = new DataInfo
+                  counters += ((name, info))
+                  info
+                case Some(info) => info
               }
-
-              info.nbUsage.incrementAndGet
-              if (!data.mode.isImmutable) {
-                info.nbMutable.incrementAndGet
-              }
+              updateInfo(caps, info, data, MutableComputing(moleExecution), levelComputing)        
+             
             }
           case None =>
         }
@@ -74,20 +75,31 @@ object ToCloneFinder {
           case Some(i) => i
         }
 
-        info.nbUsage.incrementAndGet
-        if (!data.mode.isImmutable)  info.nbMutable.incrementAndGet
-                
+        updateInfo(caps, info, data, MutableComputing(moleExecution), levelComputing)        
       }
     }
 
     var toClone = new TreeSet[String]
 
     for(entry <- counters) {
-      if(entry._2.nbUsage.get > 1 && entry._2.nbMutable.get > 0) {
+      if(entry._2.forceCloning || (entry._2.nbUsage > 1 && entry._2.nbMutable > 0)) {
         toClone += entry._1
       }
     }
 
     return toClone
+  }
+  
+  
+  private def updateInfo(caps: IGenericCapsule, info: DataInfo, data: IData[_], mutableComputing: MutableComputing, levelComputing: LevelComputing) = {
+    info.nbUsage += 1
+    mutableComputing.mutable(caps, data.prototype, levelComputing) match {
+      case No =>
+      case Yes => 
+        info.nbMutable += 1
+      case YesForHigherLevel =>
+        info.nbMutable += 1
+        info.forceCloning = true
+    }
   }
 }

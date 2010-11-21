@@ -18,107 +18,43 @@
 package org.openmole.core.implementation.tools
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.implementation.data.{DataSet,Variable,Prototype}
+import org.openmole.core.implementation.data.{DataSet,Variable,Prototype, Context}
 import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
-import scala.collection.immutable.TreeSet
-import scala.collection.immutable.TreeSet
+import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
 object ContextAggregator {
 
-  def dataIn1WhichAreAlsoIn2(one: IDataSet, two: IDataSet): IDataSet = {
+ /* def dataIn1WhichAreAlsoIn2(one: IDataSet, two: IDataSet): IDataSet = {
     new DataSet(for (data <- one ; if two.contains(data.prototype.name)) yield data)
-  }
+  }*/
 
-  def aggregate(inContext: IContext, aggregate: IDataSet, toClone: Set[String], forceArrays: Boolean, toAgregate: Iterable[IContext]) = {
-    var mergingVars = new TreeSet[String]
+  def aggregate(aggregate: IDataSet, forceArrays: Boolean, toAgregate: Iterable[IContext]): IContext = {
+    val inContext = new Context
+    
+    var mergingVars = new TreeMap[String, ListBuffer[Any]]
 
     for (current <- toAgregate) {
       for (data <- aggregate) {
-        val inProt = data.prototype
-
-        def getAndCloneIfNecessary[T](prot: IPrototype[T]): IVariable[T] = {
-          val variable = current.variable(prot) match {
-            case None => throw new InternalProcessingError("BUG Prototype not found in context.")
-            case Some(v) => v
-          }
-          if(toClone.contains(prot.name)) ClonningService.clone(variable) else variable
-        }
-        
-     
-        if ((!data.mode.isOptional || data.mode.isOptional) && current.containsVariableWithName(inProt.name)) {
-          inContext.+=(
-            if(forceArrays || inContext.containsVariableWithName(inProt.name)) {
-              val inProtArray = Prototype.toArray(inProt)
-
-              if (mergingVars.contains(inProt.name)) {
-                val curArray = inContext.value(inProtArray) match {
-                  case None => throw new InternalProcessingError("BUG should allways exist.")
-                  case Some(v) => v
-                }
-                
-                val newVal = curArray ++ Vector(getAndCloneIfNecessary(inProt).value)
-                new Variable(inProtArray, JavaConversions.asJavaIterable(newVal))
-              } else {
-                val tmp = getAndCloneIfNecessary(inProt)  
-                val agregationList = 
-                  if (inContext.containsVariableWithName(inProt.name)) 
-                    Vector(tmp.value) ++ (inContext.value(inProt.name) match {
-                      case None => throw new InternalProcessingError("BUG should allways exist.")
-                      case Some(v) => v
-                    })
-                else Vector(tmp.value)
-                new Variable(inProtArray, JavaConversions.asJavaIterable(agregationList))
-              }
-            } else getAndCloneIfNecessary(inProt))
+        if (current.containsVariableWithName(data.prototype)) {
+            val tmp = current.value(data.prototype).get  
+            mergingVars.get(data.prototype.name) match {
+              case None => mergingVars += ((data.prototype.name, ListBuffer(tmp)))
+              case Some(buff) => buff += tmp
+            }
         }
       }
     }
+
+    for(merged <- mergingVars) {
+      if(forceArrays || merged._2.size > 1)
+        inContext += new Variable(Prototype.toArray(aggregate(merged._1).get.prototype).asInstanceOf[IPrototype[Any]], merged._2.toArray) 
+      else inContext += new Variable(aggregate(merged._1).get.prototype.asInstanceOf[IPrototype[Any]], merged._2.head)
+    }  
+    
+    inContext
   }
-  
-  /*def typed[T](inContext: IContext, data: IData[T],  current: IContext, toClone: Set[String], forceArrays: Boolean) = {
-    val inProt = data.prototype
-    var mergingVars = new TreeSet[String]
-
-    def getAndCloneIfNecessary[T](prot: IPrototype[T]): IVariable[T] = {
-          val variable = current.variable(prot) match {
-            case None => throw new InternalProcessingError("BUG Prototype not found in context.")
-            case Some(v) => v
-          }
-          if(toClone.contains(prot.name)) ClonningService.clone(variable) else variable
-        }
-        
-     
-        if ((!data.mode.isOptional || data.mode.isOptional) && current.containsVariableWithName(inProt.name)) {
-          inContext.+=(
-            if(forceArrays || inContext.containsVariableWithName(inProt.name)) {
-              val inProtArray: IPrototype[java.lang.Iterable[T]] = Prototype.toArray[T](inProt)
-
-              if (mergingVars.contains(inProt.name)) {
-                var curArray: Iterable[T] = inContext.value(inProtArray) match {
-                  case None => throw new InternalProcessingError("BUG should allways exist.")
-                  case Some(v) => v.toList ++ List(getAndCloneIfNecessary(inProt).value)
-                }
-                
-             val newVal = curArray add getAndCloneIfNecessary(inProt).value
-                //FIXME?downcasting
-                new Variable(inProtArray, JavaConversions.asJavaIterable(curArray))
-              } else {
-                val tmp = getAndCloneIfNecessary(inProt)  
-                val agregationList = 
-                  if (inContext.containsVariableWithName(inProt.name)) 
-                    Vector(tmp.value) ++ (inContext.value(inProt.name) match {
-                      case None => throw new InternalProcessingError("BUG should allways exist.")
-                      case Some(v) => v
-                    })
-                else Vector(tmp.value)
-                //FIXME?downcasting
-                new Variable(inProtArray.asInstanceOf[IPrototype[Iterable[Any]]], agregationList)
-              }
-            } else getAndCloneIfNecessary(inProt))
-        }
-  }*/
 
 }

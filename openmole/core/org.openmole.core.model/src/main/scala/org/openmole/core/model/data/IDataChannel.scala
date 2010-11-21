@@ -72,6 +72,6 @@ trait IDataChannel {
     def data: Iterable[IData[_]]
 
     def provides(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution)
-    def consums(context: IContext, ticket: ITicket, moleExecution: IMoleExecution): (IContext, Set[String])
+    def consums(sticket: ITicket, moleExecution: IMoleExecution): IContext
 
 }

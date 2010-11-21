@@ -18,22 +18,36 @@
 package org.openmole.core.batchservicecontrol
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
+import org.openmole.commons.aspect.eventdispatcher.ObjectModified
+import org.openmole.core.batchservicecontrol.internal.Activator
+import org.openmole.misc.workspace.ConfigurationLocation
+
+object QualityControl {
+  val MaxQuality = new ConfigurationLocation("QualityControl", "MaxQuality")
+  Activator.getWorkspace.addToConfigurations(MaxQuality, "100")
+}
+
 
 class QualityControl extends IQualityControl {
 
   val _failureRate = new AtomicInteger
-  val _quality = new AtomicLong
+  @volatile var _quality = 1
 
   override def failed = _failureRate.incrementAndGet
-    
   override def success = _failureRate.decrementAndGet
-    
   override def failureRate: Int = _failureRate.get
-    
   override def reinit = _failureRate.set(0)
     
-  override def increaseQuality(value: Int) = _quality.addAndGet(value)
-  override def decreaseQuality(value: Int) = _quality.addAndGet(-value)
-  override def quality: Long = _quality.get
+  override def increaseQuality(value: Int) = synchronized {
+    _quality += value
+    val max = Activator.getWorkspace.getPreferenceAsInt(QualityControl.MaxQuality)
+    if(_quality > max) _quality = max
+  }
+  
+  override def decreaseQuality(value: Int) = synchronized {
+    _quality -= value
+    if(_quality < 1) _quality = 1
+  }
+  
+  override def quality: Int = _quality
 }

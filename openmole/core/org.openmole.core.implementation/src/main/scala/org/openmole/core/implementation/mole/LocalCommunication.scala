@@ -15,20 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution
+package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.mole.ILocalCommunication
 import org.openmole.core.implementation.tools.RegistryWithTicket
+import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IGenericTransition
 import scala.collection.mutable.ListBuffer
 
 class LocalCommunication extends ILocalCommunication {
-  val transitionRegistry = new RegistryWithTicket[IGenericTransition, IContext]
+  val transitionRegistry = new RegistryWithTicket[IGenericTransition, IContextBuffer]
   
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, ListBuffer[IContext]]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContextBuffer]
  
-  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContext]
+  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]
 }

@@ -48,16 +48,14 @@ object BatchEnvironment {
   
   val ResourcesExpulseThreshod = new ConfigurationLocation("BatchEnvironment", "ResourcesExpulseThreshod")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
-  val JSRunnigBonnus = new ConfigurationLocation("BatchEnvironment", "JSRunnigBonnus")
-  val JSSubmittedMalus = new ConfigurationLocation("BatchEnvironment", "JSSubmittedMalus")
-  val JSBestSelectionQuota = new ConfigurationLocation("BatchEnvironment", "JSBestSelectionQuota")
-
+  val JSBonnus = new ConfigurationLocation("BatchEnvironment", "JSBonnus")
+  val JSMalus = new ConfigurationLocation("BatchEnvironment", "JSMalus")
+  
   Activator.getWorkspace.addToConfigurations(MemorySizeForRuntime, "512")
   Activator.getWorkspace.addToConfigurations(ResourcesExpulseThreshod, "100")
   Activator.getWorkspace.addToConfigurations(CheckInterval, "PT2M")
-  Activator.getWorkspace.addToConfigurations(JSRunnigBonnus, "10")
-  Activator.getWorkspace.addToConfigurations(JSSubmittedMalus, "1")
-  Activator.getWorkspace.addToConfigurations(JSBestSelectionQuota, "0.5")
+  Activator.getWorkspace.addToConfigurations(JSBonnus, "10")
+  Activator.getWorkspace.addToConfigurations(JSMalus, "1")
 }
 
 
@@ -65,6 +63,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
 
   @transient lazy val _jobServices = new BatchServiceGroup[IBatchJobService[_,_]](Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
   @transient lazy val _storages = new BatchServiceGroup[IBatchStorage[_,_]](Activator.getWorkspace().getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient lazy val _jsLock = new ReentrantLock
+  @transient lazy val _storageLock = new ReentrantLock
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
@@ -157,13 +157,23 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   override def selectAStorage:  (IBatchStorage[_,_], IAccessToken) = storages.selectAService
 
   override def jobServices: IBatchServiceGroup[IBatchJobService[_,_]] = {
-    if (_jobServices.isEmpty) selectWorkingJobServices(_jobServices)
-    _jobServices
+    _jsLock.lock
+    try {
+      if (_jobServices.isEmpty) selectWorkingJobServices(_jobServices)
+      _jobServices
+    } finally {
+      _jsLock.unlock
+    }
   }
 
   override def storages: IBatchServiceGroup[IBatchStorage[_,_]] = {
-    if (_storages.isEmpty)  selectStorages(_storages)
-     _storages
+    _storageLock.lock
+    try {
+      if (_storages.isEmpty)  selectStorages(_storages)
+      _storages
+    } finally {
+      _storageLock.unlock
+    }
   }
 
   override def selectAJobService: (IBatchJobService[_,_], IAccessToken) = jobServices.selectAService

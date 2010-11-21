@@ -21,6 +21,7 @@ import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.commons.tools.service.Priority
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.implementation.job.MoleJob
@@ -148,23 +149,21 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   }
 
   protected def performTransition(global: IContext, context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
-    for (dataChannel <- outputDataChannels) {
-      dataChannel.provides(context, ticket, variablesToClone(this, global, context), moleExecution);
-    }
-
-    performTransitionImpl(global, context, ticket, moleExecution, subMole);
-  }
-
-
-  def performTransitionImpl(global: IContext, context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
-        
-    if (outputTransitions.size == 1 && outputDataChannels.isEmpty) {
+    if(outputTransitions.size == 1 && outputDataChannels.isEmpty)
       outputTransitions.head.perform(global, context, ticket, Set.empty, moleExecution, subMole)
-    } else {
+    else {
+      val toClone = variablesToClone(this, global, context, moleExecution)
+ 
+      for (dataChannel <- outputDataChannels) {
+        dataChannel.provides(context, ticket, toClone, moleExecution);
+      }
+
       for (transition <- outputTransitions) {
-        transition.perform(global, context, ticket, variablesToClone(this, global, context), moleExecution, subMole)
+        transition.perform(global, context, ticket, toClone, moleExecution, subMole)
       }
     }
   }
 
+  override def toString: String = task.toString
+  
 }

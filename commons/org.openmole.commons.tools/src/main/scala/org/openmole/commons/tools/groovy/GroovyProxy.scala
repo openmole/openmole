@@ -17,12 +17,15 @@
 
 package org.openmole.commons.tools.groovy
 
+import scala.collection.JavaConversions._
+import scala.collection.JavaConversions
 import groovy.lang.Binding
 import groovy.lang.GroovyShell
 import groovy.lang.Script
 import java.io.File
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.commons.exception.{InternalProcessingError, UserBadDataError}
+import scala.collection.mutable.ListBuffer
 
 class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
 
@@ -30,7 +33,7 @@ class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
   private lazy val compiledScript = {
     val groovyShell = new GroovyShell
     for(jar <- jars) {
-      groovyShell.getClassLoader().addURL(jar.toURI().toURL());
+      groovyShell.getClassLoader.addURL(jar.toURI.toURL)
     }
     try {
       groovyShell.parse("package script\n" + code)
@@ -52,4 +55,5 @@ class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
     compiledScript.setBinding(null)
     ret
   }
+   
 }

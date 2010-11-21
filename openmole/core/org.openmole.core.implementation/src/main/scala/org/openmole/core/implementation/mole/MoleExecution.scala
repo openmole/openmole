@@ -25,7 +25,6 @@ import java.util.logging.Logger
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.SynchronizedContext
 import org.openmole.core.implementation.execution.JobRegistry
-import org.openmole.core.implementation.execution.LocalCommunication
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.job.MoleJob
@@ -69,13 +68,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   import MoleExecution._
   
   class MoleExecutionAdapterForMoleJobOutputTransitionPerformed extends IObjectListener[IMoleJob] {
-
     override def eventOccured(job: IMoleJob) = jobOutputTransitionsPerformed(job)
-
   }
 
   class MoleExecutionAdapterForMoleJob extends IObjectListener[IMoleJob] {
-
     override def eventOccured(job: IMoleJob) = {
       job.state match {
         case State.FAILED => jobFailed(job)
@@ -85,10 +81,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   class MoleExecutionAdapterForSubMoleExecution extends IObjectListener[ISubMoleExecution] {
-
-    override def eventOccured(obj: ISubMoleExecution) = {
-      submitGroups(obj)
-    }
+    override def eventOccured(obj: ISubMoleExecution) = submitGroups(obj)
   }
     
    
@@ -110,7 +103,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob
   private val moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution
   private val moleJobOutputTransitionPerformed = new MoleExecutionAdapterForMoleJobOutputTransitionPerformed
-
+  
   @transient lazy val submiter = {
     val t = new Thread(new Submiter)
     t.setDaemon(true)

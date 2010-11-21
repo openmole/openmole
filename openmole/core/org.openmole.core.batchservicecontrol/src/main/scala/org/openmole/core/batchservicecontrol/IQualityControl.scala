@@ -21,6 +21,7 @@ import org.openmole.core.batchservicecontrol.internal.Activator
 import org.openmole.core.model.execution.batch.BatchServiceDescription
 
 object IQualityControl {
+
   def withFailureControl[A](desc: BatchServiceDescription, op: => A): A = {
     val qualityControl = Activator.getRessourceControl.qualityControl(desc)
     try {
@@ -48,5 +49,5 @@ trait IQualityControl {
     def reinit
     def increaseQuality(value: Int)
     def decreaseQuality(value: Int)
-    def quality: Long
+    def quality: Int
 }

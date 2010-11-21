@@ -23,6 +23,7 @@ import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.ToCloneFinder
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -71,10 +72,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
   def this(start: ICapsule, end: IGenericCapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
     
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-    
 
-  
-  
   override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
 
     val registry = moleExecution.localCommunication.aggregationTransitionRegistry
@@ -84,9 +82,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
       case Some(p) => p
     }
     
-    val resultContexts =  registry.consult(this, parent) match {
+    val resultContexts = registry.consult(this, parent) match {
       case None => 
-        val res = new ListBuffer[IContext]
+        val res = new ContextBuffer(true)
         registry.register(this, parent, res)
         Activator.getEventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
         res
@@ -94,7 +92,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     }
  
     //Store the result context
-    resultContexts += context
+    resultContexts ++= (context, toClone)
   }
 
   def subMoleFinished(subMole: ISubMoleExecution, job: IMoleJob, ticket: ITicket, moleExecution: IMoleExecution) = {
@@ -105,10 +103,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
       case Some(p) => p
     }
     
-        
-    val newContextEnd = new Context
-
-    val resultContexts = registry.remove(this, newTicket) match {
+    val result = registry.remove(this, newTicket) match {
       case None => throw new InternalProcessingError("No context registred for the aggregation transition")
       case Some(res) => res
     }
@@ -123,16 +118,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
       case Some(t) => t 
     }  
     
-    val dataToAggregate = ContextAggregator.dataIn1WhichAreAlsoIn2(endTask.inputs, startTask.outputs)
-        
-    var toClone = new TreeSet[String]
-
-    //Find the variable to clonne, it is function of the evaluation of condition on the transition
-    for(context <- resultContexts) {
-      toClone ++= (ToCloneFinder.variablesToClone(start, job.globalContext, context))
-    }
-        
-    ContextAggregator.aggregate(newContextEnd, dataToAggregate, toClone, true, resultContexts)
+   /* val dataToAggregate = ContextAggregator.dataIn1WhichAreAlsoIn2(endTask.inputs, startTask.outputs)
+    
+    val newContextEnd = ContextAggregator.aggregate(dataToAggregate, true, result._1)*/
 
     val subMoleParent = subMole.parent match {
       case None => throw new InternalProcessingError("Submole execution has no parent")
@@ -140,6 +128,6 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     }
     
     //Variable have are clonned in other transitions if necessary
-    submitNextJobsIfReady(job.globalContext, newContextEnd, newTicket, Set.empty, moleExecution, subMoleParent)
+    submitNextJobsIfReady(job.globalContext, result, newTicket, moleExecution, subMoleParent)
   }
 }

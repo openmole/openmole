@@ -19,6 +19,8 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
+import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -52,7 +54,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
     
 
   override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
-    val level = LevelComputing.levelComputing(moleExecution)
+    val level = LevelComputing(moleExecution)
 
     val beginLevel = level.level(start)
     val endLevel = level.level(end.capsule)
@@ -76,7 +78,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
     }
 
     end.synchronized  {
-      submitNextJobsIfReady(global, context, destTicket, toClone, moleExecution, newSubMole);
+      submitNextJobsIfReady(global, ContextBuffer(context, toClone), destTicket, moleExecution, newSubMole);
     }
   }
   

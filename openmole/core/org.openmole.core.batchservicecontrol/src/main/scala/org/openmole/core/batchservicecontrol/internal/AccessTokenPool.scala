@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.commons.exception.InternalProcessingError
-import  org.openmole.core.batchservicecontrol.AccessToken
+import org.openmole.core.batchservicecontrol.AccessToken
 import org.openmole.core.batchservicecontrol.IAccessTokenPool
 import org.openmole.core.model.execution.batch.IAccessToken
 import scala.collection.mutable.HashSet
@@ -96,13 +96,12 @@ class AccessTokenPool extends IAccessTokenPool {
     tokens.poll match {
       case null => _load.decrementAndGet
         return None
-        case token => 
-          taken.add(token)
-          return Some(token)
+      case token => 
+        taken.add(token)
+        return Some(token)
     }
   }
 
-  override def load: Int = {
-    _load.get
-  }
+  override def load: Int = _load.get
+  
 }

@@ -40,7 +40,6 @@ import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.ConfigurationLocation
 
 object BatchExecutionJob {
- 
   val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");

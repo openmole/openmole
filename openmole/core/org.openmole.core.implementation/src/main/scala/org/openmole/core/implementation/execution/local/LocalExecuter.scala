@@ -58,6 +58,7 @@ class LocalExecuter extends Runnable {
               if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
                 jobGoneIdle
               }
+              
               moleJob.perform
               moleJob.finished(moleJob.context)
 //              LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);

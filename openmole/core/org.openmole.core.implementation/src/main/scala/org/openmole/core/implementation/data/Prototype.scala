@@ -18,10 +18,9 @@
 package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.IPrototype
-import java.lang.Iterable
 
 object Prototype {
-  def toArray[T](prototype: IPrototype[T]): IPrototype[Iterable[_ >: T]] = new Prototype[Iterable[_ >: T]](prototype.name, classOf[Iterable[_ >: T]])
+  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = new Prototype[Array[T]](prototype.name, classOf[Array[T]])
 }
 
 class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T] {
@@ -34,12 +33,8 @@ class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T]
     this(prototype.name, `type`)
   }*/
 
-  override def isAssignableFrom(p: IPrototype[_]): Boolean = {
-    `type`.isAssignableFrom(p.`type`)
-  }
+  override def isAssignableFrom(p: IPrototype[_]): Boolean = `type`.isAssignableFrom(p.`type`)
 
-  override def toString: String = {
-    '(' + `type`.getName + ')' + name
-  }
+  override def toString: String = '(' + `type`.getName + ')' + name
 
 }

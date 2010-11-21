@@ -18,7 +18,7 @@
 package org.openmole.core.model.data
 
 trait IDataMode {
-  def isImmutable: Boolean
+  def isMutable: Boolean
 
   def isOptional: Boolean
 

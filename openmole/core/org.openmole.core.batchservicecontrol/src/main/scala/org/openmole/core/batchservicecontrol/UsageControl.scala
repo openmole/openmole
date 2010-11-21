@@ -18,7 +18,6 @@
 package org.openmole.core.batchservicecontrol
 
 import org.openmole.commons.aspect.eventdispatcher.ObjectModified
-
 import org.openmole.core.batchservicecontrol.internal.AccessTokenPool
 import org.openmole.core.batchservicecontrol.internal.BotomlessTokenPool
 import org.openmole.core.model.execution.batch.IAccessToken

@@ -17,8 +17,10 @@
 
 package org.openmole.core.implementation.data
 
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.ClonningService
+import org.openmole.core.implementation.tools.CloningService
+import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext}
@@ -36,29 +38,27 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
   end.plugInputDataChannel(this)
   
   def this(start: IGenericCapsule, end: IGenericCapsule, head: String, variables: Array[String]) = {
-    this(start, end, (List(head) ++ variables).toSet[String])
+    this(start, end, (ListBuffer(head) ++ variables).toSet[String])
   }
 
-  def this(start: IGenericCapsule, end: IGenericCapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) {
-    this(start, end, (List(head) ++ variables).map( v => v.name).toSet)
+  def this(start: IGenericCapsule, end: IGenericCapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) = {
+    this(start, end, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
   }
 
   def this(start: IGenericCapsule, end: IGenericCapsule, dataset: IDataSet) = {
-    this(start, end, dataset.map( v => v.prototype.name).toSet)
+    this(start, end, dataset.map( v => v.prototype.name ).toSet)
   }
    
-  override def consums(context: IContext, ticket: ITicket, moleExecution: IMoleExecution): (IContext, Set[String]) = {
-    val levelComputing = LevelComputing.levelComputing(moleExecution)
+  override def consums(ticket: ITicket, moleExecution: IMoleExecution): IContext = {
+    val levelComputing = LevelComputing(moleExecution)
     val dataChannelRegistry = moleExecution.localCommunication.dataChannelRegistry
 
     val startLevel = levelComputing.level(start)
     val endLevel = levelComputing.level(end)
 
     var levelDif = endLevel - startLevel
-    if (levelDif < 0) {
-      levelDif = 0
-    }
-
+    if (levelDif < 0) levelDif = 0
+   
     var currentTicket = ticket
 
     for (i <- 0 until levelDif)  {
@@ -67,79 +67,90 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
         case Some(p) => p
       }
     }
-    
-    dataChannelRegistry.remove(this, currentTicket) match {
+
+    if(endLevel <= startLevel)
+      dataChannelRegistry.remove(this, currentTicket) match {
+        case None => throw new InternalProcessingError("No context registred for data channel found in input of task " + end.toString)
+        case Some(ctx) => ctx.toContext
+      }
+    else dataChannelRegistry.consult(this, currentTicket) match {
       case None => throw new InternalProcessingError("No context registred for data channel found in input of task " + end.toString)
-      case Some(ctx) => (ctx, if (levelDif > 0) ctx.map{ _.prototype.name }.toSet else Set.empty) 
+      case Some(ctx) => ctx.toContext
     }
 
   }
 
-  override def provides(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution) = synchronized {
-    //IMoleExecution execution = context.getGlobalValue(IMole.WorkflowExecution);
-    val levelComputing = LevelComputing.levelComputing(moleExecution)
+  override def provides(fromContext: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution) = synchronized {
+    val levelComputing = LevelComputing(moleExecution)
 
     val startLevel = levelComputing.level(start)
     val endLevel = levelComputing.level(end)
-
-    var workingOnTicket = ticket
-
-    val array = endLevel < startLevel
-
-    //If from higher level
-    for (i <- startLevel until endLevel) {
-      workingOnTicket = workingOnTicket.parent match {
-        case None => throw new InternalProcessingError("Bug should never get to root.")
-        case Some(p) => p
-      }
-    }
+    val toLowerLevel = endLevel < startLevel
 
     val dataChannelRegistry = moleExecution.localCommunication.dataChannelRegistry
 
-    dataChannelRegistry synchronized {
-      val curentContext = dataChannelRegistry.consult(this, workingOnTicket) match {
-        case Some(ctx) => ctx
-        case None => 
-          val ctx = new Context
-          dataChannelRegistry.register(this, workingOnTicket, ctx)
-          ctx
+    dataChannelRegistry.synchronized {
+      if (!toLowerLevel) {
+        val toContext = ContextBuffer(fromContext, toClone, variableNames)
+        dataChannelRegistry.register(this, ticket, toContext)
       }
-
-      if (!array) {
-        for (d <- data) {
-          context.variable(d.prototype) match {
-            case Some(variable) => 
-              curentContext += (
-                if(toClone.contains(variable.prototype.name))
-                  ClonningService.clone(variable)
-                else variable)
-            case None => 
+      else {
+        var workingOnTicket = ticket
+        for (i <- startLevel until endLevel) {
+          Logger.getLogger(getClass.getName).info("Up one level")
+ 
+          workingOnTicket = workingOnTicket.parent match {
+            case None => throw new InternalProcessingError("Bug should never get to root.")
+            case Some(p) => p
           }
         }
-      } else {
-        for(d <- data) {
-          context.value(d.prototype) match {
-            case Some(curVal) =>
-              curentContext += {
-                val itProt = toArray(d.prototype)
-                curentContext.value(itProt) match {
-                  case None => 
-                    val collec = Vector(curVal)
-                    //FIXME downcasting this is supposed to be ok without but is not
-                    new Variable(itProt.asInstanceOf[IPrototype[Iterable[Any]]], collec)
-                  case Some(collec) => 
-                    //FIXME downcasting this is supposed to be ok without but is not
-                    new Variable(itProt.asInstanceOf[IPrototype[Iterable[Any]]], collec ++ Vector(curVal))
-                }
-              } 
-            case None =>
-          }
+        
+        val toContext = dataChannelRegistry.consult(this, workingOnTicket) match {
+          case Some(ctx) => ctx
+          case None => 
+            val ctx = new ContextBuffer(true)
+            dataChannelRegistry.register(this, workingOnTicket, ctx)
+            ctx
         }
-      }
 
+        toContext ++= (fromContext, toClone, variableNames)
+      }
+      
+      
     }
   }
 
+  
+  /*private def flatProvide(fromContext: IContext, data: Iterable[IData[_]], toContext: IContext) = {
+    for (d <- data) {
+      fromContext.variable(d.prototype) match {
+        case Some(variable) => toContext += variable
+        case None => 
+      }
+    }
+  }
+  
+  private def arrayProvide(fromContext: IContext, data: Iterable[IData[_]], toContext: IContext) = {
+    for(d <- data) {
+      fromContext.value(d.prototype) match {
+        case Some(curVal) =>
+          toContext += {
+            //FIXME downcasting and inefficient use of arrays
+            val itProt = toArray(d.prototype).asInstanceOf[IPrototype[Array[Any]]]
+            toContext.value(itProt) match {
+              case None => 
+                val collec = Array[Any](curVal)
+                new Variable(itProt, collec)
+              case Some(collec) =>
+                new Variable(itProt, Array.concat(collec, Array[Any](curVal)))
+            }
+          } 
+        case None =>
+      }
+    }
+  
+  }*/
+  
   def data: Iterable[IData[_]] = {
     end.task match {
       case None => List.empty

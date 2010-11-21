@@ -20,9 +20,10 @@ package org.openmole.core.implementation.transition
 import java.util.logging.Logger
 import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.SubMoleExecution
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.tools.ClonningService
+import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.model.capsule.IExplorationCapsule
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
@@ -61,15 +62,14 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
   
   override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
 
-    val registry = moleExecution.localCommunication.transitionRegistry
-    registry.register(this, ticket, context)
+    /*val registry = moleExecution.localCommunication.transitionRegistry
+    registry.register(this, ticket, context)*/
 
     val values = context.value(ExplorationTask.Sample.prototype) match {
       case None => throw new InternalProcessingError("BUG Sample not found in the exploration transition")
       case Some(v) => v
     }
-    context -= ExplorationTask.Sample.prototype.name
-
+    
     val subSubMole = SubMoleExecution(moleExecution, subMole)
 
     var size = 0
@@ -90,38 +90,31 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
       val notFound = new ListBuffer[IData[_]]
 
       for (in <- endTask.inputs) {
-        //Check filtred here to avoid useless clonning
-                
         context.variable(in.prototype) match {
           case None => notFound += in
-          case Some(v) =>
-            //if(!filtered.contains(v.prototype.name)) {
-              destContext += ( 
-                if(!in.mode.isImmutable && size < values.size - 1) 
-                  ClonningService.clone(v)
-                else v
-              )
-            //} else notFound += in         
+          case Some(v) => destContext += v      
         }
       }
-
+      
+      val valueMap = value.map{ elt => ((elt.prototype.name, elt.value)) }.toMap
+      
       for(data <- notFound) {
         val prototype = data.prototype
-        value.map{ elt => ((elt.prototype.name, elt.value)) }.toMap.get(prototype.name) match {
+        valueMap.get(prototype.name) match {
           case None =>
-          case Some(value) =>
-            if (value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass)) {
-              destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
-            } else {
-              throw new UserBadDataError("Factor variable " + prototype.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " found but not compatible with expected type for input " + prototype.`type`.getName)
-            }
+          case Some(value) => {
+              //Logger.getLogger(classOf[ExplorationTransition].getName).info("Add variable " + prototype)
+              if(value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass))
+                destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
+              else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype.`type`)
+          }
         }
       }
  
-      submitNextJobsIfReady(global, destContext, newTicket, toClone, moleExecution, subSubMole)
+      submitNextJobsIfReady(global, ContextBuffer(destContext, toClone), newTicket, moleExecution, subSubMole)
     }
 
-    subSubMole.decNbJobInProgress(size);
+    subSubMole.decNbJobInProgress(size)
   }
 
   override protected def plugStart = start.plugOutputTransition(this)

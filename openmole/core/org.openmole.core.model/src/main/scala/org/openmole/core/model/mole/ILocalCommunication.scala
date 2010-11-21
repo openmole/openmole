@@ -18,13 +18,13 @@
 package org.openmole.core.model.mole
 
 
-import org.openmole.core.model.data.{IDataChannel,IContext}
+import org.openmole.core.model.data.IDataChannel
+import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.{IGenericTransition,IAggregationTransition}
-import scala.collection.mutable.ListBuffer
 
 trait ILocalCommunication {
-  def transitionRegistry: IRegistryWithTicket[IGenericTransition, IContext]
-  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, ListBuffer[IContext]]
-  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContext]
+  def transitionRegistry: IRegistryWithTicket[IGenericTransition, IContextBuffer]
+  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, IContextBuffer]
+  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContextBuffer]
 }

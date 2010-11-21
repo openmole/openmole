@@ -116,14 +116,12 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
     tmpSpaceVar
   }
 
-  override def baseDir(token: IAccessToken): IURIFile = {
-    synchronized {
-      if (baseSpaceVar == null) {
-        val storeFile = new URIFile(URI.toString)
-        baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.getPreference(IWorkspace.UniqueID) + '/', token)
-      }
-      baseSpaceVar
+  override def baseDir(token: IAccessToken): IURIFile = synchronized {
+    if (baseSpaceVar == null) {
+      val storeFile = new URIFile(URI.toString)
+      baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.getPreference(IWorkspace.UniqueID) + '/', token)
     }
+    baseSpaceVar
   }
 
   override def test: Boolean = {
@@ -140,7 +138,7 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
         RNG.nextBytes(rdm)
 
         val testFile = tmpSpace(token).newFileInDir("test", ".bin")
-        val tmpFile = Activator.getWorkspace().newFile("test", ".bin");
+        val tmpFile = Activator.getWorkspace.newFile("test", ".bin")
 
         try {
           //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
@@ -151,7 +149,7 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
             output.close
           }
 
-          URIFile.copy(tmpFile, testFile, token);
+          URIFile.copy(tmpFile, testFile, token)
         } finally {
           tmpFile.delete
         }
@@ -178,12 +176,10 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
         Activator.getBatchRessourceControl.usageControl(description).releaseToken(token)
       }
     } catch {
-      case e => LOGGER.log(Level.FINE, URI.toString(), e);
+      case e => LOGGER.log(Level.FINE, URI.toString, e)
     }
     return false
   }
 
   override def toString: String = URI.toString
-  
-    
 }

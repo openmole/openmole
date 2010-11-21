@@ -41,6 +41,21 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
     if (_state != state) {
       timeStemps(state.ordinal) = System.currentTimeMillis
       _state = state
+      
+      state match {
+        case SUBMITED =>
+          Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
+            case None =>
+            case Some(quality) => quality.decreaseQuality(Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.JSMalus))
+          }
+        case RUNNING | DONE =>
+          Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
+            case None =>
+            case Some(quality) => quality.increaseQuality(Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.JSBonnus))
+          }
+        case _ => 
+      }
+      
     }
   }
 

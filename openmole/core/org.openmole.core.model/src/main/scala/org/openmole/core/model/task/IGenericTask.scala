@@ -91,7 +91,7 @@ trait IGenericTask {
     
   def addInput(dataSet: IDataSet)
 
-  def addInput(prototype: IPrototype[_], masks: DataModeMask*)
+  def addInput(prototype: IPrototype[_], masks: Array[DataModeMask])
 
   /**
    *
@@ -114,7 +114,7 @@ trait IGenericTask {
   def addOutput(data: IData[_])
   def addOutput(dataSet: IDataSet)
 
-  def addOutput(prototype: IPrototype[_], masks: DataModeMask*)
+  def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask])
 
   /**
    *

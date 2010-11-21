@@ -21,29 +21,19 @@ import org.openmole.core.model.data.{IData,IPrototype,DataModeMask, IDataMode}
 
 object Data {
   import org.openmole.core.implementation.data.Prototype
-  def toArray[T](data: IData[T]): IData[java.lang.Iterable[_ >: T]] = new Data[java.lang.Iterable[_ >: T]](Prototype.toArray(data.prototype), data.mode)  
+  def toArray[T](data: IData[T]): IData[Array[T]] = new Data[Array[T]](Prototype.toArray(data.prototype), data.mode)  
 }
 
 class Data[T](val prototype: IPrototype[T], val mode: IDataMode) extends IData[T] {
 
-    def this(prototype: IPrototype[T]) = {
-        this(prototype, DataMode.NONE)
-    }
+  def this(prototype: IPrototype[T]) = this(prototype, DataMode.NONE)
 
-    def this(prototype: IPrototype[T], masks: Array[DataModeMask]) = {
-        this(prototype, DataMode(masks))
-    }
-    
-    def this(prototype: IPrototype[T], masks: Iterable[DataModeMask]) = {
-        this(prototype, DataMode(masks))
-    }
-    
-    def this(name: String, `type`: Class[T]) = {
-        this(new Prototype[T](name, `type`))
-    }
+  def this(prototype: IPrototype[T], masks: Array[DataModeMask]) = this(prototype, DataMode(masks))
 
-    def this(name: String, `type`: Class[T], masks: Array[DataModeMask]) {
-        this(new Prototype[T](name, `type`), masks)
-    }
+  def this(prototype: IPrototype[T], masks: Iterable[DataModeMask]) = this(prototype, DataMode(masks))
+    
+  def this(name: String, `type`: Class[T]) = this(new Prototype[T](name, `type`))
+
+  def this(name: String, `type`: Class[T], masks: Array[DataModeMask]) = this(new Prototype[T](name, `type`), masks)
 
 }

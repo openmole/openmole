@@ -24,7 +24,7 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.misc.math.BigDecimalOperations._
 import java.math.BigDecimal
 
-class LogarithmBigDecimalRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[BigDecimal] with IWithRange[BigDecimal] {
+class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[BigDecimal] with IWithRange[BigDecimal] {
   
   override def range(global: IContext, context: IContext): BigDecimal = {max(global, context).subtract(min(global, context))}
     

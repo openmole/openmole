@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,8 +17,30 @@
 
 package org.openmole.core.model.data
 
-trait IVariable[T] {
-  def prototype: IPrototype[T]
-  def value: T
-  def value_=(value: T)
+
+object DataModeMask {
+
+  /**
+   *
+   * Data is optionnal
+   *
+   */
+  val OPTIONAL = new DataModeMask(0x0001)
+
+  /**
+   *
+   * State that the data value of a variable will not be modified
+   *
+   */
+  val MUTABLE = new DataModeMask(0x0002)
+
+  /**
+   *
+   * State that the data value of a variable that is used for system level information
+   * as oposed to buisiness level informations
+   *
+   */
+  val SYSTEM = new DataModeMask(0x0004)
 }
+
+class DataModeMask(val value: Int)

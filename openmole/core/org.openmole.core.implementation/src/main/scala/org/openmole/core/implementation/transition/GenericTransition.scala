@@ -17,8 +17,11 @@
 
 package org.openmole.core.implementation.transition
 
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.tools.CloningService
 import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
@@ -26,108 +29,98 @@ import org.openmole.core.model.job.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.transition.ISlot
+import org.openmole.core.implementation.tools.ToCloneFinder.variablesToClone
 import scala.collection.mutable.ListBuffer
 
 abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends IGenericTransition {
 
-    /*def this(start: TS, end: IGenericTaskCapsule[_,_]) = this(start, end.defaultInputSlot, None, Set.empty)
+  /*def this(start: TS, end: IGenericTaskCapsule[_,_]) = this(start, end.defaultInputSlot, None, Set.empty)
     
-    def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition) = this(start, end.getDefaultInputSlot(), Some(condition), Set.empty)
+   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition) = this(start, end.getDefaultInputSlot(), Some(condition), Set.empty)
 
-    def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String) = this(start, end.getDefaultInputSlot(), new Condition(condition), Set.empty)
+   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String) = this(start, end.getDefaultInputSlot(), new Condition(condition), Set.empty)
     
-    def this(start: TS , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty)
+   def this(start: TS , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty)
     
-    def this(start: TS , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty)
+   def this(start: TS , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty)
    
-    def this(start: TS, end: IGenericTaskCapsule[_,_], filtred: String*) = this(start, end.defaultInputSlot, None, filtred)
+   def this(start: TS, end: IGenericTaskCapsule[_,_], filtred: String*) = this(start, end.defaultInputSlot, None, filtred)
     
-    def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition, filtred: String*) = this(start, end.getDefaultInputSlot(), Some(condition), filtred)
+   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition, filtred: String*) = this(start, end.getDefaultInputSlot(), Some(condition), filtred)
 
-    def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String, filtred: String*) = this(start, end.getDefaultInputSlot(), new Condition(condition), filtred)
+   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String, filtred: String*) = this(start, end.getDefaultInputSlot(), new Condition(condition), filtred)
     
-    def this(start: TS , slot: ISlot, condition: String, filtred: String*) = this(start, slot, new Condition(condition), filtred)
+   def this(start: TS , slot: ISlot, condition: String, filtred: String*) = this(start, slot, new Condition(condition), filtred)
     
-    def this(start: TS , slot: ISlot, condition: ICondition, filtred: String*) = this(start, slot, condition, filtred)
-*/
-    plugStart 
-    end.plugTransition(this)
+   def this(start: TS , slot: ISlot, condition: ICondition, filtred: String*) = this(start, slot, condition, filtred)
+   */
+  plugStart 
+  end.plugTransition(this)
   
 
-    def nextTaskReady(context: IContext, ticket: ITicket, execution: IMoleExecution): Boolean = {
-        val registry = execution.localCommunication.transitionRegistry
+  def nextTaskReady(ticket: ITicket, execution: IMoleExecution): Boolean = {
+    val registry = execution.localCommunication.transitionRegistry
 
-        for (t <- end.transitions) {
-            if (!registry.isRegistred(t, ticket)) return false
-        }
-        return true
+    for (t <- end.transitions) {
+      if (!registry.isRegistred(t, ticket)) return false
     }
+    return true
+  }
 
-    protected def submitNextJobsIfReady(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
-             
-       
+  protected def submitNextJobsIfReady(global: IContext, context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
+    val registry = moleExecution.localCommunication.transitionRegistry
+    registry.register(this, ticket, context)
 
-        var allVarToClone = toClone 
-        val registry = moleExecution.localCommunication.transitionRegistry
-        registry.register(this, ticket, context)
+    if (nextTaskReady(ticket, moleExecution)) {
+      val combinaison = new ListBuffer[IContext]
 
-        if (nextTaskReady(context, ticket, moleExecution)) {
-            val combinaison = new ListBuffer[IContext]
-
-            for (t <- end.transitions) combinaison += {
-              (registry.remove(t, ticket) match {
-                  case None => throw new InternalProcessingError("BUG Context not registred for transtion")
-                  case Some(c) => c
-              })
-            }
+      for (t <- end.transitions) combinaison += {
+        (registry.remove(t, ticket) match {
+            case None => throw new InternalProcessingError("BUG Context not registred for transtion")
+            case Some(c) => c
+          }).toContext
+      }
             
-            val itDc = end.capsule.inputDataChannels
-            for (dataChannel <- itDc) {
-              
-                val res = dataChannel.consums(context, ticket, moleExecution)
-                allVarToClone ++= res._2
-                combinaison += res._1
-            }
+      val itDc = end.capsule.inputDataChannels
+      for (dataChannel <- itDc) {
+        combinaison += dataChannel.consums(ticket, moleExecution)
+      }
 
-            val newTicket =  if (end.capsule.intputSlots.size <= 1)  ticket else {
-              moleExecution.nextTicket(ticket.parent match {
-                  case None => throw new InternalProcessingError("BUG should never reach root ticket")
-                  case Some(t) => t
-              })
-            } 
+      val newTicket =  if (end.capsule.intputSlots.size <= 1) ticket else {
+        moleExecution.nextTicket(ticket.parent match {
+            case None => throw new InternalProcessingError("BUG should never reach root ticket")
+            case Some(t) => t
+          })
+      } 
 
-            //Agregate the variables = inputs for the next job
-            val newContextEnd = new Context
+      val endTask = end.capsule.task match {
+        case None => throw new InternalProcessingError("End task capsule of the transition is no assigned")
+        case Some(t) => t
+      }  
+  
+      val newContext = ContextAggregator.aggregate(endTask.inputs, false, combinaison)
 
-            val endTask = end.capsule.task match {
-              case None => throw new InternalProcessingError("End task capsule of the transition is no assigned")
-              case Some(t) => t
-            }  
-      
-            ContextAggregator.aggregate(newContextEnd, endTask.inputs, toClone, false, combinaison)
-
-           // Logger.getLogger(Transition.class.getName()).info("Submit job for task " + getEnd().getCapsule().getTask().getName());
-            moleExecution.submit(end.capsule,  global, newContextEnd, newTicket, subMole)
-        }
+      moleExecution.submit(end.capsule,  global, newContext, newTicket, subMole)
     }
+  }
 
-    override def perform(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) = {
-        if (isConditionTrue(global, context)) {
-            /*-- Remove filtred --*/
-            for(name <- filtered) context -= name
-
-            performImpl(global, context, ticket, toClone, scheduler, subMole);
-        }
+  override def perform(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) = {
+    if (isConditionTrue(global, context)) {
+      /*-- Remove filtred --*/
+      for(name <- filtered) context -= name
+      performImpl(global, context, ticket, toClone, scheduler, subMole);
     }
+  }
 
 
-    override def isConditionTrue(global: IContext, context: IContext): Boolean = {
-      condition.evaluate(global, context)
-    }
+  override def isConditionTrue(global: IContext, context: IContext): Boolean = {
+    condition.evaluate(global, context)
+  }
 
-    protected def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
-    protected def plugStart
+  protected def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
+  protected def plugStart
 }

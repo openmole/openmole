@@ -52,7 +52,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
-      if (!d.mode.isOptional) {
+     if (!d.mode.isOptional) {
         val p = d.prototype
 
         context.variable(p.name) match {
@@ -133,7 +133,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     addOutput(new Data(prototype))
   }
 
-  override def addOutput(prototype: IPrototype[_], masks: DataModeMask*): Unit = {
+  override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): Unit = {
     addOutput(new Data(prototype, masks));
   }
 
@@ -150,13 +150,13 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     addInput(new Data(prototype))
   }
 
-  override def addInput(prototype: IPrototype[_], masks: DataModeMask*): Unit = {
+  override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): Unit = {
     addInput(new Data(prototype, masks))
   }
 
 
   override def addInput(data: IData[_]): Unit = {
-    _inputs += ((data.prototype.name,data))
+     _inputs += ((data.prototype.name,data))
   }
 
   override def addInput(dataSet: IDataSet): Unit = {

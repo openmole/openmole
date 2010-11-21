@@ -23,7 +23,7 @@ import org.openmole.core.model.domain.IWithRange
 import org.openmole.core.implementation.tools.VariableExpansion._
 import java.lang.Double
 
-class LogarithmDoubleRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IWithRange[Double] {
+class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IWithRange[Double] {
   
   override def range(global: IContext, context: IContext): Double = {max(global, context).doubleValue - min(global, context).doubleValue}
     

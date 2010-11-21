@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,24 +17,17 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{DataModeMask,IDataMode}
-import org.openmole.core.model.data.DataModeMask._
+import org.openmole.core.model.data.IVariable
+import scala.collection.mutable.ListBuffer
 
-object DataMode {
-  val NONE = new DataMode(0)
-  
-  def apply(masks: Iterable[DataModeMask]): DataMode = {
-    var mask = 0
-    for(m <- masks) mask |= m.value
-    new DataMode(mask)
+object VariableRepository {
+  object ModeMask  {
+     val Clone = 0x01
+     val ToArray = 0x02
   }
-  
+
 }
 
-class DataMode(mask: Int) extends IDataMode {
-  override def isOptional: Boolean = (mask & OPTIONAL.value) != 0
-   
-  override def isMutable: Boolean = (mask & MUTABLE.value) != 0
-
-  override def isSystem: Boolean = (mask & SYSTEM.value) != 0
+class VariableRepository {
+  val variable = new ListBuffer[(IVariable[_], Boolean)]
 }

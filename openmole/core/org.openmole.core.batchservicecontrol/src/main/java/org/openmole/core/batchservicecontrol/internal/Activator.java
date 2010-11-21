@@ -21,6 +21,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
+import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.ServiceReference;
 
 public class Activator implements BundleActivator {
@@ -28,6 +29,7 @@ public class Activator implements BundleActivator {
     private static IEventDispatcher eventDispatcher;
     private static BundleContext context;
     private static IBatchServiceControl ressourceControl;
+    private static IWorkspace workspace;
     private ServiceRegistration reg;
 
     /*
@@ -72,4 +74,19 @@ public class Activator implements BundleActivator {
         return context;
     }
 
+    public static IWorkspace getWorkspace() {
+        if (workspace != null) {
+            return workspace;
+        }
+
+        synchronized (Activator.class) {
+            if (workspace == null) {
+                ServiceReference ref = getContext().getServiceReference(IWorkspace.class.getName());
+                workspace = (IWorkspace) getContext().getService(ref);
+            }
+        }
+        return workspace;
+    }
+    
+    
 }

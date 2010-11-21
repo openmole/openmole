@@ -24,41 +24,16 @@ object Variable {
   def apply[C,T <: C](prototype: IPrototype[C], value: T): Variable[C] = new Variable[C](prototype, value)
 }
 
-
 class Variable[C](val prototype: IPrototype[C], var value: C) extends IVariable[C] {
 
+  def this(name: String, `type`: Class[C] , value: C) = this(new Prototype[C](name, `type`), value)
+
+  def this(name: String, value: C) = this(name, value.asInstanceOf[AnyRef].getClass.asInstanceOf[Class[C]], value)
   
-  def this(name: String, `type`: Class[C] , value: C) = {
-    this(new Prototype[C](name, `type`), value)
-  }
-    
-  def this(name: String, value: C) = {
-    this(name, value.asInstanceOf[AnyRef].getClass.asInstanceOf[Class[C]], value)
-  }
+  def this(prototype: IPrototype[C]) = this(prototype, null.asInstanceOf[C])
 
-  def this(prototype: IPrototype[C]) = {
-    this(prototype, null.asInstanceOf[C])
-  }
+  def this(name: String, `type`: Class[C]) = this(new Prototype[C](name, `type`))
   
-  def this(name: String, `type`: Class[C]) = {
-    this(new Prototype[C](name, `type`))
-  }
-
-
-
-  /* public Object readResolve() {
-   if (getValue() == null) {
-   if (getType() == Integer.class) {
-   value = (T) new Integer(0);
-   } else {
-   value = (T) new Double(0.0);
-   }
-   }
-   return this;
-   }*/
-
- 
-
   override def toString: String = {
     prototype.name + '=' + (if(value != null) value.toString else "null")
   }

@@ -31,6 +31,17 @@ object RNG extends Random {
     }
     a
   }*/
+ 
+  @transient lazy val longInterval = {
+    val min = BigDecimal(Long.MinValue)
+    val max = BigDecimal(Long.MaxValue) + 1
+    max - min
+  }
+ 
+  def nextLong(max: Long): Long = {
+    val v = BigDecimal(nextLong())
+    ((v - Long.MinValue) * (BigDecimal(max) / longInterval)).toLong
+  }
   
   def shuffle[T](a: IndexedSeq[T]) = {
     for (i <- 1 until a.size reverse) {

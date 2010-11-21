@@ -29,7 +29,7 @@ object LevelComputing {
 
   val levelComputings = new WeakHashMap[IMoleExecution, LevelComputing]
 
-  def levelComputing(moleExecution: IMoleExecution): LevelComputing = synchronized {
+  def apply(moleExecution: IMoleExecution): LevelComputing = synchronized {
     levelComputings.get(moleExecution) match {
       case None =>  
         val ret = new LevelComputing(moleExecution.mole)
@@ -43,13 +43,9 @@ object LevelComputing {
 
 class LevelComputing(mole: IMole) {
   
-  @transient
-  private val levelCache = new WeakHashMap[IGenericCapsule, Int]
+  @transient private val levelCache = new WeakHashMap[IGenericCapsule, Int]
 
-
-  //TODO derecurisivate
   def level(capsule: IGenericCapsule): Int = {
-
     levelCache.get(capsule) match {
       case Some(cachedLevel) => cachedLevel
       case None => 
