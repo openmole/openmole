@@ -31,12 +31,12 @@ object BatchServiceControl {
 
 class BatchServiceControl extends IBatchServiceControl {
  
-  val ressources = new TreeMap[BatchServiceDescription, (IUsageControl, IQualityControl)]
+  var ressources = new TreeMap[BatchServiceDescription, (IUsageControl, IQualityControl)]
 
   override def registerRessouce(ressource: BatchServiceDescription, usageControl: IUsageControl, failureControl: IQualityControl) = synchronized {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._2.reinit
-      case None => ressources(ressource) = (ressource -> (usageControl, failureControl))
+      case None => ressources += ((ressource -> (usageControl, failureControl)))
     }  
   }
 

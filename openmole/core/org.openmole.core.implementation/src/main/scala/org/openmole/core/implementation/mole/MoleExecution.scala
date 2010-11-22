@@ -216,7 +216,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       for (moleJob <- inProgress.keySet) {
         moleJob.cancel
       }
-      inProgress.clear
+      inProgress = TreeMap.empty
     }
   }
 

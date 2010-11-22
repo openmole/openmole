@@ -23,6 +23,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.RNG
@@ -89,13 +90,15 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) extends 
                 val toInsert = ((cur, token, 
                  Activator.getBatchRessourceControl.qualityControl(cur.description) match {
                   case None => 1L
-                  case Some(quality) => quality.quality
+                  case Some(quality) => 
+                      quality.quality
                 }))
+              
                 notLoaded += toInsert
                 totalQuality += toInsert._3
             }
         }
-               
+             
         if (notLoaded.size > 0) {
           var selectedIndex = RNG.nextLong(totalQuality)
           val it = notLoaded.iterator
