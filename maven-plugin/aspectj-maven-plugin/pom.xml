@@ -58,7 +58,7 @@
         </plugins>
     </build>
     <profiles>
-        <profile>
+<!--        <profile>
             <id>default-tools.jar</id>
             <activation>
                 <property>
@@ -77,7 +77,7 @@
                     </systemPath>
                 </dependency>
             </dependencies>
-        </profile>
+        </profile>-->
       <profile>
         <id>maven-repo-local</id>
         <activation>
