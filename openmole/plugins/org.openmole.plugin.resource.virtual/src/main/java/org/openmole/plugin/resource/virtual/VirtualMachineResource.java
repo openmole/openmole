@@ -55,7 +55,7 @@ public class VirtualMachineResource implements IResource {
     final static ConfigurationLocation VMBootTime = new ConfigurationLocation(VirtualMachineResource.class.getSimpleName(), "VMBootTime");
 
     static {
-        workspace().addToConfigurations(VMBootTime, "PT5M");
+        workspace().$plus$eq(VMBootTime, "PT5M");
     }
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
@@ -101,13 +101,14 @@ public class VirtualMachineResource implements IResource {
         }
 
         final File vmImage;
+
         try {
             vmImage = workspace().newFile();
             FileUtil.copy(system, vmImage);
-        } catch (IOException ex) {
-            throw new InternalProcessingError(ex);
+        } catch(IOException e) {
+            throw new InternalProcessingError(e);
         }
-
+ 
         class VirtualMachineConnector implements IConnectable {
 
             IVirtualMachine virtualMachine;
@@ -144,7 +145,7 @@ public class VirtualMachineResource implements IResource {
         //First connection
         //final Connection connection = new Connection(ret.host(), ret.port());
 
-        final Long timeOut = workspace().getPreferenceAsDurationInMs(VMBootTime);
+        final Long timeOut = workspace().preferenceAsDurationInMs(VMBootTime);
 
         Future connectionFuture = Activator.executorService().getExecutorService(ExecutorType.OWN).submit(new Callable<Void>() {
 
@@ -271,7 +272,7 @@ public class VirtualMachineResource implements IResource {
     }
 
     @Override
-    public void deploy() throws InternalProcessingError, UserBadDataError {
+    public void deploy() {
         
     }
 }

@@ -23,13 +23,12 @@ import java.io.IOException;
 
 public class TempDir {
 
-	File base;
-	
-	TempDir (File base) {
-		this.base = base;
-	}
+    File base;
 
-	
+    TempDir(File base) {
+        this.base = base;
+    }
+
     /**
      * Creates a temp directory in the System temp directory.
      */
@@ -42,21 +41,17 @@ public class TempDir {
         if (!tempFile.mkdir()) {
             throw new IOException();
         }
-        
+
         tempFile.deleteOnExit();
         return tempFile;
     }
-   
-    
+
     public File createNewFile(String prefix, String suffix) throws IOException {
-    	File tempFile = File.createTempFile(prefix, suffix, base);
+        File tempFile = File.createTempFile(prefix, suffix, base);
         return tempFile;
     }
 
     public File getLocation() {
         return base;
     }
-    
 }
-
-

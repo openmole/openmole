@@ -49,8 +49,8 @@ object BatchStorage {
   val TmpDirRemoval = new ConfigurationLocation("BatchStorage", "TmpDirRemoval")
   val TmpDirRegenerate = new ConfigurationLocation("BatchStorage", "TmpDirRegenerate")
     
-  Activator.getWorkspace.addToConfigurations(TmpDirRemoval, "P30D")
-  Activator.getWorkspace.addToConfigurations(TmpDirRegenerate, "P1D")
+  Activator.getWorkspace += (TmpDirRemoval, "P30D")
+  Activator.getWorkspace += (TmpDirRegenerate, "P1D")
     
   val persistent = "persistent/"
   val tmp = "tmp/"
@@ -81,13 +81,13 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
 
   override def tmpSpace(token: IAccessToken): IURIFile = synchronized {
 
-    if (tmpSpaceVar == null || time + Activator.getWorkspace.getPreferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
+    if (tmpSpaceVar == null || time + Activator.getWorkspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
       time = System.currentTimeMillis
 
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
 
       val service = Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE);
-      val removalDate = System.currentTimeMillis - Activator.getWorkspace.getPreferenceAsDurationInMs(TmpDirRemoval);
+      val removalDate = System.currentTimeMillis - Activator.getWorkspace.preferenceAsDurationInMs(TmpDirRemoval);
 
       for (dir <- tmpNoTime.list(token)) {
         val child = new URIFile(tmpNoTime, dir)
@@ -119,7 +119,7 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
   override def baseDir(token: IAccessToken): IURIFile = synchronized {
     if (baseSpaceVar == null) {
       val storeFile = new URIFile(URI.toString)
-      baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.getPreference(IWorkspace.UniqueID) + '/', token)
+      baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.preference(IWorkspace.UniqueID) + '/', token)
     }
     baseSpaceVar
   }

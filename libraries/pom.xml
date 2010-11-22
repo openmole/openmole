@@ -28,6 +28,8 @@
         <module>org.apache.commons.compress</module>
         <module>org.apache.commons.pool</module>
         <module>org.apache.commons.cli</module>
+	<module>org.apache.commons.configuration</module>
+	<module>org.jasypt.encryption</module>
         <module>org.nuiton.j2r</module>
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>

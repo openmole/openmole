@@ -58,7 +58,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
 
   override protected def process(global: IContext, context: IContext, progress: IProgress) = {
-
     val globalContext = new SynchronizedContext
     val firstTaskContext = new Context
 

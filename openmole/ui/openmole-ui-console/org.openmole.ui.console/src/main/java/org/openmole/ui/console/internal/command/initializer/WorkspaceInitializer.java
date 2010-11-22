@@ -35,11 +35,7 @@ public class WorkspaceInitializer implements IInitializer<IWorkspace> {
 
         try {
             String password = new jline.ConsoleReader().readLine("Enter your password:", new Character('*'));
-            object.providePassword(password);
-        } catch (InternalProcessingError e) {
-           throw new Error(e);
-        } catch (UserBadDataError e) {
-            throw new Error(e);
+            object.password_$eq(password);
         } catch (IOException e) {
             throw new Error(e);
         }

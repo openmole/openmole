@@ -46,16 +46,15 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
         case SUBMITED =>
           Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
             case None =>
-            case Some(quality) => quality.decreaseQuality(Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.JSMalus))
+            case Some(quality) => quality.decreaseQuality(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.JSMalus))
           }
         case RUNNING | DONE =>
           Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
             case None =>
-            case Some(quality) => quality.increaseQuality(Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.JSBonnus))
+            case Some(quality) => quality.increaseQuality(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.JSBonnus))
           }
         case _ => 
       }
-      
     }
   }
 

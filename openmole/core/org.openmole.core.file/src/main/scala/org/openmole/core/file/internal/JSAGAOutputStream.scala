@@ -39,7 +39,7 @@ class JSAGAOutputStream(stream: FileOutputStream) extends OutputStream {
     val task = stream.close(TaskMode.ASYNC)
         
     try {
-      task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS);
+      task.get(Activator.getWorkspace().preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
     } catch {
       case (e: TimeoutException) => 
         task.cancel(true)

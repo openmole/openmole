@@ -60,9 +60,9 @@ object URIFile {
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
 
-  Activator.getWorkspace.addToConfigurations(Timeout, "PT2M")
-  Activator.getWorkspace.addToConfigurations(BufferSize, "8192")
-  Activator.getWorkspace.addToConfigurations(CopyTimeout, "PT2M")
+  Activator.getWorkspace += (Timeout, "PT2M")
+  Activator.getWorkspace += (BufferSize, "8192")
+  Activator.getWorkspace += (CopyTimeout, "PT2M")
         
   def child(url: URL, child: String): URL = {
     if (url.toString().endsWith("/") || child.charAt(0) == '/') fromLocation(url.toString() + child)
@@ -99,7 +99,7 @@ object URIFile {
     try {
       val os = dest.openOutputStream(token)
       try {
-        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)))
+        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally {
         os.close
       }
@@ -131,8 +131,8 @@ object URIFile {
 
       try {
         withFailureControl(srcDesc,
-          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)))
-          else FileUtil.copy(is, os, Activator.getWorkspace.getPreferenceAsInt(BufferSize), Activator.getWorkspace.getPreferenceAsDurationInMs(CopyTimeout)) 
+          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)))
+          else FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)) 
         )              
       } finally {
         os.close
@@ -190,19 +190,19 @@ class URIFile(val location: String) extends IURIFile {
   private def fetchEntry: NSEntry = trycatch {
     val task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL)
     trycatch(
-      task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+      task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
       , task)
   }
     
 
   private def fetchEntryAsDirectory: NSDirectory = trycatch {
     val task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL)
-    trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def close(entry: NSEntry) = trycatch {
     val task = entry.close(TaskMode.ASYNC)
-    trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def SAGAURL: URL = trycatch(fromLocation(location))
@@ -222,7 +222,7 @@ class URIFile(val location: String) extends IURIFile {
 
   private def isDirectory(entry: NSEntry): Boolean = trycatch {
     val task = entry.isDir(TaskMode.ASYNC)
-    trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
+    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
   }
 
   override def URLRepresentsADirectory: Boolean = trycatch {location.toString.endsWith("/")}
@@ -242,7 +242,7 @@ class URIFile(val location: String) extends IURIFile {
       val dest = URIFile.child(SAGAURL, cname)
       val task = dir.makeDir(TaskMode.ASYNC, dest);
             
-      trycatch(task.get(Activator.getWorkspace().getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+      trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
       new URIFile(this, name)
     } finally {
       close(dir)
@@ -277,7 +277,7 @@ class URIFile(val location: String) extends IURIFile {
       val dest = URLFactory.createURL(name)
       val task = dir.exists(TaskMode.ASYNC, dest)
     
-      trycatch(task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
+      trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
     
     } finally {
       close(dir)
@@ -292,7 +292,7 @@ class URIFile(val location: String) extends IURIFile {
 
     trycatch(
       withFailureControl {
-        val ret = task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+        val ret = task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         new JSAGAInputStream(ret)
       }, task)
   }
@@ -304,7 +304,7 @@ class URIFile(val location: String) extends IURIFile {
     val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL, false)
     trycatch(
       withFailureControl {
-        val ret = task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+        val ret = task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         new JSAGAOutputStream(ret)
       }, task)
   }
@@ -340,7 +340,7 @@ class URIFile(val location: String) extends IURIFile {
 
       trycatch(
         if (timeOut) {
-          task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+          task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         } else {
           task.get
         }
@@ -358,7 +358,7 @@ class URIFile(val location: String) extends IURIFile {
     try {
       val task = dir.list(TaskMode.ASYNC)
 
-      trycatch (task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
+      trycatch (task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
     } finally {
       close(dir);
     }

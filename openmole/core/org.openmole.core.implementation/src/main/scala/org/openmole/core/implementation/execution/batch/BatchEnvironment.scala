@@ -51,27 +51,27 @@ object BatchEnvironment {
   val JSBonnus = new ConfigurationLocation("BatchEnvironment", "JSBonnus")
   val JSMalus = new ConfigurationLocation("BatchEnvironment", "JSMalus")
   
-  Activator.getWorkspace.addToConfigurations(MemorySizeForRuntime, "512")
-  Activator.getWorkspace.addToConfigurations(ResourcesExpulseThreshod, "100")
-  Activator.getWorkspace.addToConfigurations(CheckInterval, "PT2M")
-  Activator.getWorkspace.addToConfigurations(JSBonnus, "10")
-  Activator.getWorkspace.addToConfigurations(JSMalus, "1")
+  Activator.getWorkspace += (MemorySizeForRuntime, "512")
+  Activator.getWorkspace += (ResourcesExpulseThreshod, "100")
+  Activator.getWorkspace += (CheckInterval, "PT2M")
+  Activator.getWorkspace += (JSBonnus, "10")
+  Activator.getWorkspace += (JSMalus, "1")
 }
 
 
 abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment[IBatchExecutionJob] with IBatchEnvironment {
 
-  @transient lazy val _jobServices = new BatchServiceGroup[IBatchJobService[_,_]](Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
-  @transient lazy val _storages = new BatchServiceGroup[IBatchStorage[_,_]](Activator.getWorkspace().getPreferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient lazy val _jobServices = new BatchServiceGroup[IBatchJobService[_,_]](Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient lazy val _storages = new BatchServiceGroup[IBatchStorage[_,_]](Activator.getWorkspace().preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
   @transient lazy val _jsLock = new ReentrantLock
   @transient lazy val _storageLock = new ReentrantLock
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
-    case None => Activator.getWorkspace.getPreferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+    case None => Activator.getWorkspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
   }
   
-  Activator.getUpdater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace().getPreferenceAsDurationInMs(BatchEnvironment.CheckInterval))
+  Activator.getUpdater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval))
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
@@ -82,7 +82,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   }
   
   override def runtime: File = {
-    new File(Activator.getWorkspace.getPreference(BatchEnvironment.RuntimeLocation))
+    new File(Activator.getWorkspace.preference(BatchEnvironment.RuntimeLocation))
   }
 
   protected def selectStorages(storages: BatchServiceGroup[IBatchStorage[_,_]]) = {

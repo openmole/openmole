@@ -110,16 +110,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>com.springsource.javax.servlet.jsp</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>net.sourceforge.jline</artifactId>
             <version>${lib.net.sourceforge.jline.version}</version>
@@ -157,6 +147,16 @@
             <groupId>org.openmole</groupId>
             <artifactId>org.slf4j</artifactId>
             <version>${lib.org.slf4j.version}</version>
+        </dependency>
+     	<dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.jasypt.encryption</artifactId>
+            <version>${lib.org.jasypt.encryption.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.configuration</artifactId>
+            <version>${lib.org.apache.commons.configuration.version}</version>
         </dependency>
     </dependencies>
 

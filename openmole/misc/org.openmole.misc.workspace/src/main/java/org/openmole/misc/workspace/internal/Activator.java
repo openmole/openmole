@@ -5,6 +5,8 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+
+
 import org.openmole.commons.tools.io.FileUtil;
 
 import org.osgi.framework.BundleActivator;
@@ -28,7 +30,7 @@ public class Activator implements BundleActivator {
         workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
         
-        final File tmpDir = workspace.getTmpDir().getLocation();
+        final File tmpDir = workspace.tmpDir().getLocation();
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override
@@ -43,7 +45,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         reg.unregister();
         context = null;
-        FileUtil.recursiveDelete(workspace.getTmpDir().getLocation());
+        FileUtil.recursiveDelete(workspace.tmpDir().getLocation());
     }
 
     public static BundleContext getContext() {

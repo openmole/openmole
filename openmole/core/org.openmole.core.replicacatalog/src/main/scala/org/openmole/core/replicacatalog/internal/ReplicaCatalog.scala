@@ -52,7 +52,7 @@ object ReplicaCatalog {
 
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
 
-  Activator.getWorkpace().addToConfigurations(GCUpdateInterval, "PT2M")
+  Activator.getWorkpace += (GCUpdateInterval, "PT2M")
 }
 
 class ReplicaCatalog extends IReplicaCatalog {
@@ -61,7 +61,7 @@ class ReplicaCatalog extends IReplicaCatalog {
   
   val locks = new ReplicaLockRepository();
   val objServeur = {
-    val objRepoLocation = Activator.getWorkpace().getPreference(IWorkspace.ObjectRepoLocation);
+    val objRepoLocation = Activator.getWorkpace().preference(IWorkspace.ObjectRepoLocation)
             
     if(new File(objRepoLocation).exists) {
       val defragmentConfig = new DefragmentConfig(objRepoLocation)
@@ -72,7 +72,7 @@ class ReplicaCatalog extends IReplicaCatalog {
     Db4o.openFile(dB4oConfiguration, objRepoLocation)
   }
    
-  Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this), ExecutorType.OWN, Activator.getWorkpace().getPreferenceAsDurationInMs(GCUpdateInterval))
+  Activator.getUpdater().registerForUpdate(new ReplicaCatalogGC(this), ExecutorType.OWN, Activator.getWorkpace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchServiceDescription, authenticationKey: IBatchServiceAuthenticationKey[_]): Option[Replica] = synchronized {
     val set = objServeur.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));

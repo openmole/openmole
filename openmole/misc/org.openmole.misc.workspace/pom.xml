@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -26,14 +26,16 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jasypt</groupId>
-            <artifactId>com.springsource.org.jasypt.encryption</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.jasypt.encryption</artifactId>
+            <version>${lib.org.jasypt.encryption.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.configuration</artifactId>
+            <version>${lib.org.apache.commons.configuration.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>com.springsource.javax.servlet</artifactId>
         </dependency>
@@ -44,14 +46,20 @@
 	<dependency>
             <groupId>org.apache.log4j</groupId>
             <artifactId>com.springsource.org.apache.log4j</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.aspect.caching</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.joda.time</artifactId>
             <version>${lib.org.joda.time.version}</version>
         </dependency>

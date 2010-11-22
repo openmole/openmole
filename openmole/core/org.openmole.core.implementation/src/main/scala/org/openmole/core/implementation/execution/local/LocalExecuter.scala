@@ -38,14 +38,12 @@ class LocalExecuter extends Runnable {
   var stop: Boolean = false;
 
   override def run = {
-
+    
     while (!stop) {
       try {
         val executionJob = LocalExecutionEnvironment.takeNextjob
-        
         val job = executionJob.job
 
-        
         try {
           executionJob.state = ExecutionState.RUNNING
           val running = System.currentTimeMillis

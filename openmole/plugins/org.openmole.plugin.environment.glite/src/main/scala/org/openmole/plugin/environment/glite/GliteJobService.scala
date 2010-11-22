@@ -35,7 +35,7 @@ object GliteJobService {
   val ConfigGroup = GliteJobService.getClass.getSimpleName
   val LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut")
     
-  Activator.getWorkspace.addToConfigurations(LCGCPTimeOut, "PT2M")
+  Activator.getWorkspace += (LCGCPTimeOut, "PT2M")
 }
 
 
@@ -98,7 +98,7 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authent
   }
 
   private def getTimeOut: String = {
-    Activator.getWorkspace.getPreferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
+    Activator.getWorkspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
   }
 
   override protected def buildJobDescription(runtime: IRuntime, script: File,  attributes: Map[String, String]): JobDescription = {

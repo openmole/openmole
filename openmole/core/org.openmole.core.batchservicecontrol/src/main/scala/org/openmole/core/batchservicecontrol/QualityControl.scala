@@ -18,13 +18,12 @@
 package org.openmole.core.batchservicecontrol
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.commons.aspect.eventdispatcher.ObjectModified
 import org.openmole.core.batchservicecontrol.internal.Activator
 import org.openmole.misc.workspace.ConfigurationLocation
 
 object QualityControl {
   val MaxQuality = new ConfigurationLocation("QualityControl", "MaxQuality")
-  Activator.getWorkspace.addToConfigurations(MaxQuality, "100")
+  Activator.getWorkspace += (MaxQuality, "100")
 }
 
 
@@ -40,7 +39,7 @@ class QualityControl extends IQualityControl {
     
   override def increaseQuality(value: Int) = synchronized {
     _quality += value
-    val max = Activator.getWorkspace.getPreferenceAsInt(QualityControl.MaxQuality)
+    val max = Activator.getWorkspace.preferenceAsInt(QualityControl.MaxQuality)
     if(_quality > max) _quality = max
   }
   

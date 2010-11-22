@@ -29,13 +29,13 @@ import org.openmole.core.model.execution.SampleType
 object Environment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
-  Activator.getWorkspace().addToConfigurations(StatisticsHistorySize, "100")
+  Activator.getWorkspace += (StatisticsHistorySize, "100")
 }
 
 
 abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
    
-  val statistic = new EnvironmentStatistic(Activator.getWorkspace.getPreferenceAsInt(Environment.StatisticsHistorySize))
+  val statistic = new EnvironmentStatistic(Activator.getWorkspace.preferenceAsInt(Environment.StatisticsHistorySize))
   val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong

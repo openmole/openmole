@@ -78,7 +78,7 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                             boolean enabled;
 
                             if (!interactiveConfiguration.dependOn().isEmpty()) {
-                                String value = Activator.getWorkspace().getPreference(new ConfigurationLocation(location.getGroup(), interactiveConfiguration.dependOn()));
+                                String value = Activator.getWorkspace().preference(new ConfigurationLocation(location.group(), interactiveConfiguration.dependOn()));
                                 enabled = value.equals(interactiveConfiguration.value());
                             } else {
                                 enabled = true;
@@ -99,12 +99,12 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                                     } else possibleValues = "";
 
                                     String label = interactiveConfiguration.label();
-                                    if (location.isCyphered()) {
+                                    if (location.cyphered()) {
                                         label += ": ";
                                         line = new jline.ConsoleReader().readLine(label, '*');
                                     } else {
-                                        String oldVal = Activator.getWorkspace().getPreference(location);
-                                        String defaultVal = Activator.getWorkspace().getDefaultValue(location);
+                                        String oldVal = Activator.getWorkspace().preference(location);
+                                        String defaultVal = Activator.getWorkspace().defaultValue(location);
                                        
                                         label += " (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ";
                                         line = new jline.ConsoleReader().readLine(label);
@@ -118,8 +118,6 @@ public class EnvironmentInitializer implements IInitializer<IEnvironment> {
                                 }
                             }
                         } catch (IOException e) {
-                            throw new Error(e);
-                        } catch (InternalProcessingError e) {
                             throw new Error(e);
                         } catch (IllegalAccessException e) {
                             throw new Error(e);

@@ -29,7 +29,7 @@ import java.util.Arrays;
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 @Retention(RetentionPolicy.RUNTIME)
-//@Target(ElementType.FIELD)
+@Target(ElementType.FIELD)
 public @interface InteractiveConfiguration {
     String label();
     String[] choices() default {};

@@ -45,9 +45,9 @@ object BatchExecutionJob {
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
   val LOGGER = Logger.getLogger(classOf[BatchExecutionJob].getName)
 
-  Activator.getWorkspace.addToConfigurations(MinUpdateInterval, "PT2M")
-  Activator.getWorkspace.addToConfigurations(MaxUpdateInterval, "PT30M")
-  Activator.getWorkspace.addToConfigurations(IncrementUpdateInterval, "PT2M")
+  Activator.getWorkspace += (MinUpdateInterval, "PT2M")
+  Activator.getWorkspace += (MaxUpdateInterval, "PT30M")
+  Activator.getWorkspace += (IncrementUpdateInterval, "PT2M")
 }
 
 
@@ -58,7 +58,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   var batchJob: IBatchJob = null
   val killed = new AtomicBoolean(false)
   var copyToEnvironmentResult: CopyToEnvironmentResult = null
-  var _delay: Long = Activator.getWorkspace.getPreferenceAsDurationInMs(MinUpdateInterval)
+  var _delay: Long = Activator.getWorkspace.preferenceAsDurationInMs(MinUpdateInterval)
  
   @transient
   var copyToEnvironmentExecFuture: Future[CopyToEnvironmentResult] = null
@@ -113,8 +113,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       if (oldState != state) {
         initDelay
       } else {
-        val newDelay = _delay + Activator.getWorkspace.getPreferenceAsDurationInMs(IncrementUpdateInterval)
-        if (newDelay <= Activator.getWorkspace.getPreferenceAsDurationInMs(MaxUpdateInterval)) {
+        val newDelay = _delay + Activator.getWorkspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+        if (newDelay <= Activator.getWorkspace.preferenceAsDurationInMs(MaxUpdateInterval)) {
           _delay = newDelay
         }
       }
@@ -133,7 +133,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   }
 
   private def initDelay = {
-    _delay = Activator.getWorkspace.getPreferenceAsDurationInMs(MinUpdateInterval)
+    _delay = Activator.getWorkspace.preferenceAsDurationInMs(MinUpdateInterval)
   }
     
   private def tryFinalise = {

@@ -18,7 +18,6 @@
 package org.openmole.plugin.environment.glite
 
 
-import org.openmole.misc.workspace.ConfigurationElement
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 import java.net.URI
@@ -72,46 +71,31 @@ object GliteEnvironment {
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
 
 
-  Activator.getWorkspace.addToConfigurations(CertificatePathLocation, new ConfigurationElement {
+  Activator.getWorkspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
 
-      override def getDefaultValue = {
-        System.getProperty("user.home") + "/.globus/usercert.pem"
-      }
-    })
+  Activator.getWorkspace += (KeyPathLocation,  () => System.getProperty("user.home") + "/.globus/userkey.pem")
 
-  Activator.getWorkspace.addToConfigurations(KeyPathLocation, new ConfigurationElement {
+  Activator.getWorkspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
 
-      override def getDefaultValue = {
-        System.getProperty("user.home") + "/.globus/userkey.pem";
-      }
-    })
+  Activator.getWorkspace += (CertificateType, "pem")
+  Activator.getWorkspace += (TimeLocation, "PT24H")
+  Activator.getWorkspace += (DelegationTimeLocation, "P7D")
 
-  Activator.getWorkspace().addToConfigurations(P12CertificateLocation, new ConfigurationElement {
+  Activator.getWorkspace += (FetchRessourcesTimeOutLocation, "PT2M")
+  Activator.getWorkspace += (CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
-      override def getDefaultValue = {
-        System.getProperty("user.home") + "/.globus/certificate.p12";
-      }
-    })
+  Activator.getWorkspace += (LocalThreadsBySELocation, "10")
+  Activator.getWorkspace += (LocalThreadsByWMSLocation, "10")
 
-  Activator.getWorkspace.addToConfigurations(CertificateType, "pem");
-  Activator.getWorkspace.addToConfigurations(TimeLocation, "PT24H");
-  Activator.getWorkspace.addToConfigurations(DelegationTimeLocation, "P7D");
+  Activator.getWorkspace += (ProxyRenewalRatio, "0.2")
 
-  Activator.getWorkspace.addToConfigurations(FetchRessourcesTimeOutLocation, "PT2M");
-  Activator.getWorkspace.addToConfigurations(CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/");
+  Activator.getWorkspace += (OverSubmissionRatioWaitingLocation, "0.5")
+  Activator.getWorkspace += (OverSubmissionRatioRunningLocation, "0.2")
+  Activator.getWorkspace += (OverSubmissionRatioEpsilonLocation, "0.01")
+  Activator.getWorkspace += (OverSubmissionIntervalLocation, "PT5M")
 
-  Activator.getWorkspace.addToConfigurations(LocalThreadsBySELocation, "10");
-  Activator.getWorkspace.addToConfigurations(LocalThreadsByWMSLocation, "10");
-
-  Activator.getWorkspace.addToConfigurations(ProxyRenewalRatio, "0.2");
-
-  Activator.getWorkspace.addToConfigurations(OverSubmissionRatioWaitingLocation, "0.5");
-  Activator.getWorkspace.addToConfigurations(OverSubmissionRatioRunningLocation, "0.2");
-  Activator.getWorkspace.addToConfigurations(OverSubmissionRatioEpsilonLocation, "0.01");
-  Activator.getWorkspace.addToConfigurations(OverSubmissionIntervalLocation, "PT5M");
-
-  Activator.getWorkspace.addToConfigurations(OverSubmissionMinJob, Integer.toString(100));
-  Activator.getWorkspace.addToConfigurations(OverSubmissionNumberOfJobUnderMin, Integer.toString(3));
+  Activator.getWorkspace += (OverSubmissionMinJob, "100")
+  Activator.getWorkspace += (OverSubmissionNumberOfJobUnderMin, "3")
     
 }
 
@@ -119,14 +103,14 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   import GliteEnvironment._
 
-  val threadsBySE = Activator.getWorkspace.getPreferenceAsInt(LocalThreadsBySELocation)
-  val threadsByWMS = Activator.getWorkspace.getPreferenceAsInt(LocalThreadsByWMSLocation)
-  val overSubmissionWaitingRatio = Activator.getWorkspace.getPreferenceAsDouble(OverSubmissionRatioWaitingLocation)
-  val overSubmissionRunningRatio = Activator.getWorkspace.getPreferenceAsDouble(OverSubmissionRatioRunningLocation)
-  val overSubmissionEpsilonRatio = Activator.getWorkspace.getPreferenceAsDouble(OverSubmissionRatioEpsilonLocation)
-  val overSubmissionInterval = Activator.getWorkspace.getPreferenceAsDurationInMs(OverSubmissionIntervalLocation)
-  val minJobs = Activator.getWorkspace.getPreferenceAsInt(OverSubmissionMinJob)
-  val numberOfJobUnderMin = Activator.getWorkspace.getPreferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+  val threadsBySE = Activator.getWorkspace.preferenceAsInt(LocalThreadsBySELocation)
+  val threadsByWMS = Activator.getWorkspace.preferenceAsInt(LocalThreadsByWMSLocation)
+  val overSubmissionWaitingRatio = Activator.getWorkspace.preferenceAsDouble(OverSubmissionRatioWaitingLocation)
+  val overSubmissionRunningRatio = Activator.getWorkspace.preferenceAsDouble(OverSubmissionRatioRunningLocation)
+  val overSubmissionEpsilonRatio = Activator.getWorkspace.preferenceAsDouble(OverSubmissionRatioEpsilonLocation)
+  val overSubmissionInterval = Activator.getWorkspace.preferenceAsDurationInMs(OverSubmissionIntervalLocation)
+  val minJobs = Activator.getWorkspace.preferenceAsInt(OverSubmissionMinJob)
+  val numberOfJobUnderMin = Activator.getWorkspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
        
   Activator.getUpdater.registerForUpdate(new OverSubmissionAgent(this, DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval)
     
@@ -156,7 +140,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   
   override def allJobServices: Iterable[JSAGAJobService[_,_]] = {
 
-    val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
+    val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
     val jobServices = new ListBuffer[JSAGAJobService[_,_]]
 
@@ -174,10 +158,8 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   }
 
   override def allStorages: Iterable[IBatchStorage[_,_]] = {
-
     val allStorages = new ListBuffer[IBatchStorage[_,_]]
-
-    val stors = getBDII.querySRMURIs(voName, Activator.getWorkspace.getPreferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
+    val stors = getBDII.querySRMURIs(voName, Activator.getWorkspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
 
     for (stor <- stors) {
       val storage = new BatchStorage(stor, this, authenticationKey, authentication,threadsBySE)

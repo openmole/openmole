@@ -44,7 +44,7 @@ public class ExecutorService implements IExecutorService {
         
     
     static {
-        Activator.getWorkspace().addToConfigurations(NbTread, "20");
+        Activator.getWorkspace().$plus$eq(NbTread, "20");
     }
 
     final Map<String, java.util.concurrent.ExecutorService> executorServices = new TreeMap<String, java.util.concurrent.ExecutorService>();
@@ -53,7 +53,7 @@ public class ExecutorService implements IExecutorService {
 
     public ExecutorService() throws InternalProcessingError, UserBadDataError {
         super();
-        nbThreads = Activator.getWorkspace().getPreferenceAsInt(NbTread);
+        nbThreads = Activator.getWorkspace().preferenceAsInt(NbTread);
         //cachedPool = Executors.newCachedThreadPool(threadFactory);
     }
 

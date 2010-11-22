@@ -26,11 +26,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
-                <artifactId>com.springsource.org.apache.commons.configuration</artifactId>
-                <version>1.5.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
                 <artifactId>com.springsource.org.apache.commons.logging</artifactId>
                 <version>1.1.1</version>
             </dependency>
@@ -196,6 +191,8 @@
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
 	<lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
 	<lib.org.apache.commons.cli.version>1.2.0</lib.org.apache.commons.cli.version>
+	<lib.org.apache.commons.configuration.version>1.6</lib.org.apache.commons.configuration.version>
+	<lib.org.jasypt.encryption.version>1.7</lib.org.jasypt.encryption.version>
         <lib.org.codehaus.groovy.version>1.7.5</lib.org.codehaus.groovy.version>
         <lib.org.ogf.saga.version>1.0</lib.org.ogf.saga.version>
         <lib.uk.com.robust-it.cloning.version>1.7.1</lib.uk.com.robust-it.cloning.version>

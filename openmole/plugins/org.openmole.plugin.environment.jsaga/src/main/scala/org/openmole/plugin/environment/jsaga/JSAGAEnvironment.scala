@@ -25,7 +25,7 @@ import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 object JSAGAEnvironment {
     val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
 
-    Activator.getWorkspace.addToConfigurations(DefaultRequieredMemory, "1024")
+    Activator.getWorkspace += (DefaultRequieredMemory, "1024")
 }
 
 
@@ -33,7 +33,7 @@ abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]], i
     import JSAGAEnvironment._
     
     val attributes = inAttributes match {
-      case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> Activator.getWorkspace.getPreference(DefaultRequieredMemory)}
-      case None => Map(MEMORY -> Activator.getWorkspace().getPreference(DefaultRequieredMemory))
+      case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> Activator.getWorkspace.preference(DefaultRequieredMemory)}
+      case None => Map(MEMORY -> Activator.getWorkspace.preference(DefaultRequieredMemory))
     }
 }

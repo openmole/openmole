@@ -32,11 +32,11 @@ public abstract class AbstractVirtualMachinePool implements IVirtualMachinePool 
   final static ConfigurationLocation unusedVMKeepOn = new ConfigurationLocation(Group, "UnusedVMKeepOn");
 
   static {
-    workspace().addToConfigurations(unusedVMKeepOn, "PT2M");
+    workspace().$plus$eq(unusedVMKeepOn, "PT2M");
   }
 
   long delay() throws InternalProcessingError {
-      return workspace().getPreferenceAsDurationInMs(unusedVMKeepOn);
+      return workspace().preferenceAsDurationInMs(unusedVMKeepOn);
   }
 
   private final VirtualMachineResource resource;

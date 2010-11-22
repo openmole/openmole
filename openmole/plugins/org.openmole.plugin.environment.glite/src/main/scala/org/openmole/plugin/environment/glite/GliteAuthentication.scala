@@ -29,8 +29,6 @@ import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.ogf.saga.context.Context
-import org.openmole.commons.aspect.caching.Cachable
-import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
@@ -45,23 +43,23 @@ import scala.collection.JavaConversions._
 
 object GliteAuthentication {
   def getCertType: String = {
-    Activator.getWorkspace.getPreference(GliteEnvironment.CertificateType)
+    Activator.getWorkspace.preference(GliteEnvironment.CertificateType)
   }
 
   def getP12CertPath: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.P12CertificateLocation)
+    Activator.getWorkspace.preference(GliteEnvironment.P12CertificateLocation)
   }
 
   def getCertPath: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.CertificatePathLocation)
+    Activator.getWorkspace.preference(GliteEnvironment.CertificatePathLocation)
   }
 
   def getKeyPath: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.KeyPathLocation)
+    Activator.getWorkspace.preference(GliteEnvironment.KeyPathLocation)
   }
 
   def getTimeString: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.TimeLocation)
+    Activator.getWorkspace.preference(GliteEnvironment.TimeLocation)
   }
 
   def getTime: Long = {
@@ -73,7 +71,7 @@ object GliteAuthentication {
   }
 
   def getDelegationTimeString: String = {
-    Activator.getWorkspace().getPreference(GliteEnvironment.DelegationTimeLocation)
+    Activator.getWorkspace.preference(GliteEnvironment.DelegationTimeLocation)
   }
 
   def dowloadCACertificates(uri: URI, dir: File) = {
@@ -94,7 +92,7 @@ object GliteAuthentication {
           tarEntry = tis.getNextTarEntry
 
           while (tarEntry != null) {
-            var dest = new File(dir, tarEntry.getName())
+            var dest = new File(dir, tarEntry.getName)
             dest = new File(dir, dest.getName())
 
             if (dest.exists) {
@@ -147,11 +145,11 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       if (caDir.exists) {
         caDir
       } else {
-        val tmp = Activator.getWorkspace.getFile("CACertificates")
+        val tmp = Activator.getWorkspace.file("CACertificates")
 
         if (!tmp.exists || !new File(tmp, ".complete").exists) {
           tmp.mkdir();
-          dowloadCACertificates(new URI(Activator.getWorkspace().getPreference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
+          dowloadCACertificates(new URI(Activator.getWorkspace.preference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
           new File(tmp, ".complete").createNewFile
         }
         tmp
@@ -171,7 +169,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     val ctx = Activator.getJSagaSessionService.createContext
     val proxyDuration = initContext(ctx)
 
-    val interval = (proxyDuration * Activator.getWorkspace().getPreferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+    val interval = (proxyDuration * Activator.getWorkspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
 
     Activator.getUpdater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval);
     Activator.getJSagaSessionService.addContext(ctx)
@@ -210,7 +208,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       }
 
       val keyPassword = {
-        val pass = Activator.getWorkspace.getPreference(GliteEnvironment.PasswordLocation)
+        val pass = Activator.getWorkspace.preference(GliteEnvironment.PasswordLocation)
         if(pass == null) "" else pass
       }
 

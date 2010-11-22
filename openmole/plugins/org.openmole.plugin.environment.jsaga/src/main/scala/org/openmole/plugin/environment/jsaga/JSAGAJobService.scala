@@ -50,8 +50,8 @@ object JSAGAJobService {
   val CreationTimeout = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "CreationTimout")
   val TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "TestJobDoneTimeOut")
 
-  Activator.getWorkspace.addToConfigurations(CreationTimeout, "PT2M")
-  Activator.getWorkspace.addToConfigurations(TestJobDoneTimeOut, "PT30M")
+  Activator.getWorkspace += (CreationTimeout, "PT2M")
+  Activator.getWorkspace += (TestJobDoneTimeOut, "PT30M")
   
 }
 
@@ -102,16 +102,14 @@ abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAut
       script.delete
     }
   }
-
  
   @transient lazy val jobServiceCache = {
-
     val task = {
       val url = URLFactory.createURL(jobServiceURI.toString());
       JobFactory.createJobService(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), url);
     } 
 
-    task.get(Activator.getWorkspace.getPreferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
+    task.get(Activator.getWorkspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
     
   protected def buildJob(id: String): JSAGAJob = {

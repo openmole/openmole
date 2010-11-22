@@ -19,6 +19,7 @@ package org.openmole.core.implementation.execution.local
 
 import java.util.LinkedList
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.Semaphore
 import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.internal.Activator
@@ -27,18 +28,30 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.workspace.ConfigurationLocation
+import scala.collection.mutable.SynchronizedPriorityQueue
 
 object LocalExecutionEnvironment extends Environment[IExecutionJob] {
   
+  implicit def jobOrdering = new Ordering[LocalExecutionJob] {
+    override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
+      val nbMJLeft = left.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
+      val nbMJRight = right.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
+          
+      nbMJRight - nbMJLeft
+    }
+  }
   
   val DefaultNumberOfThreads = new ConfigurationLocation(LocalExecutionEnvironment.getClass.getSimpleName, "ThreadNumber")
 
-  Activator.getWorkspace().addToConfigurations(DefaultNumberOfThreads, Integer.toString(1))
+  Activator.getWorkspace += (DefaultNumberOfThreads, Integer.toString(1))
     
-  private val jobs = new LinkedBlockingQueue[LocalExecutionJob]
+  private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
+  private val jobInQueue = new Semaphore(0)
+  
   private val executers = new LinkedList[LocalExecuter]
-  private var nbThreadVar = Activator.getWorkspace.getPreferenceAsInt(DefaultNumberOfThreads)
+  private var nbThreadVar = Activator.getWorkspace.preferenceAsInt(DefaultNumberOfThreads)
        
   addExecuters(nbThread)
     
@@ -97,10 +110,14 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
 
   private def submit(ejob: LocalExecutionJob) = {
     ejob.state = ExecutionState.SUBMITED
-    jobs.add(ejob)
+    jobs += ejob
+    jobInQueue.release
   }
 
-  private[local] def takeNextjob: LocalExecutionJob = jobs.take
+  private[local] def takeNextjob: LocalExecutionJob = {
+    jobInQueue.acquire
+    jobs.dequeue
+  }
   
    
 }
