@@ -19,11 +19,12 @@ package org.openmole.plugin.domain.range
 
 
 import org.openmole.core.model.data.IContext
+import java.math.MathContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.math.Numeric.BigDecimalAsIfIntegral
 
 class ScalaBigDecimalRange(min: String, max: String, step: String) extends IntegralRange[BigDecimal](min, max, step)(BigDecimalAsIfIntegral) {
-  override def step(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, step))
-  override def max(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, max))
-  override def min(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, min))
+  override def step(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, step), MathContext.DECIMAL128)
+  override def max(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, max), MathContext.DECIMAL128)
+  override def min(global: IContext, context: IContext): BigDecimal = BigDecimal(expandData(global, context, min), MathContext.DECIMAL128)
 }
