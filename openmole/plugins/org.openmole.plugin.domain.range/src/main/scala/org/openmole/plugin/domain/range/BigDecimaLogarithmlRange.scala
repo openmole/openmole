@@ -20,6 +20,7 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.core.model.domain.IWithRange
+import java.math.MathContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.misc.math.BigDecimalOperations._
 import java.math.BigDecimal
@@ -43,7 +44,7 @@ class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: Str
     }      
   }
   
-  def nbStep(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, nbStep))
-  def min(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, min))
-  def max(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, max))
+  def nbStep(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, nbStep), MathContext.DECIMAL128)
+  def min(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, min), MathContext.DECIMAL128)
+  def max(global: IContext, context: IContext): BigDecimal = new BigDecimal(expandData(global, context, max), MathContext.DECIMAL128)
 }
