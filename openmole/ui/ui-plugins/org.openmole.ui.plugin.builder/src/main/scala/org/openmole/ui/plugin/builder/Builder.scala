@@ -89,7 +89,7 @@ class Builder {
    * @param prototypes, the prototypes to be grouped.
    * @return a DataSet
    */
-  def dataSet(head: IPrototype[_], prototypes: IPrototype[_]*): IDataSet = new DataSet(head, prototypes)
+  def dataSet(head: IPrototype[_], prototypes: Array[IPrototype[_]]): IDataSet = new DataSet(head, prototypes)
     
 
   /**
@@ -99,7 +99,7 @@ class Builder {
    * @param dataSets, the dataSet to be composed.
    * @return the composed dataSet.
    */
-  def dataSet(head: IDataSet, dataSets: IDataSet*): IDataSet = new DataSet(head, dataSets)
+  def dataSet(head: IDataSet, dataSets: Array[IDataSet]): IDataSet = new DataSet(head, dataSets)
     
 
   /**
@@ -150,8 +150,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def mole(head: ITask, tasks: Iterable[ITask]): IMole = new Mole(chain(head, tasks.toIterable).firstCapsule)
-  def mole(head: ITask, tasks: ITask*): IMole = mole(head, tasks.toIterable)
+  def mole(head: ITask, tasks: Array[ITask]): IMole = new Mole(chain(head, tasks).firstCapsule)
     
   /**
    * Builds a Mole.
@@ -162,7 +161,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def mole(head: ICapsule, capsules: ICapsule*): IMole = new Mole(chain(head, capsules.toArray).firstCapsule)
+  def mole(head: ICapsule, capsules: Array[ICapsule]): IMole = new Mole(chain(head, capsules).firstCapsule)
   def mole(capsule: IGenericCapsule): IMole = new Mole(capsule)
 
   /**
@@ -184,7 +183,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def moleExecution(head: ITask, tasks: ITask*): IMoleExecution = new MoleExecution(mole(head, tasks))
+  def moleExecution(head: ITask, tasks: Array[ITask]): IMoleExecution = new MoleExecution(mole(head, tasks))
     
 
   /**

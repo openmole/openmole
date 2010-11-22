@@ -42,9 +42,7 @@ class DataSet(_data: Map[String, IData[_]]) extends IDataSet {
   
   def this(head: IData[_], data: Array[IData[_]]) =  this(List(head) ++ data)
   
-  def this(head: IDataSet, dataSets: Iterable[IDataSet]) = this(DataSet.fromIterable2Map(head ++ dataSets.flatten))
- 
-  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(head, dataSets.toIterable)
+  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(DataSet.fromIterable2Map((ListBuffer(head) ++ dataSets).flatten))
   
   def this(head: IPrototype[_], prototypes: Iterable[IPrototype[_]]) = this((List(head) ++ prototypes).map{new Data(_)})
    
