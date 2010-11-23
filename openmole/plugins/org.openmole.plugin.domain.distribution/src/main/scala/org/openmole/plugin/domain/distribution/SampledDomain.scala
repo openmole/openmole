@@ -32,6 +32,7 @@ class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDo
 
       def iterator() = new Iterator[T] {
         var i = 0
+        override def size = localSize
         override def hasNext: Boolean = i < localSize && it.hasNext
         override def next: T = {
           i += 1

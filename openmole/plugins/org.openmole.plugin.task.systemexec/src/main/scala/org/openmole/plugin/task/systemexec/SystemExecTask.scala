@@ -20,6 +20,7 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import java.lang.Integer
@@ -28,23 +29,32 @@ import scala.collection.JavaConversions._
 
 class SystemExecTask(name: String, 
                      cmd: String, 
-                     returnValue: Prototype[Integer], 
-                     relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
+                     returnValue: Option[IPrototype[Integer]], 
+                     exceptionIfReturnValueNotZero: Boolean,
+                     relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,exceptionIfReturnValueNotZero,relativeDir) {
   
   def this(name: String, cmd: String) = {
-    this(name, cmd, null, "")
+    this(name, cmd, None, true, "")
   }
   
   def this(name: String, cmd: String, relativeDir: String) = {
-    this(name, cmd, null, relativeDir)
+    this(name, cmd, None, true, relativeDir)
+  }
+  
+  def this(name: String, cmd: String, exceptionIfReturnValueNotZero: Boolean) = {
+    this(name, cmd, None, exceptionIfReturnValueNotZero, "")
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String,  exceptionIfReturnValueNotZero: Boolean) = {
+    this(name, cmd, None, exceptionIfReturnValueNotZero, relativeDir)
   }
   
   def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, "")
+    this(name, cmd, Some(returnValue), false, "")
   }
   
   def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
-    this(name, cmd, returnValue, relativeDir)
+    this(name, cmd, Some(returnValue), false, relativeDir)
   }
   
 //  override protected def process(global: IContext, context: IContext, progress: IProgress) = {

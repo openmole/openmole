@@ -34,49 +34,44 @@ import java.lang.Integer
 
 abstract class AbstractSystemExecTask (name: String, 
                                        val cmd: String, 
-                                       val returnValue: IPrototype[Integer] = null, 
+                                       val returnValue: Option[IPrototype[Integer]] = null, 
+                                       exceptionIfReturnValueNotZero: Boolean = true,
                                        relativeDir: String = "") extends ExternalSystemTask(name) {
-  if(returnValue != null) addOutput(returnValue)
-  
-//  def this(name: String, cmd: String) = {
-//    this(name, cmd, null, "")
-//  }
-//  
-//  def this(name: String, cmd: String, relativeDir: String) = {
-//    this(name, cmd, null, relativeDir)
-//  }
-//  
-//  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = {
-//    this(name, cmd, returnValue, "")
-//  }
-//  
-//  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = {
-//    this(name, cmd, returnValue, relativeDir)
-//  }
-//  
-  
-  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
-      val tmpDir = workspace.newDir("systemExecTask")
-
-      prepareInputFiles(global, context, progress, tmpDir)
-      val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-      val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
-      
-      try {                    
-        // val executor = new DefaultExecutor
-        // executor.setWorkingDirectory(workDir)
-        // val ret = executor.execute(commandLine);
-     
-        val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
-        val ret = execute(process,context)
-        if(returnValue != null) context += (returnValue, ret)
-        // if(returnValue != null) context.setValue[Integer](returnValue, ret)
-      } catch {
-        case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
-      }
-
-      fetchOutputFiles(global, context, progress, workDir)
+ 
+  returnValue match {
+    case None =>
+    case Some(returnValue) => addOutput(returnValue)
   }
   
-  protected def execute(process: Process, context: IContext):Integer
+  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
+    val tmpDir = workspace.newDir("systemExecTask")
+
+    prepareInputFiles(global, context, progress, tmpDir)
+    val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
+      
+    try {                    
+      // val executor = new DefaultExecutor
+      // executor.setWorkingDirectory(workDir)
+      // val ret = executor.execute(commandLine);
+     
+      val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
+      val ret = execute(process,context)
+
+      if(exceptionIfReturnValueNotZero && ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
+        
+      returnValue match {
+        case None =>
+        case Some(returnValue) => context += (returnValue, ret)
+      }
+
+      // if(returnValue != null) context.setValue[Integer](returnValue, ret)
+    } catch {
+      case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
+    }
+
+    fetchOutputFiles(global, context, progress, workDir)
+  }
+  
+  protected def execute(process: Process, context: IContext): Integer
 }

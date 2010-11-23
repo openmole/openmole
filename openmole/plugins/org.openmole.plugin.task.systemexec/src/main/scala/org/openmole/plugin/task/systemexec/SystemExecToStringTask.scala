@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.systemexec
 
+import org.openmole.core.model.data.IPrototype
 import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.commons.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
@@ -27,19 +28,44 @@ import java.lang.Integer
 
 class SystemExecToStringTask(name: String, 
                              cmd: String, 
-                             returnValue: Prototype[Integer], 
+                             returnValue: Option[Prototype[Integer]], 
+                             exceptionIfReturnValueNotZero: Boolean,
                              relativeDir: String,
-                             val outString: Prototype[String] = null,
-                             val errString: Prototype[String] = null) extends AbstractSystemExecTask(name,cmd,returnValue,relativeDir) {
+                             val outString: IPrototype[String],
+                             val errString: IPrototype[String]) extends AbstractSystemExecTask(name,cmd,returnValue,exceptionIfReturnValueNotZero,relativeDir) {
   
-    
+  
+  def this(name: String, cmd: String, outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, None, true, "", outString, errString)
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String, outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, None, true, relativeDir, outString, errString)
+  }
+  
+  def this(name: String, cmd: String, exceptionIfReturnValueNotZero: Boolean, outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, None, exceptionIfReturnValueNotZero, "", outString, errString)
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String,  exceptionIfReturnValueNotZero: Boolean, outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, None, exceptionIfReturnValueNotZero, relativeDir, outString, errString)
+  }
+  
+  def this(name: String, cmd: String, returnValue: Prototype[Integer], outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, Some(returnValue), false, "", outString, errString)
+  }
+  
+  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer], outString: IPrototype[String], errString: IPrototype[String]) = {
+    this(name, cmd, Some(returnValue), false, relativeDir, outString, errString)
+  }
+  
   override protected def execute(process: Process, context: IContext):Integer = {    
     val outStringBuilder = new StringBuilder
     val errStringBuilder = new StringBuilder
-
+    
     val ret = executeProcess(process,new PrintStream(new StringBuilderOutputStream(outStringBuilder)),new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
-    if(outString != null) context += (outString,outStringBuilder.toString)
-    if(errString != null) context += (errString,errStringBuilder.toString)
-    return ret
+    context += (outString,outStringBuilder.toString)
+    context += (errString,errStringBuilder.toString)
+    ret
   }
 }
