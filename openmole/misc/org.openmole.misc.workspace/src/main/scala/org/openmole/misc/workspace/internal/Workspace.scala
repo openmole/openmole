@@ -31,7 +31,6 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.IWorkspace
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.aspect.caching.ChangeState;
-import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashMap
 
 object Workspace {
@@ -50,16 +49,17 @@ class Workspace(var _location: File) extends IWorkspace {
   val configurations = new HashMap[ConfigurationLocation, () => String]
     
   @transient private var _password = ""
-  @transient val currentTime = System.currentTimeMillis
+  //@transient val currentTime = System.currentTimeMillis
 
   this += (UniqueID, UUID.randomUUID.toString)
     
-  this += (ObjectRepoLocation, new File(location, DefaultObjectRepoLocaltion).getAbsolutePath)
-  this += (TmpLocation, new File(location, DefaultTmpLocation).getAbsolutePath)
+  //this += (ObjectRepoLocation, () => new File(location, DefaultObjectRepoLocaltion).getAbsolutePath)
+
+  //this += (TmpLocation, () => new File(location, DefaultTmpLocation).getAbsolutePath)
     
   this += (passwordTest, passwordTestString)
    
-  override def location_=(location: File) = {
+  override def location_= (location: File) = {
     _location = location
   }
   
@@ -77,18 +77,17 @@ class Workspace(var _location: File) extends IWorkspace {
     configurations(location) = () => defaultValue
   }
 
-
   @Cachable
   private[internal] def tmpDir: TempDir = {
-    val locTmp = new File(new File(preference(TmpLocation), preference(UniqueID)), currentTime.toString)
-
-    if (!locTmp.exists) {
-      if (!locTmp.mkdirs) {
-        throw new InternalProcessingError("Cannot create tmp dir " + locTmp.getAbsolutePath)
+    val tmpLocation = new File(location, DefaultTmpLocation)
+  
+    if (!tmpLocation.exists) {
+      if (!tmpLocation.mkdirs) {
+        throw new InternalProcessingError("Cannot create tmp dir " + tmpLocation.getAbsolutePath)
       }
     }
 
-    new TempDir(locTmp)
+    new TempDir(tmpLocation)
   }
 
   override def newDir(prefix: String): File =  tmpDir.createNewDir(prefix)
@@ -115,7 +114,6 @@ class Workspace(var _location: File) extends IWorkspace {
     val configuration = new PropertiesConfiguration(configurationFile)
     configuration.setReloadingStrategy(new FileChangedReloadingStrategy)
     return configuration
-       
   }
 
   override def defaultValue(location: ConfigurationLocation): String = {

@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.misc.logging.internal;
 
 import java.util.logging.Handler;
@@ -34,41 +33,38 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 public class Activator implements BundleActivator {
 
     final static ConfigurationLocation LevelConfiguration = new ConfigurationLocation("Logging", "Level");
-    
     private static IWorkspace workspace;
     private static BundleContext context;
-
 
     @Override
     public void start(BundleContext bc) throws Exception {
         context = bc;
-        
-        getWorkspace().addToConfigurations(LevelConfiguration, Level.INFO.toString());
-        
-        java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");  
-        Handler[] handlers = rootLogger.getHandlers();  
-        for (int i = 0; i < handlers.length; i++) {  
-            rootLogger.removeHandler(handlers[i]);  
-        }
-        
-        SLF4JBridgeHandler.install();
-        
-        String configuredLevel = getWorkspace().getPreference(LevelConfiguration);
 
-        for (int i = 0; i < handlers.length; i++) {  
-            rootLogger.setLevel(Level.parse(configuredLevel)); 
-        }     
+        getWorkspace().$plus$eq(LevelConfiguration, Level.INFO.toString());
+
+        java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
+        Handler[] handlers = rootLogger.getHandlers();
+        for (int i = 0; i < handlers.length; i++) {
+            rootLogger.removeHandler(handlers[i]);
+        }
+
+        SLF4JBridgeHandler.install();
+
+        String configuredLevel = getWorkspace().preference(LevelConfiguration);
+
+        for (int i = 0; i < handlers.length; i++) {
+            rootLogger.setLevel(Level.parse(configuredLevel));
+        }
     }
 
     @Override
     public void stop(BundleContext bc) throws Exception {
-
     }
 
     private static BundleContext getContext() {
         return context;
     }
-    
+
     public static IWorkspace getWorkspace() {
         if (workspace != null) {
             return workspace;
@@ -82,6 +78,4 @@ public class Activator implements BundleActivator {
         }
         return workspace;
     }
-    
-    
 }

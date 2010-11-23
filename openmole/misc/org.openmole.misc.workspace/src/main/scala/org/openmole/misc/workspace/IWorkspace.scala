@@ -22,12 +22,12 @@ import java.io.File
 object IWorkspace {
   val ConfigurationFile = ".preferences"
   val GlobalGroup = "Global"
-  val DefaultObjectRepoLocaltion = ".objectRepository.bin" 
+  //val DefaultObjectRepoLocaltion = ".objectRepository.bin" 
   val DefaultTmpLocation = ".tmp"
 	
   val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
-  val ObjectRepoLocation = new ConfigurationLocation(GlobalGroup, "ObjectRepoLocation")
-  val TmpLocation = new ConfigurationLocation(GlobalGroup, "TmpLocation")
+  //val ObjectRepoLocation = new ConfigurationLocation(GlobalGroup, "ObjectRepoLocation")
+  //val TmpLocation = new ConfigurationLocation(GlobalGroup, "TmpLocation")
 
 }
 

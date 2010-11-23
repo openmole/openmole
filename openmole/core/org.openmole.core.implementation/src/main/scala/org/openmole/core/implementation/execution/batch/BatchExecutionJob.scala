@@ -170,7 +170,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       val bj = js._1.submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2)
       batchJob = bj
     } catch {
-      case(e: InternalProcessingError) => LOGGER.log(Level.FINE, "Error durring job submission.", e)
+      case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)
     } finally {
       Activator.getBatchRessourceControl.usageControl(js._1.description).releaseToken(js._2)
     }

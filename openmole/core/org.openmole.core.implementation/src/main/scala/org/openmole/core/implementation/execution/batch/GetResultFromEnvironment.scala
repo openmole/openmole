@@ -63,7 +63,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
       val result = getRuntimeResult(outputFile, token)
 
       if (result.exception != null) {
-        throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node");
+        throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
       }
 
       display(result.stdOut, "Output", token)
