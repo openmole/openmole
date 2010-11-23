@@ -15,25 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.domain
 
-import org.openmole.core.implementation.tools.VariableExpansion
+package org.openmole.plugin.domain.distribution
+
 import org.openmole.core.model.data.IContext
-import scala.collection.mutable.ArrayBuffer
+import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFiniteDomain
-import scala.collection.JavaConversions
 
-class EnumerationDomain[+T](val values: Iterable[String]) extends IFiniteDomain[T] {
-
-  def this (vals: String*) = this(vals.toIterable)
-
-  def this (vals: java.lang.Iterable[String]) = this(JavaConversions.asScalaIterable(vals))
+class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
 
   override def computeValues(global: IContext, context: IContext): Iterable[T] = {
-    var ret = new ArrayBuffer[T](values.size)
-    for(s <- values) {
-      ret += VariableExpansion.expandData(global, context, s).asInstanceOf[T]
+    val it = domain.iterator(global, context)
+    val localSize = size
+    
+    new Iterable[T] {
+
+      def iterator() = new Iterator[T] {
+        var i = 0
+        override def hasNext: Boolean = i < localSize && it.hasNext
+        override def next: T = {
+          i += 1
+          it.next
+        }
+      }
     }
-    ret
   }
+
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.core.batchservicecontrol.internal
 
-import org.openmole.core.batchservicecontrol.AccessToken
+import java.util.logging.Logger
 import org.openmole.core.batchservicecontrol.IBatchServiceControl
 import org.openmole.core.batchservicecontrol.IQualityControl
 import org.openmole.core.batchservicecontrol.IUsageControl
@@ -51,7 +51,7 @@ class BatchServiceControl extends IBatchServiceControl {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._1
       case None => BatchServiceControl.botomlessUsage
-    }
+    }    
   }
 
 }

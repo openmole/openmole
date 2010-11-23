@@ -15,17 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.domain
+package org.openmole.plugin.domain.collection
 
+import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
+import scala.collection.mutable.ArrayBuffer
 import org.openmole.core.model.domain.IFiniteDomain
+import scala.collection.JavaConversions
+import scala.collection.mutable.ListBuffer
 
-class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
+class DynamicValueSetDomain[+T](val values: Iterable[String]) extends IFiniteDomain[T] {
+
+  def this (head: String, vals: Array[String]) = this(ListBuffer(head) ++ vals)
+
+  def this (vals: java.lang.Iterable[String]) = this(JavaConversions.asScalaIterable(vals))
 
   override def computeValues(global: IContext, context: IContext): Iterable[T] = {
-    val it = domain.iterator(global, context)
-    for(i <- 0 until math.min(size, it.size)) yield it.next
+    var ret = new ArrayBuffer[T](values.size)
+    for(s <- values) {
+      ret += VariableExpansion.expandData(global, context, s).asInstanceOf[T]
+    }
+    ret
   }
-
 }

@@ -49,13 +49,8 @@ class Workspace(var _location: File) extends IWorkspace {
   val configurations = new HashMap[ConfigurationLocation, () => String]
     
   @transient private var _password = ""
-  //@transient val currentTime = System.currentTimeMillis
 
   this += (UniqueID, UUID.randomUUID.toString)
-    
-  //this += (ObjectRepoLocation, () => new File(location, DefaultObjectRepoLocaltion).getAbsolutePath)
-
-  //this += (TmpLocation, () => new File(location, DefaultTmpLocation).getAbsolutePath)
     
   this += (passwordTest, passwordTestString)
    
@@ -92,15 +87,6 @@ class Workspace(var _location: File) extends IWorkspace {
 
   override def newDir(prefix: String): File =  tmpDir.createNewDir(prefix)
   override def newFile(prefix: String, suffix: String): File =  tmpDir.createNewFile(prefix, suffix)
- 
-
-  /*def tmpFile(String name) throws InternalProcessingError {
-
-   File ret = new File(getTmpDir().getLocation(), name);
-   ret.deleteOnExit();
-   return ret;
-
-   }*/
 
   @Cachable
   private def configurationFile: File = {
@@ -165,7 +151,6 @@ class Workspace(var _location: File) extends IWorkspace {
   override def removePreference(location: ConfigurationLocation) = synchronized {
     val conf = configuration.subset(location.group)
     conf.clearProperty(location.name)
-
   }
 
   override def file(name: String): File = new File(location, name)

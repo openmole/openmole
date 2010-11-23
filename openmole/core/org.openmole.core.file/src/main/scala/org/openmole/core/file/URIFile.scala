@@ -154,18 +154,14 @@ class URIFile(val location: String) extends IURIFile {
   def this(file: File) = this(file.getCanonicalFile.toURI.toString)
 
   def this(uriFile: IURIFile, childVal: String) = this(URIFile.child(URIFile.fromLocation(uriFile.location), childVal))
-    
-    
-  def this(location: URI) =  this(if (location.getScheme == null) 
-    new File(location.getPath).toURI.toString else location.toString)
-    
+
+  def this(location: URI) =  this(if (location.getScheme == null) new File(location.getPath).toURI.toString else location.toString)
 
   def this(file: IURIFile) = this(file.location)
     
   private def withToken[A](a: (IAccessToken) => A): A = org.openmole.core.batchservicecontrol.IUsageControl.withToken(storageDescription,a)
   private def withFailureControl[A](a: => A): A = org.openmole.core.batchservicecontrol.IQualityControl.withFailureControl(storageDescription,a)
 
-  
   private def trycatch[A](f: => A): A = {
     try {
       f
@@ -189,9 +185,7 @@ class URIFile(val location: String) extends IURIFile {
   
   private def fetchEntry: NSEntry = trycatch {
     val task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSagaSessionService.getSession, SAGAURL)
-    trycatch(
-      task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-      , task)
+    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS) , task)
   }
     
 
@@ -314,7 +308,7 @@ class URIFile(val location: String) extends IURIFile {
   override def cache(token: IAccessToken): File = trycatch(synchronized {
       val cacheTmp = Activator.getWorkspace().newFile("file", "cache")
       this.copy(new URIFile(cacheTmp), token)
-      cacheTmp;
+      cacheTmp
     })
 
   private def isLocal: Boolean = {

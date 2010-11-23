@@ -15,11 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.collection
+package org.openmole.plugin.domain.distribution
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
+import scala.util.Random
+import java.lang.Integer
 
-class ValueSetDomain[T](values: Array[T]) extends IDomain[T] {
-  override def iterator(ic: IContext, ic1: IContext): Iterator[T] = values.iterator
+class UniformIntegerDistribution(generator: Random) extends IDomain[Integer] {
+ 
+  def this(seed: Long) = this(new Random(seed))
+    
+  override def iterator(global: IContext, context: IContext): Iterator[Integer] = {
+    new Iterator[Integer] {
+      override def hasNext: Boolean = true
+      override def next: Integer =  generator.nextInt
+    }
+  }
 }

@@ -60,7 +60,12 @@ object TarArchiver extends IArchiver {
           additionnalCommand(e)
           tos.putArchiveEntry(e)
           try {
-            FileUtil.copy(new FileInputStream(cur._1), tos)
+            val fis = new FileInputStream(cur._1)
+            try {
+              FileUtil.copy(fis, tos)
+            } finally {
+              fis.close
+            }
           } finally {
             tos.closeArchiveEntry
           }
@@ -83,7 +88,13 @@ object TarArchiver extends IArchiver {
       while (e != null) {
         val dest = new File(baseDir, e.getName)
         dest.getParentFile.mkdirs
-        FileUtil.copy(tis, new FileOutputStream(dest))
+        val fos = new FileOutputStream(dest)
+        try {
+          FileUtil.copy(tis, fos)
+        } finally {
+          fos.close
+        }
+        
         e = tis.getNextTarEntry
       }
     } finally {

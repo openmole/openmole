@@ -199,7 +199,7 @@
         </dependency>
 	<dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.domain.uniformintegerdistribution</artifactId>
+            <artifactId>org.openmole.plugin.domain.distribution</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

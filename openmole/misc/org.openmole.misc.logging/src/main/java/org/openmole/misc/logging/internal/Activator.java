@@ -19,6 +19,7 @@ package org.openmole.misc.logging.internal;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
+
 import org.openmole.misc.workspace.ConfigurationLocation;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
@@ -55,6 +56,8 @@ public class Activator implements BundleActivator {
         for (int i = 0; i < handlers.length; i++) {
             rootLogger.setLevel(Level.parse(configuredLevel));
         }
+        
+        LogManager.getLogManager().getLogger("org.apache.axis.utils.JavaUtils").setLevel(Level.SEVERE);
     }
 
     @Override
