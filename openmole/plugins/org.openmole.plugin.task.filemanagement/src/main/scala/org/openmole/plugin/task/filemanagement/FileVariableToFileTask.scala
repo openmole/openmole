@@ -27,7 +27,6 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.implementation.data.Prototype_
 import scala.collection.mutable.ListBuffer
 
 import org.openmole.commons.tools.io.FileUtil.copy
@@ -106,7 +105,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
     addInput(name);
   }
 
-  def saveInputFilesAs(fileProt: IPrototype[List[File]], nameProt: IPrototype[List[String]], dirUrl: String) {
+  def saveInputFilesAs(fileProt: IPrototype[Array[File]], nameProt: IPrototype[Array[String]], dirUrl: String) {
     listToCopyWithNameInVariable += ((fileProt,nameProt, dirUrl))
     addInput(fileProt)
     addInput(nameProt)
