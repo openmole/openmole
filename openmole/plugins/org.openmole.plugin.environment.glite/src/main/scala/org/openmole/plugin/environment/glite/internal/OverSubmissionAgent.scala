@@ -78,9 +78,10 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
                             val runningStat = computeStat(sampleType, registry.executionJobs(statisticKey))
                             strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
                           })
-                
+
+                        Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission, limit is " + limitTime + " job time is " + jobTime)
+
                         if (jobTime > limitTime) {
-                          //Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission, limit is " + limitTime + " job time is " + jobTime)
                           environment.submit(job)
                         }
 

@@ -36,7 +36,7 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
 
   override def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
 
-    //val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
+   // val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
     //LOGGER.info("Sample type " + sample.getLabel)
     
     val finished = finishedStat.toArray
@@ -45,47 +45,52 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
     quickSort(finished)
     quickSort(running)
      
-    //LOGGER.info(running.toIterable.toString) 
+    //LOGGER.info(running.toIterable.toString)
     //LOGGER.info(finished.toIterable.toString)
-     
-    if (finished.length == 0) {
-      //LOGGER.info("Finished length " + 0)
-      return Long.MaxValue
-
-    }
-    if (running.length == 0) {
-      //LOGGER.info("Running length " + 0)
-      return Long.MaxValue
-    }
+    
+    if (finished.length == 0) return Long.MaxValue
+    if (running.length == 0) return Long.MaxValue
 
     var tmax = finished(finished.length - 1)
     var tmin = finished(0)
 
-        
+    //LOGGER.info("tmin " + tmin + " tmax " + tmax + " epsilon " + epsilon)
+     
     var lastTPToSmall = Long.MaxValue
     val ratio = maxOverSubmitRatio(sample)
-    var t: Long = 0
-    var p: Long =0
+    
+    var t = 0L
+    var p = 0.0
+    
     do {
 
       t = (tmax + tmin) / 2
+      
+      //LOGGER.info("t " + t)
+      
       val n1 = nbSup(finished, t)
       val n4 = running.length
       val n3 = nbSup(running, t)
       val n2 = finished.length
 
       var n4bis = n3
+
+      //LOGGER.info("n1 n2 n3 n4 " + n1 + " " + n2 + " " + n3 + " " + n4)
+
       var indice = 0
 
       while (indice < running.length && running(indice) < t) {
-
         val overS = nbSup(finished, running(indice))
         n4bis += (n1.doubleValue / overS).intValue
         indice += 1
       }
             
-      p = (n1 + n4bis) / (n2 + n4)
+      //LOGGER.info("indice "+ indice)
+      
+      p = (n1.doubleValue + n4bis) / (n2 + n4)
 
+      //LOGGER.info("p "+ p)
+      
       if(p < ratio) {
         if(p > 0.0) {
           lastTPToSmall = t;
@@ -94,8 +99,9 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
       } else {
         tmin = t
       }
-    } while((tmax - tmin) > 1 && abs(p - ratio) > epsilon );
-
+      
+      //LOGGER.info("tmin " + tmin + " tmax " + tmax + " t " + t)
+    } while((tmax - tmin) > 1 && abs(p - ratio) > epsilon )
 
     if(abs(p - ratio) > epsilon) {
       t = lastTPToSmall
@@ -111,11 +117,7 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
       indice -= 1
     }
 
-    if(indice >= 0) {
-      return samples.length - indice
-    } else {
-      return samples.length + indice + 1
-    }
-        
+    if(indice >= 0) samples.length - indice
+    else samples.length + indice + 1  
   }
 }
