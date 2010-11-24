@@ -19,126 +19,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.apache.axis</groupId>
-                <artifactId>com.springsource.org.apache.axis</artifactId>
-                <version>1.4.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>com.springsource.org.apache.commons.logging</artifactId>
-                <version>1.1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant</artifactId>
-                <version>${lib.org.apache.ant.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jasypt</groupId>
-                <artifactId>com.springsource.org.jasypt.encryption</artifactId>
-                <version>1.5.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.objenesis</groupId>
-                <artifactId>com.springsource.org.objenesis</artifactId>
-                <version>${lib.org.objenesis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>gnu-crypto</groupId>
-                <artifactId>gnu-crypto</artifactId>
-                <version>${lib.org.gnu.crypto.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javatar</groupId>
-                <artifactId>javatar</artifactId>
-                <version>${lib.com.ice.tar.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nuiton</groupId>
-                <artifactId>nuiton-j2r</artifactId>
-                <version>${lib.org.nuiton.j2r.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nuiton.thirdparty</groupId>
-                <artifactId>JRI</artifactId>
-                <version>0.7-0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nuiton.thirdparty</groupId>
-                <artifactId>REngine</artifactId>
-                <version>0.6-0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nuiton.thirdparty</groupId>
-                <artifactId>Rserve</artifactId>
-                <version>0.6-0</version>
-            </dependency>
-
-            <!-- FIXME transitive dep not imported for commons-jxpath -->
-            <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>com.springsource.javax.el</artifactId>
-                <version>1.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>com.springsource.javax.servlet.jsp</artifactId>
-                <version>2.1.0</version>
-            </dependency>
-            <!-- FIXME transitive dep not imported for apache-axis -->
-            <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>com.springsource.javax.activation</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.jms</groupId>
-                <artifactId>com.springsource.javax.jms</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>com.springsource.javax.mail</artifactId>
-                <version>1.4.0</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.wsdl</groupId>
-                <artifactId>com.springsource.javax.wsdl</artifactId>
-                <version>1.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>com.springsource.javax.servlet</artifactId>
-                <version>2.4.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.castor</groupId>
-                <artifactId>com.springsource.org.castor</artifactId>
-                <version>1.1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.rpc</groupId>
-                <artifactId>com.springsource.javax.xml.rpc</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-            <!-- FIXME transitive dep not imported for xml-rpc -->
-            <dependency>
-                <groupId>javax.xml.soap</groupId>
-                <artifactId>com.springsource.javax.xml.soap</artifactId>
-                <version>1.3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.log4j</groupId>
-                <artifactId>com.springsource.org.apache.log4j</artifactId>
-                <version>${lib.com.springsource.org.apache.log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>${lib.org.objectweb.asm.version}</version>
-            </dependency>
-
 	    <!-- equinox -->
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
@@ -190,6 +70,7 @@
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
 	<lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
+	<lib.org.apache.log4j.version>1.2.16</lib.org.apache.log4j.version>
 	<lib.org.apache.commons.cli.version>1.2.0</lib.org.apache.commons.cli.version>
 	<lib.org.apache.commons.configuration.version>1.6</lib.org.apache.commons.configuration.version>
 	<lib.org.jasypt.encryption.version>1.7</lib.org.jasypt.encryption.version>
@@ -208,7 +89,7 @@
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
         <lib.org.scala-lang.scala.version>2.8.1</lib.org.scala-lang.scala.version>
-        <lib.org.objenesis.version>1.0.0</lib.org.objenesis.version>
+        <lib.org.objenesis.version>1.2</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
         <lib.ch.ethz.ssh2.version>build250</lib.ch.ethz.ssh2.version>
@@ -224,6 +105,9 @@
 	<lib.org.junit.version>4.8.1</lib.org.junit.version>
 	<lib.org.fusesource.jansi.version>1.2.1</lib.org.fusesource.jansi.version>
 	<lib.org.openmole.tools.distrng.version>1.0-SNAPSHOT</lib.org.openmole.tools.distrng.version>
+	<lib.org.nuiton.thirdparty.rengine.version>0.6-0</lib.org.nuiton.thirdparty.rengine.version>
+	<lib.org.nuiton.thirdparty.rserve.version>0.6-0</lib.org.nuiton.thirdparty.rserve.version>
+	<lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
 
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->

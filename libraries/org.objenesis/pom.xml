@@ -14,15 +14,15 @@
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
-    <artifactId>org.apache.ant</artifactId>
-    <version>${lib.org.apache.ant.version}</version>
+    <artifactId>org.objenesis</artifactId>
+    <version>${lib.org.objenesis.version}</version>
 
     <dependencies>
-	<dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-	    <version>${lib.org.apache.ant.version}</version>
-	    <scope>provided</scope>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>${lib.org.objenesis.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -38,5 +38,12 @@
 
     <packaging>bundle</packaging>
 
+
+    <!--optional. Use this property to tune the exported packages-->
+    <!--<properties>
+        <export.packages>
+            TODO
+        </export.packages>
+    </properties>-->
 
 </project>

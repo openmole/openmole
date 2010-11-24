@@ -120,10 +120,6 @@
             <version>${lib.org.apache.ant.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j</groupId>
-            <artifactId>com.springsource.org.apache.log4j</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.structuregenerator</artifactId>
             <version>${project.version}</version>
@@ -157,6 +153,16 @@
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.commons.configuration</artifactId>
             <version>${lib.org.apache.commons.configuration.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${lib.org.apache.log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.objenesis</artifactId>
+            <version>${lib.org.objenesis.version}</version>
         </dependency>
     </dependencies>
 

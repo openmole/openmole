@@ -17,7 +17,9 @@
 
 package org.openmole.core.model.execution
 
+import org.openmole.core.model.mole.IMoleExecution
+
 trait IStatistic {
-    def add (sample: SampleType, length: Long)
-    def apply(sample: SampleType): Iterable[Long]
+  def apply(moleExecution: IMoleExecution, key: IStatisticKey): IStatisticSamples
+  def +=(oleExecution: IMoleExecution, key: IStatisticKey, sample: SampleType, length: Long)
 }

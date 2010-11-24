@@ -25,5 +25,5 @@ trait IEnvironment {
 
     def jobRegistry: IExecutionJobRegistry[_ <: IExecutionJob]
 
-    def statistic: IEnvironmentStatistic
+    def statistic: IStatistic
 }

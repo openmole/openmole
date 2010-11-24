@@ -35,12 +35,19 @@ object Environment {
 
 abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
    
-  val statistic = new EnvironmentStatistic(Activator.getWorkspace.preferenceAsInt(Environment.StatisticsHistorySize))
+  val statistic = new Statistic(Activator.getWorkspace.preferenceAsInt(Environment.StatisticsHistorySize))
   val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
-  def sample(sample: SampleType, value: Long, job: IJob) = statistic.statusJustChanged(sample, value, job)
+  def sample(sample: SampleType, value: Long, job: IJob) = {
+    JobRegistry(job) match {
+      case None =>
+      case Some(moleExecution) =>
+        statistic += (moleExecution, new StatisticKey(job), sample, value)
+    }
+
+  }
 
   def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
   

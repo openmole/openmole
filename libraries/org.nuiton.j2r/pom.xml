@@ -21,33 +21,37 @@
         <dependency>
             <groupId>org.nuiton</groupId>
             <artifactId>nuiton-j2r</artifactId>
+    	    <version>${lib.org.nuiton.j2r.version}</version>
             <scope>provided</scope>
-            <exclusions>
+            <!--<exclusions>
                 <exclusion>
                     <artifactId>commons-logging</artifactId>
                     <groupId>commons-logging</groupId>
                 </exclusion>
-            </exclusions>
+            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.nuiton.thirdparty</groupId>
             <artifactId>JRI</artifactId>
+            <version>${lib.org.nuiton.thirdparty.jri.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.nuiton.thirdparty</groupId>
             <artifactId>REngine</artifactId>
+	    <version>${lib.org.nuiton.thirdparty.rengine.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.nuiton.thirdparty</groupId>
             <artifactId>Rserve</artifactId>
+            <version>${lib.org.nuiton.thirdparty.rserve.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>com.springsource.org.apache.commons.logging</artifactId>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <!-- ************************************************************* -->

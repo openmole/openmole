@@ -31,8 +31,9 @@
             <version>${lib.fr.in2p3.jsaga.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j</groupId>
-            <artifactId>com.springsource.org.apache.log4j</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${lib.org.apache.log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>

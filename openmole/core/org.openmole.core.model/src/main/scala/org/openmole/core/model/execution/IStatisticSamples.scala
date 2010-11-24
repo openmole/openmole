@@ -17,9 +17,7 @@
 
 package org.openmole.core.model.execution
 
-import org.openmole.core.model.job.IJob
-
-trait IEnvironmentStatistic {
-  def statistic(job: IJob): IStatistic
-  def statusJustChanged(sample: SampleType, length: Long, job: IJob)
+trait IStatisticSamples {
+    def += (sample: SampleType, length: Long)
+    def apply(sample: SampleType): Iterable[Long]
 }

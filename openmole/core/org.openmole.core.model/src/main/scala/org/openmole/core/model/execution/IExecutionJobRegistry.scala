@@ -21,9 +21,9 @@ import org.openmole.core.model.job.IJob
 
 trait IExecutionJobRegistry  [EXECUTIONJOB <: IExecutionJob] {
 
-    def executionJobs(category: IJobStatisticCategory): Iterable[EXECUTIONJOB]
+    def executionJobs(key: IStatisticKey): Iterable[EXECUTIONJOB]
     
-    def jobs(category: IJobStatisticCategory): Iterable[IJob]
+    def jobs(category: IStatisticKey): Iterable[IJob]
 
     def allExecutionJobs: Iterable[EXECUTIONJOB]
 

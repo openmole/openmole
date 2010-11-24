@@ -144,14 +144,29 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${lib.org.apache.log4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
             <artifactId>org.jasypt.encryption</artifactId>
             <version>${lib.org.jasypt.encryption.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.commons.configuration</artifactId>
             <version>${lib.org.apache.commons.configuration.version}</version>
+            <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.objenesis</artifactId>
+            <version>${lib.org.objenesis.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
     <!-- ************************************************************* -->

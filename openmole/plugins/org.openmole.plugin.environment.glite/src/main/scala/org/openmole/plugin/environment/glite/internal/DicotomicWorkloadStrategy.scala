@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.glite.internal
 
 import java.util.Arrays
-import java.util.EnumMap
+import java.util.logging.Logger
 import org.openmole.core.model.execution.SampleType
 import scala.util.Sorting._
 import scala.math._
@@ -36,18 +36,25 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
 
   override def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
 
+   // val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
+  //  LOGGER.info("Sample type " + sample.getLabel)
+    
     val finished = finishedStat.toArray
     val running = runningStat.toArray
-
     
     quickSort(finished)
     quickSort(running)
-        
+     
+   // LOGGER.info(running.toString) 
+    //LOGGER.info(finished.toString)
+     
     if (finished.length == 0) {
+      //LOGGER.info("Finished length " + 0)
       return Long.MaxValue
 
     }
     if (running.length == 0) {
+     // LOGGER.info("Running length " + 0)
       return Long.MaxValue
     }
 
@@ -87,17 +94,14 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
       } else {
         tmin = t
       }
-
     } while((tmax - tmin) > 1 && abs(p - ratio) > epsilon );
-
 
 
     if(abs(p - ratio) > epsilon) {
       t = lastTPToSmall
     }
-
+    
     t
-
   }
 
   def nbSup(samples: Array[Long], t: Long): Int = {

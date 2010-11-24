@@ -57,7 +57,7 @@ public class Activator implements BundleActivator {
             rootLogger.setLevel(Level.parse(configuredLevel));
         }
         
-        LogManager.getLogManager().getLogger("org.apache.axis.utils.JavaUtils").setLevel(Level.SEVERE);
+        //LogManager.getLogManager().getLogger("org.apache.axis.utils.JavaUtils").setLevel(Level.SEVERE);
     }
 
     @Override

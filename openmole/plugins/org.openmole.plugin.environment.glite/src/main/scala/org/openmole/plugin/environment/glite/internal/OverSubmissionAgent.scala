@@ -23,14 +23,16 @@ import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.model.execution.batch.IBatchExecutionJob
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.updater.IUpdatable
+import org.openmole.core.implementation.execution.JobRegistry
+import org.openmole.core.implementation.execution.StatisticKey
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.execution.SampleType
 import org.openmole.core.model.job.IJob
 import org.openmole.commons.tools.cache.AssociativeCache
-import org.openmole.core.implementation.execution.JobStatisticCategory
 import org.openmole.core.model.execution.IExecutionJobRegistry
-import org.openmole.core.model.execution.IJobStatisticCategory
 import org.openmole.plugin.environment.glite.GliteEnvironment
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
@@ -43,112 +45,121 @@ import scala.collection.mutable.MultiMap
 class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatable {
 
   override def update: Boolean = {
-
+    Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission computing")
     val registry = environment.jobRegistry
 
     registry.synchronized {
-      var nbJobsByCategory = new HashMap[IJobStatisticCategory, Int]
+      //var nbJobsByCategory = new HashMap[(IMoleExecution, IStatisticKey), Int]
 
       val curTime = System.currentTimeMillis
-      val timeCache = new AssociativeCache[(IJobStatisticCategory, SampleType), Long](AssociativeCache.HARD, AssociativeCache.HARD)
-
+      val timeCache = new AssociativeCache[(IMoleExecution, IStatisticKey, SampleType), Long](AssociativeCache.HARD, AssociativeCache.HARD)
+      var nbJobs = 0
+      
       for (job <- registry.allJobs) {
+        nbJobs += 1
         if (!job.allMoleJobsFinished) {
 
-          val jobStatisticCategory = new JobStatisticCategory(job)
-          registry.lastExecutionJob(job) match {
-            case Some(lastJob) => 
+          val statisticKey = new StatisticKey(job)
+          JobRegistry(job) match {
+            case None =>
+            case Some(moleExecution)=>
+              registry.lastExecutionJob(job) match {
+                case Some(lastJob) => 
                         
-              val executionState = lastJob.state
-              getSampleType(executionState) match {
-                case Some(sampleType) => 
-                  val jobTime = curTime - lastJob.batchJob.timeStemp(executionState)
+                  val executionState = lastJob.state
+                  getSampleType(executionState) match {
+                    case Some(sampleType) => 
+                      val jobTime = curTime - lastJob.batchJob.timeStemp(executionState)
 
-                  val key = (jobStatisticCategory, sampleType)
-                  try {
-                    val limitTime = timeCache.cache(this, key, {
-                        val finishedStat = environment.statistic.statistic(job)(sampleType)
-                          val runningStat = computeStat(sampleType, registry.executionJobs(jobStatisticCategory))
-                          strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
-                        })
+                      val key = (moleExecution, statisticKey, sampleType)
+                      try {
+                        val limitTime = timeCache.cache(this, key, {
+                            val finishedStat = environment.statistic(moleExecution, statisticKey)(sampleType)
+                            val runningStat = computeStat(sampleType, registry.executionJobs(statisticKey))
+                            strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
+                          })
 
+                        //Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Limit?is " + limitTime + " job time is " + jobTime)
 
-                    if (jobTime > limitTime) {
-                      environment.submit(job)
-                    }
+                    
+                        if (jobTime > limitTime) {
+                          Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission, limit is " + limitTime + " job time is " + jobTime)
+                          environment.submit(job)
+                        }
 
-                  } catch {
-                    case (e: Throwable) => Logger.getLogger(classOf[OverSubmissionAgent].getName()).log(Level.WARNING, "Oversubmission failed.", e);
-                  } 
+                      } catch {
+                        case e => Logger.getLogger(classOf[OverSubmissionAgent].getName()).log(Level.WARNING, "Oversubmission failed.", e);
+                      } 
+                    case None =>
+                  }
+          
+                  /* nbJobsByCategory((moleExecution, statisticKey)) = nbJobsByCategory.get((moleExecution,statisticKey)) match {
+                   case Some(nb) => nb + 1
+                   case None => 1
+                   }*/
                 case None =>
               }
-          
-              nbJobsByCategory(jobStatisticCategory) = nbJobsByCategory.get(jobStatisticCategory) match {
-                case Some(nb) => nb + 1
-                case None => 1
-              }
-            case None =>
           }
         }
                     
       }
 
-      for (val entry <- nbJobsByCategory.entrySet) {
-        var nbRessub = minNumberOfJobsByCategory - entry.getValue
-        val jobStatisticCategory = entry.getKey
-        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,nbRessub + " " + entry.getValue);
+      // for (val entry <- nbJobsByCategory.entrySet) {
+      var nbRessub = minNumberOfJobsByCategory - nbJobs
+      //  val key = entry.getKey
+      //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,nbRessub + " " + entry.getValue);
 
-        if (nbRessub > 0) {
-          // Resubmit nbRessub jobs in a fair manner
-          val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
-          var keys = new TreeSet[Int]
+      if (nbRessub > 0) {
+        // Resubmit nbRessub jobs in a fair manner
+        val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+        var keys = new TreeSet[Int]
 
-          for (job <- registry.jobs(jobStatisticCategory)) {
-            val nb = registry.nbExecutionJobs(job)
-            if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-             val set = order.get(nb) match {
-                case None => 
-                  val set = new HashSet[IJob]
-                  order += ((nb, set))
-                  set
-                case Some(set) => set
-              } 
-              set += job
-              keys += nb
-            }
+        for (job <- registry.allJobs) {
+          val nb = registry.nbExecutionJobs(job)
+          if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            val set = order.get(nb) match {
+              case None => 
+                val set = new HashSet[IJob]
+                order += ((nb, set))
+                set
+              case Some(set) => set
+            } 
+            set += job
+            keys += nb
           }
+        }
 
-          if (!keys.isEmpty) {
-            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-              var key = keys.head
-              val jobs = order(keys.head)
-              val it = jobs.iterator
-              val job = it.next
+        if (!keys.isEmpty) {
+          while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            var key = keys.head
+            val jobs = order(keys.head)
+            val it = jobs.iterator
+            val job = it.next
 
-              //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
+            //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
 
-              try {
-                environment.submit(job)
-              } catch {
-                case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
-              }
-
-              jobs -= job
-              if (jobs.isEmpty) {
-                jobs.remove(key)
-                keys -= key
-              }
-
-              key += 1
-              if(!order.contains(key)) order.put(key, new HashSet[IJob])
-             
-              order(key) += job
-              keys += key
-              nbRessub -= 1
+            try {
+              environment.submit(job)
+            } catch {
+              case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
             }
+
+            jobs -= job
+            if (jobs.isEmpty) {
+              jobs.remove(key)
+              keys -= key
+            }
+
+            key += 1
+            if(!order.contains(key)) order.put(key, new HashSet[IJob])
+             
+            order(key) += job
+            keys += key
+            nbRessub -= 1
           }
         }
       }
+      // }
     }
         
     true

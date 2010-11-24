@@ -21,7 +21,7 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.execution.IExecutionJobRegistry
-import org.openmole.core.model.execution.IJobStatisticCategory
+import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.job.IJob
 
 import scala.collection.mutable.HashMap
@@ -32,7 +32,6 @@ import scala.collection.immutable.TreeSet
 class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJobRegistry[EXECUTIONJOB] {
 
   private def ExecutionJobOrderOnTime = new Ordering[EXECUTIONJOB] {
-    
     override def compare(o1: EXECUTIONJOB, o2: EXECUTIONJOB): Int = {
       val comp = o2.creationTime.compare(o1.creationTime)
       if(comp != 0) comp
@@ -41,7 +40,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   }
 
   var jobs = new HashMap[IJob, TreeSet[EXECUTIONJOB]]
-  var categories = new HashMap[IJobStatisticCategory, HashSet[IJob]]
+  var categories = new HashMap[IStatisticKey, HashSet[IJob]]
 
   override def allJobs: Iterable[IJob] = jobs.keySet
       
@@ -51,7 +50,6 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
       case None => Iterable.empty
     }
   }
-   
 
   override def remove(ejob: EXECUTIONJOB) = {
     jobs.get(ejob.job) match {
@@ -69,7 +67,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
       case Some(ejobs) => ejobs + ejob
       case None => TreeSet[EXECUTIONJOB](ejob)(ExecutionJobOrderOnTime)
     }  
-    val category = new JobStatisticCategory(ejob.job)
+    val category = new StatisticKey(ejob.job)
     categories(category) = categories.get(category) match {
       case Some(jobs) => jobs + ejob.job
       case None => HashSet(ejob.job)
@@ -82,7 +80,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   override def removeJob(job: IJob) = synchronized {
     jobs -= job
 
-    val category = new JobStatisticCategory(job)
+    val category = new StatisticKey(job)
     categories.get(category) match {
       case Some(jobs) => {
           val newJobs = jobs - job
@@ -104,14 +102,14 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
     }
   }
 
-  override def executionJobs(category: IJobStatisticCategory): Iterable[EXECUTIONJOB] = {
+  override def executionJobs(category: IStatisticKey): Iterable[EXECUTIONJOB] = {
     categories.get(category) match {
       case Some(js) => for(j <- js; if jobs.contains(j); ejob <- jobs(j)) yield ejob
       case None => Iterable.empty
     }  
   }
 
-  override def jobs(category: IJobStatisticCategory): Iterable[IJob] = {
+  override def jobs(category: IStatisticKey): Iterable[IJob] = {
     categories.get(category) match {
       case None => Iterable.empty
       case Some(jobs) => jobs

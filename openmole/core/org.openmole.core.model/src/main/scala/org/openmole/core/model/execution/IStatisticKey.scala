@@ -17,4 +17,4 @@
 
 package org.openmole.core.model.execution
 
-trait IJobStatisticCategory
+trait IStatisticKey

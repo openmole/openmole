@@ -61,8 +61,9 @@
             <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.objenesis</groupId>
-            <artifactId>com.springsource.org.objenesis</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.objenesis</artifactId>
+            <version>${lib.org.objenesis.version}</version>
         </dependency>
     </dependencies>
 
