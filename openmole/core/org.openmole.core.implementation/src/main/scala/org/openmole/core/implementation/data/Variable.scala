@@ -24,7 +24,7 @@ object Variable {
   def apply[C,T <: C](prototype: IPrototype[C], value: T): Variable[C] = new Variable[C](prototype, value)
 }
 
-class Variable[C](val prototype: IPrototype[C], var value: C) extends IVariable[C] {
+class Variable[C](val prototype: IPrototype[C], val value: C) extends IVariable[C] {
 
   def this(name: String, `type`: Class[C] , value: C) = this(new Prototype[C](name, `type`), value)
 

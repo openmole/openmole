@@ -20,5 +20,4 @@ package org.openmole.core.model.data
 trait IVariable[T] {
   def prototype: IPrototype[T]
   def value: T
-  def value_=(value: T)
 }
