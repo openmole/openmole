@@ -112,10 +112,7 @@ class ReplicaCatalog extends IReplicaCatalog {
   def getReplica(src: File, storageDescription: BatchServiceDescription, authenticationKey: IBatchServiceAuthenticationKey[_]): ObjectSet[Replica] = synchronized {
       
     objServeur.query(new Predicate[Replica](classOf[Replica]){
-
         override def `match`(replica: Replica): Boolean = replica.source.equals(src) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
-        
-            
       })
   }
 
@@ -177,24 +174,18 @@ class ReplicaCatalog extends IReplicaCatalog {
 
   private def insert(replica: Replica): IReplica = synchronized {
 
-
     val srcToInsert = { 
       val srcsInbase = objServeur.query(new Predicate[File](classOf[File]) {
-
           override def `match`(src: File): Boolean = src.equals(replica.source)
-            
         })
         
       if (!srcsInbase.isEmpty) srcsInbase.get(0)
       else replica.source
     }
-       
-    
+
     val hashToInsert = {
       val hashsInbase = objServeur.query(new Predicate[IHash](classOf[IHash]) {
-
           override def `match`(hash: IHash): Boolean = hash.equals(replica.hash)
-            
         })
         
       if (!hashsInbase.isEmpty) hashsInbase.get(0)
@@ -204,9 +195,7 @@ class ReplicaCatalog extends IReplicaCatalog {
         
     val storageDescriptionToInsert =  {
       val storagesDescriptionInBase = objServeur.query(new Predicate[BatchServiceDescription](classOf[BatchServiceDescription]) {
-
           override def `match`(batchServiceDescription: BatchServiceDescription): Boolean =  batchServiceDescription.equals(replica.storageDescription)
-            
         })
         
       if (!storagesDescriptionInBase.isEmpty) storagesDescriptionInBase.get(0)
@@ -215,9 +204,7 @@ class ReplicaCatalog extends IReplicaCatalog {
 
     val authenticationKeyToInsert = {
       val authenticationKeyInBase = objServeur.query(new Predicate[IBatchServiceAuthenticationKey[_]](classOf[IBatchServiceAuthenticationKey[_]]) {
-
           override def `match`(batchEnvironmentDescription: IBatchServiceAuthenticationKey[_]): Boolean = batchEnvironmentDescription.equals(replica.authenticationKey)
-
         })
         
       if (!authenticationKeyInBase.isEmpty)  authenticationKeyInBase.get(0)
@@ -245,7 +232,7 @@ class ReplicaCatalog extends IReplicaCatalog {
   }
 
   def clean(replica: IReplica): Option[Future[_]] = synchronized {
-    LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
+    //LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
 
     remove(replica)
 

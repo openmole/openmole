@@ -96,16 +96,16 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
             val timeOfDir = dir.substring(0, dir.length - 1).toLong
 
             if (timeOfDir < removalDate) {
-              LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir)
-              service.submit(new URIFileCleaner(child, true, false));
+              //LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir)
+              service.submit(new URIFileCleaner(child, true, false))
             }
           } catch  {
             case (ex: NumberFormatException) =>
-              LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir)
-              service.submit(new URIFileCleaner(child, true, false));
+              //LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir)
+              service.submit(new URIFileCleaner(child, true, false))
           }
         } else {
-          service.submit(new URIFileCleaner(child, false, false));
+          service.submit(new URIFileCleaner(child, false, false))
         }
       }
 

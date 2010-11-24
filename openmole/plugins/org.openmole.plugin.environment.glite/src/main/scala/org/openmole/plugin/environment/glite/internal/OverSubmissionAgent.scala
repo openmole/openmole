@@ -45,7 +45,6 @@ import scala.collection.mutable.MultiMap
 class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatable {
 
   override def update: Boolean = {
-    Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission computing")
     val registry = environment.jobRegistry
 
     registry.synchronized {
@@ -78,8 +77,6 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
                             val runningStat = computeStat(sampleType, registry.executionJobs(statisticKey))
                             strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
                           })
-
-                        Logger.getLogger(classOf[OverSubmissionAgent].getName).info("Oversubmission, limit is " + limitTime + " job time is " + jobTime)
 
                         if (jobTime > limitTime) {
                           environment.submit(job)
