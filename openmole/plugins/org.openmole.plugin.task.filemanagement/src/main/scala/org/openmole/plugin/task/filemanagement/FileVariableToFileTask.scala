@@ -19,9 +19,6 @@ package org.openmole.plugin.task.filemanagement
 
 import java.io.File
 import java.io.IOException
-import java.util.Iterator
-import java.util.LinkedList
-import java.util.List
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
@@ -30,6 +27,7 @@ import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data.Prototype_
 import scala.collection.mutable.ListBuffer
 
 import org.openmole.commons.tools.io.FileUtil.copy
@@ -43,8 +41,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
   
   val toCopy = new ListBuffer[(IPrototype[File],String)]()
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String)]()
-  val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[List[File]],IPrototype[List[String]],String)]()
-
+  val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[Array[File]],IPrototype[Array[String]],String)]()
 
   override def process(global: IContext, context: IContext, progress: IProgress)  {
     try{
@@ -54,8 +51,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
           to.getParentFile.mkdirs
           copy(from, to)
 
-          if(remove) from.delete()
-
+          if(remove) from.delete
         })
 
       toCopyWithNameInVariable foreach( p => {
@@ -68,7 +64,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
           val to = new File(dir, name)
           copy(from, to)
 
-          if(remove) from.delete()
+          if(remove) from.delete
         })
 
       listToCopyWithNameInVariable foreach ( cpList => {
@@ -81,15 +77,15 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
             val toDir = new File(expandData(global, context, urlDir))
             toDir.mkdirs
             
-            val itFile = files.iterator()
-            val itName = names.iterator()
+            val itFile = files.iterator
+            val itName = names.iterator
 
-            while(itFile.hasNext() && itName.hasNext()) {
-              val to = new File(toDir, itName.next())
-              val from = itFile.next()
+            while(itFile.hasNext && itName.hasNext) {
+              val to = new File(toDir, itName.next)
+              val from = itFile.next
               copy(from, to)
 
-              if(remove) from.delete()
+              if(remove) from.delete
             }
 
           }
