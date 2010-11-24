@@ -112,7 +112,9 @@ class ReplicaCatalog extends IReplicaCatalog {
   def getReplica(src: File, storageDescription: BatchServiceDescription, authenticationKey: IBatchServiceAuthenticationKey[_]): ObjectSet[Replica] = synchronized {
       
     objServeur.query(new Predicate[Replica](classOf[Replica]){
+        
         override def `match`(replica: Replica): Boolean = replica.source.equals(src) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
+      
       })
   }
 
@@ -176,7 +178,9 @@ class ReplicaCatalog extends IReplicaCatalog {
 
     val srcToInsert = { 
       val srcsInbase = objServeur.query(new Predicate[File](classOf[File]) {
+          
           override def `match`(src: File): Boolean = src.equals(replica.source)
+          
         })
         
       if (!srcsInbase.isEmpty) srcsInbase.get(0)
@@ -185,7 +189,9 @@ class ReplicaCatalog extends IReplicaCatalog {
 
     val hashToInsert = {
       val hashsInbase = objServeur.query(new Predicate[IHash](classOf[IHash]) {
+          
           override def `match`(hash: IHash): Boolean = hash.equals(replica.hash)
+          
         })
         
       if (!hashsInbase.isEmpty) hashsInbase.get(0)
