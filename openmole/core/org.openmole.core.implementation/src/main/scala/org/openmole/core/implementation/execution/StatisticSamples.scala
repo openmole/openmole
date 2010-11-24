@@ -42,7 +42,7 @@ class StatisticSamples(historySize: Int) extends IStatisticSamples {
         case Some(histo) => 
           if(histo.size < historySize) histo += length 
           else histo.tail += length
-        case None => ListBuffer(length)
+        case None => averages(sample) = ListBuffer(length)
       }
   }
 }

@@ -36,8 +36,8 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
 
   override def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
 
-   // val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
-  //  LOGGER.info("Sample type " + sample.getLabel)
+    //val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
+    //LOGGER.info("Sample type " + sample.getLabel)
     
     val finished = finishedStat.toArray
     val running = runningStat.toArray
@@ -45,8 +45,8 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
     quickSort(finished)
     quickSort(running)
      
-   // LOGGER.info(running.toString) 
-    //LOGGER.info(finished.toString)
+    //LOGGER.info(running.toIterable.toString) 
+    //LOGGER.info(finished.toIterable.toString)
      
     if (finished.length == 0) {
       //LOGGER.info("Finished length " + 0)
@@ -54,7 +54,7 @@ class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, 
 
     }
     if (running.length == 0) {
-     // LOGGER.info("Running length " + 0)
+      //LOGGER.info("Running length " + 0)
       return Long.MaxValue
     }
 

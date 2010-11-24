@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.execution
 
 import java.util.Arrays
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.model.execution.IStatistic
 import org.openmole.core.model.job.IJob
@@ -47,6 +48,7 @@ class Statistic(historySize: Int) extends IStatistic {
 
   override def += (moleExecution: IMoleExecution, key: IStatisticKey, sample: SampleType, length: Long) = {
     val statForTask = getOrConstructStatistic(moleExecution, key)
+   // Logger.getLogger(classOf[Statistic].getName).info("New sample for " + moleExecution + " " + key + " " + sample)
     statForTask += (sample, length)
   }
 
@@ -69,7 +71,7 @@ class Statistic(historySize: Int) extends IStatistic {
         case Some(m) => m
         case None => 
           val m = new HashMap[IStatisticKey, IStatisticSamples] with SynchronizedMap[IStatisticKey, IStatisticSamples]
-          stats(moleExecution) = m
+          stats += ((moleExecution, m))
           m
       }
     }
