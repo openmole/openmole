@@ -2,7 +2,7 @@
     <parent>
       <groupId>org.openmole</groupId>
       <artifactId>maven-plugin</artifactId>
-      <version>0.3</version>
+      <version>0.3-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

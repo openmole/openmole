@@ -5,7 +5,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.openmole</groupId>
-        <version>0.3</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.openmole.plugin.sampling.filter</artifactId>

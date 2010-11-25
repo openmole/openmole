@@ -10,7 +10,7 @@
     <parent>
         <artifactId>openmole-ecosystem</artifactId>
         <groupId>org.openmole</groupId>
-        <version>0.3</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>libraries</artifactId>
