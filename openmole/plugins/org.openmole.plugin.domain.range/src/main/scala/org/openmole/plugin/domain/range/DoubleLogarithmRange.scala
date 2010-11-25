@@ -31,8 +31,8 @@ class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String)
      val mi = java.lang.Math.log(min(global, context).doubleValue)
      val ma = java.lang.Math.log(max(global, context).doubleValue)
      val nbst = nbStep(global, context).intValue - 1
-     val st = (math.abs(ma - mi) / nbst)
-
+     val st = if(nbst > 0) (math.abs(ma - mi) / nbst)
+              else 0
      var cur = mi
         
      for (i <- 0 to nbst) yield {
