@@ -79,22 +79,15 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
       for (moleJob <- job.moleJobs) {
         if (contextResults.results.isDefinedAt(moleJob.id)) {
           val context = contextResults.results(moleJob.id)
-          //  FileMigrator.initFilesInVariables(context, fileCache);
-
+ 
           moleJob.synchronized {
             if (!moleJob.isFinished) {
               try {
-                moleJob.rethrowException(context);
-                try {
-                  moleJob.finished(context);
-                  successfull +=1 
-                } catch {
-                  case(e: UserBadDataError) => LOGGER.log(Level.SEVERE, "Error when finishing job.", e)
-                  case(e: InternalProcessingError) => LOGGER.log(Level.SEVERE, "Error when finishing job.", e)
-                }
-
+                moleJob.rethrowException(context)
+                moleJob.finished(context)
+                successfull +=1 
               } catch {
-                case(e: ExecutionException) => LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e);
+                case e => LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e);
               }
             }
           }

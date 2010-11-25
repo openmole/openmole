@@ -26,19 +26,17 @@ object MoleJobInfoToCSV {
     moleJob.context.value(GenericTask.Timestamps.prototype) match {
       case None => Array.empty
       case Some(timeStamps) => 
-        val toWrite = new Array[String]((timeStamps.size - 1) + 2)
+        val toWrite = new Array[String]((timeStamps.size) + 2)
         var cur = 0
 
         toWrite(cur) = moleJob.task.name
         cur += 1
         
-        val itTimeStamps = timeStamps.iterator
-        val created = itTimeStamps.next.time
+        val created = timeStamps.head.time
         toWrite(cur) = created.toString
         cur += 1
 
-        while (itTimeStamps.hasNext) {
-          val timeStamp = itTimeStamps.next
+        for(timeStamp <- timeStamps) {
           toWrite(cur) = timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
           cur += 1
         }

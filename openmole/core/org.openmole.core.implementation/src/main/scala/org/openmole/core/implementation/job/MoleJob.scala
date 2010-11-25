@@ -41,8 +41,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
   
   val progress = new Progress
     
-  @volatile
-  private var _state: State = null
+  @volatile  private var _state: State = null
   state = State.READY
     
   override def state: State = _state

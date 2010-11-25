@@ -28,25 +28,25 @@ import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 
 class CSVProfiler(writer: CSVWriter) extends Profiler {
    
-    def this(moleExecution: IMoleExecution, writter: CSVWriter) = {
-      this(writter)
-      Profiler.register(this, moleExecution)
-    }
-
-    def this(moleExecution: IMoleExecution, out: Writer) = this(moleExecution,new CSVWriter(out))
+  def this(moleExecution: IMoleExecution, writter: CSVWriter) = {
+    this(writter)
+    register(moleExecution)
+  }
+    
+  def this(moleExecution: IMoleExecution, out: Writer) = this(moleExecution,new CSVWriter(out))
   
-    def this(moleExecution: IMoleExecution) = this(moleExecution, new OutputStreamWriter(System.out))
+  def this(moleExecution: IMoleExecution) = this(moleExecution, new OutputStreamWriter(System.out))
 
 
-    override def moleJobFinished(moleJob: IMoleJob) = synchronized {
-        writer.writeNext(toColumns(moleJob))
-        writer.flush
-    }
+  override def moleJobFinished(moleJob: IMoleJob) = synchronized {
+    writer.writeNext(toColumns(moleJob))
+    writer.flush
+  }
 
-    override def moleExecutionFinished = {
-        writer.flush
-    }
+  override def moleExecutionFinished = {
+    writer.flush
+  }
 
-    override def moleExecutionStarting = {}
+  override def moleExecutionStarting = {}
        
 }

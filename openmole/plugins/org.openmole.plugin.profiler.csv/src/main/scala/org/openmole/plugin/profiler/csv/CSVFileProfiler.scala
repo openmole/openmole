@@ -32,7 +32,7 @@ class CSVFileProfiler(file: File) extends Profiler {
 
     def this(moleExecution: IMoleExecution, file: File) {
       this(file)
-      Profiler.register(this, moleExecution)
+      register(moleExecution)
     }
   
     def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))

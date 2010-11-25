@@ -34,11 +34,14 @@ import org.openmole.core.model.persistence.PersistentContext._
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
-class Saver(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) extends IMoleExecutionObserver {
+class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecutionObserver {
 
-  MoleExecutionObserverAdapter(moleExection, this)
-  var ordinal: Int = 0;
-
+   var ordinal: Int = 0;
+  
+  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) = {
+    this(taskCapsule, dir)
+     new MoleExecutionObserverAdapter(moleExection, this)
+  }
 
   def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = {
     this(moleExection, taskCapsule, new File(dir));

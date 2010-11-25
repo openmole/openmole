@@ -24,18 +24,17 @@ import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 
-object MoleExecutionObserverAdapter {
-  def apply(moleExecution: IMoleExecution, moleExecutionObserver: IMoleExecutionObserver) = {
-    val obsAdapter = new MoleExecutionObserverAdapter(moleExecutionObserver)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new obsAdapter.MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new obsAdapter.MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobFinished)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new obsAdapter. MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
-  }
-}
 
-
-class MoleExecutionObserverAdapter(moleExecutionObserver: IMoleExecutionObserver) {
+class MoleExecutionObserverAdapter private (moleExecutionObserver: IMoleExecutionObserver) {
     
+  def this(moleExecution: IMoleExecution, moleExecutionObserver: IMoleExecutionObserver) = {
+    this(moleExecutionObserver)
+    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
+    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobFinished)
+    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
+  }
+  
+  
   class MoleExecutionOneJobFinishedAdapter extends IObjectListenerWithArgs[IMoleExecution]  {
 
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
@@ -49,9 +48,7 @@ class MoleExecutionObserverAdapter(moleExecutionObserver: IMoleExecutionObserver
     override def eventOccured(obj: IMoleExecution) = {
       moleExecutionObserver.moleExecutionStarting
     }
-
   }
-
 
   class MoleExecutionExecutionFinishedAdapter extends IObjectListener[IMoleExecution]  {
 

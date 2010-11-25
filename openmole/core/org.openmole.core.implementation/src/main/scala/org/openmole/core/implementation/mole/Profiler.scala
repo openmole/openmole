@@ -22,12 +22,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IProfiler
 import org.openmole.core.implementation.observer. IMoleExecutionObserver
 
-object Profiler {
-  
-  def register(profiler: Profiler, moleExecution: IMoleExecution) = {
-    MoleExecutionObserverAdapter(moleExecution, profiler)
-  }
 
+abstract class Profiler extends IProfiler with IMoleExecutionObserver {  
+  def register(moleExecution: IMoleExecution) = new MoleExecutionObserverAdapter(moleExecution, this)
 }
-
-abstract class Profiler extends IProfiler with IMoleExecutionObserver
