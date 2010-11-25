@@ -132,37 +132,40 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   def createExecutionMessage(jobForRuntime: JobForRuntime, token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): ExecutionMessage = {
 
     val jobFile = Activator.getWorkspace.newFile("job", ".xml")
-    val serializationResult = Activator.getSerializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
+    
+    try {
+      val serializationResult = Activator.getSerializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
         
-    val jobURIFile = new URIFile(jobFile)
-    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
+      val jobURIFile = new URIFile(jobFile)
+      val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
 
-    URIFile.copy(jobURIFile, jobForRuntimeFile, token)
-    val jobHash = Activator.getHashService.computeHash(jobFile)
+      URIFile.copy(jobURIFile, jobForRuntimeFile, token)
+      val jobHash = Activator.getHashService.computeHash(jobFile)
 
-    jobURIFile.remove(false)
+      val plugins = new TreeSet[File]
+      val pluginReplicas = new ListBuffer[ReplicatedFile]
 
-    val plugins = new TreeSet[File]
-    val pluginReplicas = new ListBuffer[ReplicatedFile]
-
-    for (c <- serializationResult._2) {
-      for (f <- Activator.getPluginManager.getPluginAndDependanciesForClass(c)) {
-        plugins += f
+      for (c <- serializationResult._2) {
+        for (f <- Activator.getPluginManager.getPluginAndDependanciesForClass(c)) {
+          plugins += f
+        }
       }
-    }
 
-    for (f <- plugins) {
-      val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
-      pluginReplicas += replicatedPlugin
-    }
+      for (f <- plugins) {
+        val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
+        pluginReplicas += replicatedPlugin
+      }
         
-    val files = new ListBuffer[ReplicatedFile]
+      val files = new ListBuffer[ReplicatedFile]
         
-    for(file <- serializationResult._1) {
-      files += toReplicatedFile(file, communicationStorage, token)
-    }
+      for(file <- serializationResult._1) {
+        files += toReplicatedFile(file, communicationStorage, token)
+      }
 
-    new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir);
+      new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir)
+    } finally {
+      jobFile.delete
+    }
   }
 
   def createJobForRuntime(token: IAccessToken, communicationStorage: IBatchStorage[_,_], communicationDir: IURIFile): JobForRuntime = {
