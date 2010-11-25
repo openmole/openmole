@@ -11,10 +11,10 @@
     <version>0.3-SNAPSHOT</version>
 
     <modules>
-	<module>maven-plugin</module>
+	<!--<module>maven-plugin</module>-->
         <module>openmole</module>
         <module>commons</module>
-        <module>libraries</module>
+        <!--<module>libraries</module>-->
     </modules>
 
     <dependencyManagement>
@@ -404,55 +404,32 @@
         <url>https://forge.iscpif.fr/projects/openmole/issues</url>
     </issueManagement>
 
+    <pluginRepositories>
+    	<pluginRepository>
+            <id>maven.openmole.org</id>
+            <name>OpenMole repository</name>
+            <url>http://maven.openmole.org/public/</url>
+    	</pluginRepository>
+    </pluginRepositories>
+
     <repositories>
-        <!-- all repositories IDs are prefixed with "SE-" to easily proxy them in maven configuration -->
-        <!-- see also http://www.openmole.org/wiki/DevDoc/Maven -->
-        <!-- Spring Repository for OSGi bundles -->
-        <repository>
-            <id>SE-springsource-release</id>
-            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
-        </repository>
-        <repository>
-            <id>SE-springsource-external</id>
-            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository>
         <repository>
             <id>grid.in2p3.fr</id>
             <name>IN2P3 maven repository</name>
             <url>http://grid.in2p3.fr/maven2/</url>
         </repository>
 
-
-        <!-- SimExplorer repository - can serve as proxy -->
         <repository>
-            <id>maven.simexplorer.org</id>
-            <name>SimExplorer repository</name>
-            <url>http://maven.simexplorer.org/repo/</url>
+            <id>maven.openmole.org</id>
+            <name>OpenMole repository</name>
+            <url>http://maven.openmole.org/public/</url>
         </repository>
         <repository>
-            <id>maven.simexplorer.org.snapshot</id>
-            <name>SimExplorer Snapshots repository</name>
-            <url>http://maven.simexplorer.org/snapshots/</url>
-        </repository>
-        <repository>
-            <id>maven.iscpif.fr</id>
-            <name>ISCPIF repository</name>
-            <url>http://maven.iscpif.fr/public/</url>
-        </repository>
-        <repository>
-            <id>maven.iscpif.fr.snapshots</id>
-            <name>ISCPIF snapshots repository</name>
-            <url>http://maven.iscpif.fr/snapshots/</url>
+            <id>maven.openmole.org.snapshots</id>
+            <name>OpenMOLE snapshots repository</name>
+            <url>http://maven.openmole.org/snapshots/</url>
         </repository>
 
-        <!--Code Lutin Repositories-->
-        <repository>
-            <id>SEIS-codelutin</id>
-            <name>CodeLutinRepository</name>
-            <url>http://lutinbuilder.labs.libre-entreprise.org/maven2</url>
-        </repository>
         <repository>
             <id>SE-nuiton</id>
             <name>Nuiton Repository</name>

@@ -30,7 +30,7 @@ class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String)
   override def computeValues(global: IContext, context: IContext): Iterable[Double] = {
      val mi = java.lang.Math.log(min(global, context).doubleValue)
      val ma = java.lang.Math.log(max(global, context).doubleValue)
-     val nbst = nbStep(global, context).intValue
+     val nbst = nbStep(global, context).intValue - 1
      val st = (math.abs(ma - mi) / nbst)
 
      var cur = mi

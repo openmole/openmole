@@ -46,14 +46,14 @@ class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: Str
 
     val retScale = math.max(minValue.scale, maxValue.scale)
     
-    val nbst = nbStep(global, context)
-    val step = ma.subtract(mi).abs.divide(nbst, BigDecimal.ROUND_HALF_UP)
+    val nbst = nbStep(global, context).intValue - 1
+    val step = ma.subtract(mi).abs.divide(new BigDecimal(nbst), BigDecimal.ROUND_HALF_UP)
 
     var cur = mi
     val mc = new MathContext(retScale, RoundingMode.HALF_UP)
     //Logger.getLogger(getClass.getName).info(" " + minValue + " " + retScale)
     
-    for (i <- 0 to nbst.intValue) yield {
+    for (i <- 0 to nbst) yield {
       val ret = cur
       cur = cur.add(step)
       exp(ret, scale).setScale(retScale, RoundingMode.HALF_UP).round(mc) 
