@@ -140,7 +140,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      Activator.getExecutorService().getExecutorService(ExecutorType.OWN).submit(test)
+      Activator.getExecutorService.getExecutorService(ExecutorType.OWN).submit(test)
     }
 
 
