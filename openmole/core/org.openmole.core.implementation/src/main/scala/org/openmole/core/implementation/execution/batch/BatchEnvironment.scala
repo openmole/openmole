@@ -54,7 +54,7 @@ object BatchEnvironment {
   Activator.getWorkspace += (MemorySizeForRuntime, "512")
   Activator.getWorkspace += (ResourcesExpulseThreshod, "100")
   Activator.getWorkspace += (CheckInterval, "PT2M")
-  Activator.getWorkspace += (JSBonnus, "10")
+  Activator.getWorkspace += (JSBonnus, "100")
   Activator.getWorkspace += (JSMalus, "1")
 }
 

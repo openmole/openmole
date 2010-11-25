@@ -31,6 +31,7 @@ import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.plugin.resource.virtual.IVirtualMachine
 import org.openmole.plugin.task.external.virtual.internal.Activator._
 import scala.collection.JavaConversions._
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 abstract class ExternalVirtualTask(name: String, relativeDir: String) extends ExternalTask(name) {
@@ -72,7 +73,7 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + " ; " + expandData(global, context, CommonVariables(workDir), cmd))
+          session.execCommand("cd " + workDir + " ; " + expandData(global, context, List(new Variable(ExternalTask.PWD, workDir)), cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close

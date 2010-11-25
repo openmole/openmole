@@ -19,8 +19,6 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import java.io.IOException
-import java.util.HashMap
-import java.util.TreeMap
 
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -38,23 +36,25 @@ import org.openmole.commons.tools.io.FileUtil
 
 import org.openmole.core.implementation.tools.VariableExpansion._
 
+import scala.collection.immutable.TreeMap
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
 
-abstract class ExternalTask(name: String) extends Task(name) {
-
-  object CommonVariables {
+object ExternalTask {
     val PWD = new Prototype[String]("PWD", classOf[String])
     
-    def apply(pwd: String): List[IVariable[_]] = {
+    /*def apply(pwd: String): List[IVariable[_]] = {
       val vals = List(new Variable(PWD, pwd))
       vals
-    }
-  }
+    }*/
+}
+
+
+abstract class ExternalTask(name: String) extends Task(name) {
  
   val inContextFiles = new ListBuffer[(IPrototype[File], String)]
   val inContextFileList = new ListBuffer[(IPrototype[java.util.List[File]], IPrototype[java.util.List[String]])]
-  val inFileNames = new TreeMap[File, String]
+  val inFileNames = new HashMap[File, String]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String)]
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
@@ -66,9 +66,9 @@ abstract class ExternalTask(name: String) extends Task(name) {
   protected def listInputFiles(global: IContext, context: IContext, progress: IProgress): List[ToPut] = {
     var ret = new ListBuffer[ToPut]
 
-    inFileNames.entrySet().foreach(entry => {
-        val localFile = entry.getKey         
-        ret += (new ToPut(localFile, expandData(global, context, entry.getValue)))
+    inFileNames.foreach(entry => {
+        val localFile = entry._1         
+        ret += (new ToPut(localFile, expandData(global, context, entry._2)))
       })
 
     inContextFiles.foreach( p => {
@@ -96,7 +96,6 @@ abstract class ExternalTask(name: String) extends Task(name) {
                   }
                 }
             }
-         
         }
       })
     ret.toList
@@ -114,8 +113,9 @@ abstract class ExternalTask(name: String) extends Task(name) {
         ret += (new ToGet(filename, fo))
 
         context += (p._1, fo)
-        if (outFileNamesVar.containsKey(p._1)) {
-          context += (outFileNamesVar.get(p._1), filename)
+        outFileNamesVar.get(p._1) match {
+          case None =>
+          case Some(value) => context += (value, filename)
         }
       })
 
@@ -125,7 +125,6 @@ abstract class ExternalTask(name: String) extends Task(name) {
           case Some(filename) =>
             val fo = new File(localDir, filename)
             ret += (new ToGet(filename, fo))
-
             context += (p._1, fo)
         }
 
@@ -158,22 +157,17 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
   def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]) = {
     addOutput(v)
-    outFileNamesFromVar.add((v, varFileName))
+    outFileNamesFromVar += ((v, varFileName))
   }
 
   def addInFile(file: File, name: String): Unit = {
     inFileNames.put(file, name)
   }
 
-  def addInFile(file: File): Unit = {
-    addInFile(file, file.getName)
-  }
+  def addInFile(file: File): Unit =  addInFile(file, file.getName)
     
-  def addInFile(location: String): Unit = {
-    addInFile(new File(location))
-  }
+  def addInFile(location: String): Unit = addInFile(new File(location))
 
-  def addInFile(location: String, name: String): Unit = {
-    addInFile(new File(location), name)
-  }
+  def addInFile(location: String, name: String): Unit =  addInFile(new File(location), name)
+  
 }

@@ -23,9 +23,11 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
+import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import java.io.IOException
 import org.openmole.plugin.task.systemexec.internal.Activator._
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
 import org.openmole.plugin.tools.utils.ProcessUtils._
@@ -48,7 +50,7 @@ abstract class AbstractSystemExecTask (name: String,
 
     prepareInputFiles(global, context, progress, tmpDir)
     val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, CommonVariables(workDir.getAbsolutePath), cmd))
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
       
     try {                    
       // val executor = new DefaultExecutor

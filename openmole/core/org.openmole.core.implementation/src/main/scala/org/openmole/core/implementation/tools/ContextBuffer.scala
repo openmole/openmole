@@ -27,7 +27,7 @@ import org.openmole.core.model.tools.IVariableBuffer
 import org.openmole.core.implementation.data.Prototype._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
-
+import org.openmole.commons.tools.service.ManifestUtil._
 
 object ContextBuffer {
   
@@ -65,8 +65,14 @@ class ContextBuffer(forceArray: Boolean) extends IContextBuffer {
       if(listBuff.size == 1 && !forceArray) {
         ret += listBuff.head
       } else {
-        //TODO find higher common supertype
-        ret += new Variable(toArray(listBuff.head.prototype).asInstanceOf[IPrototype[Array[Any]]], listBuff.map{ _.value }.toArray)
+        val m = intersect(listBuff.map{_.prototype.`type`}: _*)
+        val array = m.newArray(listBuff.size).asInstanceOf[Array[Any]]
+        var i = 0
+        for(v <- listBuff.map{_.value}) {
+          array(i) = v
+          i += 1
+        }
+        ret += new Variable(toArray(listBuff.head.prototype).asInstanceOf[IPrototype[Array[Any]]], array)
       }
     }
     ret

@@ -69,7 +69,7 @@ class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task
       listToCopyWithNameInVariable foreach ( cpList => {
           val files = context.value(cpList._1).get
           val names = context.value(cpList._2).get
-          val urlDir = cpList._3;
+          val urlDir = cpList._3
 
           if(files != null && names != null) {
 

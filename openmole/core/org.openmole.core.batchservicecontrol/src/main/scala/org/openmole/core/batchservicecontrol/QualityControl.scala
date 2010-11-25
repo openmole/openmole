@@ -17,25 +17,23 @@
 
 package org.openmole.core.batchservicecontrol
 
-import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batchservicecontrol.internal.Activator
 import org.openmole.misc.workspace.ConfigurationLocation
 
 object QualityControl {
   val MaxQuality = new ConfigurationLocation("QualityControl", "MaxQuality")
-  Activator.getWorkspace += (MaxQuality, "100")
+  Activator.getWorkspace += (MaxQuality, "1000")
 }
-
 
 class QualityControl extends IQualityControl {
 
-  val _failureRate = new AtomicInteger
+  @volatile var _failureRate = 0
   @volatile var _quality = 1
 
-  override def failed = _failureRate.incrementAndGet
-  override def success = _failureRate.decrementAndGet
-  override def failureRate: Int = _failureRate.get
-  override def reinit = _failureRate.set(0)
+  override def failed = _failureRate += 1
+  override def success = _failureRate -= 1
+  override def failureRate: Int = _failureRate
+  override def reinit = _failureRate = 0
     
   override def increaseQuality(value: Int) = synchronized {
     _quality += value
