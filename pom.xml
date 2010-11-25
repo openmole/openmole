@@ -370,12 +370,12 @@
 
     <distributionManagement>
         <repository>
-            <id>maven.simexplorer.org</id>
-            <url>http://maven.simexplorer.org/releases</url>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/releases</url>
         </repository>
         <snapshotRepository>
-            <id>maven.simexplorer.org</id>
-            <url>http://maven.simexplorer.org/snapshots</url>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -395,13 +395,13 @@
     </mailingLists>
 
     <scm>
-        <connection>scm:svn:http://svn.simexplorer.org/SimExplorer/trunk/openmole</connection>
-        <url>http://www.openmole.org/browser/trunk/openmole</url>
+        <connection>scm:git:http://git.openmole.org</connection>
+        <url>http://git.openmole.org</url>
     </scm>
 
     <issueManagement>
-        <system>trac</system>
-        <url>http://www.openmole.org/report/1</url>
+        <system>redmine</system>
+        <url>https://forge.iscpif.fr/projects/openmole/issues</url>
     </issueManagement>
 
     <repositories>
