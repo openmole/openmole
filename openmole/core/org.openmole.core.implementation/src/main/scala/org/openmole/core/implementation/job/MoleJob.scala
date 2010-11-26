@@ -31,6 +31,7 @@ import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified}
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
 
 object MoleJob {
@@ -47,17 +48,19 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
   override def state: State = _state
   override def context: IContext = _context
     
- // @ObjectModified(name = IMoleJob.StateChanged)
+  //@ObjectModified(name = IMoleJob.StateChanged)
   def state_=(state: State) = {
     if(_state == null || !_state.isFinal) {
       val timeStamps = context.value(GenericTask.Timestamps.prototype) match {
         case None => 
-          val ret = new ListBuffer[ITimeStamp]
+          val ret = new ArrayBuffer[ITimeStamp](5)
           context += (GenericTask.Timestamps.prototype, ret)
           ret
         case Some(ts) => ts
       }
+     // MoleJob.LOGGER.info("Before " + task.name + " " + timeStamps.map{ _.state.toString } + " " + timeStamps.getClass)
       timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
+     // MoleJob.LOGGER.info("After " + task.name + " " + timeStamps.map{ _.state.toString } + timeStamps.getClass)
       _state = state
       Activator.getEventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
     }
@@ -89,8 +92,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
     _context = context
 
     context.value(GenericTask.Exception.prototype) match {
-      case None =>
-        state = State.COMPLETED
+      case None => state = State.COMPLETED
       case Some(ex) =>
         state = State.FAILED
         MoleJob.LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", ex)

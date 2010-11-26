@@ -28,23 +28,19 @@ import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 
 class CSVFileProfiler(file: File) extends Profiler {
 
-    @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
+  @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
 
-    def this(moleExecution: IMoleExecution, file: File) {
-      this(file)
-      register(moleExecution)
-    }
+  def this(moleExecution: IMoleExecution, file: File) {
+    this(file)
+    register(moleExecution)
+  }
   
-    def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
+  def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
 
-    override def moleJobFinished(moleJob: IMoleJob) = {
-        writer.writeNext(toColumns(moleJob))
-    }
+  override def moleJobFinished(moleJob: IMoleJob) =  writer.writeNext(toColumns(moleJob))
 
-    override def moleExecutionFinished = {
-         writer.close
-    }
+  override def moleExecutionFinished = writer.close
 
-    override def moleExecutionStarting = {}
+  override def moleExecutionStarting = {}
 
 }

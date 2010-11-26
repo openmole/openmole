@@ -25,17 +25,16 @@ object MoleJobInfoToCSV {
   def toColumns(moleJob: IMoleJob): Array[String] = {
     moleJob.context.value(GenericTask.Timestamps.prototype) match {
       case None => Array.empty
-      case Some(timeStamps) => 
+      case Some(ts) => 
+        val timeStamps = ts.toList
         val toWrite = new Array[String]((timeStamps.size) + 2)
-        var cur = 0
-
-        toWrite(cur) = moleJob.task.name
-        cur += 1
         
-        val created = timeStamps.head.time
-        toWrite(cur) = created.toString
-        cur += 1
+        toWrite(0) = moleJob.task.name
 
+        val created = timeStamps.head.time
+        toWrite(1) = created.toString
+
+        var cur = 2
         for(timeStamp <- timeStamps) {
           toWrite(cur) = timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
           cur += 1

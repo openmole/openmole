@@ -30,12 +30,13 @@ import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.task.{IGenericTask,IResource}
 import org.openmole.core.model.execution.IProgress
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ArraySeq
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 object GenericTask {
-  val Timestamps = new Data[ListBuffer[ITimeStamp]]("Timestamps#", classOf[ListBuffer[ITimeStamp]], Array(SYSTEM))
+  val Timestamps = new Data[ArrayBuffer[ITimeStamp]]("Timestamps#", classOf[ArrayBuffer[ITimeStamp]], Array(SYSTEM))
   val Exception = new Data[Throwable]("Exception#", classOf[Throwable], Array(OPTIONAL, SYSTEM))
 }
 
