@@ -29,12 +29,12 @@ import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.data.IContext;
 
-public class DeleteFilePrototypeTask extends Task {
+public class DeleteFileTask extends Task {
 
 	List<IPrototype<File>> toDelete = new LinkedList<IPrototype<File>>();
         List<IPrototype<List<File>>> toDeleteList = new LinkedList<IPrototype<List<File>>>();
 
-	public DeleteFilePrototypeTask(String name) throws UserBadDataError, InternalProcessingError {
+	public DeleteFileTask(String name) throws UserBadDataError, InternalProcessingError {
 		super(name);
 	}
 

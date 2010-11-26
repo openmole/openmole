@@ -32,7 +32,7 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.commons.tools.io.FileUtil.copy
 import org.openmole.core.implementation.tools.VariableExpansion._
 
-class FileVariableToFileTask(name: String, remove: Boolean = false) extends Task(name) {
+class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
   def this(name: String) = {
     this(name, false)

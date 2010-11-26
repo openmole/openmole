@@ -32,5 +32,9 @@ public class TemplateFileGeneratorFromLocalFileTask extends TemplateFileGenerato
     File getFile(IContext context) {
         return template;
     }
+    
+    public File template() {
+        return template;
+    }
 
 }
