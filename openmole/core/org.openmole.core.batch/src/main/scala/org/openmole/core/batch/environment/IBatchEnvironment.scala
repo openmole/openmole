@@ -18,6 +18,7 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJobRegistry
 
@@ -27,7 +28,7 @@ trait IBatchEnvironment extends IEnvironment {
     def allStorages: Iterable[IBatchStorage[_,_]]
 //    def jobServices: IBatchServiceGroup[IBatchJobService[_,_]] 
 //    def storages: IBatchServiceGroup[IBatchStorage[_,_]]
-    def selectAJobService: (IBatchJobService[_,_], IAccessToken)
-    def selectAStorage: (IBatchStorage[_,_], IAccessToken)
+    def selectAJobService: (IBatchJobService[_,_], AccessToken)
+    def selectAStorage: (IBatchStorage[_,_], AccessToken)
     override def jobRegistry: IExecutionJobRegistry[IBatchExecutionJob]
 }

@@ -17,6 +17,4 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.core.batch.environment.IAccessToken
-
-class AccessToken extends IAccessToken
+class AccessToken

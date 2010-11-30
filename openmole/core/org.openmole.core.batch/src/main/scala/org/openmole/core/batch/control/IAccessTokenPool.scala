@@ -18,12 +18,11 @@
 package org.openmole.core.batch.control
 
 import java.util.concurrent.TimeUnit
-import org.openmole.core.batch.environment.IAccessToken
 
 trait IAccessTokenPool {
-  def waitAToken: IAccessToken
-  def waitAToken(time: Long, unit: TimeUnit): IAccessToken
-  def releaseToken(token: IAccessToken)
+  def waitAToken: AccessToken
+  def waitAToken(time: Long, unit: TimeUnit): AccessToken
+  def releaseToken(token: AccessToken)
   def load: Int
-  def tryGetToken: Option[IAccessToken]
+  def tryGetToken: Option[AccessToken]
 }

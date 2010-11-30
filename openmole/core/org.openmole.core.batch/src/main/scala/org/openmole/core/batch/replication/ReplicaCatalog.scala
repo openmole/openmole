@@ -32,8 +32,8 @@ import java.util.logging.Logger
 import org.openmole.commons.tools.service.IHash
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.environment.IAccessToken
 import org.openmole.core.batch.environment.IBatchServiceAuthentication
 import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
 import org.openmole.core.batch.environment.IBatchStorage
@@ -114,7 +114,7 @@ object ReplicaCatalog {
   }
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
-  def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: IBatchStorage[_,_], token: IAccessToken): Replica = {
+  def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: IBatchStorage[_,_], token: AccessToken): Replica = {
 
     val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
     locks.lock(key)

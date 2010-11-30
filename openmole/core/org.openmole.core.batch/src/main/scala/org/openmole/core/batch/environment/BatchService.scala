@@ -20,12 +20,12 @@ package org.openmole.core.batch.environment
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.BatchServiceControl
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.IQualityControl
-import org.openmole.core.batch.control.IUsageControl
+import org.openmole.core.batch.control.QualityControl
+import org.openmole.core.batch.control.UsageControl
 
 abstract class BatchService [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val description: BatchServiceDescription, val environment: ENV, val authenticationKey: IBatchServiceAuthenticationKey[AUTH]) extends IBatchService[ENV, AUTH] {
 
-  def this(description: BatchServiceDescription, environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, usageControl: IUsageControl, failureControl: IQualityControl) = {
+  def this(description: BatchServiceDescription, environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, usageControl: UsageControl, failureControl: QualityControl) = {
     this(description, environment, authenticationKey)
     AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
     BatchServiceControl.registerRessouce(description, usageControl, failureControl)      

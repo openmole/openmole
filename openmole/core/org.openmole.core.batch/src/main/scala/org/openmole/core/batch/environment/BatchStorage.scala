@@ -25,6 +25,7 @@ import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.service.RNG
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceControl
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.control.QualityControl
@@ -69,14 +70,14 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
   @transient 
   var time = System.currentTimeMillis
  
-  override def persistentSpace(token: IAccessToken): IURIFile = synchronized {
+  override def persistentSpace(token: AccessToken): IURIFile = synchronized {
     if (persistentSpaceVar == null) {
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
     }
     persistentSpaceVar
   }
 
-  override def tmpSpace(token: IAccessToken): IURIFile = synchronized {
+  override def tmpSpace(token: AccessToken): IURIFile = synchronized {
 
     if (tmpSpaceVar == null || time + Activator.getWorkspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
       time = System.currentTimeMillis
@@ -113,7 +114,7 @@ class BatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthenticatio
     tmpSpaceVar
   }
 
-  override def baseDir(token: IAccessToken): IURIFile = synchronized {
+  override def baseDir(token: AccessToken): IURIFile = synchronized {
     if (baseSpaceVar == null) {
       val storeFile = new URIFile(URI.toString)
       baseSpaceVar = storeFile.mkdirIfNotExist(Activator.getWorkspace.preference(IWorkspace.UniqueID) + '/', token)

@@ -21,7 +21,6 @@ import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batch.environment.IAccessToken
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.SynchronizedSet
 import java.util.concurrent.TimeUnit
@@ -38,11 +37,11 @@ object AccessTokenPool {
 
 
 class AccessTokenPool extends IAccessTokenPool {
-  private val tokens = new LinkedBlockingDeque[IAccessToken]
-  private val taken = new HashSet[IAccessToken] with SynchronizedSet[IAccessToken]
+  private val tokens = new LinkedBlockingDeque[AccessToken]
+  private val taken = new HashSet[AccessToken] with SynchronizedSet[AccessToken]
   private val _load = new AtomicInteger
   
-  def add(token: IAccessToken) = {
+  def add(token: AccessToken) = {
     tokens.add(token)
     _load.decrementAndGet
   }
@@ -61,7 +60,7 @@ class AccessTokenPool extends IAccessTokenPool {
     token
   }
 
-  override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = {
+  override def waitAToken(time: Long, unit: TimeUnit): AccessToken = {
     _load.incrementAndGet
     val ret = try {
       tokens.poll(time, unit)
@@ -80,7 +79,7 @@ class AccessTokenPool extends IAccessTokenPool {
     ret
   }
 
-  override def releaseToken(token: IAccessToken) = {
+  override def releaseToken(token: AccessToken) = {
     if (!taken.remove(token)) {
       throw new InternalProcessingError("Trying to release a token that hasn't been taken.")
     }
@@ -89,7 +88,7 @@ class AccessTokenPool extends IAccessTokenPool {
     _load.decrementAndGet
   }
 
-  override def tryGetToken: Option[IAccessToken] = {
+  override def tryGetToken: Option[AccessToken] = {
     _load.incrementAndGet
     tokens.poll match {
       case null => _load.decrementAndGet

@@ -20,8 +20,9 @@ package org.openmole.core.batch.environment
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.IUsageControl._
+import org.openmole.core.batch.control.UsageControl._
 
 
 abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) extends IBatchJob {
@@ -58,7 +59,7 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
 
   override def kill = withToken(jobServiceDescription,kill(_))
   
-  override def kill(token: IAccessToken)= synchronized {
+  override def kill(token: AccessToken)= synchronized {
     try {
       deleteJob
     } finally {
@@ -69,7 +70,7 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
   override def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
 
 
-  override def updatedState(token: IAccessToken): ExecutionState = synchronized {
+  override def updatedState(token: AccessToken): ExecutionState = synchronized {
     state = updateState
     state
   }

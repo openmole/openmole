@@ -41,14 +41,14 @@ import org.ogf.saga.namespace.Flags
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.batch.internal.Activator
-import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.commons.tools.io.Network._
 
-import org.openmole.core.batch.control.IUsageControl._
+import org.openmole.core.batch.control.UsageControl._
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription
-import org.openmole.core.batch.control.IQualityControl._
+import org.openmole.core.batch.control.QualityControl._
 import scala.collection.JavaConversions._
 
 object URIFile {
@@ -69,7 +69,7 @@ object URIFile {
   def fromLocation(location: String): URL = URLFactory.createURL(location) 
   def fromLocation(location: URI): URL = fromLocation(location.toString)
     
-  def copy(src: IURIFile, srcToken: IAccessToken, dest: IURIFile): Unit = {
+  def copy(src: IURIFile, srcToken: AccessToken, dest: IURIFile): Unit = {
     val srcDescrption = src.storageDescription
     val destDescrption = dest.storageDescription
 
@@ -79,7 +79,7 @@ object URIFile {
     else withToken(destDescrption,copy(src, dest, srcToken,_))
   }
 
-  def copy(src: IURIFile, dest: IURIFile, destToken: IAccessToken): Unit = {
+  def copy(src: IURIFile, dest: IURIFile, destToken: AccessToken): Unit = {
     val srcDescrption = src.storageDescription
     val destDescrption = dest.storageDescription
 
@@ -91,7 +91,7 @@ object URIFile {
 
   def copy(src: File, dest: IURIFile): Unit =  withToken(dest.storageDescription, copy(src, dest,_))
 
-  def copy(src: File, dest: IURIFile, token: IAccessToken): Unit =  {
+  def copy(src: File, dest: IURIFile, token: AccessToken): Unit =  {
     val is = new FileInputStream(src)
     try {
       val os = dest.openOutputStream(token)
@@ -117,7 +117,7 @@ object URIFile {
         )
   }
 
-  private def copy(src: IURIFile, dest: IURIFile, srcToken: IAccessToken, destToken: IAccessToken): Unit = {
+  private def copy(src: IURIFile, dest: IURIFile, srcToken: AccessToken, destToken: AccessToken): Unit = {
     val srcDesc = src.storageDescription
     val destDesc = dest.storageDescription
     val same = sameRessource(srcDesc, destDesc)
@@ -156,8 +156,8 @@ class URIFile(val location: String) extends IURIFile {
 
   def this(file: IURIFile) = this(file.location)
     
-  private def withToken[A](a: (IAccessToken) => A): A = org.openmole.core.batch.control.IUsageControl.withToken(storageDescription,a)
-  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.IQualityControl.withFailureControl(storageDescription,a)
+  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.UsageControl.withToken(storageDescription,a)
+  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.QualityControl.withFailureControl(storageDescription,a)
 
   private def trycatch[A](f: => A): A = {
     try {
@@ -202,7 +202,7 @@ class URIFile(val location: String) extends IURIFile {
   /*-------------------- is a directory ---------------------------*/
   override def isDirectory: Boolean = withToken(isDirectory(_))
 
-  override def isDirectory(token: IAccessToken): Boolean = trycatch {
+  override def isDirectory(token: AccessToken): Boolean = trycatch {
     val entry = fetchEntry
     try {
       isDirectory(entry)
@@ -221,7 +221,7 @@ class URIFile(val location: String) extends IURIFile {
   /*--------------------- mkdir ---------------------------*/
   override def mkdir(name: String): IURIFile = withToken(mkdir(name, _))
 
-  override def mkdir(name: String, token: IAccessToken): IURIFile = {
+  override def mkdir(name: String, token: AccessToken): IURIFile = {
     val dir = fetchEntryAsDirectory
     try trycatch {
       val cname =  if (name.endsWith("/")) {
@@ -242,7 +242,7 @@ class URIFile(val location: String) extends IURIFile {
   
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))
 
-  override def mkdirIfNotExist(name: String, token: IAccessToken): IURIFile = {
+  override def mkdirIfNotExist(name: String, token: AccessToken): IURIFile = {
     try {
       mkdir(name, token)
     } catch {
@@ -261,7 +261,7 @@ class URIFile(val location: String) extends IURIFile {
   /*-------------------------- exist -------------------------*/
   override def exist(name: String): Boolean = withToken(exist(name, _))
 
-  override def exist(name: String, token: IAccessToken): Boolean = {
+  override def exist(name: String, token: AccessToken): Boolean = {
     val dir = fetchEntryAsDirectory
 
     try trycatch {
@@ -277,7 +277,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def openInputStream: InputStream = withToken(openInputStream(_))
 
-  override def openInputStream(token: IAccessToken): InputStream = trycatch {
+  override def openInputStream(token: AccessToken): InputStream = trycatch {
 
     val task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL);
 
@@ -290,7 +290,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
 
-  override def openOutputStream(token: IAccessToken): OutputStream = trycatch {
+  override def openOutputStream(token: AccessToken): OutputStream = trycatch {
 
     val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL, false)
     trycatch(
@@ -302,7 +302,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def cache: File = withToken(cache(_))
 
-  override def cache(token: IAccessToken): File = trycatch(synchronized {
+  override def cache(token: AccessToken): File = trycatch(synchronized {
       val cacheTmp = Activator.getWorkspace().newFile("file", "cache")
       this.copy(new URIFile(cacheTmp), token)
       cacheTmp
@@ -314,15 +314,15 @@ class URIFile(val location: String) extends IURIFile {
   }
  
   override def copy(dest: IURIFile) = URIFile.copy(this, dest)
-  override def copy(dest: IURIFile, srcToken: IAccessToken) = URIFile.copy(this, srcToken, dest)
+  override def copy(dest: IURIFile, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
 
 
   /* -------------------- remove -------------------------------*/
   override def remove(recursive: Boolean) = remove(true, recursive);
-  override def remove(recursive: Boolean, token: IAccessToken) = remove(true, recursive, token);
+  override def remove(recursive: Boolean, token: AccessToken) = remove(true, recursive, token);
   override def remove(timeOut: Boolean, recursive: Boolean) = withToken(remove(timeOut, recursive,_))
 
-  override def remove(timeOut: Boolean, recursive: Boolean, token: IAccessToken) = trycatch {
+  override def remove(timeOut: Boolean, recursive: Boolean, token: AccessToken) = trycatch {
     val entry = fetchEntry
     try {
 
@@ -343,7 +343,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def list: Iterable[String] = withToken(list(_))
 
-  override def list(token: IAccessToken): Iterable[String] = trycatch {
+  override def list(token: AccessToken): Iterable[String] = trycatch {
 
     val dir = fetchEntryAsDirectory
     try {

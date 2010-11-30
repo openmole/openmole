@@ -17,9 +17,10 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 
 trait IBatchJobService[+ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication] extends IBatchService[ENV, AUTH] {
-    def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob
+    def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: AccessToken): IBatchJob
 }
 

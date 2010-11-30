@@ -22,23 +22,23 @@ import scala.collection.immutable.TreeMap
 object BatchServiceControl {
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
  
-  var ressources = new TreeMap[BatchServiceDescription, (IUsageControl, IQualityControl)]
+  var ressources = new TreeMap[BatchServiceDescription, (UsageControl, QualityControl)]
 
-  def registerRessouce(ressource: BatchServiceDescription, usageControl: IUsageControl, failureControl: IQualityControl) = synchronized {
+  def registerRessouce(ressource: BatchServiceDescription, usageControl: UsageControl, failureControl: QualityControl) = synchronized {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._2.reinit
       case None => ressources += ((ressource -> (usageControl, failureControl)))
     }  
   }
 
-  def qualityControl(ressource: BatchServiceDescription): Option[IQualityControl] = {
+  def qualityControl(ressource: BatchServiceDescription): Option[QualityControl] = {
     ressources.get(ressource) match {
       case Some(ctrl) => Some(ctrl._2)
       case None => None
     }
   } 
   
-  def usageControl(ressource: BatchServiceDescription): IUsageControl = {
+  def usageControl(ressource: BatchServiceDescription): UsageControl = {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._1
       case None => BatchServiceControl.botomlessUsage

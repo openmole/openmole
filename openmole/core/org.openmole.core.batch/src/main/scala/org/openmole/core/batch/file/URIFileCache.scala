@@ -18,7 +18,7 @@
 package org.openmole.core.batch.file
 
 import org.openmole.commons.tools.cache.AssociativeCache
-import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
 
@@ -28,7 +28,7 @@ object URIFileCache {
 
     def apply(uri: IURIFile): IFileCache =  associativeCache.cache(uri, uri, new FileCacheDeleteOnFinalize(uri.cache))
     
-    def apply(uri: IURIFile, token: IAccessToken): IFileCache = associativeCache.cache(uri, uri, new FileCacheDeleteOnFinalize(uri.cache(token)));
+    def apply(uri: IURIFile, token: AccessToken): IFileCache = associativeCache.cache(uri, uri, new FileCacheDeleteOnFinalize(uri.cache(token)));
     
     def invalidate(uri: IURIFile) = associativeCache.invalidateCache(uri, uri)
 

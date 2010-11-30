@@ -18,7 +18,6 @@
 package org.openmole.core.batch.control
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batch.environment.IAccessToken
 import java.util.concurrent.TimeUnit
 
 object BotomlessTokenPool extends IAccessTokenPool {
@@ -27,15 +26,15 @@ object BotomlessTokenPool extends IAccessTokenPool {
 
   override def load: Int = -1
 
-  override def releaseToken(token: IAccessToken) = {
+  override def releaseToken(token: AccessToken) = {
     if (!this.token.equals(token)) {
       throw new InternalProcessingError("The token doesn't belong to this pool");
     }
   }
 
-  override def waitAToken: IAccessToken = token
+  override def waitAToken: AccessToken = token
 
-  override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = token
+  override def waitAToken(time: Long, unit: TimeUnit): AccessToken = token
 
-  override def tryGetToken: Option[IAccessToken] = Some(token)
+  override def tryGetToken: Option[AccessToken] = Some(token)
 }

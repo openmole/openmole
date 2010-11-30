@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.model.execution.ExecutionState
 
@@ -32,11 +33,11 @@ trait IBatchJob {
   def jobServiceDescription: BatchServiceDescription
         
   def kill
-  def kill(token: IAccessToken)
+  def kill(token: AccessToken)
 	
   //void submit() throws InternalProcessingError, UserBadDataError, InterruptedException;	
   //void submit(IAccessToken token) throws InternalProcessingError, InterruptedException;
 	
   def updatedState: ExecutionState
-  def updatedState(token: IAccessToken): ExecutionState
+  def updatedState(token: AccessToken): ExecutionState
 }

@@ -32,6 +32,7 @@ import org.openmole.commons.tools.io.FileInputStream
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.TarArchiver
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceControl
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.batch.message.ContextResults
@@ -105,7 +106,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
   }
 
 
-  private def getRuntimeResult(outputFile: IURIFile, token: IAccessToken): RuntimeResult = {
+  private def getRuntimeResult(outputFile: IURIFile, token: AccessToken): RuntimeResult = {
     val resultFile = outputFile.cache(token)
     try {
       return Activator.getSerializer.deserialize(resultFile)
@@ -114,7 +115,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
     }
   }
 
-  private def display(message: FileMessage, description: String, token: IAccessToken) = {
+  private def display(message: FileMessage, description: String, token: AccessToken) = {
     if (message == null) {
       LOGGER.log(Level.WARNING, "{0} is null.", description)
     } else {
@@ -147,7 +148,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
     }
   }
 
-  private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: IAccessToken): Map[File, File] = {
+  private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
     if (tarResult == null) {
       throw new InternalProcessingError("TarResult uri result is null.")
     }
@@ -213,7 +214,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
     fileReplacement.toMap
   }
 
-  private def getContextResults(uriFile: IURIFile, fileReplacement: PartialFunction[File, File], token: IAccessToken): ContextResults = {
+  private def getContextResults(uriFile: IURIFile, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {
 
     //Download and deserialize the context results
 

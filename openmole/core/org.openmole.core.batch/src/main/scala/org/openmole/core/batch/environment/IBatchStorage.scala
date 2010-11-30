@@ -18,17 +18,18 @@
 package org.openmole.core.batch.environment
 
 import java.net.URI
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 
 trait IBatchStorage [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication] extends IBatchService[ENV, AUTH] {
 
     def URI: URI
 
-    def tmpSpace(token: IAccessToken): IURIFile
+    def tmpSpace(token: AccessToken): IURIFile
 
-    def persistentSpace(token: IAccessToken): IURIFile 
+    def persistentSpace(token: AccessToken): IURIFile 
     
-    def baseDir(token: IAccessToken): IURIFile
+    def baseDir(token: AccessToken): IURIFile
     
 //    def authentication: IBatchServiceAuthentication
 }

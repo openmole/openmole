@@ -18,10 +18,13 @@
 package org.openmole.core.batch.control
 
 import org.openmole.commons.aspect.eventdispatcher.ObjectModified
-import org.openmole.core.batch.environment.IAccessToken
+
 import java.util.concurrent.TimeUnit
 
 object UsageControl {
+  
+  final val ResourceReleased = "ResourceReleased"
+  
   def apply(nbAccess: Int) = {
     if (nbAccess != Int.MaxValue) {
       new UsageControl(AccessTokenPool(nbAccess));
@@ -29,20 +32,31 @@ object UsageControl {
       new UsageControl(BotomlessTokenPool)
     }
   }
+
+  def withToken[B]( desc: BatchServiceDescription, f: (AccessToken => B)): B = {
+    val usageControl = BatchServiceControl.usageControl(desc)
+    val token = usageControl.waitAToken
+    try {
+      f(token)
+    } finally {
+      usageControl.releaseToken(token)
+    }
+  }
+
 }
 
 
-class UsageControl(tokenPool: IAccessTokenPool) extends IUsageControl {
+class UsageControl(tokenPool: IAccessTokenPool) {
 
-  override def waitAToken(time: Long, unit: TimeUnit): IAccessToken = tokenPool.waitAToken(time, unit)
+  def waitAToken(time: Long, unit: TimeUnit): AccessToken = tokenPool.waitAToken(time, unit)
 
-  override def waitAToken: IAccessToken = tokenPool.waitAToken
+  def waitAToken: AccessToken = tokenPool.waitAToken
 
-  override def tryGetToken: Option[IAccessToken] = tokenPool.tryGetToken
+  def tryGetToken: Option[AccessToken] = tokenPool.tryGetToken
   
-  @ObjectModified(name = IUsageControl.ResourceReleased)
-  override def releaseToken(token: IAccessToken) = tokenPool.releaseToken(token)
+  @ObjectModified(name = UsageControl.ResourceReleased)
+  def releaseToken(token: AccessToken) = tokenPool.releaseToken(token)
  
-  override def load: Int = tokenPool.load
+  def load: Int = tokenPool.load
   
 }

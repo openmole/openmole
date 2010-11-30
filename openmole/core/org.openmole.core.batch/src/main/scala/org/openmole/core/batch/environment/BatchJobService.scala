@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceControl
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.QualityControl
@@ -25,7 +26,7 @@ import org.openmole.core.batch.file.IURIFile
 
 abstract class BatchJobService[ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, description: BatchServiceDescription, nbAccess: Int) extends BatchService[ENV, AUTH](description, environment, authenticationKey, authentication, UsageControl(nbAccess), new QualityControl) with IBatchJobService[ENV, AUTH] {
   
-  override def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob = {
+  override def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: AccessToken): IBatchJob = {
     try {
       val ret = doSubmit(inputFile, outputFile, runtime, token)
       BatchServiceControl.qualityControl(description) match {
@@ -43,6 +44,6 @@ abstract class BatchJobService[ENV <: IBatchEnvironment, AUTH <: IBatchServiceAu
     }
   }
  
-  protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob
+  protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: AccessToken): IBatchJob
 
 }

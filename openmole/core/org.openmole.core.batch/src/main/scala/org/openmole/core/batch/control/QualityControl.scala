@@ -17,26 +17,32 @@
 
 package org.openmole.core.batch.control
 
-class QualityControl extends IQualityControl {
+object QualityControl {
+  def withFailureControl[A](desc: BatchServiceDescription, op: => A): A = {
+    val qualityControl = BatchServiceControl.qualityControl(desc)
+    try {
+      val ret = op
+      qualityControl match {
+        case Some(f) => f.success
+        case None => 
+      }
+      ret
+    } catch {
+      case e =>
+        qualityControl match {
+          case Some(f) => f.failed
+          case None =>
+        }
+        throw e
+    }
+  }
+}
 
+class QualityControl {
   @volatile var _failureRate = 0
-  //@volatile var _quality = 1
 
-  override def failed = _failureRate += 1
-  override def success = _failureRate -= 1
-  override def failureRate: Int = _failureRate
-  override def reinit = _failureRate = 0
-    
-//  override def increaseQuality(value: Int) = synchronized {
-//    _quality += value
-//    val max = Activator.getWorkspace.preferenceAsInt(QualityControl.MaxQuality)
-//    if(_quality > max) _quality = max
-//  }
-//  
-//  override def decreaseQuality(value: Int) = synchronized {
-//    _quality -= value
-//    if(_quality < 1) _quality = 1
-//  }
-//  
-//  override def quality: Int = _quality
+  def failed = _failureRate += 1
+  def success = _failureRate -= 1
+  def failureRate: Int = _failureRate
+  def reinit = _failureRate = 0
 }

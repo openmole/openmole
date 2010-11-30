@@ -33,7 +33,7 @@ import org.ogf.saga.url.URLFactory
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.environment.BatchJobService
-import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.environment.IBatchJob
 import org.openmole.core.batch.environment.IBatchServiceAuthentication
 import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
@@ -78,7 +78,7 @@ abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAut
     } 
   }
 
-  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: IAccessToken): IBatchJob = {
+  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: AccessToken): IBatchJob = {
 
     val script = Activator.getWorkspace.newFile("script", ".sh")
     try {

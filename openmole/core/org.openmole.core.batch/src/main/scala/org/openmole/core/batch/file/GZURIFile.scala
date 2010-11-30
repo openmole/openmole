@@ -21,9 +21,9 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.control.AccessToken
 
 class GZURIFile(file: IURIFile) extends URIFile(file) {
-  override def openInputStream(token: IAccessToken): InputStream = new GZIPInputStream(super.openInputStream(token))
-  override def  openOutputStream(token: IAccessToken): OutputStream = new GZIPOutputStream(super.openOutputStream(token))
+  override def openInputStream(token: AccessToken): InputStream = new GZIPInputStream(super.openInputStream(token))
+  override def  openOutputStream(token: AccessToken): OutputStream = new GZIPOutputStream(super.openOutputStream(token))
 }

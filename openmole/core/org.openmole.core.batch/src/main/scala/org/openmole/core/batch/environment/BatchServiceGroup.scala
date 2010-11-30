@@ -29,9 +29,10 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.RNG
 import org.openmole.commons.tools.service.Priority
 
+import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceControl
-import org.openmole.core.batch.control.IQualityControl
-import org.openmole.core.batch.control.IUsageControl
+import org.openmole.core.batch.control.QualityControl
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.internal.Activator
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
@@ -39,8 +40,8 @@ import scala.collection.JavaConversions._
 
 class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
 
-  class BatchRessourceGroupAdapterUsage extends IObjectListener[IUsageControl] {
-    override def eventOccured(obj: IUsageControl) = waiting.release
+  class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
+    override def eventOccured(obj: UsageControl) = waiting.release
   }
   
   private val resources = new LinkedList[T]
@@ -48,10 +49,10 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
   @transient lazy val waiting: Semaphore = new Semaphore(0)
   @transient lazy val selectingRessource: Lock = new ReentrantLock
 
-  def selectAService: (T, IAccessToken) = {
+  def selectAService: (T, AccessToken) = {
     selectingRessource.lock
     try {
-      var ret: (T, IAccessToken) = null
+      var ret: (T, AccessToken) = null
 
       do {
         //Select the less failing resources
@@ -76,7 +77,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
 
         //Among them select one not over loaded
         val bestResourcesIt = resourcesCopy.iterator
-        val notLoaded = new ArrayBuffer[(T, IAccessToken)]
+        val notLoaded = new ArrayBuffer[(T, AccessToken)]
         //var totalQuality = 0L
         
         while (bestResourcesIt.hasNext) {       
@@ -118,7 +119,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
     resources.synchronized {
       resources.add(service)
       val usageControl = BatchServiceControl.usageControl(service.description)
-      Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, IUsageControl.ResourceReleased)
+      Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     }
     waiting.release
   }

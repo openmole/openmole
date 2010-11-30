@@ -22,7 +22,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.control.AccessToken
 
 object IURIFile {
   implicit def ordering = new Ordering[IURIFile] {
@@ -34,40 +34,40 @@ object IURIFile {
 
 trait IURIFile {
     def isDirectory: Boolean 
-    def isDirectory(token: IAccessToken): Boolean
+    def isDirectory(token: AccessToken): Boolean
     def URLRepresentsADirectory: Boolean
     
     def mkdir(name: String): IURIFile
-    def mkdir(name: String, token: IAccessToken): IURIFile
+    def mkdir(name: String, token: AccessToken): IURIFile
     
     def mkdirIfNotExist(name: String): IURIFile
-    def mkdirIfNotExist(name: String, token: IAccessToken): IURIFile
+    def mkdirIfNotExist(name: String, token: AccessToken): IURIFile
     
     def newFileInDir(prefix: String, sufix: String): IURIFile
     
     def openInputStream: InputStream 
-    def openInputStream(token: IAccessToken): InputStream 
+    def openInputStream(token: AccessToken): InputStream 
     
     def openOutputStream: OutputStream
-    def openOutputStream(token: IAccessToken): OutputStream
+    def openOutputStream(token: AccessToken): OutputStream
     
     def copy(dest: IURIFile)
-    def copy(dest: IURIFile, srcToken: IAccessToken)
+    def copy(dest: IURIFile, srcToken: AccessToken)
     
     def remove(recusrsive: Boolean) 
-    def remove(recursive: Boolean, token: IAccessToken)   
+    def remove(recursive: Boolean, token: AccessToken)   
   
     def remove(timeOut: Boolean, recusrsive: Boolean) 
-    def remove(timeOut: Boolean, recusrsive: Boolean, token: IAccessToken) 
+    def remove(timeOut: Boolean, recusrsive: Boolean, token: AccessToken) 
     
     def list: Iterable[String]
-    def list(token: IAccessToken): Iterable[String]
+    def list(token: AccessToken): Iterable[String]
     
     def exist(name: String): Boolean 
-    def exist(name: String, token: IAccessToken): Boolean 
+    def exist(name: String, token: AccessToken): Boolean 
     
     def cache: File
-    def cache(token: IAccessToken): File
+    def cache(token: AccessToken): File
     
     def child(child: String): IURIFile
     
