@@ -20,6 +20,7 @@ package org.openmole.core.batch.control
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.SynchronizedSet
@@ -55,7 +56,7 @@ class AccessTokenPool extends IAccessTokenPool {
         _load.decrementAndGet
         throw e
     }
-
+    
     taken.add(token)
     token
   }
@@ -80,6 +81,7 @@ class AccessTokenPool extends IAccessTokenPool {
   }
 
   override def releaseToken(token: AccessToken) = {
+    
     if (!taken.remove(token)) {
       throw new InternalProcessingError("Trying to release a token that hasn't been taken.")
     }

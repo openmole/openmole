@@ -75,6 +75,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
           ret
         }
 
+
         //Among them select one not over loaded
         val bestResourcesIt = resourcesCopy.iterator
         val notLoaded = new ArrayBuffer[(T, AccessToken)]
@@ -98,14 +99,14 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
           }
         }
              
-        if (notLoaded.size > 0) {
-          val selected = notLoaded(RNG.nextInt(notLoaded.size))
+       if (notLoaded.size > 0) {
+          ret = notLoaded(RNG.nextInt(notLoaded.size))
           
           for (service <- notLoaded) {    
-            if(service._1.description != selected._1.description) BatchServiceControl.usageControl(service._1.description).releaseToken(service._2) 
+            if(service._1.description != ret._1.description) BatchServiceControl.usageControl(service._1.description).releaseToken(service._2) 
           }
-          selected
         } else {
+          //Logger.getLogger(getClass.getName).info("Waiting")
           waiting.acquire
         }
       } while (ret == null)
@@ -134,7 +135,7 @@ class BatchServiceGroup[T <: IBatchService[_,_]](expulseThreshold: Int) {
 
   def get(index: Int): T = {
     resources.synchronized {
-      resources.get(index);
+      resources.get(index)
     }
   }
 
