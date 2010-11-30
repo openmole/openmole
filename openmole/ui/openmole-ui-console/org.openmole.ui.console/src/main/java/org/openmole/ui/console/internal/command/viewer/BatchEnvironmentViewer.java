@@ -33,10 +33,10 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
-import org.openmole.core.model.execution.batch.IBatchEnvironment;
-import org.openmole.core.model.execution.batch.IBatchExecutionJob;
-import org.openmole.core.model.execution.batch.IBatchJob;
-import org.openmole.core.model.execution.batch.BatchServiceDescription;
+import org.openmole.core.batch.environment.IBatchEnvironment;
+import org.openmole.core.batch.environment.IBatchExecutionJob;
+import org.openmole.core.batch.environment.IBatchJob;
+import org.openmole.core.batch.control.BatchServiceDescription;
 
 import scala.collection.Iterator;
 

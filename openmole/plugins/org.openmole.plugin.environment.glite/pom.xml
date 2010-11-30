@@ -38,14 +38,10 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.implementation</artifactId>
+            <artifactId>org.openmole.core.batch</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.jsagasession</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>

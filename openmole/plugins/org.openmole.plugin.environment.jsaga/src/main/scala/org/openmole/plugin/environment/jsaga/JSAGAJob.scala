@@ -18,11 +18,12 @@
 package org.openmole.plugin.environment.jsaga
 
 import fr.in2p3.jsaga.adaptor.job.SubState
+import fr.in2p3.jsaga.impl.job.service.ReconnectionException
 import java.util.logging.Logger
 import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.job.Job
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.implementation.execution.batch.BatchJob
+import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState
 
 import org.ogf.saga.monitoring.Metric
@@ -39,10 +40,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService[_,_]) extends BatchJob
       case NEW => ExecutionState.SUBMITED
       case RUNNING =>
         val subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
-        /*} catch {
-          case (e: Exception) => throw new InternalProcessingError(e)
-        }*/
-
+       
         if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITED
         else ExecutionState.RUNNING
         
@@ -53,21 +51,23 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService[_,_]) extends BatchJob
 
   override def deleteJob =  {
     if (state == ExecutionState.SUBMITED || state == ExecutionState.RUNNING) {
-      job.cancel
+      var deleted = false
+      do {
+        try {
+          job.cancel
+          deleted = true
+        } catch {
+          case e: ReconnectionException => 
+            Logger.getLogger(classOf[JSAGAJob].getName).info("Job service reconnecting, retrying in 10s.")
+            Thread.sleep(1000)
+        }
+      } while(!deleted)
     }
   }
 
   override def updateState: ExecutionState = {
-   // try {
-      val curjob = job
-      return translateStatus(curjob, curjob.getState)
-    /*} catch {
-      case (e: TimeoutException) => //setState(ExecutionState.FAILED);
-        throw e
-      case (e: Exception) => 
-        state = ExecutionState.FAILED
-        throw e
-    }*/
+    val curjob = job
+    return translateStatus(curjob, curjob.getState)
   }
 
   override def toString: String = jobId

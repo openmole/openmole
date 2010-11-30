@@ -29,7 +29,7 @@ import org.openmole.core.model.execution.SampleType
 object Environment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
-  Activator.getWorkspace += (StatisticsHistorySize, "100")
+  Activator.getWorkspace += (StatisticsHistorySize, "1000")
 }
 
 

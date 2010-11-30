@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.jsaga
 
-import org.openmole.core.implementation.execution.batch.BatchEnvironment
+import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.environment.jsaga.internal.Activator
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._

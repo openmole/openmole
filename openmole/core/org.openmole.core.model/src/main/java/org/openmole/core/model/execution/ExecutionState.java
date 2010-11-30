@@ -14,19 +14,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.model.execution;
 
 public enum ExecutionState {
-	
-	READY,
-	SUBMITED,
-	RUNNING,
-	DONE,
-        FAILED,
-	KILLED;
-	
-	public boolean isFinal() {
-		return this == DONE || this == KILLED;
-	}
+
+    READY,
+    SUBMITED,
+    RUNNING,
+    DONE,
+    FAILED,
+    KILLED;
+
+    public boolean isFinal() {
+        return this == DONE || this == KILLED;
+    }
 }

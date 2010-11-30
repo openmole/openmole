@@ -23,7 +23,7 @@ import java.io.PrintStream
 import java.net.URI
 import org.ogf.saga.job.JobDescription
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.model.execution.batch.IRuntime
+import org.openmole.core.batch.environment.IRuntime
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.jsaga.JSAGAJob

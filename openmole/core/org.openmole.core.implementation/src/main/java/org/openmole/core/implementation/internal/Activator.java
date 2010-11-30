@@ -19,16 +19,9 @@ package org.openmole.core.implementation.internal;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.openmole.core.batchservicecontrol.IBatchServiceControl;
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
-import org.openmole.core.authenticationregistry.IAuthenticationRegistry;
-import org.openmole.core.file.IURIFileCache;
 import org.openmole.misc.executorservice.IExecutorService;
-import org.openmole.misc.fileservice.IFileService;
-import org.openmole.misc.hashservice.IHashService;
 import org.openmole.misc.pluginmanager.IPluginManager;
-import org.openmole.core.jsagasession.IJSagaSessionService;
-import org.openmole.core.replicacatalog.IReplicaCatalog;
 import org.openmole.core.serializer.ISerializer;
 import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
@@ -37,18 +30,11 @@ public class Activator implements BundleActivator {
 
     static BundleContext context;
     private static transient IUpdater updater;
-    private static transient IReplicaCatalog replicaCatalog;
     private static IWorkspace workspace;
     private static ISerializer messageSerializer;
     private static IExecutorService executorService;
-    private static IJSagaSessionService jSagaSessionService;
-    private static IBatchServiceControl batchRessourceControl;
     private static IEventDispatcher eventDispatcher;
     private static IPluginManager pluginManager;
-    private static IAuthenticationRegistry batchEnvironmentAuthenticationRegistry;
-    private static IFileService fileService;
-    private static IHashService hashService;
-    private static IURIFileCache URIFileCache;
 
     @Override
     public synchronized void start(BundleContext context) throws Exception {
@@ -62,21 +48,6 @@ public class Activator implements BundleActivator {
 
     public synchronized static BundleContext getContext() {
         return context;
-    }
-
-    public static IReplicaCatalog getReplicaCatalog() {
-        if (replicaCatalog != null) {
-            return replicaCatalog;
-        }
-
-        synchronized (Activator.class) {
-            if (replicaCatalog == null) {
-                ServiceReference ref = getContext().getServiceReference(IReplicaCatalog.class.getName());
-                replicaCatalog = (IReplicaCatalog) getContext().getService(ref);
-            }
-        }
-
-        return replicaCatalog;
     }
 
     public static IWorkspace getWorkspace() {
@@ -93,20 +64,6 @@ public class Activator implements BundleActivator {
         return workspace;
     }
 
-    public static IUpdater getUpdater() {
-        if (updater != null) {
-            return updater;
-        }
-
-        synchronized (Activator.class) {
-            if (updater == null) {
-                ServiceReference ref = getContext().getServiceReference(IUpdater.class.getName());
-                updater = (IUpdater) getContext().getService(ref);
-            }
-        }
-        return updater;
-    }
-
     public static IExecutorService getExecutorService() {
         if (executorService != null) {
             return executorService;
@@ -119,42 +76,6 @@ public class Activator implements BundleActivator {
             }
         }
         return executorService;
-    }
-
-    public synchronized static ISerializer getSerializer() {
-        if (messageSerializer == null) {
-            ServiceReference ref = getContext().getServiceReference(ISerializer.class.getName());
-            messageSerializer = (ISerializer) getContext().getService(ref);
-        }
-        return messageSerializer;
-    }
-
-    public static IJSagaSessionService getJSagaSessionService() {
-        if (jSagaSessionService != null) {
-            return jSagaSessionService;
-        }
-
-        synchronized (Activator.class) {
-            if (jSagaSessionService == null) {
-                ServiceReference ref = getContext().getServiceReference(IJSagaSessionService.class.getName());
-                jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
-            }
-            return jSagaSessionService;
-        }
-    }
-
-    public static IBatchServiceControl getBatchRessourceControl() {
-        if (batchRessourceControl != null) {
-            return batchRessourceControl;
-        }
-
-        synchronized (Activator.class) {
-            if (batchRessourceControl == null) {
-                ServiceReference ref = getContext().getServiceReference(IBatchServiceControl.class.getName());
-                batchRessourceControl = (IBatchServiceControl) getContext().getService(ref);
-            }
-            return batchRessourceControl;
-        }
     }
 
     public static IEventDispatcher getEventDispatcher() {
@@ -171,49 +92,19 @@ public class Activator implements BundleActivator {
         }
     }
 
+    public synchronized static ISerializer getSerializer() {
+        if (messageSerializer == null) {
+            ServiceReference ref = getContext().getServiceReference(ISerializer.class.getName());
+            messageSerializer = (ISerializer) getContext().getService(ref);
+        }
+        return messageSerializer;
+    }
+
     public synchronized static IPluginManager getPluginManager() {
         if (pluginManager == null) {
             ServiceReference ref = getContext().getServiceReference(IPluginManager.class.getName());
             pluginManager = (IPluginManager) getContext().getService(ref);
         }
         return pluginManager;
-    }
-
-    public synchronized static IAuthenticationRegistry getBatchEnvironmentAuthenticationRegistry() {
-        if (batchEnvironmentAuthenticationRegistry == null) {
-            ServiceReference ref = getContext().getServiceReference(IAuthenticationRegistry.class.getName());
-            batchEnvironmentAuthenticationRegistry = (IAuthenticationRegistry) getContext().getService(ref);
-        }
-        return batchEnvironmentAuthenticationRegistry;
-    }
-
-    public synchronized static IFileService getFileService() {
-        if (fileService == null) {
-            ServiceReference ref = getContext().getServiceReference(IFileService.class.getName());
-            fileService = (IFileService) getContext().getService(ref);
-        }
-        return fileService;
-    }
-
-    public static IHashService getHashService() {
-        if (hashService != null) {
-            return hashService;
-        }
-
-        synchronized (Activator.class) {
-            if (hashService == null) {
-                ServiceReference ref = getContext().getServiceReference(IHashService.class.getName());
-                hashService = (IHashService) getContext().getService(ref);
-            }
-        }
-        return hashService;
-    }
-
-    public static synchronized IURIFileCache getURIFileCache() {
-        if (URIFileCache == null) {
-            ServiceReference ref = getContext().getServiceReference(IURIFileCache.class.getName());
-            URIFileCache = (IURIFileCache) getContext().getService(ref);
-        }
-        return URIFileCache;
     }
 }

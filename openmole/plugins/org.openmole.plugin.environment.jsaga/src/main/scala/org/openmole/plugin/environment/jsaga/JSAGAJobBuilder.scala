@@ -24,8 +24,8 @@ import org.joda.time.format.ISOPeriodFormat
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.model.execution.batch.IRuntime
 import org.openmole.plugin.environment.jsaga.internal.Activator
+import org.openmole.core.batch.environment.IRuntime
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 
 object JSAGAJobBuilder {

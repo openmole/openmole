@@ -22,7 +22,7 @@ import java.util.logging.Logger
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.core.model.execution.batch.IBatchExecutionJob
+import org.openmole.core.batch.environment.IBatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.updater.IUpdatable
 import org.openmole.core.implementation.execution.JobRegistry
@@ -41,12 +41,19 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Set
 import scala.collection.JavaConversions._
 import scala.collection.mutable.MultiMap
+import scala.ref.WeakReference
 
-class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatable {
+class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatable {
 
+  def this (environment: GliteEnvironment, strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) =
+    this(new WeakReference(environment), strategy, minNumberOfJobsByCategory, numberOfSimultaneousExecutionForAJobWhenUnderMinJob)
+  
   override def update: Boolean = {
-    val registry = environment.jobRegistry
-
+    val env = environment.get match {
+      case None => return false
+      case Some(env) => env
+    }
+    val registry = env.jobRegistry
     registry.synchronized {
       //var nbJobsByCategory = new HashMap[(IMoleExecution, IStatisticKey), Int]
 
@@ -73,17 +80,15 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
                       val key = (moleExecution, statisticKey, sampleType)
                       try {
                         val limitTime = timeCache.cache(this, key, {
-                            val finishedStat = environment.statistic(moleExecution, statisticKey)(sampleType)
+                            val finishedStat = env.statistic(moleExecution, statisticKey)(sampleType)
                             val runningStat = computeStat(sampleType, registry.executionJobs(statisticKey))
                             strategy.whenJobShouldBeResubmited(sampleType, finishedStat, runningStat)
                           })
-
-                        if (jobTime > limitTime) {
-                          environment.submit(job)
-                        }
+                        //Logger.getLogger(classOf[OverSubmissionAgent].getName()).log(Level.INFO, "" + jobTime+  " > " + limitTime + " " + sampleType)
+                        if (jobTime > limitTime) env.submit(job)
 
                       } catch {
-                        case e => Logger.getLogger(classOf[OverSubmissionAgent].getName()).log(Level.WARNING, "Oversubmission failed.", e);
+                        case e => Logger.getLogger(classOf[OverSubmissionAgent].getName()).log(Level.WARNING, "Oversubmission failed.", e)
                       } 
                     case None =>
                   }
@@ -134,7 +139,7 @@ class OverSubmissionAgent(environment: GliteEnvironment, strategy: IWorkloadMana
             //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
 
             try {
-              environment.submit(job)
+              env.submit(job)
             } catch {
               case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
             }

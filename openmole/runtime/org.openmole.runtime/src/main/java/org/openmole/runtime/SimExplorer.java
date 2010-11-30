@@ -16,7 +16,7 @@
  */
 package org.openmole.runtime;
 
-import org.openmole.core.model.execution.batch.IBatchServiceAuthentication;
+import org.openmole.core.batch.environment.IBatchServiceAuthentication;
 import java.io.File;
 import java.util.logging.Level;
 

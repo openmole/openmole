@@ -32,8 +32,8 @@ import org.ogf.saga.context.Context
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
-import org.openmole.core.file.URIFile
-import org.openmole.core.model.execution.batch.IBatchServiceAuthentication
+import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.environment.IBatchServiceAuthentication
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.ProxyChecker

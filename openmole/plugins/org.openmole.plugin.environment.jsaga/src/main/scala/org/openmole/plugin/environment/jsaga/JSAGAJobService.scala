@@ -23,28 +23,25 @@ import java.io.OutputStream
 import java.net.URI
 import java.util.logging.Level
 import java.util.logging.Logger
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit
 import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
 import org.ogf.saga.job.JobService
 import org.ogf.saga.url.URLFactory
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileOutputStream
-import org.openmole.core.batchservicecontrol.BatchJobServiceDescription
-import org.openmole.core.implementation.execution.batch.BatchJobService
-import org.openmole.core.model.execution.batch.IAccessToken
-import org.openmole.core.model.execution.batch.IBatchJob
-import org.openmole.core.model.execution.batch.IBatchServiceAuthentication
-import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey
-import org.openmole.core.model.execution.batch.IRuntime
-import org.openmole.core.model.file.IURIFile
+import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.environment.BatchJobService
+import org.openmole.core.batch.environment.IAccessToken
+import org.openmole.core.batch.environment.IBatchJob
+import org.openmole.core.batch.environment.IBatchServiceAuthentication
+import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
+import org.openmole.core.batch.environment.IRuntime
+import org.openmole.core.batch.file.IURIFile
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.environment.jsaga.internal.Activator
 import scala.io.Source._
-import scala.collection.JavaConversions._
 
 object JSAGAJobService {
   val CreationTimeout = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "CreationTimout")
@@ -111,7 +108,7 @@ abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAut
 
     task.get(Activator.getWorkspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
-    
+
   protected def buildJob(id: String): JSAGAJob = {
     new JSAGAJob(id, this)
   }

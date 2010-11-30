@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.model.execution.batch.IBatchServiceAuthenticationKey
+import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
 
 class GliteAuthenticationKey(voName: String, vomsURL: String) extends (String, String)(voName, vomsURL) with IBatchServiceAuthenticationKey[GliteAuthentication] 

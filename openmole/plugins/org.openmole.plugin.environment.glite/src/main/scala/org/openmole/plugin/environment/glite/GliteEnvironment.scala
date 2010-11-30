@@ -24,8 +24,8 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.core.implementation.execution.batch.BatchStorage
-import org.openmole.core.model.execution.batch.IBatchStorage
+import org.openmole.core.batch.environment.BatchStorage
+import org.openmole.core.batch.environment.IBatchStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.BDII
@@ -139,7 +139,6 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime), fqan)
   
   override def allJobServices: Iterable[JSAGAJobService[_,_]] = {
-
     val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
     val jobServices = new ListBuffer[JSAGAJobService[_,_]]
