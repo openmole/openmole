@@ -21,21 +21,21 @@ import scala.collection.mutable.HashMap
 
 object AuthenticationRegistry {
 
-  private val registry = new HashMap[IBatchServiceAuthenticationKey[_], IBatchServiceAuthentication]
+  private val registry = new HashMap[BatchAuthenticationKey, BatchAuthentication]
     
-  def isRegistred(authenticationKey: IBatchServiceAuthenticationKey[_]): Boolean = synchronized {
+  def isRegistred(authenticationKey: BatchAuthenticationKey): Boolean = synchronized {
     registry.contains(authenticationKey)
   }
 
-  def initAndRegisterIfNotAllreadyIs[AUTH <: IBatchServiceAuthentication](key: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH) = synchronized {
+  def initAndRegisterIfNotAllreadyIs(key: BatchAuthenticationKey, authentication: BatchAuthentication) = synchronized {
     if(!isRegistred(key)) {
       authentication.initialize
       registry.put(key, authentication)
     }
   }
                                                                                     
-  def registred[AUTH <: IBatchServiceAuthentication] (key: IBatchServiceAuthenticationKey[AUTH]): Option[AUTH] = synchronized {
-    registry.get(key).asInstanceOf[Option[AUTH]]
+  def registred (key: BatchAuthenticationKey): Option[BatchAuthentication] = synchronized {
+    registry.get(key)
   }
 
 }

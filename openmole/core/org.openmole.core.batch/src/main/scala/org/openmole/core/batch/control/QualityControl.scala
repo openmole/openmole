@@ -17,9 +17,11 @@
 
 package org.openmole.core.batch.control
 
+import java.util.concurrent.atomic.AtomicInteger
+
 object QualityControl {
-  def withFailureControl[A](desc: BatchServiceDescription, op: => A): A = {
-    val qualityControl = BatchServiceControl.qualityControl(desc)
+  
+  def withQualityControl[A](qualityControl: Option[QualityControl], op: => A): A = {
     try {
       val ret = op
       qualityControl match {
@@ -36,13 +38,14 @@ object QualityControl {
         throw e
     }
   }
+  
 }
 
 class QualityControl {
-  @volatile var _failureRate = 0
+  val _failureRate = new AtomicInteger
 
-  def failed = _failureRate += 1
-  def success = _failureRate -= 1
-  def failureRate: Int = _failureRate
-  def reinit = _failureRate = 0
+  def failed = _failureRate.incrementAndGet
+  def success = _failureRate.decrementAndGet
+  def failureRate: Int = _failureRate.get
+  def reinit = _failureRate.set(0)
 }

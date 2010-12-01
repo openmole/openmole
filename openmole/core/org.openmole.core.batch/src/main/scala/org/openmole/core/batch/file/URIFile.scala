@@ -45,7 +45,7 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.commons.tools.io.Network._
 
-import org.openmole.core.batch.control.UsageControl._
+import org.openmole.core.batch.control.BatchStorageControl._
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.control.QualityControl._
@@ -156,8 +156,8 @@ class URIFile(val location: String) extends IURIFile {
 
   def this(file: IURIFile) = this(file.location)
     
-  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.UsageControl.withToken(storageDescription,a)
-  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.QualityControl.withFailureControl(storageDescription,a)
+  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.BatchStorageControl.withToken(storageDescription,a)
+  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.BatchStorageControl.withFailureControl(storageDescription,a)
 
   private def trycatch[A](f: => A): A = {
     try {
@@ -357,7 +357,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)
 
-  override def storageDescription: BatchServiceDescription =  new BatchStorageDescription(location)
+  override def storageDescription = new BatchStorageDescription(location)
   override def URI: URI = new URI(location)
   override def toString: String = location
 

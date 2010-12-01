@@ -17,11 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.model.execution.IExecutionJob
-
-trait IBatchExecutionJob extends IExecutionJob {
-  def batchJob: IBatchJob
-  def kill
-  def retry
-  override def environment: IBatchEnvironment
-}
+trait BatchAuthenticationKey

@@ -19,4 +19,4 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.file.IURIFile
 
-class Runtime(val runtime: IURIFile, val environmentPlugins: Iterable[IURIFile], val authentication: IURIFile) extends IRuntime
+class Runtime(val runtime: IURIFile, val environmentPlugins: Iterable[IURIFile], val authentication: IURIFile)

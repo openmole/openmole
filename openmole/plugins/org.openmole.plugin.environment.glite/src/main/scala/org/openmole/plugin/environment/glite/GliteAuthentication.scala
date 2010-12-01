@@ -32,8 +32,8 @@ import org.ogf.saga.context.Context
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
+import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.environment.IBatchServiceAuthentication
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.ProxyChecker
@@ -121,7 +121,7 @@ object GliteAuthentication {
 }
 
 
-class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy], fqan: String) extends IBatchServiceAuthentication {
+class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy], fqan: String) extends BatchAuthentication {
 
   import GliteAuthentication._
     
@@ -131,7 +131,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   @transient 
   private var _proxyExpiresTime = Long.MaxValue
   
-  def proxyExpiresTime = _proxyExpiresTime
+  override def expires = _proxyExpiresTime
 
   //FIXME lazy val in scala 2.9.0 
   //@transient lazy val 

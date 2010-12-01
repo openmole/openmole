@@ -18,7 +18,7 @@
 package org.openmole.core.batch.replication
 
 import org.openmole.commons.tools.service.IHash
-import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
+import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.environment.BatchAuthenticationKey
 
-class ReplicaLockKey(hash: IHash,desc: BatchServiceDescription,auth: IBatchServiceAuthenticationKey[_]) extends (IHash, BatchServiceDescription, IBatchServiceAuthenticationKey[_])(hash, desc, auth)
+class ReplicaLockKey(hash: IHash,desc: BatchStorageDescription, auth: BatchAuthenticationKey) extends (IHash, BatchStorageDescription, BatchAuthenticationKey)(hash, desc, auth)

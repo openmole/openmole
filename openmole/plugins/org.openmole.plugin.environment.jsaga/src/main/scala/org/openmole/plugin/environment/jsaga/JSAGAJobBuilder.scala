@@ -25,12 +25,12 @@ import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.plugin.environment.jsaga.internal.Activator
-import org.openmole.core.batch.environment.IRuntime
+import org.openmole.core.batch.environment.Runtime
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 
 object JSAGAJobBuilder {
 
-  def getJobDescription(runtime: IRuntime, tmpScript: File, attributes: Map[String, String]): JobDescription = {
+  def jobDescription(runtime: Runtime, tmpScript: File, attributes: Map[String, String]): JobDescription = {
     try {
 
       val description = JobFactory.createJobDescription

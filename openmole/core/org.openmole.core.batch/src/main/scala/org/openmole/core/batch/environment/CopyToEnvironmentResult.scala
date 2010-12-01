@@ -19,4 +19,4 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.file.IURIFile
 
-class CopyToEnvironmentResult(val communicationStorage: IBatchStorage[_,_],val communicationDir: IURIFile,val inputFile: IURIFile,val outputFile: IURIFile,val runtime: IRuntime)
+class CopyToEnvironmentResult(val communicationStorage: BatchStorage,val communicationDir: IURIFile,val inputFile: IURIFile,val outputFile: IURIFile,val runtime: Runtime)

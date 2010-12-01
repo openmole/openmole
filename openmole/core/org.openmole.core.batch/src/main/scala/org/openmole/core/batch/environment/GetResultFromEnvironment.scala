@@ -33,12 +33,13 @@ import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchServiceControl
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
 import org.openmole.core.batch.control.BatchServiceDescription
+import org.openmole.core.batch.control.BatchStorageControl
+import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.execution.SampleType
@@ -50,7 +51,7 @@ object GetResultFromEnvironment {
   private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
 }
 
-class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, lastStatusChangeInterval: Long) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, lastStatusChangeInterval: Long) extends Callable[Unit] {
   import GetResultFromEnvironment._
 
   private def successFullFinish = {
@@ -58,7 +59,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
   }
 
   override def call: Unit = {
-    val token = BatchServiceControl.usageControl(communicationStorageDescription).waitAToken
+    val token = BatchStorageControl.usageControl(communicationStorageDescription).waitAToken
 
     try {
       val result = getRuntimeResult(outputFile, token)
@@ -101,7 +102,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchServiceDesc
       }
 
     } finally {
-      BatchServiceControl.usageControl(communicationStorageDescription).releaseToken(token)
+      BatchStorageControl.usageControl(communicationStorageDescription).releaseToken(token)
     }
   }
 

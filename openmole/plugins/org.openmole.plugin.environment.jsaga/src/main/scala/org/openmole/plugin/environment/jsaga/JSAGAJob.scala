@@ -29,7 +29,7 @@ import org.openmole.core.model.execution.ExecutionState
 import org.ogf.saga.monitoring.Metric
 import org.ogf.saga.task.State
 
-class JSAGAJob(jobId: String, jobService: JSAGAJobService[_,_]) extends BatchJob(jobService) {
+class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
   def job: Job = jobService.jobServiceCache.getJob(jobId)
 

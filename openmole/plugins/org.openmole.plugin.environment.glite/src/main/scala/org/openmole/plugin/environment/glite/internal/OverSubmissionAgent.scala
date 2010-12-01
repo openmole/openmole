@@ -22,7 +22,7 @@ import java.util.logging.Logger
 
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.core.batch.environment.IBatchExecutionJob
+import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.updater.IUpdatable
 import org.openmole.core.implementation.execution.JobRegistry
@@ -166,7 +166,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
   }
    
     
-  private def computeStat(sample: SampleType, allExecutionjobs: Iterable[IBatchExecutionJob] ): List[Long] = {
+  private def computeStat(sample: SampleType, allExecutionjobs: Iterable[BatchExecutionJob] ): List[Long] = {
                   
     val curTime = System.currentTimeMillis
     val stat = new ListBuffer[Long]

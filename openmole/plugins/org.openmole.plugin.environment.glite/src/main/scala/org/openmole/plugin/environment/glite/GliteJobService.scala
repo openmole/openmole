@@ -23,7 +23,7 @@ import java.io.PrintStream
 import java.net.URI
 import org.ogf.saga.job.JobDescription
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batch.environment.IRuntime
+import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.jsaga.JSAGAJob
@@ -39,13 +39,13 @@ object GliteJobService {
 }
 
 
-class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authenticationKey: GliteAuthenticationKey, authentication: GliteAuthentication, nbAccess: Int) extends JSAGAJobService[GliteEnvironment, GliteAuthentication](jobServiceURI, environment, authenticationKey, authentication, nbAccess)  {
+class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authenticationKey: GliteAuthenticationKey, authentication: GliteAuthentication, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, authenticationKey, authentication, nbAccess)  {
 
   override protected def buildJob(id: String): JSAGAJob = {
-    new GliteJob(id, this, authentication.proxyExpiresTime)
+    new GliteJob(id, this, super.authentication.expires)
   }
 
-  override protected def generateScriptString(in: String, out: String, runtime: IRuntime, memorySizeForRuntime: Int, os: OutputStream) = {
+  override protected def generateScriptString(in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream) = {
     val writter = new PrintStream(os)
 
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
@@ -101,7 +101,7 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authent
     Activator.getWorkspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
   }
 
-  override protected def buildJobDescription(runtime: IRuntime, script: File,  attributes: Map[String, String]): JobDescription = {
+  override protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]): JobDescription = {
     try {
       val description = super.buildJobDescription(runtime, script, attributes)
 

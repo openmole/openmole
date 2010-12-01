@@ -25,7 +25,6 @@ import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.batch.environment.BatchStorage
-import org.openmole.core.batch.environment.IBatchStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.BDII
@@ -138,10 +137,10 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
  
   def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime), fqan)
   
-  override def allJobServices: Iterable[JSAGAJobService[_,_]] = {
+  override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Activator.getWorkspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
-    val jobServices = new ListBuffer[JSAGAJobService[_,_]]
+    val jobServices = new ListBuffer[GliteJobService]
 
     for (js <- jss) {
       try {
@@ -156,12 +155,12 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
     jobServices.toList
   }
 
-  override def allStorages: Iterable[IBatchStorage[_,_]] = {
-    val allStorages = new ListBuffer[IBatchStorage[_,_]]
+  override def allStorages: Iterable[BatchStorage] = {
+    val allStorages = new ListBuffer[BatchStorage]
     val stors = getBDII.querySRMURIs(voName, Activator.getWorkspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
 
     for (stor <- stors) {
-      val storage = new BatchStorage(stor, this, authenticationKey, authentication,threadsBySE)
+      val storage = new BatchStorage(stor, authenticationKey, authentication,threadsBySE)
       allStorages += storage
     }
 

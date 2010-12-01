@@ -21,13 +21,14 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.UsageControl._
+import org.openmole.core.batch.control.BatchJobServiceControl._
 
 
-abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) extends IBatchJob {
+abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
   
-  def this(jobService: IBatchJobService[_,_]) = this(jobService.description)
+  def this(jobService: BatchJobService) = this(jobService.description)
   
   val timeStemps = new Array[Long](ExecutionState.values.length)
 
@@ -55,11 +56,11 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
     }
   }
 
-  override def hasBeenSubmitted: Boolean = state.compareTo(SUBMITED) >= 0
+  def hasBeenSubmitted: Boolean = state.compareTo(SUBMITED) >= 0
 
-  override def kill = withToken(jobServiceDescription,kill(_))
+  def kill: Unit = withToken(jobServiceDescription,kill(_))
   
-  override def kill(token: AccessToken)= synchronized {
+  def kill(token: AccessToken)= synchronized {
     try {
       deleteJob
     } finally {
@@ -67,22 +68,22 @@ abstract class BatchJob(val jobServiceDescription: BatchServiceDescription) exte
     }
   }
 
-  override def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
+  def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
 
 
-  override def updatedState(token: AccessToken): ExecutionState = synchronized {
+  def updatedState(token: AccessToken): ExecutionState = synchronized {
     state = updateState
     state
   }
 
-  override def state: ExecutionState =  _state
+  def state: ExecutionState =  _state
 
-  override def timeStemp(state: ExecutionState): Long = timeStemps(state.ordinal)
+  def timeStemp(state: ExecutionState): Long = timeStemps(state.ordinal)
   
-  override def lastStateDurration: Long = {
+  def lastStateDurration: Long = {
     val currentState = state
     var previous: Long = 0
-    timeStemps.slice(0, currentState.ordinal).reverse.find( _ != 0 ) match {
+    timeStemps.view.slice(0, currentState.ordinal).reverse.find( _ != 0 ) match {
       case Some(stemp) => return timeStemp(currentState) - stemp
       case None => throw new InternalProcessingError("Bug should allways have submitted time stemp.")
     }

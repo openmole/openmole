@@ -16,7 +16,7 @@
  */
 package org.openmole.runtime;
 
-import org.openmole.core.batch.environment.IBatchServiceAuthentication;
+import org.openmole.core.batch.environment.BatchAuthentication;
 import java.io.File;
 import java.util.logging.Level;
 
@@ -81,7 +81,7 @@ public class SimExplorer implements IApplication {
             if (cmdLine.hasOption("a")) {
                 /* get env and init */
                 File envFile = new File(cmdLine.getOptionValue("a"));
-                IBatchServiceAuthentication authentication = Activator.getSerialiser().deserialize(envFile);
+                BatchAuthentication authentication = Activator.getSerialiser().deserialize(envFile);
                 authentication.initialize();
                 if(!debug) envFile.delete();
             }

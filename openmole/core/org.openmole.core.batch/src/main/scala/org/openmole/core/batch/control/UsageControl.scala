@@ -25,6 +25,9 @@ object UsageControl {
   
   final val ResourceReleased = "ResourceReleased"
   
+  val botomlessUsage = new UsageControl(BotomlessTokenPool)
+
+  
   def apply(nbAccess: Int) = {
     if (nbAccess != Int.MaxValue) {
       new UsageControl(AccessTokenPool(nbAccess));
@@ -33,8 +36,8 @@ object UsageControl {
     }
   }
 
-  def withToken[B]( desc: BatchServiceDescription, f: (AccessToken => B)): B = {
-    val usageControl = BatchServiceControl.usageControl(desc)
+  
+  def withUsageControl[B](usageControl: UsageControl, f: (AccessToken => B)): B = {
     val token = usageControl.waitAToken
     try {
       f(token)

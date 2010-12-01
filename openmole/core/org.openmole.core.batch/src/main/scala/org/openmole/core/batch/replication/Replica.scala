@@ -21,11 +21,11 @@ import com.db4o.activation.ActivationPurpose
 import com.db4o.ta.Activatable
 import java.io.File
 import org.openmole.commons.tools.service.IHash
-import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
+import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.file.IURIFile
 
-class Replica(_source: File, _hash: IHash, _storageDescription: BatchServiceDescription, _authenticationKey: IBatchServiceAuthenticationKey[_], _destination: IURIFile) extends Activatable {
+class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDescription, _authenticationKey: BatchAuthenticationKey, _destination: IURIFile) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -41,12 +41,12 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchServiceDesc
     _source
   }
 
-  def storageDescription: BatchServiceDescription = {
+  def storageDescription: BatchStorageDescription = {
     activate(ActivationPurpose.READ)
     _storageDescription
   }
 
-  def authenticationKey: IBatchServiceAuthenticationKey[_] = {
+  def authenticationKey: BatchAuthenticationKey = {
     activate(ActivationPurpose.READ)
     _authenticationKey;
   }

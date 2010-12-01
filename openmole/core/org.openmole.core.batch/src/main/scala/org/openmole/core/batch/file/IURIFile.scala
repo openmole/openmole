@@ -23,6 +23,7 @@ import java.io.OutputStream
 import java.net.URI
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.control.BatchStorageDescription
 
 object IURIFile {
   implicit def ordering = new Ordering[IURIFile] {
@@ -74,5 +75,5 @@ trait IURIFile {
     def URI: URI
     def location: String
 
-    def storageDescription: BatchServiceDescription
+    def storageDescription: BatchStorageDescription
 }

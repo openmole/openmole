@@ -20,7 +20,7 @@ package org.openmole.core.batch.environment
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class BatchJobKiller(job: IBatchJob) extends Runnable {
+class BatchJobKiller(job: BatchJob) extends Runnable {
 
   override def run = {
     try {

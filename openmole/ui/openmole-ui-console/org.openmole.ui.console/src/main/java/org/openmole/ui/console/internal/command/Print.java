@@ -22,7 +22,7 @@ import org.codehaus.groovy.tools.shell.Shell;
 import org.openmole.core.model.execution.IEnvironment;
 import org.openmole.core.model.mole.IMoleExecution;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
-import org.openmole.core.batch.environment.IBatchEnvironment;
+import org.openmole.core.batch.environment.BatchEnvironment;
 import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.EnvironmentViewer;
 import org.openmole.ui.console.internal.command.viewer.IViewer;
@@ -40,7 +40,7 @@ public class Print extends UICommand {
     public Print(Shell shell, String string, String string1) {
         super(shell, string, string1);
         viewers.register(IEnvironment.class, new EnvironmentViewer());
-        viewers.register(IBatchEnvironment.class, new BatchEnvironmentViewer());
+        viewers.register(BatchEnvironment.class, new BatchEnvironmentViewer());
         viewers.register(IMoleExecution.class, new MoleExecutionViewer());
     }
 

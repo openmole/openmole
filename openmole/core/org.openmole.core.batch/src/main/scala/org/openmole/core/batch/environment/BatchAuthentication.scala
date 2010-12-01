@@ -17,17 +17,10 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.batch.control.BatchServiceDescription
-
-trait IBatchService [+ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication] {
-
-    def test: Boolean
-
-    def description: BatchServiceDescription
-
-    def environment: ENV
-    
-    def authentication: AUTH
-    
-    def authenticationKey: IBatchServiceAuthenticationKey[AUTH]
+trait BatchAuthentication {
+   
+  @throws(classOf[Throwable])
+  def initialize
+  
+  def expires: Long = Long.MaxValue
 }

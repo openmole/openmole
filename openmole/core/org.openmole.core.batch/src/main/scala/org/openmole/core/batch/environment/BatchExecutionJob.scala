@@ -25,7 +25,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batch.control.BatchServiceControl
+import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.implementation.execution.ExecutionJob
@@ -49,11 +49,11 @@ object BatchExecutionJob {
 }
 
 
-class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IBatchExecutionJob with IUpdatableWithVariableDelay {
+class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IUpdatableWithVariableDelay {
 
   import BatchExecutionJob._
     
-  var batchJob: IBatchJob = null
+  var batchJob: BatchJob = null
   val killed = new AtomicBoolean(false)
   var copyToEnvironmentResult: CopyToEnvironmentResult = null
   var _delay: Long = Activator.getWorkspace.preferenceAsDurationInMs(MinUpdateInterval)
@@ -170,7 +170,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     } catch {
       case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)
     } finally {
-      BatchServiceControl.usageControl(js._1.description).releaseToken(js._2)
+      BatchJobServiceControl.usageControl(js._1.description).releaseToken(js._2)
     }
   }
 
@@ -181,7 +181,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     }
   }
 
-  override def kill = {
+  def kill = {
     
     if (!killed.getAndSet(true)) {
       try {
@@ -201,11 +201,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     }
   }
 
-  override def retry = {
+  def retry = {
     batchJob = null
     _delay = 0
   }
 
-  override def delay: Long =  _delay
+  def delay: Long =  _delay
 
 }

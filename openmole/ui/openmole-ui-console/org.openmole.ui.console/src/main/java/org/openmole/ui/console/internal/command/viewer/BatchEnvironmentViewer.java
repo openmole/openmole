@@ -33,9 +33,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.openmole.core.model.execution.ExecutionState;
 import org.openmole.core.model.execution.IExecutionJobRegistry;
-import org.openmole.core.batch.environment.IBatchEnvironment;
-import org.openmole.core.batch.environment.IBatchExecutionJob;
-import org.openmole.core.batch.environment.IBatchJob;
+import org.openmole.core.batch.environment.BatchEnvironment;
+import org.openmole.core.batch.environment.BatchExecutionJob;
+import org.openmole.core.batch.environment.BatchJob;
 import org.openmole.core.batch.control.BatchServiceDescription;
 
 import scala.collection.Iterator;
@@ -44,12 +44,12 @@ import scala.collection.Iterator;
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
+public class BatchEnvironmentViewer implements IViewer<BatchEnvironment> {
 
     EnvironmentViewer environmentViewer = new EnvironmentViewer();
 
     @Override
-    public void view(IBatchEnvironment object, String[] args) {
+    public void view(BatchEnvironment object, String[] args) {
         Option verbosity = OptionBuilder.withLongOpt("verbose").withDescription("level of verbosity").hasArgs(1).withArgName("level").withType(Integer.class).isRequired(false).create("v");
         Options options = new Options().addOption(verbosity);
 
@@ -67,11 +67,11 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
             if (v >= 1) {
                 System.out.println(Separator);
                 Map<BatchServiceDescription, Map<ExecutionState, AtomicInteger>> jobServices = new HashMap<BatchServiceDescription, Map<ExecutionState, AtomicInteger>>();
-                IExecutionJobRegistry<? extends IBatchExecutionJob> executionJobRegistry = object.jobRegistry();
-                Iterator<? extends IBatchExecutionJob> it = executionJobRegistry.allExecutionJobs().iterator();
+                IExecutionJobRegistry<? extends BatchExecutionJob> executionJobRegistry = object.jobRegistry();
+                Iterator<? extends BatchExecutionJob> it = executionJobRegistry.allExecutionJobs().iterator();
                 while (it.hasNext()) {
-                    IBatchExecutionJob executionJob = it.next();
-                    IBatchJob batchJob = executionJob.batchJob();
+                    BatchExecutionJob executionJob = it.next();
+                    BatchJob batchJob = executionJob.batchJob();
                     if (batchJob != null) {
                         Map<ExecutionState, AtomicInteger> jobServiceInfo = jobServices.get(batchJob.jobServiceDescription());
                         if (jobServiceInfo == null) {
@@ -101,11 +101,11 @@ public class BatchEnvironmentViewer implements IViewer<IBatchEnvironment> {
             if (v >= 2) {
                 System.out.println(Separator);
 
-                IExecutionJobRegistry<? extends IBatchExecutionJob> executionJobRegistry = object.jobRegistry();
-                Iterator<? extends IBatchExecutionJob> it = executionJobRegistry.allExecutionJobs().iterator();
+                IExecutionJobRegistry<? extends BatchExecutionJob> executionJobRegistry = object.jobRegistry();
+                Iterator<? extends BatchExecutionJob> it = executionJobRegistry.allExecutionJobs().iterator();
                 while (it.hasNext()) {
-                    IBatchExecutionJob executionJob = it.next();
-                    IBatchJob batchJob = executionJob.batchJob();
+                    BatchExecutionJob executionJob = it.next();
+                    BatchJob batchJob = executionJob.batchJob();
                     if (batchJob != null) {
                         System.out.println(batchJob.toString() + " " + batchJob.state().toString());
                     }

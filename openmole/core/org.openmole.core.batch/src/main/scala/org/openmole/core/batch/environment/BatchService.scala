@@ -18,26 +18,21 @@
 package org.openmole.core.batch.environment
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.core.batch.control.BatchServiceControl
-import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.QualityControl
-import org.openmole.core.batch.control.UsageControl
 
-abstract class BatchService [ENV <: IBatchEnvironment, AUTH <: IBatchServiceAuthentication](val description: BatchServiceDescription, val environment: ENV, val authenticationKey: IBatchServiceAuthenticationKey[AUTH]) extends IBatchService[ENV, AUTH] {
 
-  def this(description: BatchServiceDescription, environment: ENV, authenticationKey: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, usageControl: UsageControl, failureControl: QualityControl) = {
-    this(description, environment, authenticationKey)
+abstract class BatchService(val authenticationKey: BatchAuthenticationKey) {
+
+  def this(authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication) = {
+    this(authenticationKey)
     AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
-    BatchServiceControl.registerRessouce(description, usageControl, failureControl)      
   }
   
-  override def authentication: AUTH = {
+  def authentication: BatchAuthentication = {
     AuthenticationRegistry.registred(authenticationKey) match {
       case None => throw new InternalProcessingError("No authentication registred for batch service")
       case Some(a) => a
     }
   }
 
-  override def toString: String = description.toString
     
 }

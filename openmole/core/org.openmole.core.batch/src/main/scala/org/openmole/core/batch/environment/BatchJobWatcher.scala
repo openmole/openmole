@@ -25,9 +25,9 @@ import org.openmole.misc.updater.IUpdatable
 import scala.collection.mutable.ListBuffer
 import scala.ref.WeakReference
 
-class BatchJobWatcher(environmentRef: WeakReference[IBatchEnvironment]) extends IUpdatable {
+class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends IUpdatable {
 
-  def this(environment: IBatchEnvironment) = this(new WeakReference(environment))
+  def this(environment: BatchEnvironment) = this(new WeakReference(environment))
   
   override def update: Boolean = {
     val environment = environmentRef.get match {
@@ -49,7 +49,7 @@ class BatchJobWatcher(environmentRef: WeakReference[IBatchEnvironment]) extends 
           jobGroupsToRemove += job
         } else {
 
-          val executionJobsToRemove = new ListBuffer[IBatchExecutionJob]
+          val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
 
           for (ej <- registry.executionJobs(job)) {
             ej.state match {

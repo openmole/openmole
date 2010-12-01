@@ -34,9 +34,10 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.environment.IBatchServiceAuthentication
-import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
-import org.openmole.core.batch.environment.IBatchStorage
+import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.environment.BatchAuthenticationKey
+import org.openmole.core.batch.environment.BatchAuthenticationKey
+import org.openmole.core.batch.environment.BatchStorage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
@@ -70,13 +71,13 @@ object ReplicaCatalog {
    
   Activator.getUpdater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(GCUpdateInterval))
  
-  private def getReplica(hash: IHash, storageDescription: BatchServiceDescription, authenticationKey: IBatchServiceAuthenticationKey[_]): Option[Replica] = synchronized {
+  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
     val set = objServeur.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
     if (!set.isEmpty()) Some(set.get(0))
     else None
   }
 
-  private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchServiceDescription,  authenticationKey: IBatchServiceAuthenticationKey[_]): Option[Replica] = synchronized {
+  private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
 
     val objectContainer = objServeur
     val set = objectContainer.query(new Predicate[Replica](classOf[Replica]) {
@@ -104,7 +105,7 @@ object ReplicaCatalog {
   }
     
 
-  def getReplica(src: File, storageDescription: BatchServiceDescription, authenticationKey: IBatchServiceAuthenticationKey[_]): ObjectSet[Replica] = synchronized {
+  def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = synchronized {
       
     objServeur.query(new Predicate[Replica](classOf[Replica]){
         
@@ -114,7 +115,7 @@ object ReplicaCatalog {
   }
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
-  def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: IBatchStorage[_,_], token: AccessToken): Replica = {
+  def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
 
     val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
     locks.lock(key)
@@ -195,8 +196,8 @@ object ReplicaCatalog {
     }
         
     val storageDescriptionToInsert =  {
-      val storagesDescriptionInBase = objServeur.query(new Predicate[BatchServiceDescription](classOf[BatchServiceDescription]) {
-          override def `match`(batchServiceDescription: BatchServiceDescription): Boolean =  batchServiceDescription.equals(replica.storageDescription)
+      val storagesDescriptionInBase = objServeur.query(new Predicate[BatchStorageDescription](classOf[BatchStorageDescription]) {
+          override def `match`(batchServiceDescription: BatchStorageDescription): Boolean =  batchServiceDescription.equals(replica.storageDescription)
         })
         
       if (!storagesDescriptionInBase.isEmpty) storagesDescriptionInBase.get(0)
@@ -204,8 +205,8 @@ object ReplicaCatalog {
     }
 
     val authenticationKeyToInsert = {
-      val authenticationKeyInBase = objServeur.query(new Predicate[IBatchServiceAuthenticationKey[_]](classOf[IBatchServiceAuthenticationKey[_]]) {
-          override def `match`(batchEnvironmentDescription: IBatchServiceAuthenticationKey[_]): Boolean = batchEnvironmentDescription.equals(replica.authenticationKey)
+      val authenticationKeyInBase = objServeur.query(new Predicate[BatchAuthenticationKey](classOf[BatchAuthenticationKey]) {
+          override def `match`(batchEnvironmentDescription: BatchAuthenticationKey): Boolean = batchEnvironmentDescription.equals(replica.authenticationKey)
         })
         
       if (!authenticationKeyInBase.isEmpty)  authenticationKeyInBase.get(0)

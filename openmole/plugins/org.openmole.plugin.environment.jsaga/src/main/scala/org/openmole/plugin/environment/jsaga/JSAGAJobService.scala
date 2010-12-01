@@ -32,12 +32,12 @@ import org.ogf.saga.job.JobService
 import org.ogf.saga.url.URLFactory
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.environment.BatchAuthentication
+import org.openmole.core.batch.environment.BatchAuthenticationKey
+import org.openmole.core.batch.environment.BatchJob
+import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.BatchJobService
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.environment.IBatchJob
-import org.openmole.core.batch.environment.IBatchServiceAuthentication
-import org.openmole.core.batch.environment.IBatchServiceAuthenticationKey
-import org.openmole.core.batch.environment.IRuntime
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.plugin.environment.jsaga.internal.Activator
@@ -52,7 +52,7 @@ object JSAGAJobService {
   
 }
 
-abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAuthentication](jobServiceURI: URI, environment: ENV, key: IBatchServiceAuthenticationKey[AUTH], authentication: AUTH, nbAccess: Int) extends BatchJobService[ENV, AUTH](environment, key, authentication, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
+abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, key: BatchAuthenticationKey, authentication: BatchAuthentication, nbAccess: Int) extends BatchJobService(key, authentication, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
 
   override def test: Boolean = {
 
@@ -78,7 +78,7 @@ abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAut
     } 
   }
 
-  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: IRuntime, token: AccessToken): IBatchJob = {
+  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
 
     val script = Activator.getWorkspace.newFile("script", ".sh")
     try {
@@ -109,14 +109,13 @@ abstract class JSAGAJobService[ENV <: JSAGAEnvironment, AUTH <: IBatchServiceAut
     task.get(Activator.getWorkspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
 
-  protected def buildJob(id: String): JSAGAJob = {
-    new JSAGAJob(id, this)
+  protected def buildJob(id: String): JSAGAJob = new JSAGAJob(id, this)
+  
+    
+  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]): JobDescription = {
+    JSAGAJobBuilder.jobDescription(runtime, script, attributes)
   }
     
-  protected def buildJobDescription(runtime: IRuntime, script: File, attributes: Map[String, String]): JobDescription = {
-    JSAGAJobBuilder.getJobDescription(runtime, script, attributes)
-  }
-    
-  protected def generateScriptString (in: String, out: String, runtime: IRuntime, memorySizeForRuntime: Int, os: OutputStream)
+  protected def generateScriptString (in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream)
     
 }
