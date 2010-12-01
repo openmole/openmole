@@ -357,7 +357,7 @@ class URIFile(val location: String) extends IURIFile {
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)
 
-  override def storageDescription = new BatchStorageDescription(location)
+  override def storageDescription = new BatchStorageDescription(new URI(location))
   override def URI: URI = new URI(location)
   override def toString: String = location
 

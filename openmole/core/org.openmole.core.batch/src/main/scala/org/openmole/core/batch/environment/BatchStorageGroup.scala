@@ -20,6 +20,7 @@ package org.openmole.core.batch.environment
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
+import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.Priority

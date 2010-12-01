@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.control
 
+import java.util.logging.Logger
 import scala.collection.immutable.HashMap
 
 object BatchStorageControl {

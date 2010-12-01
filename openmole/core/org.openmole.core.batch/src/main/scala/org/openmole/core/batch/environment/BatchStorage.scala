@@ -56,6 +56,8 @@ object BatchStorage {
 
 class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication, nbAccess: Int) extends BatchService(authenticationKey, authentication) {
   
+  @transient lazy val description = new BatchStorageDescription(URI)
+  
   BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl)      
 
   import BatchStorage._
@@ -181,7 +183,5 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
     return false
   }
 
-  val description = new BatchStorageDescription(URI)
-  
   override def toString: String = URI.toString
 }
