@@ -17,24 +17,22 @@
 
 package org.openmole.core.batch.control
 
+import org.openmole.commons.exception.InternalProcessingError
 import scala.collection.immutable.HashMap
 
 
 object BatchJobServiceControl {
-  var ressources = new HashMap[BatchJobServiceDescription, (UsageControl, QualityControl)]
+  var ressources = new HashMap[BatchJobServiceDescription, (UsageControl, JobServiceQualityControl)]
 
-  def registerRessouce(ressource: BatchJobServiceDescription, usageControl: UsageControl, failureControl: QualityControl) = synchronized {
+  def registerRessouce(ressource: BatchJobServiceDescription, usageControl: UsageControl, failureControl: JobServiceQualityControl) = synchronized {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._2.reinit
       case None => ressources += ((ressource -> (usageControl, failureControl)))
     }  
   }
 
-  def qualityControl(ressource: BatchJobServiceDescription): Option[QualityControl] = {
-    ressources.get(ressource) match {
-      case Some(ctrl) => Some(ctrl._2)
-      case None => None
-    }
+  def qualityControl(ressource: BatchJobServiceDescription): JobServiceQualityControl = {
+    ressources.getOrElse(ressource, throw new InternalProcessingError("Quality control not found for " + ressource.toString))._2
   } 
   
   def usageControl(ressource: BatchJobServiceDescription): UsageControl = {

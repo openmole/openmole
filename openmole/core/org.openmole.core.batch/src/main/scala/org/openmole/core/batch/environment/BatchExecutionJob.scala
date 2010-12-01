@@ -75,7 +75,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     if (!oldState.isFinal) {
       val newState = batchJob.updatedState
 
-      if (oldState == SUBMITED && newState == RUNNING) {
+      if (oldState == SUBMITTED && newState == RUNNING) {
         executionEnvironment.sample(SampleType.WAITING, batchJob.lastStateDurration, job)
       }
     }
@@ -102,7 +102,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             _delay = 0
             trySubmit
           }
-        case (SUBMITED | RUNNING | KILLED) => {}
+        case (SUBMITTED | RUNNING | KILLED) => {}
         case FAILED => retry
         case DONE => tryFinalise
       }

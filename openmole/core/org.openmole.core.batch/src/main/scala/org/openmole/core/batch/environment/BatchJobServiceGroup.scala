@@ -17,10 +17,9 @@
 
 package org.openmole.core.batch.environment
 
-import java.util.ArrayList
-import java.util.LinkedList
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
+import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.Priority
@@ -52,35 +51,41 @@ class BatchJobServiceGroup(val expulseThreshold: Int) {
         //Select the less failing resources
         val resourcesCopy = synchronized {
           resources = resources.filter( {r =>
-              BatchJobServiceControl.qualityControl(r.description) match {
-                case Some(f) => f.failureRate <= expulseThreshold
-                case None => true
-              }
+              BatchJobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
             })
-          if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.");
-
+          if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.")
           resources
         }
 
         //Among them select one not over loaded
-        val bestResourcesIt = resourcesCopy.iterator
-        val notLoaded = new ArrayBuffer[(BatchJobService, AccessToken)]
-        //var totalQuality = 0L
+        val notLoaded = new ArrayBuffer[(BatchJobService, AccessToken, Double)]
+        var totalFitness = 0.
         
-        while (bestResourcesIt.hasNext) {       
-          val cur = bestResourcesIt.next
-
+        for (cur <- resourcesCopy) {       
           BatchJobServiceControl.usageControl(cur.description).tryGetToken match {
             case None =>
-            case Some(token) => notLoaded += ((cur, token))
+            case Some(token) => 
+              val quality = BatchJobServiceControl.qualityControl(cur.description)
+              val nbSubmitted = quality.submitted
+              val fitness = if(quality.submitted > 0) {
+                math.pow(quality.runnig.toDouble / quality.submitted, 2)
+              } else Double.PositiveInfinity
+              
+              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              
+              notLoaded += ((cur, token, fitness))
+              totalFitness += fitness
           }
+          
         }
              
        if (notLoaded.size > 0) {
-          ret = notLoaded(RNG.nextInt(notLoaded.size))
+         var selected = RNG.nextDouble * totalFitness
           
           for (service <- notLoaded) {    
-            if(service._1.description != ret._1.description) BatchJobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
+            if(ret == null && selected <= service._3) ret = (service._1, service._2)
+            else BatchJobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
+            selected -= service._3
           }
         } else {
           //Logger.getLogger(getClass.getName).info("Waiting")

@@ -37,11 +37,11 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
     import State._
     
     state match {
-      case NEW => ExecutionState.SUBMITED
+      case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
         val subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
        
-        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITED
+        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITTED
         else ExecutionState.RUNNING
         
       case DONE => ExecutionState.DONE
@@ -50,7 +50,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
   }
 
   override def deleteJob =  {
-    if (state == ExecutionState.SUBMITED || state == ExecutionState.RUNNING) {
+    if (state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
       var deleted = false
       do {
         try {

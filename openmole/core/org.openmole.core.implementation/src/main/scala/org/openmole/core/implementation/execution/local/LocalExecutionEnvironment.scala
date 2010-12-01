@@ -109,7 +109,7 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
   }
 
   private def submit(ejob: LocalExecutionJob) = {
-    ejob.state = ExecutionState.SUBMITED
+    ejob.state = ExecutionState.SUBMITTED
     jobs += ejob
     jobInQueue.release
   }

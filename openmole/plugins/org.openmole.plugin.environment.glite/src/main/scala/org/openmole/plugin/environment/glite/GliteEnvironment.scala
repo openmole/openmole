@@ -29,6 +29,7 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy
+import org.openmole.plugin.environment.glite.internal.JobShaker
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
@@ -68,6 +69,8 @@ object GliteEnvironment {
   val LocalThreadsBySELocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMSLocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
+  val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
+  val JobShakingProbability = new ConfigurationLocation("GliteEnvironment", "JobShakingProbability")
 
 
   Activator.getWorkspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
@@ -95,7 +98,9 @@ object GliteEnvironment {
 
   Activator.getWorkspace += (OverSubmissionMinJob, "100")
   Activator.getWorkspace += (OverSubmissionNumberOfJobUnderMin, "3")
-    
+  
+  Activator.getWorkspace += (JobShakingInterval, "PT5M")
+  Activator.getWorkspace += (JobShakingProbability, "0.02")
 }
 
 class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes, memoryForRuntime) {
@@ -112,7 +117,8 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   val numberOfJobUnderMin = Activator.getWorkspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
        
   Activator.getUpdater.registerForUpdate(new OverSubmissionAgent(this, DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval)
-    
+  Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
+  
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
 
   def this(voName: String, vomsURL: String, bdii: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), None)

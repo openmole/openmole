@@ -23,6 +23,7 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.control.BatchServiceDescription
+import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.control.BatchJobServiceControl._
 
 
@@ -33,30 +34,29 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
   val timeStemps = new Array[Long](ExecutionState.values.length)
 
   var _state: ExecutionState = null
-  state = SUBMITED
+  state = SUBMITTED
 
   private def state_=(state: ExecutionState) = synchronized {  
     if (_state != state) {
       timeStemps(state.ordinal) = System.currentTimeMillis
-      _state = state
       
-//      state match {
-//        case SUBMITED =>
-//          Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
-//            case None =>
-//            case Some(quality) => quality.decreaseQuality(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.JSMalus))
-//          }
-//        case RUNNING | DONE =>
-//          Activator.getBatchRessourceControl.qualityControl(jobServiceDescription) match {
-//            case None =>
-//            case Some(quality) => quality.increaseQuality(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.JSBonnus))
-//          }
-//        case _ => 
-//      }
+      _state match {
+        case SUBMITTED => BatchJobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
+        case RUNNING => BatchJobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
+        case _ => 
+      }
+      
+      state match {
+        case SUBMITTED => BatchJobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
+        case RUNNING => BatchJobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
+        case _ => 
+      }
+      
+      _state = state
     }
   }
 
-  def hasBeenSubmitted: Boolean = state.compareTo(SUBMITED) >= 0
+  def hasBeenSubmitted: Boolean = state.compareTo(SUBMITTED) >= 0
 
   def kill: Unit = withToken(jobServiceDescription,kill(_))
   

@@ -17,6 +17,17 @@
 
 package org.openmole.core.batch.control
 
+import java.util.concurrent.atomic.AtomicInteger
+
 class JobServiceQualityControl extends QualityControl {
+  private val _nbSubmitted = new AtomicInteger
+  private val _nbRunning = new AtomicInteger
+
+  def submitted = _nbSubmitted.get
+  def runnig = _nbRunning.get
   
+  def incrementSubmitted = _nbSubmitted.incrementAndGet
+  def decrementSubmitted = _nbSubmitted.decrementAndGet
+  def incrementRunning = _nbRunning.incrementAndGet
+  def decrementRunning = _nbRunning.decrementAndGet
 }

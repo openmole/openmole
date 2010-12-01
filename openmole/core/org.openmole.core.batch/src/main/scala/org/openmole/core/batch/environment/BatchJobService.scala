@@ -20,28 +20,23 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceQualityControl
 import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.IURIFile
 
 abstract class BatchJobService(authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(authenticationKey, authentication) {
   
-  BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl)      
+  BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl)      
 
   def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
     try {
       val ret = doSubmit(inputFile, outputFile, runtime, token)
-      BatchJobServiceControl.qualityControl(description) match {
-        case Some(f) => f.success
-        case None =>
-      }
+      BatchJobServiceControl.qualityControl(description).success
       return ret
     } catch {
       case e =>
-        BatchJobServiceControl.qualityControl(description) match {
-          case Some(f) => f.failed
-          case None =>
-        }
+        BatchJobServiceControl.qualityControl(description).failed
         throw e
     }
   }

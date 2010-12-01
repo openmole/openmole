@@ -20,10 +20,11 @@ package org.openmole.core.implementation.execution.local
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
 
 class LocalExecutionJob(job: IJob, id: IExecutionJobId) extends ExecutionJob[Environment[IExecutionJob]](LocalExecutionEnvironment, job, id) {
-    var state: ExecutionState = null
+    var state: ExecutionState = READY
 }

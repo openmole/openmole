@@ -174,8 +174,8 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
     sample match {
       case SampleType.WAITING =>
         for (executionJob <- allExecutionjobs) {
-          if(executionJob.state == ExecutionState.SUBMITED) {
-            stat += curTime - executionJob.batchJob.timeStemp(ExecutionState.SUBMITED)
+          if(executionJob.state == ExecutionState.SUBMITTED) {
+            stat += curTime - executionJob.batchJob.timeStemp(ExecutionState.SUBMITTED)
           }
         }
       case SampleType.RUNNING =>
@@ -191,7 +191,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
 
   private def getSampleType(executionState: ExecutionState): Option[SampleType] = {
     executionState match {
-      case ExecutionState.SUBMITED => Some(SampleType.WAITING)
+      case ExecutionState.SUBMITTED => Some(SampleType.WAITING)
       case ExecutionState.RUNNING => Some(SampleType.RUNNING)
       case _ => None
     }

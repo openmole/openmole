@@ -19,7 +19,7 @@ package org.openmole.core.model.execution;
 public enum ExecutionState {
 
     READY,
-    SUBMITED,
+    SUBMITTED,
     RUNNING,
     DONE,
     FAILED,

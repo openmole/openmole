@@ -39,6 +39,18 @@ object QualityControl {
     }
   }
   
+  def withQualityControl[A](qualityControl: QualityControl, op: => A): A = {
+    try {
+      val ret = op
+      qualityControl.success
+      ret
+    } catch {
+      case e =>
+        qualityControl.failed
+        throw e
+    }
+  }
+  
 }
 
 class QualityControl {
