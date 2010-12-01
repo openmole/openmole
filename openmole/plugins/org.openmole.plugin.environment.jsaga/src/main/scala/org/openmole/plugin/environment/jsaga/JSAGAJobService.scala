@@ -89,6 +89,8 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
         os.close
       }
 
+      //println(fromFile(script).getLines.mkString)
+      
       val jobDescription = buildJobDescription(runtime, script, environment.attributes)
       val job = jobServiceCache.createJob(jobDescription)
       job.run

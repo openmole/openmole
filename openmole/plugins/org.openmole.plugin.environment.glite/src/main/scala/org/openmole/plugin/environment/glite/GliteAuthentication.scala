@@ -177,6 +177,8 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
   def initContext(ctx: Context): Long = {
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
+  
+    //Logger.getLogger(classOf[GliteAuthentication].getName).info(CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
   
     val proxyDuration = myProxy match {
@@ -201,7 +203,9 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       if (getCertType.equalsIgnoreCase("p12")) {
         ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath)
       } else if (getCertType.equalsIgnoreCase("pem")) {
+        //Logger.getLogger(classOf[GliteAuthentication].getName).info(getCertPath)
         ctx.setAttribute(Context.USERCERT, getCertPath)
+        //Logger.getLogger(classOf[GliteAuthentication].getName).info(getKeyPath)
         ctx.setAttribute(Context.USERKEY, getKeyPath)
       } else {
         throw new UserBadDataError("Unknown certificate type " + getCertType)
@@ -209,6 +213,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
       val keyPassword = {
         val pass = Activator.getWorkspace.preference(GliteEnvironment.PasswordLocation)
+        // Logger.getLogger(classOf[GliteAuthentication].getName).info(pass)
         if(pass == null) "" else pass
       }
 
@@ -217,9 +222,12 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       if (!fqan.isEmpty)  ctx.setAttribute(VOMSContext.USERFQAN, fqan)
       
     }
-
+    //Logger.getLogger(classOf[GliteAuthentication].getName).info(proxy.getAbsolutePath)
     ctx.setAttribute(Context.USERPROXY, proxy.getAbsolutePath)
+    // Logger.getLogger(classOf[GliteAuthentication].getName).info(vomsURL)
     ctx.setAttribute(Context.SERVER, vomsURL)
+    
+    //Logger.getLogger(classOf[GliteAuthentication].getName).info(voName)
     ctx.setAttribute(Context.USERVO, voName)
 
     ctx.getAttribute(Context.USERID)
