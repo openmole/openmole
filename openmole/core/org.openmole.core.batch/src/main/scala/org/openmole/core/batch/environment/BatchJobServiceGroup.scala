@@ -71,7 +71,7 @@ class BatchJobServiceGroup(val expulseThreshold: Int) {
                 math.pow(quality.runnig.toDouble / quality.submitted, 2)
               } else Double.PositiveInfinity
               
-              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
               
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness
