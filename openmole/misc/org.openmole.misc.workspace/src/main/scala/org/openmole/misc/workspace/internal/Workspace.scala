@@ -53,12 +53,12 @@ class Workspace(var _location: File) extends IWorkspace {
   this += (UniqueID, UUID.randomUUID.toString)
     
   this += (passwordTest, passwordTestString)
-   
+  
+  @ChangeState
   override def location_= (location: File) = {
     _location = location
   }
   
-  @ChangeState
   override def location: File = {
     if (!_location.exists) _location.mkdirs
     _location

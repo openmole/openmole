@@ -89,21 +89,17 @@ class BatchStorageGroup(val expulseThreshold: Int) {
     }
   }
 
-  def +=(service: BatchStorage) = {
-    synchronized {
-      resources :+= service
-      val usageControl = BatchStorageControl.usageControl(service.description)
-      Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
-    }
+  def +=(service: BatchStorage) = synchronized {
+
+    resources :+= service
+    val usageControl = BatchStorageControl.usageControl(service.description)
+    Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+    
     waiting.release
   }
     
 
-  def get(index: Int): BatchStorage = {
-    synchronized {
-      resources(index)
-    }
-  }
+  def get(index: Int): BatchStorage = resources(index)
 
   def isEmpty: Boolean = resources.isEmpty
 

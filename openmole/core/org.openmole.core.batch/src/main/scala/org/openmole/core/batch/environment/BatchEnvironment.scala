@@ -22,6 +22,8 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicInteger
 
 import java.util.concurrent.locks.ReentrantLock
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.internal.Activator
@@ -49,11 +51,11 @@ object BatchEnvironment {
 
 
 abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment[BatchExecutionJob] {
-
-  @transient lazy val _jobServices = new BatchJobServiceGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
-  @transient lazy val _storages = new BatchStorageGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
-  @transient lazy val _jsLock = new ReentrantLock
-  @transient lazy val _storageLock = new ReentrantLock
+  @transient private lazy val _storagesLock = new ReentrantLock
+  @transient private lazy val _jobServicesLock = new ReentrantLock
+  
+  @transient private lazy val _jobServices = new BatchJobServiceGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient private lazy val _storages = new BatchStorageGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
@@ -72,7 +74,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   @transient lazy val runtime: File = new File(Activator.getWorkspace.preference(BatchEnvironment.RuntimeLocation))
   
-  protected def selectStorages(storages: BatchStorageGroup) = {
+  protected def selectStorages(storageGroup: BatchStorageGroup) = {
         
     val stors = allStorages
 
@@ -84,7 +86,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
 
         override def run = {
           try {
-            if (storage.test)  storages += storage
+            if (storage.test) storageGroup += storage
           } finally {
             nbLeftRunning.decrementAndGet
             oneFinished.release
@@ -95,13 +97,13 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
       Activator.getExecutorService.getExecutorService(ExecutorType.OWN).submit(r)
     }
 
-    while (storages.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
-    
-    if (storages.isEmpty)  throw new InternalProcessingError("No storage available")
+    while (storageGroup.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
+  
+    if (storageGroup.isEmpty)  throw new InternalProcessingError("No storage available")
     
   }
 
-  protected def selectWorkingJobServices(jobServices: BatchJobServiceGroup) = {
+  protected def selectWorkingJobServices(jobServiceGroup: BatchJobServiceGroup) = {
     val allJobServicesList = allJobServices
     val done = new Semaphore(0)
     val nbStillRunning = new AtomicInteger(allJobServicesList.size)
@@ -112,7 +114,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
 
         override def run = {
           try {
-            if (js.test) jobServices += js
+            if (js.test) jobServiceGroup += js
           } finally {
             nbStillRunning.decrementAndGet
             done.release
@@ -123,31 +125,27 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
       Activator.getExecutorService.getExecutorService(ExecutorType.OWN).submit(test)
     }
     
-    while (jobServices.isEmpty && nbStillRunning.get > 0) done.acquire
+    while (jobServiceGroup.isEmpty && nbStillRunning.get > 0) done.acquire
 
-    if (jobServices.isEmpty) throw new InternalProcessingError("No job submission service available")
+    if (jobServiceGroup.isEmpty) throw new InternalProcessingError("No job submission service available")
 
   }
 
 
   def jobServices: BatchJobServiceGroup = {
-    _jsLock.lock
+    _jobServicesLock.lock 
     try {
       if (_jobServices.isEmpty) selectWorkingJobServices(_jobServices)
       _jobServices
-    } finally {
-      _jsLock.unlock
-    }
+    } finally _jobServicesLock.unlock 
   }
 
   def storages: BatchStorageGroup = {
-    _storageLock.lock
+    _storagesLock.lock
     try {
       if (_storages.isEmpty)  selectStorages(_storages)
       _storages
-    } finally {
-      _storageLock.unlock
-    }
+    } finally _storagesLock.unlock
   }
 
   def allStorages: Iterable[BatchStorage]

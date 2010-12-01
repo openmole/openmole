@@ -17,20 +17,26 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.commons.tools.service.LockRepository
 import scala.collection.mutable.HashMap
 
 object AuthenticationRegistry {
-
+  @transient private lazy val lockRepository = new LockRepository[BatchAuthenticationKey]
   private val registry = new HashMap[BatchAuthenticationKey, BatchAuthentication]
     
-  def isRegistred(authenticationKey: BatchAuthenticationKey): Boolean = synchronized {
+  def isRegistred(authenticationKey: BatchAuthenticationKey): Boolean = {
     registry.contains(authenticationKey)
   }
 
   def initAndRegisterIfNotAllreadyIs(key: BatchAuthenticationKey, authentication: BatchAuthentication) = synchronized {
-    if(!isRegistred(key)) {
-      authentication.initialize
-      registry.put(key, authentication)
+    lockRepository.lock(key)
+    try {
+      if(!isRegistred(key)) {
+        authentication.initialize
+        registry.put(key, authentication)
+      }
+    } finally {
+      lockRepository.unlock(key)
     }
   }
                                                                                     
