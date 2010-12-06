@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,30 +17,24 @@
 
 package org.openmole.plugin.domain.file
 
-
 import java.io.File
 import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import scala.collection.JavaConversions._
+import org.openmole.commons.tools.io.FileUtil._
 
-class ListFilesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDomain[File] {
+class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IFiniteDomain[File] {
 
-    def this(dir: File) = this(dir, None)
-
-    def this(dir: File, pattern: String) = {
-        this(dir, Some(new FileFilter {
-
-            override def accept(file: File): Boolean = file.getName.matches(pattern)
+  def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
+    this(dir, new FileFilter {
             
-        }))
-    }
-
-    override def computeValues(global: IContext, context: IContext): Iterable[File] = {
-      filter match {
-        case None => dir.listFiles
-        case Some(filter) => dir.listFiles(filter)
-      }
-    }
-
+        override def accept(file: File): Boolean = {
+          file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
+        }
+            
+      })
+  }
+    
+  override def computeValues(global: IContext, context: IContext): Iterable[File] = listRecursive(dir, filter)
+  
 }

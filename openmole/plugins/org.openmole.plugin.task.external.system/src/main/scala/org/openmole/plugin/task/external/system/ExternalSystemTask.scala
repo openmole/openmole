@@ -36,7 +36,8 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
    
     listInputFiles(global, context, progress).foreach( f => {
         val to = new File(tmpDir, f.name)
-
+        
+        to.getAbsoluteFile.getParentFile.mkdirs
         copy(f.file, to)
 
         applyRecursive(to, (file: File) => {

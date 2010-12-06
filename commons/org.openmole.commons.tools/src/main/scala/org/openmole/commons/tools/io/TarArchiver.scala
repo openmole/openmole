@@ -41,7 +41,8 @@ object TarArchiver extends IArchiver {
       throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
     }
 
-    val tos = new TarArchiveOutputStream(archive);
+    val tos = new TarArchiveOutputStream(archive)
+    tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
 
     try {
       val toArchive = new Stack[(File, String)]

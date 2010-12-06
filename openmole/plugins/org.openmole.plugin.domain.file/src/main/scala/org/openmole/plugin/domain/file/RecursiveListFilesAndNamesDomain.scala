@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -21,23 +21,33 @@ import java.io.File
 import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import scala.collection.JavaConversions._
+import org.openmole.commons.tools.io.FileUtil._
 
-class ListFilesAndNamesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDomain[(File,String)] {
+class RecursiveListFilesAndNamesDomain(dir: File, filter: FileFilter) extends IFiniteDomain[(File, String)] {
 
-  @transient lazy val listFiles = new ListFilesDomain(dir, filter)
-  
-  def this(dir: File) = this(dir, None)
-
-  def this(dir: File, pattern: String) = {
-    this(dir, Some(new FileFilter {
-
-          override def accept(file: File): Boolean = file.getName.matches(pattern)
+  def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
+    this(dir, new FileFilter {
             
-        }))
+        override def accept(file: File): Boolean = {
+          file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
+        }
+            
+      })
   }
+  
+  def this(dir: File, shouldBeAFile: Boolean) = {
+    this(dir, new FileFilter {
+            
+        override def accept(file: File): Boolean = {
+          (if(shouldBeAFile) file.isFile else true)
+        }
+            
+      })
+  }
+  
+  def this(dir: File) = this(dir, false)
 
   override def computeValues(global: IContext, context: IContext): Iterable[(File, String)] = {
-    listFiles.computeValues(global,context).map(f => (f,f.getName))
+    listRecursive(dir, filter).map{ f: File => (f, f.getAbsolutePath.substring(dir.getAbsolutePath.size + 1))}
   }
 }

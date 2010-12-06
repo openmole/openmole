@@ -18,6 +18,7 @@
 package org.openmole.commons.tools.io
 
 import java.io.File
+import java.io.FileFilter
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -62,6 +63,13 @@ object FileUtil {
     return lastModification
   }
 
+  
+  def listRecursive(file: File, filter: FileFilter): Iterable[File] = {
+    val ret = new ListBuffer[File]
+    applyRecursive(file, { f: File => if(filter.accept(f)) ret += f})
+    ret
+  }
+  
   def applyRecursive(file: File, operation: File => Unit): Unit = {
     applyRecursive(file, operation, Set.empty)
   }
