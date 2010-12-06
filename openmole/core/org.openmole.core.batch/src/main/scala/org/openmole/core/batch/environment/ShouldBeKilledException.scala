@@ -2,7 +2,7 @@
  * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,16 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-import java.util.logging.Level
-import java.util.logging.Logger
-
-class BatchJobKiller(job: BatchJob) extends Runnable {
-
-  override def run = {
-    try {
-      job.kill
-    } catch {
-      case e => Logger.getLogger(classOf[BatchJobKiller].getName).log(Level.WARNING, "Could not kill job " + job.toString(), e)
-    } 
-  }
-}
+class ShouldBeKilledException(message: String) extends Exception(message)

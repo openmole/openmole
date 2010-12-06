@@ -22,7 +22,6 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchJobServiceDescription
-import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.control.BatchJobServiceControl._
 
@@ -60,23 +59,19 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
 
   def kill: Unit = withToken(jobServiceDescription,kill(_))
   
-  def kill(token: AccessToken)= synchronized {
-    try {
-      deleteJob
-    } finally {
-      state = KILLED
-    }
+  def kill(token: AccessToken) = synchronized {
+    state = KILLED
+    deleteJob
   }
 
   def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
-
 
   def updatedState(token: AccessToken): ExecutionState = synchronized {
     state = updateState
     state
   }
 
-  def state: ExecutionState =  _state
+  def state: ExecutionState = _state
 
   def timeStemp(state: ExecutionState): Long = timeStemps(state.ordinal)
   
@@ -87,7 +82,6 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
       case Some(stemp) => return timeStemp(currentState) - stemp
       case None => throw new InternalProcessingError("Bug should allways have submitted time stemp.")
     }
-
   }
 
   def deleteJob

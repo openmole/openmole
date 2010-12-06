@@ -29,7 +29,6 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy
-import org.openmole.plugin.environment.glite.internal.JobShaker
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
@@ -71,7 +70,6 @@ object GliteEnvironment {
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
   val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
   val JobShakingProbability = new ConfigurationLocation("GliteEnvironment", "JobShakingProbability")
-
 
   Activator.getWorkspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
 
@@ -117,7 +115,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   val numberOfJobUnderMin = Activator.getWorkspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
        
   Activator.getUpdater.registerForUpdate(new OverSubmissionAgent(this, DicotomicWorkloadStrategy(overSubmissionWaitingRatio, overSubmissionRunningRatio, overSubmissionEpsilonRatio), minJobs, numberOfJobUnderMin), ExecutorType.OWN, overSubmissionInterval)
-  Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
+ // Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
 
@@ -176,6 +174,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
   @transient lazy val authenticationKey = new GliteAuthenticationKey(voName, vomsURL)
 
+  
   private def getBDII: BDII = {
     new BDII(bdii)
   }

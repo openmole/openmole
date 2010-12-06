@@ -79,8 +79,8 @@ class BatchJobServiceGroup(val expulseThreshold: Int) {
           
         }
              
-       if (notLoaded.size > 0) {
-         var selected = RNG.nextDouble * totalFitness
+        if (notLoaded.size > 0) {
+          var selected = RNG.nextDouble * totalFitness
           
           for (service <- notLoaded) {    
             if(ret == null && selected <= service._3) ret = (service._1, service._2)

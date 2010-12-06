@@ -18,13 +18,35 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.plugin.environment.glite.internal.Activator
 import org.openmole.plugin.environment.jsaga.JSAGAJob
+import org.openmole.commons.tools.service.RNG
+import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState
+
+object GliteJob {
+  @transient lazy val jobShakingProbability = Activator.getWorkspace.preferenceAsDouble(GliteEnvironment.JobShakingProbability)
+  @transient lazy val jobShakingInterval = Activator.getWorkspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
+}
 
 class GliteJob(jobId: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(jobId, jobService){
 
-    override def updateState: ExecutionState = {
-        if(proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.");
-        return super.updateState
+  var lastUpdate = System.currentTimeMillis
+  
+  override def updateState: ExecutionState = {
+    val ret = super.updateState
+    lastUpdate = System.currentTimeMillis
+    
+    if(!ret.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
+    
+    if(ret == ExecutionState.SUBMITTED) {
+      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / GliteJob.jobShakingInterval)
+      if(nbInterval < 1) if(RNG.nextDouble < nbInterval * GliteJob.jobShakingProbability) {
+        throw new ShouldBeKilledException("Killed in shaking process")
+      } else for(i <- 0 to nbInterval.toInt) if(RNG.nextDouble < GliteJob.jobShakingProbability){
+        throw new ShouldBeKilledException("Killed in shaking process")
+      }
     }
+    ret   
+  }
 }

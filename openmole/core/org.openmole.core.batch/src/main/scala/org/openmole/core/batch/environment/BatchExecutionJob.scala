@@ -77,14 +77,14 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
       if (oldState == SUBMITTED && newState == RUNNING) {
         executionEnvironment.sample(SampleType.WAITING, batchJob.lastStateDurration, job)
-      }
+      } 
     }
       
+    if(oldState != batchJob.state && batchJob.state == KILLED) kill
     state
   }
 
   override def state: ExecutionState = {
-    //LOGGER.info("Get the state " + killed.get)
     if (killed.get) return KILLED
     if (batchJob == null) return READY
     
@@ -122,9 +122,12 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
     } catch {
       case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
-      case e =>
+      case (e: ShouldBeKilledException) => 
+        LOGGER.log(Level.FINE, e.getMessage)
         kill
+      case e =>
         LOGGER.log(Level.WARNING, "Error in job update", e)
+        kill
     }
 
     return !killed.get
