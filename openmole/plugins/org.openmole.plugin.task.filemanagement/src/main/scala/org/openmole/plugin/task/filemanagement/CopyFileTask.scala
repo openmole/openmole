@@ -29,7 +29,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import scala.collection.mutable.ListBuffer
 
-import org.openmole.commons.tools.io.FileUtil.copy
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
@@ -63,7 +63,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
           val to = new File(dir, name)
           copy(from, to)
 
-          if(remove) from.delete
+          if(remove) recursiveDelete(from)
         })
 
       listToCopyWithNameInVariable foreach ( cpList => {

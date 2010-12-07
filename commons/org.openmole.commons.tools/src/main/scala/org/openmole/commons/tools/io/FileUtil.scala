@@ -109,6 +109,7 @@ object FileUtil {
   }
 
   def recursiveDelete(dir: File): Boolean = {
+    if(!dir.isDirectory) return dir.delete
     if (dir.exists) {
       val files = dir.listFiles
       for (i <- 0 until files.length) {
