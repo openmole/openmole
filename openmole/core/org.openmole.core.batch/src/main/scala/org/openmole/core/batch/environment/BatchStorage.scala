@@ -35,6 +35,7 @@ import org.openmole.core.batch.file.URIFileCache
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.ConfigurationLocation
 
@@ -77,6 +78,17 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
   def persistentSpace(token: AccessToken): IURIFile = synchronized {
     if (persistentSpaceVar == null) {
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
+      
+      val service = Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE)
+      
+      for (dir <- persistentSpaceVar.list(token)) {
+        val child = new URIFile(persistentSpaceVar, dir)
+        if(!ReplicaCatalog.isInCatalog(child.location)) {
+          LOGGER.log(Level.FINE, "Removing {0} because it is not in catalog anymore.", dir)
+          service.submit(new URIFileCleaner(child, false, false))
+        } else LOGGER.log(Level.FINE, "Not removing {0} because it is in catalog.", dir)
+      }
+        
     }
     persistentSpaceVar
   }
@@ -88,7 +100,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
 
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
 
-      val service = Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE);
+      val service = Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE)
       val removalDate = System.currentTimeMillis - Activator.getWorkspace.preferenceAsDurationInMs(TmpDirRemoval);
 
       for (dir <- tmpNoTime.list(token)) {

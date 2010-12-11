@@ -26,6 +26,7 @@ import com.db4o.defragment.DefragmentConfig
 import com.db4o.query.Predicate
 import com.db4o.ta.TransparentPersistenceSupport
 import java.io.File
+import java.net.URI
 import java.util.concurrent.Future
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -114,6 +115,14 @@ object ReplicaCatalog {
       })
   }
 
+  def isInCatalog(uri: String): Boolean = {
+    !objServeur.query(new Predicate[Replica](classOf[Replica]){
+        
+        override def `match`(replica: Replica): Boolean = replica.destination.location.equals(uri)
+      
+      }).isEmpty
+  }
+  
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
 
@@ -270,7 +279,8 @@ object ReplicaCatalog {
     configuration.objectClass(classOf[Replica]).objectField("source").indexed(true)
     configuration.objectClass(classOf[Replica]).objectField("storageDescription").indexed(true)
     configuration.objectClass(classOf[Replica]).objectField("authenticationKey").indexed(true)
-        
+    configuration.objectClass(classOf[URIFile]).objectField("locatiton").indexed(true)
+    
     configuration
   }
 
