@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.external.system
 
+import java.util.logging.Logger
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._
@@ -34,8 +35,11 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
   def prepareInputFiles(global: IContext, context: IContext, progress: IProgress, tmpDir: File) {
    
-    listInputFiles(global, context, progress).foreach( f => {
+    listInputFiles(global, context, progress).foreach( f => {        
         val to = new File(tmpDir, f.name)
+        
+        //Logger.getLogger(classOf[ExternalSystemTask].getName).info("Copy " + f.file.getAbsolutePath + " to " + to.getAbsolutePath)
+
         
         to.getAbsoluteFile.getParentFile.mkdirs
         copy(f.file, to)
