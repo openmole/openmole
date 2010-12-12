@@ -152,7 +152,10 @@ object ReplicaCatalog {
               insert(newReplica)
               newReplica 
           }
-        case Some(r) => r
+        case Some(r) => {
+            LOGGER.log(Level.INFO, "Found Replica for {0}.", src.getAbsolutePath)
+            r
+        }
       }
       objServeur.commit         
       replica
