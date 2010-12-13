@@ -18,6 +18,7 @@
 package org.openmole.misc.fileservice.internal
 
 import java.io.File
+import java.util.logging.Logger
 import org.openmole.commons.tools.cache.AssociativeCache
 import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
@@ -58,8 +59,8 @@ class FileService extends IFileService {
 
     invalidateDirCacheIfModified(file, cacheLenght)
 
-    return archiveCache.cache(cacheLenght, file.getAbsolutePath(), {
-        val ret = Activator.getWorkspace().newFile("archive", ".tar");
+    return archiveCache.cache(cacheLenght, file.getAbsolutePath, {
+        val ret = Activator.getWorkspace.newFile("archive", ".tar");
         val os = new FileOutputStream(ret)
 
         try {
@@ -68,6 +69,8 @@ class FileService extends IFileService {
           os.close
         }
 
+        Logger.getLogger(classOf[FileService].getName).info("Archive " + ret.getAbsolutePath)
+        
         return new CachedArchiveForDir(ret, FileUtil.lastModification(file))
       })
   }
