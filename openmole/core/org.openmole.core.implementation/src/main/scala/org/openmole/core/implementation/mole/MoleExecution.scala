@@ -28,12 +28,12 @@ import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.internal.Activator
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.job.MoleJob
-import org.openmole.core.implementation.job.MoleJobId
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -41,7 +41,6 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.apache.commons.collections15.multimap.MultiHashMap
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified
-import org.openmole.core.model.job.IMoleJobId
 import org.openmole.core.model.job.ITicket
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleJobGroup
@@ -256,7 +255,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  override def nextJobId: IMoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
+  override def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
     
   override def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution] = {
     inProgress.get(job) match{

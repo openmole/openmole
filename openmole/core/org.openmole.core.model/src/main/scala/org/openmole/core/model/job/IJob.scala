@@ -20,6 +20,6 @@ package org.openmole.core.model.job
 
 trait IJob {
   def moleJobs: Iterable[IMoleJob]
-  def apply(id: IMoleJobId):  IMoleJob 
+  def apply(id: MoleJobId):  IMoleJob 
   def allMoleJobsFinished: Boolean
 }

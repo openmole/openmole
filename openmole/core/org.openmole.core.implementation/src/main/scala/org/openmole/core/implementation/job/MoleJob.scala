@@ -26,7 +26,7 @@ import org.openmole.core.implementation.task.GenericTask
 import org.openmole.core.implementation.tools.LocalHostName
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.IMoleJobId
+import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IGenericTask
@@ -38,7 +38,7 @@ object MoleJob {
   val LOGGER = Logger.getLogger(classOf[MoleJob].getName)
 }
 
-class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: IContext, private var _context: IContext, val id: IMoleJobId) extends IMoleJob {
+class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: IContext, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
   
   val progress = new Progress
     

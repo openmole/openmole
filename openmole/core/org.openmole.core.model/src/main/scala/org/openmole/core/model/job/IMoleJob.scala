@@ -29,7 +29,7 @@ object IMoleJob {
   implicit val ordering = new Ordering[IMoleJob] {
     
     override def compare(left: IMoleJob, right: IMoleJob) = {
-      IMoleJobId.ordering.compare(left.id, right.id)
+      MoleJobId.ordering.compare(left.id, right.id)
     }
   }
 }
@@ -54,7 +54,7 @@ trait IMoleJob {
 
   def progress: IProgress
 
-  def id: IMoleJobId
+  def id: MoleJobId
 
   def cancel 
     

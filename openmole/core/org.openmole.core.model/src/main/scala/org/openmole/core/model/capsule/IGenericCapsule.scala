@@ -18,7 +18,7 @@
 package org.openmole.core.model.capsule
 
 import org.openmole.core.model.data.{IDataChannel,IContext}
-import org.openmole.core.model.job.{IMoleJob,IMoleJobId}
+import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.{IGenericTransition,ISlot}
 
@@ -125,6 +125,6 @@ trait IGenericCapsule {
    * @param jobId the id of the job
    * @return the job
    */
-  def toJob(global: IContext, context: IContext, jobId: IMoleJobId): IMoleJob
+  def toJob(global: IContext, context: IContext, jobId: MoleJobId): IMoleJob
 
 }

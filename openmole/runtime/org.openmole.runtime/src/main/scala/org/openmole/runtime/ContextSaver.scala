@@ -20,14 +20,14 @@ package org.openmole.runtime
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.IMoleJobId
+import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
 
 class ContextSaver extends IObjectListener[IMoleJob] {
 
-  var _results = new TreeMap[IMoleJobId, IContext]
-  def results: TreeMap[IMoleJobId, IContext] = _results
+  var _results = new TreeMap[MoleJobId, IContext]
+  def results: TreeMap[MoleJobId, IContext] = _results
 
   override def eventOccured(job: IMoleJob) = synchronized {
     job.state match {

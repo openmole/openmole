@@ -31,7 +31,7 @@ import org.openmole.core.model.mole.{IMoleExecution,ISubMoleExecution}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.data.{IContext,IDataChannel}
-import org.openmole.core.model.job.{IMoleJob,IMoleJobId,ITicket}
+import org.openmole.core.model.job.{IMoleJob,MoleJobId,ITicket}
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
@@ -97,7 +97,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
 
-  override def toJob(global: IContext, context: IContext, jobId: IMoleJobId): IMoleJob = {
+  override def toJob(global: IContext, context: IContext, jobId: MoleJobId): IMoleJob = {
          
     _task match {
       case Some(t) =>

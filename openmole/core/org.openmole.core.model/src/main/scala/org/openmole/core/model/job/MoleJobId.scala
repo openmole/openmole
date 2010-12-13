@@ -17,10 +17,10 @@
 
 package org.openmole.core.model.job
 
-object IMoleJobId {
+object MoleJobId {
   
-  implicit val ordering = new Ordering[IMoleJobId] {
-    override def compare(left: IMoleJobId, right: IMoleJobId) = {
+  implicit val ordering = new Ordering[MoleJobId] {
+    override def compare(left: MoleJobId, right: MoleJobId) = {
       val comp = left.id.compare(right.id)
       if(comp != 0) comp 
       else left.executionId.compare(right.executionId)
@@ -29,11 +29,5 @@ object IMoleJobId {
   
 }
 
+case class MoleJobId(val executionId: String, val id: Long) 
 
-trait IMoleJobId {
-  def id: Long
-  def executionId: String
-  
-  override def equals(obj: Any) = (id,executionId).equals(obj)
-  override def hashCode = (id,executionId).hashCode
-}

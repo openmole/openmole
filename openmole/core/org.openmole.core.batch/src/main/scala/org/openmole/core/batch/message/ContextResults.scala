@@ -18,6 +18,6 @@
 package org.openmole.core.batch.message
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJobId
+import org.openmole.core.model.job.MoleJobId
 
-class ContextResults(val results: PartialFunction[IMoleJobId, IContext])
+class ContextResults(val results: PartialFunction[MoleJobId, IContext])

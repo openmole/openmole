@@ -19,16 +19,16 @@ package org.openmole.core.implementation.job
 
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.IMoleJobId
+import org.openmole.core.model.job.MoleJobId
 import scala.collection.immutable.TreeMap
 
 class Job extends IJob {
 
-    var _moleJobs = new TreeMap[IMoleJobId, IMoleJob]
+    var _moleJobs = new TreeMap[MoleJobId, IMoleJob]
 
     override def moleJobs: Iterable[IMoleJob] = _moleJobs.values
        
-    override def apply(id: IMoleJobId) = _moleJobs(id)
+    override def apply(id: MoleJobId) = _moleJobs(id)
 
     def +=(moleJob: IMoleJob) = synchronized { _moleJobs += ((moleJob.id, moleJob)) }
 

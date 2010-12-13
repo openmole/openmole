@@ -23,21 +23,4 @@ object BatchServiceDescription {
   }
 }
 
-class BatchServiceDescription(val description: String) {
-
-    override def toString: String = description
-    
-    override def equals(obj: Any): Boolean =  {    
-        if (obj == null) return false      
-        if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
-        
-        val other = obj.asInstanceOf[BatchServiceDescription]
-        if(this.description == null) return other.description == null
-        return this.description.equals(other.description)
-    }
-
-    override def hashCode: Int = {
-      if(description == null) 0
-      else description.hashCode
-    }
-}
+case class BatchServiceDescription(description: String)

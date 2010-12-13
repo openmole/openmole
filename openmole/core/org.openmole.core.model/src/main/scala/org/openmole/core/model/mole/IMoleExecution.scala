@@ -23,7 +23,7 @@ import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.IMoleJobId
+import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITicket
 
 object IMoleExecution {
@@ -55,7 +55,7 @@ trait IMoleExecution {
     def nextTicket(parent: ITicket): ITicket
     def register(subMoleExecution: ISubMoleExecution)
 
-    def nextJobId: IMoleJobId
+    def nextJobId: MoleJobId
 
     def localCommunication: ILocalCommunication
 
