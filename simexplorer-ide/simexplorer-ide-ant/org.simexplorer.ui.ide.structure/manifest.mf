@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: org.simexplorer.ui.ide.structure
-OpenIDE-Module-Layer: org/simexplorer/ui/ide/structure/layer.xml
-OpenIDE-Module-Localizing-Bundle: org/simexplorer/ui/ide/structure/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

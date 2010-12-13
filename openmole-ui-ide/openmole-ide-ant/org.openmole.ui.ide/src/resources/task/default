@@ -1,6 +1,0 @@
-name=defaultTaskName
-impl= org.openmole.ui.ide.workflow.implementation.TaskModelUI
-bg-color=255,255,255
-border-color=0,0,0
-bg-img=resources/img/thumb/default.png
-thumb-img=resources/img/thumb/default.png

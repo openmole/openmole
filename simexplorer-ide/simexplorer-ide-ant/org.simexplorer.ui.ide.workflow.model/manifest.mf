@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: org.simexplorer.ui.ide.workflow.model
-OpenIDE-Module-Localizing-Bundle: org/simexplorer/ui/ide/workflow/model/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

@@ -1,4 +1,0 @@
-== TODO ==
-
- * exploration output is not redirect to the dedicated output window
- * exploration without nested task fails

@@ -1,7 +1,0 @@
-Bundle-Activator: org.simexplorer.ui.ide.osgiinit.Installer
-Bundle-SymbolicName: org.simexplorer.ui.ide.osgiinit
-Bundle-Version: 0.3
-Import-Package: org.osgi.framework
-Manifest-Version: 1.0
-OpenIDE-Module-Localizing-Bundle: org/simexplorer/ui/ide/osgiinit/Bundle.properties
-

@@ -1,5 +1,0 @@
-name=Mole Task
-impl= org.openmole.ui.ide.workflow.implementation.MoleTaskModelUI
-bg-color=238,255,170
-border-color=68,120,33
-thumb-img=resources/img/thumb/moleTask.png
