@@ -23,4 +23,4 @@ object BatchServiceDescription {
   }
 }
 
-case class BatchServiceDescription(description: String)
+case class BatchServiceDescription(val description: String)

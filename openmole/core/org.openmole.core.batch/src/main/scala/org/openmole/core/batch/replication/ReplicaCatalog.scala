@@ -125,7 +125,7 @@ object ReplicaCatalog {
   
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
-
+    LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
     val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
     locks.lock(key)
 
@@ -153,7 +153,7 @@ object ReplicaCatalog {
               newReplica 
           }
         case Some(r) => {
-            LOGGER.log(Level.INFO, "Found Replica for {0}.", src.getAbsolutePath)
+            LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath)
             r
         }
       }
@@ -246,7 +246,7 @@ object ReplicaCatalog {
   }
 
   def clean(replica: Replica): Option[Future[_]] = synchronized {
-    //LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
+    LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
 
     remove(replica)
 
