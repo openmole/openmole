@@ -17,6 +17,7 @@
 
 package org.openmole.commons.tools.cache
 
+import java.util.logging.Logger
 import org.openmole.commons.tools.service.LockRepository
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.WeakHashMap
@@ -50,6 +51,8 @@ class AssociativeCache[K, T] {
   }
 
   def cache(cacheAssociation: Object, key: K, cachable: => T): T = {
+    //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Get cache for " + key)
+    
     val cache = cacheMap(cacheAssociation)
     cache.get(key) match {
       case Some(elt) => return elt
@@ -59,8 +62,14 @@ class AssociativeCache[K, T] {
     lockRepository.lock(key)
     try {
       cache.getOrElse(key, {
+          Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Not cached for key " + key)
+          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info(cache.toString)
+          
           val ret = cachable
-          cache.put(key, ret)
+          cache.synchronized {cache += ((key, ret))}
+ 
+          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info(cache.toString)
+
           ret
         })
     } finally {
@@ -70,13 +79,11 @@ class AssociativeCache[K, T] {
 
   def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
     cacheMaps.synchronized  {
-      cacheMaps.get(cacheAssociation) match {
-        case Some(map) => map
-        case None =>
+      cacheMaps.getOrElse(cacheAssociation,{
           val ret = new HashMap[K,T]
-          cacheMaps(cacheAssociation) = ret
+          cacheMaps += ((cacheAssociation, ret))
           ret
-      }
+      })
     }
   }
 }
