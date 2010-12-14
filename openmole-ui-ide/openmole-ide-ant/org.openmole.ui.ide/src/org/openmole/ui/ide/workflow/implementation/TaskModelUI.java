@@ -34,4 +34,9 @@ public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI<T> {
     public void proceed() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

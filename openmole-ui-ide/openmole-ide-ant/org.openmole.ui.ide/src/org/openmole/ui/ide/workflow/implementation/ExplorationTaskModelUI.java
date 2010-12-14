@@ -26,5 +26,10 @@ public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericT
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 }

@@ -47,13 +47,15 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitor;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.provider.DnDNewTaskCapsuleProvider;
+import scala.Option;
 
 /**
  *
@@ -168,27 +170,27 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         sceneGraphLayout.invokeLayout();
     }
 
-    public void build(IMole mole) throws InternalProcessingError, UserBadDataError {
+    public void build(IMole mole) throws InternalProcessingError, UserBadDataError, Throwable {
 
         setLayout();
 
-        mole.visit(new IVisitor<IGenericTaskCapsule>() {
+        mole.visit(new IVisitor<IGenericCapsule>() {
 
             int i = 0;
 
             @Override
-            public void action(IGenericTaskCapsule visited) throws InternalProcessingError, UserBadDataError {
+            public void action(IGenericCapsule visited) throws InternalProcessingError, UserBadDataError {
                 String nodeID, startNodeId;
-                Iterator<ISlot> itG = visited.getIntputTransitionsSlots().iterator();
+                Iterator<ISlot> itG = (Iterator<ISlot>) visited.intputSlots();
                 while (itG.hasNext()) {
                     ISlot its = itG.next();
                     nodeID = getConnectableName(visited);
                     buildXXTasks(visited, nodeID);
-                    Iterator<IGenericTransition> itT = its.getTransitions().iterator();
+                    Iterator<IGenericTransition> itT = (Iterator<IGenericTransition>) its.transitions();
                     while (itT.hasNext()) {
                         IGenericTransition transition = itT.next();
-                        startNodeId = getConnectableName(transition.getStart());
-                        buildXXTasks(transition.getStart(), startNodeId);
+                        startNodeId = getConnectableName(transition.start());
+                        buildXXTasks(transition.start(), startNodeId);
                         createEdge(startNodeId,
                                 nodeID);
                     }
@@ -199,19 +201,20 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         validate();
     }
 
-    private String getConnectableName(IGenericTaskCapsule tCapsule) {
+    private String getConnectableName(IGenericCapsule tCapsule) {
         String nodeID = "";
-        if (tCapsule.getTask() != null) {
-            nodeID = String.valueOf(tCapsule.getTask().getName());
+        Option<IGenericTask> opt = tCapsule.task();
+        if (opt.isDefined()) {
+            nodeID = String.valueOf(opt.get().name());
         }
         return nodeID;
     }
 
-    private void buildXXTasks(IGenericTaskCapsule tCapsule,
+    private void buildXXTasks(IGenericCapsule tCapsule,
             String nodeID) throws InternalProcessingError, UserBadDataError {
         ITaskCapsuleView connectable = null;
 
-        if (tCapsule.getTask() != null) {
+        if (tCapsule.task() != null) {
             if (!getNodes().contains(nodeID)) {
                 //  connectable = createTaskComposite(tCapsule, nodeID);
                 //  connectable = UIFactory.getInstance().createTaskComposite(this, tCapsule);

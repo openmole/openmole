@@ -16,18 +16,23 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericCapsule;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleModelUI extends CapsuleModelUI<IGenericTaskCapsule> {
+public class TaskCapsuleModelUI extends CapsuleModelUI<IGenericCapsule> {
 
   //  TaskCapsule taskCapsule;
 
     public TaskCapsuleModelUI() {
      //   setTaskCapsule(new TaskCapsule());
+    }
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /*@Override

@@ -31,11 +31,11 @@
     </folder>
     <folder name="Windows2">
         <folder name="Components">
-            <file name="MoleSceneTopComponentTopComponent.settings" url="MoleSceneTopComponentTopComponentSettings.xml"/>
+            <file name="MoleSceneTopComponent.settings" url="MoleSceneTopComponentSettings.xml"/>
         </folder>
         <folder name="Modes">
             <folder name="editor">
-                <file name="MoleSceneTopComponentTopComponent.wstcref" url="MoleSceneTopComponentTopComponentWstcref.xml"/>
+                <file name="MoleSceneTopComponent.wstcref" url="MoleSceneTopComponentWstcref.xml"/>
             </folder>
         </folder>
     </folder>

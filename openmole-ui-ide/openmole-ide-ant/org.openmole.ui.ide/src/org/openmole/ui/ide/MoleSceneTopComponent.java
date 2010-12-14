@@ -57,12 +57,12 @@ public final class MoleSceneTopComponent extends TopComponent {
     private JToolBar toolBar = new JToolBar("SSSE");
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
-    private static final String PREFERRED_ID = "MoleSceneTopComponentTopComponent";
+    private static final String PREFERRED_ID = "MoleSceneTopComponent";
 
     public MoleSceneTopComponent() {
         initComponents();
-        setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponentTopComponent"));
-        setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponentTopComponent"));
+        setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
+        setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
         //FIXME un meilleur endroit pour les inits??
@@ -150,7 +150,7 @@ public final class MoleSceneTopComponent extends TopComponent {
     }
 
     /**
-     * Obtain the MoleSceneTopComponentTopComponent instance. Never call {@link #getDefault} directly!
+     * Obtain the MoleSceneTopComponent instance. Never call {@link #getDefault} directly!
      */
     public static synchronized MoleSceneTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);

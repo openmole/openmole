@@ -21,7 +21,7 @@ import org.openmole.ui.ide.commons.IOType;
 import java.util.HashMap;
 import java.util.Map;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 
 /**
@@ -29,10 +29,10 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 //public abstract class CapsuleModelUI<T extends IGenericTaskCapsule> extends ObjectModelUI implements ICapsuleModelUI<T>{
-public abstract class CapsuleModelUI<T extends IGenericTaskCapsule> extends ObjectModelUI implements ICapsuleModelUI{
+public abstract class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI{
 
     private transient Map<IOType, Integer> nbSlots;
-    private IGenericTaskCapsule taskCapsule;
+    private IGenericCapsule taskCapsule;
     private final static String category = "Task Tapsules";
 
     private void setNbSlots() {

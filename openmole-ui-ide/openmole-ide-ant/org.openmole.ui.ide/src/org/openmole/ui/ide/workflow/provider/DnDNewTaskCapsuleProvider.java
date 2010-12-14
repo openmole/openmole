@@ -21,7 +21,7 @@ import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.UIFactory;
@@ -31,7 +31,7 @@ import org.openmole.ui.ide.workflow.implementation.UIFactory;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class DnDNewTaskCapsuleProvider extends DnDProvider{
-    private IGenericTaskCapsule model;
+    private IGenericCapsule model;
 
     public DnDNewTaskCapsuleProvider(MoleScene molescene) {
         super(molescene);

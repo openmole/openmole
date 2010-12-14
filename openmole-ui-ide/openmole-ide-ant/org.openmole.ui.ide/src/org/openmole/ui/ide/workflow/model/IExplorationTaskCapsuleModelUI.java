@@ -17,12 +17,12 @@
 
 package org.openmole.ui.ide.workflow.model;
 
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.model.capsule.IExplorationCapsule;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public interface IExplorationTaskCapsuleModelUI extends ICapsuleModelUI<IExplorationTaskCapsule>{
-    IExplorationTaskCapsule getTaskCapsule();
+public interface IExplorationTaskCapsuleModelUI extends ICapsuleModelUI<IExplorationCapsule>{
+    IExplorationCapsule getTaskCapsule();
 }

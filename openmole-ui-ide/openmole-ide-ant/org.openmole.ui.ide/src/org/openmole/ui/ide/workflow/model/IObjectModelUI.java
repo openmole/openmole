@@ -16,14 +16,13 @@
  */
 package org.openmole.ui.ide.workflow.model;
 
-import org.openmole.commons.aspect.eventdispatcher.IObjectChangedAsynchronousListener;
+import org.openmole.commons.aspect.eventdispatcher.IObjectListener;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public interface IObjectModelUI <T> extends IObjectChangedAsynchronousListener<T>{
-    @Override
+public interface IObjectModelUI <T> extends IObjectListener<T>{
     void objectChanged(T obj);
     void updateData();
     void setName(String name);

@@ -5,7 +5,7 @@
     <groupId>org.openmole</groupId>
     <version>0.3-SNAPSHOT</version>
 
-    <artifactId>openmole-ide</artifactId>
+    <artifactId>openmole-ui-ide</artifactId>
 
     <name>${project.artifactId} ${project.version}</name>
 
@@ -21,15 +21,13 @@
             <artifactId>org.aspectj.runtime</artifactId>
             <scope>compile</scope>
             <version>1.6.9</version>
-        </dependency>
+        </dependency> 
     </dependencies>
-
 
     <properties>
         <openmole-ide.ant-script>${basedir}/openmole-ide-ant/build.xml</openmole-ide.ant-script>
     </properties>
     
-
     <repositories>
         <repository>
             <id>maven.openmole.org</id>

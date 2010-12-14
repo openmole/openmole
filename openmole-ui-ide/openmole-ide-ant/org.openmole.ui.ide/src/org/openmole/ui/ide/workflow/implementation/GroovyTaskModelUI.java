@@ -30,4 +30,9 @@ public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModel
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

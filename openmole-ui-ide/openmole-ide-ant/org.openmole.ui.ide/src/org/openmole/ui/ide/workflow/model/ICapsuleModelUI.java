@@ -17,13 +17,13 @@
 package org.openmole.ui.ide.workflow.model;
 
 import org.openmole.ui.ide.commons.IOType;
-import org.openmole.core.model.capsule.IGenericTaskCapsule;
+import org.openmole.core.model.capsule.IGenericCapsule;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public interface ICapsuleModelUI<T extends IGenericTaskCapsule> extends IObjectModelUI<T>{
+public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModelUI<T>{
     //IGenericTaskCapsule getTaskCapsule();
  //   void setTaskCapsule(IGenericTaskCapsule taskCapsule);
   //  void setTransitionTo(IGenericTaskCapsule tc);

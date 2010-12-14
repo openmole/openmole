@@ -83,7 +83,7 @@ public class UIFactory implements IUIFactory<Object> {
         TaskCapsuleModelUI tcm = new TaskCapsuleModelUI();
         Widget obUI= null;
         try {
-            obUI = new TaskCapsuleViewUI(scene, tcm, Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE, org.openmole.core.implementation.capsule.TaskCapsule.class));
+            obUI = new TaskCapsuleViewUI(scene, tcm, Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE, org.openmole.core.implementation.capsule.Capsule.class));
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);
         }
@@ -95,15 +95,15 @@ public class UIFactory implements IUIFactory<Object> {
         return (ITaskCapsuleView) obUI;
     }
 
-    @Override
-    public void objectConstructed(Object t) {
-        //   ServiceProxy.getEventDispatcher().registerListner(obj,createTaskModel(obj));
-    }
-
     public static UIFactory getInstance() {
         if (instance == null) {
             instance = new UIFactory();
         }
         return instance;
+    }
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

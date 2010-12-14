@@ -16,17 +16,17 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import org.openmole.core.implementation.capsule.ExplorationTaskCapsule;
-import org.openmole.core.model.capsule.IExplorationTaskCapsule;
+import org.openmole.core.implementation.capsule.ExplorationCapsule;
+import org.openmole.core.model.capsule.IExplorationCapsule;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 //public class TaskCapsuleModelUI extends CapsuleModelUI<IGenericTaskCapsule> {
-public class ExplorationTaskCapsuleModelUI extends CapsuleModelUI<IExplorationTaskCapsule> {
+public class ExplorationTaskCapsuleModelUI extends CapsuleModelUI<IExplorationCapsule> {
 
-    ExplorationTaskCapsule explorationTaskCapsule;
+    ExplorationCapsule explorationTaskCapsule;
 
     public ExplorationTaskCapsuleModelUI() {
         super();
@@ -52,6 +52,11 @@ public class ExplorationTaskCapsuleModelUI extends CapsuleModelUI<IExplorationTa
     }*/
 
     private void setTaskCapsule() {
-        explorationTaskCapsule = new ExplorationTaskCapsule();
+        explorationTaskCapsule = new ExplorationCapsule();
+    }
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
