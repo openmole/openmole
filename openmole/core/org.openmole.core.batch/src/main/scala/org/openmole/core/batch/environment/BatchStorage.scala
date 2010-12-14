@@ -83,9 +83,9 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
       for (dir <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, dir)
         if(!ReplicaCatalog.isInCatalog(child.location)) {
-          LOGGER.log(Level.FINE, "Removing {0} because it is not in catalog anymore.", dir)
+          //LOGGER.log(Level.FINE, "Removing {0} because it is not in catalog anymore.", dir)
           service.submit(new URIFileCleaner(child, false, false))
-        } else LOGGER.log(Level.FINE, "Not removing {0} because it is in catalog.", dir)
+        } //else LOGGER.log(Level.FINE, "Not removing {0} because it is in catalog.", dir)
       }
         
     }

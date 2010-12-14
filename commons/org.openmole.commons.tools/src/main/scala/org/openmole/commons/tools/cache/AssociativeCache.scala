@@ -62,7 +62,7 @@ class AssociativeCache[K, T] {
     lockRepository.lock(key)
     try {
       cache.getOrElse(key, {
-          Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Not cached for key " + key)
+          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Not cached for key " + key)
           //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info(cache.toString)
           
           val ret = cachable

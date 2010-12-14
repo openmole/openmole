@@ -125,7 +125,7 @@ object ReplicaCatalog {
   
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
-    LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
+    //LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
     val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
     locks.lock(key)
 
