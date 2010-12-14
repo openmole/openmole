@@ -33,8 +33,8 @@ class FileService extends IFileService {
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
   class HashWithLastModified(val hash: IHash, val lastModified: Long)
     
-  val hashCach = new AssociativeCache[String, HashWithLastModified](AssociativeCache.SOFT, AssociativeCache.SOFT)
-  val archiveCache = new AssociativeCache[String, CachedArchiveForDir](AssociativeCache.SOFT, AssociativeCache.SOFT)
+  val hashCach = new AssociativeCache[String, HashWithLastModified]
+  val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
   override def hash(file: File): IHash = hash(file, file)
 

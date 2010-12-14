@@ -31,7 +31,6 @@ import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.file.URIFileCache
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.batch.internal.Activator
 import org.openmole.core.batch.file.IURIFile
@@ -169,8 +168,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
         }
 
         try {
-          val fileCache = URIFileCache(testFile, token)
-          val local = fileCache.file(false)
+          val local = testFile.cache(token)
           val input = new FileInputStream(local)
           val resRdm = new Array[Byte](lenght)
         

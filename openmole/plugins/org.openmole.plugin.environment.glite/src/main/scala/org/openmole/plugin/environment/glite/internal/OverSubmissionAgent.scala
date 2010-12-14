@@ -58,7 +58,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
       //var nbJobsByCategory = new HashMap[(IMoleExecution, IStatisticKey), Int]
 
       val curTime = System.currentTimeMillis
-      val timeCache = new AssociativeCache[(IMoleExecution, IStatisticKey, SampleType), Long](AssociativeCache.HARD, AssociativeCache.HARD)
+      val timeCache = new AssociativeCache[(IMoleExecution, IStatisticKey, SampleType), Long]
       var nbJobs = 0
       
       for (job <- registry.allJobs) {

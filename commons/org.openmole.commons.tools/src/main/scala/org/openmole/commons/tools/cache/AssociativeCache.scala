@@ -17,79 +17,66 @@
 
 package org.openmole.commons.tools.cache
 
-import java.util.WeakHashMap
-import java.util.Collections
-import java.util.Map
-import org.apache.commons.collections15.map.ReferenceMap
 import org.openmole.commons.tools.service.LockRepository
-import org.apache.commons.collections15.map.AbstractReferenceMap
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.WeakHashMap
 
-object AssociativeCache {
-  val WEAK = AbstractReferenceMap.WEAK
-  val SOFT = AbstractReferenceMap.SOFT
-  val HARD = AbstractReferenceMap.HARD
-}
+class AssociativeCache[K, T] {
 
-class AssociativeCache[K, T](keyRef: Int, valRef: Int) {
-
-  val cacheMaps = new WeakHashMap[Object, Map[K, T]]
+  val cacheMaps = new WeakHashMap[Object, HashMap[K, T]]
   val lockRepository = new LockRepository[K]
 
   def invalidateCache(cacheAssociation: Object, key: K) = {
     val cache = cacheMaps.synchronized {
-      cacheMaps.get(cacheAssociation) 
+      cacheMaps.getOrElse(cacheAssociation, null)
     }
         
     if (cache != null) {
       lockRepository.lock(key)
       try {
-        cache.remove(key)
+        cache -= key
       } finally {
         lockRepository.unlock(key)
       }
     } 
 
-
   }
 
   def cached(cacheAssociation: Object, key: K): Option[T] = {
-    val cache = cacheMaps.synchronized {
-      cacheMaps.get(cacheAssociation)
-    }
-    if (cache == null) None
-    else {
-      val ret = cache.get(key) 
-      if(ret == null) None
-      else Some(ret)
+    cacheMaps.get(cacheAssociation) match {
+      case None => None
+      case Some(map) => map.get(key)
     }
   }
 
   def cache(cacheAssociation: Object, key: K, cachable: => T): T = {
     val cache = cacheMap(cacheAssociation)
-    var ret = cache.get(key)
-
-    if(ret != null) return ret
+    cache.get(key) match {
+      case Some(elt) => return elt
+      case None =>
+    }
+    
     lockRepository.lock(key)
     try {
-      if (ret == null) {
-        ret = cachable
-        cache.put(key, ret)
-      }
+      cache.getOrElse(key, {
+          val ret = cachable
+          cache.put(key, ret)
+          ret
+        })
     } finally {
       lockRepository.unlock(key)
     }
-
-    return ret
   }
 
-  def cacheMap(cacheAssociation: Object): Map[K, T] = {
+  def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
     cacheMaps.synchronized  {
-      var ret = cacheMaps.get(cacheAssociation);
-      if (ret == null) {
-        ret = Collections.synchronizedMap(new ReferenceMap(keyRef, valRef));
-        cacheMaps.put(cacheAssociation, ret);
+      cacheMaps.get(cacheAssociation) match {
+        case Some(map) => map
+        case None =>
+          val ret = new HashMap[K,T]
+          cacheMaps(cacheAssociation) = ret
+          ret
       }
-      ret
     }
   }
 }
