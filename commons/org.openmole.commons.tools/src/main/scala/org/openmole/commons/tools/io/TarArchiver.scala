@@ -52,7 +52,7 @@ object TarArchiver extends IArchiver {
         val cur = toArchive.pop
 
         if (cur._1.isDirectory) {
-          for (name <- cur._1.list) {
+          for (name <- cur._1.list.sorted) {
             toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
           }
         } else {
