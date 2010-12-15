@@ -153,7 +153,7 @@ object ReplicaCatalog {
               newReplica 
           }
         case Some(r) => {
-            LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath)
+            //LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath)
             r
         }
       }

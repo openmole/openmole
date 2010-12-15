@@ -49,7 +49,8 @@ class FileService extends IFileService {
     val hashWithLastModified = hashCach.cached(cacheLength, file.getAbsolutePath) match {
       case None =>
       case Some(hash) => 
-        if (hash.lastModified < file.lastModified) {
+        if (hash.lastModified < FileUtil.lastModification(file)) {
+          Logger.getLogger(classOf[FileService].getName).info("Invalidate cache " + file.getAbsolutePath)
           hashCach.invalidateCache(cacheLength, file.getAbsolutePath)
         }
     }
@@ -69,9 +70,7 @@ class FileService extends IFileService {
           os.close
         }
 
-        Logger.getLogger(classOf[FileService].getName).info("Archive " + ret.getAbsolutePath)
-        
-        return new CachedArchiveForDir(ret, FileUtil.lastModification(file))
+        new CachedArchiveForDir(ret, FileUtil.lastModification(file))
       })
   }
 

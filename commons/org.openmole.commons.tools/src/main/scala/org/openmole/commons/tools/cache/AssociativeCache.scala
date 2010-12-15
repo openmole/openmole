@@ -20,12 +20,12 @@ package org.openmole.commons.tools.cache
 import java.util.logging.Logger
 import org.openmole.commons.tools.service.LockRepository
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
 class AssociativeCache[K, T] {
 
-  val cacheMaps = new WeakHashMap[Object, HashMap[K, T]]
-  val lockRepository = new LockRepository[K]
+  val cacheMaps = new WeakHashMap[Object, HashMap[K, T]] with SynchronizedMap[Object, HashMap[K, T]]
 
   def invalidateCache(cacheAssociation: Object, key: K) = {
     val cache = cacheMaps.synchronized {
@@ -33,12 +33,7 @@ class AssociativeCache[K, T] {
     }
         
     if (cache != null) {
-      lockRepository.lock(key)
-      try {
         cache -= key
-      } finally {
-        lockRepository.unlock(key)
-      }
     } 
 
   }
@@ -50,40 +45,14 @@ class AssociativeCache[K, T] {
     }
   }
 
-  def cache(cacheAssociation: Object, key: K, cachable: => T): T = {
-    //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Get cache for " + key)
-    
+  def cache(cacheAssociation: Object, key: K, cachable : => T): T = {    
     val cache = cacheMap(cacheAssociation)
-    cache.get(key) match {
-      case Some(elt) => return elt
-      case None =>
-    }
-    
-    lockRepository.lock(key)
-    try {
-      cache.getOrElse(key, {
-          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info("Not cached for key " + key)
-          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info(cache.toString)
-          
-          val ret = cachable
-          cache.synchronized {cache += ((key, ret))}
- 
-          //Logger.getLogger(classOf[AssociativeCache[_,_]].getName).info(cache.toString)
-
-          ret
-        })
-    } finally {
-      lockRepository.unlock(key)
-    }
+    return cache.getOrElseUpdate(key, cachable)
   }
 
   def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
     cacheMaps.synchronized  {
-      cacheMaps.getOrElse(cacheAssociation,{
-          val ret = new HashMap[K,T]
-          cacheMaps += ((cacheAssociation, ret))
-          ret
-      })
+      cacheMaps.getOrElseUpdate(cacheAssociation,new HashMap[K,T] with SynchronizedMap[K,T])
     }
   }
 }
