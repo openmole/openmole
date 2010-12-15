@@ -13,10 +13,11 @@
         <version>0.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>maven-plugin</artifactId>
+    <artifactId>third-parties</artifactId>
 
     <modules>
 	<module>aspectj-maven-plugin</module>
+	<module>com.ice.tar</module>
     </modules>
 
     <!-- ************************************************************* -->
@@ -24,7 +25,6 @@
     <!-- ************************************************************* -->
 
     <name>${project.artifactId}</name>
-    <description>Third-party OSGi bundles used by SimExplorer</description>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
@@ -32,8 +32,7 @@
 
     <packaging>pom</packaging>
 
-    <properties>
-        <!-- Default properties for bundles creation -->
+    <!--<properties>
         <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
@@ -45,7 +44,6 @@
 
     <build>
         <plugins>
-            <!-- Bundles creation -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -58,11 +56,8 @@
                         <Bundle-Description>${bundle.description}</Bundle-Description>
                         <Import-Package>${import.packages}</Import-Package>
                         <Export-Package>${libraries.export.packages}</Export-Package>
-                        <!--<Include-Resource>${include.resources}</Include-Resource>-->
                         <Embed-Dependency>${embed-dep}</Embed-Dependency>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
-                        <!--<Require-Bundle>${require.bundle}</Require-Bundle>-->
-                        <!--<_exportcontents>${export.packages}</_exportcontents>-->
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
 			<Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
 		    </instructions>
@@ -70,5 +65,5 @@
             </plugin>
         </plugins>
     </build>
-
+-->
 </project>

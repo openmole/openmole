@@ -26,14 +26,8 @@ class AssociativeCache[K, T] {
   val cacheMaps = new WeakHashMap[Object, HashMap[K, T]] with SynchronizedMap[Object, HashMap[K, T]]
 
   def invalidateCache(cacheAssociation: Object, key: K) = {
-    val cache = cacheMaps.synchronized {
-      cacheMaps.getOrElse(cacheAssociation, null)
-    }
-        
-    if (cache != null) {
-        cache -= key
-    } 
-
+    val cache = cacheMaps.getOrElse(cacheAssociation, null)
+    if (cache != null) cache -= key
   }
 
   def cached(cacheAssociation: Object, key: K): Option[T] = {
@@ -49,6 +43,6 @@ class AssociativeCache[K, T] {
   }
 
   def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
-    cacheMaps.getOrElseUpdate(cacheAssociation,new HashMap[K,T] with SynchronizedMap[K,T])
+    cacheMaps.getOrElseUpdate(cacheAssociation, new HashMap[K,T] with SynchronizedMap[K,T])
   }
 }
