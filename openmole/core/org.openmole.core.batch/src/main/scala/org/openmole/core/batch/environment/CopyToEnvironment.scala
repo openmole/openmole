@@ -90,7 +90,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      Logger.getLogger(classOf[CopyToEnvironment].getName).info("Archive for dir " + file)
+      //Logger.getLogger(classOf[CopyToEnvironment].getName).info("Archive for dir " + file)
       val cache = Activator.getFileService.archiveForDir(file, moleExecution)
       toReplicate = cache.file(false)
       cache
