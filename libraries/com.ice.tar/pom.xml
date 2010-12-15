@@ -19,8 +19,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>javatar</groupId>
-            <artifactId>javatar</artifactId>
+            <groupId>com.ice.tar</groupId>
+            <artifactId>javagnutar</artifactId>
 	    <version>${lib.com.ice.tar.version}</version>
             <scope>provided</scope>
         </dependency>

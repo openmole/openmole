@@ -6,17 +6,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-
-import org.openmole.commons.tools.io.FileUtil;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.workspace.IWorkspace;
-
+import org.openmole.commons.tools.io.FileUtil;
+        
 public class Activator implements BundleActivator {
 
-    private static String OpenMoleDir = ".openmole";
     private ServiceRegistration reg;
     private static BundleContext context;
     private Workspace workspace;
@@ -27,18 +24,8 @@ public class Activator implements BundleActivator {
         Logger logger = Logger.getLogger("org.apache.commons.configuration.ConfigurationUtils");
         logger.addAppender(new ConsoleAppender(new PatternLayout("%-5p %d  %c - %F:%L - %m%n")));
         logger.setLevel(Level.WARN);
-        workspace = new Workspace(new File(System.getProperty("user.home"), OpenMoleDir));
+        workspace = new Workspace();
         reg = context.registerService(IWorkspace.class.getName(), workspace, null);
-        
-        final File tmpDir = workspace.tmpDir().getLocation();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-
-            @Override
-            public void run() {
-                FileUtil.recursiveDelete(tmpDir);
-            }
-            
-        });
     }
 
     @Override

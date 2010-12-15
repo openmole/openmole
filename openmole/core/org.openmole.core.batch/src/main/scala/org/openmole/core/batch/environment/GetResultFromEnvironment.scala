@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import com.ice.tar.TarInputStream
 import java.io.File
 import java.io.IOException
 import java.util.TreeMap
@@ -24,8 +25,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.apache.commons.compress.archivers.ArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileInputStream
@@ -166,12 +165,12 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
           throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
         }
 
-        val tis = new TarArchiveInputStream(new FileInputStream(tarResultFile));
+        val tis = new TarInputStream(new FileInputStream(tarResultFile));
 
         try {
           val destDir = Activator.getWorkspace.newDir("tarResult")
 
-          var te: ArchiveEntry = tis.getNextEntry
+          var te = tis.getNextEntry
 
           while (te != null) {
             val dest = new File(destDir, te.getName)

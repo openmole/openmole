@@ -17,8 +17,6 @@
 
 package org.openmole.commons.tools.cache
 
-import java.util.logging.Logger
-import org.openmole.commons.tools.service.LockRepository
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
@@ -51,8 +49,6 @@ class AssociativeCache[K, T] {
   }
 
   def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
-    cacheMaps.synchronized  {
-      cacheMaps.getOrElseUpdate(cacheAssociation,new HashMap[K,T] with SynchronizedMap[K,T])
-    }
+    cacheMaps.getOrElseUpdate(cacheAssociation,new HashMap[K,T] with SynchronizedMap[K,T])
   }
 }

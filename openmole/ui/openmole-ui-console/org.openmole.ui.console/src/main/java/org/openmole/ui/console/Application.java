@@ -1,5 +1,6 @@
 package org.openmole.ui.console;
 
+import java.io.File;
 import java.util.logging.Logger;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -16,7 +17,7 @@ import org.openmole.ui.console.internal.Activator;
 import org.openmole.ui.console.internal.Console;
 import org.openmole.ui.console.internal.command.Init;
 import org.openmole.ui.console.internal.command.Print;
-
+import org.openmole.misc.workspace.IWorkspace$;
 /**
  * Hello world!
  *
@@ -34,8 +35,9 @@ public class Application implements IApplication {
         // Init options parsing
         String[] args = (String[]) context.getArguments().get("application.args");
         Option optionPluginsDir = OptionBuilder.withLongOpt("pluginsDir").withDescription("Add plugins directories (seperated by \",\")").hasArgs(1).withArgName("directories").isRequired(false).create("p");
-        Options options = new Options().addOption(optionPluginsDir);
+        Option workspaceDir = OptionBuilder.withLongOpt("workspaceDir").withDescription("Directory of the workspace").hasArgs(1).withArgName("directory").isRequired(false).create("w");
 
+        Options options = new Options().addOption(optionPluginsDir).addOption(workspaceDir);
         CommandLineParser parser = new BasicParser();
         
         CommandLine cmd = null;
@@ -47,6 +49,19 @@ public class Application implements IApplication {
             return IApplication.EXIT_OK;
         }
 
+        
+        File workspaceLocation = IWorkspace$.MODULE$.defaultLocation();
+        if (cmd.hasOption(workspaceDir.getOpt())) {
+            workspaceLocation = new File(cmd.getOptionValue(workspaceDir.getOpt()));
+        }
+
+        if(IWorkspace$.MODULE$.isAlreadyRunningAt(workspaceLocation)) {
+            Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + IWorkspace$.MODULE$.running() + "'.");
+            return IApplication.EXIT_OK;
+        }
+        
+        Activator.getWorkspace().location_$eq(workspaceLocation);
+        
         // Init Console
         Console console = Activator.getConsole();
         console.setVariable(pluginManager, Activator.getPluginManager());

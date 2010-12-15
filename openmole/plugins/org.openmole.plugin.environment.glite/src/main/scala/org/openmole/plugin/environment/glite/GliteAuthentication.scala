@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
+import com.ice.tar.TarInputStream
 import fr.in2p3.jsaga.adaptor.base.usage.UDuration
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import fr.in2p3.jsaga.generated.parser.ParseException
@@ -27,7 +28,6 @@ import java.net.URI
 import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.ogf.saga.context.Context
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileOutputStream
@@ -83,13 +83,13 @@ object GliteAuthentication {
         val child = site.child(tarUrl)
         val is = child.openInputStream
 
-        val tis = new TarArchiveInputStream(new GZIPInputStream(new BufferedInputStream(is)))
+        val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 
         try {
           //Bypass the directory
-          var tarEntry = tis.getNextTarEntry
+          var tarEntry = tis.getNextEntry
 
-          tarEntry = tis.getNextTarEntry
+          tarEntry = tis.getNextEntry
 
           while (tarEntry != null) {
             var dest = new File(dir, tarEntry.getName)
@@ -106,7 +106,7 @@ object GliteAuthentication {
               os.close
             }
 
-            tarEntry = tis.getNextTarEntry
+            tarEntry = tis.getNextEntry
           }
         } catch {
           case (e: IOException) => Logger.getLogger(classOf[GliteAuthentication].getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);

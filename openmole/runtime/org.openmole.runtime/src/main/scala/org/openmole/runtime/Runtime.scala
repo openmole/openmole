@@ -17,6 +17,8 @@
 
 package org.openmole.runtime
 
+import com.ice.tar.TarEntry
+import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.util.TreeMap
@@ -24,8 +26,6 @@ import java.util.TreeMap
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileInputStream
 import org.openmole.commons.tools.io.FileOutputStream
@@ -189,8 +189,8 @@ class Runtime {
 
         val tarResult = Activator.getWorkspace.newFile("result", ".tar")
 
-        val tos = new TarArchiveOutputStream(new FileOutputStream(tarResult))
-        tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
+        val tos = new TarOutputStream(new FileOutputStream(tarResult))
+        //tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
 
                 
         if (!serializationResult._1.isEmpty) {
@@ -205,7 +205,7 @@ class Runtime {
                 is.close
               }
                             
-              val entry = new TarArchiveEntry(hash.toString())
+              val entry = new TarEntry(hash.toString)
 
               val toArchive =  if (file.isDirectory) {
                 val toArchive = Activator.getWorkspace.newFile
@@ -223,11 +223,11 @@ class Runtime {
 
               //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
               entry.setSize(toArchive.length)
-              tos.putArchiveEntry(entry)
+              tos.putNextEntry(entry)
               try {
                 FileUtil.copy(new FileInputStream(toArchive), tos);
               } finally {
-                tos.closeArchiveEntry
+                tos.closeEntry
               }
 
               filesInfo.put(entry.getName, (file, file.isDirectory))

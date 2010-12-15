@@ -73,7 +73,7 @@ object GliteEnvironment {
 
   Activator.getWorkspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
 
-  Activator.getWorkspace += (KeyPathLocation,  () => System.getProperty("user.home") + "/.globus/userkey.pem")
+  Activator.getWorkspace += (KeyPathLocation, () => System.getProperty("user.home") + "/.globus/userkey.pem")
 
   Activator.getWorkspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
 

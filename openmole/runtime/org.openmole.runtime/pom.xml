@@ -171,7 +171,11 @@
             <version>${lib.org.objenesis.version}</version>
             <scope>runtime</scope>
         </dependency>
-
+	<dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>com.ice.tar</artifactId>
+            <version>${lib.com.ice.tar.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

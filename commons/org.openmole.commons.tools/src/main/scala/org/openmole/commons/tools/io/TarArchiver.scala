@@ -17,32 +17,33 @@
 
 package org.openmole.commons.tools.io
 
+import com.ice.tar.TarEntry
+import com.ice.tar.TarInputStream
+import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import scala.collection.mutable.Stack
 
 object TarArchiver extends IArchiver {
 
   override def createDirArchiveWithRelativePathNoVariableContent(baseDir: File, archive: OutputStream) = {
-    createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, (e:TarArchiveEntry) => e.setModTime(0))
+    createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, (e:TarEntry) => e.setModTime(0))
   }
 
   override def createDirArchiveWithRelativePath(baseDir: File, archive: OutputStream) = {
     createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, {(e)=>})
   }
 
-  private def createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir: File, archive: OutputStream, additionnalCommand: TarArchiveEntry => Unit ) = {
+  private def createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir: File, archive: OutputStream, additionnalCommand: TarEntry => Unit ) = {
     if (!baseDir.isDirectory) {
       throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
     }
 
-    val tos = new TarArchiveOutputStream(archive)
-    tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
+    val tos = new TarOutputStream(archive)
+
+    //tos.setLongFileMode(TarOutputStream.LONGFILE_GNU)
 
     try {
       val toArchive = new Stack[(File, String)]
@@ -56,10 +57,10 @@ object TarArchiver extends IArchiver {
             toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
           }
         } else {
-          val e = new TarArchiveEntry(cur._2)
+          val e = new TarEntry(cur._2)
           e.setSize(cur._1.length)
           additionnalCommand(e)
-          tos.putArchiveEntry(e)
+          tos.putNextEntry(e)
           try {
             val fis = new FileInputStream(cur._1)
             try {
@@ -68,7 +69,7 @@ object TarArchiver extends IArchiver {
               fis.close
             }
           } finally {
-            tos.closeArchiveEntry
+            tos.closeEntry
           }
         }
       }
@@ -82,10 +83,10 @@ object TarArchiver extends IArchiver {
     if (!baseDir.isDirectory) {
       throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
     }
-    val tis = new TarArchiveInputStream(archive)
+    val tis = new TarInputStream(archive)
 
     try {
-      var e = tis.getNextTarEntry
+      var e = tis.getNextEntry
       while (e != null) {
         val dest = new File(baseDir, e.getName)
         dest.getParentFile.mkdirs
@@ -95,8 +96,8 @@ object TarArchiver extends IArchiver {
         } finally {
           fos.close
         }
-        
-        e = tis.getNextTarEntry
+
+        e = tis.getNextEntry
       }
     } finally {
       tis.close

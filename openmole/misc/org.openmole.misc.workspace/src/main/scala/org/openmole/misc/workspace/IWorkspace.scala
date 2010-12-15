@@ -20,52 +20,53 @@ package org.openmole.misc.workspace
 import java.io.File
 
 object IWorkspace {
+  val OpenMoleDir = ".openmole"
   val ConfigurationFile = ".preferences"
   val GlobalGroup = "Global"
-  //val DefaultObjectRepoLocaltion = ".objectRepository.bin" 
   val DefaultTmpLocation = ".tmp"
-	
+  val running = ".running"
   val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
-  //val ObjectRepoLocation = new ConfigurationLocation(GlobalGroup, "ObjectRepoLocation")
-  //val TmpLocation = new ConfigurationLocation(GlobalGroup, "TmpLocation")
 
+  lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
+  def isAlreadyRunningAt(location: File) = new File(location, running).exists
 }
 
 trait IWorkspace {
 
-	def location_=(location: File)
-        def location: File
+  def location_=(location: File)
+  def location: File
 
-	def newDir(prefix: String): File
-        def newDir: File
-	def newFile(prefix: String, suffix: String): File
-        def newFile: File
+  def newDir(prefix: String): File
+  def newDir: File
+  def newFile(prefix: String, suffix: String): File
+  def newFile: File
 
-        def file(name: String): File
+  def file(name: String): File
 
-        def preference(location: ConfigurationLocation): String 
+  def preference(location: ConfigurationLocation): String 
 
-        def preferenceAsInt(location: ConfigurationLocation): Int
+  def preferenceAsInt(location: ConfigurationLocation): Int
 
-        def preferenceAsLong(location: ConfigurationLocation): Long
+  def preferenceAsLong(location: ConfigurationLocation): Long
 
-        def preferenceAsDouble(location: ConfigurationLocation): Double
+  def preferenceAsDouble(location: ConfigurationLocation): Double
 
-        def preferenceAsDurationInMs(location: ConfigurationLocation): Long
+  def preferenceAsDurationInMs(location: ConfigurationLocation): Long
 
-        def preferenceAsDurationInS(location: ConfigurationLocation): Int
+  def preferenceAsDurationInS(location: ConfigurationLocation): Int
 
-	def setPreference(configurationLocation: ConfigurationLocation, value: String)
+  def setPreference(configurationLocation: ConfigurationLocation, value: String)
 
-        def removePreference(configurationElement: ConfigurationLocation)
+  def removePreference(configurationElement: ConfigurationLocation)
 
-        def password_=(password: String)
+  def password_=(password: String)
 
-        def reset
+  def reset
 
-        def isPreferenceSet(location: ConfigurationLocation): Boolean
+  def isPreferenceSet(location: ConfigurationLocation): Boolean
         
-	def +=(location: ConfigurationLocation, defaultValue : () => String)
-	def +=(location: ConfigurationLocation, defaultValue : String)
-        def defaultValue(location: ConfigurationLocation): String
+  def +=(location: ConfigurationLocation, defaultValue : () => String)
+  def +=(location: ConfigurationLocation, defaultValue : String)
+  def defaultValue(location: ConfigurationLocation): String
+  
 }

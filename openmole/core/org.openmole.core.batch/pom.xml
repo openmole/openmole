@@ -80,6 +80,11 @@
             <artifactId>org.openmole.misc.pluginmanager</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>com.ice.tar</artifactId>
+            <version>${lib.com.ice.tar.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

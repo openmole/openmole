@@ -32,8 +32,10 @@ import org.openmole.misc.workspace.IWorkspace
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.aspect.caching.ChangeState;
 import scala.collection.mutable.HashMap
+import org.openmole.commons.tools.io.FileUtil
 
 object Workspace {
+
   val group = "Workspace"
   val fixedPrefix = "file"
   val fixedPostfix = ".wf"
@@ -42,26 +44,38 @@ object Workspace {
   val passwordTestString = "test"
 }
 
-class Workspace(var _location: File) extends IWorkspace {
+class Workspace extends IWorkspace {
+
   import Workspace._
   import IWorkspace._ 
+  
+  var _location: File = null
   
   val configurations = new HashMap[ConfigurationLocation, () => String]
     
   @transient private var _password = ""
 
   this += (UniqueID, UUID.randomUUID.toString)
-    
   this += (passwordTest, passwordTestString)
   
   @ChangeState
   override def location_= (location: File) = {
+    new File(locationInternal, running).delete
     _location = location
+    val run = new File(_location, running)
+    run.createNewFile
+    run.deleteOnExit
+  }
+  
+  private def locationInternal = {
+    if(_location == null) defaultLocation
+    else _location
   }
   
   override def location: File = {
-    if (!_location.exists) _location.mkdirs
-    _location
+    val ret = locationInternal
+    if (!ret.exists) ret.mkdirs
+    ret
   }
 
   override def += (location: ConfigurationLocation, defaultValue: () => String) = synchronized {
@@ -74,14 +88,16 @@ class Workspace(var _location: File) extends IWorkspace {
 
   @Cachable
   private[internal] def tmpDir: TempDir = {
-    val tmpLocation = new File(location, DefaultTmpLocation)
-  
-    if (!tmpLocation.exists) {
-      if (!tmpLocation.mkdirs) {
-        throw new InternalProcessingError("Cannot create tmp dir " + tmpLocation.getAbsolutePath)
-      }
-    }
+    val tmpLocation = new File(new File(location, DefaultTmpLocation), UUID.randomUUID.toString)
 
+    if (!tmpLocation.mkdirs) {
+      throw new InternalProcessingError("Cannot create tmp dir " + tmpLocation.getAbsolutePath)
+    }
+    
+    Runtime.getRuntime.addShutdownHook(new Thread {
+        override def run = FileUtil.recursiveDelete(tmpLocation)
+      })
+    
     new TempDir(tmpLocation)
   }
 
@@ -117,13 +133,13 @@ class Workspace(var _location: File) extends IWorkspace {
     val confVal = conf.getString(location.name)
 
     if (confVal == null) {
-    configurations.get(location) match {
-      case None => return null 
-      case Some(value) =>
-      val default = value()
-      setPreference(location, default)
-      return default
-    }
+      configurations.get(location) match {
+        case None => return null 
+        case Some(value) =>
+          val default = value()
+          setPreference(location, default)
+          return default
+      }
     } 
 
     if (!location.cyphered) {
@@ -135,10 +151,10 @@ class Workspace(var _location: File) extends IWorkspace {
   }
 
   override def setPreference(location: ConfigurationLocation, value: String) = synchronized {
-      val conf = configuration.subset(location.group)
-      val prop = if(location.cyphered) textEncryptor.encrypt(value) else value
-      conf.setProperty(location.name, prop)
-      configuration.save
+    val conf = configuration.subset(location.group)
+    val prop = if(location.cyphered) textEncryptor.encrypt(value) else value
+    conf.setProperty(location.name, prop)
+    configuration.save
   }
 
   @Cachable
