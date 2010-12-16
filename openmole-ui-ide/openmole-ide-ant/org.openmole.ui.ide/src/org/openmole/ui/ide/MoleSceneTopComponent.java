@@ -24,12 +24,14 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.text.EditorKit;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.spi.palette.PaletteController;
+import org.openide.text.CloneableEditorSupport;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.Lookup;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
@@ -68,6 +70,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         //FIXME un meilleur endroit pour les inits??
         // TableMapping.getInstance().initialize();
         // Preferences.getInstance().initialize();
+                
         TaskSettingTabManager.getInstance().setTabbedPane(jTabbedPane1);
 
 
@@ -106,10 +109,8 @@ public final class MoleSceneTopComponent extends TopComponent {
     }
 
     public void refreshP() {
-        System.out.println("-- refreshPalette" + getLookup());
         palette = PaletteSupport.createPalette();
         paletteLookup = getLookup();
-        //palette.refresh();
         PaletteSupport.MyPaletteFilter.refresh();
         // associateLookup(Lookups.fixed(new Object[]{palette}));
         repaint();
