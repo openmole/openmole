@@ -16,6 +16,8 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
+import com.thoughtworks.xstream.XStream;
+import org.openide.util.Exceptions;
 import org.openmole.ui.ide.workflow.provider.MoleSceneMenuProvider;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -23,6 +25,9 @@ import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -53,9 +58,17 @@ import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.serializer.Serializer;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.provider.DnDNewTaskCapsuleProvider;
 import scala.Option;
+import org.openmole.core.implementation.capsule.Capsule;
+import org.openmole.core.implementation.data.Prototype;
+import org.openmole.core.implementation.mole.Mole;
+import org.openmole.core.implementation.task.MoleTask;
+import org.openmole.core.implementation.transition.Transition;
+import org.openmole.core.model.mole.IMole;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 /**
  *
@@ -99,6 +112,44 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         //getActions().addAction(ActionFactory.createAcceptAction(new DnDProvider(this)));
 
         setMovable(true);
+
+        // TMP
+//        Prototype fileProto = new Prototype("fileProto", File.class);
+//        //GroovyTask gTask = new GroovyTask("gTask");
+//        //Capsule gCapsule = new Capsule(gTask);
+//        MoleTask mTask = new MoleTask("mTask", new Mole(new Capsule()));
+//        Capsule mCapsule = new Capsule(mTask);
+//        mTask.addInput(fileProto);
+//      //  new Transition(gCapsule, mCapsule);
+//
+//        DataOutputStream dos = null;
+//        try {
+//            XStream xstream = new XStream();
+//            dos = new DataOutputStream(new FileOutputStream("/tmp/mole.xml"));
+//            dos.writeUTF(xstream.toXML(new Mole(mCapsule)));
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        } finally {
+//            try {
+//                dos.close();
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+
+
+        //tmp
+//        try {
+//            build(Serializer.unserialize("/tmp/mole.xml"));
+//        } catch (InternalProcessingError ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (UserBadDataError ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (Throwable ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+
+
         MoleScenesManager.getInstance().addMoleScene(this);
     }
 

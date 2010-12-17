@@ -19,17 +19,21 @@ package org.openmole.ui.ide.control;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class MoleScenesManager {
+public class MoleScenesManager extends TabManager{
 
     private static MoleScenesManager instance = null;
     
     private Collection<IMoleScene> moleScenes = new ArrayList<IMoleScene>();
+    private int count=1;
 
     public void addMoleScene(IMoleScene ms){
         moleScenes.add(ms);
@@ -50,5 +54,17 @@ public class MoleScenesManager {
             instance = new MoleScenesManager();
         }
         return instance;
+    }
+
+    @Override
+    public void addTab(Object displayed) {
+        MoleScene scene = (MoleScene) displayed;
+
+        JComponent myView = scene.createView();
+        JScrollPane moleSceneScrollPane = new JScrollPane();
+        moleSceneScrollPane.setViewportView(myView);
+
+        addMapping(displayed, moleSceneScrollPane,"Mole"+count);
+        count ++;
     }
 }

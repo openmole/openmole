@@ -13,7 +13,7 @@ public class MoleExceptionManagement {
 
     private static MoleExceptionManagement instance;
 
-    public static void showException(Exception e) {
+    public static void showException(Throwable e) {
         System.out.println("ShowException " + e + ", to be implemented");
     }
 

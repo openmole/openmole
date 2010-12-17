@@ -24,7 +24,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.commons.IOType;
-import org.openmole.ui.ide.workflow.action.AddExistingPrototype;
+import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
 import org.openmole.ui.ide.workflow.action.AddInputAction;
 import org.openmole.ui.ide.workflow.action.AddOutputAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
@@ -101,7 +101,7 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
         Collection<JMenuItem> prototypeCol = new ArrayList<JMenuItem>();
         for (PrototypeUI p : Preferences.getInstance().getPrototypes()) {
             JMenuItem it = new JMenuItem(p.getName());
-            it.addActionListener(new AddExistingPrototype(p, capsuleView,type));
+            it.addActionListener(new AddExistingPrototypeAction(p, capsuleView,type));
             prototypeCol.add(it);
         }
         return prototypeCol;

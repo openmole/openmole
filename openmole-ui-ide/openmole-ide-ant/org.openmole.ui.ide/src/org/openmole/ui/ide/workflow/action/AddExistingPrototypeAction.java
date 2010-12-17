@@ -27,13 +27,13 @@ import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class AddExistingPrototype implements ActionListener {
+public class AddExistingPrototypeAction implements ActionListener {
 
     private PrototypeUI prototype;
     private TaskCapsuleViewUI capsuleViewUI;
     private IOType type;
 
-    public AddExistingPrototype(PrototypeUI prototype,
+    public AddExistingPrototypeAction(PrototypeUI prototype,
                                 TaskCapsuleViewUI capsuleViewUI,
                                 IOType type) {
         this.prototype = prototype;

@@ -2,7 +2,7 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.ui.ide.control.task.TaskSettingTabManager;
+import org.openmole.ui.ide.control.task.TaskSettingsManager;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
 
@@ -61,7 +61,7 @@ public class TaskActions extends WidgetAction.Adapter {
             WidgetMouseEvent event) {
      //   SelectionManager.getInstance().setSelected(view);
         if (event.getClickCount() == 2) {
-            TaskSettingTabManager.getInstance().display(view);
+            TaskSettingsManager.getInstance().display(view);
         }
 
      /*   try {

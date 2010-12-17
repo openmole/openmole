@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.text.EditorKit;
@@ -35,13 +36,17 @@ import org.openide.text.CloneableEditorSupport;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.Lookup;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.control.task.TaskSettingTabManager;
+import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.control.TabManager;
+import org.openmole.ui.ide.control.task.TaskSettingsManager;
 import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.palette.PaletteSupport;
 import org.openmole.ui.ide.workflow.action.ManagePrototypeAction;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
 import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
+import org.openmole.ui.ide.workflow.action.OpenXMLAction;
+import org.openmole.ui.ide.workflow.action.SaveXMLAction;
 
 /**
  * Top component which displays something.
@@ -52,10 +57,8 @@ public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
-    private JComponent myView;
     private PrototypeManagementPanel prototypeManagement;
     private Lookup paletteLookup;
-    
     private JToolBar toolBar = new JToolBar("SSSE");
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -70,20 +73,22 @@ public final class MoleSceneTopComponent extends TopComponent {
         //FIXME un meilleur endroit pour les inits??
         // TableMapping.getInstance().initialize();
         // Preferences.getInstance().initialize();
-                
-        TaskSettingTabManager.getInstance().setTabbedPane(jTabbedPane1);
 
+        // TaskSettingsManager.getInstance().setTabbedPane(jTabbedPane1);
+
+        
+      //  jScrollPane1.setViewportView(TaskSettingsManager.getInstance().getTabbedPane());
 
         MoleScene scene = new MoleScene();
-        myView = scene.createView();
+        MoleScenesManager.getInstance().setTabbedPane(tabbedPane);
+        TaskSettingsManager.getInstance().setTabbedPane(tabbedPane);
+        MoleScenesManager.getInstance().display(scene);
 
-        moleSceneScrollPane.setViewportView(myView);
-        jTabbedPane1.add("Workflow", moleSceneScrollPane);
         palette = PaletteSupport.createPalette();
         paletteLookup = Lookups.fixed(new Object[]{palette});
         associateLookup(paletteLookup);
-        
-        
+
+
         prototypeManagement = new PrototypeManagementPanel();
         prototypeManagement.setVisible(true);
 
@@ -94,16 +99,26 @@ public final class MoleSceneTopComponent extends TopComponent {
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
 
+
+        JButton openXML = new JButton("Open");
+        openXML.addActionListener(new OpenXMLAction());
+
+        JButton saveXML = new JButton("Save");
+        saveXML.addActionListener(new SaveXMLAction());
+
         JButton newPrototypeButton = new JButton("Prototypes");
-        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement,this));
+        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement, this));
+        toolBar.add(openXML);
+        toolBar.add(saveXML);
+        toolBar.add(new JToolBar.Separator());
         toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
-        add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+       // add(tabbedPane, java.awt.BorderLayout.CENTER);
 
-       
+
 
         //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
@@ -124,18 +139,18 @@ public final class MoleSceneTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        moleSceneScrollPane = new javax.swing.JScrollPane();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tabbedPane = new javax.swing.JTabbedPane();
 
         setLayout(new java.awt.BorderLayout());
 
-        moleSceneScrollPane.setViewportView(jTabbedPane1);
+        jScrollPane1.setViewportView(tabbedPane);
 
-        add(moleSceneScrollPane, java.awt.BorderLayout.CENTER);
+        add(jScrollPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JScrollPane moleSceneScrollPane;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
 
     /**
