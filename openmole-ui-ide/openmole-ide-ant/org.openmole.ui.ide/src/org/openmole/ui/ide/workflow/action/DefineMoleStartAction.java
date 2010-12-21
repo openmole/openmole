@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 mathieu
+ *  Copyright (C) 2010 Mathieu Leclaire <mathieu.leclaire@openmole.org>
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,39 +14,30 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openide.util.Exceptions;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.serializer.MoleMaker;
-import org.openmole.ui.ide.serializer.Serializer;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class SaveXMLAction implements ActionListener{
+public class DefineMoleStartAction implements ActionListener {
+
+    final MoleScene moleScene;
+    final ICapsuleModelUI capsuleModel;
+
+    public DefineMoleStartAction(MoleScene moleScene,
+            ICapsuleModelUI cm) {
+        this.moleScene = moleScene;
+        this.capsuleModel = cm;
+    }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        Object obj = MoleScenesManager.getInstance().getCurrentObject();
-        if (obj instanceof MoleScene){
-            System.out.println("MOLE TO BE SAVED");
-            try {
-                Serializer.serialize(MoleMaker.process((MoleScene) obj), "/tmp/mole.xml");
-            } catch (UserBadDataError ex) {
-                MoleExceptionManagement.showException(ex);
-            }
-        }
-        else{
-            System.out.println("TASK TAB");
-        }
+        moleScene.getManager().setStartingCapsule(capsuleModel);
     }
-
 }

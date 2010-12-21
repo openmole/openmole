@@ -19,6 +19,7 @@ package org.openmole.ui.ide.workflow.implementation;
 import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
@@ -28,6 +29,7 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
 public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
+    private ICapsuleModelUI startingCapsule = null;
     private int nodeCounter = 0;
     private int nodeID = 0;
 
@@ -41,6 +43,14 @@ public class MoleSceneManager {
 
     public String getNodeID() {
         return "node" + nodeID;
+    }
+
+    public void setStartingCapsule(ICapsuleModelUI startingCapsule) {
+        this.startingCapsule = startingCapsule;
+    }
+
+    public ICapsuleModelUI getStartingCapsule() {
+        return startingCapsule;
     }
 
     public Set<ICapsuleView> getCapsuleViews(){

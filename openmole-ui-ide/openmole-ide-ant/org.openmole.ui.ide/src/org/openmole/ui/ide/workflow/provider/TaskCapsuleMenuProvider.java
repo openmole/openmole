@@ -28,6 +28,7 @@ import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
 import org.openmole.ui.ide.workflow.action.AddInputAction;
 import org.openmole.ui.ide.workflow.action.AddOutputAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
+import org.openmole.ui.ide.workflow.action.DefineMoleStartAction;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
@@ -90,7 +91,11 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
         menus.add(PopupMenuProviderFactory.addSubMenu("Add ",
                 colI));
         JMenuItem itR = new JMenuItem("Remove");
+        JMenuItem itStart = new JMenuItem("Define as starting capsule");
+        itStart.addActionListener(new DefineMoleStartAction(scene,capsuleView.getCapsuleModel()));
+
         items.add(itR);
+        items.add(itStart);
     }
 
     public void addTaskMenus() {

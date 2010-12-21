@@ -18,6 +18,7 @@
 package org.openmole.ui.ide.serializer;
 
 import java.io.File;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.capsule.Capsule;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.mole.Mole;
@@ -27,6 +28,7 @@ import org.openmole.plugin.task.filemanagement.AppendFileTask;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
@@ -35,18 +37,25 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
  */
 public class MoleMaker {
 
-    public static IMole process (MoleScene scene){
+    public static IMole process (MoleScene scene) throws UserBadDataError{
         MoleSceneManager manager = scene.getManager();
 
-        for (ICapsuleView cav : manager.getCapsuleViews()){
-            //capsule = new Capsule
-           // System.out.println("NAME "+cav.getTaskCapsuleModel().);
+        ICapsuleModelUI start = manager.getStartingCapsule();
+        if (start != null){
+            Capsule startingCapsule = new Capsule();
+            Mole mole = new Mole(startingCapsule);
+        return mole;
+        }
+        else {
+            throw new UserBadDataError("A starting capsule is expected");
         }
 
-        Capsule capsule1 = new Capsule(new AppendFileTask("append", new Prototype("proto1",File.class),"astring"));
+       // for (ICapsuleView cav : manager.getCapsuleViews()){
+            //capsule = new Capsule
+           // System.out.println("NAME "+cav.getTaskCapsuleModel().);
+      //  }
+
 //        Capsule capsule2 = new Capsule();
 //        new Transition(capsule1, capsule2);
-        Mole mole = new Mole(capsule1);
-        return mole;
     }
 }
