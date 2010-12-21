@@ -55,7 +55,7 @@ public class MyWidget extends Widget {
     }
 
     public void setWidthHint() {
-        if (scene.isDetailedView()) {
+         if (scene.isDetailedView()) {
             taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
             taskImageOffset = ApplicationCustomize.EXPANDED_TASK_IMAGE_WIDTH_OFFSET;
         }
@@ -97,11 +97,8 @@ public class MyWidget extends Widget {
         this.backgroundImaqe = backgroundImaqe;
     }
 
-    //private void enlargeWidgetArea(Rectangle addedArea) {
     protected void enlargeWidgetArea(int y,
             int height) {
-        //widgetArea.height += addedArea.height;
-        //widgetArea.y -= addedArea.y;
         widgetArea.height += height;
         widgetArea.y -= y;
     }
@@ -124,6 +121,10 @@ public class MyWidget extends Widget {
 
     public String getTitleString() {
         return titleString;
+    }
+
+    public int getTaskWidth() {
+        return taskWidth;
     }
 
     public void addTitle(String titleString) {

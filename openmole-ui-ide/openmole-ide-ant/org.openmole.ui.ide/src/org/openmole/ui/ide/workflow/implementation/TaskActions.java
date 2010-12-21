@@ -4,7 +4,7 @@ import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.control.task.TaskSettingsManager;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
@@ -13,10 +13,10 @@ import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
 public class TaskActions extends WidgetAction.Adapter {
 
     private IGenericTaskModelUI model;
-    private ITaskCapsuleView view;
+    private ICapsuleView view;
 
     public TaskActions(IGenericTaskModelUI m,
-                       ITaskCapsuleView v) {
+                       ICapsuleView v) {
         model = m;
         view = v;
     }

@@ -19,7 +19,10 @@ package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.serializer.MoleMaker;
 import org.openmole.ui.ide.serializer.Serializer;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
  *
@@ -29,7 +32,14 @@ public class SaveXMLAction implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        //Serializer.serialize(Mo, "/tmp/mole.xml");
+        Object obj = MoleScenesManager.getInstance().getCurrentObject();
+        if (obj instanceof MoleScene){
+            System.out.println("MOLE TO BE SAVED");
+            Serializer.serialize(MoleMaker.process((MoleScene) obj), "/tmp/mole.xml");
+        }
+        else{
+            System.out.println("TASK TAB");
+        }
     }
 
 }

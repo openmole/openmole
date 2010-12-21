@@ -39,7 +39,6 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     public GenericTaskModelUI(Properties...properties) {
     }
 
-    
     @Override
     public Set<PrototypeUI> getPrototypesIn() {
         if (prototypesIn == null) prototypesIn = new HashSet<PrototypeUI>();

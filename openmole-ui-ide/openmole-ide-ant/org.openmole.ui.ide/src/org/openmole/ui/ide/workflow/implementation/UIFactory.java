@@ -18,14 +18,13 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
-import org.netbeans.api.visual.widget.Widget;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.workflow.model.IUIFactory;
 import org.openmole.commons.tools.object.Instanciator;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.palette.Category.CategoryName;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
 /**
@@ -38,7 +37,6 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class UIFactory implements IUIFactory<Object> {
 
     private static UIFactory instance = null;
-
 
     @Override
     public IGenericTask createCoreTaskInstance(Class<? extends IGenericTask> taskClass) throws UserBadDataError {
@@ -74,25 +72,25 @@ public class UIFactory implements IUIFactory<Object> {
         }
     }
 
-    public ITaskCapsuleView createTaskCapsule(MoleScene scene) {
-            return createTaskCapsule(scene, new Point(0, 0));
+    public void createCapsule(MoleScene scene) {
+        createCapsule(scene, new Point(0, 0));
     }
 
-    public ITaskCapsuleView createTaskCapsule(MoleScene scene,
-                                              Point locationPoint){
-        TaskCapsuleModelUI tcm = new TaskCapsuleModelUI();
-        Widget obUI= null;
+    public void createCapsule(MoleScene scene,
+            Point locationPoint) {
+        ICapsuleView obUI = null;
         try {
-            obUI = new TaskCapsuleViewUI(scene, tcm, Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE, org.openmole.core.implementation.capsule.Capsule.class));
+            obUI = new CapsuleViewUI(scene,
+                    new CapsuleModelUI(),
+                    Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE,
+                    org.openmole.core.implementation.capsule.Capsule.class));
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);
         }
+
         scene.initCapsuleAdd(obUI);
+        scene.getManager().registerCapsuleView(obUI);
         scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
-        scene.getManager().registerTaskView((ITaskCapsuleView) obUI);
-
-
-        return (ITaskCapsuleView) obUI;
     }
 
     public static UIFactory getInstance() {

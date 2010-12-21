@@ -11,9 +11,9 @@ public class MyAnchor extends Anchor {
 
     int index;
     IOType slotType;
-    MyConnectableWidget relatedWidget;
+    ConnectableWidget relatedWidget;
 
-    public MyAnchor(MyConnectableWidget relatedWidget,
+    public MyAnchor(ConnectableWidget relatedWidget,
                     IOType slotType,
                     int index) {
         super(relatedWidget);

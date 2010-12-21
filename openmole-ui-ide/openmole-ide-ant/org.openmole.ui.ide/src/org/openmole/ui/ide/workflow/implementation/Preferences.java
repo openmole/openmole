@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -38,24 +39,20 @@ import org.openmole.ui.ide.palette.Category.CategoryName;
 public class Preferences {
 
     private static Preferences instance = null;
-
     private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.TASK_CAPSULE};
     private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
     private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
     private Collection<Class> prototypeTypes = new ArrayList<Class>();
-
-
     private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
 
-    
-    public void clearModels(){
+    public void clearModels() {
         models.clear();
     }
-    
-    public void clearProperties(){
+
+    public void clearProperties() {
         properties.clear();
     }
-    
+
     public void register() {
         if (models.isEmpty()) {
             for (CategoryName c : propertyTypes) {
@@ -98,7 +95,7 @@ public class Preferences {
     }
 
     public Properties getProperties(CategoryName cat,
-            Class coreClass) throws UserBadDataError{
+            Class coreClass) throws UserBadDataError {
         register();
         try {
             return properties.get(cat).get(coreClass);
@@ -137,8 +134,17 @@ public class Preferences {
         return prototypeTypes;
     }
 
-     public void registerPrototype(PrototypeUI p) {
+    public void registerPrototype(PrototypeUI p) {
         prototypes.put(p.getName(), p);
+    }
+
+    public void setPrototypes(List<PrototypeUI> protos) {
+
+    Map<String, PrototypeUI> newprotos = new WeakHashMap<String, PrototypeUI>();
+        for (PrototypeUI p : protos){
+            newprotos.put(p.getName(),p);
+        }
+        prototypes = newprotos;
     }
 
     public PrototypeUI getPrototype(String st) throws UserBadDataError {
@@ -148,14 +154,15 @@ public class Preferences {
             throw new UserBadDataError("The prototype " + st + " doest not exist.");
         }
     }
-    
-    public Collection<PrototypeUI> getPrototypes(){
-        prototypes.put("proto1", new PrototypeUI("proto1",BigInteger.class));
-        prototypes.put("proto2", new PrototypeUI("proto2",BigDecimal.class));
-        prototypes.put("proto3", new PrototypeUI("proto3",File.class));
+
+    public Collection<PrototypeUI> getPrototypes() {
+        if (prototypes.isEmpty()) {
+            prototypes.put("protoInteger", new PrototypeUI("protoInteger", BigInteger.class));
+            prototypes.put("protoBigDecimal", new PrototypeUI("protoBigDecimal", BigDecimal.class));
+            prototypes.put("protoFile", new PrototypeUI("protoFile", File.class));
+        }
         return prototypes.values();
     }
-
 
     public Set<Class> getCoreTaskClasses() {
         register();

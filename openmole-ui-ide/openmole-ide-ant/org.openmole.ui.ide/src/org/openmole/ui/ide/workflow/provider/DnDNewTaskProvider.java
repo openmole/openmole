@@ -27,7 +27,7 @@ import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
-import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
@@ -35,10 +35,10 @@ import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
  */
 public class DnDNewTaskProvider extends DnDProvider {
 
-    private TaskCapsuleViewUI capsuleView;
+    private CapsuleViewUI capsuleView;
 
     public DnDNewTaskProvider(MoleScene molescene,
-            TaskCapsuleViewUI cv) {
+            CapsuleViewUI cv) {
         super(molescene);
         this.capsuleView = cv;
     }

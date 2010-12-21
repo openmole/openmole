@@ -19,7 +19,7 @@ package org.openmole.ui.ide.workflow.implementation;
 import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
@@ -27,7 +27,7 @@ import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
  */
 public class MoleSceneManager {
 
-    private BidiMap<String, ITaskCapsuleView> taskViews = new DualHashBidiMap<String, ITaskCapsuleView>();
+    private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
     private int nodeCounter = 0;
     private int nodeID = 0;
 
@@ -43,34 +43,29 @@ public class MoleSceneManager {
         return "node" + nodeID;
     }
 
-    public Set<ITaskCapsuleView> getTaskViews(){
-        return taskViews.values();
+    public Set<ICapsuleView> getCapsuleViews(){
+        return capsuleViews.values();
     }
 
-    public void registerTaskView(ITaskCapsuleView cv) {
-        taskViews.put(getNodeID(), cv);
+    public void registerCapsuleView(ICapsuleView cv) {
         nodeID++;
+        capsuleViews.put(getNodeID(), cv);
     }
 
-    public String getTaskViewID(ITaskCapsuleView cv) {
-        return taskViews.getKey(cv);
+    public String getCapsuleViewID(ICapsuleView cv) {
+        return capsuleViews.getKey(cv);
     }
 
-    public ITaskCapsuleView getTaskView(String name) {
-        return taskViews.get(name);
+    public ICapsuleView getCapsuleView(String name) {
+        return capsuleViews.get(name);
     }
 
-    public void removeTaskView(ITaskCapsuleView cv) {
-        taskViews.remove(cv);
-    }
-
-    public void setTransition(String start,
-            String end) {
-    //    taskViews.get(start).setTransitionTo(taskViews.get(end).getTaskCapsule());
+    public void removeCapsuleView(ICapsuleView cv) {
+        capsuleViews.remove(cv);
     }
 
     public void printTaskC() {
-        for (String t : taskViews.keySet()) {
+        for (String t : capsuleViews.keySet()) {
             System.out.println("TASKC :: " + t);
         }
     }

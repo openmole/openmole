@@ -28,8 +28,8 @@ import org.openide.util.ImageUtilities;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public abstract class ObjectViewUI extends Widget implements IObjectViewUI {
-
+//public abstract class ObjectViewUI extends Widget implements IObjectViewUI {
+  public abstract class ObjectViewUI extends Widget implements IObjectViewUI {
     protected MoleScene scene;
     protected Properties properties;
 

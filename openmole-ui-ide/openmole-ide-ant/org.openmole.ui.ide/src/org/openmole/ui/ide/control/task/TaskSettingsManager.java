@@ -26,7 +26,7 @@ import org.openide.loaders.DataObject;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.util.Exceptions;
 import org.openmole.ui.ide.control.TabManager;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
@@ -39,7 +39,7 @@ public class TaskSettingsManager extends TabManager {
 
     @Override
     public void addTab(Object displayed) {
-        ITaskCapsuleView tcv = (ITaskCapsuleView) displayed;
+        ICapsuleView tcv = (ICapsuleView) displayed;
         JEditorPane editorPane = new JEditorPane();
 
          EditorKit kit = CloneableEditorSupport.getEditorKit("text/x-groovy");
@@ -65,7 +65,7 @@ public class TaskSettingsManager extends TabManager {
     }
 
 
-//    private void addTaskSettingTab(ITaskCapsuleView tcv) {
+//    private void addTaskSettingTab(ICapsuleView tcv) {
 //        //    taskSettingMap.put(tcv,new ContainerComposerBuilder().setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
 //    /*    taskSettingMap.put(tcv,new ContainerComposerBuilder().setSplitOrientation(JSplitPane.VERTICAL_SPLIT)
 //        .addComponent(new IOContainer())

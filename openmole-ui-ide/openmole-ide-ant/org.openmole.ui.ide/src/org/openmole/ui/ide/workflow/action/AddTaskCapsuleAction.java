@@ -14,14 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.UIFactory;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
 
 /**
  *
@@ -37,9 +35,8 @@ public class AddTaskCapsuleAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        ITaskCapsuleView c = UIFactory.getInstance().createTaskCapsule(moleScene,
-                                                                      moleScene.getLocation());
+        UIFactory.getInstance().createCapsule(moleScene,
+                moleScene.getLocation());
         moleScene.refresh();
     }
-
 }

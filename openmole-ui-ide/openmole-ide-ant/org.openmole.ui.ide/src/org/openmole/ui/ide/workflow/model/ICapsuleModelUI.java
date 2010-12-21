@@ -27,6 +27,7 @@ public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModel
     //IGenericTaskCapsule getTaskCapsule();
  //   void setTaskCapsule(IGenericTaskCapsule taskCapsule);
   //  void setTransitionTo(IGenericTaskCapsule tc);
+    void addTransition(ICapsuleModelUI tModel);
     void addOutputSlot();
     void addInputSlot();
     int getNbInputslots();

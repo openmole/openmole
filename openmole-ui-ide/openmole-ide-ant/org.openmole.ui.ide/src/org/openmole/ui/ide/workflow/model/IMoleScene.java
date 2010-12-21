@@ -5,7 +5,6 @@
 
 package org.openmole.ui.ide.workflow.model;
 
-import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
 
 /**
@@ -20,6 +19,6 @@ public interface IMoleScene{
     void refresh();
     void setMovable(boolean b);
     MoleSceneManager getManager();
-    void initCompositeAdd(Widget w);
-    void initCapsuleAdd(Widget w);
+    void initCompositeAdd(IObjectViewUI w);
+    void initCapsuleAdd(ICapsuleView w);
 }

@@ -35,6 +35,8 @@ import org.netbeans.spi.palette.PaletteController;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.control.TabManager;
@@ -57,8 +59,9 @@ public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
+    private final InstanceContent ic = new InstanceContent();
     private PrototypeManagementPanel prototypeManagement;
-    private Lookup paletteLookup;
+    
     private JToolBar toolBar = new JToolBar("SSSE");
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -70,24 +73,15 @@ public final class MoleSceneTopComponent extends TopComponent {
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
-        //FIXME un meilleur endroit pour les inits??
-        // TableMapping.getInstance().initialize();
-        // Preferences.getInstance().initialize();
-
-        // TaskSettingsManager.getInstance().setTabbedPane(jTabbedPane1);
-
-        
-      //  jScrollPane1.setViewportView(TaskSettingsManager.getInstance().getTabbedPane());
-
         MoleScene scene = new MoleScene();
         MoleScenesManager.getInstance().setTabbedPane(tabbedPane);
         TaskSettingsManager.getInstance().setTabbedPane(tabbedPane);
         MoleScenesManager.getInstance().display(scene);
 
         palette = PaletteSupport.createPalette();
-        paletteLookup = Lookups.fixed(new Object[]{palette});
-        associateLookup(paletteLookup);
 
+        associateLookup(new AbstractLookup(ic));
+        ic.add(palette);
 
         prototypeManagement = new PrototypeManagementPanel();
         prototypeManagement.setVisible(true);
@@ -116,18 +110,13 @@ public final class MoleSceneTopComponent extends TopComponent {
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
-       // add(tabbedPane, java.awt.BorderLayout.CENTER);
-
-
-
-        //   associateLookup(Lookups.fixed(new Object[]{new PropertySupport()}));
     }
 
-    public void refreshP() {
+    public void refreshPalette() {
+
+        ic.remove(palette);
         palette = PaletteSupport.createPalette();
-        paletteLookup = getLookup();
-        PaletteSupport.MyPaletteFilter.refresh();
-        // associateLookup(Lookups.fixed(new Object[]{palette}));
+        ic.add(palette);
         repaint();
     }
 

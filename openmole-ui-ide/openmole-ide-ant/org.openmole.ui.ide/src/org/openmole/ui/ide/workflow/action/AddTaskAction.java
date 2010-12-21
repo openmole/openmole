@@ -22,7 +22,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
-import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
@@ -32,10 +32,10 @@ public class AddTaskAction implements ActionListener {
 
     MoleScene moleScene;
     Class<? extends IGenericTask> coreTaskClass;
-    private TaskCapsuleViewUI capsuleView;
+    private CapsuleViewUI capsuleView;
 
     public AddTaskAction(MoleScene moleScene,
-            TaskCapsuleViewUI capsuleView,
+            CapsuleViewUI capsuleView,
            // Class<? extends IGenericTaskModelUI> taskClass) {
             Class<? extends IGenericTask> coreTaskClass) {
         this.moleScene = moleScene;

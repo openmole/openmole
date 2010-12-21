@@ -29,20 +29,21 @@ import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
 public class ManagePrototypeAction implements ActionListener {
+
     private PrototypeManagementPanel prototypePanel;
     private MoleSceneTopComponent topComponent;
-    
+
     public ManagePrototypeAction(PrototypeManagementPanel protoPanel,
-                                 MoleSceneTopComponent topcomponent) {
+            MoleSceneTopComponent topcomponent) {
         this.prototypePanel = protoPanel;
         this.topComponent = topcomponent;
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
         System.out.println("++ actionPerformed ++ " + prototypePanel.isVisible() + " !!");
-        
+
 //        JFrame frame = new JFrame("Prototype management");
 //        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //
@@ -52,10 +53,10 @@ public class ManagePrototypeAction implements ActionListener {
 //        frame.setContentPane(newContentPane);
 
         //Display the window.
-       // frame.pack();
-       // prototypePanel.setVisible(!prototypePanel.isVisible());
-            DialogSupport.showDialog(prototypePanel);
-                topComponent.refreshP();
+        // frame.pack();
+        // prototypePanel.setVisible(!prototypePanel.isVisible());
+        DialogSupport.showDialog(prototypePanel);
+        topComponent.refreshPalette();
 
 //        
 //        

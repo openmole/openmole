@@ -16,8 +16,6 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import com.thoughtworks.xstream.XStream;
-import org.openide.util.Exceptions;
 import org.openmole.ui.ide.workflow.provider.MoleSceneMenuProvider;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -25,9 +23,6 @@ import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -47,28 +42,21 @@ import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
 import org.openide.util.ImageUtilities;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.model.capsule.IGenericCapsule;
-import org.openmole.core.model.mole.IMole;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.serializer.Serializer;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
-import org.openmole.ui.ide.workflow.provider.DnDNewTaskCapsuleProvider;
+import org.openmole.ui.ide.workflow.provider.DnDNewCapsuleProvider;
 import scala.Option;
-import org.openmole.core.implementation.capsule.Capsule;
-import org.openmole.core.implementation.data.Prototype;
-import org.openmole.core.implementation.mole.Mole;
-import org.openmole.core.implementation.task.MoleTask;
-import org.openmole.core.implementation.transition.Transition;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.plugin.task.groovy.GroovyTask;
+import org.openmole.ui.ide.workflow.model.IObjectViewUI;
 
 /**
  *
@@ -107,7 +95,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         // getActions().addAction(ActionFactory.createZoomAction());
         //  getActions().addAction(ActionFactory.createPanAction());
 
-        getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskCapsuleProvider(this)));
+        getActions().addAction(ActionFactory.createAcceptAction(new DnDNewCapsuleProvider(this)));
 
         //getActions().addAction(ActionFactory.createAcceptAction(new DnDProvider(this)));
 
@@ -174,8 +162,8 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     }
 
     public void removeElement(ICapsuleModelUI cm) {
-        //    removeNode(getManager().getTaskViewID(cm));
-        //    getManager().removeTaskView(cm);
+        //    removeNode(getManager().getCapsuleViewID(cm));
+        //    getManager().removeCapsuleView(cm);
     }
 
     @Override
@@ -203,14 +191,15 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     @Override
     protected void attachEdgeSourceAnchor(String edge, String oldSourceNode, String sourceNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        cw.setSourceAnchor(((ITaskCapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
+       // cw.setSourceAnchor(((ICapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
+
+        cw.setSourceAnchor(((ICapsuleView) findWidget(sourceNode)).getConnectableWidget().getOutputSlotAnchor(0));
         cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
     }
 
     @Override
     protected void attachEdgeTargetAnchor(String edge, String oldTargetNode, String targetNode) {
-        ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        cw.setTargetAnchor(((ITaskCapsuleView) (findWidget(targetNode))).getConnectableWidget().getInputSlotAnchor(0));
+        ((ConnectionWidget) findWidget(edge)).setTargetAnchor(((ICapsuleView) findWidget(targetNode)).getConnectableWidget().getInputSlotAnchor(0));
     }
 
     @Override
@@ -263,7 +252,6 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
     private void buildXXTasks(IGenericCapsule tCapsule,
             String nodeID) throws InternalProcessingError, UserBadDataError {
-        ITaskCapsuleView connectable = null;
 
         if (tCapsule.task() != null) {
             if (!getNodes().contains(nodeID)) {
@@ -274,11 +262,11 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         } else {
             if (!getNodes().contains(nodeID)) {
                 /* if (nodeID.isEmpty()) {
-                connectable = createTaskCapsule(nodeID);
+                connectable = createCapsule(nodeID);
                 } else {
-                connectable = createTaskCapsule();
+                connectable = createCapsule();
                 }*/
-                UIFactory.getInstance().createTaskCapsule(this);
+                UIFactory.getInstance().createCapsule(this);
                 //   initConnectable(tCapsule, connectable);
             }
         }
@@ -310,15 +298,15 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     }
 
     @Override
-    public void initCompositeAdd(Widget w) {
+    public void initCompositeAdd(IObjectViewUI w) {
         currentLayer = taskCompositeLayer;
-        obUI = w;
+        obUI = (Widget) w;
     }
 
     @Override
-    public void initCapsuleAdd(Widget w) {
+    public void initCapsuleAdd(ICapsuleView w) {
         currentLayer = taskCapsuleLayer;
-        obUI = w;
+        obUI = (Widget) w;
     }
 
     private class MoleSceneConnectProvider implements ConnectProvider {
@@ -356,6 +344,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
             MoleScene.this.createEdge(source, target);
+            getManager().getCapsuleView(source).getCapsuleModel().addTransition(getManager().getCapsuleView(target).getCapsuleModel());
         }
     }
 

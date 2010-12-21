@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
-import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.commons.exception.UserBadDataError;
@@ -32,6 +32,7 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
 
 /**
  *
@@ -40,11 +41,11 @@ import org.openmole.ui.ide.exception.MoleExceptionManagement;
 public class DnDAddPrototypeInstanceProvider extends DnDProvider {
 
     protected boolean encapsulated = false;
-    protected TaskCapsuleViewUI view;
+    protected CapsuleViewUI view;
     protected MoleScene moleScene;
 
     public DnDAddPrototypeInstanceProvider(MoleScene molescene,
-            TaskCapsuleViewUI view) {
+            CapsuleViewUI view) {
         super(molescene);
         this.moleScene = molescene;
         this.view = view;
@@ -68,7 +69,7 @@ public class DnDAddPrototypeInstanceProvider extends DnDProvider {
     public void accept(Widget widget, Point point, Transferable t) {
         try {
             String inputValue = (String) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR);
-            if (point.x < ApplicationCustomize.TASK_CONTAINER_WIDTH / 2) {
+            if (point.x < view.getConnectableWidget().getTaskWidth() / 2) {
                 view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
             } else {
                 view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);

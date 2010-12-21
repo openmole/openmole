@@ -19,7 +19,9 @@ package org.openmole.ui.ide.workflow.implementation;
 import org.openmole.ui.ide.commons.IOType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
@@ -29,11 +31,11 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 //public abstract class CapsuleModelUI<T extends IGenericTaskCapsule> extends ObjectModelUI implements ICapsuleModelUI<T>{
-public abstract class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI{
+public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI{
 
     private transient Map<IOType, Integer> nbSlots;
-    private IGenericCapsule taskCapsule;
     private final static String category = "Task Tapsules";
+    private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
 
     private void setNbSlots() {
         if (nbSlots == null){
@@ -86,5 +88,15 @@ public abstract class CapsuleModelUI<T extends IGenericCapsule> extends ObjectMo
     public void removeSlot(IOType type) {
         int nb = nbSlots.get(type) - 1;
         nbSlots.put(type, nb);
+    }
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void addTransition(ICapsuleModelUI taskmodel){
+        connectedTo.add(taskmodel);
     }
 }

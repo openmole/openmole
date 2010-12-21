@@ -22,8 +22,10 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
@@ -78,6 +80,8 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
 
         nameField = new JTextField(10);
         nameField.addActionListener(new AddButtonListener());
+        if (!Preferences.getInstance().getPrototypes().isEmpty())
+            nameField.setText(Preferences.getInstance().getPrototypes().iterator().next().getName());
 
         //Create the update prototype button.
         upButton = new JButton(updateString);
@@ -190,7 +194,12 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         public void actionPerformed(ActionEvent e) {
             PrototypeUI proto = exists(nameField.getText());
             if (proto != null) {
+                System.out.println(" ---------- ROMOVE");
                 prototypeListModel.removeElement(proto);
+
+                List li = Arrays.asList(prototypeListModel.toArray());
+                Preferences.getInstance().setPrototypes(li);
+                System.out.println("SIze .."+Preferences.getInstance().getPrototypes().size());
                 nameField.setText("");
             }
         }

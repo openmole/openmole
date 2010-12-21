@@ -20,12 +20,11 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
-import java.io.FileReader;
 import java.util.LinkedHashMap;
 import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleModelUI;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 
 /**
  *
@@ -49,7 +48,7 @@ public class ApplicationCustomize {
     public static final int PANEL_WIDTH =  (int) (SCREEN_WIDTH * 0.8);
     public static final int PANEL_HEIGHT = (int) (SCREEN_HEIGHT * 0.8);
 
-    public static final int EXPANDED_TASK_CONTAINER_WIDTH = 200;
+    public static final int EXPANDED_TASK_CONTAINER_WIDTH = 350;
     public static final int TASK_CONTAINER_WIDTH = 80;
     public static final int TASK_CONTAINER_HEIGHT = 100;
     public static final int TASK_TITLE_WIDTH = TASK_CONTAINER_WIDTH;
@@ -76,7 +75,7 @@ public class ApplicationCustomize {
     public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor(Class.class, "Prototype instances" );
     public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
     public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
-    public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ITaskCapsuleModelUI.class, "Task capsules" );
+    public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ICapsuleModelUI.class, "Task capsules" );
 
     public static final String TASK_DEFAULT_PROPERTIES = "src/resources/task/default";
     

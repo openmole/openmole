@@ -21,7 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractButton;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
@@ -39,7 +39,7 @@ public class EnableTaskDetailedView implements ActionListener{
     public void actionPerformed(ActionEvent ae) {
         AbstractButton button = (AbstractButton)ae.getSource();
         scene.setDetailedView(button.isSelected());
-        for(ITaskCapsuleView cv:scene.getManager().getTaskViews()){
+        for(ICapsuleView cv:scene.getManager().getCapsuleViews()){
             cv.getConnectableWidget().setWidthHint();
         }
         scene.validate();

@@ -18,8 +18,13 @@ package org.openmole.ui.ide.serializer;
 
 import com.thoughtworks.xstream.XStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import org.openide.util.Exceptions;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 
@@ -29,25 +34,21 @@ import org.openmole.ui.ide.exception.MoleExceptionManagement;
  */
 public class Serializer {
 
+
     public static void serialize(IMole mole, String toFile) {
-        DataOutputStream dos = null;
         try {
             XStream xstream = new XStream();
-            dos = new DataOutputStream(new FileOutputStream(toFile));
-            dos.writeUTF(xstream.toXML(mole));
-        } catch (IOException ex) {
+            // dos = new DataOutputStream(new FileOutputStream(toFile));
+            xstream.toXML(mole, new FileOutputStream(toFile));
+        } catch (FileNotFoundException ex) {
             MoleExceptionManagement.showException(ex);
-        } finally {
-            try {
-                dos.close();
-            } catch (IOException ex) {
-                MoleExceptionManagement.showException(ex);
-            }
         }
+        
     }
 
-    public static IMole unserialize(String fromFile) {
+    public static IMole unserialize(String fromFile) throws FileNotFoundException, IOException {
         XStream xstream = new XStream();
-        return (IMole) xstream.fromXML(fromFile);
+        IMole mole = (IMole) xstream.fromXML(new FileInputStream(fromFile));
+        return mole;
     }
 }

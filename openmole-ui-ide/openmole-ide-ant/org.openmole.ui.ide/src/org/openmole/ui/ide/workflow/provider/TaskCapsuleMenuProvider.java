@@ -31,7 +31,7 @@ import org.openmole.ui.ide.workflow.action.AddTaskAction;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
-import org.openmole.ui.ide.workflow.implementation.TaskCapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
@@ -41,7 +41,7 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
 
     private JMenu inPrototypeMenu;
     private JMenu outPrototypeMenu;
-    private TaskCapsuleViewUI capsuleView = null;
+    private CapsuleViewUI capsuleView = null;
     private boolean encapsulated = false;
 
     @Override
@@ -62,7 +62,7 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
     }
 
     public TaskCapsuleMenuProvider(MoleScene scene,
-            TaskCapsuleViewUI capsuleView) {
+            CapsuleViewUI capsuleView) {
         super();
         this.capsuleView = capsuleView;
         JMenuItem mItemI = new JMenuItem("an input slot");

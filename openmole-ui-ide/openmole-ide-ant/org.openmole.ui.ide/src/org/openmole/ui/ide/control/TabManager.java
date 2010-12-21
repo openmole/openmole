@@ -20,6 +20,8 @@ import java.awt.Component;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.swing.JTabbedPane;
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 
 /**
  *
@@ -27,7 +29,8 @@ import javax.swing.JTabbedPane;
  */
 public abstract class TabManager implements ITabManager {
 
-    private Map<Object, Component> tabMap = new WeakHashMap<Object, Component>();
+    private BidiMap<Object, Component> tabMap = new DualHashBidiMap<Object, Component>();
+   // private Map<Object, Component> tabMap = new WeakHashMap<Object, Component>();
     private JTabbedPane tabbedPane;
 
     @Override
@@ -48,5 +51,9 @@ public abstract class TabManager implements ITabManager {
 
     public void setTabbedPane(JTabbedPane tabbedPane) {
         this.tabbedPane = tabbedPane;
+    }
+
+    public Object getCurrentObject(){
+        return tabMap.getKey(tabbedPane.getSelectedComponent());
     }
 }

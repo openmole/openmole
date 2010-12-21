@@ -2,16 +2,16 @@ package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openmole.ui.ide.workflow.model.ITaskCapsuleView;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
  * @author mathieu
  */
 public class AddOutputAction implements ActionListener {
-     private ITaskCapsuleView connectable;
+     private ICapsuleView connectable;
 
-     public AddOutputAction(ITaskCapsuleView c){
+     public AddOutputAction(ICapsuleView c){
         connectable = c;
      }
 

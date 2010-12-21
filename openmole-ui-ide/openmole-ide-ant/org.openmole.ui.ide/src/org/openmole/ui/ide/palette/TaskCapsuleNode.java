@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.openide.util.datatransfer.ExTransferable;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.palette.Category.CategoryName;
-import org.openmole.ui.ide.workflow.implementation.TaskCapsuleModelUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 
 /**
  *
@@ -45,7 +45,7 @@ public class TaskCapsuleNode extends GenericNode{
         retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR) {
             @Override
             protected Object getData() throws IOException, UnsupportedFlavorException {
-                return TaskCapsuleModelUI.class;
+                return CapsuleModelUI.class;
             }
         });
         return retValue;

@@ -39,7 +39,7 @@ public class MoleScenesManager extends TabManager{
         moleScenes.add(ms);
     }
 
-    Collection<IMoleScene> getMoleScenes(){
+    public Collection<IMoleScene> getMoleScenes(){
         return moleScenes;
     }
 
