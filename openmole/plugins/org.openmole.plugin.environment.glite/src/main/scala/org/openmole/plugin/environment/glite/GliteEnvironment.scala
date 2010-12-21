@@ -89,8 +89,8 @@ object GliteEnvironment {
 
   Activator.getWorkspace += (ProxyRenewalRatio, "0.2")
 
-  Activator.getWorkspace += (OverSubmissionRatioWaitingLocation, "0.5")
-  Activator.getWorkspace += (OverSubmissionRatioRunningLocation, "0.2")
+  Activator.getWorkspace += (OverSubmissionRatioWaitingLocation, "0.2")
+  Activator.getWorkspace += (OverSubmissionRatioRunningLocation, "0.1")
   Activator.getWorkspace += (OverSubmissionRatioEpsilonLocation, "0.01")
   Activator.getWorkspace += (OverSubmissionIntervalLocation, "PT5M")
 
