@@ -25,6 +25,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.openmole.misc.fileservice.IFileService;
 import org.openmole.misc.hashservice.IHashService;
+import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
 
 /**
@@ -36,6 +37,7 @@ public class Activator implements BundleActivator {
     private static IWorkspace workspace;
     private static BundleContext context;
     private static IHashService hashService;
+    private static IUpdater updater;
     private ServiceRegistration regExecutor;
     private static ExecutorService cleanFiles;
 
@@ -103,5 +105,19 @@ public class Activator implements BundleActivator {
             }
         }
         return hashService;
+    }
+    
+    public static IUpdater getUpdater() {
+        if (updater != null) {
+            return updater;
+        }
+
+        synchronized (Activator.class) {
+            if (updater == null) {
+                ServiceReference ref = getContext().getServiceReference(IUpdater.class.getName());
+                updater = (IUpdater) getContext().getService(ref);
+            }
+        }
+        return updater;
     }
 }

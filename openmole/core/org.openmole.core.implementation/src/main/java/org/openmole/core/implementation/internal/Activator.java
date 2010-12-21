@@ -23,16 +23,13 @@ import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.pluginmanager.IPluginManager;
 import org.openmole.core.serializer.ISerializer;
-import org.openmole.misc.updater.IUpdater;
 import org.openmole.misc.workspace.IWorkspace;
 
 public class Activator implements BundleActivator {
 
     static BundleContext context;
-    private static transient IUpdater updater;
     private static IWorkspace workspace;
     private static ISerializer messageSerializer;
-    private static IExecutorService executorService;
     private static IEventDispatcher eventDispatcher;
     private static IPluginManager pluginManager;
 
@@ -62,20 +59,6 @@ public class Activator implements BundleActivator {
             }
         }
         return workspace;
-    }
-
-    public static IExecutorService getExecutorService() {
-        if (executorService != null) {
-            return executorService;
-        }
-
-        synchronized (Activator.class) {
-            if (executorService == null) {
-                ServiceReference ref = getContext().getServiceReference(IExecutorService.class.getName());
-                executorService = (IExecutorService) getContext().getService(ref);
-            }
-        }
-        return executorService;
     }
 
     public static IEventDispatcher getEventDispatcher() {

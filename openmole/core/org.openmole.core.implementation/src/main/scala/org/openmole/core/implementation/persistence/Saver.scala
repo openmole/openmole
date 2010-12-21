@@ -36,7 +36,7 @@ import scala.collection.JavaConversions._
 
 class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecutionObserver {
 
-   var ordinal: Int = 0;
+   var ordinal: Int = 0
   
   def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) = {
     this(taskCapsule, dir)

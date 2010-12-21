@@ -142,7 +142,7 @@ object URIFile {
   private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);
 }
 
-class URIFile(val location: String) extends IURIFile {
+case class URIFile(val location: String) extends IURIFile {
   
   import URIFile._
  
@@ -157,6 +157,7 @@ class URIFile(val location: String) extends IURIFile {
   def this(file: IURIFile) = this(file.location)
     
   private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.BatchStorageControl.withToken(storageDescription,a)
+  private def withFailureControl[A](a: => A, isFailure: Throwable => Boolean): A = org.openmole.core.batch.control.BatchStorageControl.withFailureControl(storageDescription,a,isFailure)
   private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.BatchStorageControl.withFailureControl(storageDescription,a)
 
   private def trycatch[A](f: => A): A = {
@@ -171,7 +172,7 @@ class URIFile(val location: String) extends IURIFile {
   private def trycatch[A](f: => A, t: Task[_,_]): A = {
     try {
       f
-    } catch {
+    } catch { 
       case (e: TimeoutException) =>
         t.cancel(true)
         throw new IOException(location, e)
@@ -282,10 +283,10 @@ class URIFile(val location: String) extends IURIFile {
     val task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL);
 
     trycatch(
-      withFailureControl {
+      withFailureControl ({
         val ret = task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         new JSAGAInputStream(ret)
-      }, task)
+      }, {e: Throwable => !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass)}), task)
   }
 
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
@@ -302,11 +303,11 @@ class URIFile(val location: String) extends IURIFile {
 
   override def cache: File = withToken(cache(_))
 
-  override def cache(token: AccessToken): File = trycatch(synchronized {
-      val cacheTmp = Activator.getWorkspace().newFile("file", "cache")
+  override def cache(token: AccessToken): File = trycatch(/*synchronized */{
+      val cacheTmp = Activator.getWorkspace.newFile("file", "cache")
       this.copy(new URIFile(cacheTmp), token)
       cacheTmp
-    })
+  })
 
   private def isLocal: Boolean = {
     val url = SAGAURL
@@ -318,7 +319,7 @@ class URIFile(val location: String) extends IURIFile {
 
 
   /* -------------------- remove -------------------------------*/
-  override def remove(recursive: Boolean) = remove(true, recursive);
+  override def remove(recursive: Boolean) = remove(true, recursive)
   override def remove(recursive: Boolean, token: AccessToken) = remove(true, recursive, token);
   override def remove(timeOut: Boolean, recursive: Boolean) = withToken(remove(timeOut, recursive,_))
 
@@ -351,7 +352,7 @@ class URIFile(val location: String) extends IURIFile {
 
       trycatch (task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
     } finally {
-      close(dir);
+      close(dir)
     }
   }
 
@@ -361,7 +362,7 @@ class URIFile(val location: String) extends IURIFile {
   override def URI: URI = new URI(location)
   override def toString: String = location
 
-  override def equals(obj: Any): Boolean = {
+  /*override def equals(obj: Any): Boolean = {
     if (obj == null) return false
     if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
   
@@ -373,5 +374,5 @@ class URIFile(val location: String) extends IURIFile {
   override def hashCode: Int = {
     var hash = 3
     97 * hash + (if(location != null) location.hashCode else 0)
-  }
+  }*/
 }

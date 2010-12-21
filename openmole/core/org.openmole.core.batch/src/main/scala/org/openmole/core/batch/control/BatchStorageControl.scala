@@ -45,9 +45,11 @@ object BatchStorageControl {
     }    
   }
   
-  def withFailureControl[A](desc: BatchStorageDescription, op: => A): A = {
+  def withFailureControl[A](desc: BatchStorageDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => true})
+  
+  def withFailureControl[A](desc: BatchStorageDescription, op: => A, isFailure: Throwable => Boolean): A = {
     val qualityControl = this.qualityControl(desc)
-    QualityControl.withQualityControl(qualityControl, op)
+    QualityControl.withQualityControl(qualityControl, op, isFailure)
   }
   
   def withToken[B]( desc: BatchStorageDescription, f: (AccessToken => B)): B = {

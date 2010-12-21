@@ -21,6 +21,7 @@ import java.io.File
 import org.openmole.misc.filecache.IFileCache
 import org.openmole.commons.tools.service.IHash
 
+
 trait IFileService {
   def hash(file: File): IHash
   def hash(file: File, cacheLength: Object): IHash

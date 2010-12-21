@@ -47,11 +47,7 @@
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>${lib.uk.com.robust-it.cloning.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.executorservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
 	<dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>

@@ -27,31 +27,41 @@ import org.openmole.commons.tools.service.IHash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
 import org.openmole.misc.fileservice.IFileService
+import org.openmole.misc.workspace.ConfigurationLocation
+import org.openmole.misc.executorservice.ExecutorType
+
+object FileService {
+    val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
+    Activator.getWorkspace += (GCInterval, "PT5M")
+}
+
 
 class FileService extends IFileService {
 
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
   class HashWithLastModified(val hash: IHash, val lastModified: Long)
     
-  val hashCach = new AssociativeCache[String, HashWithLastModified]
-  val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
+  private[internal] val hashCache = new AssociativeCache[String, HashWithLastModified]
+  private[internal] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
+  Activator.getUpdater.delay(new FileServiceGC(this), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(FileService.GCInterval))
+ 
   override def hash(file: File): IHash = hash(file, file)
 
   override def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
     
   override def hash(file: File, cacheLength: Object): IHash = {
     invalidateHashCacheIfModified(file, cacheLength)
-    hashCach.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(Activator.getHashService.computeHash(file), file.lastModified)).hash
+    hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(Activator.getHashService.computeHash(file), file.lastModified)).hash
   }
 
   private def invalidateHashCacheIfModified(file: File, cacheLength: Object) = {
-    val hashWithLastModified = hashCach.cached(cacheLength, file.getAbsolutePath) match {
+    val hashWithLastModified = hashCache.cached(cacheLength, file.getAbsolutePath) match {
       case None =>
       case Some(hash) => 
         if (hash.lastModified < FileUtil.lastModification(file)) {
           Logger.getLogger(classOf[FileService].getName).info("Invalidate cache " + file.getAbsolutePath)
-          hashCach.invalidateCache(cacheLength, file.getAbsolutePath)
+          hashCache.invalidateCache(cacheLength, file.getAbsolutePath)
         }
     }
   }

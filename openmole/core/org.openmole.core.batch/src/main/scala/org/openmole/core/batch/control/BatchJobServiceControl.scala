@@ -42,10 +42,10 @@ object BatchJobServiceControl {
     }    
   }
   
-  
-  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A): A = {
+  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => true})
+  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A, isFailure: Throwable => Boolean): A = {
     val qualityControl = this.qualityControl(desc)
-    QualityControl.withQualityControl(qualityControl, op)
+    QualityControl.withQualityControl(qualityControl, op, isFailure)
   }
   
    

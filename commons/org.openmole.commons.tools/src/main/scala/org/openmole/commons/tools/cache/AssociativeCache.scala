@@ -24,7 +24,7 @@ import scala.collection.mutable.WeakHashMap
 class AssociativeCache[K, T] {
 
   val cacheMaps = new WeakHashMap[Object, HashMap[K, T]] with SynchronizedMap[Object, HashMap[K, T]]
-
+  
   def invalidateCache(cacheAssociation: Object, key: K) = {
     val cache = cacheMaps.getOrElse(cacheAssociation, null)
     if (cache != null) cache -= key

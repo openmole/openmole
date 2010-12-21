@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 object QualityControl {
   
-  def withQualityControl[A](qualityControl: Option[QualityControl], op: => A): A = {
+  def withQualityControl[A](qualityControl: Option[QualityControl], op: => A, isFailure: Throwable => Boolean): A = {
     try {
       val ret = op
       qualityControl match {
@@ -39,14 +39,14 @@ object QualityControl {
     }
   }
   
-  def withQualityControl[A](qualityControl: QualityControl, op: => A): A = {
+  def withQualityControl[A](qualityControl: QualityControl, op: => A, isFailure: Throwable => Boolean): A = {
     try {
       val ret = op
       qualityControl.success
       ret
     } catch {
       case e =>
-        qualityControl.failed
+        if(isFailure(e)) qualityControl.failed
         throw e
     }
   }
