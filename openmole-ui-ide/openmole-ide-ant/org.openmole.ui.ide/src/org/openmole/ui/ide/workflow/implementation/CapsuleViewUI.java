@@ -53,6 +53,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         capsuleModel = tcm;
 
         connectableWidget = new ConnectableWidget(scene,
+                capsuleModel,
                 getBackgroundColor(),
                 getBorderColor(),
                 getBackgroundImage());
@@ -108,13 +109,13 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     @Override
     public void addInputSlot() {
         capsuleModel.addInputSlot();
-        connectableWidget.addInputSlot();
+        connectableWidget.adjustInputSlotPosition();
     }
 
     @Override
     public void addOutputSlot() {
         capsuleModel.addOutputSlot();
-        connectableWidget.addOutputSlot();
+        connectableWidget.adjustOutputSlotPosition();
     }
 
     @Override

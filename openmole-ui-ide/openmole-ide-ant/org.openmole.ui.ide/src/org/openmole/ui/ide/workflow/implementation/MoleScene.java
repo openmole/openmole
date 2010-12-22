@@ -275,8 +275,8 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     /*  private void initConnectable(IGenericTaskCapsule tCapsule,
     IConnectable connectable) {
     for (int i = 0; i < tCapsule.getIntputTransitionsSlots().size(); ++i) {
-    connectable.addInputSlot();
-    connectable.addOutputSlot();
+    connectable.adjustInputSlotPosition();
+    connectable.adjustOutputSlotPosition();
     }
     connectable.setTaskCapsule(tCapsule);
     }*/

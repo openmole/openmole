@@ -24,9 +24,9 @@ import org.openmole.core.model.capsule.IGenericCapsule;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModelUI<T>{
-    //IGenericTaskCapsule getTaskCapsule();
- //   void setTaskCapsule(IGenericTaskCapsule taskCapsule);
-  //  void setTransitionTo(IGenericTaskCapsule tc);
+    public void defineAsStartingCapsule();
+    public void defineAsRegularCapsule();
+    public boolean isStartingCapsule();
     void addTransition(ICapsuleModelUI tModel);
     void addOutputSlot();
     void addInputSlot();

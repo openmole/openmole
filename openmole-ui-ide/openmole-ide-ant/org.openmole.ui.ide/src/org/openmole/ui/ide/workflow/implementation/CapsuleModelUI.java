@@ -30,10 +30,11 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-//public abstract class CapsuleModelUI<T extends IGenericTaskCapsule> extends ObjectModelUI implements ICapsuleModelUI<T>{
 public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI{
 
+    public static CapsuleModelUI EMPTY_CAPSULE_MODEL = new CapsuleModelUI();
     private transient Map<IOType, Integer> nbSlots;
+    private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
     private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
 
@@ -98,5 +99,20 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     @Override
     public void addTransition(ICapsuleModelUI taskmodel){
         connectedTo.add(taskmodel);
+    }
+
+    @Override
+    public void defineAsStartingCapsule(){
+        nbSlots.put(IOType.INPUT,1);
+        startingCapsule = true;
+    }
+
+    @Override
+    public void defineAsRegularCapsule(){
+        startingCapsule = false;
+    }
+
+    public boolean isStartingCapsule(){
+        return startingCapsule;
     }
 }

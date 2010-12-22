@@ -38,6 +38,7 @@ public class DefineMoleStartAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
+        capsuleModel.defineAsStartingCapsule();
         moleScene.getManager().setStartingCapsule(capsuleModel);
     }
 }

@@ -29,7 +29,7 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
 public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
-    private ICapsuleModelUI startingCapsule = null;
+    private ICapsuleModelUI startingCapsule = CapsuleModelUI.EMPTY_CAPSULE_MODEL;
     private int nodeCounter = 0;
     private int nodeID = 0;
 
@@ -46,7 +46,11 @@ public class MoleSceneManager {
     }
 
     public void setStartingCapsule(ICapsuleModelUI startingCapsule) {
+        if (this.startingCapsule != CapsuleModelUI.EMPTY_CAPSULE_MODEL){
+            this.startingCapsule.defineAsRegularCapsule();
+        }
         this.startingCapsule = startingCapsule;
+        startingCapsule.defineAsStartingCapsule();
     }
 
     public ICapsuleModelUI getStartingCapsule() {

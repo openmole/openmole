@@ -65,6 +65,7 @@ public class ApplicationCustomize {
     public static final Image IMAGE_EXPAND = ImageUtilities.loadImage("resources/img/expand.png");
     public static final Image IMAGE_INPUT_ARROW = ImageUtilities.loadImage("resources/img/inputArrow.png");
     public static final Image IMAGE_OUTPUT_ARROW = ImageUtilities.loadImage("resources/img/outputArrow.png");
+    public static final Image IMAGE_START_SLOT = ImageUtilities.loadImage("resources/img/startSlot.png");
     public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/img/inputSlot.png");
     public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/img/outputSlot.png");
     public static final Image IMAGE_TRANSITIONS = ImageUtilities.loadImage("resources/img/transitions.png");

@@ -35,6 +35,7 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskModelUI;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
 /**
@@ -43,26 +44,14 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  */
 public class ConnectableWidget extends MyWidget {
 
-    private int nbInSlot = 0;
-    private int nbOutSlot = 0;
     private int inputDelta = 0;
     private int outputDelta = 0;
     private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
+    private ICapsuleModelUI capsuleModel;
 
+    
     public ConnectableWidget(MoleScene scene,
-            Color backgroundCol,
-            Color borderCol) {
-        super(scene,
-                backgroundCol);
-    }
-
-    public ConnectableWidget(MoleScene scene,
-            Color col) {
-        super(scene,
-                col);
-    }
-
-    public ConnectableWidget(MoleScene scene,
+            ICapsuleModelUI capsuleModel,
             Color backgroundCol,
             Color borderCol,
             Image img) {
@@ -71,14 +60,16 @@ public class ConnectableWidget extends MyWidget {
                 borderCol,
                 img);
         this.borderCol = borderCol;
+        this.capsuleModel = capsuleModel;
     }
 
     public ConnectableWidget(MoleScene scene,
+            ICapsuleModelUI capsuleModel,
             Color backgroundCol,
             Color borderCol,
             Image backgroundImaqe,
             IGenericTaskModelUI taskModelUI) {
-        this(scene, backgroundCol, borderCol, backgroundImaqe);
+        this(scene, capsuleModel,backgroundCol, borderCol, backgroundImaqe);
         this.taskModel = taskModelUI;
         createActions(MoleScene.MOVE).addAction (ActionFactory.createMoveAction());
     }
@@ -87,23 +78,17 @@ public class ConnectableWidget extends MyWidget {
         this.taskModel = taskModelUI;
     }
 
-//    public IGenericTaskModelUI<IGenericTask> getTaskModel() {
-//        return taskModel;
-//    }
-
     public void setDetailedView() {
         setWidthHint();
     }
 
-    public void addInputSlot() {
-        nbInSlot++;
-        inputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - nbInSlot * 14) / (nbInSlot + 1);
+    public void adjustInputSlotPosition() {
+        inputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - capsuleModel.getNbInputslots() * 14) / (capsuleModel.getNbInputslots() + 1);
         repaint();
     }
 
-    public void addOutputSlot() {
-        nbOutSlot++;
-        outputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - nbOutSlot * 14) / (nbOutSlot + 1);
+    public void adjustOutputSlotPosition() {
+        outputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - capsuleModel.getNbOutputslots() * 14) / (capsuleModel.getNbOutputslots() + 1);
         repaint();
     }
 
@@ -134,18 +119,19 @@ public class ConnectableWidget extends MyWidget {
         super.paintWidget();
         Graphics2D graphics = getGraphics();
 
+        adjustInputSlotPosition();
         graphics.setColor(borderCol);
         BasicStroke stroke = new BasicStroke(1.3f, 1, 1);
         graphics.draw(stroke.createStrokedShape(bodyArea));
 
-        for (int i = 0; i < nbInSlot; ++i) {
-            graphics.drawImage(ApplicationCustomize.IMAGE_INPUT_SLOT,
+        for (int i = 0; i < capsuleModel.getNbInputslots(); ++i) {
+            graphics.drawImage(capsuleModel.isStartingCapsule() ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT,
                     -8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + i * (inputDelta + 14) + inputDelta,
                     new Container());
         }
 
-        for (int i = 0; i < nbOutSlot; ++i) {
+        for (int i = 0; i < capsuleModel.getNbOutputslots(); ++i) {
             graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
                     taskWidth - 8,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + i * (outputDelta + 14) + outputDelta,
