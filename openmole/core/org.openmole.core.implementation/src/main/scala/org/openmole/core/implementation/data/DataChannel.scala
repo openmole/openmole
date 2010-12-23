@@ -33,8 +33,8 @@ import scala.collection.mutable.ListBuffer
 
 class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val variableNames: Set[String]) extends IDataChannel {
 
-  start.plugOutputDataChannel(this)
-  end.plugInputDataChannel(this)
+  start.addOutputDataChannel(this)
+  end.addInputDataChannel(this)
   
   def this(start: IGenericCapsule, end: IGenericCapsule, head: String, variables: Array[String]) = {
     this(start, end, (ListBuffer(head) ++ variables).toSet[String])

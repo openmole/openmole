@@ -17,27 +17,31 @@
 
 package org.openmole.core.model.data
 
-
+/**
+ * This class is a collection of masks to set modalties on how a task uses
+ * {@see IData}.
+ */
 object DataModeMask {
 
   /**
-   *
-   * Data is optionnal
+   * IData is optionnal. If this data is no found at the begining of a task 
+   * execution no error will be raised and the task should accomodate of it.
    *
    */
   val OPTIONAL = new DataModeMask(0x0001)
 
   /**
-   *
-   * State that the data value of a variable will not be modified
+   * The value corresponding to the IData is mutable. The task will modify the
+   * value, theyrefore the workflow system will clone the value when needed
+   * to ensure consistency. This data mode only applies for task inputs.
    *
    */
   val MUTABLE = new DataModeMask(0x0002)
 
   /**
-   *
-   * State that the data value of a variable that is used for system level information
-   * as oposed to buisiness level informations
+   * The value corresponding to the IData is used for system level information
+   * (as oposed to buisiness or user level information). This mask is use by the
+   * workflow system.
    *
    */
   val SYSTEM = new DataModeMask(0x0004)

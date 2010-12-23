@@ -18,17 +18,17 @@
 package org.openmole.core.model.data
 
 /**
+ * It modelizes atomic elements of data-flows. IData is a typed data chunk with
+ * meta-information. Tasks takes IData in input and produce IData in output. 
+ * IData travels through transitions and data channels.
  *
- * {@link IData} modelizes data atomic elements of data-flows.
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
 trait IData[T] {
 
 
     /**
-     *
-     * Get the mode of the data
+     * The mode is meta-information on the IData. It indicates the manner a task
+     * uses it. For a list of modalties see {@see DataModeMask}.
      *
      * @return mode of the data
      */
@@ -36,10 +36,10 @@ trait IData[T] {
 
 
     /**
+     * Data chunks are named and typed. Get the prototype (type and name) of 
+     * this data chunk.
      *
-     * Get the prototype of the data.
-     *
-     * @return the prototype of the data
+     * @return the prototype of the IData
      */
     def prototype: IPrototype[T]
 }

@@ -20,11 +20,48 @@ package org.openmole.core.model.capsule
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ITransition
 
+/**
+ * A capsule containing ordinry task (as oposed from exploration ones). This
+ * type of capsule must be followed by a Transition (as oposed to exploration
+ * ones).
+ * 
+ */
 trait ICapsule extends IGenericCapsule {
-    def task: Option[ITask]
-    def task_=(task: ITask)
-    def task_=(task: Option[ITask])
+
+  /**
+   * Get the Some(task) assigned to this capsule or None if not the task has not
+   * been assigned.
+   *
+   * @return Some(task) inside this capsule or None if not the task has not been assigned
+   */
+  def task: Option[ITask]
     
-    def plugOutputTransition(transition: ITransition): this.type
-    def outputTransitions: Iterable[ITransition]
+  /**
+   * Assing a task to this capsule.
+   * 
+   * @param task the task to assign to this capsule.
+   */
+  def task_=(task: ITask)
+  
+  /**
+   * Assing an option of task to this capsule.
+   * 
+   * @param task the option of task to assign to this capsule.
+   */
+  def task_=(task: Option[ITask])
+    
+  /**
+   * Add an output transition to this capsule.
+   * 
+   * @param transition the transition to add
+   * @return the capsule itself
+   */
+  def addOutputTransition(transition: ITransition): this.type
+  
+  /**
+   * Get all the output transitions plugged to this capsule.
+   *
+   * @return all the output transitions plugged to this capsule
+   */
+  def outputTransitions: Iterable[ITransition]
 }

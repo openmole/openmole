@@ -165,7 +165,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
           throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
         }
 
-        val tis = new TarInputStream(new FileInputStream(tarResultFile));
+        val tis = new TarInputStream(new FileInputStream(tarResultFile))
 
         try {
           val destDir = Activator.getWorkspace.newDir("tarResult")
@@ -188,11 +188,11 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             }
 
             val file = if (fileInfo._2) {
-              val file = Activator.getWorkspace().newDir("tarResult")
+              val file = Activator.getWorkspace.newDir("tarResult")
 
               val destIn = new FileInputStream(dest)
               try {
-                TarArchiver.extractDirArchiveWithRelativePath(file, destIn);
+                TarArchiver.extractDirArchiveWithRelativePath(file, destIn)
               } finally {
                 destIn.close
               }
