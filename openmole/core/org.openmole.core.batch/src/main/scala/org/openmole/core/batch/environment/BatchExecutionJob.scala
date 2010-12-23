@@ -121,6 +121,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
 
     } catch {
+      case (e: TemporaryErrorException) => LOGGER.log(Level.FINE, "Temporary error durring job update.", e)
       case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
       case (e: ShouldBeKilledException) => 
         LOGGER.log(Level.FINE, e.getMessage)

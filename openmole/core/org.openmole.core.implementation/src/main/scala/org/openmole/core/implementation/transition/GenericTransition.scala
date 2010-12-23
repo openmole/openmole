@@ -38,29 +38,8 @@ import scala.collection.mutable.ListBuffer
 
 abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends IGenericTransition {
 
-  /*def this(start: TS, end: IGenericTaskCapsule[_,_]) = this(start, end.defaultInputSlot, None, Set.empty)
-    
-   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition) = this(start, end.getDefaultInputSlot(), Some(condition), Set.empty)
-
-   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String) = this(start, end.getDefaultInputSlot(), new Condition(condition), Set.empty)
-    
-   def this(start: TS , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty)
-    
-   def this(start: TS , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty)
-   
-   def this(start: TS, end: IGenericTaskCapsule[_,_], filtred: String*) = this(start, end.defaultInputSlot, None, filtred)
-    
-   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: ICondition, filtred: String*) = this(start, end.getDefaultInputSlot(), Some(condition), filtred)
-
-   def this(start: TS, end: IGenericTaskCapsule[_,_], condition: String, filtred: String*) = this(start, end.getDefaultInputSlot(), new Condition(condition), filtred)
-    
-   def this(start: TS , slot: ISlot, condition: String, filtred: String*) = this(start, slot, new Condition(condition), filtred)
-    
-   def this(start: TS , slot: ISlot, condition: ICondition, filtred: String*) = this(start, slot, condition, filtred)
-   */
   plugStart 
-  end.plugTransition(this)
-  
+  end += this
 
   def nextTaskReady(ticket: ITicket, execution: IMoleExecution): Boolean = {
     val registry = execution.localCommunication.transitionRegistry
