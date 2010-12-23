@@ -22,71 +22,80 @@ import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.{IGenericTransition,ISlot}
 
+
+/**
+ * Super class for all capsules. Capsules are entities linked together by
+ * transition to build a workflow. Even if it may be not true fo technical
+ * reasons, conceptually they are this is the only mutable class element of
+ * the workflow representation.
+ * 
+ */
 object IGenericCapsule {
+  /**
+   * Job created event id. It is raised when a job is created in order to run
+   * the task contained by this capsule.
+   */
   val JobCreated = "JobCreated"
 }
 
 trait IGenericCapsule {
 
   /**
+   * Get the Some(task) assigned to this capsule or None if not the task has not
+   * been assigned.
    *
-   * Get the task assigned to this capsule or null if not the task has not been assigned.
-   *
-   * @return task inside this capsule or null if not the task has not been assigned
+   * @return Some(task) inside this capsule or None if not the task has not been assigned
    */
   def task: Option[IGenericTask]
   
   /**
+   * Get all data channels ending at this capsule.
    *
-   * Get the list of data channels ending at this capsule.
-   *
-   * @return the list of data channels ending at this capsule
+   * @return all of data channels ending at this capsule
    */
   def inputDataChannels: Iterable[IDataChannel]
 
   /**
+   * Get all data channels starting from this capsule.
    *
-   * Get the list of data channels starting at this capsule.
-   *
-   * @return the list of data channels starting at this capsule
+   * @return all data channels starting from this capsule
    */
   def outputDataChannels: Iterable[IDataChannel]
 
   /**
-   *
-   * Plug a datachannel in input of this capsule.
-   *
-   * @param dataChannel the datachannel to plug
-   */
-  def plugInputDataChannel(dataChannel: IDataChannel): this.type
-
-  /**
-   *
-   * Plug a datachannel in output of this capsule.
+   * Add a datachannel to the input data channels of this capsule.
    *
    * @param dataChannel the datachannel to plug
+   * @return the capsule itself
    */
-  def plugOutputDataChannel(dataChannel: IDataChannel): this.type
+  def addInputDataChannel(dataChannel: IDataChannel): this.type
 
   /**
+   * Add a datachannel in output of this capsule.
    *
-   * Unplug a datachannel in input of this capsule.
-   *
-   * @param dataChannel   the datachannel to unplug
+   * @param dataChannel the datachannel to add
+   * @return the capsule itself
    */
-  def unplugInputDataChannel(dataChannel: IDataChannel): this.type
+  def addOutputDataChannel(dataChannel: IDataChannel): this.type
 
   /**
+   * Remove a datachannel from the input data chanel of this capsule.
    *
-   * Unplug a datachannel in output of this capsule.
-   *
-   * @param dataChannel   the datachannel to unplug
+   * @param dataChannel the datachannel to remove
+   * @return the capsule itself
    */
-  def unplugOutputDataChannel(dataChannel: IDataChannel): this.type
+  def removeInputDataChannel(dataChannel: IDataChannel): this.type
+
+  /**
+   * Remove a datachannel in output of this capsule.
+   *
+   * @param dataChannel the datachannel to remove
+   * @return the capsule itself
+   */
+  def removeOutputDataChannel(dataChannel: IDataChannel): this.type
 
 
   /**
-   *
    * Get the default input slot of this capsule.
    *
    * @return the default input slot of this capsule
@@ -94,22 +103,20 @@ trait IGenericCapsule {
   def defaultInputSlot: ISlot
 
   /**
-   *
    * Get all the input slots of this capsule.
    *
-   * @return the input slots of this capsule
+   * @return all the input slots of this capsule
    */
   def intputSlots: Iterable[ISlot]
 
   /**
-   * .
+   * Add an input slot to this capsule
    * 
-   * @param group the transition slot to be added.
+   * @param group the input slot to add.
    */
   def addInputSlot(group: ISlot): this.type
 
   /**
-   *
    * Get all the output transitions plugged to this capsule.
    *
    * @return all the output transitions plugged to this capsule
@@ -117,13 +124,13 @@ trait IGenericCapsule {
   def outputTransitions: Iterable[IGenericTransition]
 
   /**
+   * Instanciate a MoleJob from this capsule for running the task contained
+   * in it.
    *
-   * Instanciate a job from this capsule.
-   *
-   * @param context the context in which the job will be executed
-   * @param ticket the ticket in which the job will be executed
-   * @param jobId the id of the job
-   * @return the job
+   * @param global the global context in which the MoleJob will be executed
+   * @param context the context in which the MoleJob will be executed
+   * @param jobId the id of the MoleJob
+   * @return the MoleJob
    */
   def toJob(global: IContext, context: IContext, jobId: MoleJobId): IMoleJob
 

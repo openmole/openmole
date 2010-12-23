@@ -66,36 +66,6 @@ class Context extends IContext {
       case Some(v) => proto.`type`.isAssignableFrom(v.prototype.`type`)
     }
   }
-    
-  /*override def value_=(name: String, value: Object) = {
-        
-   synchronized {
-   Variable var = getVariable(name);
-
-   if (var != null) {
-   var.setValue(value);
-   } else {
-   putVariable(name, value);
-   }
-   }
-   }
-
-
-
-   @Override
-   public <T> void setValue(IPrototype<? super T> proto, T value) {
-   synchronized (getVariables()) {
-   IVariable var = getVariable(proto);
-
-   if (var != null) {
-   var.setValue(value);
-   } else {
-   putVariable(proto, value);
-   }
-
-   }
-   }*/
-
 
   override def clean = {_variables = new TreeMap[String, IVariable[_]]}
 

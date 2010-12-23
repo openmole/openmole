@@ -20,11 +20,46 @@ package org.openmole.core.model.capsule
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.transition.IExplorationTransition
 
+/**
+ * A capsule containing an exploration task. This capsule should be followed
+ * by an ExplorationTransition.
+ */
 trait IExplorationCapsule extends IGenericCapsule {
-    def task: Option[IExplorationTask]
-    def task_=(task: IExplorationTask)
-    def task_=(task: Option[IExplorationTask])
+  
+  /**
+   * Get the Some(task) assigned to this capsule or None if not the task has not
+   * been assigned.
+   *
+   * @return Some(task) inside this capsule or None if not the task has not been assigned
+   */
+  def task: Option[IExplorationTask]
+    
+  /**
+   * Assing a task to this capsule.
+   * 
+   * @param task the task to assign to this capsule.
+   */
+  def task_=(task: IExplorationTask)
+    
+  /**
+   * Assing an option of task to this capsule.
+   * 
+   * @param task the option of task to assign to this capsule.
+   */
+  def task_=(task: Option[IExplorationTask])
 
-    def plugOutputTransition(transition: IExplorationTransition): this.type
-    def outputTransitions: Iterable[IExplorationTransition]
+  /**
+   * Add an output transition to this capsule.
+   * 
+   * @param transition the transition to add
+   * @return the capsule itself
+   */
+  def addOutputTransition(transition: IExplorationTransition): this.type
+    
+  /**
+   * Get all the output transitions plugged to this capsule.
+   *
+   * @return all the output transitions plugged to this capsule
+   */
+  def outputTransitions: Iterable[IExplorationTransition]
 }

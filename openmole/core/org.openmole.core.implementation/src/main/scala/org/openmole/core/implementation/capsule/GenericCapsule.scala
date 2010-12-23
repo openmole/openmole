@@ -67,7 +67,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
 
-  override def plugInputDataChannel(dataChannel: IDataChannel): this.type = {
+  override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
     _inputDataChannels.add(dataChannel)
     this
   }
@@ -77,22 +77,22 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     
   override def outputTransitions: Iterable[TOUT] = _outputTransitions
       
-  override def plugOutputDataChannel(dataChannel: IDataChannel): this.type = {
+  override def addOutputDataChannel(dataChannel: IDataChannel): this.type = {
     _outputDataChannels += dataChannel
     this
   }
 
-  override def unplugInputDataChannel(dataChannel: IDataChannel): this.type = {
+  override def removeInputDataChannel(dataChannel: IDataChannel): this.type = {
     _inputDataChannels -= dataChannel
     this
   }
 
-  override def unplugOutputDataChannel(dataChannel: IDataChannel): this.type = {
+  override def removeOutputDataChannel(dataChannel: IDataChannel): this.type = {
     _outputDataChannels -= dataChannel
     this
   }
 
-  def plugOutputTransition(transition: TOUT): this.type = {
+  def addOutputTransition(transition: TOUT): this.type = {
     _outputTransitions += transition
     this
   }
