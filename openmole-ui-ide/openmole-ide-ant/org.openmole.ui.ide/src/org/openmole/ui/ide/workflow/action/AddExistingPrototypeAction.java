@@ -43,7 +43,7 @@ public class AddExistingPrototypeAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent ae) {
-        capsuleViewUI.getTaskModel().addPrototype(prototype, type);
+        capsuleViewUI.getCapsuleModel().getTaskModel().addPrototype(prototype, type);
         capsuleViewUI.repaint();
     }
 

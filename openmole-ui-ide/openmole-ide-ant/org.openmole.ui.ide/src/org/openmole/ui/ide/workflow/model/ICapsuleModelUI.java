@@ -18,15 +18,18 @@ package org.openmole.ui.ide.workflow.model;
 
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.task.IGenericTask;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModelUI<T>{
-    public void defineAsStartingCapsule();
-    public void defineAsRegularCapsule();
-    public boolean isStartingCapsule();
+    IGenericTaskModelUI<IGenericTask> getTaskModel();
+    void setTaskModel(IGenericTaskModelUI<IGenericTask> taskModel);
+    void defineAsStartingCapsule();
+    void defineAsRegularCapsule();
+    boolean isStartingCapsule();
     void addTransition(ICapsuleModelUI tModel);
     void addOutputSlot();
     void addInputSlot();

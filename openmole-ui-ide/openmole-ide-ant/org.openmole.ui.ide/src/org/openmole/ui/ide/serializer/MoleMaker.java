@@ -14,22 +14,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.serializer;
 
-import java.io.File;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.capsule.Capsule;
-import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.implementation.mole.Mole;
-import org.openmole.core.implementation.transition.Transition;
+import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.plugin.task.filemanagement.AppendFileTask;
-import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
-import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
-import org.openmole.ui.ide.workflow.model.ICapsuleView;
+import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
  *
@@ -37,23 +31,23 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
  */
 public class MoleMaker {
 
-    public static IMole process (MoleScene scene) throws UserBadDataError{
+    public static IMole process(IMoleScene scene) throws UserBadDataError {
         MoleSceneManager manager = scene.getManager();
+        IMole mole = null;
 
         ICapsuleModelUI start = manager.getStartingCapsule();
-        if (start != null){
-            Capsule startingCapsule = new Capsule();
-            Mole mole = new Mole(startingCapsule);
-        return mole;
-        }
-        else {
+        if (start != CapsuleModelUI.EMPTY_CAPSULE_MODEL) {
+                IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
+                mole = new Mole(startingCapsule);
+        } else {
             throw new UserBadDataError("A starting capsule is expected");
         }
 
-       // for (ICapsuleView cav : manager.getCapsuleViews()){
-            //capsule = new Capsule
-           // System.out.println("NAME "+cav.getTaskCapsuleModel().);
-      //  }
+       return mole;
+        // for (ICapsuleView cav : manager.getCapsuleViews()){
+        //capsule = new Capsule
+        // System.out.println("NAME "+cav.getTaskCapsuleModel().);
+        //  }
 
 //        Capsule capsule2 = new Capsule();
 //        new Transition(capsule1, capsule2);

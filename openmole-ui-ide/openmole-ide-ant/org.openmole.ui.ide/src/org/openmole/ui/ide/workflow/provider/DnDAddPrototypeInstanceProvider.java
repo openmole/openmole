@@ -16,12 +16,9 @@
  */
 package org.openmole.ui.ide.workflow.provider;
 
-import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.netbeans.api.visual.action.ConnectorState;
@@ -32,7 +29,6 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
 
 /**
  *
@@ -70,9 +66,9 @@ public class DnDAddPrototypeInstanceProvider extends DnDProvider {
         try {
             String inputValue = (String) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR);
             if (point.x < view.getConnectableWidget().getTaskWidth() / 2) {
-                view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
+                view.getCapsuleModel().getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
             } else {
-                view.getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
+                view.getCapsuleModel().getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
             }
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);

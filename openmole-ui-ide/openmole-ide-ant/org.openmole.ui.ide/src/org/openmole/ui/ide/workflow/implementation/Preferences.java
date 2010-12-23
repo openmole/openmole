@@ -39,11 +39,12 @@ import org.openmole.ui.ide.palette.Category.CategoryName;
 public class Preferences {
 
     private static Preferences instance = null;
-    private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.TASK_CAPSULE};
+    private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.CAPSULE};
     private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
     private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
     private Collection<Class> prototypeTypes = new ArrayList<Class>();
     private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
+    private Map<Class<? extends IObjectModelUI>,Class> coreClasses = new WeakHashMap<Class<? extends IObjectModelUI>,Class>();
 
     public void clearModels() {
         models.clear();
@@ -80,6 +81,8 @@ public class Preferences {
                 models.put(c, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
             }
         }
+
+        coreClasses.put(modelClass, coreClass);
         models.get(cat).register(coreClass, modelClass);
     }
 
@@ -162,6 +165,10 @@ public class Preferences {
             prototypes.put("protoFile", new PrototypeUI("protoFile", File.class));
         }
         return prototypes.values();
+    }
+
+    public Class getCoreClass(Class <? extends IObjectModelUI> cl){
+        return coreClasses.get(cl);
     }
 
     public Set<Class> getCoreTaskClasses() {

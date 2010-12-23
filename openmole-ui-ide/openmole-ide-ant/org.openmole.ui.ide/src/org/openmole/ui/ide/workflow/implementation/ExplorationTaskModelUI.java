@@ -19,17 +19,19 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import org.openmole.core.model.task.IExplorationTask;
 
-public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericTaskModelUI<T> {
+public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericTaskModelUI {
+
+    @Override
+    public void eventOccured(Object t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     @Override
     public void proceed() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public void eventOccured(Object t) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+
 
 
 }

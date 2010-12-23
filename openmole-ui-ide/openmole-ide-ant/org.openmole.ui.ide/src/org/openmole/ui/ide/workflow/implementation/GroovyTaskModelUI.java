@@ -23,7 +23,7 @@ import org.openmole.core.model.task.IGenericTask;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI<T>{
+public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI{
 
     @Override
     public void proceed() {

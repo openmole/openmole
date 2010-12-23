@@ -21,7 +21,7 @@ package org.openmole.ui.ide.palette;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleCategory implements ICategory{
+public class CapsuleCategory implements ICategory{
     private final static String name = "Task capsules";
 
     @Override
@@ -31,7 +31,7 @@ public class TaskCapsuleCategory implements ICategory{
 
     @Override
     public GenericChildren getChildren() {
-        return new TaskCapsuleChildren();
+        return new CapsuleChildren();
     }
 
 }

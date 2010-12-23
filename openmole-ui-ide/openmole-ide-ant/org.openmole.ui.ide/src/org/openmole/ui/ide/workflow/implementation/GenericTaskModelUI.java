@@ -28,13 +28,13 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI<T> {
+public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI {
 
     protected transient Collection<TableType.Name> fields;
     private Set<PrototypeUI> prototypesIn;
     private Set<PrototypeUI> prototypesOut;
     private final static String category = "Tasks";
-    protected Class<? extends IGenericTask> coreTask;
+   // protected Class<? extends IGenericTask> coreTask = null;
 
     public GenericTaskModelUI(Properties...properties) {
     }
@@ -73,7 +73,7 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
         return category;
     }
 
-    @Override
+   /* @Override
     public Class <? extends IGenericTask> getCoreTaskClass() {
         return this.coreTask;
     }
@@ -81,7 +81,7 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     @Override
     public void setCoreTaskClass(Class <? extends IGenericTask> coreTask) {
         this.coreTask = coreTask;
-    }
+    }*/
 
 
 }

@@ -22,6 +22,8 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.workflow.model.IUIFactory;
 import org.openmole.commons.tools.object.Instanciator;
+import org.openmole.core.model.task.IExplorationTask;
+import org.openmole.core.model.task.ITask;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
@@ -37,23 +39,6 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class UIFactory implements IUIFactory<Object> {
 
     private static UIFactory instance = null;
-
-    @Override
-    public IGenericTask createCoreTaskInstance(Class<? extends IGenericTask> taskClass) throws UserBadDataError {
-        try {
-            return Instanciator.instanciate(taskClass);
-        } catch (IllegalArgumentException ex) {
-            throw new UserBadDataError(ex);
-        } catch (NoSuchMethodException ex) {
-            throw new UserBadDataError(ex);
-        } catch (InstantiationException ex) {
-            throw new UserBadDataError(ex);
-        } catch (IllegalAccessException ex) {
-            throw new UserBadDataError(ex);
-        } catch (InvocationTargetException ex) {
-            throw new UserBadDataError(ex);
-        }
-    }
 
     @Override
     public IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass) throws UserBadDataError {
@@ -82,7 +67,7 @@ public class UIFactory implements IUIFactory<Object> {
         try {
             obUI = new CapsuleViewUI(scene,
                     new CapsuleModelUI(),
-                    Preferences.getInstance().getProperties(CategoryName.TASK_CAPSULE,
+                    Preferences.getInstance().getProperties(CategoryName.CAPSULE,
                     org.openmole.core.implementation.capsule.Capsule.class));
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);

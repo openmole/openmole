@@ -38,7 +38,6 @@ import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
  */
 public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
-    private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
     protected ConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeInstanceProvider dnDAddPrototypeInstanceProvider;
@@ -76,14 +75,10 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     public String getName() {
         return connectableWidget.getTitleString();
     }
-    
-    public IGenericTaskModelUI<IGenericTask> getTaskModel() {
-        return taskModel;
-    }
 
     public void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError {
-        this.taskModel = UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass));
-        this.taskModel.setCoreTaskClass(coreTaskClass);
+        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass)));
+       // capsuleModel.getTaskModel().setCoreTaskClass(coreTaskClass);
 
         properties = Preferences.getInstance().getProperties(CategoryName.TASK, coreTaskClass);
 
@@ -95,7 +90,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         connectableWidget.addTitle(scene.getManager().getNodeName());
 
         taskCapsuleMenuProvider.addTaskMenus();
-        getActions().addAction(new TaskActions(taskModel, this));
+        getActions().addAction(new TaskActions(capsuleModel.getTaskModel(), this));
     }
 
     @Override
@@ -103,7 +98,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         connectableWidget.setBackgroundCol(getBackgroundColor());
         connectableWidget.setBorderCol(getBorderColor());
         connectableWidget.setBackgroundImaqe(getBackgroundImage());
-        connectableWidget.setTaskModel(taskModel);
+        connectableWidget.setTaskModel(capsuleModel.getTaskModel());
     }
     
     @Override

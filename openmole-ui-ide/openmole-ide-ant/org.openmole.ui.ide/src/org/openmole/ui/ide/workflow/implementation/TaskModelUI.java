@@ -23,7 +23,7 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI<T> {
+public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI{
 
     public static IGenericTaskModelUI<IGenericTask>  EMPTY_TASK_MODEL = new TaskModelUI();
 

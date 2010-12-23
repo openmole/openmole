@@ -28,8 +28,8 @@ public class Category{
     public enum CategoryName {
 	TASK,
         TASK_INSTANCE,
-	TASK_CAPSULE,
-	TASK_CAPSULE_INSTANCE,
+	CAPSULE,
+	CAPSULE_INSTANCE,
 	PROTOTYPE,
 	PROTOTYPE_INSTANCE,
     }
@@ -37,7 +37,7 @@ public class Category{
     public static String toString(CategoryName cat){
         
         if (cat == CategoryName.TASK) return "task";
-        else if(cat == CategoryName.TASK_CAPSULE) return "taskcapsule";
+        else if(cat == CategoryName.CAPSULE) return "capsule";
         else if(cat == CategoryName.PROTOTYPE_INSTANCE) return "prototype instance";
         return "unknown string";
         }

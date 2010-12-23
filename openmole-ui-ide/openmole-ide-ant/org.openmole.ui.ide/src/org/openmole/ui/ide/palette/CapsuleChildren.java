@@ -24,12 +24,12 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleChildren extends GenericChildren {
+public class CapsuleChildren extends GenericChildren {
 
     @Override
     protected java.util.List<Node> initCollection() {
         ArrayList childrenNodes = new ArrayList(1);
-            childrenNodes.add(new TaskCapsuleNode(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR));
+            childrenNodes.add(new CapsuleNode(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR));
     return childrenNodes;
     }
 

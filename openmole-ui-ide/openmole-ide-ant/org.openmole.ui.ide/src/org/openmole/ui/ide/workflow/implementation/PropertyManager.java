@@ -42,9 +42,7 @@ public class PropertyManager {
     public static void readProperties(CategoryName cat) {
 
         File actual = new File("src/resources/",Category.toString(cat));
-        System.out.println("DIR :: "+actual.getName());
         for (File f : actual.listFiles()) {
-                System.out.println("-- File: " + f.getName());
             Properties props = read(f.getPath());
             try {
                 Preferences.getInstance().registerProperties(cat,

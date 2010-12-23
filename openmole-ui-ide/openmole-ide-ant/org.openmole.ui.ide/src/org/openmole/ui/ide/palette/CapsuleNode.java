@@ -30,11 +30,11 @@ import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleNode extends GenericNode{
+public class CapsuleNode extends GenericNode{
 
-    public TaskCapsuleNode(DataFlavor key) {
+    public CapsuleNode(DataFlavor key) {
         super(key,
-              CategoryName.TASK_CAPSULE,
+              CategoryName.CAPSULE,
               org.openmole.core.implementation.capsule.Capsule.class);
     }
 

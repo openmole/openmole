@@ -17,6 +17,12 @@
 package org.openmole.ui.ide.serializer;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,8 +31,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.openide.util.Exceptions;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
  *
@@ -35,15 +45,20 @@ import org.openmole.ui.ide.exception.MoleExceptionManagement;
 public class Serializer {
 
 
-    public static void serialize(IMole mole, String toFile) {
+    public static void serialize(MoleScene scene, String toFile) throws UserBadDataError {
         try {
-            XStream xstream = new XStream();
+            XStream xstream = new XStream(new DomDriver());
+            DomMaker dommaker = new DomMaker(scene);
+            xstream.registerConverter(dommaker);
+            xstream.alias("mole", Mole.class);
+            xstream.alias("capsule", org.openmole.core.implementation.capsule.Capsule.class);
+
             // dos = new DataOutputStream(new FileOutputStream(toFile));
-            xstream.toXML(mole, new FileOutputStream(toFile));
+            xstream.toXML(MoleMaker.process(scene), new FileOutputStream(toFile));
         } catch (FileNotFoundException ex) {
             MoleExceptionManagement.showException(ex);
         }
-        
+
     }
 
     public static IMole unserialize(String fromFile) throws FileNotFoundException, IOException {

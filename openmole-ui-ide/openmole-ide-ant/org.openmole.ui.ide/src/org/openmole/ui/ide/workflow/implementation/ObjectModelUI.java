@@ -53,17 +53,17 @@ public abstract class ObjectModelUI implements IObjectModelUI {
     public String getModelGroup() {
         return modelGroup;
     }
-/*
+    /*
     @Override
     public Image getIcon() {
-        if (img == null) {
-            loadIcon();
-        }
-        return img;
+    if (img == null) {
+    loadIcon();
+    }
+    return img;
     }
 
     @Override
     public void setIcon(Image img) {
-        this.img = img;
+    this.img = img;
     }*/
 }

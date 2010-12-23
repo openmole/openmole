@@ -16,6 +16,8 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
+import org.openide.util.Exceptions;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.IOType;
 
 import java.util.HashMap;
@@ -24,22 +26,45 @@ import java.util.Map;
 import java.util.Set;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.palette.Category.CategoryName;
+import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI{
+public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI implements ICapsuleModelUI {
 
     public static CapsuleModelUI EMPTY_CAPSULE_MODEL = new CapsuleModelUI();
+    private IGenericTaskModelUI<IGenericTask> taskModel;
     private transient Map<IOType, Integer> nbSlots;
     private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
     private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
 
+    CapsuleModelUI() {
+        this(TaskModelUI.EMPTY_TASK_MODEL);
+    }
+
+    CapsuleModelUI(IGenericTaskModelUI<IGenericTask> taskModel) {
+        this.taskModel = taskModel;
+    }
+
+    @Override
+    public IGenericTaskModelUI<IGenericTask> getTaskModel() {
+        return taskModel;
+    }
+
+    @Override
+    public void setTaskModel(IGenericTaskModelUI taskModel) {
+        this.taskModel = taskModel;
+    }
+
     private void setNbSlots() {
-        if (nbSlots == null){
+        if (nbSlots == null) {
             nbSlots = new HashMap();
             nbSlots.put(IOType.INPUT, 0);
             nbSlots.put(IOType.OUTPUT, 0);
@@ -97,22 +122,23 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     }
 
     @Override
-    public void addTransition(ICapsuleModelUI taskmodel){
+    public void addTransition(ICapsuleModelUI taskmodel) {
         connectedTo.add(taskmodel);
     }
 
     @Override
-    public void defineAsStartingCapsule(){
-        nbSlots.put(IOType.INPUT,1);
+    public void defineAsStartingCapsule() {
+        nbSlots.put(IOType.INPUT, 1);
         startingCapsule = true;
     }
 
     @Override
-    public void defineAsRegularCapsule(){
+    public void defineAsRegularCapsule() {
         startingCapsule = false;
     }
 
-    public boolean isStartingCapsule(){
+    @Override
+    public boolean isStartingCapsule() {
         return startingCapsule;
     }
 }
