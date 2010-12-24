@@ -20,14 +20,14 @@ package org.openmole.core.batch.environment
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.tools.service.Retry._
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.misc.workspace.ConfigurationLocation
 
 object BatchJobKiller {
   val NbRetryIfTemporaryError = new ConfigurationLocation("BatchJobKiller", "NbRetryIfTemporaryError")
   val RetryInterval = new ConfigurationLocation("BatchJobKiller", "RetryInterval")
-  Activator.getWorkspace += (NbRetryIfTemporaryError, "3")
-  Activator.getWorkspace += (RetryInterval, "PT10S")
+  workspace += (NbRetryIfTemporaryError, "3")
+  workspace += (RetryInterval, "PT10S")
 }
 
 class BatchJobKiller(job: BatchJob) extends Runnable {
@@ -35,7 +35,7 @@ class BatchJobKiller(job: BatchJob) extends Runnable {
   
   override def run = {
     try {
-      waitAndRetryFor(job.kill, Activator.getWorkspace.preferenceAsInt(NbRetryIfTemporaryError), Set(classOf[TemporaryErrorException]), Activator.getWorkspace.preferenceAsDurationInMs(RetryInterval))
+      waitAndRetryFor(job.kill, workspace.preferenceAsInt(NbRetryIfTemporaryError), Set(classOf[TemporaryErrorException]), workspace.preferenceAsDurationInMs(RetryInterval))
     } catch {
       case e => Logger.getLogger(classOf[BatchJobKiller].getName).log(Level.WARNING, "Could not kill job " + job.toString(), e)
     } 

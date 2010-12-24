@@ -18,6 +18,8 @@
 package org.openmole.core.batch.replication
 
 import com.db4o.Db4o
+import com.db4o.Db4oEmbedded
+import com.db4o.EmbeddedObjectContainer
 import com.db4o.ObjectContainer
 import com.db4o.ObjectSet
 import com.db4o.config.Configuration
@@ -26,13 +28,17 @@ import com.db4o.defragment.DefragmentConfig
 import com.db4o.query.Predicate
 import com.db4o.ta.TransparentPersistenceSupport
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.net.URI
 import java.util.concurrent.Future
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.tools.service.IHash
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription
@@ -43,7 +49,6 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.IWorkspace
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -53,34 +58,65 @@ object ReplicaCatalog {
 
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
-  Activator.getWorkspace += (GCUpdateInterval, "PT2M")
-  Activator.getWorkspace += (ObjectRepoLocation, ".objectRepository.bin")
+  workspace += (GCUpdateInterval, "PT2M")
+  workspace += (ObjectRepoLocation, ".objectRepository.bin")
   
-  val locks = new ReplicaLockRepository
+  lazy val dbFile = workspace.file(workspace.preference(ObjectRepoLocation))
+  lazy val locks = new ReplicaLockRepository
   
-  lazy val objServeur = {
-    val objRepo = Activator.getWorkspace.file(Activator.getWorkspace.preference(ObjectRepoLocation))
+  lazy val objectServer: EmbeddedObjectContainer = {
+    val objRepo = workspace.file(workspace.preference(ObjectRepoLocation))
             
-    if(objRepo.exists) {
-      val defragmentConfig = new DefragmentConfig(objRepo.getAbsolutePath)
-      defragmentConfig.forceBackupDelete(true);
-      Defragment.defrag(defragmentConfig)
-    }
-            
-    Db4o.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
+    /*if(objRepo.exists) {
+      val channel = new RandomAccessFile(objRepo, "rw").getChannel
+      try {
+        val lock = channel.lock
+        try {
+          val dbFileChannel = new FileOutputStream(dbFile).getChannel
+          try { copy(channel, dbFileChannel)} finally {dbFileChannel.close}
+        } finally {
+          lock.release
+        }
+      } finally {
+        channel.close
+      }
+    }*/
+        
+    /*Runtime.getRuntime.addShutdownHook(new Thread {
+        override def run = {
+          val channel = new FileInputStream(objRepo).getChannel
+          try {
+            val lock = channel.lock
+            try {
+              merge(objRepo)
+              defrag(objRepo)
+              
+              objectServer.close
+              dbFile.delete
+              
+            } finally {
+              lock.release
+            }
+          } finally {
+            channel.close
+          }
+        }
+      })*/
+    defrag(objRepo)
+    Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
   }
    
-  Activator.getUpdater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(GCUpdateInterval))
+  updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
-    val set = objServeur.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
+    val set = objectServer.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
     if (!set.isEmpty()) Some(set.get(0))
     else None
   }
 
   private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
 
-    val objectContainer = objServeur
+    val objectContainer = objectServer
     val set = objectContainer.query(new Predicate[Replica](classOf[Replica]) {
 
         override def `match`(replica: Replica): Boolean = {
@@ -98,8 +134,8 @@ object ReplicaCatalog {
         for (rep <- set.iterator) {
           build.append(rep.toString).append(';');
         }
-        LOGGER.log(Level.WARNING, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
-
+        //LOGGER.log(Level.INFO, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
+        //This could append due to merging process
         Some(fix(set, objectContainer))
     }
 
@@ -108,7 +144,7 @@ object ReplicaCatalog {
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = synchronized {
       
-    objServeur.query(new Predicate[Replica](classOf[Replica]){
+    objectServer.query(new Predicate[Replica](classOf[Replica]){
         
         override def `match`(replica: Replica): Boolean = replica.source.equals(src) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
       
@@ -116,7 +152,7 @@ object ReplicaCatalog {
   }
 
   def isInCatalog(uri: String): Boolean = {
-    !objServeur.query(new Predicate[Replica](classOf[Replica]){
+    !objectServer.query(new Predicate[Replica](classOf[Replica]){
         
         override def `match`(replica: Replica): Boolean = replica.destination.location.equals(uri)
       
@@ -141,7 +177,7 @@ object ReplicaCatalog {
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
               val newReplica = new Replica(srcPath, hash, storageDescription, authenticationKey, sameContent.destination)
-              insert(newReplica)
+              insert(newReplica, objectServer)
               newReplica
             case None =>
               val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
@@ -149,20 +185,19 @@ object ReplicaCatalog {
               URIFile.copy(src, newFile, token)
 
               val newReplica = new Replica(srcPath, hash, storage.description, storage.authenticationKey, newFile)
-              insert(newReplica)
+              insert(newReplica, objectServer)
               newReplica 
           }
         case Some(r) => {
             //LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath)
             r
-        }
+          }
       }
-      objServeur.commit         
+      objectServer.commit         
       replica
     } finally {
       locks.unlock(key)
     }
-
   }
 
   private def fix(toFix: Iterable[Replica], container: ObjectContainer): Replica = synchronized {
@@ -171,21 +206,15 @@ object ReplicaCatalog {
   }
 
   def allReplicas:  Iterable[Replica] = synchronized {
-    val q = objServeur.query();
+    val q = objectServer.query();
     q.constrain(classOf[Replica])
-
     q.execute.toArray(Array[Replica]())
-
-    /*Collection<IReplica> ret = new ArrayList<IReplica>(set.size());
-     ret.addAll(set);
-
-     return set;*/
   }
 
-  private def insert(replica: Replica): Replica = synchronized {
+  private def insert(replica: Replica, container: EmbeddedObjectContainer): Replica = synchronized {
 
     val srcToInsert = { 
-      val srcsInbase = objServeur.query(new Predicate[File](classOf[File]) {
+      val srcsInbase = container.query(new Predicate[File](classOf[File]) {
           
           override def `match`(src: File): Boolean = src.equals(replica.source)
           
@@ -196,7 +225,7 @@ object ReplicaCatalog {
     }
 
     val hashToInsert = {
-      val hashsInbase = objServeur.query(new Predicate[IHash](classOf[IHash]) {
+      val hashsInbase = container.query(new Predicate[IHash](classOf[IHash]) {
           
           override def `match`(hash: IHash): Boolean = hash.equals(replica.hash)
           
@@ -208,7 +237,7 @@ object ReplicaCatalog {
     }
         
     val storageDescriptionToInsert =  {
-      val storagesDescriptionInBase = objServeur.query(new Predicate[BatchStorageDescription](classOf[BatchStorageDescription]) {
+      val storagesDescriptionInBase = container.query(new Predicate[BatchStorageDescription](classOf[BatchStorageDescription]) {
           override def `match`(batchServiceDescription: BatchStorageDescription): Boolean =  batchServiceDescription.equals(replica.storageDescription)
         })
         
@@ -217,7 +246,7 @@ object ReplicaCatalog {
     }
 
     val authenticationKeyToInsert = {
-      val authenticationKeyInBase = objServeur.query(new Predicate[BatchAuthenticationKey](classOf[BatchAuthenticationKey]) {
+      val authenticationKeyInBase = container.query(new Predicate[BatchAuthenticationKey](classOf[BatchAuthenticationKey]) {
           override def `match`(batchEnvironmentDescription: BatchAuthenticationKey): Boolean = batchEnvironmentDescription.equals(replica.authenticationKey)
         })
         
@@ -226,65 +255,65 @@ object ReplicaCatalog {
     }
          
 
-    /*ObjectSet<IURIFile> destinations = objServeur.query(destinationToInsert);
+    /*ObjectSet<IURIFile> destinations = objectServer.query(destinationToInsert);
      if (!destinations.isEmpty()) {
      destinationToInsert = destinations.get(0);
      }*/
 
     val replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescriptionToInsert, authenticationKeyToInsert, replica.destination)
 
-    objServeur.store(replicaToInsert)
+    container.store(replicaToInsert)
     replicaToInsert
   }
 
   def remove(replica: Replica) = synchronized {
     try {
-      objServeur.delete(replica)
+      objectServer.delete(replica)
     } finally {
-      objServeur.commit
+      objectServer.commit
     }
   }
 
-  def clean(replica: Replica): Option[Future[_]] = synchronized {
+  def clean(replica: Replica): Future[_] = synchronized {
     LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
-
+    val ret = executorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
     remove(replica)
-
-    getReplica(replica.hash, replica.storageDescription, replica.authenticationKey) match {
-      case None => None
-      case Some(rep) => Some(Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false))
-    }
+    ret
   }
 
   def cleanAll: Iterable[Future[_]] = synchronized {
     val ret = new ListBuffer[Future[_]]
-
-    for (rep <- allReplicas) {
-
-      clean(rep) match {
-        case None =>
-        case Some(fut) => ret += fut
-      }
-    }
-
+    for (rep <- allReplicas) ret += clean(rep)
     ret
   }
 
-  def close = objServeur.close
-
-  private def dB4oConfiguration: Configuration = {
-    val configuration = Db4o.newConfiguration
-    configuration.add(new TransparentPersistenceSupport)
+  private def dB4oConfiguration = {
+    val configuration = Db4oEmbedded.newConfiguration
+    configuration.common.add(new TransparentPersistenceSupport)
         
-    configuration.freespace.discardSmallerThan(50)
+    //configuration.freespace.discardSmallerThan(50)
         
-    configuration.objectClass(classOf[Replica]).objectField("hash").indexed(true)
-    configuration.objectClass(classOf[Replica]).objectField("source").indexed(true)
-    configuration.objectClass(classOf[Replica]).objectField("storageDescription").indexed(true)
-    configuration.objectClass(classOf[Replica]).objectField("authenticationKey").indexed(true)
-    configuration.objectClass(classOf[URIFile]).objectField("locatiton").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("hash").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("source").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("storageDescription").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("authenticationKey").indexed(true)
+    configuration.common.objectClass(classOf[URIFile]).objectField("locatiton").indexed(true)
     
     configuration
   }
 
+  private def defrag(db: File) = {
+    val defragmentConfig = new DefragmentConfig(db.getAbsolutePath)
+    defragmentConfig.forceBackupDelete(true)
+    Defragment.defrag(defragmentConfig)
+  }
+  
+  private def merge(db: File) = {
+    val container = Db4oEmbedded.openFile(dB4oConfiguration, db.getAbsolutePath)
+    try {
+      for(replica <- allReplicas) insert(replica, container)
+    } finally {
+      container.close
+    }
+  }
 }

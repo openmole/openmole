@@ -28,7 +28,7 @@ import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import scala.collection.mutable.ArrayBuffer
 
 class BatchStorageGroup(val expulseThreshold: Int) {
@@ -94,7 +94,7 @@ class BatchStorageGroup(val expulseThreshold: Int) {
 
     resources :+= service
     val usageControl = BatchStorageControl.usageControl(service.description)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+    eventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     
     waiting.release
   }

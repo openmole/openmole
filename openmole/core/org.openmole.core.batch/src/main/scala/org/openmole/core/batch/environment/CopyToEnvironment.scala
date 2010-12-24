@@ -23,7 +23,7 @@ import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Logger
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.batch.message.ExecutionMessage
@@ -64,8 +64,8 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
       /* ---- upload the execution message ----*/
 
-      val executionMessageFile = Activator.getWorkspace.newFile("job", ".xml")
-      Activator.getSerializer.serialize(executionMessage, executionMessageFile)
+      val executionMessageFile = workspace.newFile("job", ".xml")
+      serializer.serialize(executionMessage, executionMessageFile)
 
       val executionMessageURIFile = new URIFile(executionMessageFile)
       URIFile.copy(executionMessageURIFile, inputFile, token)
@@ -91,12 +91,12 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
       //Logger.getLogger(classOf[CopyToEnvironment].getName).info("Archive for dir " + file)
-      val cache = Activator.getFileService.archiveForDir(file, moleExecution)
+      val cache = fileService.archiveForDir(file, moleExecution)
       toReplicate = cache.file(false)
       cache
     } else null
 
-    val hash = Activator.getFileService.hash(toReplicate, moleExecution)
+    val hash = fileService.hash(toReplicate, moleExecution)
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.destination)
   }
@@ -105,7 +105,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   def replicateTheRuntime(token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): Runtime = {
     val environmentPluginReplica = new ListBuffer[IURIFile]
 
-    val environmentPlugins = Activator.getPluginManager.getPluginAndDependanciesForClass(environment.getClass)
+    val environmentPlugins = pluginManager.getPluginAndDependanciesForClass(environment.getClass)
     val runtimeFile = environment.runtime
 
     for (environmentPlugin <- environmentPlugins) {     
@@ -117,9 +117,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
         
-    val authenticationFile = Activator.getWorkspace.newFile("envrionmentAuthentication", ".xml")
+    val authenticationFile = workspace.newFile("envrionmentAuthentication", ".xml")
      
-    Activator.getSerializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
+    serializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
     
     //println("Authentication " + authenticationFile.getAbsolutePath)
   
@@ -132,22 +132,22 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
   def createExecutionMessage(jobForRuntime: JobForRuntime, token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): ExecutionMessage = {
 
-    val jobFile = Activator.getWorkspace.newFile("job", ".xml")
+    val jobFile = workspace.newFile("job", ".xml")
     
     try {
-      val serializationResult = Activator.getSerializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
+      val serializationResult = serializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
         
       val jobURIFile = new URIFile(jobFile)
       val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
 
       URIFile.copy(jobURIFile, jobForRuntimeFile, token)
-      val jobHash = Activator.getHashService.computeHash(jobFile)
+      val jobHash = hashService.computeHash(jobFile)
 
       val plugins = new TreeSet[File]
       val pluginReplicas = new ListBuffer[ReplicatedFile]
 
       for (c <- serializationResult._2) {
-        for (f <- Activator.getPluginManager.getPluginAndDependanciesForClass(c)) {
+        for (f <- pluginManager.getPluginAndDependanciesForClass(c)) {
           plugins += f
         }
       }
