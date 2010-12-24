@@ -26,7 +26,6 @@ import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
 import org.openmole.ui.ide.workflow.action.AddInputAction;
-import org.openmole.ui.ide.workflow.action.AddOutputAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
 import org.openmole.ui.ide.workflow.action.DefineMoleStartAction;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
@@ -38,7 +37,7 @@ import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskCapsuleMenuProvider extends GenericMenuProvider {
+public class CapsuleMenuProvider extends GenericMenuProvider {
 
     private JMenu inPrototypeMenu;
     private JMenu outPrototypeMenu;
@@ -54,7 +53,6 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
                 menus.remove(inPrototypeMenu);
                 menus.remove(outPrototypeMenu);
                 inPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ", colI);
-                outPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an output prototype ", colO);
                 menus.add(inPrototypeMenu);
                 menus.add(outPrototypeMenu);
             }
@@ -62,21 +60,15 @@ public class TaskCapsuleMenuProvider extends GenericMenuProvider {
         return super.getPopupMenu(widget, point);
     }
 
-    public TaskCapsuleMenuProvider(MoleScene scene,
+    public CapsuleMenuProvider(MoleScene scene,
             CapsuleViewUI capsuleView) {
         super();
         this.capsuleView = capsuleView;
         JMenuItem mItemI = new JMenuItem("an input slot");
         mItemI.addActionListener(new AddInputAction(capsuleView));
 
-
-        JMenuItem mItemO = new JMenuItem("an output slot");
-        mItemO.addActionListener(new AddOutputAction(capsuleView));
-
         Collection<JMenuItem> colI = new ArrayList<JMenuItem>();
         colI.add(mItemI);
-        colI.add(mItemO);
-
 
         Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
         for (Class c : Preferences.getInstance().getCoreTaskClasses()) {

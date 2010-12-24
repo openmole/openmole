@@ -16,8 +16,12 @@
  */
 package org.openmole.ui.ide.serializer;
 
+import java.util.Iterator;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.mole.Mole;
+import org.openmole.core.implementation.transition.Slot;
+import org.openmole.core.implementation.transition.Transition;
+import org.openmole.core.model.capsule.ICapsule;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
@@ -33,17 +37,23 @@ public class MoleMaker {
 
     public static IMole process(IMoleScene scene) throws UserBadDataError {
         MoleSceneManager manager = scene.getManager();
-        IMole mole = null;
 
+        //First capsule
         ICapsuleModelUI start = manager.getStartingCapsule();
-        if (start != CapsuleModelUI.EMPTY_CAPSULE_MODEL) {
-                IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
-                mole = new Mole(startingCapsule);
-        } else {
+        if (start == CapsuleModelUI.EMPTY_CAPSULE_MODEL) {
             throw new UserBadDataError("A starting capsule is expected");
         }
 
-       return mole;
+
+//        IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
+//        IMole mole = new Mole(startingCapsule);
+
+//IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
+        IMole mole = new Mole(explore(start));
+
+
+
+        return mole;
         // for (ICapsuleView cav : manager.getCapsuleViews()){
         //capsule = new Capsule
         // System.out.println("NAME "+cav.getTaskCapsuleModel().);
@@ -51,5 +61,18 @@ public class MoleMaker {
 
 //        Capsule capsule2 = new Capsule();
 //        new Transition(capsule1, capsule2);
+    }
+
+    public static IGenericCapsule explore(ICapsuleModelUI capsuleModel) throws UserBadDataError {
+        IGenericCapsule capsule = CoreClassInstanciator.instanciateCapsule(capsuleModel);
+        if (capsuleModel.hasChild()){
+            while (capsule.intputSlots().size() < capsuleModel.getNbInputslots()){
+                capsule.addInputSlot(new Slot(capsule));
+            }
+            for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext(); ){
+                new Transition((ICapsule) capsule,explore(child.next()));
+            }
+        }
+        return capsule;
     }
 }

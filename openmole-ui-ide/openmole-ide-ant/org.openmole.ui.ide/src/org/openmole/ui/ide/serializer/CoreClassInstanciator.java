@@ -36,7 +36,6 @@ public class CoreClassInstanciator {
 
     public static IGenericCapsule instanciateCapsule(ICapsuleModelUI capsuleModelUI) throws UserBadDataError {
         if (capsuleModelUI.getTaskModel() != TaskModelUI.EMPTY_TASK_MODEL) {
-           // if (capsuleModelUI.getTaskModel().getCoreTaskClass() != null) {
             if (Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()) != null) {
                 if (Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()).equals(org.openmole.core.implementation.task.ExplorationTask.class)) {
                     try {

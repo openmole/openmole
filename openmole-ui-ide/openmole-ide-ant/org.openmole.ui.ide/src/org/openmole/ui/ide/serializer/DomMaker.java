@@ -21,9 +21,14 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.Iterator;
+import org.openide.util.Exceptions;
+import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.implementation.mole.Mole;
-import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
+import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
@@ -45,15 +50,51 @@ public class DomMaker implements Converter {
     }
 
     @Override
-    public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
-            Mole mole = (Mole) o;
-            MoleSceneManager manager = molescene.getManager();
+    public void marshal(Object o, final HierarchicalStreamWriter writer, MarshallingContext mc) {
+        final Mole mole = (Mole) o;
+        try {
+            //Prototypes
+            for (Iterator<PrototypeUI> proto = Preferences.getInstance().getPrototypes().iterator(); proto.hasNext();) {
+                PrototypeUI p = proto.next();
+                writer.startNode("prototype");
+                writer.addAttribute("name", p.getName());
+                writer.addAttribute("type", p.getType().getName().toString());
+                writer.endNode();
+            }
 
-            writer.startNode("capsule");
-            writer.addAttribute("start", "true");
-            writer.addAttribute("impl", Preferences.getInstance().getCoreClass(manager.getStartingCapsule().getClass()).toString());
+            mole.visit(new IVisitor<IGenericCapsule>() {
 
-            writer.endNode();
+                int slotcount = 0;
+
+                @Override
+                public void action(IGenericCapsule t) throws Throwable {
+                    //Capsule
+                    writer.startNode("capsule");
+                    writer.addAttribute("start", t.equals(mole.root()) ? "true" : "false");
+                    writer.addAttribute("impl", t.getClass().toString());
+
+                    //Input slot
+                    for (scala.collection.Iterator<ISlot> slots = t.intputSlots().iterator(); slots.hasNext();) {
+                        slots.next();
+                        slotcount++;
+                        writer.startNode("islot");
+                        writer.addAttribute("id", String.valueOf(slotcount));
+                        writer.endNode();
+                    }
+
+                    //Output slot
+                    slotcount++;
+                    writer.startNode("oslot");
+                    writer.addAttribute("id", String.valueOf(slotcount));
+                    writer.endNode();
+
+                    writer.endNode();
+                }
+            });
+        } catch (Throwable ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
     }
 
     @Override

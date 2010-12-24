@@ -17,7 +17,7 @@
 package org.openmole.ui.ide.workflow.implementation;
 
 import java.util.Properties;
-import org.openmole.ui.ide.workflow.provider.TaskCapsuleMenuProvider;
+import org.openmole.ui.ide.workflow.provider.CapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.openmole.commons.exception.UserBadDataError;
@@ -41,7 +41,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     protected ConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeInstanceProvider dnDAddPrototypeInstanceProvider;
-    private TaskCapsuleMenuProvider taskCapsuleMenuProvider;
+    private CapsuleMenuProvider taskCapsuleMenuProvider;
 
     
     public CapsuleViewUI(MoleScene scene,
@@ -64,7 +64,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
         dnDAddPrototypeInstanceProvider = new DnDAddPrototypeInstanceProvider(scene, this);
 
-        taskCapsuleMenuProvider = new TaskCapsuleMenuProvider(scene, this);
+        taskCapsuleMenuProvider = new CapsuleMenuProvider(scene, this);
         getActions().addAction(ActionFactory.createPopupMenuAction(taskCapsuleMenuProvider));
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(scene, this)));
         getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeInstanceProvider));

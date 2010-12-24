@@ -49,7 +49,6 @@ public class ConnectableWidget extends MyWidget {
     private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
     private ICapsuleModelUI capsuleModel;
 
-    
     public ConnectableWidget(MoleScene scene,
             ICapsuleModelUI capsuleModel,
             Color backgroundCol,
@@ -69,9 +68,9 @@ public class ConnectableWidget extends MyWidget {
             Color borderCol,
             Image backgroundImaqe,
             IGenericTaskModelUI taskModelUI) {
-        this(scene, capsuleModel,backgroundCol, borderCol, backgroundImaqe);
+        this(scene, capsuleModel, backgroundCol, borderCol, backgroundImaqe);
         this.taskModel = taskModelUI;
-        createActions(MoleScene.MOVE).addAction (ActionFactory.createMoveAction());
+        createActions(MoleScene.MOVE).addAction(ActionFactory.createMoveAction());
     }
 
     public void setTaskModel(IGenericTaskModelUI<IGenericTask> taskModelUI) {
@@ -88,7 +87,7 @@ public class ConnectableWidget extends MyWidget {
     }
 
     public void adjustOutputSlotPosition() {
-        outputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - capsuleModel.getNbOutputslots() * 14) / (capsuleModel.getNbOutputslots() + 1);
+        outputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - 14) / 2;
         repaint();
     }
 
@@ -131,19 +130,18 @@ public class ConnectableWidget extends MyWidget {
                     new Container());
         }
 
-        for (int i = 0; i < capsuleModel.getNbOutputslots(); ++i) {
-            graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
-                    taskWidth - 8,
-                    ApplicationCustomize.TASK_TITLE_HEIGHT + i * (outputDelta + 14) + outputDelta,
-                    new Container());
-        }
+        graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
+                taskWidth - 8,
+                ApplicationCustomize.TASK_TITLE_HEIGHT + outputDelta,
+                new Container());
 
         if (scene.isDetailedView()) {
-            if (taskModel != TaskModelUI.EMPTY_TASK_MODEL)
+            if (taskModel != TaskModelUI.EMPTY_TASK_MODEL) {
                 graphics.drawLine(taskWidth / 2,
                         ApplicationCustomize.TASK_TITLE_HEIGHT,
                         taskWidth / 2,
                         ApplicationCustomize.TASK_CONTAINER_HEIGHT);
+            }
 
             graphics.setColor(new Color(0, 0, 0));
             int x = taskWidth / 2 + 9;

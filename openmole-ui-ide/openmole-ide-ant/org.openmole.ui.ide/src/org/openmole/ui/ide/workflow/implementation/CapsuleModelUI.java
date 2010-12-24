@@ -16,8 +16,6 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import org.openide.util.Exceptions;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.IOType;
 
 import java.util.HashMap;
@@ -28,8 +26,6 @@ import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
 /**
@@ -80,12 +76,6 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     public int getNbInputslots() {
         setNbSlots();
         return nbSlots.get(IOType.INPUT);
-    }
-
-    @Override
-    public int getNbOutputslots() {
-        setNbSlots();
-        return nbSlots.get(IOType.OUTPUT);
     }
 
     @Override
@@ -140,5 +130,15 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     @Override
     public boolean isStartingCapsule() {
         return startingCapsule;
+    }
+
+    @Override
+    public boolean hasChild() {
+        return !connectedTo.isEmpty();
+    }
+
+    @Override
+    public Set getChilds() {
+        return connectedTo;
     }
 }
