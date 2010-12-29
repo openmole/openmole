@@ -69,7 +69,8 @@ object GliteEnvironment {
   val LocalThreadsByWMSLocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
   val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
-  val JobShakingProbability = new ConfigurationLocation("GliteEnvironment", "JobShakingProbability")
+  val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
+  val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
 
   Activator.getWorkspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
 
@@ -98,7 +99,9 @@ object GliteEnvironment {
   Activator.getWorkspace += (OverSubmissionNumberOfJobUnderMin, "3")
   
   Activator.getWorkspace += (JobShakingInterval, "PT5M")
-  Activator.getWorkspace += (JobShakingProbability, "0.02")
+  Activator.getWorkspace += (JobShakingProbabilitySubmitted, "0.1")
+  Activator.getWorkspace += (JobShakingProbabilityQueued, "0.01")
+ 
 }
 
 class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes, memoryForRuntime) {

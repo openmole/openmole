@@ -32,19 +32,19 @@ import org.ogf.saga.task.State
 
 class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
+  var subState: String = ""
   def job: Job = jobService.jobServiceCache.getJob(jobId)
-
+  
   private def translateStatus(job: Job, state: State): ExecutionState = {
     import State._
+    
+    subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE)
     
     state match {
       case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
-        val subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
-       
-        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITTED
-        else ExecutionState.RUNNING
-        
+        if (subState == SubState.RUNNING_SUBMITTED.toString || subState == SubState.RUNNING_QUEUED.toString) ExecutionState.SUBMITTED
+        else ExecutionState.RUNNING        
       case DONE => ExecutionState.DONE
       case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
     }
