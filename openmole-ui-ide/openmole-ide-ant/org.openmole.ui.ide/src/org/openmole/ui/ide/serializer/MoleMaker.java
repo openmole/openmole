@@ -44,33 +44,18 @@ public class MoleMaker {
             throw new UserBadDataError("A starting capsule is expected");
         }
 
-
-//        IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
-//        IMole mole = new Mole(startingCapsule);
-
-//IGenericCapsule startingCapsule = CoreClassInstanciator.instanciateCapsule(start);
         IMole mole = new Mole(explore(start));
-
-
-
         return mole;
-        // for (ICapsuleView cav : manager.getCapsuleViews()){
-        //capsule = new Capsule
-        // System.out.println("NAME "+cav.getTaskCapsuleModel().);
-        //  }
-
-//        Capsule capsule2 = new Capsule();
-//        new Transition(capsule1, capsule2);
     }
 
     public static IGenericCapsule explore(ICapsuleModelUI capsuleModel) throws UserBadDataError {
         IGenericCapsule capsule = CoreClassInstanciator.instanciateCapsule(capsuleModel);
-        if (capsuleModel.hasChild()){
-            while (capsule.intputSlots().size() < capsuleModel.getNbInputslots()){
-                capsule.addInputSlot(new Slot(capsule));
-            }
-            for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext(); ){
-                new Transition((ICapsule) capsule,explore(child.next()));
+        while (capsule.intputSlots().size() < capsuleModel.getNbInputslots()) {
+            capsule.addInputSlot(new Slot(capsule));
+        }
+        if (capsuleModel.hasChild()) {
+            for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext();) {
+                new Transition((ICapsule) capsule, explore(child.next()));
             }
         }
         return capsule;

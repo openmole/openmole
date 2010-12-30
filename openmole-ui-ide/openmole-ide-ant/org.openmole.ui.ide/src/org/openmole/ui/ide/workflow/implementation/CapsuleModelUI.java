@@ -16,11 +16,7 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import org.openmole.ui.ide.commons.IOType;
-
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.core.model.capsule.IGenericCapsule;
@@ -36,7 +32,7 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
 
     public static CapsuleModelUI EMPTY_CAPSULE_MODEL = new CapsuleModelUI();
     private IGenericTaskModelUI<IGenericTask> taskModel;
-    private transient Map<IOType, Integer> nbSlots;
+    private transient int nbInputSlots = 0;
     private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
     private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
@@ -59,14 +55,6 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
         this.taskModel = taskModel;
     }
 
-    private void setNbSlots() {
-        if (nbSlots == null) {
-            nbSlots = new HashMap();
-            nbSlots.put(IOType.INPUT, 0);
-            nbSlots.put(IOType.OUTPUT, 0);
-        }
-    }
-
     @Override
     public String getCategory() {
         return category;
@@ -74,36 +62,27 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
 
     @Override
     public int getNbInputslots() {
-        setNbSlots();
-        return nbSlots.get(IOType.INPUT);
-    }
-
-    @Override
-    public void addOutputSlot() {
-        setNbSlots();
-        nbSlots.put(IOType.OUTPUT, 1 + nbSlots.get(IOType.OUTPUT));
+        return nbInputSlots;
     }
 
     @Override
     public void addInputSlot() {
-        setNbSlots();
-        nbSlots.put(IOType.INPUT, 1 + nbSlots.get(IOType.INPUT));
+        nbInputSlots++;
     }
 
     @Override
-    public boolean isSlotRemovable(IOType type) {
-        return (nbSlots.get(type) > 1 ? true : false);
+    public boolean isSlotRemovable() {
+        return (nbInputSlots > 1 ? true : false);
     }
 
     @Override
-    public boolean isSlotAddable(IOType type) {
-        return (nbSlots.get(type) < ApplicationCustomize.NB_MAX_SLOTS ? true : false);
+    public boolean isSlotAddable() {
+        return (nbInputSlots < ApplicationCustomize.NB_MAX_SLOTS ? true : false);
     }
 
     @Override
-    public void removeSlot(IOType type) {
-        int nb = nbSlots.get(type) - 1;
-        nbSlots.put(type, nb);
+    public void removeInputSlot() {
+        nbInputSlots -= 1;
     }
 
     @Override
@@ -118,7 +97,7 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
 
     @Override
     public void defineAsStartingCapsule() {
-        nbSlots.put(IOType.INPUT, 1);
+        nbInputSlots = 1;
         startingCapsule = true;
     }
 

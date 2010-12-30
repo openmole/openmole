@@ -17,7 +17,6 @@
 package org.openmole.ui.ide.workflow.model;
 
 import java.util.Set;
-import org.openmole.ui.ide.commons.IOType;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.task.IGenericTask;
 
@@ -32,12 +31,11 @@ public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModel
     void defineAsRegularCapsule();
     boolean isStartingCapsule();
     void addTransition(ICapsuleModelUI tModel);
-    void addOutputSlot();
     void addInputSlot();
     int getNbInputslots();
-    boolean isSlotRemovable(IOType type);
-    boolean isSlotAddable(IOType type);
-    void removeSlot(IOType type);
+    boolean isSlotRemovable();
+    boolean isSlotAddable();
+    void removeInputSlot();
     boolean hasChild();
     Set<ICapsuleModelUI> getChilds();
 }

@@ -60,7 +60,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         addChild(connectableWidget);
 
         addInputSlot();
-        addOutputSlot();
+        connectableWidget.adjustOutputSlotPosition();
 
         dnDAddPrototypeInstanceProvider = new DnDAddPrototypeInstanceProvider(scene, this);
 
@@ -105,12 +105,6 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     public void addInputSlot() {
         capsuleModel.addInputSlot();
         connectableWidget.adjustInputSlotPosition();
-    }
-
-    @Override
-    public void addOutputSlot() {
-        capsuleModel.addOutputSlot();
-        connectableWidget.adjustOutputSlotPosition();
     }
 
     @Override

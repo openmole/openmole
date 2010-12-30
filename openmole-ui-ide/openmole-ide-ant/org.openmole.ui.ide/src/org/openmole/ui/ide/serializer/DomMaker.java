@@ -21,15 +21,19 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import org.openide.util.Exceptions;
 import org.openmole.commons.tools.pattern.IVisitor;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.transition.ISlot;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
+import scala.collection.immutable.HashMap.HashMap1;
 
 /**
  *
@@ -38,9 +42,12 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
 public class DomMaker implements Converter {
 
     private IMoleScene molescene = null;
+    private Map<Object, Integer> slotmapping;
+
 
     public DomMaker(IMoleScene scene) {
         this.molescene = scene;
+        this.slotmapping = new HashMap<Object, Integer>();
     }
 
     @Override
@@ -73,13 +80,17 @@ public class DomMaker implements Converter {
                     writer.addAttribute("start", t.equals(mole.root()) ? "true" : "false");
                     writer.addAttribute("impl", t.getClass().toString());
 
+                    System.out.println("+++---  slot number " + t.intputSlots().size());
                     //Input slot
                     for (scala.collection.Iterator<ISlot> slots = t.intputSlots().iterator(); slots.hasNext();) {
-                        slots.next();
+                        ISlot slot = slots.next();
                         slotcount++;
+
                         writer.startNode("islot");
                         writer.addAttribute("id", String.valueOf(slotcount));
                         writer.endNode();
+
+                        slotmapping.put(slot, slotcount);
                     }
 
                     //Output slot
@@ -88,12 +99,27 @@ public class DomMaker implements Converter {
                     writer.addAttribute("id", String.valueOf(slotcount));
                     writer.endNode();
 
+                    slotmapping.put(t, slotcount);
                     writer.endNode();
                 }
             });
+
+            for (scala.collection.Iterator<IGenericCapsule> caps = mole.capsules().iterator(); caps.hasNext();) {
+                for (scala.collection.Iterator<IGenericTransition> trans = caps.next().outputTransitions().iterator(); trans.hasNext();) {
+                    IGenericTransition t = trans.next();
+                    writer.startNode("transition");
+                    writer.addAttribute("source", slotmapping.get(t.start()).toString());
+                    writer.addAttribute("target", slotmapping.get(t.end()).toString());
+                    writer.endNode();
+                }
+            }
+
         } catch (Throwable ex) {
             Exceptions.printStackTrace(ex);
         }
+
+
+
 
     }
 

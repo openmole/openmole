@@ -28,6 +28,7 @@ import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
 import org.openmole.ui.ide.workflow.action.AddInputAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
 import org.openmole.ui.ide.workflow.action.DefineMoleStartAction;
+import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
@@ -43,6 +44,7 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
     private JMenu outPrototypeMenu;
     private CapsuleViewUI capsuleView = null;
     private boolean encapsulated = false;
+    JMenuItem itIS = new JMenuItem();
 
     @Override
     public JPopupMenu getPopupMenu(Widget widget, Point point) {
@@ -57,6 +59,8 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
                 menus.add(outPrototypeMenu);
             }
         }
+
+        itIS.setEnabled(!capsuleView.getCapsuleModel().isStartingCapsule());
         return super.getPopupMenu(widget, point);
     }
 
@@ -64,11 +68,6 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
             CapsuleViewUI capsuleView) {
         super();
         this.capsuleView = capsuleView;
-        JMenuItem mItemI = new JMenuItem("an input slot");
-        mItemI.addActionListener(new AddInputAction(capsuleView));
-
-        Collection<JMenuItem> colI = new ArrayList<JMenuItem>();
-        colI.add(mItemI);
 
         Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
         for (Class c : Preferences.getInstance().getCoreTaskClasses()) {
@@ -80,14 +79,16 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
         }
 
         menus.add(PopupMenuProviderFactory.addSubMenu("Encapsulate a task ", colTask));
-        menus.add(PopupMenuProviderFactory.addSubMenu("Add ",
-                colI));
+        itIS = new JMenuItem("Add an input slot");
+        itIS.addActionListener(new AddInputAction(capsuleView));
         JMenuItem itR = new JMenuItem("Remove");
         JMenuItem itStart = new JMenuItem("Define as starting capsule");
-        itStart.addActionListener(new DefineMoleStartAction(scene,capsuleView.getCapsuleModel()));
+        itStart.addActionListener(new DefineMoleStartAction(scene, capsuleView.getCapsuleModel()));
 
+        items.add(itIS);
         items.add(itR);
         items.add(itStart);
+
     }
 
     public void addTaskMenus() {
@@ -98,7 +99,7 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
         Collection<JMenuItem> prototypeCol = new ArrayList<JMenuItem>();
         for (PrototypeUI p : Preferences.getInstance().getPrototypes()) {
             JMenuItem it = new JMenuItem(p.getName());
-            it.addActionListener(new AddExistingPrototypeAction(p, capsuleView,type));
+            it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, type));
             prototypeCol.add(it);
         }
         return prototypeCol;

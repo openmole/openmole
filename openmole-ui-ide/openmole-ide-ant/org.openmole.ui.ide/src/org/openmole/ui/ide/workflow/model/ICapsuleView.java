@@ -26,9 +26,7 @@ import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
 public interface ICapsuleView {
     String getName();
     ICapsuleModelUI<IGenericCapsule> getCapsuleModel();
- //   void setTaskCapsule(IGenericTaskCapsule tc);
     void  addInputSlot();
-    void  addOutputSlot();
     ConnectableWidget getConnectableWidget();
     void changeConnectableWidget();
 }
