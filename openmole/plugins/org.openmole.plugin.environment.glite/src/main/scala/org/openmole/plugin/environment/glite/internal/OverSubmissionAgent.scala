@@ -24,15 +24,16 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.updater.IUpdatable
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.execution.StatisticKey
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.execution.SampleType
 import org.openmole.core.model.job.IJob
+import org.openmole.plugin.environment.glite.internal.Activator._
 import org.openmole.commons.tools.cache.AssociativeCache
 import org.openmole.core.model.execution.IExecutionJobRegistry
+import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.plugin.environment.glite.GliteEnvironment
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
@@ -43,10 +44,13 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.MultiMap
 import scala.ref.WeakReference
 
-class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatable {
+class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) extends IUpdatableWithVariableDelay {
 
   def this (environment: GliteEnvironment, strategy: IWorkloadManagmentStrategy, minNumberOfJobsByCategory: Int, numberOfSimultaneousExecutionForAJobWhenUnderMinJob: Int) =
     this(new WeakReference(environment), strategy, minNumberOfJobsByCategory, numberOfSimultaneousExecutionForAJobWhenUnderMinJob)
+  
+  override def delay = workspace.preferenceAsDurationInMs(GliteEnvironment.OverSubmissionIntervalLocation)
+
   
   override def update: Boolean = {
     val env = environment.get match {

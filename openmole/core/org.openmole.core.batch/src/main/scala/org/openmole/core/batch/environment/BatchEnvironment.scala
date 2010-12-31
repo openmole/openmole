@@ -40,13 +40,16 @@ object BatchEnvironment {
     
   @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
-  
-  val ResourcesExpulseThreshod = new ConfigurationLocation("BatchEnvironment", "ResourcesExpulseThreshod")
+    
+  val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
+
+  val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
    
   workspace += (MemorySizeForRuntime, "512")
-  workspace += (ResourcesExpulseThreshod, "100")
+  workspace += (QualityHysteresis, "1000")
   workspace += (CheckInterval, "PT2M")
+  workspace += (MinValueForSelectionExploration, "0.001")
 }
 
 
@@ -54,8 +57,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   @transient private lazy val _storagesLock = new ReentrantLock
   @transient private lazy val _jobServicesLock = new ReentrantLock
   
-  @transient private lazy val _jobServices = new BatchJobServiceGroup(workspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
-  @transient private lazy val _storages = new BatchStorageGroup(workspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient private lazy val _jobServices = new BatchJobServiceGroup
+  @transient private lazy val _storages = new BatchStorageGroup
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem

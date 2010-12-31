@@ -30,7 +30,7 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.internal.Activator._
 import scala.collection.mutable.ArrayBuffer
 
-class BatchJobServiceGroup(val expulseThreshold: Int) {
+class BatchJobServiceGroup {
 
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release
@@ -49,29 +49,33 @@ class BatchJobServiceGroup(val expulseThreshold: Int) {
       do {
         //Select the less failing resources
         //Select the less failing resources
-        val resourcesCopy = synchronized {
-          resources = resources.filter( {r =>
-              BatchJobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
-            })
-          if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.")
-          resources
-        }
+        /*val resourcesCopy = synchronized {
+         resources = resources.filter( {r =>
+         BatchJobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
+         })
+         if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.")
+         resources
+         }*/
+        val resourcesCopy = resources
 
         //Among them select one not over loaded
         val notLoaded = new ArrayBuffer[(BatchJobService, AccessToken, Double)]
         var totalFitness = 0.
         
-        for (cur <- resourcesCopy) {       
+        for (cur <- resourcesCopy) {   
+          
           BatchJobServiceControl.usageControl(cur.description).tryGetToken match {
             case None =>
             case Some(token) => 
               val quality = BatchJobServiceControl.qualityControl(cur.description)
               val nbSubmitted = quality.submitted
-              val fitness = if(quality.submitted > 0) {
-                math.pow(quality.runnig.toDouble / quality.submitted, 2)
-              } else Double.PositiveInfinity
+              val fitness = (if(quality.submitted > 0) {
+                  val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.success, 2)
+                  val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                  if(v < min) min else v
+                } else Double.PositiveInfinity) 
               
-              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
               
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness

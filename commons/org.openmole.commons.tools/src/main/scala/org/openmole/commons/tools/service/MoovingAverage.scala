@@ -15,19 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.control
+package org.openmole.commons.tools.service
 
-import java.util.concurrent.atomic.AtomicInteger
-
-class JobServiceQualityControl(hysteresis: Int) extends QualityControl(hysteresis) {
-  private val _nbSubmitted = new AtomicInteger
-  private val _nbRunning = new AtomicInteger
-
-  def submitted = _nbSubmitted.get
-  def runnig = _nbRunning.get
-  
-  def incrementSubmitted = _nbSubmitted.incrementAndGet
-  def decrementSubmitted = _nbSubmitted.decrementAndGet
-  def incrementRunning = _nbRunning.incrementAndGet
-  def decrementRunning = _nbRunning.decrementAndGet
+class MoovingAverage(period: Int) {
+  private val queue = new scala.collection.mutable.Queue[Double]
+  def apply(n: Double) = synchronized {
+    queue.enqueue(n)
+    if (queue.size > period)
+      queue.dequeue
+    queue.sum / queue.size
+  }
+  def get = synchronized (queue.sum / queue.size)
+  override def toString = get.toString
+  def clear = queue.clear
 }

@@ -58,7 +58,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
   
   @transient lazy val description = new BatchStorageDescription(URI)
   
-  BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl)      
+  BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   import BatchStorage._
   

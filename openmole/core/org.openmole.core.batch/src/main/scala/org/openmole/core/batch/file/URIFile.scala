@@ -222,7 +222,7 @@ case class URIFile(val location: String) extends IURIFile {
   /*--------------------- mkdir ---------------------------*/
   override def mkdir(name: String): IURIFile = withToken(mkdir(name, _))
 
-  override def mkdir(name: String, token: AccessToken): IURIFile = {
+  override def mkdir(name: String, token: AccessToken): IURIFile = withFailureControl {
     val dir = fetchEntryAsDirectory
     try trycatch {
       val cname =  if (name.endsWith("/")) {

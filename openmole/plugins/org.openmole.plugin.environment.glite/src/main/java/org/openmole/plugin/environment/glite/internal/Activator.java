@@ -12,10 +12,10 @@ import org.openmole.misc.workspace.IWorkspace;
 public class Activator implements BundleActivator{
 
 	static BundleContext context;
-	private static IUpdater updater;
-	private static IJSagaSessionService jSagaSessionService;
-	private static IWorkspace workspace;
-	private static IExecutorService executorService;
+	private static IUpdater _updater;
+	private static IJSagaSessionService _jSagaSessionService;
+	private static IWorkspace _workspace;
+	private static IExecutorService _executorService;
 	
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -33,48 +33,48 @@ public class Activator implements BundleActivator{
 	}
 	
 	
-	public synchronized static IUpdater getUpdater() {
-		if(updater == null) {
+	public synchronized static IUpdater updater() {
+		if(_updater == null) {
 			ServiceReference ref = getContext().getServiceReference(IUpdater.class.getName());
-			updater = (IUpdater) getContext().getService(ref);
+			_updater = (IUpdater) getContext().getService(ref);
 		}
-		return updater;
+		return _updater;
 	}
 	
-	public static IJSagaSessionService getJSagaSessionService() {
-		if(jSagaSessionService != null) return jSagaSessionService;
+	public static IJSagaSessionService JSagaSessionService() {
+		if(_jSagaSessionService != null) return _jSagaSessionService;
 		
 		synchronized (Activator.class) {
-			if(jSagaSessionService  == null) {
+			if(_jSagaSessionService  == null) {
 				ServiceReference ref = getContext().getServiceReference(IJSagaSessionService.class.getName());
-				jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
+				_jSagaSessionService = (IJSagaSessionService) getContext().getService(ref);
 			}
-			return jSagaSessionService;
+			return _jSagaSessionService;
 		}
 	}
 	
-	public static IWorkspace getWorkspace() {
-		if(workspace != null) return workspace;
+	public static IWorkspace workspace() {
+		if(_workspace != null) return _workspace;
 
 		synchronized (Activator.class) {
-			if(workspace  == null) {
+			if(_workspace  == null) {
 				ServiceReference ref = getContext().getServiceReference(IWorkspace.class.getName());
-				workspace = (IWorkspace) getContext().getService(ref);
+				_workspace = (IWorkspace) getContext().getService(ref);
 			}
 		}
-		return workspace;
+		return _workspace;
 	}
 
-	public static IExecutorService getExecutorService() {
-		if(executorService != null) return executorService;
+	public static IExecutorService executorService() {
+		if(_executorService != null) return _executorService;
 
 		synchronized (Activator.class) {
-			if(executorService == null) {
+			if(_executorService == null) {
 				ServiceReference ref = getContext().getServiceReference(IExecutorService.class.getName());
-				executorService = (IExecutorService) getContext().getService(ref);
+				_executorService = (IExecutorService) getContext().getService(ref);
 			}
 		}
-		return executorService;
+		return _executorService;
 	}
 
 

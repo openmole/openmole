@@ -17,7 +17,8 @@
 
 package org.openmole.core.batch.control
 
-import java.util.concurrent.atomic.AtomicInteger
+import org.openmole.commons.tools.internal.Activator._
+import org.openmole.commons.tools.service.MoovingAverage
 
 object QualityControl {
   
@@ -53,11 +54,12 @@ object QualityControl {
   
 }
 
-class QualityControl {
-  val _failureRate = new AtomicInteger
+class QualityControl(hysteresis: Int) {
+  val _successRate = new MoovingAverage(hysteresis)
+  success
 
-  def failed = _failureRate.incrementAndGet
-  def success = _failureRate.decrementAndGet
-  def failureRate: Int = _failureRate.get
-  def reinit = _failureRate.set(0)
+  def failed = _successRate.apply(0)
+  def success = _successRate.apply(1)
+  def successRate = _successRate.get
+  def reinit = _successRate.clear
 }

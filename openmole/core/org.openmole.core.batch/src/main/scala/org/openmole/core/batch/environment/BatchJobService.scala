@@ -22,13 +22,13 @@ import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.control.BatchJobServiceControl._
 import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.control.JobServiceQualityControl
-import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.batch.internal.Activator._
 
 abstract class BatchJobService(authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(authenticationKey, authentication) {
   
-  BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl)      
+  BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
     withFailureControl(description, doSubmit(inputFile, outputFile, runtime, token))
