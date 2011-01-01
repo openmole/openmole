@@ -65,7 +65,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     case None => workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
   }
   
-  updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval))
+  updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN)
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
