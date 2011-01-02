@@ -23,15 +23,7 @@ object Prototype {
   def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = new Prototype[Array[T]](prototype.name, classOf[Array[T]])
 }
 
-class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T] {
-
-/*  def this(prototype: IPrototype[T], name: String) = {
-    this(name, prototype.`type`)
-  }
-
-  def this(prototype: IPrototype[T], `type`: Class[T]) = {
-    this(prototype.name, `type`)
-  }*/
+case class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T] {
 
   override def isAssignableFrom(p: IPrototype[_]): Boolean = `type`.isAssignableFrom(p.`type`)
 
