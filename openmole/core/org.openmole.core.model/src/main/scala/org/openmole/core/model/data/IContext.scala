@@ -43,7 +43,7 @@ trait IContext extends IVisitable[IVariable[_]] with Iterable[IVariable[_]] {
   def variable[T](name: String): Option[IVariable[T]]
 
   /**
-   * Get a variable give a prototype name. This method get the variable by its
+   * Get a variable given a prototype name. This method get the variable by its
    * name and then cast it to the correct type.
    * 
    * @param proto the prototype that matches the name of the variable
@@ -52,16 +52,59 @@ trait IContext extends IVisitable[IVariable[_]] with Iterable[IVariable[_]] {
    */
   def variable[T] (proto: IPrototype[T]): Option[IVariable[T]]
 
+  /** 
+   * Get a variable value given its name.
+   * 
+   * @param name the name of the variable
+   * @return Some(value) if a variable with the given name is present None
+   * otherwise
+   */
   def value[T](name: String): Option[T]
 
+  /**
+   * Get a variable valaue given a prototype name. This method get the variable by its
+   * name and then cast it to the correct type.
+   * 
+   * @param proto the prototype that matches the name of the variable
+   * @return Some(value) if a variable with the given name is present None
+   * otherwise
+   */
   def value[T](proto: IPrototype[T]): Option[T]
   
+  /**
+   * Add a variable to this context.
+   * 
+   * @param variable the variable to add
+   * @return the context itself
+   */
   def +=(variable: IVariable[_]): this.type
 
+  /**
+   * Construct ant add a variable to this context.
+   * 
+   * @param name the name of the variable
+   * @param value the value of the variable
+   * @return the context itself
+   */
   def +=(name: String, value: Object): this.type
 
+  /**
+   * Construct and add a variable to this context.
+   * 
+   * @param name the name of the variable
+   * @param t the type of the variable
+   * @param value the value of the variable
+   * @return the context itself
+   */
   def +=[T] (name: String, t: Class[T], value: T): this.type
     
+  /**
+   * Construct and add a variable to this context.
+   * 
+   * @param prototype the prototype of the variable
+   * @param value the value of the variable
+   * @return the context itself
+   */
   def +=[T] (proto: IPrototype[T], value: T): this.type
   
   /**
@@ -72,12 +115,41 @@ trait IContext extends IVisitable[IVariable[_]] with Iterable[IVariable[_]] {
    */
   def ++=(variables: Iterable[IVariable[_]] ): this.type
   
+  /**
+   * Remove a variable from this context given its name.
+   * 
+   * @param name the name of the variable
+   * @return the context itself
+   */
   def -=(name: String): this.type
 
+  /**
+   * Check if the context contains a variable with a given prototype's name.
+   * 
+   * @param proto a prototype with the same name as the variable
+   * @return true if a variable with the given name as been found false
+   * otherwise
+   */
   def containsVariableWithName(proto: IPrototype[_]): Boolean
-
+  
+  /**
+   * Check if the context contains a variable with a given name.
+   * 
+   * @param name the name of the variable
+   * @return true if a variable with the given name as been found false
+   * otherwise
+   */
   def containsVariableWithName(name: String): Boolean
 
+  /**
+   * Check if a variable matching a given prototype is contained in the context.
+   * A variable matches the prototype if and only if it has the same name and
+   * the prototype type is assignable from the variable type.
+   * 
+   * @param proto the prototype to look for in the context
+   * @return true if a variable matching the prototype has been found, false
+   * otherwise
+   */
   def contains(proto: IPrototype[_]): Boolean
 
   /**
@@ -86,16 +158,34 @@ trait IContext extends IVisitable[IVariable[_]] with Iterable[IVariable[_]] {
    */
   def clean
   
+  /**
+   * Alias for +=
+   */
   def add(variable: IVariable[_]): this.type = { += (variable)}
 
+  /**
+   * Alias for +=
+   */
   def add(name: String, value: Object): this.type = { += (name, value)}
 
+  /**
+   * Alias for +=
+   */
   def add[T] (name: String, t: Class[T], value: T): this.type = { += (name, t, value)}
   
+  /**
+   * Alias for +=
+   */
   def add[T] (proto: IPrototype[T], value: T): this.type = { += (proto, value)}
  
+  /**
+   * Alias for ++=
+   */
   def addAll(variables: Iterable[IVariable[_]] ): this.type = { ++= (variables)}
 
+  /**
+   * Alias for -=
+   */
   def remove(name: String): this.type = { -= (name) }
 
 }

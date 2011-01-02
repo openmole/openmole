@@ -20,12 +20,12 @@ package org.openmole.core.model.data
 
 /**
  *
- * A data channel allow to transmit data between remotes task capsule (under some condition) within a mole.
+ * A data channel allow to transmit data between remotes task capsules within a mole.
  * Two capsules could be linked with a {@link IDataChannel} if:
  *      - they belong to the same mole,
- *      - there is no capsule with more than one input slot in a path between the two capsules.
- *
- * @author reuillon
+ *      - there is no capsule with more than one input slot in a path between 
+ *        the two capsules.
+ *        
  */
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.job.ITicket
@@ -33,45 +33,63 @@ import org.openmole.core.model.mole.IMoleExecution
 
 trait IDataChannel {
 
-    /**
-     *
-     * Get the capsule from which the data channel starts.
-     *
-     * @return the capsule from whitch the data channel starts
-     */
-    def start: IGenericCapsule
+  /**
+   *
+   * Get the capsule from which the data channel starts.
+   *
+   * @return the capsule from whitch the data channel starts
+   */
+  def start: IGenericCapsule
 
 
-    /**
-     *
-     * Get the capsule to which the data channel ends.
-     *
-     * @return the capsule to which the data channel ends.
-     */
-    def end:  IGenericCapsule
+  /**
+   *
+   * Get the capsule to which the data channel ends.
+   *
+   * @return the capsule to which the data channel ends.
+   */
+  def end:  IGenericCapsule
 
 
-    /**
-     *
-     * Get the name of the variable transported by this data channel.
-     *
-     * @return the name of the variable transported by this data channel.
-     */
-    def variableNames: Iterable[String]
+  /**
+   *
+   * Get the names of the variable transported by this data channel.
+   *
+   * @return the name of the variable transported by this data channel.
+   */
+  def variableNames: Iterable[String]
 
    
-    /**
-     *
-     * Get the set of data of that will actually be transmitted as input to the
-     * ending task capsule. This is computed by intersecting the set of variable
-     * names transported by this data channel and the set of input of the ending
-     * task.
-     *
-     * @return the transmitted data
-    */
-    def data: Iterable[IData[_]]
+  /**
+   *
+   * Get the set of data of that will actually be transmitted as input to the
+   * ending task capsule. This is computed by intersecting the set of variable
+   * names transported by this data channel and the set of input of the ending
+   * task.
+   *
+   * @return the transmitted data
+   */
+  def data: Iterable[IData[_]]
 
-    def provides(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution)
-    def consums(sticket: ITicket, moleExecution: IMoleExecution): IContext
+  /**
+   * Provides the variable for future consuption by the matching execution of
+   * the ending task.
+   * 
+   * @param context the context containing the variables
+   * @param ticket the ticket of the current execution
+   * @param toClone the set of variable wich should be cloned
+   * @param moleExecution the current mole execution
+   */
+  def provides(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution)
+    
+  /**
+   * Consums the provided variables and construct a context for them.
+   * 
+   * @param ticket the ticket of the current execution
+   * @param moleExecution the current mole execution
+   * @return a new context containing the variable wich has gone through this
+   * data channel
+   */
+  def consums(sticket: ITicket, moleExecution: IMoleExecution): IContext
 
 }

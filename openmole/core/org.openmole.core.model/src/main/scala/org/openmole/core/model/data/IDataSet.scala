@@ -17,7 +17,26 @@
 
 package org.openmole.core.model.data
 
+/**
+ * It is a set of @link{IData}. It allows manipulating data by set instead of
+ * individualy.
+ */
 trait IDataSet extends Iterable[IData[_]] {
+  
+  /**
+   * Get the @link{IData} by its name as an Option.
+   * 
+   * @param name the name of the @link{IData}
+   * @return Some(data) if it is present in the data set None otherwise
+   */
   def apply(name: String): Option[IData[_]]
+  
+  /**
+   * Test if a variable with a given name is present in the data set.
+   * 
+   * @param name the name of the @link{IData}
+   * @return true if the variable with a matching name is present in the data
+   * set false otherwise
+   */
   def contains(name: String): Boolean
 }

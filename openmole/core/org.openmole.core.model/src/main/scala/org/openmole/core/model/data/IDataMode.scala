@@ -17,10 +17,25 @@
 
 package org.openmole.core.model.data
 
+/**
+ * The data mode give meta-information about the circulation of data in the 
+ * mole.
+ */
 trait IDataMode {
+  
+  /**
+   * This data chunk is modified durring the task execution.
+   */
   def isMutable: Boolean
 
+  /**
+   * This data chunk is optional for the task execution.
+   */
   def isOptional: Boolean
 
+  /**
+   * This data chunk is for system use and has not been generated for the
+   * bussiness logic but rather for the workflow system use. 
+   */
   def isSystem: Boolean
 }
