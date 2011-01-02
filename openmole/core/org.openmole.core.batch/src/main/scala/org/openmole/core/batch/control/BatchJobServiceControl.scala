@@ -18,6 +18,7 @@
 package org.openmole.core.batch.control
 
 import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.core.batch.environment.TemporaryErrorException
 import scala.collection.immutable.HashMap
 
 
@@ -42,7 +43,7 @@ object BatchJobServiceControl {
     }    
   }
   
-  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => true})
+  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => !classOf[TemporaryErrorException].isAssignableFrom(e.getClass)})
   def withFailureControl[A](desc: BatchJobServiceDescription, op: => A, isFailure: Throwable => Boolean): A = {
     val qualityControl = this.qualityControl(desc)
     QualityControl.withQualityControl(qualityControl, op, isFailure)

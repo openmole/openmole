@@ -18,6 +18,7 @@
 package org.openmole.misc.workspace
 
 import java.io.File
+import java.util.UUID
 
 object IWorkspace {
   val OpenMoleDir = ".openmole"
@@ -33,6 +34,8 @@ object IWorkspace {
 
 trait IWorkspace {
 
+  def sessionUUID: UUID
+  
   def location_=(location: File)
   def location: File
 

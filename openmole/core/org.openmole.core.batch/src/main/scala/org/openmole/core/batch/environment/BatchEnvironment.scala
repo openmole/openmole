@@ -26,7 +26,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
@@ -40,13 +40,16 @@ object BatchEnvironment {
     
   @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
-  
-  val ResourcesExpulseThreshod = new ConfigurationLocation("BatchEnvironment", "ResourcesExpulseThreshod")
+    
+  val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
+
+  val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
    
-  Activator.getWorkspace += (MemorySizeForRuntime, "512")
-  Activator.getWorkspace += (ResourcesExpulseThreshod, "100")
-  Activator.getWorkspace += (CheckInterval, "PT2M")
+  workspace += (MemorySizeForRuntime, "512")
+  workspace += (QualityHysteresis, "1000")
+  workspace += (CheckInterval, "PT2M")
+  workspace += (MinValueForSelectionExploration, "0.001")
 }
 
 
@@ -54,25 +57,25 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   @transient private lazy val _storagesLock = new ReentrantLock
   @transient private lazy val _jobServicesLock = new ReentrantLock
   
-  @transient private lazy val _jobServices = new BatchJobServiceGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
-  @transient private lazy val _storages = new BatchStorageGroup(Activator.getWorkspace.preferenceAsInt(BatchEnvironment.ResourcesExpulseThreshod))
+  @transient private lazy val _jobServices = new BatchJobServiceGroup
+  @transient private lazy val _storages = new BatchStorageGroup
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
-    case None => Activator.getWorkspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+    case None => workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
   }
   
-  Activator.getUpdater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval))
+  updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN)
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
 
-    Activator.getUpdater.delay(bej, ExecutorType.UPDATE)
+    updater.delay(bej, ExecutorType.UPDATE)
 
     jobRegistry.register(bej)
   }
   
-  @transient lazy val runtime: File = new File(Activator.getWorkspace.preference(BatchEnvironment.RuntimeLocation))
+  @transient lazy val runtime: File = new File(workspace.preference(BatchEnvironment.RuntimeLocation))
   
   protected def selectStorages(storageGroup: BatchStorageGroup) = {
         
@@ -94,7 +97,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      Activator.getExecutorService.getExecutorService(ExecutorType.OWN).submit(r)
+      executorService.getExecutorService(ExecutorType.OWN).submit(r)
     }
 
     while (storageGroup.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
@@ -122,7 +125,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      Activator.getExecutorService.getExecutorService(ExecutorType.OWN).submit(test)
+      executorService.getExecutorService(ExecutorType.OWN).submit(test)
     }
     
     while (jobServiceGroup.isEmpty && nbStillRunning.get > 0) done.acquire

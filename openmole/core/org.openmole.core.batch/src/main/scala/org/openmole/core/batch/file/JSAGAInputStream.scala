@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.file.FileInputStream
 import org.ogf.saga.task.TaskMode
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 
 class JSAGAInputStream(stream: FileInputStream) extends InputStream {
 
@@ -45,7 +45,7 @@ class JSAGAInputStream(stream: FileInputStream) extends InputStream {
         val task = stream.close(TaskMode.ASYNC)
  
         try {
-            task.get(Activator.getWorkspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS);
+            task.get(workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
         } catch {
           case (e: TimeoutException) => task.cancel(true); throw e;
         } 

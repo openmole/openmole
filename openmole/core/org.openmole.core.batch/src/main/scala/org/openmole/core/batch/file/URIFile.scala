@@ -40,7 +40,7 @@ import org.ogf.saga.url.URLFactory
 import org.ogf.saga.namespace.Flags
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileUtil
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.commons.tools.io.Network._
@@ -57,9 +57,9 @@ object URIFile {
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
 
-  Activator.getWorkspace += (Timeout, "PT2M")
-  Activator.getWorkspace += (BufferSize, "8192")
-  Activator.getWorkspace += (CopyTimeout, "PT2M")
+  workspace += (Timeout, "PT2M")
+  workspace += (BufferSize, "8192")
+  workspace += (CopyTimeout, "PT2M")
         
   def child(url: URL, child: String): URL = {
     if (url.toString().endsWith("/") || child.charAt(0) == '/') fromLocation(url.toString() + child)
@@ -96,7 +96,7 @@ object URIFile {
     try {
       val os = dest.openOutputStream(token)
       try {
-        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)))
+        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, workspace.preferenceAsInt(BufferSize), workspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally {
         os.close
       }
@@ -128,8 +128,8 @@ object URIFile {
 
       try {
         withFailureControl(srcDesc,
-          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)))
-          else FileUtil.copy(is, os, Activator.getWorkspace.preferenceAsInt(BufferSize), Activator.getWorkspace.preferenceAsDurationInMs(CopyTimeout)) 
+          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, workspace.preferenceAsInt(BufferSize), workspace.preferenceAsDurationInMs(CopyTimeout)))
+          else FileUtil.copy(is, os, workspace.preferenceAsInt(BufferSize), workspace.preferenceAsDurationInMs(CopyTimeout)) 
         )              
       } finally {
         os.close
@@ -182,19 +182,19 @@ case class URIFile(val location: String) extends IURIFile {
   }
   
   private def fetchEntry: NSEntry = trycatch {
-    val task = NSFactory.createNSEntry(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL)
-    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS) , task)
+    val task = NSFactory.createNSEntry(TaskMode.ASYNC, JSAGASessionService.getSession, SAGAURL)
+    trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS) , task)
   }
     
 
   private def fetchEntryAsDirectory: NSDirectory = trycatch {
-    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL)
-    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, JSAGASessionService.getSession, SAGAURL)
+    trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def close(entry: NSEntry) = trycatch {
     val task = entry.close(TaskMode.ASYNC)
-    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
   protected def SAGAURL: URL = trycatch(fromLocation(location))
@@ -214,7 +214,7 @@ case class URIFile(val location: String) extends IURIFile {
 
   private def isDirectory(entry: NSEntry): Boolean = trycatch {
     val task = entry.isDir(TaskMode.ASYNC)
-    trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
+    trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
   }
 
   override def URLRepresentsADirectory: Boolean = trycatch {location.toString.endsWith("/")}
@@ -222,7 +222,7 @@ case class URIFile(val location: String) extends IURIFile {
   /*--------------------- mkdir ---------------------------*/
   override def mkdir(name: String): IURIFile = withToken(mkdir(name, _))
 
-  override def mkdir(name: String, token: AccessToken): IURIFile = {
+  override def mkdir(name: String, token: AccessToken): IURIFile = withFailureControl {
     val dir = fetchEntryAsDirectory
     try trycatch {
       val cname =  if (name.endsWith("/")) {
@@ -234,7 +234,7 @@ case class URIFile(val location: String) extends IURIFile {
       val dest = URIFile.child(SAGAURL, cname)
       val task = dir.makeDir(TaskMode.ASYNC, dest);
             
-      trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+      trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
       new URIFile(this, name)
     } finally {
       close(dir)
@@ -269,7 +269,7 @@ case class URIFile(val location: String) extends IURIFile {
       val dest = URLFactory.createURL(name)
       val task = dir.exists(TaskMode.ASYNC, dest)
     
-      trycatch(task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
+      trycatch(task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
     
     } finally {
       close(dir)
@@ -280,11 +280,11 @@ case class URIFile(val location: String) extends IURIFile {
 
   override def openInputStream(token: AccessToken): InputStream = trycatch {
 
-    val task = FileFactory.createFileInputStream(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL);
+    val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.getSession, SAGAURL);
 
     trycatch(
       withFailureControl ({
-        val ret = task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+        val ret = task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         new JSAGAInputStream(ret)
       }, {e: Throwable => !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass)}), task)
   }
@@ -293,10 +293,10 @@ case class URIFile(val location: String) extends IURIFile {
 
   override def openOutputStream(token: AccessToken): OutputStream = trycatch {
 
-    val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, Activator.getJSAGASessionService.getSession, SAGAURL, false)
+    val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.getSession, SAGAURL, false)
     trycatch(
       withFailureControl {
-        val ret = task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+        val ret = task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         new JSAGAOutputStream(ret)
       }, task)
   }
@@ -304,7 +304,7 @@ case class URIFile(val location: String) extends IURIFile {
   override def cache: File = withToken(cache(_))
 
   override def cache(token: AccessToken): File = trycatch(/*synchronized */{
-      val cacheTmp = Activator.getWorkspace.newFile("file", "cache")
+      val cacheTmp = workspace.newFile("file", "cache")
       this.copy(new URIFile(cacheTmp), token)
       cacheTmp
   })
@@ -332,7 +332,7 @@ case class URIFile(val location: String) extends IURIFile {
 
       trycatch(
         if (timeOut) {
-          task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+          task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         } else {
           task.get
         }
@@ -350,7 +350,7 @@ case class URIFile(val location: String) extends IURIFile {
     try {
       val task = dir.list(TaskMode.ASYNC)
 
-      trycatch (task.get(Activator.getWorkspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
+      trycatch (task.get(workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
     } finally {
       close(dir)
     }

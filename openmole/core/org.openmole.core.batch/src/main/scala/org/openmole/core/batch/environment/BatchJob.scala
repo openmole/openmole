@@ -67,7 +67,7 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
   def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
 
   def updatedState(token: AccessToken): ExecutionState = synchronized {
-    state = updateState
+    state = withFailureControl(jobServiceDescription, updateState)
     state
   }
 

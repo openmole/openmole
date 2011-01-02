@@ -24,6 +24,7 @@ import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.job.Job
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.environment.BatchJob
+import org.openmole.core.batch.environment.TemporaryErrorException
 import org.openmole.core.model.execution.ExecutionState
 
 import org.ogf.saga.monitoring.Metric
@@ -31,19 +32,19 @@ import org.ogf.saga.task.State
 
 class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
+  var subState: String = ""
   def job: Job = jobService.jobServiceCache.getJob(jobId)
-
+  
   private def translateStatus(job: Job, state: State): ExecutionState = {
     import State._
+    
+    subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE)
     
     state match {
       case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
-        val subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE);
-       
-        if (!subState.equals(SubState.RUNNING_ACTIVE.toString)) ExecutionState.SUBMITTED
-        else ExecutionState.RUNNING
-        
+        if (subState == SubState.RUNNING_SUBMITTED.toString || subState == SubState.RUNNING_QUEUED.toString) ExecutionState.SUBMITTED
+        else ExecutionState.RUNNING        
       case DONE => ExecutionState.DONE
       case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
     }
@@ -51,23 +52,21 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
 
   override def deleteJob =  {
     if (state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
-      var deleted = false
-      do {
-        try {
-          job.cancel
-          deleted = true
-        } catch {
-          case e: ReconnectionException => 
-            Logger.getLogger(classOf[JSAGAJob].getName).info("Job service reconnecting, retrying in 10s.")
-            Thread.sleep(1000)
-        }
-      } while(!deleted)
+      try {
+        job.cancel
+      } catch {
+        case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job deletion.", e)
+      }
     }
   }
 
   override def updateState: ExecutionState = {
     val curjob = job
-    return translateStatus(curjob, curjob.getState)
+    try {
+      translateStatus(curjob, curjob.getState)
+    } catch {
+      case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job satus update.", e)
+    }
   }
 
   override def toString: String = jobId

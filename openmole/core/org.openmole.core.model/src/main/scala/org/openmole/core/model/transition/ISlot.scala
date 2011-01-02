@@ -35,16 +35,18 @@ trait ISlot {
    *
    * @param transition the transition to plug
    */
-  def plugTransition(transition: IGenericTransition)
-
+  def +=(transition: IGenericTransition): this.type
+  def add(transition: IGenericTransition): this.type = { +=(transition) }
+  
   /**
    *
    * Unplug <code>transition</code> from thi slot.
    *
    * @param transition the transition to unplug
    */
-  def unplugTransition(transition: IGenericTransition)
-
+  def -=(transition: IGenericTransition): this.type
+  def remove(transition: IGenericTransition): this.type = { -=(transition)}
+  
   /**
    *
    * Test if <code>transition</code> is plugged to this slot.
@@ -52,7 +54,7 @@ trait ISlot {
    * @param transition the transition to test
    * @return true if the transition is plugged to this slot
    */
-  def isPlugged(transition: IGenericTransition): Boolean
+  def contains(transition: IGenericTransition): Boolean
 
   /**
    *

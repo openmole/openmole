@@ -28,10 +28,10 @@ import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import scala.collection.mutable.ArrayBuffer
 
-class BatchStorageGroup(val expulseThreshold: Int) {
+class BatchStorageGroup {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release
   }
@@ -46,41 +46,46 @@ class BatchStorageGroup(val expulseThreshold: Int) {
     try {
       var ret: (BatchStorage, AccessToken) = null
       do {
-        //Select the less failing resources
-        val resourcesCopy = synchronized {
-          resources = resources.filter( {r =>
-              BatchStorageControl.qualityControl(r.description) match {
-                case Some(f) => f.failureRate <= expulseThreshold
-                case None => true
-              }
-            })
-          if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.");
-
-          resources
-        }
+        val resourcesCopy = resources
 
         //Among them select one not over loaded
+        val notLoaded = new ArrayBuffer[(BatchStorage, AccessToken, Double)]
+        var totalFitness = 0.
+        
+        //Among them select one not over loaded
         val bestResourcesIt = resourcesCopy.iterator
-        val notLoaded = new ArrayBuffer[(BatchStorage, AccessToken)]
-        //var totalQuality = 0L
         
         while (bestResourcesIt.hasNext) {       
           val cur = bestResourcesIt.next
 
           BatchStorageControl.usageControl(cur.description).tryGetToken match {
             case None =>
-            case Some(token) => notLoaded += ((cur, token))
+            case Some(token) => 
+              val quality = BatchStorageControl.qualityControl(cur.description)
+              val fitness = quality match {
+                case Some(q) => 
+                  val v = math.pow(1. * q.success, 2)
+                  val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                  if(v < min) min else v
+                case None => 1.
+              }
+              
+              Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+
+              notLoaded += ((cur, token, fitness))
+              totalFitness += fitness
           }
         }
              
         if (notLoaded.size > 0) {
-          ret = notLoaded(RNG.nextInt(notLoaded.size))
+          var selected = RNG.nextDouble * totalFitness
           
           for (service <- notLoaded) {    
-            if(service._1.description != ret._1.description) BatchStorageControl.usageControl(service._1.description).releaseToken(service._2) 
+            if(ret == null && selected <= service._3) ret = (service._1, service._2)
+            else BatchStorageControl.usageControl(service._1.description).releaseToken(service._2) 
+            selected -= service._3
           }
         } else {
-          //Logger.getLogger(getClass.getName).info("Waiting")
           waiting.acquire
         }
       } while (ret == null)
@@ -94,7 +99,7 @@ class BatchStorageGroup(val expulseThreshold: Int) {
 
     resources :+= service
     val usageControl = BatchStorageControl.usageControl(service.description)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+    eventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     
     waiting.release
   }

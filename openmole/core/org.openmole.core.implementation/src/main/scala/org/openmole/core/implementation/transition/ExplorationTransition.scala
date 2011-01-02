@@ -117,6 +117,6 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
     subSubMole.decNbJobInProgress(size)
   }
 
-  override protected def plugStart = start.plugOutputTransition(this)
+  override protected def plugStart = start.addOutputTransition(this)
     
 }

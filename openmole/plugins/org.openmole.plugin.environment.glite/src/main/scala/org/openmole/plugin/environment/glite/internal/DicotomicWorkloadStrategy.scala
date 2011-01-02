@@ -17,25 +17,25 @@
 
 package org.openmole.plugin.environment.glite.internal
 
+import org.openmole.plugin.environment.glite.internal.Activator._
+import org.openmole.plugin.environment.glite.GliteEnvironment
 import java.util.Arrays
 import java.util.logging.Logger
 import org.openmole.core.model.execution.SampleType
 import scala.util.Sorting._
 import scala.math._
 
-object DicotomicWorkloadStrategy {
-  def apply(maxOverSubmitRatioWaiting: Double, maxOverSubmitRatioRunning: Double,  epsilon: Double) = {
-    new DicotomicWorkloadStrategy(x => x match {
-        case SampleType.WAITING => maxOverSubmitRatioWaiting
-        case SampleType.RUNNING => maxOverSubmitRatioRunning
-      }, epsilon)
-  }
-}
 
-class DicotomicWorkloadStrategy(maxOverSubmitRatio: PartialFunction[SampleType, Double], epsilon: Double) extends IWorkloadManagmentStrategy {
+class DicotomicWorkloadStrategy extends IWorkloadManagmentStrategy {
 
   override def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
+    val epsilon = workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioEpsilonLocation)
 
+    val maxOverSubmitRatio: PartialFunction[SampleType, Double] = {
+        x => x match {
+        case SampleType.WAITING => workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioWaitingLocation)
+        case SampleType.RUNNING => workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioRunningLocation)
+      }}
    // val LOGGER = Logger.getLogger(classOf[DicotomicWorkloadStrategy].getName)
     //LOGGER.info("Sample type " + sample.getLabel)
     

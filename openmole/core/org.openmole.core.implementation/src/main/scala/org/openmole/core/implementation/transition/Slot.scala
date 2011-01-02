@@ -24,20 +24,21 @@ import scala.collection.mutable.HashSet
 
 class Slot(val capsule: IGenericCapsule) extends ISlot {
 
-    private val _transitions = new HashSet[IGenericTransition]
+  private val _transitions = new HashSet[IGenericTransition]
 
-    override def plugTransition(transition: IGenericTransition) = {
-        _transitions += transition
-    }
+  override def +=(transition: IGenericTransition) = {
+    _transitions += transition
+    this
+  }
 
-   override def unplugTransition(transition: IGenericTransition) = {
-        _transitions -= transition
-    }
+  override def -=(transition: IGenericTransition) = {
+    _transitions -= transition
+    this
+  }
 
-    override def transitions: Iterable[IGenericTransition] =  _transitions
+  override def transitions: Iterable[IGenericTransition] =  _transitions
     
-
-    override def isPlugged(transition: IGenericTransition): Boolean = {
-        _transitions.contains(transition)
-    }
+  override def contains(transition: IGenericTransition): Boolean = {
+    _transitions.contains(transition)
+  }
 }

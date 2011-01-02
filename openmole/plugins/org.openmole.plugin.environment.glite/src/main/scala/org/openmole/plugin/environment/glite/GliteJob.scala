@@ -18,16 +18,13 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.plugin.environment.glite.internal.Activator
+import org.openmole.plugin.environment.glite.internal.Activator._
 import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState
+import fr.in2p3.jsaga.adaptor.job.SubState
 
-object GliteJob {
-  @transient lazy val jobShakingProbability = Activator.getWorkspace.preferenceAsDouble(GliteEnvironment.JobShakingProbability)
-  @transient lazy val jobShakingInterval = Activator.getWorkspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
-}
 
 class GliteJob(jobId: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(jobId, jobService){
 
@@ -40,10 +37,18 @@ class GliteJob(jobId: String, jobService: GliteJobService, proxyExpired: Long) e
     if(!ret.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     
     if(ret == ExecutionState.SUBMITTED) {
-      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / GliteJob.jobShakingInterval)
-      if(nbInterval < 1) if(RNG.nextDouble < nbInterval * GliteJob.jobShakingProbability) {
+      val jobShakingInterval = workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
+
+      val probability = {
+        if (subState == SubState.RUNNING_SUBMITTED.toString) 
+          workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilitySubmitted)
+        else workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilityQueued)
+      }
+      
+      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingInterval)
+      if(nbInterval < 1) if(RNG.nextDouble < nbInterval * probability) {
         throw new ShouldBeKilledException("Killed in shaking process")
-      } else for(i <- 0 to nbInterval.toInt) if(RNG.nextDouble < GliteJob.jobShakingProbability){
+      } else for(i <- 0 to nbInterval.toInt) if(RNG.nextDouble < probability){
         throw new ShouldBeKilledException("Killed in shaking process")
       }
     }

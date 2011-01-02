@@ -35,7 +35,6 @@ import scala.collection.mutable.HashMap
 import org.openmole.commons.tools.io.FileUtil
 
 object Workspace {
-
   val group = "Workspace"
   val fixedPrefix = "file"
   val fixedPostfix = ".wf"
@@ -86,9 +85,11 @@ class Workspace extends IWorkspace {
     configurations(location) = () => defaultValue
   }
 
+  @transient override lazy val sessionUUID = UUID.randomUUID
+  
   @Cachable
   private[internal] def tmpDir: TempDir = {
-    val tmpLocation = new File(new File(location, DefaultTmpLocation), UUID.randomUUID.toString)
+    val tmpLocation = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
 
     if (!tmpLocation.mkdirs) {
       throw new InternalProcessingError("Cannot create tmp dir " + tmpLocation.getAbsolutePath)

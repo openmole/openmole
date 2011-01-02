@@ -27,7 +27,7 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.file.URIFileCleaner
-import org.openmole.core.batch.internal.Activator
+import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.execution.SampleType
@@ -43,9 +43,9 @@ object BatchExecutionJob {
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
   val LOGGER = Logger.getLogger(classOf[BatchExecutionJob].getName)
 
-  Activator.getWorkspace += (MinUpdateInterval, "PT2M")
-  Activator.getWorkspace += (MaxUpdateInterval, "PT30M")
-  Activator.getWorkspace += (IncrementUpdateInterval, "PT2M")
+  workspace += (MinUpdateInterval, "PT2M")
+  workspace += (MaxUpdateInterval, "PT30M")
+  workspace += (IncrementUpdateInterval, "PT2M")
 }
 
 
@@ -56,7 +56,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   var batchJob: BatchJob = null
   val killed = new AtomicBoolean(false)
   var copyToEnvironmentResult: CopyToEnvironmentResult = null
-  var _delay: Long = Activator.getWorkspace.preferenceAsDurationInMs(MinUpdateInterval)
+  var _delay: Long = workspace.preferenceAsDurationInMs(MinUpdateInterval)
  
   @transient
   var copyToEnvironmentExecFuture: Future[CopyToEnvironmentResult] = null
@@ -111,16 +111,17 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       if (oldState != state) {
         initDelay
       } else {
-        val newDelay = _delay + Activator.getWorkspace.preferenceAsDurationInMs(IncrementUpdateInterval)
-        if (newDelay <= Activator.getWorkspace.preferenceAsDurationInMs(MaxUpdateInterval)) {
-          _delay = newDelay
-        }
+        val newDelay = _delay + workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+        
+        val maxDelay = workspace.preferenceAsDurationInMs(MaxUpdateInterval)
+        _delay = if (newDelay <= maxDelay) newDelay else maxDelay
       }
             
       //LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
 
 
     } catch {
+      case (e: TemporaryErrorException) => LOGGER.log(Level.FINE, "Temporary error durring job update.", e)
       case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
       case (e: ShouldBeKilledException) => 
         LOGGER.log(Level.FINE, e.getMessage)
@@ -134,12 +135,12 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   }
 
   private def initDelay = {
-    _delay = Activator.getWorkspace.preferenceAsDurationInMs(MinUpdateInterval)
+    _delay = workspace.preferenceAsDurationInMs(MinUpdateInterval)
   }
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = Activator.getExecutorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob.lastStateDurration))
+      finalizeExecutionFuture = executorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob.lastStateDurration))
     }
     if (finalizeExecutionFuture.isDone) {
       finalizeExecutionFuture.get
@@ -151,7 +152,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   private def asynchonousCopy: Boolean = {
     if (copyToEnvironmentResult == null) {
       if (copyToEnvironmentExecFuture == null) {
-        copyToEnvironmentExecFuture = Activator.getExecutorService.getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
+        copyToEnvironmentExecFuture = executorService.getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
       }
 
       if (copyToEnvironmentExecFuture.isDone) {
@@ -179,7 +180,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
   private def clean = {
     if (copyToEnvironmentResult != null) {
-      Activator.getExecutorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true))
+      executorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true))
       copyToEnvironmentResult = null
     }
   }
@@ -198,7 +199,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       } finally {
         val bj = batchJob
         if (bj != null) {
-          Activator.getExecutorService.getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          executorService.getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
         }
       }
     }

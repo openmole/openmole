@@ -15,19 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.control
+package org.openmole.core.batch.environment
 
-import java.util.concurrent.atomic.AtomicInteger
-
-class JobServiceQualityControl(hysteresis: Int) extends QualityControl(hysteresis) {
-  private val _nbSubmitted = new AtomicInteger
-  private val _nbRunning = new AtomicInteger
-
-  def submitted = _nbSubmitted.get
-  def runnig = _nbRunning.get
-  
-  def incrementSubmitted = _nbSubmitted.incrementAndGet
-  def decrementSubmitted = _nbSubmitted.decrementAndGet
-  def incrementRunning = _nbRunning.incrementAndGet
-  def decrementRunning = _nbRunning.decrementAndGet
-}
+class TemporaryErrorException(message: String, cause: Exception) extends Exception(message, cause)

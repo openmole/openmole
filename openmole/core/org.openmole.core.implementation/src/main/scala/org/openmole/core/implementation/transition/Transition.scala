@@ -82,6 +82,6 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
     }
   }
   
-  override protected def plugStart = start.plugOutputTransition(this)
+  override protected def plugStart = start.addOutputTransition(this)
   
 }
