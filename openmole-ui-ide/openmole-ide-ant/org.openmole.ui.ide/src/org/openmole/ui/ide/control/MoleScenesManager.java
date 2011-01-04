@@ -34,6 +34,15 @@ public class MoleScenesManager extends TabManager{
     
     private Collection<IMoleScene> moleScenes = new ArrayList<IMoleScene>();
     private int count=1;
+    private int nodeCounter = 0;
+
+    public void incrementNodeName() {
+        nodeCounter++;
+    }
+
+    public String getNodeName() {
+        return "task" + nodeCounter;
+    }
 
     public void addMoleScene(IMoleScene ms){
         moleScenes.add(ms);

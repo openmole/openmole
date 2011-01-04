@@ -45,6 +45,7 @@ import javax.swing.event.ListSelectionListener;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
+import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 
 /**
  *
@@ -67,7 +68,7 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         super(new BorderLayout());
         prototypeListModel = new DefaultListModel();
 
-        for (PrototypeUI p : Preferences.getInstance().getPrototypes()) {
+        for (PrototypeUI p : PrototypesUI.getInstance().getPrototypes()) {
             prototypeListModel.addElement(p);
         }
 
@@ -80,8 +81,8 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
 
         nameField = new JTextField(10);
         nameField.addActionListener(new AddButtonListener());
-        if (!Preferences.getInstance().getPrototypes().isEmpty())
-            nameField.setText(Preferences.getInstance().getPrototypes().iterator().next().getName());
+        if (!PrototypesUI.getInstance().getPrototypes().isEmpty())
+            nameField.setText(PrototypesUI.getInstance().getPrototypes().iterator().next().getName());
 
         //Create the update prototype button.
         upButton = new JButton(updateString);
@@ -176,7 +177,7 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
                     PrototypeUI newproto = new PrototypeUI(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
                     prototypeListModel.addElement(newproto);
                     list.setSelectedIndex(prototypeListModel.getSize());
-                    Preferences.getInstance().registerPrototype(newproto);
+                    PrototypesUI.getInstance().registerPrototype(newproto);
                     nameField.setText("");
                 } catch (ClassNotFoundException ex) {
                     MoleExceptionManagement.showException(ex);
@@ -198,8 +199,8 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
                 prototypeListModel.removeElement(proto);
 
                 List li = Arrays.asList(prototypeListModel.toArray());
-                Preferences.getInstance().setPrototypes(li);
-                System.out.println("SIze .."+Preferences.getInstance().getPrototypes().size());
+                PrototypesUI.getInstance().setPrototypes(li);
+                System.out.println("SIze .."+PrototypesUI.getInstance().getPrototypes().size());
                 nameField.setText("");
             }
         }

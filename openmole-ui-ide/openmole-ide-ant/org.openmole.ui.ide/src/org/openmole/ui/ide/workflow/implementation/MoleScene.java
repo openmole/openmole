@@ -100,44 +100,6 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         //getActions().addAction(ActionFactory.createAcceptAction(new DnDProvider(this)));
 
         setMovable(true);
-
-        // TMP
-//        Prototype fileProto = new Prototype("fileProto", File.class);
-//        //GroovyTask gTask = new GroovyTask("gTask");
-//        //Capsule gCapsule = new Capsule(gTask);
-//        MoleTask mTask = new MoleTask("mTask", new Mole(new Capsule()));
-//        Capsule mCapsule = new Capsule(mTask);
-//        mTask.addInput(fileProto);
-//      //  new Transition(gCapsule, mCapsule);
-//
-//        DataOutputStream dos = null;
-//        try {
-//            XStream xstream = new XStream();
-//            dos = new DataOutputStream(new FileOutputStream("/tmp/mole.xml"));
-//            dos.writeUTF(xstream.toXML(new Mole(mCapsule)));
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        } finally {
-//            try {
-//                dos.close();
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-
-
-        //tmp
-//        try {
-//            build(Serializer.unserialize("/tmp/mole.xml"));
-//        } catch (InternalProcessingError ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (UserBadDataError ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (Throwable ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-
-
         MoleScenesManager.getInstance().addMoleScene(this);
     }
 

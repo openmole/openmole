@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -43,7 +42,8 @@ public class Preferences {
     private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
     private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
     private Collection<Class> prototypeTypes = new ArrayList<Class>();
-    private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
+  //  private PrototypesUI prototypes = new PrototypesUI();
+  //  private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
     private Map<Class<? extends IObjectModelUI>,Class> coreClasses = new WeakHashMap<Class<? extends IObjectModelUI>,Class>();
 
     public void clearModels() {
@@ -137,35 +137,35 @@ public class Preferences {
         return prototypeTypes;
     }
 
-    public void registerPrototype(PrototypeUI p) {
-        prototypes.put(p.getName(), p);
-    }
+//    public void registerPrototype(PrototypeUI p) {
+//        prototypes.put(p.getName(), p);
+//    }
 
-    public void setPrototypes(List<PrototypeUI> protos) {
-
-    Map<String, PrototypeUI> newprotos = new WeakHashMap<String, PrototypeUI>();
-        for (PrototypeUI p : protos){
-            newprotos.put(p.getName(),p);
-        }
-        prototypes = newprotos;
-    }
-
-    public PrototypeUI getPrototype(String st) throws UserBadDataError {
-        if (prototypes.containsKey(st)) {
-            return prototypes.get(st);
-        } else {
-            throw new UserBadDataError("The prototype " + st + " doest not exist.");
-        }
-    }
-
-    public Collection<PrototypeUI> getPrototypes() {
-        if (prototypes.isEmpty()) {
-            prototypes.put("protoInteger", new PrototypeUI("protoInteger", BigInteger.class));
-            prototypes.put("protoBigDecimal", new PrototypeUI("protoBigDecimal", BigDecimal.class));
-            prototypes.put("protoFile", new PrototypeUI("protoFile", File.class));
-        }
-        return prototypes.values();
-    }
+//    public void setPrototypes(List<PrototypeUI> protos) {
+//
+//    Map<String, PrototypeUI> newprotos = new WeakHashMap<String, PrototypeUI>();
+//        for (PrototypeUI p : protos){
+//            newprotos.put(p.getName(),p);
+//        }
+//        prototypes = newprotos;
+//    }
+//
+//    public PrototypeUI getPrototype(String st) throws UserBadDataError {
+//        if (prototypes.containsKey(st)) {
+//            return prototypes.get(st);
+//        } else {
+//            throw new UserBadDataError("The prototype " + st + " doest not exist.");
+//        }
+//    }
+//
+//    public Collection<PrototypeUI> getPrototypes() {
+//        if (prototypes.isEmpty()) {
+//            prototypes.put("protoInteger", new PrototypeUI("protoInteger", BigInteger.class));
+//            prototypes.put("protoBigDecimal", new PrototypeUI("protoBigDecimal", BigDecimal.class));
+//            prototypes.put("protoFile", new PrototypeUI("protoFile", File.class));
+//        }
+//        return prototypes.values();
+//    }
 
     public Class getCoreClass(Class <? extends IObjectModelUI> cl){
         return coreClasses.get(cl);

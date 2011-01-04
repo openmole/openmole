@@ -24,6 +24,7 @@ import org.openmole.core.implementation.capsule.ExplorationCapsule;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
+import org.openmole.plugin.task.groovy.GroovyTask;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.TaskModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
@@ -39,7 +40,8 @@ public class CoreClassInstanciator {
             if (Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()) != null) {
                 if (Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()).equals(org.openmole.core.implementation.task.ExplorationTask.class)) {
                     try {
-                        return new ExplorationCapsule((IExplorationTask) Instanciator.instanciate(Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass())));
+                        return new ExplorationCapsule((IExplorationTask) Instanciator.instanciate(Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()),
+                                capsuleModelUI.getTaskModel().getName()));
                     } catch (IllegalArgumentException ex) {
                         throw new UserBadDataError(ex);
                     } catch (NoSuchMethodException ex) {
@@ -53,7 +55,8 @@ public class CoreClassInstanciator {
                     }
                 } else {
                     try {
-                        return new Capsule((ITask) Instanciator.instanciate(Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass())));
+                        return new Capsule((ITask) Instanciator.instanciate(Preferences.getInstance().getCoreClass(capsuleModelUI.getTaskModel().getClass()),
+                                capsuleModelUI.getTaskModel().getName()));
                     } catch (IllegalArgumentException ex) {
                         throw new UserBadDataError(ex);
                     } catch (NoSuchMethodException ex) {
@@ -71,6 +74,7 @@ public class CoreClassInstanciator {
                 throw new UserBadDataError("The task " + capsuleModelUI.getTaskModel().getClass().getCanonicalName() + " has no implementation");
             }
         } else {
+            System.out.println("++++++ ELSE ++++++");
             return new Capsule();
         }
 

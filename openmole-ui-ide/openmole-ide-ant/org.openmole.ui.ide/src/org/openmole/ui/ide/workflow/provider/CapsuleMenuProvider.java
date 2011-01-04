@@ -28,11 +28,11 @@ import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
 import org.openmole.ui.ide.workflow.action.AddInputAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
 import org.openmole.ui.ide.workflow.action.DefineMoleStartAction;
-import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 
 /**
  *
@@ -55,12 +55,14 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
                 menus.remove(inPrototypeMenu);
                 menus.remove(outPrototypeMenu);
                 inPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ", colI);
+                outPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an output prototype ", colO);
                 menus.add(inPrototypeMenu);
                 menus.add(outPrototypeMenu);
             }
         }
 
         itIS.setEnabled(!capsuleView.getCapsuleModel().isStartingCapsule());
+
         return super.getPopupMenu(widget, point);
     }
 
@@ -97,7 +99,7 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
 
     public Collection<JMenuItem> fillPrototypeMenu(IOType type) {
         Collection<JMenuItem> prototypeCol = new ArrayList<JMenuItem>();
-        for (PrototypeUI p : Preferences.getInstance().getPrototypes()) {
+        for (PrototypeUI p : PrototypesUI.getInstance().getPrototypes()) {
             JMenuItem it = new JMenuItem(p.getName());
             it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, type));
             prototypeCol.add(it);

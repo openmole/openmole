@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.implementation;
 
 import org.openmole.core.model.task.IGenericTask;
@@ -23,8 +22,11 @@ import org.openmole.core.model.task.IGenericTask;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class MoleTaskModelUI   <T extends IGenericTask> extends GenericTaskModelUI {
+public class MoleTaskModelUI<T extends IGenericTask> extends GenericTaskModelUI {
 
+    public MoleTaskModelUI(String name) {
+        super(name);
+    }
 
     @Override
     public void proceed() {
@@ -35,5 +37,4 @@ public class MoleTaskModelUI   <T extends IGenericTask> extends GenericTaskModel
     public void eventOccured(Object t) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }

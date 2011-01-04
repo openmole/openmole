@@ -1,0 +1,123 @@
+/*
+ *  Copyright (C) 2011 Mathieu Leclaire <mathieu.leclaire@openmole.org>
+ * 
+ *  This program is free software: you can redistribute itV and/or modify
+ *  itV under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that itV will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.openmole.ui.ide.serializer;
+
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
+import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
+import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
+import org.openmole.ui.ide.workflow.model.IMoleScene;
+
+/**
+ *
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
+ */
+public class MoleSceneConverter implements Converter {
+
+    Collection<IGenericTaskModelUI> taskModels = new ArrayList<IGenericTaskModelUI>();
+    private Map<Object, Integer> slotmapping = new HashMap<Object, Integer>();
+
+    @Override
+    public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
+
+        for (Iterator<IMoleScene> itms = MoleScenesManager.getInstance().getMoleScenes().iterator(); itms.hasNext();) {
+            int slotcount = 0;
+
+            //Mole
+             writer.startNode("molescene");
+            for (Iterator<ICapsuleView> itV = itms.next().getManager().getCapsuleViews().iterator(); itV.hasNext();) {
+                ICapsuleView view = itV.next();
+
+                writer.startNode("capsule");
+                writer.addAttribute("start", view.getCapsuleModel().isStartingCapsule() ? "true" : "false");
+                writer.addAttribute("impl", Preferences.getInstance().getCoreClass(view.getCapsuleModel().getClass()).toString());
+
+                //Input slot
+                for (int is = 0; is < view.getCapsuleModel().getNbInputslots(); is++) {
+                    slotcount++;
+
+                    writer.startNode("islot");
+                    writer.addAttribute("id", String.valueOf(slotcount));
+                    writer.endNode();
+
+                    // slotmapping.put(slot, slotcount);
+                }
+
+                //Output slot
+                slotcount++;
+                writer.startNode("oslot");
+                writer.addAttribute("id", String.valueOf(slotcount));
+                writer.endNode();
+
+                //  slotmapping.put(t, slotcount);
+
+                //Task
+                if (view.getCapsuleModel().containsTask()) {
+                    taskModels.add(view.getCapsuleModel().getTaskModel());
+                    writer.startNode("task");
+                    writer.addAttribute("name", view.getCapsuleModel().getTaskModel().getName());
+                    writer.endNode();
+                }
+                writer.endNode();
+            }
+              writer.endNode();
+        }
+        //Tasks
+        writer.startNode("tasks");
+        for (Iterator<IGenericTaskModelUI> itTM = taskModels.iterator(); itTM.hasNext();) {
+            IGenericTaskModelUI t = itTM.next();
+            writer.startNode("task");
+            writer.addAttribute("name", t.getName());
+            writer.addAttribute("impl", t.getClass().toString());
+            writer.endNode();
+        }
+        writer.endNode();
+
+        //Prototypes
+        writer.startNode("prototypes");
+        for (Iterator<PrototypeUI> proto = PrototypesUI.getInstance().getPrototypes().iterator(); proto.hasNext();) {
+            PrototypeUI p = proto.next();
+            writer.startNode("prototype");
+            writer.addAttribute("name", p.getName());
+            writer.addAttribute("type", p.getType().getName().toString());
+            writer.endNode();
+        }
+        writer.endNode();
+    }
+
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean canConvert(Class type) {
+         return type.equals(GUISerializer.OpenMole.class);
+    }
+}

@@ -24,6 +24,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 import org.openmole.core.model.task.IGenericTask;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
@@ -71,14 +72,10 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
     }
 
-    @Override
-    public String getName() {
-        return connectableWidget.getTitleString();
-    }
-
     public void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError {
-        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass)));
-       // capsuleModel.getTaskModel().setCoreTaskClass(coreTaskClass);
+
+        String taskName = MoleScenesManager.getInstance().getNodeName();
+        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass),taskName));
 
         properties = Preferences.getInstance().getProperties(CategoryName.TASK, coreTaskClass);
 
@@ -86,8 +83,8 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
         dnDAddPrototypeInstanceProvider.setEncapsulated(true);
 
-        scene.getManager().incrementNodeName();
-        connectableWidget.addTitle(scene.getManager().getNodeName());
+        MoleScenesManager.getInstance().incrementNodeName();
+        connectableWidget.addTitle(taskName);
 
         taskCapsuleMenuProvider.addTaskMenus();
         getActions().addAction(new TaskActions(capsuleModel.getTaskModel(), this));

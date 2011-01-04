@@ -21,33 +21,34 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.openide.util.Exceptions;
 import org.openmole.commons.tools.pattern.IVisitor;
+import org.openmole.core.implementation.capsule.Capsule;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.transition.IGenericTransition;
 import org.openmole.core.model.transition.ISlot;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
-import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
-import org.openmole.ui.ide.workflow.model.IMoleScene;
-import scala.collection.immutable.HashMap.HashMap1;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class DomMaker implements Converter {
+public class MoleConverter implements Converter {
 
-    private IMoleScene molescene = null;
     private Map<Object, Integer> slotmapping;
+    private Collection<IPrototype> prototypes = new ArrayList<IPrototype>();
 
-
-    public DomMaker(IMoleScene scene) {
-        this.molescene = scene;
+    public MoleConverter() {
         this.slotmapping = new HashMap<Object, Integer>();
+    }
+
+    public Collection<IPrototype> getPrototypes() {
+        return prototypes;
     }
 
     @Override
@@ -60,15 +61,6 @@ public class DomMaker implements Converter {
     public void marshal(Object o, final HierarchicalStreamWriter writer, MarshallingContext mc) {
         final Mole mole = (Mole) o;
         try {
-            //Prototypes
-            for (Iterator<PrototypeUI> proto = Preferences.getInstance().getPrototypes().iterator(); proto.hasNext();) {
-                PrototypeUI p = proto.next();
-                writer.startNode("prototype");
-                writer.addAttribute("name", p.getName());
-                writer.addAttribute("type", p.getType().getName().toString());
-                writer.endNode();
-            }
-
             mole.visit(new IVisitor<IGenericCapsule>() {
 
                 int slotcount = 0;
@@ -80,7 +72,16 @@ public class DomMaker implements Converter {
                     writer.addAttribute("start", t.equals(mole.root()) ? "true" : "false");
                     writer.addAttribute("impl", t.getClass().toString());
 
-                    System.out.println("+++---  slot number " + t.intputSlots().size());
+
+                        System.out.println("-- task is defined "+ t.task().isDefined() );
+                    //Task
+                    if (t.task().isDefined()) {
+                        writer.startNode("task");
+                        writer.addAttribute("name", t.task().get().name());
+                        writer.addAttribute("impl", t.task().get().getClass().toString());
+                        writer.endNode();
+                    }
+
                     //Input slot
                     for (scala.collection.Iterator<ISlot> slots = t.intputSlots().iterator(); slots.hasNext();) {
                         ISlot slot = slots.next();
@@ -125,6 +126,6 @@ public class DomMaker implements Converter {
 
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new Mole(new Capsule());
     }
 }

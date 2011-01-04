@@ -25,6 +25,10 @@ import org.openmole.core.model.task.IGenericTask;
  */
 public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI{
 
+    public GroovyTaskModelUI(String name) {
+        super(name);
+    }
+
     @Override
     public void proceed() {
         throw new UnsupportedOperationException("Not supported yet.");

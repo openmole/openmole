@@ -25,7 +25,6 @@ import org.openmole.ui.ide.workflow.model.IObjectModelUI;
  */
 public abstract class ObjectModelUI implements IObjectModelUI {
 
-    private String name;
     private String modelGroup;
     private Image img = null;
 
@@ -37,16 +36,6 @@ public abstract class ObjectModelUI implements IObjectModelUI {
     @Override
     public void updateData() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override

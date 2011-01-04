@@ -61,7 +61,7 @@ public class TaskSettingsManager extends TabManager {
 
 //        taskSettingMap.put(tcv, editorPane);
 //        tabbedPane.add(tcv.getName(), taskSettingMap.get(tcv));
-        addMapping(tcv, editorPane,tcv.getName());
+        addMapping(tcv, editorPane,tcv.getCapsuleModel().getTaskModel().getName());
     }
 
 

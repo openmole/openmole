@@ -25,6 +25,7 @@ import org.openmole.core.model.capsule.ICapsule;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
@@ -35,7 +36,7 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
  */
 public class MoleMaker {
 
-    public static IMole process(IMoleScene scene) throws UserBadDataError {
+    public static IMole processFromMoleScene(IMoleScene scene) throws UserBadDataError {
         MoleSceneManager manager = scene.getManager();
 
         //First capsule
@@ -44,20 +45,26 @@ public class MoleMaker {
             throw new UserBadDataError("A starting capsule is expected");
         }
 
-        IMole mole = new Mole(explore(start));
+        IMole mole = new Mole(exploreCapsuleModel(start));
         return mole;
     }
 
-    public static IGenericCapsule explore(ICapsuleModelUI capsuleModel) throws UserBadDataError {
+    public static IGenericCapsule exploreCapsuleModel(ICapsuleModelUI capsuleModel) throws UserBadDataError {
         IGenericCapsule capsule = CoreClassInstanciator.instanciateCapsule(capsuleModel);
         while (capsule.intputSlots().size() < capsuleModel.getNbInputslots()) {
             capsule.addInputSlot(new Slot(capsule));
         }
         if (capsuleModel.hasChild()) {
             for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext();) {
-                new Transition((ICapsule) capsule, explore(child.next()));
+                new Transition((ICapsule) capsule, exploreCapsuleModel(child.next()));
             }
         }
         return capsule;
+    }
+
+    public static IMoleScene processToMoleScene(IMole mole) {
+        IMoleScene moleS = new MoleScene();
+
+        return moleS;
     }
 }

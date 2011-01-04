@@ -13,7 +13,7 @@ import org.openmole.commons.exception.UserBadDataError;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface IUIFactory<T> extends IObjectListener<T> {
-    IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass) throws UserBadDataError ;
+    IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass,String taskName) throws UserBadDataError ;
 
     
 }

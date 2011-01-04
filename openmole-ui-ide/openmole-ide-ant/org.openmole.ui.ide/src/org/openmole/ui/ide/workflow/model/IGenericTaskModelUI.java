@@ -32,4 +32,5 @@ public interface IGenericTaskModelUI<T extends IGenericTask> extends IObjectMode
     void addPrototype(PrototypeUI p,IOType ioType);
     Set<PrototypeUI> getPrototypesIn();
     Set<PrototypeUI> getPrototypesOut();
+    String getName();
 }

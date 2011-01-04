@@ -44,6 +44,7 @@ import org.openmole.ui.ide.control.task.TaskSettingsManager;
 import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.palette.PaletteSupport;
+import org.openmole.ui.ide.workflow.action.AddMoleSceneAction;
 import org.openmole.ui.ide.workflow.action.ManagePrototypeAction;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
 import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
@@ -102,6 +103,10 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         JButton newPrototypeButton = new JButton("Prototypes");
         newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement, this));
+
+        JButton newMoleButton = new JButton("New Mole");
+        newMoleButton.addActionListener(new AddMoleSceneAction());
+
         toolBar.add(openXML);
         toolBar.add(saveXML);
         toolBar.add(new JToolBar.Separator());
@@ -109,6 +114,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);
+        toolBar.add(newMoleButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
     }
 

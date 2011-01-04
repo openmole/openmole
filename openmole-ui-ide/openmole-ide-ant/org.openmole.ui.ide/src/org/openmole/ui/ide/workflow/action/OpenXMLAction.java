@@ -19,13 +19,11 @@ package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.serializer.Serializer;
-import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.serializer.MoleMaker;
+import org.openmole.ui.ide.serializer.GUISerializer;
 
 /**
  *
@@ -36,14 +34,10 @@ public class OpenXMLAction  implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         try {
-            IMole mole = Serializer.unserialize("/tmp/mole.xml");
-            MoleScene moleS = new MoleScene();
-            moleS.build(mole);
-            MoleScenesManager.getInstance().addTab(moleS);
-        } catch (InternalProcessingError ex) {
-            MoleExceptionManagement.showException(ex);
-        } catch (UserBadDataError ex) {
-            MoleExceptionManagement.showException(ex);
+            IMole mole = (IMole) GUISerializer.getInstance().unserialize("/tmp/mole.xml");
+         //   MoleScene moleS = new MoleScene();
+           // moleS.build(mole);
+            MoleScenesManager.getInstance().addTab(MoleMaker.processToMoleScene(mole));
         } catch (Throwable ex) {
             MoleExceptionManagement.showException(ex);
         }

@@ -14,12 +14,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.implementation;
 
 import org.openmole.core.model.task.IExplorationTask;
 
 public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericTaskModelUI {
+
+    public ExplorationTaskModelUI(String name) {
+        super(name);
+    }
 
     @Override
     public void eventOccured(Object t) {
@@ -30,8 +33,4 @@ public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericT
     public void proceed() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-
-
-
 }

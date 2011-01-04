@@ -25,6 +25,7 @@ import org.openmole.core.model.task.IGenericTask;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModelUI<T>{
+    boolean containsTask();
     IGenericTaskModelUI<IGenericTask> getTaskModel();
     void setTaskModel(IGenericTaskModelUI<IGenericTask> taskModel);
     void defineAsStartingCapsule();

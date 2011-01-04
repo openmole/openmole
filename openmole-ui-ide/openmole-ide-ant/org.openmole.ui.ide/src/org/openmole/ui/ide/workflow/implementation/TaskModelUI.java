@@ -25,9 +25,10 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  */
 public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI{
 
-    public static IGenericTaskModelUI<IGenericTask>  EMPTY_TASK_MODEL = new TaskModelUI();
+    public static IGenericTaskModelUI<IGenericTask>  EMPTY_TASK_MODEL = new TaskModelUI("empty");
 
-    public TaskModelUI() {
+    public TaskModelUI(String name) {
+        super(name);
     }
 
     @Override

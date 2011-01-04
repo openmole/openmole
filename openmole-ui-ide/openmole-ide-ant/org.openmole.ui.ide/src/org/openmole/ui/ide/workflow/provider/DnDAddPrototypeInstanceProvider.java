@@ -29,6 +29,7 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 
 /**
  *
@@ -66,9 +67,9 @@ public class DnDAddPrototypeInstanceProvider extends DnDProvider {
         try {
             String inputValue = (String) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR);
             if (point.x < view.getConnectableWidget().getTaskWidth() / 2) {
-                view.getCapsuleModel().getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.INPUT);
+                view.getCapsuleModel().getTaskModel().addPrototype(PrototypesUI.getInstance().getPrototype(inputValue), IOType.INPUT);
             } else {
-                view.getCapsuleModel().getTaskModel().addPrototype(Preferences.getInstance().getPrototype(inputValue), IOType.OUTPUT);
+                view.getCapsuleModel().getTaskModel().addPrototype(PrototypesUI.getInstance().getPrototype(inputValue), IOType.OUTPUT);
             }
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);

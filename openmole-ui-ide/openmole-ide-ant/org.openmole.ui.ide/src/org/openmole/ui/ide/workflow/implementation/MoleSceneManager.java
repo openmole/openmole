@@ -30,16 +30,7 @@ public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
     private ICapsuleModelUI startingCapsule = CapsuleModelUI.EMPTY_CAPSULE_MODEL;
-    private int nodeCounter = 0;
     private int nodeID = 0;
-
-    public void incrementNodeName() {
-        nodeCounter++;
-    }
-
-    public String getNodeName() {
-        return "task" + nodeCounter;
-    }
 
     public String getNodeID() {
         return "node" + nodeID;

@@ -36,6 +36,7 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
     private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
+    private boolean containsTask = false;
 
     CapsuleModelUI() {
         this(TaskModelUI.EMPTY_TASK_MODEL);
@@ -43,6 +44,10 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
 
     CapsuleModelUI(IGenericTaskModelUI<IGenericTask> taskModel) {
         this.taskModel = taskModel;
+    }
+
+    public boolean containsTask() {
+        return containsTask;
     }
 
     @Override
@@ -53,6 +58,7 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     @Override
     public void setTaskModel(IGenericTaskModelUI taskModel) {
         this.taskModel = taskModel;
+        this.containsTask = true;
     }
 
     @Override

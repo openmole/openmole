@@ -37,6 +37,7 @@ public class PopupMenuProviderFactory {
         JPopupMenu popupMenu = new JPopupMenu();
 
         for(JMenu menu:gmp.getMenus()){
+            System.out.println("menu :" + menu);
             popupMenu.add(menu);
         }
 

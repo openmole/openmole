@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import org.openide.nodes.Node;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
+import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 
 /**
  *
@@ -30,23 +30,12 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
  */
 public class PrototypeInstanceChildren extends GenericChildren {
 
- /*   @Override
-     public void refreshNodes(){
-        Node[] mynodes = new Node[1];
-        mynodes[0] = new PrototypeInstanceNode(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR, "Add ");
-        add(mynodes);
-        refresh();
-    }*/
-
-
-        @Override
+    @Override
     protected List<Node> initCollection() {
-            System.out.println("*********** initCollection");
-        Collection<PrototypeUI> prototypes = Preferences.getInstance().getPrototypes();
+        Collection<PrototypeUI> prototypes = PrototypesUI.getInstance().getPrototypes();
 
         ArrayList childrenNodes = new ArrayList(prototypes.size());
         for (PrototypeUI proto : prototypes) {
-            System.out.println("*********** "+proto.getName());
             childrenNodes.add(new PrototypeInstanceNode(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR, proto.getName()));
         }
         return childrenNodes;

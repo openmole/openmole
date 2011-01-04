@@ -17,8 +17,6 @@
 package org.openmole.ui.ide.control;
 
 import java.awt.Component;
-import java.util.Map;
-import java.util.WeakHashMap;
 import javax.swing.JTabbedPane;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;

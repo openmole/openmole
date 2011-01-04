@@ -25,8 +25,6 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectListener;
 public interface IObjectModelUI <T> extends IObjectListener<T>{
     void objectChanged(T obj);
     void updateData();
-    void setName(String name);
-    String getName();
     String getModelGroup();
     String getCategory();
 }

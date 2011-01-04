@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 mathieu
+ *  Copyright (C) 2011 Mathieu Leclaire <mathieu.leclaire@openmole.org>
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,37 +14,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.mole.Mole;
 import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.serializer.MoleMaker;
-import org.openmole.ui.ide.serializer.GUISerializer;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class SaveXMLAction implements ActionListener {
+public class AddMoleSceneAction implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        Object obj = MoleScenesManager.getInstance().getCurrentObject();
-        if (obj instanceof MoleScene) {
-            System.out.println("MOLE TO BE SAVED");
-            try {
-                GUISerializer.getInstance().serialize( ((MoleScene) obj).getManager(), "/tmp/mole.xml");
-            } catch (IOException ex) {
-                MoleExceptionManagement.showException(ex);
-            }
-        } else {
-            System.out.println("TASK TAB");
-        }
+        MoleScenesManager.getInstance().display(new MoleScene());
     }
 }
