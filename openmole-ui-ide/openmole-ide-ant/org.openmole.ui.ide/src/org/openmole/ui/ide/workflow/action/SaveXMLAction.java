@@ -19,7 +19,7 @@ package org.openmole.ui.ide.workflow.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import org.openide.util.Exceptions;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.serializer.GUISerializer;
 
 /**
@@ -33,7 +33,7 @@ public class SaveXMLAction implements ActionListener {
         try {
             GUISerializer.getInstance().serialize("/tmp/mole.xml");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            MoleExceptionManagement.showException(ex);
         }
     }
 }

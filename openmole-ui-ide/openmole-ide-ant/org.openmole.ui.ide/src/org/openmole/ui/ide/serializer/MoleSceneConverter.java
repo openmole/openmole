@@ -30,6 +30,8 @@ import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
+import org.openmole.ui.ide.workflow.implementation.TransitionUI;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
@@ -41,7 +43,7 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
 public class MoleSceneConverter implements Converter {
 
     Collection<IGenericTaskModelUI> taskModels = new ArrayList<IGenericTaskModelUI>();
-    private Map<Object, Integer> slotmapping = new HashMap<Object, Integer>();
+    private Map<ICapsuleModelUI, Integer> firstSlotIDMapping = new HashMap<ICapsuleModelUI, Integer>();
 
     @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
@@ -50,7 +52,7 @@ public class MoleSceneConverter implements Converter {
             int slotcount = 0;
 
             //Mole
-             writer.startNode("molescene");
+            writer.startNode("molescene");
             for (Iterator<ICapsuleView> itV = itms.next().getManager().getCapsuleViews().iterator(); itV.hasNext();) {
                 ICapsuleView view = itV.next();
 
@@ -59,23 +61,20 @@ public class MoleSceneConverter implements Converter {
                 writer.addAttribute("impl", Preferences.getInstance().getCoreClass(view.getCapsuleModel().getClass()).toString());
 
                 //Input slot
+                slotcount++;
+                firstSlotIDMapping.put(view.getCapsuleModel(), slotcount);
                 for (int is = 0; is < view.getCapsuleModel().getNbInputslots(); is++) {
-                    slotcount++;
 
                     writer.startNode("islot");
                     writer.addAttribute("id", String.valueOf(slotcount));
                     writer.endNode();
-
-                    // slotmapping.put(slot, slotcount);
+                    slotcount++;
                 }
 
                 //Output slot
-                slotcount++;
                 writer.startNode("oslot");
                 writer.addAttribute("id", String.valueOf(slotcount));
                 writer.endNode();
-
-                //  slotmapping.put(t, slotcount);
 
                 //Task
                 if (view.getCapsuleModel().containsTask()) {
@@ -86,7 +85,18 @@ public class MoleSceneConverter implements Converter {
                 }
                 writer.endNode();
             }
-              writer.endNode();
+
+            //Transitions
+            writer.startNode("transitions");
+            for (Iterator<TransitionUI> itT = Preferences.getInstance().getTransitions().iterator(); itT.hasNext();) {
+                TransitionUI trans = itT.next();
+                writer.startNode("transition");
+                writer.addAttribute("source", String.valueOf(firstSlotIDMapping.get(trans.getSource()) + trans.getSource().getNbInputslots()));
+                writer.addAttribute("target", String.valueOf(firstSlotIDMapping.get(trans.getTarget()) + trans.getTargetSlotNumber()));
+                writer.endNode();
+            }
+            writer.endNode();
+            writer.endNode();
         }
         //Tasks
         writer.startNode("tasks");
@@ -118,6 +128,6 @@ public class MoleSceneConverter implements Converter {
 
     @Override
     public boolean canConvert(Class type) {
-         return type.equals(GUISerializer.OpenMole.class);
+        return type.equals(GUISerializer.OpenMole.class);
     }
 }

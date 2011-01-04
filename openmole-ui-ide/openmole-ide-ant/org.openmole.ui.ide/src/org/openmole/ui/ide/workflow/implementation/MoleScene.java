@@ -153,7 +153,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     @Override
     protected void attachEdgeSourceAnchor(String edge, String oldSourceNode, String sourceNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-       // cw.setSourceAnchor(((ICapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
+        // cw.setSourceAnchor(((ICapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
 
         cw.setSourceAnchor(((ICapsuleView) findWidget(sourceNode)).getConnectableWidget().getOutputSlotAnchor(0));
         cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
@@ -306,7 +306,10 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
             MoleScene.this.createEdge(source, target);
-            getManager().getCapsuleView(source).getCapsuleModel().addTransition(getManager().getCapsuleView(target).getCapsuleModel());
+            // getManager().getCapsuleView(source).getCapsuleModel().addTransition(getManager().getCapsuleView(target).getCapsuleModel(),0);
+            Preferences.getInstance().addTransition(getManager().getCapsuleView(source).getCapsuleModel(),
+                                                    getManager().getCapsuleView(target).getCapsuleModel(),
+                                                    0);
         }
     }
 

@@ -16,8 +16,6 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.task.IGenericTask;
@@ -35,7 +33,7 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     private transient int nbInputSlots = 0;
     private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
-    private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
+   // private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
     private boolean containsTask = false;
 
     CapsuleModelUI() {
@@ -96,10 +94,11 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public void addTransition(ICapsuleModelUI taskmodel) {
-        connectedTo.add(taskmodel);
-    }
+//    @Override
+//    public void addTransition(ICapsuleModelUI taskmodel,
+//                                int slotNumber) {
+//        connectedTo.add(taskmodel);
+//    }
 
     @Override
     public void defineAsStartingCapsule() {
@@ -117,13 +116,13 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
         return startingCapsule;
     }
 
-    @Override
-    public boolean hasChild() {
-        return !connectedTo.isEmpty();
-    }
-
-    @Override
-    public Set getChilds() {
-        return connectedTo;
-    }
+//    @Override
+//    public boolean hasChild() {
+//        return !connectedTo.isEmpty();
+//    }
+//
+//    @Override
+//    public Set getChilds() {
+//        return connectedTo;
+//    }
 }

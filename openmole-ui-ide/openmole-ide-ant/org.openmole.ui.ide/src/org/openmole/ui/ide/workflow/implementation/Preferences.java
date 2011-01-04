@@ -30,6 +30,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.commons.tools.service.HierarchicalRegistry;
 import org.openmole.ui.ide.palette.Category.CategoryName;
+import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 
 /**
  *
@@ -42,9 +43,8 @@ public class Preferences {
     private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
     private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
     private Collection<Class> prototypeTypes = new ArrayList<Class>();
-  //  private PrototypesUI prototypes = new PrototypesUI();
-  //  private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
-    private Map<Class<? extends IObjectModelUI>,Class> coreClasses = new WeakHashMap<Class<? extends IObjectModelUI>,Class>();
+    private Collection<TransitionUI> transitions = new ArrayList<TransitionUI>();
+    private Map<Class<? extends IObjectModelUI>, Class> coreClasses = new WeakHashMap<Class<? extends IObjectModelUI>, Class>();
 
     public void clearModels() {
         models.clear();
@@ -97,6 +97,16 @@ public class Preferences {
         properties.get(cat).put(coreClass, prop);
     }
 
+    public Collection<TransitionUI> getTransitions() {
+        return transitions;
+    }
+
+    public void addTransition(ICapsuleModelUI source,
+            ICapsuleModelUI target,
+            int targetSlotNumber) {
+        transitions.add(new TransitionUI(source, target, targetSlotNumber));
+    }
+
     public Properties getProperties(CategoryName cat,
             Class coreClass) throws UserBadDataError {
         register();
@@ -140,7 +150,6 @@ public class Preferences {
 //    public void registerPrototype(PrototypeUI p) {
 //        prototypes.put(p.getName(), p);
 //    }
-
 //    public void setPrototypes(List<PrototypeUI> protos) {
 //
 //    Map<String, PrototypeUI> newprotos = new WeakHashMap<String, PrototypeUI>();
@@ -166,8 +175,7 @@ public class Preferences {
 //        }
 //        return prototypes.values();
 //    }
-
-    public Class getCoreClass(Class <? extends IObjectModelUI> cl){
+    public Class getCoreClass(Class<? extends IObjectModelUI> cl) {
         return coreClasses.get(cl);
     }
 

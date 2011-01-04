@@ -16,12 +16,9 @@
  */
 package org.openmole.ui.ide.serializer;
 
-import java.util.Iterator;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.transition.Slot;
-import org.openmole.core.implementation.transition.Transition;
-import org.openmole.core.model.capsule.ICapsule;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
@@ -54,11 +51,11 @@ public class MoleMaker {
         while (capsule.intputSlots().size() < capsuleModel.getNbInputslots()) {
             capsule.addInputSlot(new Slot(capsule));
         }
-        if (capsuleModel.hasChild()) {
-            for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext();) {
-                new Transition((ICapsule) capsule, exploreCapsuleModel(child.next()));
-            }
-        }
+//        if (capsuleModel.hasChild()) {
+//            for (Iterator<ICapsuleModelUI> child = capsuleModel.getChilds().iterator(); child.hasNext();) {
+//                new Transition((ICapsule) capsule, exploreCapsuleModel(child.next()));
+//            }
+//        }
         return capsule;
     }
 

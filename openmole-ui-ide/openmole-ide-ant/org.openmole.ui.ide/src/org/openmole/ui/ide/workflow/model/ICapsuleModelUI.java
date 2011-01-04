@@ -31,12 +31,12 @@ public interface ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModel
     void defineAsStartingCapsule();
     void defineAsRegularCapsule();
     boolean isStartingCapsule();
-    void addTransition(ICapsuleModelUI tModel);
+   // void addTransition(ICapsuleModelUI tModel,int slotNumber);
     void addInputSlot();
     int getNbInputslots();
     boolean isSlotRemovable();
     boolean isSlotAddable();
     void removeInputSlot();
-    boolean hasChild();
-    Set<ICapsuleModelUI> getChilds();
+//    boolean hasChild();
+//    Set<ICapsuleModelUI> getChilds();
 }
