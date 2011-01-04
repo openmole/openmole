@@ -16,6 +16,8 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
@@ -29,6 +31,7 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
 public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
+    private Collection<TransitionUI> transitions = new ArrayList<TransitionUI>();
     private ICapsuleModelUI startingCapsule = CapsuleModelUI.EMPTY_CAPSULE_MODEL;
     private int nodeID = 0;
 
@@ -37,7 +40,7 @@ public class MoleSceneManager {
     }
 
     public void setStartingCapsule(ICapsuleModelUI startingCapsule) {
-        if (this.startingCapsule != CapsuleModelUI.EMPTY_CAPSULE_MODEL){
+        if (this.startingCapsule != CapsuleModelUI.EMPTY_CAPSULE_MODEL) {
             this.startingCapsule.defineAsRegularCapsule();
         }
         this.startingCapsule = startingCapsule;
@@ -48,7 +51,7 @@ public class MoleSceneManager {
         return startingCapsule;
     }
 
-    public Set<ICapsuleView> getCapsuleViews(){
+    public Set<ICapsuleView> getCapsuleViews() {
         return capsuleViews.values();
     }
 
@@ -67,6 +70,16 @@ public class MoleSceneManager {
 
     public void removeCapsuleView(ICapsuleView cv) {
         capsuleViews.remove(cv);
+    }
+
+    public Collection<TransitionUI> getTransitions() {
+        return transitions;
+    }
+
+    public void addTransition(ICapsuleModelUI source,
+            ICapsuleModelUI target,
+            int targetSlotNumber) {
+        transitions.add(new TransitionUI(source, target, targetSlotNumber));
     }
 
     public void printTaskC() {

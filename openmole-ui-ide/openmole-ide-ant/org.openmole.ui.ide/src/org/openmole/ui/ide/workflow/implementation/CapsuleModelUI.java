@@ -33,7 +33,6 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     private transient int nbInputSlots = 0;
     private boolean startingCapsule = false;
     private final static String category = "Task Tapsules";
-   // private Set<ICapsuleModelUI> connectedTo = new HashSet<ICapsuleModelUI>();
     private boolean containsTask = false;
 
     CapsuleModelUI() {
@@ -94,12 +93,6 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-//    @Override
-//    public void addTransition(ICapsuleModelUI taskmodel,
-//                                int slotNumber) {
-//        connectedTo.add(taskmodel);
-//    }
-
     @Override
     public void defineAsStartingCapsule() {
         nbInputSlots = 1;
@@ -115,14 +108,4 @@ public class CapsuleModelUI<T extends IGenericCapsule> extends ObjectModelUI imp
     public boolean isStartingCapsule() {
         return startingCapsule;
     }
-
-//    @Override
-//    public boolean hasChild() {
-//        return !connectedTo.isEmpty();
-//    }
-//
-//    @Override
-//    public Set getChilds() {
-//        return connectedTo;
-//    }
 }

@@ -44,13 +44,7 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     public String getName(){
         return name;
     }
-   // protected Class<? extends IGenericTask> coreTask = null;
-
-
-
-   // public GenericTaskModelUI(Properties...properties) {
-  //  }
-
+   
     @Override
     public Set<PrototypeUI> getPrototypesIn() {
         if (prototypesIn == null) prototypesIn = new HashSet<PrototypeUI>();
@@ -84,16 +78,4 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     public String getCategory() {
         return category;
     }
-
-   /* @Override
-    public Class <? extends IGenericTask> getCoreTaskClass() {
-        return this.coreTask;
-    }
-
-    @Override
-    public void setCoreTaskClass(Class <? extends IGenericTask> coreTask) {
-        this.coreTask = coreTask;
-    }*/
-
-
 }

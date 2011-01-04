@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
@@ -51,9 +52,11 @@ public class MoleSceneConverter implements Converter {
         for (Iterator<IMoleScene> itms = MoleScenesManager.getInstance().getMoleScenes().iterator(); itms.hasNext();) {
             int slotcount = 0;
 
+            IMoleScene molescene = itms.next();
+
             //Mole
             writer.startNode("molescene");
-            for (Iterator<ICapsuleView> itV = itms.next().getManager().getCapsuleViews().iterator(); itV.hasNext();) {
+            for (Iterator<ICapsuleView> itV = molescene.getManager().getCapsuleViews().iterator(); itV.hasNext();) {
                 ICapsuleView view = itV.next();
 
                 writer.startNode("capsule");
@@ -88,7 +91,7 @@ public class MoleSceneConverter implements Converter {
 
             //Transitions
             writer.startNode("transitions");
-            for (Iterator<TransitionUI> itT = Preferences.getInstance().getTransitions().iterator(); itT.hasNext();) {
+            for (Iterator<TransitionUI> itT = molescene.getManager().getTransitions().iterator(); itT.hasNext();) {
                 TransitionUI trans = itT.next();
                 writer.startNode("transition");
                 writer.addAttribute("source", String.valueOf(firstSlotIDMapping.get(trans.getSource()) + trans.getSource().getNbInputslots()));
@@ -105,6 +108,16 @@ public class MoleSceneConverter implements Converter {
             writer.startNode("task");
             writer.addAttribute("name", t.getName());
             writer.addAttribute("impl", t.getClass().toString());
+            for (Iterator<PrototypeUI> ipit = t.getPrototypesIn().iterator(); ipit.hasNext();) {
+                writer.startNode("iprototype");
+                writer.addAttribute("name", ipit.next().getName());
+                writer.endNode();
+            }
+            for (Iterator<PrototypeUI> opit = t.getPrototypesOut().iterator(); opit.hasNext();) {
+                writer.startNode("oprototype");
+                writer.addAttribute("name", opit.next().getName());
+                writer.endNode();
+            }
             writer.endNode();
         }
         writer.endNode();

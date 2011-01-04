@@ -307,7 +307,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
             MoleScene.this.createEdge(source, target);
             // getManager().getCapsuleView(source).getCapsuleModel().addTransition(getManager().getCapsuleView(target).getCapsuleModel(),0);
-            Preferences.getInstance().addTransition(getManager().getCapsuleView(source).getCapsuleModel(),
+            manager.addTransition(getManager().getCapsuleView(source).getCapsuleModel(),
                                                     getManager().getCapsuleView(target).getCapsuleModel(),
                                                     0);
         }
