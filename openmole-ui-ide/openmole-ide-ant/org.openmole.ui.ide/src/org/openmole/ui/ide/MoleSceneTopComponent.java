@@ -92,7 +92,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         moveButton.setSelected(false);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
-        detailedViewButton.addActionListener(new EnableTaskDetailedView(scene));
+        detailedViewButton.addActionListener(new EnableTaskDetailedView());
 
 
         JButton openXML = new JButton("Open");

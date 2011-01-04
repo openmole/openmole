@@ -14,36 +14,35 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 import javax.swing.AbstractButton;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
+import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class EnableTaskDetailedView implements ActionListener{
-
-    private MoleScene scene;
-
-    public EnableTaskDetailedView(MoleScene scene) {
-        this.scene = scene;
-    }
+public class EnableTaskDetailedView implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        AbstractButton button = (AbstractButton)ae.getSource();
-        scene.setDetailedView(button.isSelected());
-        for(ICapsuleView cv:scene.getManager().getCapsuleViews()){
-            cv.getConnectableWidget().setWidthHint();
-        }
-        scene.validate();
-        scene.refresh();
-    }
+        AbstractButton button = (AbstractButton) ae.getSource();
+        for (Iterator<IMoleScene> its = MoleScenesManager.getInstance().getMoleScenes().iterator(); its.hasNext();) {
+            MoleScene scene = (MoleScene) its.next();
 
+            scene.setDetailedView(button.isSelected());
+            for (ICapsuleView cv : scene.getManager().getCapsuleViews()) {
+                cv.getConnectableWidget().setWidthHint();
+            }
+            scene.validate();
+            scene.refresh();
+        }
+    }
 }

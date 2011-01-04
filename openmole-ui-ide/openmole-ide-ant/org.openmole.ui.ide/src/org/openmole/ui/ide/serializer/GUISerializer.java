@@ -44,7 +44,7 @@ public class GUISerializer {
         xstream.alias("oslot", org.openmole.core.implementation.transition.Slot.class);
     }
 
-    public void serialize(MoleSceneManager manager, String toFile) throws IOException {
+    public void serialize(String toFile) throws IOException {
         FileOutputStream fos = new FileOutputStream(toFile);
         xstream.registerConverter(new MoleSceneConverter());
         xstream.toXML(new OpenMole(), fos);

@@ -19,13 +19,8 @@ package org.openmole.ui.ide.workflow.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.implementation.mole.Mole;
-import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.serializer.MoleMaker;
+import org.openide.util.Exceptions;
 import org.openmole.ui.ide.serializer.GUISerializer;
-import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
  *
@@ -35,16 +30,10 @@ public class SaveXMLAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        Object obj = MoleScenesManager.getInstance().getCurrentObject();
-        if (obj instanceof MoleScene) {
-            System.out.println("MOLE TO BE SAVED");
-            try {
-                GUISerializer.getInstance().serialize( ((MoleScene) obj).getManager(), "/tmp/mole.xml");
-            } catch (IOException ex) {
-                MoleExceptionManagement.showException(ex);
-            }
-        } else {
-            System.out.println("TASK TAB");
+        try {
+            GUISerializer.getInstance().serialize("/tmp/mole.xml");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 }
