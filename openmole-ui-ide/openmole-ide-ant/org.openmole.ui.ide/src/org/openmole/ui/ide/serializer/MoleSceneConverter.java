@@ -21,6 +21,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,10 +29,10 @@ import java.util.Iterator;
 import java.util.Map;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 import org.openmole.ui.ide.workflow.implementation.TransitionUI;
+import org.openmole.ui.ide.workflow.implementation.UIFactory;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
@@ -56,12 +57,15 @@ public class MoleSceneConverter implements Converter {
 
             //Mole
             writer.startNode("molescene");
+                writer.addAttribute("name",molescene.getManager().getName());
             for (Iterator<ICapsuleView> itV = molescene.getManager().getCapsuleViews().iterator(); itV.hasNext();) {
                 ICapsuleView view = itV.next();
 
                 writer.startNode("capsule");
+
                 writer.addAttribute("start", view.getCapsuleModel().isStartingCapsule() ? "true" : "false");
-                writer.addAttribute("impl", Preferences.getInstance().getCoreClass(view.getCapsuleModel().getClass()).toString());
+                writer.addAttribute("x", String.valueOf(view.getConnectableWidget().getLocation().getX()));
+                writer.addAttribute("y", String.valueOf(view.getConnectableWidget().getLocation().getY()));
 
                 //Input slot
                 slotcount++;
@@ -136,7 +140,30 @@ public class MoleSceneConverter implements Converter {
 
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        System.out.println("+ " + reader.getNodeName());
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            System.out.println("++ " + reader.getNodeName());
+            if ("molescene".equals(reader.getNodeName())) {
+                MoleScene scene = new MoleScene();
+                scene.getManager().setName(reader.getAttribute("name"));
+                while (reader.hasMoreChildren()) {
+                    reader.moveDown();
+                    System.out.println("+++ " + reader.getNodeName());
+                    if ("capsule".equals(reader.getNodeName())) {
+                        System.out.println("CAPSULE");
+                        Point p = new Point();
+                        p.setLocation(Double.parseDouble(reader.getAttribute("x")), Double.parseDouble(reader.getAttribute("y")));
+                        UIFactory.getInstance().createCapsule(scene, p);
+                    }
+                    reader.moveUp();
+                }
+                MoleScenesManager.getInstance().display(scene);
+            }
+            reader.moveUp();
+        }
+        return new Object();
     }
 
     @Override

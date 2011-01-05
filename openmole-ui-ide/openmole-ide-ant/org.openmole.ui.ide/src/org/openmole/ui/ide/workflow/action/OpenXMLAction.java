@@ -19,25 +19,21 @@ package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.serializer.MoleMaker;
 import org.openmole.ui.ide.serializer.GUISerializer;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class OpenXMLAction  implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
         try {
-            IMole mole = (IMole) GUISerializer.getInstance().unserialize("/tmp/mole.xml");
-         //   MoleScene moleS = new MoleScene();
-           // moleS.build(mole);
-            MoleScenesManager.getInstance().addTab(MoleMaker.processToMoleScene(mole));
+            MoleScenesManager.getInstance().removeMoleScenes();
+            GUISerializer.getInstance().unserialize("/tmp/mole.xml");
         } catch (Throwable ex) {
             MoleExceptionManagement.showException(ex);
         }

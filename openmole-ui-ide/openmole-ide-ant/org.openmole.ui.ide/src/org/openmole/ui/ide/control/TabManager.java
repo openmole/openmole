@@ -32,6 +32,18 @@ public abstract class TabManager implements ITabManager {
     private JTabbedPane tabbedPane;
 
     @Override
+    public void removeTab(Object object){
+        tabbedPane.remove(tabMap.get(object));
+        tabMap.remove(object);
+    }
+
+    @Override
+    public void removeAllTabs(){
+        tabbedPane.removeAll();
+        tabMap.clear();
+    }
+
+    @Override
     public void display(Object displayed) {
         if (!tabMap.containsKey(displayed)) {
             addTab(displayed);

@@ -24,7 +24,7 @@ import org.openmole.ui.ide.serializer.GUISerializer;
 
 /**
  *
- * @author mathieu
+ * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class SaveXMLAction implements ActionListener {
 

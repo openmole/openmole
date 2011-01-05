@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.ide.control.task;
 
+import java.awt.Component;
 import java.io.IOException;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
@@ -105,6 +106,5 @@ public class TaskSettingsManager extends TabManager {
         }
         return instance;
     }
-
 
 }

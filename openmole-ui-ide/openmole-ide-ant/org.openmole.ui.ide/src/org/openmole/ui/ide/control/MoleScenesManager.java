@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.control;
 
 import java.util.ArrayList;
@@ -28,13 +27,22 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class MoleScenesManager extends TabManager{
+public class MoleScenesManager extends TabManager {
 
     private static MoleScenesManager instance = null;
-    
     private Collection<IMoleScene> moleScenes = new ArrayList<IMoleScene>();
-    private int count=1;
+    private int count = 1;
     private int nodeCounter = 0;
+
+    public void removeMoleScenes() {
+        moleScenes.clear();
+        removeAllTabs();
+    }
+
+    public void removeMoleScene(IMoleScene molescene) {
+        moleScenes.remove(molescene);
+        removeTab(molescene);
+    }
 
     public void incrementNodeName() {
         nodeCounter++;
@@ -44,16 +52,16 @@ public class MoleScenesManager extends TabManager{
         return "task" + nodeCounter;
     }
 
-    public void addMoleScene(IMoleScene ms){
+    public void addMoleScene(IMoleScene ms) {
         moleScenes.add(ms);
     }
 
-    public Collection<IMoleScene> getMoleScenes(){
+    public Collection<IMoleScene> getMoleScenes() {
         return moleScenes;
     }
 
-    public void setScenesMovable(boolean movable){
-        for(IMoleScene ms:moleScenes){
+    public void setScenesMovable(boolean movable) {
+        for (IMoleScene ms : moleScenes) {
             ms.setMovable(movable);
         }
     }
@@ -72,8 +80,15 @@ public class MoleScenesManager extends TabManager{
         JComponent myView = scene.createView();
         JScrollPane moleSceneScrollPane = new JScrollPane();
         moleSceneScrollPane.setViewportView(myView);
-
-        addMapping(displayed, moleSceneScrollPane,"Mole"+count);
-        count ++;
+        
+        String name;
+        if (scene.getManager().getName().equals("")) {
+            name = "Mole" + count;
+            count++;
+        } else {
+            name = scene.getManager().getName();
+        }
+        addMapping(displayed, moleSceneScrollPane, name);
+        scene.getManager().setName(name);
     }
 }

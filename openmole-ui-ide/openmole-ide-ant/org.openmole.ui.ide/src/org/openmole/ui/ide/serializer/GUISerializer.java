@@ -51,9 +51,8 @@ public class GUISerializer {
         fos.close();
     }
 
-    public IMole unserialize(String fromFile) throws FileNotFoundException, IOException {
-        IMole mole = (IMole) xstream.fromXML(new FileInputStream(fromFile));
-        return mole;
+    public void unserialize(String fromFile) throws FileNotFoundException, IOException {
+        xstream.fromXML(new FileInputStream(fromFile));
     }
 
     public static GUISerializer getInstance() {

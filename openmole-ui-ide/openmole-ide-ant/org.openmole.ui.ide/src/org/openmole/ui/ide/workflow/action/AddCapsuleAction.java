@@ -25,11 +25,11 @@ import org.openmole.ui.ide.workflow.implementation.UIFactory;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class AddTaskCapsuleAction implements ActionListener {
+public class AddCapsuleAction implements ActionListener {
 
     MoleScene moleScene;
 
-    public AddTaskCapsuleAction(MoleScene moleScene) {
+    public AddCapsuleAction(MoleScene moleScene) {
         this.moleScene = moleScene;
     }
 

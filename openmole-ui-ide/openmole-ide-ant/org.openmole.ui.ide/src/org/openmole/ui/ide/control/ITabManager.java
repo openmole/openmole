@@ -24,7 +24,9 @@ import java.awt.Component;
  * @author mathieu
  */
 public interface ITabManager {
-    public void display(Object displayed);
-    public void addTab(Object displayed);
-    public void addMapping(Object obj,Component comp,String name);
+    void removeTab(Object object);
+    void removeAllTabs();
+    void display(Object displayed);
+    void addTab(Object displayed);
+    void addMapping(Object obj,Component comp,String name);
 }

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.JMenuItem;
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.ui.ide.workflow.action.AddTaskCapsuleAction;
+import org.openmole.ui.ide.workflow.action.AddCapsuleAction;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
@@ -35,7 +35,7 @@ public class MoleSceneMenuProvider extends GenericMenuProvider {
         super();
 
         JMenuItem itemTCapsule = new JMenuItem("Add a Task Capsule");
-        itemTCapsule.addActionListener(new AddTaskCapsuleAction(moleScene));
+        itemTCapsule.addActionListener(new AddCapsuleAction(moleScene));
 
 
         items.add(itemTCapsule);

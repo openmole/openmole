@@ -34,9 +34,18 @@ public class MoleSceneManager {
     private Collection<TransitionUI> transitions = new ArrayList<TransitionUI>();
     private ICapsuleModelUI startingCapsule = CapsuleModelUI.EMPTY_CAPSULE_MODEL;
     private int nodeID = 0;
+    private String name = "";
 
     public String getNodeID() {
         return "node" + nodeID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setStartingCapsule(ICapsuleModelUI startingCapsule) {
