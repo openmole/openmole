@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.netbeans.api.visual.widget.Scene;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
@@ -64,8 +65,11 @@ public class MoleSceneConverter implements Converter {
                 writer.startNode("capsule");
 
                 writer.addAttribute("start", view.getCapsuleModel().isStartingCapsule() ? "true" : "false");
-                writer.addAttribute("x", String.valueOf(view.getConnectableWidget().getLocation().getX()));
-                writer.addAttribute("y", String.valueOf(view.getConnectableWidget().getLocation().getY()));
+
+                System.out.println("XX :"+view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getX());
+
+                writer.addAttribute("x", String.valueOf(view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getX()));
+                writer.addAttribute("y", String.valueOf(view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getY()));
 
                 //Input slot
                 slotcount++;
