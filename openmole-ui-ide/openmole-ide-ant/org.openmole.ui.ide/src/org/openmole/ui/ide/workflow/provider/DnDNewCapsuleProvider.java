@@ -45,8 +45,6 @@ public class DnDNewCapsuleProvider extends DnDProvider {
 
     @Override
     public void accept(Widget widget, Point point, Transferable transferable) {
-//    Widget w = UIFactory.getInstance().createCapsule(scene,
-//                                                         point).getConnectableWidget();
         UIFactory.getInstance().createCapsule(scene, point);
         scene.repaint();
         scene.revalidate();

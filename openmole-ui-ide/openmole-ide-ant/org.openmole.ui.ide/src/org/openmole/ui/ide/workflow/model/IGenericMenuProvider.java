@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.ide.workflow.model;
 
+import java.awt.Point;
 import java.util.Collection;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -27,6 +28,7 @@ import org.netbeans.api.visual.action.PopupMenuProvider;
  */
 public interface IGenericMenuProvider extends PopupMenuProvider {
 
-    public Collection<JMenuItem> getItems();
-    public Collection<JMenu> getMenus();
+    Collection<JMenuItem> getItems();
+    Collection<JMenu> getMenus();
+    Point getCurrentPoint();
 }

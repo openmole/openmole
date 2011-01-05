@@ -217,31 +217,14 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         if (tCapsule.task() != null) {
             if (!getNodes().contains(nodeID)) {
-                //  connectable = createTaskComposite(tCapsule, nodeID);
-                //  connectable = UIFactory.getInstance().createTaskComposite(this, tCapsule);
-                //  initConnectable(tCapsule, connectable);
             }
         } else {
             if (!getNodes().contains(nodeID)) {
-                /* if (nodeID.isEmpty()) {
-                connectable = createCapsule(nodeID);
-                } else {
-                connectable = createCapsule();
-                }*/
                 UIFactory.getInstance().createCapsule(this);
-                //   initConnectable(tCapsule, connectable);
             }
         }
     }
 
-    /*  private void initConnectable(IGenericTaskCapsule tCapsule,
-    IConnectable connectable) {
-    for (int i = 0; i < tCapsule.getIntputTransitionsSlots().size(); ++i) {
-    connectable.adjustInputSlotPosition();
-    connectable.adjustOutputSlotPosition();
-    }
-    connectable.setTaskCapsule(tCapsule);
-    }*/
     @Override
     public void refresh() {
         validate();

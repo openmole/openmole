@@ -31,8 +31,9 @@ import org.openmole.ui.ide.workflow.model.IGenericMenuProvider;
  */
 public class GenericMenuProvider implements IGenericMenuProvider {
 
-    Collection<JMenuItem> items = new ArrayList<JMenuItem>();
-    Collection<JMenu> menus = new ArrayList<JMenu>();
+    protected Collection<JMenuItem> items = new ArrayList<JMenuItem>();
+    protected Collection<JMenu> menus = new ArrayList<JMenu>();
+    private Point currentPoint;
 
     @Override
     public Collection<JMenuItem> getItems() {
@@ -45,7 +46,14 @@ public class GenericMenuProvider implements IGenericMenuProvider {
     }
 
     @Override
+    public Point getCurrentPoint() {
+        return currentPoint;
+    }
+
+    @Override
     public JPopupMenu getPopupMenu(Widget widget, Point point) {
+        currentPoint = point;
         return PopupMenuProviderFactory.fillPopupMenu(this);
     }
+
 }

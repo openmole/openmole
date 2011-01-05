@@ -16,10 +16,12 @@
  */
 package org.openmole.ui.ide.workflow.action;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.UIFactory;
+import org.openmole.ui.ide.workflow.provider.GenericMenuProvider;
 
 /**
  *
@@ -27,16 +29,19 @@ import org.openmole.ui.ide.workflow.implementation.UIFactory;
  */
 public class AddCapsuleAction implements ActionListener {
 
-    MoleScene moleScene;
+    private MoleScene moleScene;
+    private GenericMenuProvider provider;
 
-    public AddCapsuleAction(MoleScene moleScene) {
+    public AddCapsuleAction(MoleScene moleScene,
+                            GenericMenuProvider provider) {
         this.moleScene = moleScene;
+        this.provider = provider;
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
         UIFactory.getInstance().createCapsule(moleScene,
-                moleScene.getLocation());
+                provider.getCurrentPoint());
         moleScene.refresh();
     }
 }

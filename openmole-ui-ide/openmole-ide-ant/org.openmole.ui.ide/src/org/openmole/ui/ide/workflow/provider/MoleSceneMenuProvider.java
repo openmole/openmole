@@ -35,8 +35,7 @@ public class MoleSceneMenuProvider extends GenericMenuProvider {
         super();
 
         JMenuItem itemTCapsule = new JMenuItem("Add a Task Capsule");
-        itemTCapsule.addActionListener(new AddCapsuleAction(moleScene));
-
+        itemTCapsule.addActionListener(new AddCapsuleAction(moleScene,this));
 
         items.add(itemTCapsule);
     }
