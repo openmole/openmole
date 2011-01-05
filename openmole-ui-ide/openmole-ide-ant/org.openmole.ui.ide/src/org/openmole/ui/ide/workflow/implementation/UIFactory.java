@@ -41,7 +41,7 @@ public class UIFactory implements IUIFactory<Object> {
     public IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass,
             String taskName) throws UserBadDataError {
         try {
-            return Instanciator.instanciate(modelClass,taskName);
+            return Instanciator.instanciate(modelClass, taskName);
         } catch (IllegalArgumentException ex) {
             throw new UserBadDataError(ex);
         } catch (NoSuchMethodException ex) {
@@ -59,7 +59,7 @@ public class UIFactory implements IUIFactory<Object> {
         createCapsule(scene, new Point(0, 0));
     }
 
-    public void createCapsule(MoleScene scene,
+    public ICapsuleView createCapsule(MoleScene scene,
             Point locationPoint) {
         ICapsuleView obUI = null;
         try {
@@ -74,6 +74,7 @@ public class UIFactory implements IUIFactory<Object> {
         scene.initCapsuleAdd(obUI);
         scene.getManager().registerCapsuleView(obUI);
         scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
+        return obUI;
     }
 
     public static UIFactory getInstance() {

@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.netbeans.api.visual.widget.Scene;
 import org.openmole.ui.ide.control.MoleScenesManager;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
@@ -58,15 +59,13 @@ public class MoleSceneConverter implements Converter {
 
             //Mole
             writer.startNode("molescene");
-                writer.addAttribute("name",molescene.getManager().getName());
+            writer.addAttribute("name", molescene.getManager().getName());
             for (Iterator<ICapsuleView> itV = molescene.getManager().getCapsuleViews().iterator(); itV.hasNext();) {
                 ICapsuleView view = itV.next();
 
                 writer.startNode("capsule");
 
                 writer.addAttribute("start", view.getCapsuleModel().isStartingCapsule() ? "true" : "false");
-
-                System.out.println("XX :"+view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getX());
 
                 writer.addAttribute("x", String.valueOf(view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getX()));
                 writer.addAttribute("y", String.valueOf(view.getConnectableWidget().convertLocalToScene(view.getConnectableWidget().getLocation()).getY()));
@@ -146,12 +145,14 @@ public class MoleSceneConverter implements Converter {
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
 
         System.out.println("+ " + reader.getNodeName());
+        //Molescenes
         while (reader.hasMoreChildren()) {
             reader.moveDown();
             System.out.println("++ " + reader.getNodeName());
             if ("molescene".equals(reader.getNodeName())) {
                 MoleScene scene = new MoleScene();
                 scene.getManager().setName(reader.getAttribute("name"));
+                //Capsules
                 while (reader.hasMoreChildren()) {
                     reader.moveDown();
                     System.out.println("+++ " + reader.getNodeName());
@@ -159,13 +160,25 @@ public class MoleSceneConverter implements Converter {
                         System.out.println("CAPSULE");
                         Point p = new Point();
                         p.setLocation(Double.parseDouble(reader.getAttribute("x")), Double.parseDouble(reader.getAttribute("y")));
-                        UIFactory.getInstance().createCapsule(scene, p);
+                        ICapsuleView caps = UIFactory.getInstance().createCapsule(scene, p);
+                        // Slots
+                        int nbslots = 0;
+                        while (reader.hasMoreChildren()) {
+                            reader.moveDown();
+                            if ("islot".equals(reader.getNodeName())) {
+                                System.out.println("++++ " + reader.getNodeName());
+                                nbslots++;
+                            }
+                            reader.moveUp();
+                        }
+                        for(int i=1;i<nbslots;++i)
+                                caps.addInputSlot();
+                        reader.moveUp();
                     }
-                    reader.moveUp();
+                    MoleScenesManager.getInstance().display(scene);
                 }
-                MoleScenesManager.getInstance().display(scene);
+                reader.moveUp();
             }
-            reader.moveUp();
         }
         return new Object();
     }
