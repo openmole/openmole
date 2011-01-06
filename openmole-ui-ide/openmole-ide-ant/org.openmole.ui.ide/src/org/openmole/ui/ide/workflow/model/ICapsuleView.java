@@ -16,7 +16,9 @@
  */
 package org.openmole.ui.ide.workflow.model;
 
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.capsule.IGenericCapsule;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
 
 /**
@@ -24,6 +26,8 @@ import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public interface ICapsuleView {
+    void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError;
+    void encapsule(Class<? extends IGenericTask> coreTaskClass,String taskName) throws UserBadDataError;
     ICapsuleModelUI<IGenericCapsule> getCapsuleModel();
     void  addInputSlot();
     ConnectableWidget getConnectableWidget();

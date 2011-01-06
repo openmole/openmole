@@ -37,6 +37,7 @@ public class GUISerializer {
 
     public GUISerializer() {
         xstream = new XStream(new DomDriver());
+        xstream.registerConverter(new MoleSceneConverter());
         xstream.alias("openmole", OpenMole.class);
         xstream.alias("prototype", PrototypeUI.class);
         xstream.alias("capsule", org.openmole.core.implementation.capsule.Capsule.class);
@@ -46,13 +47,14 @@ public class GUISerializer {
 
     public void serialize(String toFile) throws IOException {
         FileOutputStream fos = new FileOutputStream(toFile);
-        xstream.registerConverter(new MoleSceneConverter());
         xstream.toXML(new OpenMole(), fos);
         fos.close();
     }
 
     public void unserialize(String fromFile) throws FileNotFoundException, IOException {
-        xstream.fromXML(new FileInputStream(fromFile));
+        FileInputStream fos = new FileInputStream(fromFile);
+        xstream.fromXML(fos);
+        fos.close();
     }
 
     public static GUISerializer getInstance() {

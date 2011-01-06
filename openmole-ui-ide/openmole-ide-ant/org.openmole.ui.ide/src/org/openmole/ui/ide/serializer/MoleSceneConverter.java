@@ -27,10 +27,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.netbeans.api.visual.widget.Scene;
+import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 import org.openmole.ui.ide.workflow.implementation.TransitionUI;
@@ -97,7 +99,6 @@ public class MoleSceneConverter implements Converter {
             }
 
             //Transitions
-            writer.startNode("transitions");
             for (Iterator<TransitionUI> itT = molescene.getManager().getTransitions().iterator(); itT.hasNext();) {
                 TransitionUI trans = itT.next();
                 writer.startNode("transition");
@@ -106,7 +107,6 @@ public class MoleSceneConverter implements Converter {
                 writer.endNode();
             }
             writer.endNode();
-            writer.endNode();
         }
         //Tasks
         writer.startNode("tasks");
@@ -114,7 +114,7 @@ public class MoleSceneConverter implements Converter {
             IGenericTaskModelUI t = itTM.next();
             writer.startNode("task");
             writer.addAttribute("name", t.getName());
-            writer.addAttribute("impl", t.getClass().toString());
+            writer.addAttribute("impl", Preferences.getInstance().getCoreClass(t.getClass()).getName());
             for (Iterator<PrototypeUI> ipit = t.getPrototypesIn().iterator(); ipit.hasNext();) {
                 writer.startNode("iprototype");
                 writer.addAttribute("name", ipit.next().getName());
@@ -143,6 +143,12 @@ public class MoleSceneConverter implements Converter {
 
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
+        Map<String, ICapsuleView> slots = new HashMap<String, ICapsuleView>();
+        Map<ICapsuleView, Integer> nbSlots = new HashMap<ICapsuleView, Integer>();
+        Map<String, Collection<ICapsuleView>> encapsulatedTasks = new HashMap<String, Collection<ICapsuleView>>();
+        Map<String, String> taskclasses = new HashMap<String, String>();
+        Collection<String> transitions = new ArrayList<String>();
+        Collection<String> tasks = new ArrayList<String>();
 
         System.out.println("+ " + reader.getNodeName());
         //Molescenes
@@ -165,19 +171,68 @@ public class MoleSceneConverter implements Converter {
                         int nbslots = 0;
                         while (reader.hasMoreChildren()) {
                             reader.moveDown();
-                            if ("islot".equals(reader.getNodeName())) {
+                            if ("islot".equals(reader.getNodeName()) || "oslot".equals(reader.getNodeName())) {
                                 System.out.println("++++ " + reader.getNodeName());
+                                slots.put(reader.getAttribute("id"), caps);
                                 nbslots++;
+                            } else if ("task".equals(reader.getNodeName())) {
+                                System.out.println("++++ " + reader.getNodeName());
+                                String n = reader.getAttribute("name");
+                                if (encapsulatedTasks.containsKey(n)) {
+                                    encapsulatedTasks.get(n).add(caps);
+                                } else {
+                                    Collection colCaps = new ArrayList();
+                                    colCaps.add(caps);
+                                    encapsulatedTasks.put(reader.getAttribute("name"), colCaps);
+                                }
                             }
+                            nbSlots.put(caps, nbslots - 1);
                             reader.moveUp();
                         }
-                        for(int i=1;i<nbslots;++i)
-                                caps.addInputSlot();
-                        reader.moveUp();
+                        for (int i = 2; i < nbslots; ++i) {
+                            caps.addInputSlot();
+                        }
+                        // reader.moveUp();
+                    } else if ("transition".equals(reader.getNodeName())) {
+                        System.out.println("in trans");
+                        transitions.add(reader.getAttribute("source"));
+                        transitions.add(reader.getAttribute("target"));
                     }
-                    MoleScenesManager.getInstance().display(scene);
+                    reader.moveUp();
                 }
+                for (Iterator<String> itt = transitions.iterator(); itt.hasNext();) {
+                    ICapsuleView source = slots.get(itt.next());
+                    ICapsuleView target = slots.get(itt.next());
+                    System.out.println("in trans  " + scene.getManager().getCapsuleViewID(source));
+                    System.out.println("in trans  " + scene.getManager().getCapsuleViewID(target));
+                    scene.getManager().addTransition(source.getCapsuleModel(),
+                            target.getCapsuleModel(),
+                            nbSlots.get(target));
+                    scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target));
+                }
+
+                MoleScenesManager.getInstance().display(scene);
                 reader.moveUp();
+            } else if ("tasks".equals(reader.getNodeName())) {
+                //Tasks
+                while (reader.hasMoreChildren()) {
+                    reader.moveDown();
+                    taskclasses.put(reader.getAttribute("name"), reader.getAttribute("impl"));
+                    reader.moveUp();
+                }
+            }
+        }
+        // Task encapsulation
+        for (Iterator<String> ittn = encapsulatedTasks.keySet().iterator(); ittn.hasNext();) {
+            String taskName = ittn.next();
+            try {
+                for (Iterator<ICapsuleView> itc = encapsulatedTasks.get(taskName).iterator();itc.hasNext();){
+                itc.next().encapsule((Class<? extends IGenericTask>) Class.forName(taskclasses.get(taskName)), taskName);
+                }
+            } catch (ClassNotFoundException ex) {
+                MoleExceptionManagement.showException(ex);
+            } catch (UserBadDataError ex) {
+                MoleExceptionManagement.showException(ex);
             }
         }
         return new Object();

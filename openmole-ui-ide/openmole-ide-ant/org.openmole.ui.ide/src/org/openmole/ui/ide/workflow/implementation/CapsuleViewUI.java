@@ -44,7 +44,6 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     private DnDAddPrototypeInstanceProvider dnDAddPrototypeInstanceProvider;
     private CapsuleMenuProvider taskCapsuleMenuProvider;
 
-    
     public CapsuleViewUI(MoleScene scene,
             ICapsuleModelUI tcm,
             Properties properties) {
@@ -72,10 +71,15 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
     }
 
+    @Override
     public void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError {
+        encapsule(coreTaskClass,MoleScenesManager.getInstance().getNodeName());
+    }
 
-        String taskName = MoleScenesManager.getInstance().getNodeName();
-        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass),taskName));
+    @Override
+    public void encapsule(Class<? extends IGenericTask> coreTaskClass,
+                          String taskName) throws UserBadDataError {
+        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass), taskName));
 
         properties = Preferences.getInstance().getProperties(CategoryName.TASK, coreTaskClass);
 
@@ -91,13 +95,13 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     }
 
     @Override
-    public void changeConnectableWidget(){
+    public void changeConnectableWidget() {
         connectableWidget.setBackgroundCol(getBackgroundColor());
         connectableWidget.setBorderCol(getBorderColor());
         connectableWidget.setBackgroundImaqe(getBackgroundImage());
         connectableWidget.setTaskModel(capsuleModel.getTaskModel());
     }
-    
+
     @Override
     public void addInputSlot() {
         capsuleModel.addInputSlot();

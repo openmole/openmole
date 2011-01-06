@@ -101,6 +101,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         setMovable(true);
         MoleScenesManager.getInstance().addMoleScene(this);
+
     }
 
     public void setDetailedView(boolean detailedView) {
