@@ -22,14 +22,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.scala-lang.scala</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
     </dependencies>
 

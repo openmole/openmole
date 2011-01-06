@@ -31,7 +31,7 @@ public class Application implements IApplication {
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
-        
+
         // Init options parsing
         String[] args = (String[]) context.getArguments().get("application.args");
         Option optionPluginsDir = OptionBuilder.withLongOpt("pluginsDir").withDescription("Add plugins directories (seperated by \",\")").hasArgs(1).withArgName("directories").isRequired(false).create("p");

@@ -98,7 +98,7 @@
         <lib.ca.umontreal.iro.ssj.version>2.3</lib.ca.umontreal.iro.ssj.version>
         <lib.gov.lbl.acs.colt.version>1.2</lib.gov.lbl.acs.colt.version>
         <lib.org.apache.commons.math.version>2.1</lib.org.apache.commons.math.version>
-        <lib.org.slf4j.version>1.6.0</lib.org.slf4j.version>
+        <lib.org.slf4j.version>1.6.1</lib.org.slf4j.version>
         <lib.ch.qos.logback.version>0.9.21</lib.ch.qos.logback.version>
 	<lib.net.java.dev.j3d.version>1.3.1</lib.net.java.dev.j3d.version>
 	<lib.org.processing.version>1.1</lib.org.processing.version>
@@ -109,7 +109,7 @@
 	<lib.org.nuiton.thirdparty.rengine.version>0.6-0</lib.org.nuiton.thirdparty.rengine.version>
 	<lib.org.nuiton.thirdparty.rserve.version>0.6-0</lib.org.nuiton.thirdparty.rserve.version>
 	<lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
-
+	<lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
         <import.packages>*</import.packages>

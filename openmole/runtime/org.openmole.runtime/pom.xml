@@ -98,7 +98,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.scala-lang.scala</artifactId>
+            <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
 	<dependency>

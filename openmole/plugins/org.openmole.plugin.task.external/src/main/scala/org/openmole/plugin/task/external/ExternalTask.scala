@@ -144,7 +144,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
     super.addInput(fileProt)
   }
 
-  def importFileInContext(v: IPrototype[File], fileName: String) = {
+  def importFileInContext(v: IPrototype[File], fileName: String): Unit = {
     outFileNames += ((v, fileName))
     addOutput(v)
   }
@@ -155,7 +155,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
     outFileNamesVar.put(v, varFileName)
   }
 
-  def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]) = {
+  def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]): Unit = {
     addOutput(v)
     outFileNamesFromVar += ((v, varFileName))
   }
