@@ -133,41 +133,47 @@ abstract class ExternalTask(name: String) extends Task(name) {
     return ret.toList
   }
 
-  def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]) = {
+  def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]): this.type = {
     inContextFileList += ((fileList, names))
     super.addInput(fileList)
     super.addInput(names)
+    this
   }
 
-  def exportFileFromContextAs(fileProt: IPrototype[File], name: String) = {
+  def exportFileFromContextAs(fileProt: IPrototype[File], name: String): this.type = {
     inContextFiles += ((fileProt, name))
     super.addInput(fileProt)
+    this
   }
 
-  def importFileInContext(v: IPrototype[File], fileName: String): Unit = {
+  def importFileInContext(v: IPrototype[File], fileName: String): this.type = {
     outFileNames += ((v, fileName))
     addOutput(v)
+    this
   }
 
-  def importFileAndFileNameInContext(v: IPrototype[File], varFileName: IPrototype[String], fileName: String) = {
-    importFileInContext(v, fileName);
+  def importFileAndFileNameInContext(v: IPrototype[File], varFileName: IPrototype[String], fileName: String): this.type = {
+    importFileInContext(v, fileName)
     addOutput(varFileName)
     outFileNamesVar.put(v, varFileName)
+    this
   }
 
-  def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]): Unit = {
+  def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]): this.type = {
     addOutput(v)
     outFileNamesFromVar += ((v, varFileName))
+    this
   }
 
-  def addInFile(file: File, name: String): Unit = {
+  def addInFile(file: File, name: String): this.type = {
     inFileNames.put(file, name)
+    this
   }
 
-  def addInFile(file: File): Unit =  addInFile(file, file.getName)
+  def addInFile(file: File): this.type =  addInFile(file, file.getName)
     
-  def addInFile(location: String): Unit = addInFile(new File(location))
+  def addInFile(location: String): this.type = addInFile(new File(location))
 
-  def addInFile(location: String, name: String): Unit =  addInFile(new File(location), name)
+  def addInFile(location: String, name: String): this.type =  addInFile(new File(location), name)
   
 }
