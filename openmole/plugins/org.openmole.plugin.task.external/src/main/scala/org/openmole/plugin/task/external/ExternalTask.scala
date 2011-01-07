@@ -130,7 +130,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
       })
 
-    return ret.toList
+    ret.toList
   }
 
   def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]): this.type = {
