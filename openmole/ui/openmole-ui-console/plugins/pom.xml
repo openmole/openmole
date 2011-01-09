@@ -273,6 +273,7 @@
 		<configuration>
 			<excludeTransitive>true</excludeTransitive>
 			<excludeScope>compile</excludeScope>
+			<!--<outputDirectory>${project.parent.build.directory}/openmole/openmole-plugins</outputDirectory>-->
 		</configuration>
                 <executions>
                     <execution>

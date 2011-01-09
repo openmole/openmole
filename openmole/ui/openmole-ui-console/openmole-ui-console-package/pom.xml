@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>openmole-ui-console</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.openmole.ui.console</groupId>
+    <artifactId>openmole-ui-console-package</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.ui.console</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ui.console</groupId>
+            <artifactId>plugins</artifactId>
+            <version>${project.version}</version>
+	    <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ui.console</groupId>
+            <artifactId>plugins-ui</artifactId>
+            <version>${project.version}</version>
+	    <type>pom</type>
+        </dependency>
+    </dependencies>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId} ${project.version}</name>
+    <description>Command line UI for OpenMole Package</description>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>pom</packaging>
+
+    <properties>
+        <package.directory>${project.build.directory}/openmole</package.directory>
+        <package.openmole.plugins.directory>${package.directory}/openmole-plugins/</package.openmole.plugins.directory>
+        <package.openmole.ui.plugins.directory>${package.directory}/openmole-plugins-ui/</package.openmole.ui.plugins.directory>
+    </properties>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                 <execution>
+                        <id>copy-openmole</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${package.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../org.openmole.ui.console/target/product/</directory>
+                                    <!--<includes>
+                                        <include>*</include>
+                                    </includes>-->
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+ 
+                 <execution>
+                        <id>copy-plugin</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../plugins/target/dependency/</directory>
+                                    <includes>
+                                        <include>*.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                  <execution>
+                        <id>copy-ui-plugin</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../plugins-ui/target/dependency/</directory>
+                                    <includes>
+                                        <include>*.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+
+
+
+
+
+
+
+
+

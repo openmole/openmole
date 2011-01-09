@@ -15,7 +15,8 @@
 
     <groupId>org.openmole.ui.console</groupId>
     <artifactId>plugins-ui</artifactId>
-
+    <version>0.3-SNAPSHOT</version>
+    
     <dependencies>
         <dependency>
             <groupId>org.openmole</groupId>
@@ -51,6 +52,7 @@
                 <configuration>
                     <excludeTransitive>true</excludeTransitive>
                     <excludeScope>compile</excludeScope>
+                    <!--<outputDirectory>${project.parent.build.directory}/openmole/openmole-pluginsi-ui</outputDirectory>-->
                 </configuration>
                 <executions>
                     <execution>

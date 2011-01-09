@@ -19,6 +19,7 @@
         <module>org.openmole.ui.console</module>
         <module>plugins</module>
         <module>plugins-ui</module>
+	<module>openmole-ui-console-package</module>
     </modules>
     
     <!-- ************************************************************* -->
@@ -33,10 +34,6 @@
     <!-- ************************************************************* -->
 
     <packaging>pom</packaging>
-
-    <properties>
-    </properties>
-
 
     <!--build>
         <plugins>
