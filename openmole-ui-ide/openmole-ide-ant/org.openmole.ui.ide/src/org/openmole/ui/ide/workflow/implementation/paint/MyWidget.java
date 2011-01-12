@@ -68,8 +68,8 @@ public class MyWidget extends Widget {
                 taskWidth,
                 ApplicationCustomize.TASK_CONTAINER_HEIGHT);
 
-        Rectangle widgetrect = new Rectangle(-8, -1,
-                taskWidth + 16,
+        Rectangle widgetrect = new Rectangle(-12, -1,
+                taskWidth + 24,
                 ApplicationCustomize.TASK_CONTAINER_HEIGHT + 2);
         bodyArea.setBounds(bodyrect);
         widgetArea.setBounds(widgetrect);
@@ -123,10 +123,10 @@ public class MyWidget extends Widget {
         return titleString;
     }
 
-    public int getTaskWidth() {
-        return taskWidth;
+    public int getWidgetWidth(){
+     return widgetArea.width;
     }
-
+    
     public void addTitle(String titleString) {
         titleArea = new Rectangle(0, 0,
                 taskWidth,

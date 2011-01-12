@@ -16,11 +16,6 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -38,10 +33,9 @@ import org.openmole.ui.ide.palette.Category.CategoryName;
 public class Preferences {
 
     private static Preferences instance = null;
-    private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.CAPSULE};
+    private CategoryName[] propertyTypes = {CategoryName.TASK, CategoryName.CAPSULE, CategoryName.PROTOTYPE_INSTANCE};
     private Map<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>> models = new HashMap<CategoryName, HierarchicalRegistry<Class<? extends IObjectModelUI>>>();
     private Map<CategoryName, Map<Class, Properties>> properties = new HashMap<CategoryName, Map<Class, Properties>>();
-    private Collection<Class> prototypeTypes = new ArrayList<Class>();
     private Map<Class<? extends IObjectModelUI>, Class> coreClasses = new WeakHashMap<Class<? extends IObjectModelUI>, Class>();
 
     public void clearModels() {
@@ -79,7 +73,6 @@ public class Preferences {
                 models.put(c, new HierarchicalRegistry<Class<? extends IObjectModelUI>>());
             }
         }
-
         coreClasses.put(modelClass, coreClass);
         models.get(cat).register(coreClass, modelClass);
     }
@@ -119,22 +112,6 @@ public class Preferences {
         }
     }
 
-    private void setPrototypeTypes() {
-        prototypeTypes.add(Integer.class);
-        prototypeTypes.add(Double.class);
-        prototypeTypes.add(BigInteger.class);
-        prototypeTypes.add(BigDecimal.class);
-        prototypeTypes.add(String.class);
-        prototypeTypes.add(File.class);
-    }
-
-    public Collection<Class> getPrototypeTypes() {
-        if (prototypeTypes.isEmpty()) {
-            setPrototypeTypes();
-        }
-        return prototypeTypes;
-    }
-
     public Class getCoreClass(Class<? extends IObjectModelUI> cl) {
         return coreClasses.get(cl);
     }
@@ -144,6 +121,11 @@ public class Preferences {
         return models.get(CategoryName.TASK).getAllRegistred();
     }
 
+    public Set<Class> getPrototypeTypeClasses() {
+        register();
+        return models.get(CategoryName.PROTOTYPE_INSTANCE).getAllRegistred();
+    }
+    
     public static Preferences getInstance() {
         if (instance == null) {
             instance = new Preferences();

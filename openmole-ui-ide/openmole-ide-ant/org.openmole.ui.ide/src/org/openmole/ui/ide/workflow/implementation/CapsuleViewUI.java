@@ -23,14 +23,13 @@ import org.netbeans.api.visual.layout.LayoutFactory;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
-import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
-import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeInstanceProvider;
+import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeProvider;
 import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
 
 /**
@@ -41,7 +40,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
     protected ConnectableWidget connectableWidget;
     protected ICapsuleModelUI capsuleModel;
-    private DnDAddPrototypeInstanceProvider dnDAddPrototypeInstanceProvider;
+    private DnDAddPrototypeProvider dnDAddPrototypeInstanceProvider;
     private CapsuleMenuProvider taskCapsuleMenuProvider;
 
     public CapsuleViewUI(MoleScene scene,
@@ -62,7 +61,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         addInputSlot();
         connectableWidget.adjustOutputSlotPosition();
 
-        dnDAddPrototypeInstanceProvider = new DnDAddPrototypeInstanceProvider(scene, this);
+        dnDAddPrototypeInstanceProvider = new DnDAddPrototypeProvider(scene, this);
 
         taskCapsuleMenuProvider = new CapsuleMenuProvider(scene, this);
         getActions().addAction(ActionFactory.createPopupMenuAction(taskCapsuleMenuProvider));
@@ -72,23 +71,18 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     }
 
     @Override
-    public void encapsule(Class<? extends IGenericTask> coreTaskClass) throws UserBadDataError {
-        encapsule(coreTaskClass,MoleScenesManager.getInstance().getNodeName());
-    }
+    public void encapsule(TaskUI taskUI) throws UserBadDataError {
+        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, taskUI.getType()), taskUI));
 
-    @Override
-    public void encapsule(Class<? extends IGenericTask> coreTaskClass,
-                          String taskName) throws UserBadDataError {
-        capsuleModel.setTaskModel(UIFactory.getInstance().createTaskModelInstance((Class<? extends IGenericTaskModelUI>) Preferences.getInstance().getModel(CategoryName.TASK, coreTaskClass), taskName));
 
-        properties = Preferences.getInstance().getProperties(CategoryName.TASK, coreTaskClass);
+        properties = Preferences.getInstance().getProperties(CategoryName.TASK, taskUI.getType());
 
         changeConnectableWidget();
 
         dnDAddPrototypeInstanceProvider.setEncapsulated(true);
 
         MoleScenesManager.getInstance().incrementNodeName();
-        connectableWidget.addTitle(taskName);
+        connectableWidget.addTitle(taskUI.getName());
 
         taskCapsuleMenuProvider.addTaskMenus();
         getActions().addAction(new TaskActions(capsuleModel.getTaskModel(), this));

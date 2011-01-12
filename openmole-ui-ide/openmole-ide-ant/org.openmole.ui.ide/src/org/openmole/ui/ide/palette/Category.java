@@ -38,7 +38,7 @@ public class Category{
         
         if (cat == CategoryName.TASK) return "task";
         else if(cat == CategoryName.CAPSULE) return "capsule";
-        else if(cat == CategoryName.PROTOTYPE_INSTANCE) return "prototype instance";
+        else if(cat == CategoryName.PROTOTYPE_INSTANCE) return "prototype";
         return "unknown string";
         }
     

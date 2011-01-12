@@ -17,34 +17,39 @@
 package org.openmole.ui.ide.palette;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.Collection;
 import org.openide.nodes.Node;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
+import org.openmole.ui.ide.workflow.implementation.TasksUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskChildren extends GenericChildren{
+public class TaskChildren extends GenericChildren {
 
     @Override
     protected java.util.List<Node> initCollection() {
-        Set<Class> businessClasses = Preferences.getInstance().getCoreTaskClasses();
 
-        ArrayList childrenNodes = new ArrayList(businessClasses.size());
-        for (Class bclass : businessClasses) {
-            System.out.println("CLASS: "+bclass);
-            childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,
-                                           bclass));
+        Collection<IEntityUI> tasks = TasksUI.getInstance().getAll();
+        ArrayList childrenNodes = new ArrayList(tasks.size());
+        for (IEntityUI task : tasks) {
+            try {
+                childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,
+                        task));
+            } catch (UserBadDataError ex) {
+                MoleExceptionManagement.showException(ex);
+            }
 
-        }        
+        }
         return childrenNodes;
     }
 
-    @Override
-    public void refreshNodes() {
-        System.out.println("refreshNodes");
-        refresh();
+        @Override
+        public void refreshNodes() {
+            refresh();
+        }
     }
-}

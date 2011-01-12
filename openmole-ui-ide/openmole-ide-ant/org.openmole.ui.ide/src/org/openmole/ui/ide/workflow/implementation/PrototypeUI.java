@@ -21,21 +21,9 @@ package org.openmole.ui.ide.workflow.implementation;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class PrototypeUI {
-
-    private String name;
-    private Class type;
+public class PrototypeUI extends EntityUI{
 
     public PrototypeUI(String name, Class type) {
-        this.name = name;
-        this.type = type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Class getType() {
-        return type;
+        super(name,type);
     }
 }

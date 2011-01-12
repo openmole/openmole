@@ -26,7 +26,6 @@ import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 public abstract class ObjectModelUI implements IObjectModelUI {
 
     private String modelGroup;
-    private Image img = null;
 
     @Override
     public void objectChanged(Object obj) {
@@ -42,17 +41,4 @@ public abstract class ObjectModelUI implements IObjectModelUI {
     public String getModelGroup() {
         return modelGroup;
     }
-    /*
-    @Override
-    public Image getIcon() {
-    if (img == null) {
-    loadIcon();
-    }
-    return img;
-    }
-
-    @Override
-    public void setIcon(Image img) {
-    this.img = img;
-    }*/
 }

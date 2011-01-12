@@ -45,10 +45,6 @@ public class PropertyManager {
         for (File f : actual.listFiles()) {
             Properties props = read(f.getPath());
             try {
-                Preferences.getInstance().registerProperties(cat,
-                                                             Class.forName(f.getName()),
-                                                             props);
-                
                 Preferences.getInstance().register(cat,
  		                                   Class.forName(f.getName()),
  		                                   props);

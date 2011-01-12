@@ -21,10 +21,14 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import org.openide.util.datatransfer.ExTransferable;
+import org.openmole.commons.exception.UserBadDataError;
 
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.palette.Category.CategoryName;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PropertyManager;
 
 /**
  *
@@ -32,26 +36,25 @@ import org.openmole.ui.ide.palette.Category.CategoryName;
  */
 public class TaskNode extends GenericNode {
 
-    private Class<? extends IGenericTask> coreTask;
+    private IEntityUI task;
 
     public TaskNode(DataFlavor key,
-                    Class<? extends IGenericTask> coreTask) {
-        super(key,CategoryName.TASK,coreTask);
-
-        this.coreTask = coreTask;
+                    IEntityUI task) throws UserBadDataError {
+        super(key,
+                Preferences.getInstance().getProperties(CategoryName.TASK, task.getType()).getProperty(PropertyManager.THUMB_IMG),
+                task.getName());
+        this.task = task;
     }
 
-     //DND start
     @Override
     public Transferable drag() throws IOException {
         ExTransferable retValue = ExTransferable.create( super.drag() );
         retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_DATA_FLAVOR) {
             @Override
             protected Object getData() throws IOException, UnsupportedFlavorException 
-            {return coreTask;}
+            {return task;}
             
         });
         return retValue;
     }
-    //DND end
 }

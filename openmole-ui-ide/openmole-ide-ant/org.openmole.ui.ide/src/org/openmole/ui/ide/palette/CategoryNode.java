@@ -30,6 +30,5 @@ public class CategoryNode  extends AbstractNode {
     public CategoryNode( ICategory category ) {
         super(category.getChildren(), Lookups.singleton(category) );
         setDisplayName(category.getName());
-        System.out.println("setDisplayName(): "+category.getName());
     }
 }

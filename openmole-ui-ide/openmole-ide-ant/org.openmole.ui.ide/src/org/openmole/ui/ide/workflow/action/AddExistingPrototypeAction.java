@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
 
 /**
  *
@@ -33,10 +34,10 @@ public class AddExistingPrototypeAction implements ActionListener {
     private CapsuleViewUI capsuleViewUI;
     private IOType type;
 
-    public AddExistingPrototypeAction(PrototypeUI prototype,
+    public AddExistingPrototypeAction(IEntityUI prototype,
                                 CapsuleViewUI capsuleViewUI,
                                 IOType type) {
-        this.prototype = prototype;
+        this.prototype = (PrototypeUI) prototype;
         this.capsuleViewUI = capsuleViewUI;
         this.type = type;
     }

@@ -17,11 +17,9 @@
 package org.openmole.ui.ide.dialog;
 
 import java.awt.Dialog;
-import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 
 /**
  *

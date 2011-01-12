@@ -24,8 +24,8 @@ import org.openmole.core.model.task.IGenericTask;
  */
 public class MoleTaskModelUI<T extends IGenericTask> extends GenericTaskModelUI {
 
-    public MoleTaskModelUI(String name) {
-        super(name);
+    public MoleTaskModelUI(TaskUI taskUI) {
+        super(taskUI);
     }
 
     @Override

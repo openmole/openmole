@@ -105,13 +105,6 @@ public class PaletteSupport {
         public void customize(ExTransferable exTransferable, Lookup lookup) {
             Node node = lookup.lookup(Node.class);
             final Image image = (Image) node.getIcon(BeanInfo.ICON_COLOR_16x16);
-           /* exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
-
-                @Override
-                protected Object getData() throws IOException, UnsupportedFlavorException {
-                    return image;
-                }
-            });*/
             exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
 
                 @Override

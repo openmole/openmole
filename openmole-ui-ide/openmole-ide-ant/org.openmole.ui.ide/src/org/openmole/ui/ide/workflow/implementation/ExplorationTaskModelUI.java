@@ -20,8 +20,8 @@ import org.openmole.core.model.task.IExplorationTask;
 
 public class ExplorationTaskModelUI<T extends IExplorationTask> extends GenericTaskModelUI {
 
-    public ExplorationTaskModelUI(String name) {
-        super(name);
+    public ExplorationTaskModelUI(TaskUI taskUI) {
+        super(taskUI);
     }
 
     @Override

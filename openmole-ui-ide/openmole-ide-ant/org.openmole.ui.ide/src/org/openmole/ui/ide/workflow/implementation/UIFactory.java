@@ -39,9 +39,9 @@ public class UIFactory implements IUIFactory<Object> {
 
     @Override
     public IGenericTaskModelUI createTaskModelInstance(Class<? extends IGenericTaskModelUI> modelClass,
-            String taskName) throws UserBadDataError {
+            TaskUI task) throws UserBadDataError {
         try {
-            return Instanciator.instanciate(modelClass, taskName);
+            return Instanciator.instanciate(modelClass, task);
         } catch (IllegalArgumentException ex) {
             throw new UserBadDataError(ex);
         } catch (NoSuchMethodException ex) {

@@ -23,28 +23,24 @@ import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.commons.exception.UserBadDataError;
 import java.awt.Point;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.commons.IOType;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
+import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 
 /**
  *
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class DnDAddPrototypeInstanceProvider extends DnDProvider {
+public class DnDAddPrototypeProvider extends DnDProvider {
 
     protected boolean encapsulated = false;
     protected CapsuleViewUI view;
-    protected MoleScene moleScene;
 
-    public DnDAddPrototypeInstanceProvider(MoleScene molescene,
+    public DnDAddPrototypeProvider(MoleScene molescene,
             CapsuleViewUI view) {
         super(molescene);
-        this.moleScene = molescene;
         this.view = view;
     }
 
@@ -55,7 +51,7 @@ public class DnDAddPrototypeInstanceProvider extends DnDProvider {
     @Override
     public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
         ConnectorState state = ConnectorState.REJECT;
-        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR)
+        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)
                 && encapsulated == true) {
             state = ConnectorState.ACCEPT;
         }
@@ -65,14 +61,12 @@ public class DnDAddPrototypeInstanceProvider extends DnDProvider {
     @Override
     public void accept(Widget widget, Point point, Transferable t) {
         try {
-            String inputValue = (String) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR);
-            if (point.x < view.getConnectableWidget().getTaskWidth() / 2) {
-                view.getCapsuleModel().getTaskModel().addPrototype(PrototypesUI.getInstance().getPrototype(inputValue), IOType.INPUT);
+            PrototypeUI proto = (PrototypeUI) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR);
+            if (point.x < view.getConnectableWidget().getWidgetWidth() / 2) {
+                view.getCapsuleModel().getTaskModel().addPrototype(proto, IOType.INPUT);
             } else {
-                view.getCapsuleModel().getTaskModel().addPrototype(PrototypesUI.getInstance().getPrototype(inputValue), IOType.OUTPUT);
+                view.getCapsuleModel().getTaskModel().addPrototype(proto, IOType.OUTPUT);
             }
-        } catch (UserBadDataError ex) {
-            MoleExceptionManagement.showException(ex);
         } catch (UnsupportedFlavorException ex) {
             MoleExceptionManagement.showException(ex);
         } catch (IOException ex) {

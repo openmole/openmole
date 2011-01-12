@@ -24,7 +24,6 @@ import org.openmole.core.implementation.capsule.ExplorationCapsule;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.task.IExplorationTask;
 import org.openmole.core.model.task.ITask;
-import org.openmole.plugin.task.groovy.GroovyTask;
 import org.openmole.ui.ide.workflow.implementation.Preferences;
 import org.openmole.ui.ide.workflow.implementation.TaskModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
@@ -74,7 +73,6 @@ public class CoreClassInstanciator {
                 throw new UserBadDataError("The task " + capsuleModelUI.getTaskModel().getClass().getCanonicalName() + " has no implementation");
             }
         } else {
-            System.out.println("++++++ ELSE ++++++");
             return new Capsule();
         }
 

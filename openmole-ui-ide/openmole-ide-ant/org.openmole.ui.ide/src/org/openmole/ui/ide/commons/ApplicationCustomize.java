@@ -21,9 +21,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.util.LinkedHashMap;
-import java.util.prefs.Preferences;
 import org.openide.util.ImageUtilities;
-import org.openmole.core.model.task.IGenericTask;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
+import org.openmole.ui.ide.workflow.implementation.TaskUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 
 /**
@@ -34,6 +35,7 @@ public class ApplicationCustomize {
 
     private static ApplicationCustomize instance = null;
     private LinkedHashMap<String, Color> colorMap = new LinkedHashMap<String, Color>();
+    private LinkedHashMap<String, Image> typeImageMap = new LinkedHashMap<String, Image>();
 
     public static final String TASK_HEADER_BACKGROUND_COLOR = "TASK_HEADER_BACKGROUND_COLOR";
     public static final String TASK_SELECTION_COLOR = "TASK_SELECTION_COLOR";
@@ -48,7 +50,7 @@ public class ApplicationCustomize {
     public static final int PANEL_WIDTH =  (int) (SCREEN_WIDTH * 0.8);
     public static final int PANEL_HEIGHT = (int) (SCREEN_HEIGHT * 0.8);
 
-    public static final int EXPANDED_TASK_CONTAINER_WIDTH = 350;
+    public static final int EXPANDED_TASK_CONTAINER_WIDTH = 200;
     public static final int TASK_CONTAINER_WIDTH = 80;
     public static final int TASK_CONTAINER_HEIGHT = 100;
     public static final int TASK_TITLE_WIDTH = TASK_CONTAINER_WIDTH;
@@ -61,35 +63,38 @@ public class ApplicationCustomize {
     public static final int DATA_TABLE_X_OFFSET = (int) (2 + TASK_CONTAINER_WIDTH * 0.1);
     public static final int DATA_TABLE_Y_OFFSET = (int) (TASK_CONTAINER_HEIGHT * 0.1 - 2);
 
-    public static final Image IMAGE_COLLAPSE = ImageUtilities.loadImage("resources/img/collapse.png");
-    public static final Image IMAGE_EXPAND = ImageUtilities.loadImage("resources/img/expand.png");
-    public static final Image IMAGE_INPUT_ARROW = ImageUtilities.loadImage("resources/img/inputArrow.png");
-    public static final Image IMAGE_OUTPUT_ARROW = ImageUtilities.loadImage("resources/img/outputArrow.png");
     public static final Image IMAGE_START_SLOT = ImageUtilities.loadImage("resources/img/startSlot.png");
     public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/img/inputSlot.png");
     public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/img/outputSlot.png");
     public static final Image IMAGE_TRANSITIONS = ImageUtilities.loadImage("resources/img/transitions.png");
-
+    
+    
     public static final int NB_MAX_SLOTS = 5;
 
-   // public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor();
-    public static final DataFlavor PROTOTYPE_DATA_INSTANCE_FLAVOR = new DataFlavor(Class.class, "Prototype instances" );
-    public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor( Class.class, "Prototypes" );
-    public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( IGenericTask.class, "Tasks" );
+    public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor(PrototypeUI.class, "Prototypes" );
+    public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( TaskUI.class, "Tasks" );
     public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ICapsuleModelUI.class, "Task capsules" );
 
     public static final String TASK_DEFAULT_PROPERTIES = "src/resources/task/default";
     
+    public static final Class CORE_CAPSULE_CLASS = org.openmole.core.implementation.capsule.Capsule.class;
+    
     public ApplicationCustomize() {
         setDefaultColors();
+        setDefaultTypeImages();
     }
 
 
-    private void loadFromPreferences(Preferences prefs) {
-        // TO DO: Implements preference mechanism
-        setDefaultColors();
+    private void setDefaultTypeImages(){
+        for(Class c : Preferences.getInstance().getPrototypeTypeClasses()){
+            typeImageMap.put(c.getSimpleName(),ImageUtilities.loadImage("resources/img/"+c.getSimpleName()+".png"));
+        }
     }
-
+    
+    public Image getTypeImage(String type){
+        return typeImageMap.get(type);
+    }
+    
     private void setDefaultColors() {
         colorMap.put(TASK_HEADER_BACKGROUND_COLOR, new Color(68,120,33));
         colorMap.put(TASK_SELECTION_COLOR, new Color(255, 100, 0));

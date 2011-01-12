@@ -19,10 +19,10 @@ package org.openmole.ui.ide.workflow.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.TaskUI;
 
 /**
  *
@@ -31,23 +31,21 @@ import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 public class AddTaskAction implements ActionListener {
 
     MoleScene moleScene;
-    Class<? extends IGenericTask> coreTaskClass;
+    TaskUI taskUI;
     private CapsuleViewUI capsuleView;
 
     public AddTaskAction(MoleScene moleScene,
             CapsuleViewUI capsuleView,
-           // Class<? extends IGenericTaskModelUI> taskClass) {
-            Class<? extends IGenericTask> coreTaskClass) {
+            TaskUI taskUI) {
         this.moleScene = moleScene;
         this.capsuleView = capsuleView;
-        this.coreTaskClass = coreTaskClass;
+        this.taskUI = taskUI;
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
         try {
-            //  capsuleView.encapsule(UIFactory.getInstance().createTaskModelInstance(taskClass));
-            capsuleView.encapsule(coreTaskClass);
+            capsuleView.encapsule(taskUI);
         } catch (UserBadDataError ex) {
             MoleExceptionManagement.showException(ex);
         }

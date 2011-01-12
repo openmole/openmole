@@ -25,8 +25,8 @@ import org.openmole.core.model.task.IGenericTask;
  */
 public class GroovyTaskModelUI <T extends IGenericTask> extends GenericTaskModelUI{
 
-    public GroovyTaskModelUI(String name) {
-        super(name);
+    public GroovyTaskModelUI(TaskUI taskUI) {
+        super(taskUI);
     }
 
     @Override

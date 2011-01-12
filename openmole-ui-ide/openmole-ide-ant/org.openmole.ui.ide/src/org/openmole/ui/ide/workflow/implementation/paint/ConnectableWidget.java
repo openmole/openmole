@@ -24,7 +24,6 @@ import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +108,7 @@ public class ConnectableWidget extends MyWidget {
     }
 
     public Point getOutputSlotPoint(int index) {
-        return new Point(taskWidth + 8,
+        return new Point(taskWidth + 12,
                 ApplicationCustomize.TASK_TITLE_HEIGHT + (outputDelta + 7) * (index + 1));
     }
 
@@ -125,23 +124,21 @@ public class ConnectableWidget extends MyWidget {
 
         for (int i = 0; i < capsuleModel.getNbInputslots(); ++i) {
             graphics.drawImage(capsuleModel.isStartingCapsule() ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT,
-                    -8,
+                    -12,
                     ApplicationCustomize.TASK_TITLE_HEIGHT + i * (inputDelta + 14) + inputDelta,
                     new Container());
         }
 
         graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
-                taskWidth - 8,
+                taskWidth - 5,
                 ApplicationCustomize.TASK_TITLE_HEIGHT + outputDelta,
                 new Container());
 
-        if (scene.isDetailedView()) {
-            if (taskModel != TaskModelUI.EMPTY_TASK_MODEL) {
-                graphics.drawLine(taskWidth / 2,
-                        ApplicationCustomize.TASK_TITLE_HEIGHT,
-                        taskWidth / 2,
-                        ApplicationCustomize.TASK_CONTAINER_HEIGHT);
-            }
+        if (taskModel != TaskModelUI.EMPTY_TASK_MODEL) {
+            graphics.drawLine(taskWidth / 2,
+                    ApplicationCustomize.TASK_TITLE_HEIGHT,
+                    taskWidth / 2,
+                    widgetArea.height - 3);
 
             graphics.setColor(new Color(0, 0, 0));
             int x = taskWidth / 2 + 9;
@@ -149,25 +146,28 @@ public class ConnectableWidget extends MyWidget {
             List<Set<PrototypeUI>> li = new ArrayList<Set<PrototypeUI>>();
             li.add(taskModel.getPrototypesIn());
             li.add(taskModel.getPrototypesOut());
-            int varlenght = 0;
+            int h = 0;
             for (Set<PrototypeUI> protoIO : li) {
                 int i = 0;
                 for (PrototypeUI proto : protoIO) {
                     String st = proto.getName();
                     if (st.length() > 10) {
-                        st = st.substring(0, 10).concat("...");
+                        st = st.substring(0, 8).concat("...");
                     }
-                    varlenght = st.length();
-                    st += " : " + proto.getType().getSimpleName();
+                    h = 35 + i * 22;
+                    graphics.drawImage(ApplicationCustomize.getInstance().getTypeImage(proto.getType().getSimpleName()),
+                            x - taskWidth / 2, h - 13,
+                            new Container());
                     AttributedString as = new AttributedString(st);
-                    as.addAttribute(TextAttribute.FOREGROUND, Color.GRAY, varlenght, st.length());
-                    graphics.drawString(as.getIterator(), x - taskWidth / 2, 35 + i * 15);
+                    if (scene.isDetailedView()) {
+                        graphics.drawString(as.getIterator(), x - taskWidth / 2 + 24, h);
+                    }
                     i++;
                 }
                 x += taskWidth / 2 - 1;
             }
 
-            int newH = Math.max(taskModel.getPrototypesIn().size(), taskModel.getPrototypesOut().size()) * 15 + 45;
+            int newH = Math.max(taskModel.getPrototypesIn().size(), taskModel.getPrototypesOut().size()) * 22 + 45;
             int delta = bodyArea.height - newH;
             if (delta < 0) {
                 bodyArea.setSize(bodyArea.width, newH);

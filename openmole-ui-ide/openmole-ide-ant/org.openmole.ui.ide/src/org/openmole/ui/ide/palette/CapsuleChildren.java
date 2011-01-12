@@ -18,7 +18,9 @@ package org.openmole.ui.ide.palette;
 
 import java.util.ArrayList;
 import org.openide.nodes.Node;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
 
 /**
  *
@@ -29,7 +31,11 @@ public class CapsuleChildren extends GenericChildren {
     @Override
     protected java.util.List<Node> initCollection() {
         ArrayList childrenNodes = new ArrayList(1);
+        try {
             childrenNodes.add(new CapsuleNode(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR));
+        } catch (UserBadDataError ex) {
+            MoleExceptionManagement.showException(ex);
+        }
     return childrenNodes;
     }
 

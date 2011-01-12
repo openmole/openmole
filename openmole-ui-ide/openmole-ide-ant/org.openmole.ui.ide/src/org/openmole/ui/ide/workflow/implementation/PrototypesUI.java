@@ -17,54 +17,12 @@
 
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import org.openmole.commons.exception.UserBadDataError;
-
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class PrototypesUI {
-    private Map<String, PrototypeUI> prototypes = new WeakHashMap<String, PrototypeUI>();
+public class PrototypesUI extends ContainerUI {
     private static PrototypesUI instance = null;
-
-
-    public void registerPrototype(PrototypeUI p) {
-        prototypes.put(p.getName(), p);
-    }
-
-    public void setPrototypes(List<PrototypeUI> protos) {
-
-    Map<String, PrototypeUI> newprotos = new WeakHashMap<String, PrototypeUI>();
-        for (PrototypeUI p : protos){
-            newprotos.put(p.getName(),p);
-        }
-        prototypes = newprotos;
-    }
-
-    public PrototypeUI getPrototype(String st) throws UserBadDataError {
-        if (prototypes.containsKey(st)) {
-            return prototypes.get(st);
-        } else {
-            throw new UserBadDataError("The prototype " + st + " doest not exist.");
-        }
-    }
-
-    public Collection<PrototypeUI> getPrototypes() {
-        if (prototypes.isEmpty()) {
-            prototypes.put("protoInteger", new PrototypeUI("protoInteger", BigInteger.class));
-            prototypes.put("protoBigDecimal", new PrototypeUI("protoBigDecimal", BigDecimal.class));
-            prototypes.put("protoFile", new PrototypeUI("protoFile", File.class));
-        }
-        return prototypes.values();
-    }
-
 
     public static PrototypesUI getInstance() {
         if (instance == null) {

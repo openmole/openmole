@@ -22,7 +22,6 @@
         <file name="GoTo_hidden"/>
         <file name="Profile_hidden"/>
         <file name="Help_hidden"/>
-        <folder name="Window_hidden"/>
     </folder>
     <folder name="Windows2">
         <folder name="Components">

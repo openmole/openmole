@@ -18,21 +18,17 @@ package org.openmole.ui.ide.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -42,54 +38,57 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
-import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
-import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
 
 /**
  *
  * @author mathieu leclaire <mathieu.leclaire@openmole.org>
  */
-public class PrototypeManagementPanel extends javax.swing.JPanel implements ListSelectionListener,java.awt.event.ActionListener {
+public class ManagementPanel extends javax.swing.JPanel implements ListSelectionListener, java.awt.event.ActionListener {
 
     private static final String updateString = "Update";
     private static final String removeString = "Remove";
-    private DefaultListModel prototypeListModel;
+    private DefaultListModel listModel;
     private JTextField nameField;
     private JList list;
     private JButton upButton;
     private JButton removeButton;
     private ButtonGroup typeButtonGroup;
     private HashMap<String, ButtonModel> buttonModelMap = new HashMap();
+    IManager manager;
 
-    public PrototypeManagementPanel() {
-
+    public ManagementPanel(IManager manager) {
         super(new BorderLayout());
-        prototypeListModel = new DefaultListModel();
+        this.manager = manager;
 
-        for (PrototypeUI p : PrototypesUI.getInstance().getPrototypes()) {
-            prototypeListModel.addElement(p);
+        listModel = new DefaultListModel();
+
+        for (IEntityUI e : manager.getContainer().getAll()) {
+            System.out.println("add " + e.getName());
+            listModel.addElement(e);
         }
 
-        list = new JList(prototypeListModel);
+        list = new JList(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
         list.addListSelectionListener(this);
-        list.setCellRenderer(new MyCellRenderer());
+        list.setCellRenderer(new CellRenderer());
         JScrollPane listScrollPane = new JScrollPane(list);
 
         nameField = new JTextField(10);
         nameField.addActionListener(new AddButtonListener());
-        if (!PrototypesUI.getInstance().getPrototypes().isEmpty())
-            nameField.setText(PrototypesUI.getInstance().getPrototypes().iterator().next().getName());
+        if (!manager.getContainer().getAll().isEmpty()) {
+            nameField.setText(manager.getContainer().getAll().iterator().next().getName());
+        }
 
-        //Create the update prototype button.
+        //Create the update entity button.
         upButton = new JButton(updateString);
         upButton.setActionCommand(updateString);
         upButton.addActionListener(new AddButtonListener());
 
-        //Create the remove prototype button.
+        //Create the remove entity button.
         removeButton = new JButton(removeString);
         removeButton.setActionCommand(removeString);
         removeButton.addActionListener(new RemoveButtonListener());
@@ -97,13 +96,12 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         typeButtonGroup = new ButtonGroup();
         JPanel typePanel = new JPanel();
         typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.Y_AXIS));
-       // typePanel.setLayout(new BorderLayout());
 
-        for (Class c : Preferences.getInstance().getPrototypeTypes()) {
+        for (Class c : manager.getClassTypes()) {
             JRadioButton radio = new JRadioButton(c.getSimpleName());
             radio.setActionCommand(c.getCanonicalName());
             typeButtonGroup.add(radio);
-            typePanel.add(radio,BorderLayout.WEST);
+            typePanel.add(radio, BorderLayout.WEST);
             radio.setSelected(true);
             buttonModelMap.put(c.getCanonicalName(), radio.getModel());
         }
@@ -114,20 +112,15 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         namePane.add(removeButton);
 
         JPanel controlPane = new JPanel();
-      //  controlPane.setLayout(new BoxLayout(controlPane, BoxLayout.Y_AXIS));
-    //    controlPane.setLayout(new BorderLayout());
-        GridLayout lay = new GridLayout(3,1,0,0); 
-        
+        GridLayout lay = new GridLayout(3, 1, 0, 0);
+
         controlPane.add(namePane);
         controlPane.add(typePanel);
 
-    //    add(controlPane, BorderLayout.PAGE_START);
-    //    add(listScrollPane, BorderLayout.CENTER);
         add(controlPane, BorderLayout.NORTH);
         add(new JSeparator(), BorderLayout.CENTER);
         add(listScrollPane, BorderLayout.SOUTH);
         controlPane.setLayout(lay);
-     //   setSize(250, 400);
     }
 
     /**
@@ -136,9 +129,9 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!list.isSelectionEmpty()) {
-            PrototypeUI proto = (PrototypeUI) prototypeListModel.get(list.getSelectedIndex());
-            nameField.setText(proto.getName());
-            typeButtonGroup.setSelected(buttonModelMap.get(proto.getType().getCanonicalName()), true);
+            IEntityUI en = (IEntityUI) listModel.get(list.getSelectedIndex());
+            nameField.setText(en.getName());
+            typeButtonGroup.setSelected(buttonModelMap.get(en.getType().getCanonicalName()), true);
         }
     }
 
@@ -147,7 +140,7 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    class MyCellRenderer extends DefaultListCellRenderer {
+    class CellRenderer extends DefaultListCellRenderer {
 
         @Override
         public Component getListCellRendererComponent(JList list,
@@ -156,8 +149,8 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
                 boolean iss, // is the cell selected
                 boolean chf) {
             super.getListCellRendererComponent(list, value, index, iss, chf);
-            PrototypeUI proto = (PrototypeUI) value;
-            setText(proto.getName() + " - " + proto.getType().getSimpleName());
+            IEntityUI en = (IEntityUI) value;
+            setText(en.getName() + " :: " + en.getType().getSimpleName());
             return this;
         }
     }
@@ -165,76 +158,84 @@ public class PrototypeManagementPanel extends javax.swing.JPanel implements List
     class AddButtonListener implements ActionListener {
 
         /**
-         * Action linked to the adding of a new prototype
+         * Action linked to the adding of a new entity
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-            PrototypeUI proto = exists(nameField.getText());
-            if (proto != null) {
-                update(proto);
-            } else if (!nameField.getText().equals("")) {
+            IEntityUI entity = null;
+            try {
+                entity = exists(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
+            } catch (ClassNotFoundException ex) {
+                MoleExceptionManagement.giveInformation("The type " + typeButtonGroup.getSelection().getActionCommand() + " does not exist.");
+            }
+            if (entity == null) {
                 try {
-                    PrototypeUI newproto = new PrototypeUI(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
-                    prototypeListModel.addElement(newproto);
-                    list.setSelectedIndex(prototypeListModel.getSize());
-                    PrototypesUI.getInstance().registerPrototype(newproto);
-                    nameField.setText("");
+                    IEntityUI newentity = manager.getEntityInstance(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
+                    addEntity(newentity);
                 } catch (ClassNotFoundException ex) {
                     MoleExceptionManagement.showException(ex);
                 }
             }
+            nameField.setText("");
+            list.clearSelection();
         }
     }
-    
-        /**
-         * Action linked to the removing of an existing prototype
-         */
+
+    /**
+     * Action linked to the removing of an existing entity
+     */
     class RemoveButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            PrototypeUI proto = exists(nameField.getText());
-            if (proto != null) {
-                System.out.println(" ---------- ROMOVE");
-                prototypeListModel.removeElement(proto);
-
-                List li = Arrays.asList(prototypeListModel.toArray());
-                PrototypesUI.getInstance().setPrototypes(li);
-                System.out.println("SIze .."+PrototypesUI.getInstance().getPrototypes().size());
-                nameField.setText("");
+            IEntityUI entity = null;
+            try {
+                entity = exists(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand()));
+            } catch (ClassNotFoundException ex) {
+                MoleExceptionManagement.giveInformation("The type " + typeButtonGroup.getSelection().getActionCommand() + " does not exist.");
             }
+
+            if (entity != null) {
+                listModel.removeElement(entity);
+                try {
+                    manager.getContainer().removeEntity(entity);
+                } catch (UserBadDataError ex) {
+                    MoleExceptionManagement.showException("The entity " + entity.getName() + " does not exist.");
+                }
+            } else {
+                MoleExceptionManagement.giveInformation("The entity " + nameField.getText() + " does not exist and then has not been removed");
+            }
+            if (listModel.isEmpty()) {
+                nameField.setText("");
+            } else {
+                list.setSelectedIndex(0);
+            }
+
         }
     }
 
-    /**
-     * Updates a prototype, in the imutable way: removing the prototype and
-     * creating a new one with the new features.
-     * 
-     * @param proto, the prototype to be updated
-     */
-    private void update(PrototypeUI proto) {
-        try {
-            prototypeListModel.removeElement(proto);
-            prototypeListModel.addElement(new PrototypeUI(nameField.getText(), Class.forName(typeButtonGroup.getSelection().getActionCommand())));
-            list.setSelectedIndex(prototypeListModel.getSize());
-        } catch (ClassNotFoundException ex) {
-            MoleExceptionManagement.showException(ex);
-        }
+    private void addEntity(IEntityUI entity) {
+        listModel.addElement(entity);
+        list.setSelectedIndex(listModel.getSize());
+        System.out.println("RESISTER " + entity.getName());
+        System.out.println("RESISTER " + manager.getContainer());
+        manager.getContainer().register(entity);
+        System.out.println("RESISTER " + manager.getContainer().getAll().size());
     }
 
     /**
-     * Search within a prototype still exists.
+     * Search within a entity still exists.
      * 
      * @param testedName, the name of the protype to be searched.
-     * @return the PrototypeUI wether found and null otherwise
+     * @return the IEntityUI wether found and null otherwise
      */
-    private PrototypeUI exists(String testedName) {
-        Enumeration<?> en = prototypeListModel.elements();
-        PrototypeUI proto = null;
+    private IEntityUI exists(String testedName, Class type) {
+        Enumeration<?> en = listModel.elements();
+        IEntityUI entity = null;
         while (en.hasMoreElements()) {
-            proto = ((PrototypeUI) en.nextElement());
-            if (proto.getName().equals(testedName)) {
-                return proto;
+            entity = ((IEntityUI) en.nextElement());
+            if (entity.getName().equals(testedName) && entity.getType().equals(type)) {
+                return entity;
             }
         }
         return null;

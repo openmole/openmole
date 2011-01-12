@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.palette;
 
 import java.awt.datatransfer.DataFlavor;
@@ -22,27 +21,31 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import org.openide.util.datatransfer.ExTransferable;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PropertyManager;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class CapsuleNode extends GenericNode{
+public class CapsuleNode extends GenericNode {
 
-    public CapsuleNode(DataFlavor key) {
+    public CapsuleNode(DataFlavor key) throws UserBadDataError {
         super(key,
-              CategoryName.CAPSULE,
-              org.openmole.core.implementation.capsule.Capsule.class);
+                Preferences.getInstance().getProperties(CategoryName.CAPSULE, ApplicationCustomize.CORE_CAPSULE_CLASS).getProperty(PropertyManager.THUMB_IMG),
+                Preferences.getInstance().getProperties(CategoryName.CAPSULE, ApplicationCustomize.CORE_CAPSULE_CLASS).getProperty(PropertyManager.NAME));
+
     }
 
-     //DND start
     @Override
     public Transferable drag() throws IOException {
-        ExTransferable retValue = ExTransferable.create( super.drag() );
-        retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR) {
+        ExTransferable retValue = ExTransferable.create(super.drag());
+        retValue.put(new ExTransferable.Single(ApplicationCustomize.TASK_CAPSULE_DATA_FLAVOR) {
+
             @Override
             protected Object getData() throws IOException, UnsupportedFlavorException {
                 return CapsuleModelUI.class;
@@ -50,6 +53,4 @@ public class CapsuleNode extends GenericNode{
         });
         return retValue;
     }
-    //DND end
 }
-

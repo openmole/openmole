@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.openide.nodes.Node;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
+import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI;
 
 /**
@@ -32,11 +34,15 @@ public class PrototypeInstanceChildren extends GenericChildren {
 
     @Override
     protected List<Node> initCollection() {
-        Collection<PrototypeUI> prototypes = PrototypesUI.getInstance().getPrototypes();
+        Collection<IEntityUI> prototypes = PrototypesUI.getInstance().getAll();
 
         ArrayList childrenNodes = new ArrayList(prototypes.size());
-        for (PrototypeUI proto : prototypes) {
-            childrenNodes.add(new PrototypeInstanceNode(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR, proto.getName()));
+        for (IEntityUI proto : prototypes) {
+            try {
+                childrenNodes.add(new PrototypeInstanceNode(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR, proto));
+            } catch (UserBadDataError ex) {
+                MoleExceptionManagement.showException(ex);
+            }
         }
         return childrenNodes;
     }

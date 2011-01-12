@@ -20,35 +20,37 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
 import org.openide.util.datatransfer.ExTransferable;
-import org.openide.util.lookup.Lookups;
+import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.workflow.implementation.IEntityUI;
+import org.openmole.ui.ide.workflow.implementation.Preferences;
+import org.openmole.ui.ide.workflow.implementation.PropertyManager;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class PrototypeInstanceNode extends AbstractNode {
-        String proto;
+public class PrototypeInstanceNode extends GenericNode {
+
+    IEntityUI prototype;
 
     public PrototypeInstanceNode(DataFlavor key,
-                                 String proto) {
-        super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-        this.proto = proto;
-        setName(proto);
+            IEntityUI prototype) throws UserBadDataError {
+        super(key, Preferences.getInstance().getProperties(Category.CategoryName.PROTOTYPE_INSTANCE,prototype.getType()).getProperty(PropertyManager.THUMB_IMG), prototype.getName());
+        this.prototype = prototype;
     }
 
- //DND start
+    //DND start
     @Override
     public Transferable drag() throws IOException {
-        ExTransferable retValue = ExTransferable.create( super.drag() );
-        //add the 'data' into the Transferable
-        retValue.put( new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_INSTANCE_FLAVOR) {
+        ExTransferable retValue = ExTransferable.create(super.drag());
+        retValue.put(new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) {
+
             @Override
-            protected Object getData() throws IOException, UnsupportedFlavorException
-            {return proto;}
+            protected Object getData() throws IOException, UnsupportedFlavorException {
+                return prototype;
+            }
         });
         return retValue;
     }

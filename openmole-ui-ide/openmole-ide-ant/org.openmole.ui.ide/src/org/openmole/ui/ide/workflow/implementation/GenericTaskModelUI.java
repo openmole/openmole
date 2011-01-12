@@ -34,15 +34,20 @@ public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectM
     private Set<PrototypeUI> prototypesIn;
     private Set<PrototypeUI> prototypesOut;
     private final static String category = "Tasks";
-    String name;
+    TaskUI taskUI;
 
-    public GenericTaskModelUI(String name) {
-        this.name = name;
+    public GenericTaskModelUI(TaskUI taskUI) {
+        this.taskUI = taskUI;
     }
 
     @Override
+    public Class getType(){
+        return taskUI.getType();
+    }
+    
+    @Override
     public String getName(){
-        return name;
+        return taskUI.getName();
     }
    
     @Override

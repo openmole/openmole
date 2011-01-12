@@ -23,11 +23,11 @@ import java.io.IOException;
 import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.TaskUI;
 
 /**
  *
@@ -55,7 +55,7 @@ public class DnDNewTaskProvider extends DnDProvider {
     @Override
     public void accept(Widget widget, Point point, Transferable transferable) {
         try {
-            capsuleView.encapsule((Class<? extends IGenericTask>) transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR));
+            capsuleView.encapsule((TaskUI) transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR));
             scene.repaint();
             scene.revalidate();
         } catch (UnsupportedFlavorException ex) {

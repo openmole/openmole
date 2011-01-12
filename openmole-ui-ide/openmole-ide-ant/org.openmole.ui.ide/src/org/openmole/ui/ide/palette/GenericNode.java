@@ -21,11 +21,6 @@ import java.awt.datatransfer.DataFlavor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
-import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.palette.Category.CategoryName;
-import org.openmole.ui.ide.workflow.implementation.Preferences;
-import org.openmole.ui.ide.workflow.implementation.PropertyManager;
 
 /**
  *
@@ -35,16 +30,12 @@ public class GenericNode extends AbstractNode {
 
     protected  DataFlavor dataFlavor;
 
-    public GenericNode(DataFlavor key,
-                       CategoryName type,
-                       Class coreClass) {
+         public GenericNode(DataFlavor key,
+                       String iconPath,
+                       String iconName) {
         super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-        try {
             this.dataFlavor = key;
-            setIconBaseWithExtension(Preferences.getInstance().getProperties(type, coreClass).getProperty(PropertyManager.THUMB_IMG));
-            setName(Preferences.getInstance().getProperties(type, coreClass).getProperty(PropertyManager.NAME));
-        } catch (UserBadDataError ex) {
-            MoleExceptionManagement.showException(ex);
-        }
+            setIconBaseWithExtension(iconPath);
+            setName(iconName);
     }
 }

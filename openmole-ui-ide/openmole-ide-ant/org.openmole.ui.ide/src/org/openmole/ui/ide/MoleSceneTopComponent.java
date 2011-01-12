@@ -41,11 +41,13 @@ import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.control.TabManager;
 import org.openmole.ui.ide.control.task.TaskSettingsManager;
-import org.openmole.ui.ide.dialog.PrototypeManagementPanel;
+import org.openmole.ui.ide.dialog.ManagementPanel;
+import org.openmole.ui.ide.dialog.PrototypeManager;
+import org.openmole.ui.ide.dialog.TaskManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.palette.PaletteSupport;
 import org.openmole.ui.ide.workflow.action.AddMoleSceneAction;
-import org.openmole.ui.ide.workflow.action.ManagePrototypeAction;
+import org.openmole.ui.ide.workflow.action.ManageEntityAction;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
 import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
 import org.openmole.ui.ide.workflow.action.OpenXMLAction;
@@ -61,7 +63,6 @@ public final class MoleSceneTopComponent extends TopComponent {
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
-    private PrototypeManagementPanel prototypeManagement;
     
     private JToolBar toolBar = new JToolBar("SSSE");
     /** path to the icon used by the component and its open action */
@@ -84,9 +85,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         associateLookup(new AbstractLookup(ic));
         ic.add(palette);
 
-        prototypeManagement = new PrototypeManagementPanel();
-        prototypeManagement.setVisible(true);
-
+        
         JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
         moveButton.addActionListener(new MoveOrDrawTransitionAction());
         moveButton.setSelected(false);
@@ -102,7 +101,10 @@ public final class MoleSceneTopComponent extends TopComponent {
         saveXML.addActionListener(new SaveXMLAction());
 
         JButton newPrototypeButton = new JButton("Prototypes");
-        newPrototypeButton.addActionListener(new ManagePrototypeAction(prototypeManagement, this));
+        newPrototypeButton.addActionListener(new ManageEntityAction(new PrototypeManager()));
+
+        JButton newTaskButton = new JButton("Tasks");
+        newTaskButton.addActionListener(new ManageEntityAction(new TaskManager()));
 
         JButton newMoleButton = new JButton("New Mole");
         newMoleButton.addActionListener(new AddMoleSceneAction());
@@ -114,12 +116,12 @@ public final class MoleSceneTopComponent extends TopComponent {
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);
+        toolBar.add(newTaskButton);
         toolBar.add(newMoleButton);
         add(toolBar, java.awt.BorderLayout.NORTH);
     }
 
     public void refreshPalette() {
-
         ic.remove(palette);
         palette = PaletteSupport.createPalette();
         ic.add(palette);
