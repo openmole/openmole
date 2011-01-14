@@ -102,7 +102,7 @@ object ReplicaCatalog {
           }
         }
       })*/
-    defrag(objRepo)
+    if(objRepo.exists) defrag(objRepo)
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
   }
    
