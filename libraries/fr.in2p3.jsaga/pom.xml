@@ -71,4 +71,5 @@
 	<embed-dep>*;scope=provided</embed-dep>
         <bundle.classpath>{maven-dependencies},.</bundle.classpath>
     </properties>
+
 </project>
