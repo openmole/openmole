@@ -28,6 +28,7 @@ import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 
 class CSVFileProfiler(file: File) extends Profiler {
 
+  file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
 
   def this(moleExecution: IMoleExecution, file: File) {
