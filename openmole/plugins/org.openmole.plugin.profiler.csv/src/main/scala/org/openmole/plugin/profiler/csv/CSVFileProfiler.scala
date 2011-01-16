@@ -38,7 +38,10 @@ class CSVFileProfiler(file: File) extends Profiler {
   
   def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
 
-  override def moleJobFinished(moleJob: IMoleJob) =  writer.writeNext(toColumns(moleJob))
+  override def moleJobFinished(moleJob: IMoleJob) =  {
+    writer.writeNext(toColumns(moleJob))
+    writer.flush
+  }
 
   override def moleExecutionFinished = writer.close
 
