@@ -60,11 +60,11 @@ public class MoleScenesManager extends TabManager {
         return moleScenes;
     }
 
-    public void setScenesMovable(boolean movable) {
-        for (IMoleScene ms : moleScenes) {
-            ms.setMovable(movable);
-        }
-    }
+//    public void setScenesMovable(boolean movable) {
+//        for (IMoleScene ms : moleScenes) {
+//            ms.setMovable(movable);
+//        }
+//    }
 
     public static MoleScenesManager getInstance() {
         if (instance == null) {

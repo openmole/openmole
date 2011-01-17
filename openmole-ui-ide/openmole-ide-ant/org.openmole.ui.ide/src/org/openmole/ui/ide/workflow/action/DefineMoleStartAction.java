@@ -18,6 +18,7 @@ package org.openmole.ui.ide.workflow.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 
@@ -28,17 +29,17 @@ import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 public class DefineMoleStartAction implements ActionListener {
 
     final MoleScene moleScene;
-    final ICapsuleModelUI capsuleModel;
+    final CapsuleViewUI capsuleView;
 
     public DefineMoleStartAction(MoleScene moleScene,
-            ICapsuleModelUI cm) {
+            CapsuleViewUI cv) {
         this.moleScene = moleScene;
-        this.capsuleModel = cm;
+        this.capsuleView = cv;
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        capsuleModel.defineAsStartingCapsule();
-        moleScene.getManager().setStartingCapsule(capsuleModel);
+        capsuleView.defineAsStartingCapsule();
+        moleScene.getManager().setStartingCapsule(capsuleView);
     }
 }

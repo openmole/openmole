@@ -11,17 +11,11 @@
         </folder>
     </folder>
     <folder name="Menu">
-        <file name="File_hidden"/>
-        <file name="Edit_hidden"/>
-        <file name="View_hidden"/>
-        <file name="Source_hidden"/>
-        <file name="Refactoring_hidden"/>
-        <file name="Projects_hidden"/>
-        <file name="Versioning_hidden"/>
-        <file name="Tools_hidden"/>
-        <file name="GoTo_hidden"/>
-        <file name="Profile_hidden"/>
-        <file name="Help_hidden"/>
+        <folder name="Window">
+            <file name="MoleSceneAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ui-ide-openmolegui-MoleSceneAction.instance"/>
+            </file>
+        </folder>
     </folder>
     <folder name="Windows2">
         <folder name="Components">
@@ -32,14 +26,5 @@
                 <file name="MoleSceneTopComponent.wstcref" url="MoleSceneTopComponentWstcref.xml"/>
             </folder>
         </folder>
-    </folder>
-    <folder name="Toolbars">
-        <file name="Build_hidden"/>
-        <file name="Snapshot_hidden"/>
-        <file name="Clipboard_hidden"/>
-        <file name="File_hidden"/>
-        <file name="Memory_hidden"/>
-        <file name="UndoRedo_hidden"/>
-        <file name="QuickSearch_hidden"/>
     </folder>
 </filesystem>

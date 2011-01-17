@@ -21,12 +21,15 @@ import org.openmole.ui.ide.workflow.provider.CapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.model.IObjectModelUI;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.palette.Category.CategoryName;
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.MyWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget;
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeProvider;
@@ -58,8 +61,11 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         setLayout(LayoutFactory.createVerticalFlowLayout());
         addChild(connectableWidget);
 
+        //Default input slot
         addInputSlot();
-        connectableWidget.adjustOutputSlotPosition();
+
+        //Default output slot
+        connectableWidget.addOutputSlot(new OSlotWidget(scene));
 
         dnDAddPrototypeInstanceProvider = new DnDAddPrototypeProvider(scene, this);
 
@@ -68,6 +74,17 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(scene, this)));
         getActions().addAction(ActionFactory.createAcceptAction(dnDAddPrototypeInstanceProvider));
 
+    }
+    public void defineAsRegularCapsule(){
+        capsuleModel.defineAsRegularCapsule();
+        connectableWidget.clearInputSlots();
+        connectableWidget.addInputSlot(new ISlotWidget(scene,1,false));
+    }
+
+    public void defineAsStartingCapsule(){
+        capsuleModel.defineAsStartingCapsule();
+        connectableWidget.clearInputSlots();
+        connectableWidget.addInputSlot(new ISlotWidget(scene,1,true));
     }
 
     @Override
@@ -99,7 +116,9 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     @Override
     public void addInputSlot() {
         capsuleModel.addInputSlot();
-        connectableWidget.adjustInputSlotPosition();
+        ISlotWidget im = new ISlotWidget(scene, getCapsuleModel().getNbInputslots(),capsuleModel.isStartingCapsule() ? true : false);
+        getConnectableWidget().addInputSlot(im);
+        scene.refresh();
     }
 
     @Override

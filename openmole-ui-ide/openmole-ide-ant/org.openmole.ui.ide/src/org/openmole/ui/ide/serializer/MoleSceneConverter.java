@@ -36,7 +36,7 @@ import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskUI;
 import org.openmole.ui.ide.workflow.implementation.TransitionUI;
 import org.openmole.ui.ide.workflow.implementation.UIFactory;
-import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
@@ -47,7 +47,8 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class MoleSceneConverter implements Converter {
 
     Collection<IGenericTaskModelUI> taskModels = new HashSet<IGenericTaskModelUI>();
-    private Map<ICapsuleModelUI, Integer> firstSlotIDMapping = new HashMap<ICapsuleModelUI, Integer>();
+    private Map<ICapsuleView,Integer> firstSlotID = new HashMap<ICapsuleView, Integer>();
+    private Map<ISlotWidget,Integer> iSlotMapping = new HashMap<ISlotWidget, Integer>();
 
     @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
@@ -67,9 +68,9 @@ public class MoleSceneConverter implements Converter {
 
             //Input slot
             slotcount++;
-            firstSlotIDMapping.put(view.getCapsuleModel(), slotcount);
-            for (int is = 0; is < view.getCapsuleModel().getNbInputslots(); is++) {
-
+            firstSlotID.put(view, slotcount);
+            for (ISlotWidget iw : view.getConnectableWidget().getIslots()) {
+                iSlotMapping.put(iw,slotcount);
                 writer.startNode("islot");
                 writer.addAttribute("id", String.valueOf(slotcount));
                 writer.endNode();
@@ -108,11 +109,10 @@ public class MoleSceneConverter implements Converter {
 
 
         //Transitions
-        for (Iterator<TransitionUI> itT = molescene.getManager().getTransitions().iterator(); itT.hasNext();) {
-            TransitionUI trans = itT.next();
+        for (TransitionUI trans : molescene.getManager().getTransitions()) {
             writer.startNode("transition");
-            writer.addAttribute("source", String.valueOf(firstSlotIDMapping.get(trans.getSource()) + trans.getSource().getNbInputslots()));
-            writer.addAttribute("target", String.valueOf(firstSlotIDMapping.get(trans.getTarget()) + trans.getTargetSlotNumber()));
+            writer.addAttribute("source", String.valueOf(firstSlotID.get(trans.getSource()) + trans.getSource().getCapsuleModel().getNbInputslots()));
+            writer.addAttribute("target", String.valueOf(iSlotMapping.get(trans.getTarget())));
             writer.endNode();
         }
 
@@ -170,12 +170,12 @@ public class MoleSceneConverter implements Converter {
                     reader.moveUp();
                 }
             } else if ("transition".equals(reader.getNodeName())) {
-                ICapsuleView source = slots.get(reader.getAttribute("source"));
-                ICapsuleView target = slots.get(reader.getAttribute("target"));
-                scene.getManager().addTransition(source.getCapsuleModel(),
-                        target.getCapsuleModel(),
-                        nbSlots.get(target));
-                scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target));
+//                ICapsuleView source = slots.get(reader.getAttribute("source"));
+//                ICapsuleView target = slots.get(reader.getAttribute("target"));
+//                scene.getManager().addTransition(source.getCapsuleModel(),
+//                        target.getCapsuleModel(),
+//                        nbSlots.get(target));
+//                scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target));
             }
             reader.moveUp();
         }

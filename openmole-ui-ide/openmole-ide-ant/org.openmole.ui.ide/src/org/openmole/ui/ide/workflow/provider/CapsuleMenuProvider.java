@@ -92,7 +92,7 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
         itIS.addActionListener(new AddInputAction(capsuleView));
         JMenuItem itR = new JMenuItem("Remove");
         JMenuItem itStart = new JMenuItem("Define as starting capsule");
-        itStart.addActionListener(new DefineMoleStartAction(scene, capsuleView.getCapsuleModel()));
+        itStart.addActionListener(new DefineMoleStartAction(scene, capsuleView));
 
         items.add(itIS);
         items.add(itR);

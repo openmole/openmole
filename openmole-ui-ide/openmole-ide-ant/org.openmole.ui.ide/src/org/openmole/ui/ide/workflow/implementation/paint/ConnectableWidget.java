@@ -29,7 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.netbeans.api.visual.action.ActionFactory;
+import org.netbeans.api.visual.action.TwoStateHoverProvider;
+import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.anchor.Anchor;
+import org.netbeans.api.visual.widget.ImageWidget;
+import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
@@ -43,11 +47,11 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  */
 public class ConnectableWidget extends MyWidget {
 
-    private int inputDelta = 0;
-    private int outputDelta = 0;
     private IGenericTaskModelUI<IGenericTask> taskModel = TaskModelUI.EMPTY_TASK_MODEL;
-    private ICapsuleModelUI capsuleModel;
+    List<ISlotWidget> islots = new ArrayList<ISlotWidget>();
+    OSlotWidget oslot;
 
+    //private WidgetAction mouseHoverAction = ActionFactory.createHoverAction(new ImageHoverProvider());
     public ConnectableWidget(MoleScene scene,
             ICapsuleModelUI capsuleModel,
             Color backgroundCol,
@@ -58,7 +62,6 @@ public class ConnectableWidget extends MyWidget {
                 borderCol,
                 img);
         this.borderCol = borderCol;
-        this.capsuleModel = capsuleModel;
     }
 
     public ConnectableWidget(MoleScene scene,
@@ -78,38 +81,28 @@ public class ConnectableWidget extends MyWidget {
 
     public void setDetailedView() {
         setWidthHint();
+        oslot.setDetailedView(taskWidth);
     }
 
-    public void adjustInputSlotPosition() {
-        inputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - capsuleModel.getNbInputslots() * 14) / (capsuleModel.getNbInputslots() + 1);
-        repaint();
+    public void addInputSlot(ISlotWidget iw) {
+        islots.add(iw);
+        addChild(iw);
     }
 
-    public void adjustOutputSlotPosition() {
-        outputDelta = (int) (ApplicationCustomize.TASK_CONTAINER_HEIGHT - ApplicationCustomize.TASK_TITLE_HEIGHT - 14) / 2;
-        repaint();
+    public List<ISlotWidget> getIslots() {
+        return islots;
     }
 
-    public Anchor getInputSlotAnchor(int index) {
-        return new MyAnchor(this,
-                IOType.INPUT,
-                index);
+    public void addOutputSlot(OSlotWidget ow) {
+        addChild(ow);
+        oslot = ow;
     }
 
-    public Anchor getOutputSlotAnchor(int index) {
-        return new MyAnchor(this,
-                IOType.OUTPUT,
-                index);
-    }
-
-    public Point getInputSlotPoint(int index) {
-        return new Point(0,
-                ApplicationCustomize.TASK_TITLE_HEIGHT + (inputDelta + 7) * (index + 1));
-    }
-
-    public Point getOutputSlotPoint(int index) {
-        return new Point(taskWidth + 12,
-                ApplicationCustomize.TASK_TITLE_HEIGHT + (outputDelta + 7) * (index + 1));
+    public void clearInputSlots() {
+        for (ImageWidget iw : islots) {
+            removeChild(iw);
+        }
+        islots.clear();
     }
 
     @Override
@@ -117,22 +110,9 @@ public class ConnectableWidget extends MyWidget {
         super.paintWidget();
         Graphics2D graphics = getGraphics();
 
-        adjustInputSlotPosition();
         graphics.setColor(borderCol);
         BasicStroke stroke = new BasicStroke(1.3f, 1, 1);
         graphics.draw(stroke.createStrokedShape(bodyArea));
-
-        for (int i = 0; i < capsuleModel.getNbInputslots(); ++i) {
-            graphics.drawImage(capsuleModel.isStartingCapsule() ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT,
-                    -12,
-                    ApplicationCustomize.TASK_TITLE_HEIGHT + i * (inputDelta + 14) + inputDelta,
-                    new Container());
-        }
-
-        graphics.drawImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT,
-                taskWidth - 5,
-                ApplicationCustomize.TASK_TITLE_HEIGHT + outputDelta,
-                new Container());
 
         if (taskModel != TaskModelUI.EMPTY_TASK_MODEL) {
             graphics.drawLine(taskWidth / 2,

@@ -86,9 +86,9 @@ public final class MoleSceneTopComponent extends TopComponent {
         ic.add(palette);
 
         
-        JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
-        moveButton.addActionListener(new MoveOrDrawTransitionAction());
-        moveButton.setSelected(false);
+//        JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
+//        moveButton.addActionListener(new MoveOrDrawTransitionAction());
+//        moveButton.setSelected(false);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedView());
@@ -112,7 +112,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         toolBar.add(openXML);
         toolBar.add(saveXML);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(moveButton);
+       // toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);

@@ -31,6 +31,7 @@ import org.netbeans.api.visual.action.ConnectorState;
 import org.netbeans.api.visual.action.ReconnectProvider;
 import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.anchor.AnchorShape;
+import org.netbeans.api.visual.anchor.PointShape;
 import org.netbeans.api.visual.graph.GraphScene;
 import org.netbeans.api.visual.graph.layout.GraphLayout;
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory;
@@ -56,7 +57,10 @@ import org.openmole.ui.ide.workflow.model.ICapsuleModelUI;
 import org.openmole.ui.ide.workflow.provider.DnDNewCapsuleProvider;
 import scala.Option;
 import org.openmole.core.model.mole.IMole;
-import org.openmole.ui.ide.workflow.model.IObjectViewUI;
+import org.openmole.ui.ide.commons.IOType;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.SlotAnchor;
 
 /**
  *
@@ -68,40 +72,40 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     public static final String CONNECT = "connect";
     public static final String RECONNECT = "connect";
     private MoleSceneManager manager = new MoleSceneManager();
-    private LayerWidget taskLayer = new LayerWidget(this);
-    private LayerWidget taskCapsuleLayer = new LayerWidget(this);
-    private LayerWidget taskCompositeLayer = new LayerWidget(this);
+    private LayerWidget capsuleLayer = new LayerWidget(this);
     private LayerWidget connectLayer = new LayerWidget(this);
-    private LayerWidget currentLayer = null;
+    private LayerWidget slotLayer = new LayerWidget(this);
     private Widget obUI = null;
     private int nbEdges = 0;
-    private WidgetAction connectAction = ActionFactory.createConnectAction(connectLayer, new MoleSceneConnectProvider());
+    //private WidgetAction connectAction = ActionFactory.createConnectAction(connectLayer, new MoleSceneConnectProvider());
+    private WidgetAction connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider());
     private WidgetAction reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider());
     private WidgetAction moveAction = ActionFactory.createMoveAction();
     private boolean detailedView = false;
+    private int currentSlotIndex = 0;
+    private String currentEdge = "";
 
     public MoleScene() {
         super();
-        addChild(taskCapsuleLayer);
-        addChild(taskLayer);
-        addChild(taskCompositeLayer);
+        addChild(capsuleLayer);
         addChild(connectLayer);
 
         setPreferredSize(new Dimension((int) (ApplicationCustomize.SCREEN_WIDTH * 0.8), (int) (ApplicationCustomize.SCREEN_HEIGHT * 0.8)));
         // view = createView();
         getActions().addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)));
         //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskLayer));
-        //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskCapsuleLayer));
+       // getActions().addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer));
         // getActions().addAction(ActionFactory.createZoomAction());
         //  getActions().addAction(ActionFactory.createPanAction());
 
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewCapsuleProvider(this)));
 
-        //getActions().addAction(ActionFactory.createAcceptAction(new DnDProvider(this)));
-
-        setMovable(true);
+        setActiveTool(CONNECT);
         MoleScenesManager.getInstance().addMoleScene(this);
+    }
 
+    public LayerWidget getSlotLayer() {
+        return slotLayer;
     }
 
     public void setDetailedView(boolean detailedView) {
@@ -130,12 +134,16 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     }
 
     @Override
-    protected Widget attachNodeWidget(String n) {
+    public void initCapsuleAdd(ICapsuleView w) {
+        obUI = (Widget) w;
+    }
 
-        currentLayer.addChild(obUI);
+    @Override
+    protected Widget attachNodeWidget(String n) {
+        capsuleLayer.addChild(obUI);
         obUI.createActions(CONNECT).addAction(connectAction);
+        obUI.createActions(CONNECT).addAction(moveAction);
         obUI.getActions().addAction(createObjectHoverAction());
-        //obUI.getActions ().addAction (createSelectAction());
         return obUI;
     }
 
@@ -143,26 +151,27 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     protected Widget attachEdgeWidget(String e) {
         ConnectionWidget connectionWidget = new ConnectionWidget(this);
         connectLayer.addChild(connectionWidget);
-        connectionWidget.createActions(RECONNECT).addAction(reconnectAction);
 
-        // connectionWidget.setRouter (RouterFactory.createOrthogonalSearchRouter(connectLayer));
+        connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG);
+        connectionWidget.getActions().addAction(createObjectHoverAction());
+        connectionWidget.getActions().addAction(createSelectAction());
+        connectionWidget.getActions().addAction(reconnectAction);
 
-        //   connectionWidget.setRoutingPolicy(ConnectionWidget.RoutingPolicy.ALWAYS_ROUTE);
+        currentEdge = e;
         return connectionWidget;
     }
 
     @Override
     protected void attachEdgeSourceAnchor(String edge, String oldSourceNode, String sourceNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        // cw.setSourceAnchor(((ICapsuleView) (findWidget(sourceNode))).getConnectableWidget().getOutputSlotAnchor(0));
-
-        cw.setSourceAnchor(((ICapsuleView) findWidget(sourceNode)).getConnectableWidget().getOutputSlotAnchor(0));
+        cw.setSourceAnchor(new SlotAnchor((CapsuleViewUI) findWidget(sourceNode), 1, IOType.OUTPUT));
         cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
     }
 
     @Override
     protected void attachEdgeTargetAnchor(String edge, String oldTargetNode, String targetNode) {
-        ((ConnectionWidget) findWidget(edge)).setTargetAnchor(((ICapsuleView) findWidget(targetNode)).getConnectableWidget().getInputSlotAnchor(0));
+        ((ConnectionWidget) findWidget(edge)).setTargetAnchor(new SlotAnchor(((CapsuleViewUI) findWidget(targetNode)), this.currentSlotIndex, IOType.INPUT));
+
     }
 
     @Override
@@ -232,29 +241,6 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         repaint();
     }
 
-    @Override
-    public void setMovable(boolean b) {
-        setActiveTool(null);
-        if (b) {
-            setActiveTool(MOVE);
-        } else {
-            setActiveTool(CONNECT);
-            setActiveTool(RECONNECT);
-        }
-    }
-
-    @Override
-    public void initCompositeAdd(IObjectViewUI w) {
-        currentLayer = taskCompositeLayer;
-        obUI = (Widget) w;
-    }
-
-    @Override
-    public void initCapsuleAdd(ICapsuleView w) {
-        currentLayer = taskCapsuleLayer;
-        obUI = (Widget) w;
-    }
-
     private class MoleSceneConnectProvider implements ConnectProvider {
 
         private String source = null;
@@ -264,15 +250,23 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         public boolean isSourceWidget(Widget sourceWidget) {
             Object object = findObject(sourceWidget);
             source = isNode(object) ? (String) object : null;
-            return source != null;
+
+            if (sourceWidget.getClass().equals(CapsuleViewUI.class)) {
+                return source != null;
+            }
+            return false;
         }
 
         @Override
         public ConnectorState isTargetWidget(Widget sourceWidget, Widget targetWidget) {
             Object object = findObject(targetWidget);
             target = isNode(object) ? (String) object : null;
-            if (target != null) {
-                return !source.equals(target) ? ConnectorState.ACCEPT : ConnectorState.REJECT_AND_STOP;
+            if (targetWidget.getClass().equals(ISlotWidget.class)) {
+                ISlotWidget iw = (ISlotWidget) targetWidget;
+                if (!iw.isStartingSlot()) {
+                    MoleScene.this.currentSlotIndex = iw.getIndex();
+                    return !source.equals(target) ? ConnectorState.ACCEPT : ConnectorState.REJECT_AND_STOP;
+                }
             }
             return object != null ? ConnectorState.REJECT_AND_STOP : ConnectorState.REJECT;
         }
@@ -290,10 +284,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
             MoleScene.this.createEdge(source, target);
-            // getManager().getCapsuleView(source).getCapsuleModel().addTransition(getManager().getCapsuleView(target).getCapsuleModel(),0);
-            manager.addTransition(getManager().getCapsuleView(source).getCapsuleModel(),
-                                                    getManager().getCapsuleView(target).getCapsuleModel(),
-                                                    0);
+            manager.addTransition(currentEdge, (CapsuleViewUI) sourceWidget, (ISlotWidget) targetWidget);
         }
     }
 
@@ -331,7 +322,12 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         public ConnectorState isReplacementWidget(ConnectionWidget connectionWidget, Widget replacementWidget, boolean reconnectingSource) {
             Object object = findObject(replacementWidget);
             replacementNode = isNode(object) ? (String) object : null;
-            if (replacementNode != null) {
+            if (replacementWidget.getClass().equals(OSlotWidget.class)) {
+                OSlotWidget ow = (OSlotWidget) replacementWidget;
+                return ConnectorState.ACCEPT;
+            } else if (replacementWidget.getClass().equals(ISlotWidget.class)) {
+                ISlotWidget iw = (ISlotWidget) replacementWidget;
+                MoleScene.this.currentSlotIndex = iw.getIndex();
                 return ConnectorState.ACCEPT;
             }
             return object != null ? ConnectorState.REJECT_AND_STOP : ConnectorState.REJECT;
@@ -349,12 +345,19 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         @Override
         public void reconnect(ConnectionWidget connectionWidget, Widget replacementWidget, boolean reconnectingSource) {
+            TransitionUI t = getManager().getTransition(edge);
+            getManager().removeTransition(edge);
             if (replacementWidget == null) {
                 removeEdge(edge);
             } else if (reconnectingSource) {
                 setEdgeSource(edge, replacementNode);
+                getManager().addTransition(edge, (CapsuleViewUI) ((OSlotWidget) replacementWidget).getParentWidget().getParentWidget(), t.getTarget());
             } else {
+                ISlotWidget targetView =  ((ISlotWidget) replacementWidget);
+                connectionWidget.setTargetAnchor(new SlotAnchor((CapsuleViewUI)(targetView.getParentWidget().getParentWidget()), MoleScene.this.currentSlotIndex, IOType.INPUT));
                 setEdgeTarget(edge, replacementNode);
+
+                getManager().addTransition(edge, t.getSource(), targetView);
             }
             MoleScene.this.repaint();
         }

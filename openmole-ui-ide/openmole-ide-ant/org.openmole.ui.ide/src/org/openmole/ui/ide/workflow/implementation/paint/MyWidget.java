@@ -40,7 +40,6 @@ public class MyWidget extends Widget {
     private boolean title = false;
     private boolean image = false;
     private String titleString;
-  //  private Container dataTableContainer = new Container();
     protected int taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
     protected int taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET;
     protected MoleScene scene;
@@ -51,7 +50,6 @@ public class MyWidget extends Widget {
         this.backgroundCol = col;
         this.scene = scene;
         setWidthHint();
-     //   dataTableContainer.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     public void setWidthHint() {

@@ -17,8 +17,7 @@ public interface IMoleScene{
    // IConnectable createTaskCapsule();
    // TaskViewUI createTask(IGenericTask obj);
     void refresh();
-    void setMovable(boolean b);
+    //void setMovable(boolean b);
     MoleSceneManager getManager();
-    void initCompositeAdd(IObjectViewUI w);
     void initCapsuleAdd(ICapsuleView w);
 }

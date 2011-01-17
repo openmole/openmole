@@ -39,7 +39,7 @@ public class EnableTaskDetailedView implements ActionListener {
 
             scene.setDetailedView(button.isSelected());
             for (ICapsuleView cv : scene.getManager().getCapsuleViews()) {
-                cv.getConnectableWidget().setWidthHint();
+                cv.getConnectableWidget().setDetailedView();
             }
             scene.validate();
             scene.refresh();

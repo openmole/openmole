@@ -18,11 +18,14 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
+import org.netbeans.api.visual.widget.Widget;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.workflow.model.IUIFactory;
 import org.openmole.commons.tools.object.Instanciator;
+import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.palette.Category.CategoryName;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
@@ -74,6 +77,14 @@ public class UIFactory implements IUIFactory<Object> {
         scene.initCapsuleAdd(obUI);
         scene.getManager().registerCapsuleView(obUI);
         scene.addNode(scene.getManager().getNodeID()).setPreferredLocation(locationPoint);
+       
+       // obUI.getConnectableWidget().addChild(scene.getSlotLayer());
+            
+//            graphics.drawImage(capsuleModel.isStartingCapsule() ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT,
+//                    -12,
+//                    ApplicationCustomize.TASK_TITLE_HEIGHT + i * (inputDelta + 14) + inputDelta,
+//                    new Container());
+       
         return obUI;
     }
 
