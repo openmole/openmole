@@ -18,12 +18,6 @@
 package org.openmole.core.implementation.job
 
 import org.openmole.core.model.job.ITimeStamp
-import org.openmole.core.model.job.State
+import org.openmole.core.model.job.State._
 
-class TimeStamp(val state: State, val hostName: String, val time: Long) extends ITimeStamp {
-
-    override def toString: String = {
-        "TimeStamp{" + "state=" + state + "hostName=" + hostName + "time=" + time + '}';
-    }
-    
-}
+case class TimeStamp(val state: State, val hostName: String, val time: Long) extends ITimeStamp

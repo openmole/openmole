@@ -18,7 +18,7 @@
 package org.openmole.core.model.job
 
 trait ITimeStamp {
-  def state: State
+  def state: State.State
   def hostName: String
   def time: Long
 }

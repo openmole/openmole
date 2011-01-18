@@ -18,6 +18,6 @@
 package org.openmole.core.model.execution
 
 trait IStatisticSamples {
-    def += (sample: SampleType, length: Long)
-    def apply(sample: SampleType): Iterable[Long]
+    def += (sample: SampleType.Value, length: Long)
+    def apply(sample: SampleType.Value): Iterable[Long]
 }

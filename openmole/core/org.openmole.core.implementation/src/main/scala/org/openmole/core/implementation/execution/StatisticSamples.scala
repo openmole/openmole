@@ -28,16 +28,16 @@ object StatisticSamples {
 
 class StatisticSamples(historySize: Int) extends IStatisticSamples {
  
-  val averages = new HashMap[SampleType, ListBuffer[Long]]
+  val averages = new HashMap[SampleType.Value, ListBuffer[Long]]
 
-  override def apply(sample: SampleType): Iterable[Long] = {
+  override def apply(sample: SampleType.Value): Iterable[Long] = {
     averages.get(sample) match {
       case Some(av) => av
       case None => List.empty
     }
   }
 
-  override def += (sample: SampleType, length: Long) = synchronized {
+  override def += (sample: SampleType.Value, length: Long) = synchronized {
       averages.get(sample) match {
         case Some(histo) => 
           if(histo.size < historySize) histo += length 

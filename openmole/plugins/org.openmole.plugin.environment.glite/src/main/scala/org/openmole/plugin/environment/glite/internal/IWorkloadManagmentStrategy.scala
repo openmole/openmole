@@ -20,5 +20,5 @@ package org.openmole.plugin.environment.glite.internal
 import org.openmole.core.model.execution.SampleType
 
 trait IWorkloadManagmentStrategy {
-    def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long], runningStat: Iterable[Long]): Long
+    def whenJobShouldBeResubmited(sample: SampleType.Value, finishedStat: Iterable[Long], runningStat: Iterable[Long]): Long
 }

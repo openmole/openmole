@@ -40,7 +40,7 @@ abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
-  def sample(sample: SampleType, value: Long, job: IJob) = {
+  def sample(sample: SampleType.Value, value: Long, job: IJob) = {
     JobRegistry(job) match {
       case None =>
       case Some(moleExecution) =>

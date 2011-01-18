@@ -28,7 +28,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
-import org.openmole.core.model.job.State
+import org.openmole.core.model.job.State._
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified}
 import scala.collection.mutable.ArrayBuffer
@@ -43,7 +43,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
   val progress = new Progress
     
   @volatile  private var _state: State = null
-  state = State.READY
+  state = READY
     
   override def state: State = _state
   override def context: IContext = _context
@@ -69,7 +69,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
 
   override def perform = {
     try {
-      state = State.RUNNING
+      state = RUNNING
       task.perform(globalContext, context, progress)
     } catch {
       case e =>
@@ -92,9 +92,9 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
     _context = context
 
     context.value(GenericTask.Exception.prototype) match {
-      case None => state = State.COMPLETED
+      case None => state = COMPLETED
       case Some(ex) =>
-        state = State.FAILED
+        state = FAILED
         MoleJob.LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", ex)
     }
   }
@@ -102,7 +102,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
   override def isFinished: Boolean = state.isFinal
     
   override def cancel = {
-    state = State.CANCELED
+    state = CANCELED
   }
 
 }

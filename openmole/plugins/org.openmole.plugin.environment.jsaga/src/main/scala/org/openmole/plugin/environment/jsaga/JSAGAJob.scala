@@ -26,6 +26,7 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.TemporaryErrorException
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.ExecutionState.{ExecutionState => ES}
 
 import org.ogf.saga.monitoring.Metric
 import org.ogf.saga.task.State
@@ -35,7 +36,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
   var subState: String = ""
   def job: Job = jobService.jobServiceCache.getJob(jobId)
   
-  private def translateStatus(job: Job, state: State): ExecutionState = {
+  private def translateStatus(job: Job, state: State): ES = {
     import State._
     
     subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE)
@@ -60,7 +61,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
     }
   }
 
-  override def updateState: ExecutionState = {
+  override def updateState: ES = {
     val curjob = job
     try {
       translateStatus(curjob, curjob.getState)

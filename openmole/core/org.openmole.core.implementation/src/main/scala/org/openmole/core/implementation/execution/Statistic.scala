@@ -46,7 +46,7 @@ class Statistic(historySize: Int) extends IStatistic {
     }
   }
 
-  override def += (moleExecution: IMoleExecution, key: IStatisticKey, sample: SampleType, length: Long) = {
+  override def += (moleExecution: IMoleExecution, key: IStatisticKey, sample: SampleType.Value, length: Long) = {
     val statForTask = getOrConstructStatistic(moleExecution, key)
    // Logger.getLogger(classOf[Statistic].getName).info("New sample for " + moleExecution + " " + key + " " + sample)
     statForTask += (sample, length)

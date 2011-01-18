@@ -62,7 +62,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
       //var nbJobsByCategory = new HashMap[(IMoleExecution, IStatisticKey), Int]
 
       val curTime = System.currentTimeMillis
-      val timeCache = new AssociativeCache[(IMoleExecution, IStatisticKey, SampleType), Long]
+      val timeCache = new AssociativeCache[(IMoleExecution, IStatisticKey, SampleType.Value), Long]
       var nbJobs = 0
       
       for (job <- registry.allJobs) {
@@ -170,7 +170,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
   }
    
     
-  private def computeStat(sample: SampleType, allExecutionjobs: Iterable[BatchExecutionJob] ): List[Long] = {
+  private def computeStat(sample: SampleType.Value, allExecutionjobs: Iterable[BatchExecutionJob] ): List[Long] = {
                   
     val curTime = System.currentTimeMillis
     val stat = new ListBuffer[Long]
@@ -193,7 +193,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment], strategy
     stat.toList
   }
 
-  private def getSampleType(executionState: ExecutionState): Option[SampleType] = {
+  private def getSampleType(executionState: ExecutionState.Value): Option[SampleType.Value] = {
     executionState match {
       case ExecutionState.SUBMITTED => Some(SampleType.WAITING)
       case ExecutionState.RUNNING => Some(SampleType.RUNNING)

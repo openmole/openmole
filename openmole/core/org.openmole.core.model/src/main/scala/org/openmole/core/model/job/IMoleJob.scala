@@ -39,7 +39,7 @@ trait IMoleJob {
 
   def task: IGenericTask
 
-  def state: State
+  def state: State.State
 
   def isFinished: Boolean
 

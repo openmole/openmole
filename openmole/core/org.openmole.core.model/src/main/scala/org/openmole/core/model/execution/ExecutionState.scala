@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -17,13 +17,15 @@
 
 package org.openmole.core.model.execution
 
-import org.openmole.core.model.job.IJob
-import ExecutionState._
+object ExecutionState extends Enumeration {
 
-trait IExecutionJob {  
-  def state: ExecutionState
-  def environment: IEnvironment
-  def job: IJob
-  def creationTime: Long
-  def id: IExecutionJobId
+  case class ExecutionState(name: String, val isFinal: Boolean = false) extends Val(name) 
+  
+  val READY = ExecutionState("Ready")
+  val SUBMITTED = ExecutionState("Submitted")
+  val RUNNING = ExecutionState("Running")
+  val DONE = ExecutionState("Done", true)
+  val FAILED = ExecutionState("Failed")
+  val KILLED = ExecutionState("Killed", true)
 }
+

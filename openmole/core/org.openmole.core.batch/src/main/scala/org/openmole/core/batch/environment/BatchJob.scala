@@ -30,14 +30,14 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
   
   def this(jobService: BatchJobService) = this(jobService.description)
   
-  val timeStemps = new Array[Long](ExecutionState.values.length)
+  val timeStemps = new Array[Long](ExecutionState.values.size)
 
   var _state: ExecutionState = null
   state = SUBMITTED
 
   private def state_=(state: ExecutionState) = synchronized {  
     if (_state != state) {
-      timeStemps(state.ordinal) = System.currentTimeMillis
+      timeStemps(state.id) = System.currentTimeMillis
       
       _state match {
         case SUBMITTED => BatchJobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
@@ -73,12 +73,12 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
 
   def state: ExecutionState = _state
 
-  def timeStemp(state: ExecutionState): Long = timeStemps(state.ordinal)
+  def timeStemp(state: ExecutionState): Long = timeStemps(state.id)
   
   def lastStateDurration: Long = {
     val currentState = state
     var previous: Long = 0
-    timeStemps.view.slice(0, currentState.ordinal).reverse.find( _ != 0 ) match {
+    timeStemps.view.slice(0, currentState.id).reverse.find( _ != 0 ) match {
       case Some(stemp) => return timeStemp(currentState) - stemp
       case None => throw new InternalProcessingError("Bug should allways have submitted time stemp.")
     }

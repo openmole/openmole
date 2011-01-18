@@ -28,10 +28,10 @@ import scala.math._
 
 class DicotomicWorkloadStrategy extends IWorkloadManagmentStrategy {
 
-  override def whenJobShouldBeResubmited(sample: SampleType, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
+  override def whenJobShouldBeResubmited(sample: SampleType.Value, finishedStat: Iterable[Long] , runningStat: Iterable[Long]): Long = {
     val epsilon = workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioEpsilonLocation)
 
-    val maxOverSubmitRatio: PartialFunction[SampleType, Double] = {
+    val maxOverSubmitRatio: PartialFunction[SampleType.Value, Double] = {
         x => x match {
         case SampleType.WAITING => workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioWaitingLocation)
         case SampleType.RUNNING => workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionRatioRunningLocation)

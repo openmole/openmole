@@ -22,7 +22,7 @@ import org.openmole.plugin.environment.glite.internal.Activator._
 import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.environment.ShouldBeKilledException
-import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
 
 
@@ -36,7 +36,7 @@ class GliteJob(jobId: String, jobService: GliteJobService, proxyExpired: Long) e
     
     if(!ret.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     
-    if(ret == ExecutionState.SUBMITTED) {
+    if(ret == SUBMITTED) {
       val jobShakingInterval = workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
 
       val probability = {
