@@ -61,6 +61,7 @@ import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.SlotAnchor;
+import org.openmole.ui.ide.workflow.provider.TransitionMenuProvider;
 
 /**
  *
@@ -157,6 +158,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         connectionWidget.getActions().addAction(createSelectAction());
         connectionWidget.getActions().addAction(reconnectAction);
 
+        connectionWidget.getActions().addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this, e)));
         currentEdge = e;
         return connectionWidget;
     }
@@ -351,10 +353,10 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
                 removeEdge(edge);
             } else if (reconnectingSource) {
                 setEdgeSource(edge, replacementNode);
-                getManager().addTransition(edge, (CapsuleViewUI) ((OSlotWidget) replacementWidget).getParentWidget().getParentWidget(), t.getTarget());
+                getManager().addTransition(edge, ((OSlotWidget) replacementWidget).getCapsuleView(), t.getTarget());
             } else {
                 ISlotWidget targetView =  ((ISlotWidget) replacementWidget);
-                connectionWidget.setTargetAnchor(new SlotAnchor((CapsuleViewUI)(targetView.getParentWidget().getParentWidget()), MoleScene.this.currentSlotIndex, IOType.INPUT));
+                connectionWidget.setTargetAnchor(new SlotAnchor(targetView.getCapsuleView(), MoleScene.this.currentSlotIndex, IOType.INPUT));
                 setEdgeTarget(edge, replacementNode);
 
                 getManager().addTransition(edge, t.getSource(), targetView);

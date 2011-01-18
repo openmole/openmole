@@ -14,27 +14,27 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.ui.ide.workflow.implementation.paint;
 
-import java.awt.Point;
 import org.netbeans.api.visual.widget.ImageWidget;
 import org.netbeans.api.visual.widget.Scene;
-import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class OSlotWidget extends SlotWidget {
-    public OSlotWidget(Scene scene,CapsuleViewUI capsule) {
-        super(scene,capsule);
-        setImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT);
-        setDetailedView(ApplicationCustomize.TASK_CONTAINER_WIDTH);
+public class SlotWidget extends ImageWidget{
+
+    private CapsuleViewUI capsuleView;
+
+    public SlotWidget(Scene scene, CapsuleViewUI capsuleView) {
+        super(scene);
+        this.capsuleView = capsuleView;
     }
 
-    public void setDetailedView(int w){
-        setPreferredLocation(new Point(w - 6, 14 + ApplicationCustomize.TASK_TITLE_HEIGHT));
+    public CapsuleViewUI getCapsuleView() {
+        return capsuleView;
     }
-
 }

@@ -42,7 +42,7 @@ import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
 public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
 
     protected ConnectableWidget connectableWidget;
-    protected ICapsuleModelUI capsuleModel;
+    private ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeProvider dnDAddPrototypeInstanceProvider;
     private CapsuleMenuProvider taskCapsuleMenuProvider;
 
@@ -65,7 +65,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         addInputSlot();
 
         //Default output slot
-        connectableWidget.addOutputSlot(new OSlotWidget(scene));
+        connectableWidget.addOutputSlot(new OSlotWidget(scene,this));
 
         dnDAddPrototypeInstanceProvider = new DnDAddPrototypeProvider(scene, this);
 
@@ -78,13 +78,13 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     public void defineAsRegularCapsule(){
         capsuleModel.defineAsRegularCapsule();
         connectableWidget.clearInputSlots();
-        connectableWidget.addInputSlot(new ISlotWidget(scene,1,false));
+        connectableWidget.addInputSlot(new ISlotWidget(scene,this,1,false));
     }
 
     public void defineAsStartingCapsule(){
         capsuleModel.defineAsStartingCapsule();
         connectableWidget.clearInputSlots();
-        connectableWidget.addInputSlot(new ISlotWidget(scene,1,true));
+        connectableWidget.addInputSlot(new ISlotWidget(scene,this,1,true));
     }
 
     @Override
@@ -116,7 +116,7 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     @Override
     public void addInputSlot() {
         capsuleModel.addInputSlot();
-        ISlotWidget im = new ISlotWidget(scene, getCapsuleModel().getNbInputslots(),capsuleModel.isStartingCapsule() ? true : false);
+        ISlotWidget im = new ISlotWidget(scene, this,getCapsuleModel().getNbInputslots(),capsuleModel.isStartingCapsule() ? true : false);
         getConnectableWidget().addInputSlot(im);
         scene.refresh();
     }

@@ -14,13 +14,32 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.action;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
+import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class RemoveTaskCapsuleAction {
+public class RemoveCapsuleAction implements ActionListener {
 
+    CapsuleViewUI capsule;
+    MoleScene scene;
+
+    public RemoveCapsuleAction(MoleScene scene,
+            CapsuleViewUI capsule) {
+        this.capsule = capsule;
+        this.scene = scene;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        String id = scene.getManager().getCapsuleViewID(capsule);
+        scene.getManager().removeCapsuleView(id);
+        scene.removeNodeWithEdges(id);
+    }
 }

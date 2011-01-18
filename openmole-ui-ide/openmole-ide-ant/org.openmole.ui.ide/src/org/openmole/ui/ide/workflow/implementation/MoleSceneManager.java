@@ -18,6 +18,8 @@ package org.openmole.ui.ide.workflow.implementation;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections15.BidiMap;
@@ -33,8 +35,8 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
 public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
-   // private Collection<TransitionUI> transitions = new ArrayList<TransitionUI>();
-    private Map<String,TransitionUI> transitions = new HashMap<String, TransitionUI>();
+    private BidiMap<String, TransitionUI> transitions = new DualHashBidiMap<String, TransitionUI>();
+    private Map<ICapsuleView,Collection<TransitionUI>> capsuleConnection = new HashMap<ICapsuleView, Collection<TransitionUI>>();
     private CapsuleViewUI startingCapsule = null;
     private int nodeID = 0;
     private String name = "";
@@ -53,7 +55,6 @@ public class MoleSceneManager {
 
     public void setStartingCapsule(CapsuleViewUI startingCapsuleView) {
         if (this.startingCapsule != null) {
-            System.out.println("-- define as regular");
             startingCapsule.defineAsRegularCapsule();
         }
         this.startingCapsule = startingCapsuleView;
@@ -71,6 +72,7 @@ public class MoleSceneManager {
     public void registerCapsuleView(ICapsuleView cv) {
         nodeID++;
         capsuleViews.put(getNodeID(), cv);
+        capsuleConnection.put(cv,new HashSet<TransitionUI>());
     }
 
     public String getCapsuleViewID(ICapsuleView cv) {
@@ -81,35 +83,34 @@ public class MoleSceneManager {
         return capsuleViews.get(name);
     }
 
-    public void removeCapsuleView(ICapsuleView cv) {
-        capsuleViews.remove(cv);
+    public void removeCapsuleView(String nodeID) {
+        ICapsuleModelUI model = capsuleViews.get(nodeID).getCapsuleModel();
+
+        for (TransitionUI t : capsuleConnection.get(capsuleViews.get(nodeID))){
+            transitions.removeValue(t);
+        }
+        capsuleViews.remove(nodeID);
     }
 
     public Collection<TransitionUI> getTransitions() {
-        //return transitions;
         return transitions.values();
     }
 
-    public TransitionUI getTransition(String edge){
+    public TransitionUI getTransition(String edge) {
         return transitions.get(edge);
     }
-
-    public void removeTransition(String edge){
+    public void removeTransition(String edge) {
         transitions.remove(edge);
     }
 
-//    public void addTransition(ICapsuleModelUI source,
-//            ICapsuleModelUI target,
-//            int targetSlotNumber) {
-        public void addTransition(String edgename,
-                CapsuleViewUI source,
+    public void addTransition(String edgename,
+            CapsuleViewUI source,
             ISlotWidget target) {
-            transitions.put(edgename, new TransitionUI(source, target));
-           // transitions.add(new TransitionUI(source, target));
-       // transitions.add(new TransitionUI(source, target, targetSlotNumber));
+        TransitionUI t = new TransitionUI(source, target);
+        transitions.put(edgename, t);
+        capsuleConnection.get(source).add(t);
+        capsuleConnection.get(target.getCapsuleView()).add(t);
     }
-
-
 
     public void printTaskC() {
         for (String t : capsuleViews.keySet()) {

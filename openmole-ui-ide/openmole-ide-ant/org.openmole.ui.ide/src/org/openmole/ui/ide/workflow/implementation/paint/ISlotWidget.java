@@ -20,19 +20,22 @@ import java.awt.Point;
 import org.netbeans.api.visual.widget.ImageWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class ISlotWidget extends ImageWidget {
+public class ISlotWidget extends SlotWidget {
     private int index;
     private boolean startingSlot;
 
     public ISlotWidget(Scene scene,
+            CapsuleViewUI capsuleView,
             int index,
             boolean startingSlot) {
-        super(scene);
+        super(scene,capsuleView);
         this.index = index;
         this.startingSlot = startingSlot;
         setImage(startingSlot ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT);

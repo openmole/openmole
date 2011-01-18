@@ -17,23 +17,17 @@
 package org.openmole.ui.ide.workflow.implementation.paint;
 
 import org.openmole.core.model.task.IGenericTask;
-import org.openmole.ui.ide.commons.IOType;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.netbeans.api.visual.action.ActionFactory;
-import org.netbeans.api.visual.action.TwoStateHoverProvider;
-import org.netbeans.api.visual.action.WidgetAction;
-import org.netbeans.api.visual.anchor.Anchor;
 import org.netbeans.api.visual.widget.ImageWidget;
-import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
