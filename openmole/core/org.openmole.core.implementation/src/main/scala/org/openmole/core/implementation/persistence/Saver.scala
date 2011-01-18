@@ -22,7 +22,7 @@ import java.io.IOException
 import java.util.TreeSet
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.observer.IMoleExecutionObserver
 import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -62,7 +62,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
         if(!filter.contains(variable.prototype.name)) context += variable
       }
 
-      val serialization = Activator.getSerializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))
+      val serialization = serializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))
 
       val ctxLink = new File(dir, CONTEXT_LINK)
       val link = new File(ctxLink,  serialization._3 + SEPARATOR + ordinal.toString)

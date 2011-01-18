@@ -12,7 +12,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -38,7 +38,7 @@
 
     <properties>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
+        <!--<symbolic.name>${project.artifactId};singleton:=true</symbolic.name>-->
     </properties>
 
 

@@ -23,7 +23,7 @@ import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.execution.JobRegistry
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -102,8 +102,8 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     _task match {
       case Some(t) =>
         val ret = new MoleJob(t, global, context,jobId)
-        Activator.getEventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOW, new GenericCapsuleAdapter, IMoleJob.StateChanged)
-        Activator.getEventDispatcher.objectChanged(this, IGenericCapsule.JobCreated, Array[Object](ret))
+        eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOW, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+        eventDispatcher.objectChanged(this, IGenericCapsule.JobCreated, Array[Object](ret))
         return ret
       case None => throw new UserBadDataError("Reached a capsule with unassigned task.")
     }
@@ -144,7 +144,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
     } finally {
-      Activator.getEventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed);
+      eventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed);
     }
   }
 

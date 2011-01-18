@@ -25,7 +25,7 @@ import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.SynchronizedContext
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
@@ -73,7 +73,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     val execution = new MoleExecution(mole)
 
     val exceptionLister = new ExceptionLister
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, exceptionLister, IMoleExecution.OneJobFinished);
+    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, exceptionLister, IMoleExecution.OneJobFinished);
 
     execution.start(globalContext, firstTaskContext)
     execution.waitUntilEnded

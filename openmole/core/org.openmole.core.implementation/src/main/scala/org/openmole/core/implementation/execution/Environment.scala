@@ -19,7 +19,7 @@ package org.openmole.core.implementation.execution
 
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.IJob
@@ -29,13 +29,13 @@ import org.openmole.core.model.execution.SampleType
 object Environment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
-  Activator.getWorkspace += (StatisticsHistorySize, "1000")
+  workspace += (StatisticsHistorySize, "1000")
 }
 
 
 abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
    
-  val statistic = new Statistic(Activator.getWorkspace.preferenceAsInt(Environment.StatisticsHistorySize))
+  val statistic = new Statistic(workspace.preferenceAsInt(Environment.StatisticsHistorySize))
   val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong

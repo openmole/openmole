@@ -20,7 +20,7 @@ package org.openmole.core.implementation.observer
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.tools.service.Priority
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 
@@ -29,9 +29,9 @@ class MoleExecutionObserverAdapter private (moleExecutionObserver: IMoleExecutio
     
   def this(moleExecution: IMoleExecution, moleExecutionObserver: IMoleExecutionObserver) = {
     this(moleExecutionObserver)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobFinished)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
+    eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
+    eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobFinished)
+    eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
   }
   
   

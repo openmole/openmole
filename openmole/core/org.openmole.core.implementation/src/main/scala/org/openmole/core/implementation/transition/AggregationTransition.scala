@@ -20,7 +20,7 @@ package org.openmole.core.implementation.transition
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.commons.tools.service.Priority
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.implementation.tools.ContextBuffer
@@ -86,7 +86,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
       case None => 
         val res = new ContextBuffer(true)
         registry.register(this, parent, res)
-        Activator.getEventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
+        eventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
         res
       case Some(res) => res
     }

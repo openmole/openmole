@@ -21,7 +21,7 @@ import groovy.lang.Binding
 import java.io.File
 import org.openmole.commons.tools.groovy.IGroovyProxy
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.workspace.IWorkspace
@@ -38,7 +38,7 @@ object GroovyContextAdapter{
 
     binding.setVariable(globalContextVar.name, global)
     binding.setVariable(contextVar.name, context)
-    binding.setVariable(workspaceVar.name, Activator.getWorkspace)
+    binding.setVariable(workspaceVar.name, workspace)
     context.variables.values.foreach{in => binding.setVariable(in.prototype.name, in.value)}
 
     binding

@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.IMoleExecution
 
@@ -64,7 +64,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution]) extends ISubMoleEx
 
   private def checkAllJobsWaitingInGroup =  {
     if(nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0) {
-      Activator.getEventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
+      eventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
     }
   }
 

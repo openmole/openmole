@@ -25,7 +25,7 @@ import java.util.logging.Logger
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.SynchronizedContext
 import org.openmole.core.implementation.execution.JobRegistry
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -111,7 +111,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
 
   override def register(subMoleExecution: ISubMoleExecution) = {
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.NORMAL, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.AllJobsWaitingInGroup)
+    eventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.NORMAL, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.AllJobsWaitingInGroup)
   }
     
   override def submit(capsule: IGenericCapsule, global: IContext, context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = synchronized {
@@ -120,11 +120,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
    
   def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
-    Activator.getEventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
+    eventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
 
     MoleJobRegistry += (moleJob, this)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
+    eventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
+    eventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
 
     inProgress += ((moleJob, (subMole, ticket)))
     subMole.incNbJobInProgress(1)
@@ -226,7 +226,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private def jobFailed(job: IMoleJob) =  jobOutputTransitionsPerformed(job)
 
   private def jobOutputTransitionsPerformed(job: IMoleJob) = synchronized {
-    Activator.getEventDispatcher.objectChanged(this, IMoleExecution.OneJobFinished, Array(job))
+    eventDispatcher.objectChanged(this, IMoleExecution.OneJobFinished, Array(job))
 
     val jobInfo = inProgress.get(job) match {
       case None => throw new InternalProcessingError("Error in mole execution job info not found")
@@ -241,12 +241,12 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     subMole.decNbJobInProgress(1)
 
     if (subMole.nbJobInProgess == 0) {
-      Activator.getEventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(job, this, ticket))
+      eventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(job, this, ticket))
     }
 
     if (isFinished) {
       submiter.interrupt
-      Activator.getEventDispatcher.objectChanged(this, ISubMoleExecution.Finished, Array(job))
+      eventDispatcher.objectChanged(this, ISubMoleExecution.Finished, Array(job))
     }
 
   }

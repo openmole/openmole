@@ -26,7 +26,7 @@ import java.util.logging.Logger
 
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.data.IVariable
 
 object CloningService {
@@ -47,7 +47,7 @@ object CloningService {
 
         override def clone(o: Object, cloner: Cloner, map: java.util.Map[Object, Object]): Object = {
           val toClone = o.asInstanceOf[File]
-          val cloned = if (toClone.isDirectory) Activator.getWorkspace.newDir else Activator.getWorkspace.newFile
+          val cloned = if (toClone.isDirectory) workspace.newDir else workspace.newFile
                     
           FileUtil.copy(toClone, cloned)
           cloned

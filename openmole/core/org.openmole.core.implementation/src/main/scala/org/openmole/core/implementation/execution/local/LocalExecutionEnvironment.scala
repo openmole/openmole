@@ -22,7 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
 import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Environment
-import org.openmole.core.implementation.internal.Activator
+import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.ExecutionState
@@ -45,13 +45,13 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
   
   val DefaultNumberOfThreads = new ConfigurationLocation(LocalExecutionEnvironment.getClass.getSimpleName, "ThreadNumber")
 
-  Activator.getWorkspace += (DefaultNumberOfThreads, Integer.toString(1))
+  workspace += (DefaultNumberOfThreads, Integer.toString(1))
     
   private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
   private val jobInQueue = new Semaphore(0)
   
   private val executers = new LinkedList[LocalExecuter]
-  private var nbThreadVar = Activator.getWorkspace.preferenceAsInt(DefaultNumberOfThreads)
+  private var nbThreadVar = workspace.preferenceAsInt(DefaultNumberOfThreads)
        
   addExecuters(nbThread)
     

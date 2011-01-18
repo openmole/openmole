@@ -190,7 +190,7 @@
         <product.configuration.directory>${product.directory}/configuration/</product.configuration.directory>
         <import.packages>*</import.packages>
         <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${pom.version}"</export.packages>
-        <symbolic.name>${pom.artifactId};singleton:=true</symbolic.name>
+        <symbolic.name>${project.artifactId};singleton:=true</symbolic.name>
         <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>
