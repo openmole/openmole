@@ -16,10 +16,10 @@
  */
 package org.openmole.plugin.resource.virtual;
 
+import java.io.FileOutputStream;
 import ch.ethz.ssh2.Connection;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import org.openmole.commons.tools.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import scala.collection.mutable.StringBuilder;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.openmole.commons.aspect.caching.Cachable;

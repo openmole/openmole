@@ -15,22 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.commons.tools.obj
 
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.IMoleExecution
+import org.objenesis.ObjenesisStd
 
-class MoleExecutionViewer extends IViewer {
-  
-  override def view(obj: Object, args: Array[String]) = {
-    val toDisplay = new Array[AtomicInteger](State.values.size)
-
-    for (state <- State.values) toDisplay(state.id) = new AtomicInteger
+object Instanciator {
+  private val objenesis = new ObjenesisStd
     
-    for (job <- obj.asInstanceOf[IMoleExecution].moleJobs) toDisplay(job.state.id).incrementAndGet
+  def instanciate[T](c: Class[T]): T = objenesis.newInstance(c).asInstanceOf[T]
+    
+  def instanciate[T](c: Class[T], args: Object*): T = {
+    //val argsTypes = args.map{_.getClass}.toArray
+    val ctr = c.getConstructor(args.map{_.getClass}.toArray[Class[_]]: _*)
 
-    for (state <- State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+    val isAccessible = ctr.isAccessible
+    ctr.setAccessible(true)
+    val instance = ctr.newInstance(args)
+    ctr.setAccessible(isAccessible)
+
+    instance
   }
-  
 }

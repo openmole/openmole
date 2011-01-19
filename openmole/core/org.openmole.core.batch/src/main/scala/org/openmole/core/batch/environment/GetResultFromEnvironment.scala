@@ -19,6 +19,8 @@ package org.openmole.core.batch.environment
 
 import com.ice.tar.TarInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.TreeMap
 import java.util.concurrent.Callable
@@ -27,8 +29,6 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.io.FileInputStream
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.core.batch.control.AccessToken

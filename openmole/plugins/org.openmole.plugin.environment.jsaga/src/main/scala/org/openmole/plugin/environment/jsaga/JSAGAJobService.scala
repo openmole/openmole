@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.jsaga
 
 import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.OutputStream
 import java.net.URI
 import java.util.logging.Level
@@ -30,7 +31,6 @@ import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
 import org.ogf.saga.job.JobService
 import org.ogf.saga.url.URLFactory
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.environment.BatchAuthenticationKey

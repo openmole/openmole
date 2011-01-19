@@ -23,7 +23,6 @@ import org.openmole.commons.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import java.io.PrintStream
-import java.lang.StringBuilder
 import java.lang.Integer
 
 class SystemExecToStringTask(name: String, 

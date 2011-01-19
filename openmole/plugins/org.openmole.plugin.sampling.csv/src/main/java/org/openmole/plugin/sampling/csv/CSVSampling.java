@@ -127,7 +127,7 @@ public class CSVSampling implements ISampling {
     @Override
     public Iterable<Iterable<IVariable<?>>> build(IContext global, IContext context) throws Throwable {
         Collection<Iterable<IVariable<?>>> listOfListOfValues = new ArrayList<Iterable<IVariable<?>>>();
-        Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
+        //Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
         CSVReader reader = new CSVReader(new FileReader(csvFile));
 
         try {
@@ -141,13 +141,6 @@ public class CSVSampling implements ISampling {
                 }
                 headerPrototypes.put(index, p);
 
-                if (pathMapping.containsKey(p)) {
-                    File deployedPath = pathMapping.get(p);
-                    convertorMapping.put(p, StringConvertor.getInstance().getConvertor(p.type(), deployedPath));
-                } else {
-                    convertorMapping.put(p, StringConvertor.getInstance().getConvertor(p.type()));
-                }
-
             }
 
             //parse values
@@ -156,7 +149,8 @@ public class CSVSampling implements ISampling {
                 List<IVariable<?>> values = new ArrayList<IVariable<?>>(headerPrototypes.size());
                 for (int i : headerPrototypes.keySet()) {
                     IPrototype p = headerPrototypes.get(i);
-                    values.add(new Variable(p, convertorMapping.get(p).convert(nextLine[i])));
+                    if (pathMapping.containsKey(p)) values.add(new Variable(p, new FileMapping(pathMapping.get(p)).convert(nextLine[i])));
+                    else values.add(new Variable(p, StringConvertor.getConvertor(p.type()).convert(nextLine[i])));
                 }
                 listOfListOfValues.add(JavaConversions.asScalaIterable(values));
             }

@@ -20,12 +20,12 @@ package org.openmole.core.serializer.internal
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.XStreamException
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileInputStream
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.core.serializer.FileInfoHash
 import org.openmole.commons.tools.io.FileUtil._
 

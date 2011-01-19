@@ -30,10 +30,10 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.ExecutionState.ExecutionState
 import scala.collection.mutable.HashMap
 
-class BatchEnvironmentViewer extends IViewer[BatchEnvironment] {
+class BatchEnvironmentViewer extends IViewer {
   val environmentViewer = new EnvironmentViewer
 
-  override def view(obj: BatchEnvironment, args: Array[String]) = {
+  override def view(obj: Object, args: Array[String]) = {
     import IViewer.Separator
     
     val options = new Options
@@ -51,7 +51,7 @@ class BatchEnvironmentViewer extends IViewer[BatchEnvironment] {
       if (v >= 1) {
         System.out.println(Separator)
         val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState, AtomicInteger]]
-        val executionJobRegistry = obj.jobRegistry
+        val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
 
         for (executionJob <-  executionJobRegistry.allExecutionJobs) {
           val batchJob = executionJob.batchJob
@@ -78,7 +78,7 @@ class BatchEnvironmentViewer extends IViewer[BatchEnvironment] {
       if (v >= 2) {
         System.out.println(Separator)
 
-        val executionJobRegistry = obj.jobRegistry
+        val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
         for (executionJob <- executionJobRegistry.allExecutionJobs) {
           val batchJob = executionJob.batchJob
           if (batchJob != null) {

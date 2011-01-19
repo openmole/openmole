@@ -23,9 +23,9 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import java.io.File
-import org.openmole.commons.tools.io.FileInputStream
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil.copy
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import org.openmole.commons.exception.UserBadDataError
 
 /**

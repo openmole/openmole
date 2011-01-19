@@ -21,6 +21,6 @@ object IViewer {
   val Separator = "-----------"
 }
 
-trait IViewer[T] {
-  def view(obj: T, args: Array[String])
+trait IViewer {
+  def view(obj: Object, args: Array[String])
 }

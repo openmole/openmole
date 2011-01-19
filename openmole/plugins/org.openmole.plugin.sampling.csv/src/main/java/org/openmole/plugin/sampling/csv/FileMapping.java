@@ -22,9 +22,6 @@ public class FileMapping implements IStringMapping<File>{
     @Override
     public File convert(String stringToBeConverted) throws UserBadDataError {    
         File fi = new File(basePath, stringToBeConverted);
-       /* if (!fi.exists()){
-               throw new UserBadDataError("The path " + fi.getAbsolutePath() + " does not exist.");
-        }*/
         return fi;
     }
 

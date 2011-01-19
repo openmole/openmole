@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.commons.tools.internal.Activator._
 import org.openmole.commons.tools.service.MoovingAverage
 
 object QualityControl {

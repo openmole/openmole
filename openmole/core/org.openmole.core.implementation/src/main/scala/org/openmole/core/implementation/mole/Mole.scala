@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.commons.tools.pattern.IVisitor
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.task.IGenericTask
@@ -25,58 +24,38 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 class Mole(val root: IGenericCapsule) extends IMole {
-  
-    @throws(classOf[Throwable])
-    override def visit(visitor: IVisitor[IGenericCapsule]) = {
-        val tasks = new HashSet[IGenericCapsule]
-        val toExplore = new ListBuffer[IGenericCapsule]
-        toExplore += root
 
-        while (!(toExplore.isEmpty)) {
-          val current = toExplore.remove(0)
+  @throws(classOf[Throwable])
+  override def tasks: Iterable[IGenericTask] = {
+    val tasks = new HashSet[IGenericTask]
 
-            if (!tasks.contains(current)) {
-                for (transition <- current.outputTransitions) {
-                    toExplore += transition.end.capsule
-                }
-                tasks += current
-            }
+    capsules.foreach(visited => { 
+        visited.task match {
+          case None =>
+          case Some(task) => tasks += task
         }
+            
+      })
 
-        for (t <- tasks) {
-            visitor.action(t)
+    tasks
+  }
+
+  @throws(classOf[Throwable])
+  override def capsules: Iterable[IGenericCapsule] = {
+    val caps = new HashSet[IGenericCapsule]
+    val toExplore = new ListBuffer[IGenericCapsule]
+    toExplore += root
+
+    while (!(toExplore.isEmpty)) {
+      val current = toExplore.remove(0)
+
+      if (!caps.contains(current)) {
+        for (transition <- current.outputTransitions) {
+          toExplore += transition.end.capsule
         }
+        caps += current
+      }
     }
-
-
-    @throws(classOf[Throwable])
-    override def tasks: Iterable[IGenericTask] = {
-        val tasks = new HashSet[IGenericTask]
-
-        visit(new IVisitor[IGenericCapsule] {
-
-            override def action(visited: IGenericCapsule) = {
-                visited.task match {
-                  case None =>
-                  case Some(task) => tasks += task
-                }
-            }
-        });
-
-        tasks
-    }
-
-    @throws(classOf[Throwable])
-    override def capsules: Iterable[IGenericCapsule] = {
-        val capsules = new HashSet[IGenericCapsule]
-
-        visit(new IVisitor[IGenericCapsule] {
-
-            override def action(visited: IGenericCapsule) = {
-                capsules += visited
-            }
-        });
-
-        capsules
-    }
+    caps
+  }
 }

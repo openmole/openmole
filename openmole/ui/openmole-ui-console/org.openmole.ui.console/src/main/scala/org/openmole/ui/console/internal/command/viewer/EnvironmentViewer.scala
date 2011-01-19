@@ -21,9 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
 
-class EnvironmentViewer extends IViewer[IEnvironment]{
+class EnvironmentViewer extends IViewer {
 
-  override def view(obj: IEnvironment, args: Array[String]) {
+  override def view(obj: Object, args: Array[String]) {
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
     //Map<ExecutionState.ExecutionState, AtomicInteger> accounting = new EnumMap<ExecutionState.ExecutionState, AtomicInteger>(ExecutionState.ExecutionState.class);
 
@@ -31,7 +31,7 @@ class EnvironmentViewer extends IViewer[IEnvironment]{
       accounting(state.id) = new AtomicInteger
     }
 
-    for (executionJob <- obj.jobRegistry.allExecutionJobs) {
+    for (executionJob <- obj.asInstanceOf[IEnvironment].jobRegistry.allExecutionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }
 

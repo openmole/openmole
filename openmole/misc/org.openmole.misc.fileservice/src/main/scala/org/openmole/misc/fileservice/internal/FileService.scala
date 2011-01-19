@@ -18,9 +18,9 @@
 package org.openmole.misc.fileservice.internal
 
 import java.io.File
+import java.io.FileOutputStream
 import java.util.logging.Logger
 import org.openmole.commons.tools.cache.AssociativeCache
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.commons.tools.service.IHash

@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.commons.tools.pattern.IVisitor
 import org.openmole.core.model.data.{IContext,IVariable,IPrototype}
 import scala.collection.immutable.TreeMap
 
@@ -68,10 +67,6 @@ class Context extends IContext {
   }
 
   override def clean = {_variables = new TreeMap[String, IVariable[_]]}
-
-  override def visit(visitor: IVisitor[IVariable[_]]) = {
-    for (v <- _variables.values) visitor.action(v)
-  }
 
   override def iterator: Iterator[IVariable[_]] = _variables.values.iterator
     

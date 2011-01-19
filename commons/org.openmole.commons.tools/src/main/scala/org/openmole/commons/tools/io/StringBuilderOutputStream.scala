@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,30 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.function;
+package org.openmole.commons.tools.io
 
-import java.util.Map;
+import com.ibm.icu.text.UTF16
+import java.io.OutputStream
 
-/**
- *
- * @author reuillon
- */
-public class MapPartialFunction<K, V> implements IPartialFunction<K, V> {
-
-    final private Map<K, V> map;
-
-    public MapPartialFunction(Map<K, V> map) {
-        this.map = map;
-    }
-    
-    @Override
-    public boolean isDefinedAt(K arg) {
-        return map.containsKey(arg);
-    }
-
-    @Override
-    public V apply(K arg) {
-        return map.get(arg);
-    }
-
+class StringBuilderOutputStream(val builder: StringBuilder) extends OutputStream {
+  override def write(b: Int) = builder.append(UTF16.valueOf(b))
 }

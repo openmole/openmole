@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.commons.tools.pattern.IVisitor
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
@@ -56,8 +55,6 @@ class SynchronizedContext(context: IContext) extends IContext {
   override def contains(proto: IPrototype[_]): Boolean = synchronized{context.contains(proto)}
    
   override def clean = synchronized{context.clean}
-
-  override def visit(visitor: IVisitor[IVariable[_]]) = synchronized{context.visit(visitor)}
 
   override def iterator: Iterator[IVariable[_]] = synchronized{context.iterator}
 }

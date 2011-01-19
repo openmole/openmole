@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.function;
+package org.openmole.ui.console.internal.command
 
-/**
- *
- * @author reuillon
- */
-public interface IPartialFunction<A, R> {
-    boolean isDefinedAt(A arg);
-    R apply(A arg) throws Exception;
+import org.codehaus.groovy.tools.shell.CommandSupport
+import org.codehaus.groovy.tools.shell.Shell
+
+abstract class UICommand(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
+    protected def getArgs(objs: Iterable[String]) = (shell.execute(objs.head), objs.tail.toArray)
 }

@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import org.openmole.commons.tools.object.Instanciator;
+import org.openmole.commons.tools.obj.Instanciator;
 
 /**
  *
@@ -32,37 +32,23 @@ import org.openmole.commons.tools.object.Instanciator;
  * type of the convertion.
  */
 public class StringConvertor {
+
     private static StringConvertor instance = null;
-    private static Map<Class,Class> typeMapping = new HashMap<Class,Class>();
+    private static Map<Class, IStringMapping> typeMapping = new HashMap<Class, IStringMapping>();
 
- static {
-        register(BigInteger.class,BigIntegerMapping.class);
-        register(BigDecimal.class,BigDecimalMapping.class);
-        register(String.class,StringMapping.class);
-        register(File.class,FileMapping.class);
-        register(Double.class,DoubleMapping.class);
-        register(Integer.class,IntegerMapping.class);
+    static {
+        register(BigInteger.class, new BigIntegerMapping());
+        register(BigDecimal.class, new BigDecimalMapping());
+        register(String.class, new StringMapping());
+        register(Double.class, new DoubleMapping());
+        register(Integer.class, new IntegerMapping());
     }
 
-    private static <T> void register(Class<T> cl,
-                                     Class mapping){
-        typeMapping.put(cl,mapping);
-    }
-   
-    public IStringMapping getConvertor(Class type,
-                                       Object... args) throws IllegalArgumentException,
-                                                               NoSuchMethodException,
-                                                               InstantiationException,
-                                                               IllegalAccessException,
-                                                               InvocationTargetException{
-        if(args.length == 0) return (IStringMapping) Instanciator.instanciate(typeMapping.get(type));
-        return (IStringMapping) Instanciator.instanciate(typeMapping.get(type), args);
+    public static <T> void register(Class<T> cl, IStringMapping mapping) {
+        typeMapping.put(cl, mapping);
     }
 
-     public static StringConvertor getInstance() {
-        if (instance == null) {
-            instance = new StringConvertor();
-        }
-        return instance;
+    public static IStringMapping getConvertor(Class type) {
+        return typeMapping.get(type);
     }
 }

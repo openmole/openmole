@@ -311,7 +311,7 @@ case class URIFile(val location: String) extends IURIFile {
 
   private def isLocal: Boolean = {
     val url = SAGAURL
-    url.getHost == null || url.getScheme == null || (url.getScheme != null && url.getScheme.compareToIgnoreCase("file") == 0) || IsLocalHost(url.getHost)
+    url.getHost == null || url.getScheme == null || (url.getScheme != null && url.getScheme.compareToIgnoreCase("file") == 0) || isLocalHost(url.getHost)
   }
  
   override def copy(dest: IURIFile) = URIFile.copy(this, dest)

@@ -15,22 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.commons.tools.io
 
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.IMoleExecution
+import java.io.InputStream
 
-class MoleExecutionViewer extends IViewer {
+class StringInputStream(val s: String) extends InputStream {
+
+  private var strOffset  = 0
+  private var charOffset = 0
+  private var _available = s.length * 2
   
-  override def view(obj: Object, args: Array[String]) = {
-    val toDisplay = new Array[AtomicInteger](State.values.size)
+  override def available = _available
 
-    for (state <- State.values) toDisplay(state.id) = new AtomicInteger
-    
-    for (job <- obj.asInstanceOf[IMoleExecution].moleJobs) toDisplay(job.state.id).incrementAndGet
+  override def read: Int = {
+    if (available == 0) return -1
+        
+    _available -= 1
+    val c = s.charAt(strOffset)
 
-    for (state <- State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+    if (charOffset == 0) {
+      charOffset = 1
+      return (c & 0x0000ff00) >> 8
+    } else {
+      charOffset = 0
+      strOffset += 1
+      return c & 0x000000ff
+    }
   }
-  
+
 }

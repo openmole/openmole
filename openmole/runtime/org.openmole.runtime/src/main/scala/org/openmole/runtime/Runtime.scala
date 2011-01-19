@@ -20,6 +20,8 @@ package org.openmole.runtime
 import com.ice.tar.TarEntry
 import com.ice.tar.TarOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.TreeMap
 import java.util.TreeMap
@@ -27,8 +29,6 @@ import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileInputStream
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.StringInputStream
 import org.openmole.commons.tools.io.TarArchiver
@@ -189,12 +189,9 @@ class Runtime {
 
         val tarResult = Activator.getWorkspace.newFile("result", ".tar")
 
-        val tos = new TarOutputStream(new FileOutputStream(tarResult))
-        //tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
-
-                
+      
         if (!serializationResult._1.isEmpty) {
-                    
+          val tos = new TarOutputStream(new FileOutputStream(tarResult))     
           try {
             for (file <- serializationResult._1) {
               val is = new StringInputStream(file.getCanonicalPath)

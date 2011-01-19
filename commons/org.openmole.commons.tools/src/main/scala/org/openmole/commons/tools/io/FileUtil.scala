@@ -19,6 +19,8 @@ package org.openmole.commons.tools.io
 
 import java.io.File
 import java.io.FileFilter
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -210,5 +212,19 @@ object FileUtil {
       copy(from, to)
       from.delete
     }
+  }
+  
+  def deleteDirectory(path: File): Boolean = {
+    if( path.exists ) {		
+      for(file <- path.listFiles) {
+        if(file.isDirectory) {
+          deleteDirectory(file)
+        }
+        else {
+          file.delete
+        }
+      }
+    }
+    path.delete
   }
 }

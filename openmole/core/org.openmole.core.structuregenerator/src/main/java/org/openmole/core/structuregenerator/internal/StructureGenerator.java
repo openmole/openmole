@@ -26,9 +26,9 @@ import org.openmole.commons.exception.InternalProcessingError;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import org.openmole.commons.tools.io.FileInputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import org.openmole.commons.tools.io.FileOutputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;

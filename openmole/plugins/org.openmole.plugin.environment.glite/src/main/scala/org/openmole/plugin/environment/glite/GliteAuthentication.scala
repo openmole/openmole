@@ -23,6 +23,7 @@ import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import fr.in2p3.jsaga.generated.parser.ParseException
 import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.util.logging.Level
@@ -30,7 +31,6 @@ import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.file.URIFile

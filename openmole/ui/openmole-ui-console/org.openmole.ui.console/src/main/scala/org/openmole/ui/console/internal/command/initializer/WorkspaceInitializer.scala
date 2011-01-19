@@ -15,22 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.ui.console.internal.command.initializer
 
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.misc.workspace.IWorkspace
 
-class MoleExecutionViewer extends IViewer {
-  
-  override def view(obj: Object, args: Array[String]) = {
-    val toDisplay = new Array[AtomicInteger](State.values.size)
+class WorkspaceInitializer extends IInitializer {
 
-    for (state <- State.values) toDisplay(state.id) = new AtomicInteger
-    
-    for (job <- obj.asInstanceOf[IMoleExecution].moleJobs) toDisplay(job.state.id).incrementAndGet
-
-    for (state <- State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+  override def initialize(obj: Object, c: Class[_]) = {
+    obj.asInstanceOf[IWorkspace].password_=(new jline.ConsoleReader().readLine("Enter your password:", '*'))
   }
-  
 }

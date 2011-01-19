@@ -17,14 +17,12 @@
 
 package org.openmole.core.model.data
 
-import org.openmole.commons.tools.pattern.IVisitable
-
 /**
  * IContext represents a bunch of variables used by the task excutions. 
  * A task execution can remove variables from context, change the values of 
  * the variables and add values to it.
  */
-trait IContext extends IVisitable[IVariable[_]] with Iterable[IVariable[_]] {
+trait IContext extends Iterable[IVariable[_]] {
     
   /**
    * Get all the variables in this context.

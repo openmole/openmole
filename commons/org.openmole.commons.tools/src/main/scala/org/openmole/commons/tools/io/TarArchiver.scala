@@ -21,6 +21,8 @@ import com.ice.tar.TarEntry
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

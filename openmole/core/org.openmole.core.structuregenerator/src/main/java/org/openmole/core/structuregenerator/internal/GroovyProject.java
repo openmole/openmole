@@ -1,8 +1,8 @@
 package org.openmole.core.structuregenerator.internal;
 
 import java.io.File;
-import org.openmole.commons.tools.io.FileInputStream;
-import org.openmole.commons.tools.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.UUID;

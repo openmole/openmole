@@ -18,12 +18,12 @@
 package org.openmole.core.batch.environment
 
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileOutputStream
 import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl

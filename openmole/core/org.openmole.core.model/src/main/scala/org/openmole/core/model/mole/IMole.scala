@@ -17,12 +17,11 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.commons.tools.pattern.IVisitable
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.task.IGenericTask
 
 
-trait IMole extends IVisitable[IGenericCapsule] {
+trait IMole {
 
   def root: IGenericCapsule
     
