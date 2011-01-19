@@ -1,8 +1,8 @@
-package org.openmole.ui.ide.workflow.implementation;
+package org.openmole.ui.ide.workflow.action;
 
 import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.widget.Widget;
-import org.openmole.ui.ide.control.task.TaskSettingsManager;
+import org.openmole.ui.ide.control.TaskSettingsManager;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 

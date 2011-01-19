@@ -73,7 +73,6 @@ public class MoleConverter implements Converter {
                     writer.addAttribute("impl", t.getClass().toString());
 
 
-                        System.out.println("-- task is defined "+ t.task().isDefined() );
                     //Task
                     if (t.task().isDefined()) {
                         writer.startNode("task");
@@ -118,10 +117,6 @@ public class MoleConverter implements Converter {
         } catch (Throwable ex) {
             Exceptions.printStackTrace(ex);
         }
-
-
-
-
     }
 
     @Override

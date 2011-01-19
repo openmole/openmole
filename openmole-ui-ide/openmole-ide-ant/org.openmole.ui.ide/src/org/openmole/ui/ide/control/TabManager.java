@@ -28,7 +28,6 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 public abstract class TabManager implements ITabManager {
 
     private BidiMap<Object, Component> tabMap = new DualHashBidiMap<Object, Component>();
-   // private Map<Object, Component> tabMap = new WeakHashMap<Object, Component>();
     private JTabbedPane tabbedPane;
 
     @Override
@@ -36,6 +35,13 @@ public abstract class TabManager implements ITabManager {
         tabbedPane.remove(tabMap.get(object));
         tabMap.remove(object);
     }
+    
+    @Override
+    public void removeTab(Component component){
+        tabbedPane.remove(component);
+        tabMap.removeValue(component);
+    }
+
 
     @Override
     public void removeAllTabs(){

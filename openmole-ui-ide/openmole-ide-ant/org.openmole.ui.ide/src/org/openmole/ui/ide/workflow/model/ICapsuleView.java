@@ -31,4 +31,5 @@ public interface ICapsuleView {
     void  addInputSlot();
     ConnectableWidget getConnectableWidget();
     void changeConnectableWidget();
+    IMoleScene getMoleScene();
 }

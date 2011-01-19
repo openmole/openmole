@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
+import org.openmole.ui.ide.workflow.action.TaskActions;
 import java.util.Properties;
 import org.openmole.ui.ide.workflow.provider.CapsuleMenuProvider;
 import org.netbeans.api.visual.action.ActionFactory;

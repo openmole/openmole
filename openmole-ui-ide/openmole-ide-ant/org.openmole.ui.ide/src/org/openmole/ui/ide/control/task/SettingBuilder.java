@@ -17,6 +17,8 @@
 
 package org.openmole.ui.ide.control.task;
 
+import org.openmole.ui.ide.control.ITaskSettingContainer;
+
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>

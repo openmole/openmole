@@ -30,6 +30,6 @@ public class AddMoleSceneAction implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        MoleScenesManager.getInstance().display(new MoleScene());
+        MoleScenesManager.getInstance().display(MoleScenesManager.getInstance().addMoleScene());
     }
 }

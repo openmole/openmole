@@ -102,7 +102,6 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewCapsuleProvider(this)));
 
         setActiveTool(CONNECT);
-        MoleScenesManager.getInstance().addMoleScene(this);
     }
 
     public LayerWidget getSlotLayer() {

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ui.ide.control.task;
+package org.openmole.ui.ide.control;
 
 import java.awt.Component;
 import java.io.IOException;
@@ -26,6 +26,7 @@ import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.util.Exceptions;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.control.TabManager;
 import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
@@ -63,6 +64,7 @@ public class TaskSettingsManager extends TabManager {
 //        taskSettingMap.put(tcv, editorPane);
 //        tabbedPane.add(tcv.getName(), taskSettingMap.get(tcv));
         addMapping(tcv, editorPane,tcv.getCapsuleModel().getTaskModel().getName());
+        MoleScenesManager.getInstance().addChild(tcv.getMoleScene(), editorPane);
     }
 
 

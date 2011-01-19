@@ -16,11 +16,16 @@
  */
 package org.openmole.ui.ide.control;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
@@ -31,6 +36,7 @@ public class MoleScenesManager extends TabManager {
 
     private static MoleScenesManager instance = null;
     private Collection<IMoleScene> moleScenes = new ArrayList<IMoleScene>();
+    private Map<IMoleScene, Collection<Component>> childTabs = new HashMap<IMoleScene, Collection<Component>>();
     private int count = 1;
     private int nodeCounter = 0;
 
@@ -54,23 +60,29 @@ public class MoleScenesManager extends TabManager {
 
     public void addMoleScene(IMoleScene ms) {
         moleScenes.add(ms);
+        childTabs.put(ms, new ArrayList<Component>());
+    }
+
+    public IMoleScene addMoleScene(){
+        IMoleScene sc = new MoleScene();
+        addMoleScene(sc);
+        return sc;
+    }
+
+    public void addChild(IMoleScene sc,
+            Component co) {
+        childTabs.get(sc).add(co);
     }
 
     public Collection<IMoleScene> getMoleScenes() {
         return moleScenes;
     }
 
-//    public void setScenesMovable(boolean movable) {
-//        for (IMoleScene ms : moleScenes) {
-//            ms.setMovable(movable);
-//        }
-//    }
-
-    public static MoleScenesManager getInstance() {
-        if (instance == null) {
-            instance = new MoleScenesManager();
+    public void removeCurrentSceneAndChilds(IMoleScene curs) {
+        for (Component co : MoleScenesManager.getInstance().childTabs.get(curs)) {
+            TaskSettingsManager.getInstance().removeTab(co);
         }
-        return instance;
+        removeMoleScene(curs);
     }
 
     @Override
@@ -80,7 +92,7 @@ public class MoleScenesManager extends TabManager {
         JComponent myView = scene.createView();
         JScrollPane moleSceneScrollPane = new JScrollPane();
         moleSceneScrollPane.setViewportView(myView);
-        
+
         String name;
         if (scene.getManager().getName().equals("")) {
             name = "Mole" + count;
@@ -90,5 +102,12 @@ public class MoleScenesManager extends TabManager {
         }
         addMapping(displayed, moleSceneScrollPane, name);
         scene.getManager().setName(name);
+    }
+
+    public static MoleScenesManager getInstance() {
+        if (instance == null) {
+            instance = new MoleScenesManager();
+        }
+        return instance;
     }
 }

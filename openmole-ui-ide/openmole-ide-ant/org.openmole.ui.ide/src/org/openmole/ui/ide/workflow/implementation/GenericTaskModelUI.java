@@ -16,12 +16,10 @@
  */
 package org.openmole.ui.ide.workflow.implementation;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.openmole.core.model.task.IGenericTask;
 import org.openmole.ui.ide.commons.IOType;
-import org.openmole.ui.ide.control.TableType;
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 
 /**
@@ -30,7 +28,6 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
  */
 public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI {
 
-    protected transient Collection<TableType.Name> fields;
     private Set<PrototypeUI> prototypesIn;
     private Set<PrototypeUI> prototypesOut;
     private final static String category = "Tasks";

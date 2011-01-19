@@ -81,19 +81,16 @@ public class PaletteSupport {
     public static class MyPaletteFilter extends PaletteFilter {
 
         public static void refresh(){
-            System.out.println("MyPaletteFilter.refresh() " +  controller);
             controller.refresh();
         }
         
         @Override
         public boolean isValidCategory(Lookup lkp) {
-            System.out.println("MyPaletteFilter.isValidCategory() " + lkp);
             return true;
         }
 
         @Override
         public boolean isValidItem(Lookup lkp) {
-            System.out.println("MyPaletteFilter.isValidItem() " + lkp);
             return true;
         }
         

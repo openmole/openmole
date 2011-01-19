@@ -16,6 +16,7 @@
  */
 package org.openmole.ui.ide.control.task;
 
+import org.openmole.ui.ide.control.ITaskSettingContainer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

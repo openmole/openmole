@@ -92,7 +92,6 @@ public class GUISerializer {
         TasksUI.getInstance().clearAll();
         MoleScenesManager.getInstance().removeMoleScenes();
         
-
         Object readObject;
         for (int i = 0;; i++) {
             try {

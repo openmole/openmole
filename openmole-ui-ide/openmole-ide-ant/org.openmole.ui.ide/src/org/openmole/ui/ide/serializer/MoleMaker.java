@@ -21,6 +21,7 @@ import org.openmole.core.implementation.mole.Mole;
 import org.openmole.core.implementation.transition.Slot;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.core.model.mole.IMole;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.MoleSceneManager;
@@ -60,7 +61,8 @@ public class MoleMaker {
     }
 
     public static IMoleScene processToMoleScene(IMole mole) {
-        IMoleScene moleS = new MoleScene();
+
+        IMoleScene moleS = MoleScenesManager.getInstance().addMoleScene();
 
         return moleS;
     }

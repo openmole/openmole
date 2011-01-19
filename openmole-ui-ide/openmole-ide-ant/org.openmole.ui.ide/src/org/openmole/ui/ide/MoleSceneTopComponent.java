@@ -17,31 +17,22 @@
 package org.openmole.ui.ide;
 
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
+import javax.swing.JComboBox;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.text.EditorKit;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.spi.palette.PaletteController;
-import org.openide.text.CloneableEditorSupport;
-import org.openide.util.lookup.Lookups;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openmole.ui.ide.commons.ApplicationCustomize;
 import org.openmole.ui.ide.control.MoleScenesManager;
-import org.openmole.ui.ide.control.TabManager;
-import org.openmole.ui.ide.control.task.TaskSettingsManager;
-import org.openmole.ui.ide.dialog.ManagementPanel;
+import org.openmole.ui.ide.control.TaskSettingsManager;
 import org.openmole.ui.ide.dialog.PrototypeManager;
 import org.openmole.ui.ide.dialog.TaskManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
@@ -49,8 +40,9 @@ import org.openmole.ui.ide.palette.PaletteSupport;
 import org.openmole.ui.ide.workflow.action.AddMoleSceneAction;
 import org.openmole.ui.ide.workflow.action.ManageEntityAction;
 import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
-import org.openmole.ui.ide.workflow.action.MoveOrDrawTransitionAction;
 import org.openmole.ui.ide.workflow.action.OpenXMLAction;
+import org.openmole.ui.ide.workflow.action.RemoveAllMoleSceneAction;
+import org.openmole.ui.ide.workflow.action.RemoveMoleSceneAction;
 import org.openmole.ui.ide.workflow.action.SaveXMLAction;
 
 /**
@@ -63,7 +55,6 @@ public final class MoleSceneTopComponent extends TopComponent {
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
-    
     private JToolBar toolBar = new JToolBar("SSSE");
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -75,20 +66,15 @@ public final class MoleSceneTopComponent extends TopComponent {
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
-        MoleScene scene = new MoleScene();
         MoleScenesManager.getInstance().setTabbedPane(tabbedPane);
         TaskSettingsManager.getInstance().setTabbedPane(tabbedPane);
-        MoleScenesManager.getInstance().display(scene);
+        MoleScenesManager.getInstance().display(MoleScenesManager.getInstance().addMoleScene());
 
         palette = PaletteSupport.createPalette();
 
         associateLookup(new AbstractLookup(ic));
         ic.add(palette);
 
-        
-//        JToggleButton moveButton = new JToggleButton(new ImageIcon(ApplicationCustomize.IMAGE_TRANSITIONS));
-//        moveButton.addActionListener(new MoveOrDrawTransitionAction());
-//        moveButton.setSelected(false);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedView());
@@ -106,18 +92,33 @@ public final class MoleSceneTopComponent extends TopComponent {
         JButton newTaskButton = new JButton("Tasks");
         newTaskButton.addActionListener(new ManageEntityAction(new TaskManager()));
 
-        JButton newMoleButton = new JButton("New Mole");
-        newMoleButton.addActionListener(new AddMoleSceneAction());
+        JPopupMenu molePopupMenu = new JPopupMenu("Mole");
+
+        JMenuItem itAdd = new JMenuItem("Add");
+        itAdd.addActionListener(new AddMoleSceneAction());
+
+        JMenuItem itRem = new JMenuItem("Remove");
+        itRem.addActionListener(new RemoveMoleSceneAction());
+
+        JMenuItem itRemAll = new JMenuItem("Remove All");
+        itRemAll.addActionListener(new RemoveAllMoleSceneAction());
+
+        molePopupMenu.add(itAdd);
+        molePopupMenu.add(itRem);
+        molePopupMenu.add(itRemAll);
+
+        MenuToogleButton bMole = new MenuToogleButton("Mole");
+        bMole.setPopupMenu(molePopupMenu);
 
         toolBar.add(openXML);
         toolBar.add(saveXML);
         toolBar.add(new JToolBar.Separator());
-       // toolBar.add(moveButton);
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(newPrototypeButton);
         toolBar.add(newTaskButton);
-        toolBar.add(newMoleButton);
+        toolBar.add(new JToolBar.Separator());
+        toolBar.add(bMole);
         add(toolBar, java.awt.BorderLayout.NORTH);
     }
 

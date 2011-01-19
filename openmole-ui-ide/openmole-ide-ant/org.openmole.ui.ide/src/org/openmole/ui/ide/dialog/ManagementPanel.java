@@ -66,7 +66,6 @@ public class ManagementPanel extends javax.swing.JPanel implements ListSelection
         listModel = new DefaultListModel();
 
         for (IEntityUI e : manager.getContainer().getAll()) {
-            System.out.println("add " + e.getName());
             listModel.addElement(e);
         }
 
@@ -217,10 +216,7 @@ public class ManagementPanel extends javax.swing.JPanel implements ListSelection
     private void addEntity(IEntityUI entity) {
         listModel.addElement(entity);
         list.setSelectedIndex(listModel.getSize());
-        System.out.println("RESISTER " + entity.getName());
-        System.out.println("RESISTER " + manager.getContainer());
         manager.getContainer().register(entity);
-        System.out.println("RESISTER " + manager.getContainer().getAll().size());
     }
 
     /**

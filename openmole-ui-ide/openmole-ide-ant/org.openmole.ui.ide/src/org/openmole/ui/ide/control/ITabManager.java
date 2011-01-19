@@ -25,6 +25,7 @@ import java.awt.Component;
  */
 public interface ITabManager {
     void removeTab(Object object);
+    void removeTab(Component component);
     void removeAllTabs();
     void display(Object displayed);
     void addTab(Object displayed);

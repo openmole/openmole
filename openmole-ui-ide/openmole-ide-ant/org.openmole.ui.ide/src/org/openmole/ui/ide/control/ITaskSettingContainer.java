@@ -15,35 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.ide.workflow.provider;
+package org.openmole.ui.ide.control;
 
-import java.awt.Point;
-import org.netbeans.api.visual.action.MoveProvider;
-import org.netbeans.api.visual.widget.Widget;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class TaskMoveProvider implements MoveProvider{
-        private Point original;
-
-    @Override
-    public void movementStarted(Widget widget) {
-        System.out.println("Movement start "+widget.toString());
-    }
-
-    @Override
-    public void movementFinished(Widget widget) {
-        System.out.println("Movement fineshed "+widget.toString());
-    }
-
-public Point getOriginalLocation (Widget widget) {
-            return widget.getPreferredLocation ();
-        }
-
-        public void setNewLocation (Widget widget, Point location) {
-            widget.setPreferredLocation (location);
-        }
+public interface ITaskSettingContainer extends ListSelectionListener {
 
 }

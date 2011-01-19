@@ -23,6 +23,7 @@ import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.workflow.model.IObjectViewUI;
 import java.util.Properties;
 import org.openide.util.ImageUtilities;
+import org.openmole.ui.ide.workflow.model.IMoleScene;
 
 /**
  *
@@ -39,6 +40,11 @@ import org.openide.util.ImageUtilities;
         this.scene = scene;
         this.properties = properties;
         createActions(MoleScene.MOVE).addAction (ActionFactory.createMoveAction());
+    }
+
+    @Override
+    public IMoleScene getMoleScene() {
+        return scene;
     }
 
     @Override
