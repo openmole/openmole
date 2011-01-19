@@ -17,10 +17,8 @@
 package org.openmole.ui.ide.workflow.implementation.paint;
 
 import java.awt.Point;
-import org.netbeans.api.visual.widget.ImageWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.workflow.implementation.CapsuleModelUI;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**

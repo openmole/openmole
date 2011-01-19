@@ -20,6 +20,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.model.capsule.IGenericCapsule;
 import org.openmole.ui.ide.workflow.implementation.TaskUI;
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
 
 /**
  *
@@ -28,7 +29,7 @@ import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget;
 public interface ICapsuleView {
     void encapsule(TaskUI taskUI) throws UserBadDataError;
     ICapsuleModelUI<IGenericCapsule> getCapsuleModel();
-    void  addInputSlot();
+    ISlotWidget addInputSlot();
     ConnectableWidget getConnectableWidget();
     void changeConnectableWidget();
     IMoleScene getMoleScene();

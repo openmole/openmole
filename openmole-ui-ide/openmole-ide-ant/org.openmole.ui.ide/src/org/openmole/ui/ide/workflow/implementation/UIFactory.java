@@ -58,10 +58,6 @@ public class UIFactory implements IUIFactory<Object> {
         }
     }
 
-    public void createCapsule(MoleScene scene) {
-        createCapsule(scene, new Point(0, 0));
-    }
-
     public ICapsuleView createCapsule(MoleScene scene,
             Point locationPoint) {
         ICapsuleView obUI = null;

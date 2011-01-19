@@ -39,6 +39,7 @@ public class MoleScenesManager extends TabManager {
     private Map<IMoleScene, Collection<Component>> childTabs = new HashMap<IMoleScene, Collection<Component>>();
     private int count = 1;
     private int nodeCounter = 0;
+    private boolean detailedView = false;
 
     public void removeMoleScenes() {
         moleScenes.clear();
@@ -102,6 +103,14 @@ public class MoleScenesManager extends TabManager {
         }
         addMapping(displayed, moleSceneScrollPane, name);
         scene.getManager().setName(name);
+    }
+
+     public void setDetailedView(boolean detailedView) {
+        this.detailedView = detailedView;
+    }
+
+    public boolean isDetailedView() {
+        return detailedView;
     }
 
     public static MoleScenesManager getInstance() {

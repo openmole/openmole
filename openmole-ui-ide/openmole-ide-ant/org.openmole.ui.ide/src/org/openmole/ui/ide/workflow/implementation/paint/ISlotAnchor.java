@@ -17,23 +17,26 @@
 package org.openmole.ui.ide.workflow.implementation.paint;
 
 import java.awt.Point;
-import org.netbeans.api.visual.widget.Scene;
-import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.netbeans.api.visual.anchor.Anchor;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class OSlotWidget extends SlotWidget {
-    public OSlotWidget(Scene scene,CapsuleViewUI capsule) {
-        super(scene,capsule);
-        setImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT);
-        setDetailedView(ApplicationCustomize.TASK_CONTAINER_WIDTH);
+public class ISlotAnchor extends SlotAnchor {
+
+    private int index;
+    private final int x = 8;
+
+    public ISlotAnchor(CapsuleViewUI relatedWidget,
+            int index) {
+        super(relatedWidget);
+        this.index = index;
     }
 
-    public void setDetailedView(int w){
-        setPreferredLocation(new Point(w - 6, 14 + ApplicationCustomize.TASK_TITLE_HEIGHT));
+    @Override
+    public Result compute(Entry entry) {
+        return new Result(relatedWidget.convertLocalToScene(new Point(x, index * 20 + 22)), Anchor.Direction.LEFT);
     }
-
 }

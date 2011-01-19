@@ -25,7 +25,7 @@ import javax.swing.JPopupMenu;
 import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.action.AddExistingPrototypeAction;
-import org.openmole.ui.ide.workflow.action.AddInputAction;
+import org.openmole.ui.ide.workflow.action.AddInputSlotAction;
 import org.openmole.ui.ide.workflow.action.AddTaskAction;
 import org.openmole.ui.ide.workflow.action.DefineMoleStartAction;
 import org.openmole.ui.ide.workflow.action.RemoveCapsuleAction;
@@ -90,7 +90,7 @@ public class CapsuleMenuProvider extends GenericMenuProvider {
         this.scene = scene;
 
         itIS = new JMenuItem("Add an input slot");
-        itIS.addActionListener(new AddInputAction(capsuleView));
+        itIS.addActionListener(new AddInputSlotAction(capsuleView));
         JMenuItem itR = new JMenuItem("Remove capsule");
         itR.addActionListener(new RemoveCapsuleAction(scene,capsuleView));
         JMenuItem itStart = new JMenuItem("Define as starting capsule");

@@ -23,6 +23,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 
 /**
@@ -53,7 +54,7 @@ public class MyWidget extends Widget {
     }
 
     public void setWidthHint() {
-         if (scene.isDetailedView()) {
+         if (MoleScenesManager.getInstance().isDetailedView()) {
             taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
             taskImageOffset = ApplicationCustomize.EXPANDED_TASK_IMAGE_WIDTH_OFFSET;
         }

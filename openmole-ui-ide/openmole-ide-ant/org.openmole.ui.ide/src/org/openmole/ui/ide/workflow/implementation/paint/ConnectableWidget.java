@@ -29,6 +29,7 @@ import java.util.Set;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.widget.ImageWidget;
 import org.openmole.ui.ide.commons.ApplicationCustomize;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskModelUI;
@@ -133,7 +134,7 @@ public class ConnectableWidget extends MyWidget {
                             x - taskWidth / 2, h - 13,
                             new Container());
                     AttributedString as = new AttributedString(st);
-                    if (scene.isDetailedView()) {
+                    if (MoleScenesManager.getInstance().isDetailedView()) {
                         graphics.drawString(as.getIterator(), x - taskWidth / 2 + 24, h);
                     }
                     i++;

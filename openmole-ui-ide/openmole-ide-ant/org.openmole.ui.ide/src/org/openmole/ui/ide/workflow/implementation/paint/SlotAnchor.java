@@ -17,34 +17,18 @@
 
 package org.openmole.ui.ide.workflow.implementation.paint;
 
-import java.awt.Point;
 import org.netbeans.api.visual.anchor.Anchor;
-import org.openmole.ui.ide.commons.ApplicationCustomize;
-import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 
 /**
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class SlotAnchor  extends Anchor {
+public abstract class SlotAnchor  extends Anchor {
     CapsuleViewUI relatedWidget;
-    int index;
-    int delta = 0;
 
-    public SlotAnchor(CapsuleViewUI relatedWidget,
-                      int index,
-                      IOType type) {
+    public SlotAnchor(CapsuleViewUI relatedWidget) {
         super(relatedWidget);
         this.relatedWidget = relatedWidget;
-        this.index = index;
-        this.delta = (type == IOType.INPUT ? 0:ApplicationCustomize.TASK_CONTAINER_WIDTH+14);
     }
-
-    @Override
-    public Result compute(Entry entry) {
-
-        return new Result(relatedWidget.convertLocalToScene(new Point(8 + delta,index * 20 + 22)),Anchor.Direction.LEFT );
-    }
-
 }

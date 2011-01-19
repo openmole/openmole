@@ -58,7 +58,9 @@ import org.openmole.ui.ide.workflow.provider.DnDNewCapsuleProvider;
 import scala.Option;
 import org.openmole.core.model.mole.IMole;
 import org.openmole.ui.ide.commons.IOType;
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotAnchor;
 import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget;
+import org.openmole.ui.ide.workflow.implementation.paint.OSlotAnchor;
 import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.SlotAnchor;
 import org.openmole.ui.ide.workflow.provider.TransitionMenuProvider;
@@ -82,9 +84,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     private WidgetAction connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider());
     private WidgetAction reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider());
     private WidgetAction moveAction = ActionFactory.createMoveAction();
-    private boolean detailedView = false;
-    private int currentSlotIndex = 0;
-    private String currentEdge = "";
+    private int currentSlotIndex = 1;
 
     public MoleScene() {
         super();
@@ -108,29 +108,16 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         return slotLayer;
     }
 
-    public void setDetailedView(boolean detailedView) {
-        this.detailedView = detailedView;
-    }
-
-    public boolean isDetailedView() {
-        return detailedView;
-    }
-
     @Override
     public MoleSceneManager getManager() {
         return manager;
     }
 
     public void createEdge(String sourceNodeID, String targetNodeID) {
-        String ed = "edge" + String.valueOf(nbEdges++);
+        String ed = manager.getEdgeID();
         addEdge(ed);
         setEdgeSource(ed, sourceNodeID);
         setEdgeTarget(ed, targetNodeID);
-    }
-
-    public void removeElement(ICapsuleModelUI cm) {
-        //    removeNode(getManager().getCapsuleViewID(cm));
-        //    getManager().removeCapsuleView(cm);
     }
 
     @Override
@@ -158,20 +145,19 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         connectionWidget.getActions().addAction(reconnectAction);
 
         connectionWidget.getActions().addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this, e)));
-        currentEdge = e;
         return connectionWidget;
     }
 
     @Override
     protected void attachEdgeSourceAnchor(String edge, String oldSourceNode, String sourceNode) {
         ConnectionWidget cw = ((ConnectionWidget) findWidget(edge));
-        cw.setSourceAnchor(new SlotAnchor((CapsuleViewUI) findWidget(sourceNode), 1, IOType.OUTPUT));
+        cw.setSourceAnchor(new OSlotAnchor((CapsuleViewUI) findWidget(sourceNode)));
         cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
     }
 
     @Override
     protected void attachEdgeTargetAnchor(String edge, String oldTargetNode, String targetNode) {
-        ((ConnectionWidget) findWidget(edge)).setTargetAnchor(new SlotAnchor(((CapsuleViewUI) findWidget(targetNode)), this.currentSlotIndex, IOType.INPUT));
+        ((ConnectionWidget) findWidget(edge)).setTargetAnchor(new ISlotAnchor(((CapsuleViewUI) findWidget(targetNode)), this.currentSlotIndex));
 
     }
 
@@ -231,7 +217,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
             }
         } else {
             if (!getNodes().contains(nodeID)) {
-                UIFactory.getInstance().createCapsule(this);
+             //   UIFactory.getInstance().createCapsule(this);
             }
         }
     }
@@ -284,8 +270,8 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
 
         @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
+            manager.addTransition((CapsuleViewUI) sourceWidget, (ISlotWidget) targetWidget);
             MoleScene.this.createEdge(source, target);
-            manager.addTransition(currentEdge, (CapsuleViewUI) sourceWidget, (ISlotWidget) targetWidget);
         }
     }
 
@@ -352,10 +338,10 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
                 removeEdge(edge);
             } else if (reconnectingSource) {
                 setEdgeSource(edge, replacementNode);
-                getManager().addTransition(edge, ((OSlotWidget) replacementWidget).getCapsuleView(), t.getTarget());
+                getManager().addTransition(edge,((OSlotWidget) replacementWidget).getCapsuleView(), t.getTarget());
             } else {
                 ISlotWidget targetView =  ((ISlotWidget) replacementWidget);
-                connectionWidget.setTargetAnchor(new SlotAnchor(targetView.getCapsuleView(), MoleScene.this.currentSlotIndex, IOType.INPUT));
+                connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.getCapsuleView(), MoleScene.this.currentSlotIndex));
                 setEdgeTarget(edge, replacementNode);
 
                 getManager().addTransition(edge, t.getSource(), targetView);

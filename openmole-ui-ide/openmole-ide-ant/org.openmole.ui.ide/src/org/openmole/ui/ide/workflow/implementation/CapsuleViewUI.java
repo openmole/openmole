@@ -62,9 +62,6 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
         setLayout(LayoutFactory.createVerticalFlowLayout());
         addChild(connectableWidget);
 
-        //Default input slot
-        addInputSlot();
-
         //Default output slot
         connectableWidget.addOutputSlot(new OSlotWidget(scene,this));
 
@@ -115,11 +112,12 @@ public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
     }
 
     @Override
-    public void addInputSlot() {
+    public ISlotWidget addInputSlot() {
         capsuleModel.addInputSlot();
         ISlotWidget im = new ISlotWidget(scene, this,getCapsuleModel().getNbInputslots(),capsuleModel.isStartingCapsule() ? true : false);
         getConnectableWidget().addInputSlot(im);
         scene.refresh();
+        return im;
     }
 
     @Override

@@ -24,15 +24,15 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
-public class AddInputAction implements ActionListener {
-     private ICapsuleView connectable;
+public class AddInputSlotAction implements ActionListener {
+     private ICapsuleView capsule;
 
-     public AddInputAction(ICapsuleView c){
-        connectable = c;
+     public AddInputSlotAction(ICapsuleView c){
+        capsule = c;
      }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        connectable.addInputSlot();
+        capsule.addInputSlot();
     }
 }

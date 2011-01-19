@@ -41,7 +41,7 @@ public class AddCapsuleAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         UIFactory.getInstance().createCapsule(moleScene,
-                provider.getCurrentPoint());
+                provider.getCurrentPoint()).addInputSlot();
         moleScene.refresh();
     }
 }

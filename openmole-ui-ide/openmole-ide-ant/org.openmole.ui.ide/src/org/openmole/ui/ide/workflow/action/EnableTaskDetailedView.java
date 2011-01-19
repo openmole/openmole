@@ -34,10 +34,9 @@ public class EnableTaskDetailedView implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         AbstractButton button = (AbstractButton) ae.getSource();
+        MoleScenesManager.getInstance().setDetailedView(button.isSelected());
         for (Iterator<IMoleScene> its = MoleScenesManager.getInstance().getMoleScenes().iterator(); its.hasNext();) {
             MoleScene scene = (MoleScene) its.next();
-
-            scene.setDetailedView(button.isSelected());
             for (ICapsuleView cv : scene.getManager().getCapsuleViews()) {
                 cv.getConnectableWidget().setDetailedView();
             }

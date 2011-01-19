@@ -31,6 +31,7 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
+import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskUI;
@@ -47,8 +48,8 @@ import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI;
 public class MoleSceneConverter implements Converter {
 
     Collection<IGenericTaskModelUI> taskModels = new HashSet<IGenericTaskModelUI>();
-    private Map<ICapsuleView,Integer> firstSlotID = new HashMap<ICapsuleView, Integer>();
-    private Map<ISlotWidget,Integer> iSlotMapping = new HashMap<ISlotWidget, Integer>();
+    private Map<ICapsuleView, Integer> firstSlotID = new HashMap<ICapsuleView, Integer>();
+    private Map<ISlotWidget, Integer> iSlotMapping = new HashMap<ISlotWidget, Integer>();
 
     @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
@@ -70,7 +71,7 @@ public class MoleSceneConverter implements Converter {
             slotcount++;
             firstSlotID.put(view, slotcount);
             for (ISlotWidget iw : view.getConnectableWidget().getIslots()) {
-                iSlotMapping.put(iw,slotcount);
+                iSlotMapping.put(iw, slotcount);
                 writer.startNode("islot");
                 writer.addAttribute("id", String.valueOf(slotcount));
                 writer.endNode();
@@ -107,7 +108,6 @@ public class MoleSceneConverter implements Converter {
             writer.endNode();
         }
 
-
         //Transitions
         for (TransitionUI trans : molescene.getManager().getTransitions()) {
             writer.startNode("transition");
@@ -121,8 +121,8 @@ public class MoleSceneConverter implements Converter {
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext uc) {
 
-        Map<String, ICapsuleView> slots = new HashMap<String, ICapsuleView>();
-        Map<ICapsuleView, Integer> nbSlots = new HashMap<ICapsuleView, Integer>();
+        Map<String, ICapsuleView> oslots = new HashMap<String, ICapsuleView>();
+        Map<String, ISlotWidget> islots = new HashMap<String, ISlotWidget>();
 
         MoleScene scene = new MoleScene();
         scene.getManager().setName(reader.getAttribute("name"));
@@ -134,12 +134,12 @@ public class MoleSceneConverter implements Converter {
                 p.setLocation(Double.parseDouble(reader.getAttribute("x")), Double.parseDouble(reader.getAttribute("y")));
                 ICapsuleView caps = UIFactory.getInstance().createCapsule(scene, p);
                 // Slots
-                int nbslots = 0;
                 while (reader.hasMoreChildren()) {
                     reader.moveDown();
-                    if ("islot".equals(reader.getNodeName()) || "oslot".equals(reader.getNodeName())) {
-                        slots.put(reader.getAttribute("id"), caps);
-                        nbslots++;
+                    if ("islot".equals(reader.getNodeName())) {
+                        islots.put(reader.getAttribute("id"), caps.addInputSlot());
+                    } else if ("oslot".equals(reader.getNodeName())) {
+                        oslots.put(reader.getAttribute("id"), caps);
                     } else if ("task".equals(reader.getNodeName())) {
                         String n = reader.getAttribute("name");
                         String taskType = reader.getAttribute("type");
@@ -150,7 +150,6 @@ public class MoleSceneConverter implements Converter {
                         } catch (ClassNotFoundException ex) {
                             MoleExceptionManagement.showException("Unknown task class " + taskType);
                         }
-                        nbSlots.put(caps, nbslots - 1);
                         while (reader.hasMoreChildren()) {
                             reader.moveDown();
                             if ("iprototype".equals(reader.getNodeName()) || "oprototype".equals(reader.getNodeName())) {
@@ -164,18 +163,14 @@ public class MoleSceneConverter implements Converter {
                             reader.moveUp();
                         }
                     }
-                    for (int i = 2; i < nbslots; ++i) {
-                        caps.addInputSlot();
-                    }
                     reader.moveUp();
                 }
             } else if ("transition".equals(reader.getNodeName())) {
-//                ICapsuleView source = slots.get(reader.getAttribute("source"));
-//                ICapsuleView target = slots.get(reader.getAttribute("target"));
-//                scene.getManager().addTransition(source.getCapsuleModel(),
-//                        target.getCapsuleModel(),
-//                        nbSlots.get(target));
-//                scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target));
+                ICapsuleView source = oslots.get(reader.getAttribute("source"));
+                ISlotWidget target = islots.get(reader.getAttribute("target"));
+
+                scene.getManager().addTransition(source, target);
+                scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target.getCapsuleView()));
             }
             reader.moveUp();
         }

@@ -35,13 +35,18 @@ public class MoleSceneManager {
 
     private BidiMap<String, ICapsuleView> capsuleViews = new DualHashBidiMap<String, ICapsuleView>();
     private BidiMap<String, TransitionUI> transitions = new DualHashBidiMap<String, TransitionUI>();
-    private Map<ICapsuleView,Collection<TransitionUI>> capsuleConnection = new HashMap<ICapsuleView, Collection<TransitionUI>>();
+    private Map<ICapsuleView, Collection<TransitionUI>> capsuleConnection = new HashMap<ICapsuleView, Collection<TransitionUI>>();
     private CapsuleViewUI startingCapsule = null;
     private int nodeID = 0;
+    private int edgeID = 0;
     private String name = "";
 
     public String getNodeID() {
         return "node" + nodeID;
+    }
+
+    public String getEdgeID() {
+        return "edge" + edgeID;
     }
 
     public String getName() {
@@ -71,7 +76,7 @@ public class MoleSceneManager {
     public void registerCapsuleView(ICapsuleView cv) {
         nodeID++;
         capsuleViews.put(getNodeID(), cv);
-        capsuleConnection.put(cv,new HashSet<TransitionUI>());
+        capsuleConnection.put(cv, new HashSet<TransitionUI>());
     }
 
     public String getCapsuleViewID(ICapsuleView cv) {
@@ -85,7 +90,7 @@ public class MoleSceneManager {
     public void removeCapsuleView(String nodeID) {
         ICapsuleModelUI model = capsuleViews.get(nodeID).getCapsuleModel();
 
-        for (TransitionUI t : capsuleConnection.get(capsuleViews.get(nodeID))){
+        for (TransitionUI t : capsuleConnection.get(capsuleViews.get(nodeID))) {
             transitions.removeValue(t);
         }
         capsuleViews.remove(nodeID);
@@ -98,17 +103,25 @@ public class MoleSceneManager {
     public TransitionUI getTransition(String edge) {
         return transitions.get(edge);
     }
+
     public void removeTransition(String edge) {
         transitions.remove(edge);
     }
 
-    public void addTransition(String edgename,
-            CapsuleViewUI source,
+    public void addTransition(ICapsuleView source,
+            ISlotWidget target) {
+        edgeID++;
+        addTransition(getEdgeID(),source, target);
+    }
+
+    public void addTransition(String edgeID,
+            ICapsuleView source,
             ISlotWidget target) {
         TransitionUI t = new TransitionUI(source, target);
-        transitions.put(edgename, t);
+        transitions.put(edgeID, t);
         capsuleConnection.get(source).add(t);
         capsuleConnection.get(target.getCapsuleView()).add(t);
+
     }
 
     public void printTaskC() {
