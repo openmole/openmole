@@ -20,7 +20,7 @@ public aspect EventAspect {
                 String type = annotation.name();
                 Object[] args = thisJoinPoint.getArgs();
 
-                Activator.getEventDispatcher().objectChanged(object,type, args);
+                Activator.eventDispatcher().objectChanged(object,type, args);
 	}
 
 
@@ -31,7 +31,7 @@ public aspect EventAspect {
                 Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                 ObjectModified annotation = method.getAnnotation(ObjectModified.class);
 
-                Activator.getEventDispatcher().objectChanged(object,annotation.name(), thisJoinPoint.getArgs());
+                Activator.eventDispatcher().objectChanged(object,annotation.name(), thisJoinPoint.getArgs());
 	}
 
         after() : execution(*.new(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectConstructed) {
@@ -45,7 +45,7 @@ public aspect EventAspect {
 
                // Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,"ctr: " + thisJoinPointStaticPart.getSignature().toString());
 
-                Activator.getEventDispatcher().objectConstructed(object);
+                Activator.eventDispatcher().objectConstructed(object);
 		//Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,object.toString() + " "+ method);
 
 		//return ret;
