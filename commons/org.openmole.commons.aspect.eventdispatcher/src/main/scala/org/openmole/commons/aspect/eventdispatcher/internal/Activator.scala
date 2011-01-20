@@ -37,6 +37,9 @@ class Activator extends BundleActivator {
     reg = bc.registerService(classOf[IEventDispatcher].getName, Activator.eventDispatcher, null)
   }
 
-  override def stop(bc: BundleContext) = reg.unregister
+  override def stop(bc: BundleContext) = {
+    reg.unregister
+    Activator.context = None
+  }
 
 }

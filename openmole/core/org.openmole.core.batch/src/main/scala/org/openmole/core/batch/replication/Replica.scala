@@ -52,9 +52,7 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDesc
   }
 
   override def activate(purpose: ActivationPurpose) {
-    if (activator == null) {
-      return;
-    }
+    if (activator == null) return
     activator.activate(purpose)
   }
 
@@ -69,10 +67,8 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDesc
   }
 
   def hashOfSrcMatch(hash: IHash): Boolean = {
-    if (this.hash == null || hash == null) {
-      return false
-    }
-    this.hash.equals(hash);
+    if (this.hash == null || hash == null) return false
+    this.hash.equals(hash)
   }
 
   def hash: IHash = {

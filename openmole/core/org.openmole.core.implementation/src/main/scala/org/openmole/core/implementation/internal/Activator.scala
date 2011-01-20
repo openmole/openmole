@@ -19,19 +19,15 @@ package org.openmole.core.implementation.internal
 
 
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher
+import org.openmole.commons.tools.service.OSGiActivator
 import org.openmole.core.serializer.ISerializer
 import org.openmole.misc.pluginmanager.IPluginManager
 import org.openmole.misc.workspace.IWorkspace
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-object Activator {
-  var context: BundleContext = null
-  
-  def getService[T](interface: Class[T]): T = {
-    val ref = context.getServiceReference(interface.getName)
-    context.getService(ref).asInstanceOf[T]
-  }
+object Activator extends OSGiActivator {
+  var context: Option[BundleContext] = None
   
   lazy val workspace = getService(classOf[IWorkspace])
   lazy val serializer = getService(classOf[ISerializer])
@@ -42,11 +38,11 @@ object Activator {
 class Activator extends BundleActivator {
 
     override def start(context: BundleContext) = {
-        Activator.context = context
+        Activator.context = Some(context)
     }
 
     override def stop(context: BundleContext) = {
-        Activator.context = null
+        Activator.context = None
     }
 
 }

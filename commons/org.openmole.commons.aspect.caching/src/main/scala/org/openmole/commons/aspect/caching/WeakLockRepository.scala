@@ -15,35 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.commons.tools.service
+package org.openmole.commons.aspect.caching
 
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
+import scala.collection.mutable.WeakHashMap
 
-class LockRepository[T] {
-
-  val locks = new HashMap[T, (Lock, AtomicInteger)]
-
-  def lock(obj: T) = {
-    synchronized {
-      val lock = locks.getOrElseUpdate(obj,(new ReentrantLock, new AtomicInteger(0)))
-      lock._2.incrementAndGet
-      lock._1
-    }.lock
+class WeakLockRepository {
+  val locks  = new WeakHashMap[Object, HashMap[String,Lock]] with SynchronizedMap[Object, HashMap[String,Lock]]
+	
+  def lockFor(obj: Object, method: String): Lock = {
+    val lockMap = locks.getOrElseUpdate(obj, new HashMap[String, Lock] with SynchronizedMap[String, Lock])
+    lockMap.getOrElseUpdate(method, new ReentrantLock)
   }
 
-  def unlock(obj: T) = {
-
-    synchronized {
-      locks.get(obj) match {
-        case Some(lock) => 
-          val value = lock._2.decrementAndGet
-          if (value <= 0) locks.remove(obj)
-          lock._1
-        case None => throw new IllegalArgumentException("Unlocking an object that has not been locked.")
-      }
-    }.unlock
-  }
 }

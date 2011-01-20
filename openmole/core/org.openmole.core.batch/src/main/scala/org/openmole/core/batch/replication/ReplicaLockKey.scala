@@ -21,4 +21,4 @@ import org.openmole.commons.tools.service.IHash
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.environment.BatchAuthenticationKey
 
-class ReplicaLockKey(hash: IHash,desc: BatchStorageDescription, auth: BatchAuthenticationKey) extends (IHash, BatchStorageDescription, BatchAuthenticationKey)(hash, desc, auth)
+case class ReplicaLockKey(hash: IHash,desc: BatchStorageDescription, auth: BatchAuthenticationKey) 
