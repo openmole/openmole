@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.resource.virtual.internal;
 
-import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.misc.executorservice.IExecutorService;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
@@ -50,13 +50,13 @@ public class Activator implements BundleActivator {
         return instance.getWorkspace();
     }
 
-    @SoftCachable
+    @Cachable
     private IExecutorService getExecutorService() {
         ServiceReference ref = context.getServiceReference(IExecutorService.class.getName());
         return (IExecutorService) context.getService(ref);
     }
 
-    @SoftCachable
+    @Cachable
     private IWorkspace getWorkspace() {
         ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());
         return (IWorkspace) context.getService(ref);
