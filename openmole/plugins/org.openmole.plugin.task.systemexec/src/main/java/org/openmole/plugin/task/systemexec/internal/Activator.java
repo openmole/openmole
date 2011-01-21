@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.systemexec.internal;
 
-import org.openmole.commons.aspect.caching.SoftCachable;
+import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.misc.workspace.IWorkspace;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
         return instance.getWorkspace();
     }
 
-    @SoftCachable
+    @Cachable
     private IWorkspace getWorkspace()
     {
       ServiceReference ref = context.getServiceReference(IWorkspace.class.getName());

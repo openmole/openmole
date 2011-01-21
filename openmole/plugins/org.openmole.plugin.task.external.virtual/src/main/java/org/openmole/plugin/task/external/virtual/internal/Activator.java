@@ -16,7 +16,6 @@
  */
 package org.openmole.plugin.task.external.virtual.internal;
 
-import org.openmole.commons.aspect.caching.SoftCachable;
 import org.openmole.misc.workspace.IWorkspace;
 import org.openmole.misc.workspace.internal.Workspace;
 import org.osgi.framework.BundleActivator;
