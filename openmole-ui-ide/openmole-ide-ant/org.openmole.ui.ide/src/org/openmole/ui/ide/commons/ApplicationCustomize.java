@@ -36,73 +36,60 @@ public class ApplicationCustomize {
     private static ApplicationCustomize instance = null;
     private LinkedHashMap<String, Color> colorMap = new LinkedHashMap<String, Color>();
     private LinkedHashMap<String, Image> typeImageMap = new LinkedHashMap<String, Image>();
-
     public static final String TASK_HEADER_BACKGROUND_COLOR = "TASK_HEADER_BACKGROUND_COLOR";
     public static final String TASK_SELECTION_COLOR = "TASK_SELECTION_COLOR";
-
-   
-    public static final String TABLE_HEADER_COLOR = "TABLE_HEADER_COLOR";
-    public static final String TABLE_ROW_COLOR = "TABLE_ROW_COLOR";
-
-    
+    public static final String CONDITION_LABEL_BACKGROUND_COLOR = "CONDITION_LABEL_BACKGROUND_COLOR";
+    public static final String CONDITION_LABEL_BORDER_COLOR = "CONDITION_LABEL_BORDER_COLOR";
     public static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
     public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
-    public static final int PANEL_WIDTH =  (int) (SCREEN_WIDTH * 0.8);
+    public static final int PANEL_WIDTH = (int) (SCREEN_WIDTH * 0.8);
     public static final int PANEL_HEIGHT = (int) (SCREEN_HEIGHT * 0.8);
-
     public static final int EXPANDED_TASK_CONTAINER_WIDTH = 200;
     public static final int TASK_CONTAINER_WIDTH = 80;
     public static final int TASK_CONTAINER_HEIGHT = 100;
     public static final int TASK_TITLE_WIDTH = TASK_CONTAINER_WIDTH;
     public static final int TASK_TITLE_HEIGHT = 20;
-    public static final int TASK_IMAGE_HEIGHT = TASK_CONTAINER_HEIGHT - TASK_TITLE_HEIGHT -20;
+    public static final int TASK_IMAGE_HEIGHT = TASK_CONTAINER_HEIGHT - TASK_TITLE_HEIGHT - 20;
     public static final int TASK_IMAGE_WIDTH = 70;
     public static final int TASK_IMAGE_HEIGHT_OFFSET = TASK_TITLE_HEIGHT + 10;
     public static final int TASK_IMAGE_WIDTH_OFFSET = (TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2;
     public static final int EXPANDED_TASK_IMAGE_WIDTH_OFFSET = (EXPANDED_TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2;
     public static final int DATA_TABLE_X_OFFSET = (int) (2 + TASK_CONTAINER_WIDTH * 0.1);
     public static final int DATA_TABLE_Y_OFFSET = (int) (TASK_CONTAINER_HEIGHT * 0.1 - 2);
-
     public static final Image IMAGE_START_SLOT = ImageUtilities.loadImage("resources/img/startSlot.png");
     public static final Image IMAGE_INPUT_SLOT = ImageUtilities.loadImage("resources/img/inputSlot.png");
     public static final Image IMAGE_OUTPUT_SLOT = ImageUtilities.loadImage("resources/img/outputSlot.png");
     public static final Image IMAGE_TRANSITIONS = ImageUtilities.loadImage("resources/img/transitions.png");
-    
-    
     public static final int NB_MAX_SLOTS = 5;
-
-    public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor(PrototypeUI.class, "Prototypes" );
-    public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor( TaskUI.class, "Tasks" );
-    public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor( ICapsuleModelUI.class, "Task capsules" );
-
+    public static final DataFlavor PROTOTYPE_DATA_FLAVOR = new DataFlavor(PrototypeUI.class, "Prototypes");
+    public static final DataFlavor TASK_DATA_FLAVOR = new DataFlavor(TaskUI.class, "Tasks");
+    public static final DataFlavor TASK_CAPSULE_DATA_FLAVOR = new DataFlavor(ICapsuleModelUI.class, "Task capsules");
     public static final String TASK_DEFAULT_PROPERTIES = "src/resources/task/default";
-    
     public static final Class CORE_CAPSULE_CLASS = org.openmole.core.implementation.capsule.Capsule.class;
-    
+
     public ApplicationCustomize() {
         setDefaultColors();
         setDefaultTypeImages();
     }
 
-
-    private void setDefaultTypeImages(){
-        for(Class c : Preferences.getInstance().getPrototypeTypeClasses()){
-            typeImageMap.put(c.getSimpleName(),ImageUtilities.loadImage("resources/img/"+c.getSimpleName()+".png"));
+    private void setDefaultTypeImages() {
+        for (Class c : Preferences.getInstance().getPrototypeTypeClasses()) {
+            typeImageMap.put(c.getSimpleName(), ImageUtilities.loadImage("resources/img/" + c.getSimpleName() + ".png"));
         }
     }
-    
-    public Image getTypeImage(String type){
+
+    public Image getTypeImage(String type) {
         return typeImageMap.get(type);
     }
-    
+
     private void setDefaultColors() {
-        colorMap.put(TASK_HEADER_BACKGROUND_COLOR, new Color(68,120,33));
+        colorMap.put(TASK_HEADER_BACKGROUND_COLOR, new Color(68, 120, 33));
         colorMap.put(TASK_SELECTION_COLOR, new Color(255, 100, 0));
-        colorMap.put(TABLE_HEADER_COLOR, new Color(227,222,219,150));
-        colorMap.put(TABLE_ROW_COLOR, new Color(255,238,170,150));
+        colorMap.put(CONDITION_LABEL_BACKGROUND_COLOR, new Color(255, 238, 170));
+        colorMap.put(CONDITION_LABEL_BORDER_COLOR, new Color(230, 180, 0));
     }
 
-    public Color getColor(String str){
+    public Color getColor(String str) {
         return colorMap.get(str);
     }
 

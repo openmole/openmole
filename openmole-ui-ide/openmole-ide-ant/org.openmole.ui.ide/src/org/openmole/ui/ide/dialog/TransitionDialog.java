@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ui.ide.workflow.action;
+package org.openmole.ui.ide.dialog;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import org.openmole.ui.ide.dialog.TransitionDialog;
+import javax.swing.JOptionPane;
 import org.openmole.ui.ide.workflow.implementation.TransitionUI;
 import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget;
 
@@ -26,19 +24,14 @@ import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class AddTransitionConditionAction implements ActionListener {
+public class TransitionDialog {
 
-    TransitionUI transition;
-    LabeledConnectionWidget connectionWidget;
-
-    public AddTransitionConditionAction(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
-        this.transition = transition;
-        this.connectionWidget = connectionWidget;
+    public static void displayTransitionDialog(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
+        String cond = JOptionPane.showInputDialog(null, "Edit transition condition:", transition.getCondition());
+        if (cond != null) {
+            connectionWidget.setConditionLabel(cond);
+            transition.setCondition(cond);
+            connectionWidget.getScene().validate();
+        }
     }
-
-    @Override
-    public void actionPerformed(ActionEvent ae) {
-        TransitionDialog.displayTransitionDialog(transition,connectionWidget);
-    }
-
 }

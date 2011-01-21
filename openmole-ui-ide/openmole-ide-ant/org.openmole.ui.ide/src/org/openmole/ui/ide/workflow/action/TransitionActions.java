@@ -16,8 +16,8 @@
  */
 package org.openmole.ui.ide.workflow.action;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import org.netbeans.api.visual.action.WidgetAction;
+import org.netbeans.api.visual.widget.Widget;
 import org.openmole.ui.ide.dialog.TransitionDialog;
 import org.openmole.ui.ide.workflow.implementation.TransitionUI;
 import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget;
@@ -26,19 +26,24 @@ import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget
  *
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
-public class AddTransitionConditionAction implements ActionListener {
+public class TransitionActions extends WidgetAction.Adapter {
 
     TransitionUI transition;
     LabeledConnectionWidget connectionWidget;
 
-    public AddTransitionConditionAction(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
+    public TransitionActions(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
+        System.out.println("TransitionActions constructor   ");
         this.transition = transition;
         this.connectionWidget = connectionWidget;
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
-        TransitionDialog.displayTransitionDialog(transition,connectionWidget);
+    public State mouseClicked(Widget widget,
+            WidgetMouseEvent event) {
+        System.out.println(" - mouseClicked - " + transition);
+        if (event.getClickCount() == 2) {
+            TransitionDialog.displayTransitionDialog(transition, connectionWidget);
+        }
+        return State.REJECTED;
     }
-
 }

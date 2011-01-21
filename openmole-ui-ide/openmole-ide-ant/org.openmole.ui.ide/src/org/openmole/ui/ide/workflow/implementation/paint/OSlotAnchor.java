@@ -38,6 +38,6 @@ public class OSlotAnchor extends SlotAnchor {
     @Override
     public Result compute(Entry entry) {
         int detailedEffect = (MoleScenesManager.getInstance().isDetailedView() ? ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH -ApplicationCustomize.TASK_CONTAINER_WIDTH : 0);
-        return new Result(relatedWidget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.LEFT);
+        return new Result(relatedWidget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT);
     }
 }

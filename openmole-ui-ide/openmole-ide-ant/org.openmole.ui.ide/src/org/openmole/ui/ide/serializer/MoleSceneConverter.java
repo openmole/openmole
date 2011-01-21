@@ -31,7 +31,6 @@ import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.ui.ide.commons.IOType;
 import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.exception.MoleExceptionManagement;
-import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI;
 import org.openmole.ui.ide.workflow.implementation.TaskUI;
@@ -113,6 +112,7 @@ public class MoleSceneConverter implements Converter {
             writer.startNode("transition");
             writer.addAttribute("source", String.valueOf(firstSlotID.get(trans.getSource()) + trans.getSource().getCapsuleModel().getNbInputslots()));
             writer.addAttribute("target", String.valueOf(iSlotMapping.get(trans.getTarget())));
+            writer.addAttribute("condition", trans.getCondition());
             writer.endNode();
         }
 
@@ -168,8 +168,10 @@ public class MoleSceneConverter implements Converter {
             } else if ("transition".equals(reader.getNodeName())) {
                 ICapsuleView source = oslots.get(reader.getAttribute("source"));
                 ISlotWidget target = islots.get(reader.getAttribute("target"));
+                String condition = reader.getAttribute("condition");
 
-                scene.getManager().addTransition(source, target);
+                scene.getManager().registerTransition(new TransitionUI(source, target,condition));
+
                 scene.createEdge(scene.getManager().getCapsuleViewID(source), scene.getManager().getCapsuleViewID(target.getCapsuleView()));
             }
             reader.moveUp();

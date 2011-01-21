@@ -24,12 +24,19 @@ import org.openmole.ui.ide.workflow.model.ICapsuleView;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
  */
 public class TransitionUI {
-    public ICapsuleView source;
-    public ISlotWidget target;
+    private ICapsuleView source;
+    private ISlotWidget target;
+    private String condition = "";
+
 
     public TransitionUI(ICapsuleView source, ISlotWidget target) {
         this.source = source;
         this.target = target;
+    }
+
+    public TransitionUI(ICapsuleView source, ISlotWidget target,String condition) {
+        this(source,target);
+        this.condition = condition;
     }
 
     public ICapsuleView getSource() {
@@ -38,5 +45,13 @@ public class TransitionUI {
 
     public ISlotWidget getTarget() {
         return target;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 }

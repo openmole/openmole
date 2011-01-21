@@ -108,25 +108,16 @@ public class MoleSceneManager {
         transitions.remove(edge);
     }
 
-    public void addTransition(ICapsuleView source,
-            ISlotWidget target) {
+    public void registerTransition(TransitionUI transition) {
         edgeID++;
-        addTransition(getEdgeID(),source, target);
+        registerTransition(getEdgeID(),transition);
     }
 
-    public void addTransition(String edgeID,
-            ICapsuleView source,
-            ISlotWidget target) {
-        TransitionUI t = new TransitionUI(source, target);
-        transitions.put(edgeID, t);
-        capsuleConnection.get(source).add(t);
-        capsuleConnection.get(target.getCapsuleView()).add(t);
+    public void registerTransition(String edgeID,
+            TransitionUI transition) {
+        transitions.put(edgeID, transition);
+        capsuleConnection.get(transition.getSource()).add(transition);
+        capsuleConnection.get(transition.getTarget().getCapsuleView()).add(transition);
 
-    }
-
-    public void printTaskC() {
-        for (String t : capsuleViews.keySet()) {
-            System.out.println("TASKC :: " + t);
-        }
     }
 }

@@ -14,13 +14,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.provider;
 
 import javax.swing.JMenuItem;
+import org.netbeans.api.visual.widget.ConnectionWidget;
+import org.netbeans.api.visual.widget.LabelWidget;
 import org.openmole.ui.ide.workflow.action.AddTransitionConditionAction;
 import org.openmole.ui.ide.workflow.action.RemoveTransitionAction;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
+import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget;
 
 /**
  *
@@ -29,18 +31,18 @@ import org.openmole.ui.ide.workflow.implementation.MoleScene;
 public class TransitionMenuProvider extends GenericMenuProvider {
 
     public TransitionMenuProvider(MoleScene scene,
-                                  String edgeID) {
+            LabeledConnectionWidget connectionWidget,
+            String edgeID) {
         super();
 
-        JMenuItem itemCondition = new JMenuItem("Add condition");
-        itemCondition.addActionListener(new AddTransitionConditionAction(edgeID));
+        JMenuItem itemCondition = new JMenuItem("Edit condition");
+        itemCondition.addActionListener(new AddTransitionConditionAction(scene.getManager().getTransition(edgeID),
+                connectionWidget));
 
         JMenuItem itemRemove = new JMenuItem("Remove transition");
-        itemRemove.addActionListener(new RemoveTransitionAction(scene,edgeID));
+        itemRemove.addActionListener(new RemoveTransitionAction(scene, edgeID));
 
         items.add(itemCondition);
         items.add(itemRemove);
     }
-
-
 }
