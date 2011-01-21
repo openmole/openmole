@@ -9,4 +9,4 @@ Build-Jdk: 1.6.0_13
 Bundle-ManifestVersion: 2
 Bundle-License: http://www.gnu.org/copyleft/gpl.html
 Bundle-SymbolicName: org.openmole.misc.caching;singleton:=true
-Import-Package: org.osgi.framework;version="1.5", org.openmole.commons.exception;version="0.3", org.openmole.commons.tools.service;version="0.3", org.aspectj.lang, org.aspectj.lang.annotation, org.aspectj.runtime.internal
+Import-Package: org.osgi.framework;version="1.5", org.openmole.commons.exception;version="0.3", org.openmole.commons.tools.service;version="0.3", org.aspectj.lang, org.aspectj.lang.annotation, org.aspectj.runtime.internal,scala,scala.collection,scala.collection.generic,scala.collection.immutable,scala.collection.mutable,scala.collection.script,scala.math,scala.reflect,scala.runtime,scala.util

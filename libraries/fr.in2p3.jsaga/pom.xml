@@ -24,7 +24,13 @@
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
-       <dependency>
+        <dependency>
+            <groupId>fr.in2p3.jsaga.adaptor</groupId>
+            <artifactId>jsaga-adaptor-classic</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-voms</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
@@ -36,17 +42,28 @@
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-srm</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-wms</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
+        </dependency>
+<!--       	<dependency>
+            <groupId>fr.in2p3.jsaga.adaptor</groupId>
+            <artifactId>jsaga-adaptor-ssh</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <scope>provided</scope>
+        </dependency>-->
+        <dependency>
+           <groupId>xalan</groupId>
+           <artifactId>xalan</artifactId>
+           <version>2.7.1</version>
         </dependency>
     </dependencies>
 
@@ -62,14 +79,32 @@
 
     <packaging>bundle</packaging>
 
-
-    <!--optional. Use this property to tune the exported packages-->
-    <properties>
-        <!-- For not including extracted class in final jar. Commented because
-        it will not generate correct Export-Package directive in manifest -->
-        <!--libraries.export.packages>!*</libraries.export.packages-->
-	<embed-dep>*;scope=provided</embed-dep>
-        <bundle.classpath>{maven-dependencies},.</bundle.classpath>
-    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-equinox-configuration</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <includes>
+                                        <include>META-INF</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -202,7 +202,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
       val keyPassword = {
         val pass = workspace.preference(GliteEnvironment.PasswordLocation)
-        // Logger.getLogger(classOf[GliteAuthentication].getName).info(pass)
+        //Logger.getLogger(classOf[GliteAuthentication].getName).info(pass)
         if(pass == null) "" else pass
       }
 
