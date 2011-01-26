@@ -73,68 +73,69 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
  
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
 
-            val windowSize = (jobs.size * workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
-            val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
+            if(!samples.isEmpty) {
+              val windowSize = (jobs.size * workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
+              val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
             
-            //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"windowSize " + windowSize  + " windowStart " + windowStart)
+              //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"windowSize " + windowSize  + " windowStart " + windowStart)
 
             
-            val nbSamples = workspace.preferenceAsInt(OverSubmissionNbSampling)
-            val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
+              val nbSamples = workspace.preferenceAsInt(OverSubmissionNbSampling)
+              val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
             
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"interval " + interval)
+              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"interval " + interval)
             
-            val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
+              val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
             
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"maxNbRunning " + maxNbRunning)
+              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"maxNbRunning " + maxNbRunning)
  
-            val overSubmission = max(maxNbRunning, workspace.preferenceAsInt(OverSubmissionMinNumberOfJob))
-            var nbRessub = overSubmission - stillRunning.size
-            //  val key = entry.getKey
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"NbRessub " + nbRessub)
-            val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
-            if (nbRessub > 0) {
-              // Resubmit nbRessub jobs in a fair manner
-              val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
-              var keys = new TreeSet[Int]
+              val overSubmission = max(maxNbRunning, workspace.preferenceAsInt(OverSubmissionMinNumberOfJob))
+              var nbRessub = overSubmission - stillRunning.size
+              //  val key = entry.getKey
+              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"NbRessub " + nbRessub)
+              val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+              if (nbRessub > 0) {
+                // Resubmit nbRessub jobs in a fair manner
+                val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+                var keys = new TreeSet[Int]
 
-              for (job <- jobs.map{_.job}) {
-                val nb = registry.nbExecutionJobs(job)
-                if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-                  val set = order.getOrElseUpdate(nb, new HashSet[IJob])
-                  set += job
-                  keys += nb
+                for (job <- jobs.map{_.job}) {
+                  val nb = registry.nbExecutionJobs(job)
+                  if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+                    val set = order.getOrElseUpdate(nb, new HashSet[IJob])
+                    set += job
+                    keys += nb
+                  }
+                }
+
+                if (!keys.isEmpty) {
+                  while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+                    var key = keys.head
+                    val jobs = order(keys.head)
+                    val it = jobs.iterator
+                    val job = it.next
+
+                    //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
+
+                    try {
+                      env.submit(job)
+                    } catch {
+                      case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
+                    }
+
+                    jobs -= job
+                    if (jobs.isEmpty) {
+                      order -= key
+                      keys -= key
+                    }
+
+                    key += 1
+                    order.getOrElseUpdate(key, new HashSet[IJob]) += job
+                    keys += key
+                    nbRessub -= 1
+                  }
                 }
               }
-
-              if (!keys.isEmpty) {
-                while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-                  var key = keys.head
-                  val jobs = order(keys.head)
-                  val it = jobs.iterator
-                  val job = it.next
-
-                  //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO, "Resubmit : running " + key + " nbRessub " + nbRessub);
-
-                  try {
-                    env.submit(job)
-                  } catch {
-                    case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
-                  }
-
-                  jobs -= job
-                  if (jobs.isEmpty) {
-                    order -= key
-                    keys -= key
-                  }
-
-                  key += 1
-                  order.getOrElseUpdate(key, new HashSet[IJob]) += job
-                  keys += key
-                  nbRessub -= 1
-                }
-              }
-            
             }
           }
       }

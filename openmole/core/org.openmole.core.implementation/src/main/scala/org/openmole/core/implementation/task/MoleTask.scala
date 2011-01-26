@@ -33,6 +33,7 @@ import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
@@ -44,8 +45,10 @@ import org.openmole.core.model.execution.IProgress
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask {
+class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) extends Task(name) with IMoleTask {
 
+  def this(name: String, mole: IMole) = this(name, mole, false)
+  
   class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
 
     val throwables = new ListBuffer[Throwable] 
@@ -62,7 +65,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
              e => outputCapsules.get(e._2).foreach {
                prototypes => 
                 val ctx = new Context
-                for(p <- prototypes) moleJob.context.variable(p).foreach{ctx += _}
+                for(p <- prototypes) moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
                 contexts += ctx
              }
            }
@@ -72,7 +75,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
   }
    
 
-  private val outputCapsules = new HashMap[IGenericCapsule, ListBuffer[IPrototype[_]]]
+  private val outputCapsules = new HashMap[IGenericCapsule, ListBuffer[String]]
 
   override protected def process(context: IContext, progress: IProgress) = {
     val firstTaskContext = new Context
@@ -91,7 +94,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    ContextAggregator.aggregate(userOutputs, false, resultGathering.contexts).foreach {
+    ContextAggregator.aggregate(userOutputs, toArray, resultGathering.contexts).foreach {
       context += _
     }
 
@@ -112,14 +115,11 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
   def addOutput(capsule: IGenericCapsule, data: IData[_]): Unit = {
     addOutput(data)
-    outputCapsules.getOrElseUpdate(capsule, new ListBuffer[IPrototype[_]]) += data.prototype
+    outputCapsules.getOrElseUpdate(capsule, new ListBuffer[String]) += data.prototype.name
   }
   
   override def inputs: IDataSet = {
-    val firstTask = mole.root.task match {
-      case None => throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name)
-      case Some(t) => t
-    }
+    val firstTask = mole.root.task.getOrElse(throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name))
     new DataSet(super.inputs ++ firstTask.inputs)
   }
 }
