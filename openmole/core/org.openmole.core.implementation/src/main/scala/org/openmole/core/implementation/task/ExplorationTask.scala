@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.task
 
-import java.util.logging.Logger
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
@@ -35,8 +34,8 @@ class ExplorationTask(name: String, val sampling: ISampling) extends GenericTask
   addOutput(ExplorationTask.Sample)
 
   //If input prototype as the same name as the output it is erased
-  override protected def process(global: IContext, context: IContext, progress: IProgress) ={
-    val sampled = sampling.build(global, context)
+  override protected def process(context: IContext, progress: IProgress) ={
+    val sampled = sampling.build(context)
     context += (ExplorationTask.Sample.prototype, sampled)
   }
  

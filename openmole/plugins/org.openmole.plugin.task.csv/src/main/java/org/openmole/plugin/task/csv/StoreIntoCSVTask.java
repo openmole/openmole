@@ -122,13 +122,13 @@ public class StoreIntoCSVTask extends Task {
     }
 
     @Override
-    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
 
         try {
             List<Iterator<Object>> valueList = new ArrayList<Iterator<Object>>();
             int listSize = 0;
 
-            File file = new File(VariableExpansion.expandData(global, context, fileName));
+            File file = new File(VariableExpansion.expandData(context, fileName));
             CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quotechar);
 
             try {

@@ -27,7 +27,7 @@ import org.apache.commons.cli.Options
 import org.apache.commons.cli.ParseException
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.model.execution.ExecutionState.ExecutionState
+import org.openmole.core.model.execution.ExecutionState
 import scala.collection.mutable.HashMap
 
 class BatchEnvironmentViewer extends IViewer {
@@ -50,13 +50,13 @@ class BatchEnvironmentViewer extends IViewer {
       environmentViewer.view(obj, args)
       if (v >= 1) {
         System.out.println(Separator)
-        val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState, AtomicInteger]]
+        val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
         val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
 
         for (executionJob <-  executionJobRegistry.allExecutionJobs) {
           val batchJob = executionJob.batchJob
           if (batchJob != null) {
-            val jobServiceInfo = jobServices.getOrElseUpdate(batchJob.jobServiceDescription,  new HashMap[ExecutionState, AtomicInteger])
+            val jobServiceInfo = jobServices.getOrElseUpdate(batchJob.jobServiceDescription,  new HashMap[ExecutionState.Value, AtomicInteger])
             val nb = jobServiceInfo.getOrElseUpdate(batchJob.state, new AtomicInteger)
             nb.incrementAndGet
           }
@@ -64,12 +64,11 @@ class BatchEnvironmentViewer extends IViewer {
 
 
         jobServices.foreach {
-          case (description, states) =>
-          
-            System.out.print(description.toString() + ":")
-            val jobServiceInfo = jobServices.get(description) 
-            states.foreach {
-              case(state, nb) => System.out.print(" [" + state.name + " = " + nb + "]")
+          case(description, map) =>
+            System.out.print(description.toString + ":")
+
+            ExecutionState.values.foreach {
+              state => if(map.isDefinedAt(state))System.out.print(" [" + state.toString + " = " + map.get(state).get + "]")
             }
             System.out.println
         }

@@ -16,9 +16,7 @@
  */
 package org.openmole.plugin.domain.collection;
 
-import java.util.logging.Logger;
 import scala.collection.Iterator;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.openmole.core.model.data.IContext;
@@ -38,11 +36,11 @@ public class ValueSetDomain<T> implements IFiniteDomain<T> {
         this.values = Arrays.asList(values);
     }
 
-    public Iterator<T> iterator(IContext global, IContext context) {
-        return computeValues(global, context).iterator();
+    public Iterator<T> iterator(IContext context) {
+        return computeValues(context).iterator();
     }
 
-    public Iterable<T> computeValues(IContext global, IContext context) {
+    public Iterable<T> computeValues(IContext context) {
        return asScalaBuffer(values);
     }
 }

@@ -35,10 +35,9 @@ trait IGenericTask {
    *
    * Perform this task.
    *
-   * @param context the context in which it is executed
    * @param progress the progress reporting structure of the task
    */
-  def perform(global: IContext, context: IContext, progress: IProgress)
+  def perform(context: IContext, progress: IProgress)
 
   /**
    *

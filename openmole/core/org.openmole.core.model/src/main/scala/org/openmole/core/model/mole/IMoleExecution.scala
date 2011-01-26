@@ -47,7 +47,7 @@ trait IMoleExecution {
     def waitUntilEnded
     def isFinished: Boolean
 
-    def submit(capsule: IGenericCapsule, global: IContext, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
+    def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
 
     def mole: IMole
 

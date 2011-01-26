@@ -23,76 +23,98 @@ import org.openmole.commons.exception.MultipleException
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.SynchronizedContext
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.implementation.mole.MoleJobRegistry
+import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
 class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask {
 
-  class ExceptionLister extends IObjectListenerWithArgs[IMoleExecution] {
+  class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
 
     val throwables = new ListBuffer[Throwable] 
-
+    val contexts = new ListBuffer[IContext] 
+    
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
 
-      if (moleJob.state == State.FAILED) {
-        moleJob.context.value(GenericTask.Exception.prototype) match {
-          case None => throw new InternalProcessingError("BUG: Job has failed but no exception can be found")
-          case Some(exception) => throwables += exception
-        }
+      moleJob.state match {
+        case State.FAILED =>
+           throwables += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
+        case State.COMPLETED =>
+           MoleJobRegistry(moleJob).foreach{ 
+             e => outputCapsules.get(e._2).foreach {
+               prototypes => 
+                val ctx = new Context
+                for(p <- prototypes) moleJob.context.variable(p).foreach{ctx += _}
+                contexts += ctx
+             }
+           }
+        case _ =>
       }
     }
-
   }
+   
 
+  private val outputCapsules = new HashMap[IGenericCapsule, ListBuffer[IPrototype[_]]]
 
-  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
-    val globalContext = new SynchronizedContext
+  override protected def process(context: IContext, progress: IProgress) = {
     val firstTaskContext = new Context
 
     for (input <- inputs) {
       if (!input.mode.isOptional || (input.mode.isOptional && context.contains(input.prototype))) {
-        context.variable(input.prototype) match {
-          case None => throw new InternalProcessingError("Bug:?variable not found.")
-          case Some(variable) => firstTaskContext += variable
-        }
+        firstTaskContext += context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found."))        
       }
     }
 
     val execution = new MoleExecution(mole)
 
-    val exceptionLister = new ExceptionLister
-    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, exceptionLister, IMoleExecution.OneJobFinished);
+    val resultGathering = new ResultGathering
+    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobFinished);
 
-    execution.start(globalContext, firstTaskContext)
+    execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    for (output <- userOutputs) {
-      globalContext.variable(output.prototype) match {
-        case None =>
-        case Some(variable) => context += variable
-      }
+    ContextAggregator.aggregate(userOutputs, false, resultGathering.contexts).foreach {
+      context += _
     }
 
-    val exceptions = exceptionLister.throwables
+    val exceptions = resultGathering.throwables
 
     if (!exceptions.isEmpty) {
       context += (GenericTask.Exception.prototype, new MultipleException(exceptions))
     }
   }
 
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): Unit = {
+    addOutput(capsule, new Data(prototype))
+  }
 
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): Unit = {
+    addOutput(capsule, new Data(prototype, masks))
+  }
+
+  def addOutput(capsule: IGenericCapsule, data: IData[_]): Unit = {
+    addOutput(data)
+    outputCapsules.getOrElseUpdate(capsule, new ListBuffer[IPrototype[_]]) += data.prototype
+  }
+  
   override def inputs: IDataSet = {
     val firstTask = mole.root.task match {
       case None => throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name)

@@ -30,13 +30,6 @@ import org.openmole.core.model.transition.{IGenericTransition,ISlot}
  * the workflow representation.
  * 
  */
-object IGenericCapsule {
-  /**
-   * Job created event id. It is raised when a job is created in order to run
-   * the task contained by this capsule.
-   */
-  val JobCreated = "JobCreated"
-}
 
 trait IGenericCapsule {
 
@@ -127,11 +120,10 @@ trait IGenericCapsule {
    * Instanciate a MoleJob from this capsule for running the task contained
    * in it.
    *
-   * @param global the global context in which the MoleJob will be executed
    * @param context the context in which the MoleJob will be executed
    * @param jobId the id of the MoleJob
    * @return the MoleJob
    */
-  def toJob(global: IContext, context: IContext, jobId: MoleJobId): IMoleJob
+  def toJob(context: IContext, jobId: MoleJobId): IMoleJob
 
 }

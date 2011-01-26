@@ -51,7 +51,7 @@ trait IGenericTransition {
     def condition: ICondition
 
 
-    def isConditionTrue(global: IContext, context: IContext): Boolean
+    def isConditionTrue(context: IContext): Boolean
 
     /**
      *
@@ -72,7 +72,7 @@ trait IGenericTransition {
      * @param scheduler the scheduler for the execution
      * @param subMole   current submole
      */
-    def perform(global: IContext, from: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution)
+    def perform(from: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution)
 
 
 }

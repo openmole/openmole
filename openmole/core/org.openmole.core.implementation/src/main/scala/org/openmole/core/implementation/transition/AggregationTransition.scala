@@ -21,10 +21,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.internal.Activator._
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.implementation.tools.ContextBuffer
-import org.openmole.core.implementation.tools.ToCloneFinder
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
@@ -35,8 +32,6 @@ import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ISlot
-import scala.collection.immutable.TreeSet
-import scala.collection.mutable.ListBuffer
 
 class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String]) extends Transition(start, end, condition, filtered) with IAggregationTransition {
 
@@ -73,14 +68,11 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
-  override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
 
     val registry = moleExecution.localCommunication.aggregationTransitionRegistry
 
-    val parent = ticket.parent match {
-      case None => throw new UserBadDataError("Aggregation transition should take place after an exploration")
-      case Some(p) => p
-    }
+    val parent = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
     
     val resultContexts = registry.consult(this, parent) match {
       case None => 
@@ -98,36 +90,13 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
   def subMoleFinished(subMole: ISubMoleExecution, job: IMoleJob, ticket: ITicket, moleExecution: IMoleExecution) = {
     def registry =  moleExecution.localCommunication.aggregationTransitionRegistry
 
-    val newTicket = ticket.parent match {
-      case None => throw new UserBadDataError("Aggregation transition should take place after an exploration")
-      case Some(p) => p
-    }
-    
-    val result = registry.remove(this, newTicket) match {
-      case None => throw new InternalProcessingError("No context registred for the aggregation transition")
-      case Some(res) => res
-    }
-    
-    val endTask = end.capsule.task match {
-      case None => throw new UserBadDataError("No task assigned for end capsule")
-      case Some(t) => t 
-    }
-      
-    val startTask = start.task match {
-      case None => throw new UserBadDataError("No task assigned for start capsule")
-      case Some(t) => t 
-    }  
-    
-   /* val dataToAggregate = ContextAggregator.dataIn1WhichAreAlsoIn2(endTask.inputs, startTask.outputs)
-    
-    val newContextEnd = ContextAggregator.aggregate(dataToAggregate, true, result._1)*/
-
-    val subMoleParent = subMole.parent match {
-      case None => throw new InternalProcessingError("Submole execution has no parent")
-      case Some(p) => p
-    }
+    val newTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
+    val result = registry.remove(this, newTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
+    val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))
+    val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
+    val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
     
     //Variable have are clonned in other transitions if necessary
-    submitNextJobsIfReady(job.globalContext, result, newTicket, moleExecution, subMoleParent)
+    submitNextJobsIfReady(result, newTicket, moleExecution, subMoleParent)
   }
 }

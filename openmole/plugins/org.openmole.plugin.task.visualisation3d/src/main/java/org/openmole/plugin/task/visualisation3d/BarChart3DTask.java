@@ -21,7 +21,7 @@ import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.model.execution.IProgress;
-import org.openmole.core.model.job.IContext;
+import org.openmole.core.model.data.IContext;
 
 /**
  *
@@ -35,7 +35,7 @@ public class BarChart3DTask extends Task {
     
     
     @Override
-    protected void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         
     }
 

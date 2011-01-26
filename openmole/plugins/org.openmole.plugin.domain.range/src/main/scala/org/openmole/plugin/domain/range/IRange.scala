@@ -27,5 +27,5 @@ trait IRange[+T] extends IFiniteDomain[T] with IWithCenter[T] with IWithRange[T]
   def max: String
   def step: String
   
-  def step(global: IContext, context: IContext): T
+  def step(context: IContext): T
 }

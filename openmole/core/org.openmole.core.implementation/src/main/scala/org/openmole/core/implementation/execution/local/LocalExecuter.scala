@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.execution.local
 
+import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.SampleType
 import org.openmole.core.model.job.State
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -47,36 +47,30 @@ class LocalExecuter extends Runnable {
         try {
           executionJob.state = ExecutionState.RUNNING
           val running = System.currentTimeMillis
-          executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
+          //executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
 
           for (moleJob <- job.moleJobs) {
             if (moleJob.state != State.CANCELED) {
-//              LOGGER.log(Level.FINER, "New job group taken for execution: {0}", moleJob)
-
               if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
                 jobGoneIdle
               }
               
               moleJob.perform
               moleJob.finished(moleJob.context)
-//              LOGGER.log(Level.FINER, "End of job group execution: {0}", moleJob);
             }
           }
           executionJob.state = ExecutionState.DONE
-          executionJob.environment.sample(SampleType.RUNNING, System.currentTimeMillis() - running, job);
+          LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
+
         } finally {
           LocalExecutionEnvironment.jobRegistry.removeJob(job);
         }
       } catch {
         case (e: InterruptedException) => 
-          if (!stop) {
-            LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e);
-          }
-            
+          if (!stop) LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e)  
         case e => LOGGER.log(Level.SEVERE, null, e);
       }
     }
-
   }
 
   def jobGoneIdle {

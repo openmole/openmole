@@ -125,7 +125,7 @@ public class CSVSampling implements ISampling {
      *
      */
     @Override
-    public Iterable<Iterable<IVariable<?>>> build(IContext global, IContext context) throws Throwable {
+    public Iterable<Iterable<IVariable<?>>> build(IContext context) throws Throwable {
         Collection<Iterable<IVariable<?>>> listOfListOfValues = new ArrayList<Iterable<IVariable<?>>>();
         //Map<IPrototype, IStringMapping> convertorMapping = new HashMap<IPrototype, IStringMapping>();
         CSVReader reader = new CSVReader(new FileReader(csvFile));

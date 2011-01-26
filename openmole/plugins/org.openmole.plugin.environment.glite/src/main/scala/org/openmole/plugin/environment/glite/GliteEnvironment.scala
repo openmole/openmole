@@ -28,7 +28,6 @@ import org.openmole.core.batch.environment.BatchStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.plugin.environment.glite.internal.Activator._
 import org.openmole.plugin.environment.glite.internal.BDII
-import org.openmole.plugin.environment.glite.internal.DicotomicWorkloadStrategy
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
@@ -59,12 +58,15 @@ object GliteEnvironment {
 
   val FetchRessourcesTimeOutLocation = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSiteLocation = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
-  val OverSubmissionIntervalLocation = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
-  val OverSubmissionRatioWaitingLocation = new ConfigurationLocation("GliteEnvironment", "OverSubmissionRatioWaiting")
-  val OverSubmissionRatioRunningLocation = new ConfigurationLocation("GliteEnvironment", "OverSubmissionRatioRunning")
+
+  val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
   val OverSubmissionMinJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinJob")
   val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
-  val OverSubmissionRatioEpsilonLocation = new ConfigurationLocation("GliteEnvironment", "OverSubmissionRatioEpsilon")
+  val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
+  val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
+  val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
+
+
   val LocalThreadsBySELocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMSLocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
@@ -90,12 +92,13 @@ object GliteEnvironment {
 
   workspace += (ProxyRenewalRatio, "0.2")
 
-  workspace += (OverSubmissionRatioWaitingLocation, "0.2")
-  workspace += (OverSubmissionRatioRunningLocation, "0.1")
-  workspace += (OverSubmissionRatioEpsilonLocation, "0.01")
-  workspace += (OverSubmissionIntervalLocation, "PT5M")
+  workspace += (OverSubmissionNbSampling, "10")
+  workspace += (OverSubmissionSamplingWindowFactor, "5")
+  
+ // workspace += (OverSubmissionGridSizeRatio, "0.25")
+  workspace += (OverSubmissionInterval, "PT5M")
 
-  workspace += (OverSubmissionMinJob, "100")
+ // workspace += (OverSubmissionMinJob, "100")
   workspace += (OverSubmissionNumberOfJobUnderMin, "3")
   
   workspace += (JobShakingInterval, "PT5M")
@@ -110,10 +113,8 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   val threadsBySE = workspace.preferenceAsInt(LocalThreadsBySELocation)
   val threadsByWMS = workspace.preferenceAsInt(LocalThreadsByWMSLocation)
-  val minJobs = workspace.preferenceAsInt(OverSubmissionMinJob)
-  val numberOfJobUnderMin = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
        
-  updater.registerForUpdate(new OverSubmissionAgent(this, new DicotomicWorkloadStrategy, minJobs, numberOfJobUnderMin), ExecutorType.OWN)
+  updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
  // Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)

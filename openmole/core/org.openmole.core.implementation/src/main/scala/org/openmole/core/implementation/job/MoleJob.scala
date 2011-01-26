@@ -32,13 +32,12 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified}
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.ListBuffer
 
 object MoleJob {
   val LOGGER = Logger.getLogger(classOf[MoleJob].getName)
 }
 
-class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: IContext, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
+class MoleJob  @ObjectConstructed() (val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
   
   val progress = new Progress
     
@@ -70,7 +69,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, val globalContext: 
   override def perform = {
     try {
       state = RUNNING
-      task.perform(globalContext, context, progress)
+      task.perform(context, progress)
     } catch {
       case e =>
         context += (GenericTask.Exception.prototype, e)

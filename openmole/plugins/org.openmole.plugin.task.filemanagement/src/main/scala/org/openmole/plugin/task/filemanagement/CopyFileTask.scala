@@ -34,19 +34,17 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 
 class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
-  def this(name: String) = {
-    this(name, false)
-  }
+  def this(name: String) = this(name, false)
   
   val toCopy = new ListBuffer[(IPrototype[File],String)]()
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String)]()
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[Array[File]],IPrototype[Array[String]],String)]()
 
-  override def process(global: IContext, context: IContext, progress: IProgress)  {
+  override def process(context: IContext, progress: IProgress)  {
     try{
       toCopy foreach( p => {
           val from = context.value(p._1).get
-          val to = new File(expandData(global, context, p._2))
+          val to = new File(expandData(context, p._2))
           to.getParentFile.mkdirs
           copy(from, to)
 
@@ -57,7 +55,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
           val from = context.value(p._1).get
           val name = context.value(p._2).get
           
-          val dir = new File(expandData(global, context, p._3))
+          val dir = new File(expandData(context, p._3))
           dir.mkdirs
           
           val to = new File(dir, name)
@@ -73,7 +71,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
           if(files != null && names != null) {
 
-            val toDir = new File(expandData(global, context, urlDir))
+            val toDir = new File(expandData(context, urlDir))
             toDir.mkdirs
             
             val itFile = files.iterator
@@ -101,8 +99,8 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
 
   def saveInputFileAs(prot: IPrototype[File], name: IPrototype[String], dir: String) {
     toCopyWithNameInVariable += ((prot, name, dir))
-    addInput(prot);
-    addInput(name);
+    addInput(prot)
+    addInput(name)
   }
 
   def saveInputFilesAs(fileProt: IPrototype[Array[File]], nameProt: IPrototype[Array[String]], dirUrl: String) {

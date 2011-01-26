@@ -37,22 +37,26 @@ import org.openmole.commons.exception.UserBadDataError
  */
 class AppendFileTask(name: String, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends Task(name) {
  
-  override def process(global: IContext, context: IContext, progress: IProgress) = {
+  override def process(context: IContext, progress: IProgress) = {
     val from = context value(toBeDumpedPrototype) get
-    val to = new File(VariableExpansion.expandData(global,context,outputFile))
+    val to = new File(VariableExpansion.expandData(context,outputFile))
     if (!from.exists){
       throw new UserBadDataError("The file "+from+" does not exist.")
     }
     
     if (!to.exists){
-      throw new UserBadDataError("The file "+to+" does not exist.")
+      if(from.isDirectory) to.mkdirs
+      else {
+        to.getParentFile.mkdirs
+        to.createNewFile
+      }
     }
     
-    if (from.isDirectory() && to.isDirectory()){
+    if (from.isDirectory && to.isDirectory){
       val toFiles = to.list
       from.list foreach ( f => {
           if (!toFiles.contains(f)){
-            new File(f).createNewFile()
+            new File(f).createNewFile
           }
           lockAndAppendFile(new File(from,f),new File(to,f))
         })

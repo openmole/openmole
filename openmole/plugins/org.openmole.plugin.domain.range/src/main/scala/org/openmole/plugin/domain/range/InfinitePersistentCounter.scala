@@ -39,5 +39,5 @@ class InfinitePersistentCounter(counter: Iterator[Long]) extends Domain[Long] {
   
   def this() = this(0L, 1L)
     
-  override def iterator(global: IContext, context: IContext): Iterator[Long] = counter
+  override def iterator(context: IContext): Iterator[Long] = counter
 }

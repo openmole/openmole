@@ -26,15 +26,13 @@ import org.openmole.commons.tools.io.FileUtil._
 class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IFiniteDomain[File] {
 
   def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
-    this(dir, new FileFilter {
-            
+    this(dir, new FileFilter {       
         override def accept(file: File): Boolean = {
           file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
-        }
-            
+        }    
       })
   }
     
-  override def computeValues(global: IContext, context: IContext): Iterable[File] = listRecursive(dir, filter)
+  override def computeValues(context: IContext): Iterable[File] = listRecursive(dir, filter)
   
 }

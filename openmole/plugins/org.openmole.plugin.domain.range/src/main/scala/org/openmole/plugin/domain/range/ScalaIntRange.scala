@@ -22,7 +22,7 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 
 
 class ScalaIntRange(min: String, max: String, step: String) extends IntegralRange[Int](min, max, step) {
-  override def step(global: IContext, context: IContext): Int = expandData(global, context, step).toInt
-  override def max(global: IContext, context: IContext): Int = expandData(global, context, max).toInt
-  override def min(global: IContext, context: IContext): Int = expandData(global, context, min).toInt
+  override def step(context: IContext): Int = expandData(context, step).toInt
+  override def max(context: IContext): Int = expandData(context, max).toInt
+  override def min(context: IContext): Int = expandData(context, min).toInt
 }

@@ -23,10 +23,10 @@ abstract class IntegralRange[T](val min: String, val max: String, val step: Stri
   
   import integral._
   
-  override def computeValues(global: IContext, context: IContext): Iterable[T] = {
-    val mi = min(global, context)
-    val ma = max(global, context)
-    val s =  step(global, context)
+  override def computeValues(context: IContext): Iterable[T] = {
+    val mi = min(context)
+    val ma = max(context)
+    val s =  step(context)
     
     val size = (ma - mi).abs / s
     
@@ -34,12 +34,12 @@ abstract class IntegralRange[T](val min: String, val max: String, val step: Stri
     (for(i <- 0 to size.toInt) yield {val ret = cur; cur += s; ret})   
   }
     
-  override def center(global: IContext, context: IContext): T = {
-    val mi = min(global, context);
-    mi + ((max(global, context) - mi) / fromInt(2))
+  override def center(context: IContext): T = {
+    val mi = min(context);
+    mi + ((max(context) - mi) / fromInt(2))
   }
 
-  override def range(global: IContext, context: IContext): T = {
-    max(global, context) - min(global, context)
+  override def range(context: IContext): T = {
+    max(context) - min(context)
   }
 }

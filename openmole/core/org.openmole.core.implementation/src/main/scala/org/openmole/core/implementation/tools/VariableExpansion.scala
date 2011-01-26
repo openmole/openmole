@@ -31,27 +31,27 @@ object VariableExpansion {
   private val patternEnd = '}'
   private val eval = "$" + patternBegin
     
-  def expandBigDecimalData(global: IContext, context: IContext, s: String): BigDecimal = {
-    BigDecimal(expandData(global, context, s))
+  def expandBigDecimalData(context: IContext, s: String): BigDecimal = {
+    BigDecimal(expandData(context, s))
   }
 
-  def expandDoubleData(global: IContext, context: IContext, s: String): Double = {
-    expandData(global, context, s).toDouble
+  def expandDoubleData(context: IContext, s: String): Double = {
+    expandData(context, s).toDouble
   }
 
-  def expandIntegerData(global: IContext, context: IContext, s: String): Int = {
-    expandData(global, context, s).toInt
+  def expandIntegerData(context: IContext, s: String): Int = {
+    expandData(context, s).toInt
   }
 
-  def expandData(global: IContext, context: IContext, s: String): String = {
-    expandData(global, context, Iterable.empty, s)
+  def expandData(context: IContext, s: String): String = {
+    expandData(context, Iterable.empty, s)
   }
 
-  def expandData(global: IContext, context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
-    expandDataInernal(global, context, tmpVariable, s)
+  def expandData(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
+    expandDataInernal(context, tmpVariable, s)
   }
 
-  private def expandDataInernal(global: IContext, context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
+  private def expandDataInernal(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
     var ret = s
     val allVariables = new Context
     allVariables ++= context
@@ -78,7 +78,7 @@ object VariableExpansion {
       }
 
       if (cur < ret.length) {
-        val toInsert = expandOneData(global, allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
+        val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
         ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
       } else break
     } while (true) }
@@ -120,12 +120,12 @@ object VariableExpansion {
     str.substring(1, str.length - 1)
   }
 
-  protected def expandOneData(global: IContext, allVariables: IContext, variableExpression: String): String = {
+  protected def expandOneData(allVariables: IContext, variableExpression: String): String = {
     allVariables.variable(variableExpression) match {
       case Some(variable) => variable.value.toString
       case None => 
         val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
-        shell.execute(global, allVariables).toString
+        shell.execute(allVariables).toString
     }
   }
 }

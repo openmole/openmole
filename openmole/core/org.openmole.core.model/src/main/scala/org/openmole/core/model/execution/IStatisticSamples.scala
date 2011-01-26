@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.execution
 
-trait IStatisticSamples {
-    def += (sample: SampleType.Value, length: Long)
-    def apply(sample: SampleType.Value): Iterable[Long]
+trait IStatisticSamples extends Iterable[IStatisticSample] {
+  def += (sample: IStatisticSample)
 }

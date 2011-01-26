@@ -28,5 +28,5 @@ object IContextToCode {
 }
 
 trait IContextToCode {
-  def execute(global: IContext, context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object
+  def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object
 }

@@ -69,9 +69,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
-
     updater.delay(bej, ExecutorType.UPDATE)
-
     jobRegistry.register(bej)
   }
   

@@ -33,7 +33,7 @@ import scala.collection.mutable.ListBuffer
 
 class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) extends Sampling[IFactor[Double, IDomain[Double] with IWithRange[Double]]](factors) {
 
-  override def build(global: IContext, context: IContext): Iterable[Iterable[IVariable[Double]]] = {
+  override def build(context: IContext): Iterable[Iterable[IVariable[Double]]] = {
      
     //System.out.println("LHSPlan::computeValues");
     //Inititalize a temp structure
@@ -46,8 +46,8 @@ class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] w
     for (j <- 0 until samples) {
       var i = 0
       for (f <- factors) {
-        val tempMin = f.domain.min(global, context)
-        val tempMax = f.domain.max(global, context)
+        val tempMin = f.domain.min(context)
+        val tempMax = f.domain.max(context)
         TempFactors(i) += ( ((j + RNG.nextDouble) / samples) * (tempMax - tempMin) + tempMin)
         i += 1
       }

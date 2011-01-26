@@ -18,7 +18,6 @@
 package org.openmole.core.batch.environment
 
 import java.util.concurrent.CancellationException
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
@@ -30,7 +29,6 @@ import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
-import org.openmole.core.model.execution.SampleType
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
@@ -75,9 +73,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     if (!oldState.isFinal) {
       val newState = batchJob.updatedState
 
-      if (oldState == SUBMITTED && newState == RUNNING) {
+      /*if (oldState == SUBMITTED && newState == RUNNING) {
         executionEnvironment.sample(SampleType.WAITING, batchJob.lastStateDurration, job)
-      } 
+      } */
     }
       
     if(oldState != batchJob.state && batchJob.state == KILLED) kill
@@ -87,8 +85,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   override def state: ExecutionState = {
     if (killed.get) return KILLED
     if (batchJob == null) return READY
-    
-    return batchJob.state
+    batchJob.state
   }
 
   override def update: Boolean = {
@@ -116,10 +113,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         val maxDelay = workspace.preferenceAsDurationInMs(MaxUpdateInterval)
         _delay = if (newDelay <= maxDelay) newDelay else maxDelay
       }
-            
-      //LOGGER.log(Level.FINE, "Refreshed state for {0} old state was {1} new state is {2} next refresh in {3}", new Object[]{toString(), oldState, getState(), delay});
-
-
     } catch {
       case (e: TemporaryErrorException) => LOGGER.log(Level.FINE, "Temporary error durring job update.", e)
       case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
@@ -140,7 +133,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = executorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob.lastStateDurration))
+      finalizeExecutionFuture = executorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob))
     }
     if (finalizeExecutionFuture.isDone) {
       finalizeExecutionFuture.get
@@ -161,7 +154,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       }
     }
 
-    return copyToEnvironmentResult != null
+    copyToEnvironmentResult != null
   }
 
   private def trySubmit = {

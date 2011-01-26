@@ -60,27 +60,16 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
 
   
   
-  override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
 
-    /*val registry = moleExecution.localCommunication.transitionRegistry
-    registry.register(this, ticket, context)*/
-
-    val values = context.value(ExplorationTask.Sample.prototype) match {
-      case None => throw new InternalProcessingError("BUG Sample not found in the exploration transition")
-      case Some(v) => v
-    }
-    
+    val values = context.value(ExplorationTask.Sample.prototype).getOrElse(throw new InternalProcessingError("BUG Sample not found in the exploration transition"))
     val subSubMole = SubMoleExecution(moleExecution, subMole)
 
     var size = 0
         
-    val endTask = end.capsule.task match {
-      case None => throw new InternalProcessingError("Capsule is empty")
-      case Some(t) => t
-    }
-
+    val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("Capsule is empty"))
+    
     for(value <- values) {
-
       size += 1
       subSubMole.incNbJobInProgress(1)
 
@@ -100,9 +89,8 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
       
       for(data <- notFound) {
         val prototype = data.prototype
-        valueMap.get(prototype.name) match {
-          case None =>
-          case Some(value) => {
+        valueMap.get(prototype.name).foreach {
+          value => {
               //Logger.getLogger(classOf[ExplorationTransition].getName).info("Add variable " + prototype)
               if(value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass))
                 destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
@@ -111,7 +99,7 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
         }
       }
  
-      submitNextJobsIfReady(global, ContextBuffer(destContext, toClone), newTicket, moleExecution, subSubMole)
+      submitNextJobsIfReady(ContextBuffer(destContext, toClone), newTicket, moleExecution, subSubMole)
     }
 
     subSubMole.decNbJobInProgress(size)

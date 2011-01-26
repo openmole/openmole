@@ -23,8 +23,8 @@ import org.openmole.core.model.sampling.ISampling
 
 class FiltredSampling(sampling: ISampling, filters: Array[IFilter]) extends ISampling {
 
-  override def build(global: IContext, context: IContext): Iterable[Iterable[IVariable[_]]] = {
-    val samples = sampling.build(global, context)
+  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+    val samples = sampling.build(context)
     for(sample <- samples; if({
           var filtred = false
           val filterIt = filters.iterator

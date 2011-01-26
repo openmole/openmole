@@ -25,12 +25,12 @@ import java.lang.Double
 
 class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IWithRange[Double] {
   
-  override def range(global: IContext, context: IContext): Double = {max(global, context).doubleValue - min(global, context).doubleValue}
+  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
     
-  override def computeValues(global: IContext, context: IContext): Iterable[Double] = {
-     val mi = java.lang.Math.log(min(global, context).doubleValue)
-     val ma = java.lang.Math.log(max(global, context).doubleValue)
-     val nbst = nbStep(global, context).intValue - 1
+  override def computeValues(context: IContext): Iterable[Double] = {
+     val mi = java.lang.Math.log(min(context).doubleValue)
+     val ma = java.lang.Math.log(max(context).doubleValue)
+     val nbst = nbStep(context).intValue - 1
      val st = if(nbst > 0) (math.abs(ma - mi) / nbst)
               else 0
      var cur = mi
@@ -42,8 +42,8 @@ class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String)
      }      
   }
   
-  def nbStep(global: IContext, context: IContext): Double = expandData(global, context, nbStep).toDouble
-  def min(global: IContext, context: IContext): Double = expandData(global, context, min).toDouble
-  def max(global: IContext, context: IContext): Double = expandData(global, context, max).toDouble
+  def nbStep(context: IContext): Double = expandData(context, nbStep).toDouble
+  def min(context: IContext): Double = expandData(context, min).toDouble
+  def max(context: IContext): Double = expandData(context, max).toDouble
 
 }

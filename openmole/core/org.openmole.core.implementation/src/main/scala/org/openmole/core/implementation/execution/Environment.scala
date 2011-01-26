@@ -24,7 +24,7 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.core.model.execution.SampleType
+import org.openmole.core.model.execution.IStatisticSample
 
 object Environment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
@@ -40,13 +40,12 @@ abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
-  def sample(sample: SampleType.Value, value: Long, job: IJob) = {
+  def sample(job: IJob, sample: IStatisticSample) = {
     JobRegistry(job) match {
       case None =>
       case Some(moleExecution) =>
-        statistic += (moleExecution, new StatisticKey(job), sample, value)
+        statistic += (moleExecution, new StatisticKey(job), sample)
     }
-
   }
 
   def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)

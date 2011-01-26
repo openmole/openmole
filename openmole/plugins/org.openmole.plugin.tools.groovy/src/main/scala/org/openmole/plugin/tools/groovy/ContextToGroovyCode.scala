@@ -39,13 +39,13 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
   @transient
   lazy val editorPool = new GroovyProxyPool(source, libs)
 
-  def execute(global: IContext, context: IContext, tmpVariables: Iterable[IVariable[_]]): Object = {
-    execute(global, context, tmpVariables, IProgress.Dummy, Iterable.empty)
+  def execute(context: IContext, tmpVariables: Iterable[IVariable[_]]): Object = {
+    execute(context, tmpVariables, IProgress.Dummy, Iterable.empty)
   }
 
   
-  override def execute(global: IContext, context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object = {
-    val binding = GroovyContextAdapter.fromContextToBinding(global, context)
+  override def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object = {
+    val binding = GroovyContextAdapter.fromContextToBinding(context)
 
     for(variable <- tmpVariables) {
       binding.setVariable(variable.prototype.name, variable.value)

@@ -18,7 +18,6 @@
 package org.openmole.core.implementation.tools
 
 import groovy.lang.Binding
-import java.io.File
 import org.openmole.commons.tools.groovy.IGroovyProxy
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.internal.Activator._
@@ -26,17 +25,14 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.workspace.IWorkspace
 
-import scala.collection.JavaConversions.asJavaIterable
 
 object GroovyContextAdapter{
-  val globalContextVar = new Prototype[IContext]("global", classOf[IContext])
   val contextVar = new Prototype[IContext]("context", classOf[IContext])
   val workspaceVar = new Prototype[IWorkspace]("workspace", classOf[IWorkspace])
     
-  def fromContextToBinding(global: IContext, context: IContext) = {
+  def fromContextToBinding(context: IContext) = {
     val binding = new Binding
 
-    binding.setVariable(globalContextVar.name, global)
     binding.setVariable(contextVar.name, context)
     binding.setVariable(workspaceVar.name, workspace)
     context.variables.values.foreach{in => binding.setVariable(in.prototype.name, in.value)}
@@ -55,6 +51,6 @@ trait GroovyContextAdapter extends IGroovyProxy {
     execute(binding)
   }
   
-  def execute(global: IContext, binding: IContext): Object = execute(GroovyContextAdapter.fromContextToBinding(global, binding))
+  def execute(binding: IContext): Object = execute(GroovyContextAdapter.fromContextToBinding(binding))
     
 }

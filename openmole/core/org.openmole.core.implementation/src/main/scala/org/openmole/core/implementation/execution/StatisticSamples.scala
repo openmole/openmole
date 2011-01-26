@@ -17,32 +17,36 @@
 
 package org.openmole.core.implementation.execution
 
-import scala.collection.mutable.HashMap
+import java.util.LinkedList
+import org.openmole.core.model.execution.IStatisticSample
 import org.openmole.core.model.execution.IStatisticSamples
-import org.openmole.core.model.execution.SampleType
-import scala.collection.mutable.ListBuffer
-
+import scala.collection.JavaConversions
 object StatisticSamples {
   val empty = new StatisticSamples(0)
 }
 
 class StatisticSamples(historySize: Int) extends IStatisticSamples {
  
-  val averages = new HashMap[SampleType.Value, ListBuffer[Long]]
+  val averages = new LinkedList[IStatisticSample]
 
-  override def apply(sample: SampleType.Value): Iterable[Long] = {
-    averages.get(sample) match {
-      case Some(av) => av
-      case None => List.empty
-    }
+  override def iterator: Iterator[IStatisticSample] = synchronized {
+    JavaConversions.asScalaIterable(averages).toList.iterator
   }
 
-  override def += (sample: SampleType.Value, length: Long) = synchronized {
-      averages.get(sample) match {
-        case Some(histo) => 
-          if(histo.size < historySize) histo += length 
-          else histo.tail += length
-        case None => averages(sample) = ListBuffer(length)
+  override def += (sample: IStatisticSample) = synchronized {
+    if(averages.size >= historySize) averages.removeFirst
+    
+    val it = averages.listIterator(averages.size)
+    var inserted = false
+    
+    while(it.hasPrevious && !inserted) {
+      val elt = it.previous
+      if(elt.done <= sample.done) {
+        it.add(sample)
+        inserted = true
       }
+    }
+    
+    if(!inserted) it.add(sample)
   }
 }

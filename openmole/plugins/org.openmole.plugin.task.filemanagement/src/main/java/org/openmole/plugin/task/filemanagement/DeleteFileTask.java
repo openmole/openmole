@@ -39,7 +39,7 @@ public class DeleteFileTask extends Task {
 	}
 
 	@Override
-	public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
+	public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError {
 		for(IPrototype<File> p : toDelete) {
 			File f = context.value(p).get();
 			f.delete();

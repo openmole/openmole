@@ -21,7 +21,7 @@ import org.openmole.core.model.data.IContext
 
 object ICondition {
   val True = new ICondition {
-     def evaluate(global: IContext, context: IContext): Boolean = true
+     def evaluate(context: IContext): Boolean = true
   }
 }
 
@@ -35,5 +35,5 @@ trait ICondition {
      * @return the value of this condition
      */
     @throws(classOf[Throwable])
-    def evaluate(global: IContext, context: IContext): Boolean
+    def evaluate(context: IContext): Boolean
 }

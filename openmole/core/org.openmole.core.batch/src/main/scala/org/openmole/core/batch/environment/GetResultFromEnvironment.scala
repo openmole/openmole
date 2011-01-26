@@ -22,13 +22,12 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.TreeMap
+//import java.util.TreeMap
+//import java.util.concurrent.Callable
 import java.util.concurrent.Callable
-import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.core.batch.control.AccessToken
@@ -36,25 +35,30 @@ import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
-import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.core.model.execution.SampleType
+import org.openmole.core.implementation.execution.StatisticSample
+import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.model.execution.ExecutionState._
 
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
+
+import org.openmole.core.model.job.State
 import scala.Boolean._
+import scala.collection.immutable.TreeMap
 
 object GetResultFromEnvironment {
   private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
 }
 
-class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, lastStatusChangeInterval: Long) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
 
-  private def successFullFinish = {
-    environment.sample(SampleType.RUNNING, lastStatusChangeInterval, job)
+  private def successFullFinish(running: Long, done: Long) = {
+    import batchJob.timeStemp
+    environment.sample(job, new StatisticSample(timeStemp(SUBMITTED), running, done))
   }
 
   override def call: Unit = {
@@ -75,7 +79,9 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
       val contextResults = getContextResults(result.contextResultURI, fileReplacement, token)
 
       var successfull = 0
-
+      var firstRunning = Long.MaxValue
+      var lastCompleted = 0L
+      
       //Try to download the results for all the jobs of the group
       for (moleJob <- job.moleJobs) {
         if (contextResults.results.isDefinedAt(moleJob.id)) {
@@ -85,10 +91,20 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             if (!moleJob.isFinished) {
               try {
                 moleJob.rethrowException(context)
+                
+                context.value(GenericTask.Timestamps.prototype) match {
+                  case Some(stamps) => 
+                    val completed = stamps.view.reverse.find( _.state == State.COMPLETED ).get.time
+                    if(completed > lastCompleted) lastCompleted = completed
+                    val running = stamps.view.reverse.find( _.state == State.RUNNING ).get.time
+                    if(running < firstRunning) firstRunning = running
+                  case None => LOGGER.log(Level.WARNING, "No time stamps found.")
+                }
+                
                 moleJob.finished(context)
                 successfull +=1 
               } catch {
-                case e => LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e);
+                case e => LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e)
               }
             }
           }
@@ -96,9 +112,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
       }
 
       //If sucessfull for full group update stats
-      if (successfull == job.moleJobs.size) {
-        successFullFinish
-      }
+      if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
     } finally {
       BatchStorageControl.usageControl(communicationStorageDescription).releaseToken(token)
@@ -149,11 +163,11 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   }
 
   private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
-    if (tarResult == null) {
-      throw new InternalProcessingError("TarResult uri result is null.")
-    }
+    if (tarResult == null) throw new InternalProcessingError("TarResult uri result is null.")
 
-    val fileReplacement = new TreeMap[File, File]
+    var fileReplacement = new TreeMap[File, File]()(new Ordering[File] {
+        override def compare(x: File, y: File) = x.getAbsolutePath.compare(x.getAbsolutePath)
+      })
 
     if (!tarResult.isEmpty) {
       val tarResultURIFile = tarResult.file
@@ -177,15 +191,13 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             val os = new FileOutputStream(dest)
 
             try {
-              FileUtil.copy(tis, os);
+              FileUtil.copy(tis, os)
             } finally {
               os.close
             }
 
             val fileInfo = filesInfo(te.getName)
-            if (fileInfo == null) {
-              throw new InternalProcessingError("Filename not found for entry " + te.getName + '.')
-            }
+            if (fileInfo == null) throw new InternalProcessingError("Filename not found for entry " + te.getName + '.')
 
             val file = if (fileInfo._2) {
               val file = workspace.newDir("tarResult")
@@ -200,7 +212,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             } else {
               dest
             }
-            fileReplacement(fileInfo._1) = file
+            fileReplacement += fileInfo._1 -> file
             te = tis.getNextEntry
           }
 
@@ -211,7 +223,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
         tarResultFile.delete
       }
     }
-    fileReplacement.toMap
+    fileReplacement
   }
 
   private def getContextResults(uriFile: IURIFile, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {

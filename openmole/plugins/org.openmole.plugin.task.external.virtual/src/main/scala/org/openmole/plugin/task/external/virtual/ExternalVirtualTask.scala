@@ -42,23 +42,23 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
   
   implicit def callable[T](f: () => T): Callable[T] =  new Callable[T]() { def call() = f() }
 
-  def prepareInputFiles(global: IContext, context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
-    listInputFiles(global, context, progress).foreach( f => {
+  def prepareInputFiles(context: IContext, progress: IProgress, vmDir: String, client: SFTPv3Client) {
+    listInputFiles(context, progress).foreach( f => {
         val to = vmDir + '/' + f.name
         copyTo(client, f.file, to)
       })
   }
 
 
-  def fetchOutputFiles(global: IContext, context: IContext, progress: IProgress, vmDir: String, destDir: File, client: SFTPv3Client) = {
-    setOutputFilesVariables(global, context,progress,destDir).foreach( f => {
+  def fetchOutputFiles(context: IContext, progress: IProgress, vmDir: String, destDir: File, client: SFTPv3Client) = {
+    setOutputFilesVariables(context,progress,destDir).foreach( f => {
         val from = vmDir + '/' + f.name
         copyFrom(client, from, f.file)
       })
   }
 
 
-  protected def execute(global: IContext, context: IContext, progress: IProgress, cmd: String, vm: IVirtualMachine, user: String, password: String) = {
+  protected def execute(context: IContext, progress: IProgress, cmd: String, vm: IVirtualMachine, user: String, password: String) = {
     val connection = getSSHConnection(vm, user, password, 0) //workspace.getPreferenceAsDurationInMs(Configuration.VirtualMachineConnectionTimeOut).intValue )
     try {
       val sftp = new SFTPv3Client(connection)
@@ -67,19 +67,19 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
         val tmpDir = "/tmp/" + UUID.randomUUID + '/'
         sftp.mkdir(tmpDir, 0x777)
 
-        prepareInputFiles(global, context, progress, tmpDir, sftp)
+        prepareInputFiles(context, progress, tmpDir, sftp)
         
         val workDir = if(!relativeDir.isEmpty) tmpDir + relativeDir + '/' else tmpDir
         val session = connection.openSession
 
         try {
-          session.execCommand("cd " + workDir + " ; " + expandData(global, context, List(new Variable(ExternalTask.PWD, workDir)), cmd))
+          session.execCommand("cd " + workDir + " ; " + expandData(context, List(new Variable(ExternalTask.PWD, workDir)), cmd))
           waitForCommandToEnd(session, 0)
         } finally {
           session.close
         }
 
-        fetchOutputFiles(global, context, progress, workDir, workspace.newDir, sftp)
+        fetchOutputFiles(context, progress, workDir, workspace.newDir, sftp)
         delete(sftp,tmpDir)
       } finally {
         sftp.close

@@ -23,11 +23,10 @@ import org.openmole.core.model.data.IContext
 
 class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
 
-  override def  computeValues(global: IContext, context: IContext): Iterable[Double] = {
-    val nom = expandData(global, context, nominal).toDouble
-    val pe = expandData(global, context, percent).toDouble
-    val s = expandData(global, context, size).toInt
-
+  override def  computeValues(context: IContext): Iterable[Double] = {
+    val nom = expandData(context, nominal).toDouble
+    val pe = expandData(context, percent).toDouble
+    val s = expandData(context, size).toInt
 
     val min = nom * (1 - pe / 100.)
     if (s > 1) {

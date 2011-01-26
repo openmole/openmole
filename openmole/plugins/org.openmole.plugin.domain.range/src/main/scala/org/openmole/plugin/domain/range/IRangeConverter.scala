@@ -23,10 +23,10 @@ trait IRangeConverter[A, B] extends IRange[B] {
   def convert(e: A): B
   def underlyingRange: IRange[A]
   
-  override def computeValues(global: IContext, context: IContext): Iterable[B] = underlyingRange.computeValues(global, context).map{convert(_)}
-  override def step(global: IContext, context: IContext): B = convert(underlyingRange.step(global, context))
-  override def min(global: IContext, context: IContext): B = convert(underlyingRange.min(global, context))
-  override def max(global: IContext, context: IContext): B = convert(underlyingRange.max(global, context))
-  override def range(global: IContext, context: IContext): B = convert(underlyingRange.range(global, context))
-  override def center(global: IContext, context: IContext): B = convert(underlyingRange.center(global, context))
+  override def computeValues(context: IContext): Iterable[B] = underlyingRange.computeValues(context).map{convert(_)}
+  override def step(context: IContext): B = convert(underlyingRange.step(context))
+  override def min(context: IContext): B = convert(underlyingRange.min(context))
+  override def max(context: IContext): B = convert(underlyingRange.max(context))
+  override def range(context: IContext): B = convert(underlyingRange.range(context))
+  override def center(context: IContext): B = convert(underlyingRange.center(context))
 }

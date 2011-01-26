@@ -50,7 +50,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
     return true
   }
 
-  protected def submitNextJobsIfReady(global: IContext, context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
+  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
     val registry = moleExecution.localCommunication.transitionRegistry
     registry.register(this, ticket, context)
 
@@ -58,48 +58,37 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
       val combinaison = new ListBuffer[IContext]
 
       for (t <- end.transitions) combinaison += {
-        (registry.remove(t, ticket) match {
-            case None => throw new InternalProcessingError("BUG Context not registred for transtion")
-            case Some(c) => c
-          }).toContext
+        (registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG Context not registred for transtion"))).toContext
       }
             
-      val itDc = end.capsule.inputDataChannels
-      for (dataChannel <- itDc) {
-        combinaison += dataChannel.consums(ticket, moleExecution)
+      end.capsule.inputDataChannels.foreach {
+        iDc => combinaison += iDc.consums(ticket, moleExecution)
       }
-
+      
       val newTicket =  if (end.capsule.intputSlots.size <= 1) ticket else {
-        moleExecution.nextTicket(ticket.parent match {
-            case None => throw new InternalProcessingError("BUG should never reach root ticket")
-            case Some(t) => t
-          })
+        moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
       } 
 
-      val endTask = end.capsule.task match {
-        case None => throw new InternalProcessingError("End task capsule of the transition is no assigned")
-        case Some(t) => t
-      }  
-  
+      val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("End task capsule of the transition is no assigned"))  
       val newContext = ContextAggregator.aggregate(endTask.inputs, false, combinaison)
 
-      moleExecution.submit(end.capsule,  global, newContext, newTicket, subMole)
+      moleExecution.submit(end.capsule, newContext, newTicket, subMole)
     }
   }
 
-  override def perform(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) = {
-    if (isConditionTrue(global, context)) {
+  override def perform(context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) = {
+    if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
       for(name <- filtered) context -= name
-      performImpl(global, context, ticket, toClone, scheduler, subMole);
+      performImpl(context, ticket, toClone, scheduler, subMole);
     }
   }
 
 
-  override def isConditionTrue(global: IContext, context: IContext): Boolean = {
-    condition.evaluate(global, context)
+  override def isConditionTrue(context: IContext): Boolean = {
+    condition.evaluate(context)
   }
 
-  protected def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
+  protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
   protected def plugStart
 }

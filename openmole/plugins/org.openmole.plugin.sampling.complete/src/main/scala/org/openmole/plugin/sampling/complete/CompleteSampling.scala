@@ -33,13 +33,13 @@ class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}
 
   def this(factors : Array[(IFactor[T,IDomain[T]]) forSome{type T}]) = this(factors.toIterable)
 
-  override def build(global: IContext, context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
     var size = 1
         
     val values = (for (factor <- factors) yield {
-        val factorValue = (factor.prototype, factor.domain.iterator(global, context).toIndexedSeq)
+        val factorValue = (factor.prototype, factor.domain.iterator(context).toIndexedSeq)
         if(factorValue._2.size == 0) {
-          Logger.getLogger(classOf[CompleteSampling].getName).info("Factor " + factorValue._1.name + " empty.")
+//          Logger.getLogger(classOf[CompleteSampling].getName).info("Factor " + factorValue._1.name + " empty.")
           return Iterable.empty
         }
         size *= factorValue._2.size
@@ -84,7 +84,7 @@ class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}
         } }
     }
  
-    Logger.getLogger(classOf[CompleteSampling].getName).info("Size of sampling " + listOfListOfValues.size)
+    //Logger.getLogger(classOf[CompleteSampling].getName).info("Size of sampling " + listOfListOfValues.size)
     
     listOfListOfValues
   }

@@ -28,9 +28,9 @@ class Condition(code: String) extends ICondition {
     new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
   }
   
-  override def evaluate(global: IContext, context: IContext): Boolean = {
+  override def evaluate(context: IContext): Boolean = {
     groovyProxy.synchronized {
-      groovyProxy.execute(global, context).asInstanceOf[Boolean]
+      groovyProxy.execute(context).asInstanceOf[Boolean]
     }           
   }
 

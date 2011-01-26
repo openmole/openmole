@@ -22,7 +22,7 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.math.Numeric.DoubleAsIfIntegral
 
 class ScalaDoubleRange(min: String, max: String, step: String) extends IntegralRange[Double](min, max, step)(DoubleAsIfIntegral) {
-  override def step(global: IContext, context: IContext): Double = expandData(global, context, step).toDouble
-  override def max(global: IContext, context: IContext): Double = expandData(global, context, max).toDouble
-  override def min(global: IContext, context: IContext): Double = expandData(global, context, min).toDouble
+  override def step(context: IContext): Double = expandData(context, step).toDouble
+  override def max(context: IContext): Double = expandData(context, max).toDouble
+  override def min(context: IContext): Double = expandData(context, min).toDouble
 }

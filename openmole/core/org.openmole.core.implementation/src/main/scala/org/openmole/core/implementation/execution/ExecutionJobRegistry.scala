@@ -43,12 +43,9 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   var categories = new HashMap[IStatisticKey, HashSet[IJob]]
 
   override def allJobs: Iterable[IJob] = jobs.keySet
-      
+
   override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = {
-    jobs.get(job) match {
-      case Some(ejobs) => ejobs
-      case None => Iterable.empty
-    }
+    jobs.getOrElse(job, Iterable.empty)
   }
 
   override def remove(ejob: EXECUTIONJOB) = {
@@ -58,9 +55,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
     }     
   }
 
-  override def isEmpty: Boolean = {
-    jobs.isEmpty
-  }
+  override def isEmpty: Boolean = jobs.isEmpty
 
   override def register(ejob: EXECUTIONJOB) = synchronized {
     jobs(ejob.job) = jobs.get(ejob.job) match {
@@ -92,7 +87,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   }
 
   override def allExecutionJobs:  Iterable[EXECUTIONJOB] = {
-    for (job <- allJobs ; if jobs.contains(job) ; ejob <- jobs(job)) yield ejob
+    for (job <- allJobs ; ejob <- jobs.getOrElse(job, Iterable.empty)) yield ejob
   }
 
   override def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] = {

@@ -26,21 +26,20 @@ import scala.collection.JavaConversions._
 
 class ListFilesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDomain[File] {
 
-    def this(dir: File) = this(dir, None)
+  def this(dir: File) = this(dir, None)
 
-    def this(dir: File, pattern: String) = {
-        this(dir, Some(new FileFilter {
+  def this(dir: File, pattern: String) = {
+    this(dir, Some(new FileFilter {
+          override def accept(file: File): Boolean = file.getName.matches(pattern)          
+        })
+    )
+  }
 
-            override def accept(file: File): Boolean = file.getName.matches(pattern)
-            
-        }))
+  override def computeValues(context: IContext): Iterable[File] = {
+    filter match {
+      case None => dir.listFiles
+      case Some(filter) => dir.listFiles(filter)
     }
-
-    override def computeValues(global: IContext, context: IContext): Iterable[File] = {
-      filter match {
-        case None => dir.listFiles
-        case Some(filter) => dir.listFiles(filter)
-      }
-    }
+  }
 
 }

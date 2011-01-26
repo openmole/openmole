@@ -26,17 +26,17 @@ import org.openmole.core.model.sampling.ISampling
 
 class FactorSamplingAdapter(factor: IFactor[T,IDomain[T]] forSome{type T}) extends ISampling {
  
-  override def build(global: IContext, context: IContext): Iterable[Iterable[IVariable[_]]] = {
-    return typedBuild(global, context, factor)
+  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+    typedBuild(context, factor)
   }
   
-  private def typedBuild[T](global: IContext, context: IContext, factor: IFactor[T,IDomain[T]]): Iterable[Iterable[IVariable[T]]] = {
+  private def typedBuild[T](context: IContext, factor: IFactor[T,IDomain[T]]): Iterable[Iterable[IVariable[T]]] = {
     return new Iterable[Iterable[IVariable[T]]] {
 
       override def iterator: Iterator[Iterable[IVariable[T]]] = {
         new Iterator[Iterable[IVariable[T]]] {
 
-          val iterator = factor.domain.iterator(global, context)
+          val iterator = factor.domain.iterator(context)
 
           override def hasNext: Boolean = iterator.hasNext
                     

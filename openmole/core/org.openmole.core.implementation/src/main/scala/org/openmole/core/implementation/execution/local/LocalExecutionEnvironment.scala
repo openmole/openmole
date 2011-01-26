@@ -18,9 +18,7 @@
 package org.openmole.core.implementation.execution.local
 
 import java.util.LinkedList
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
-import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job

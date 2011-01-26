@@ -70,12 +70,12 @@ class BatchJobServiceGroup {
               val quality = BatchJobServiceControl.qualityControl(cur.description)
               val nbSubmitted = quality.submitted
               val fitness = (if(quality.submitted > 0) {
-                  val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.success, 2)
+                  val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
                   val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                   if(v < min) min else v
-                } else Double.PositiveInfinity) 
+                } else quality.successRate) 
               
-              Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
               
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness

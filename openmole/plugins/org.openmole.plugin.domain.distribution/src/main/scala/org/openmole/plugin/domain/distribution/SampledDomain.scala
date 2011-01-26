@@ -24,13 +24,13 @@ import org.openmole.core.model.domain.IFiniteDomain
 
 class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
 
-  override def computeValues(global: IContext, context: IContext): Iterable[T] = {
-    val it = domain.iterator(global, context)
+  override def computeValues(context: IContext): Iterable[T] = {
+    val it = domain.iterator(context)
     val localSize = size
     
     new Iterable[T] {
 
-      def iterator() = new Iterator[T] {
+      def iterator = new Iterator[T] {
         var i = 0
         override def size = localSize
         override def hasNext: Boolean = i < localSize && it.hasNext

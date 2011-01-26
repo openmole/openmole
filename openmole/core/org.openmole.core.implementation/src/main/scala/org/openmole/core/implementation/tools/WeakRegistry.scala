@@ -25,11 +25,11 @@ class WeakRegistry[K,V] {
   val registry = new WeakHashMap[K, V] with SynchronizedMap[K, V]
    
   def isRegistred(key: K): Boolean = registry.contains(key)
-  
-  def +=(key: K, value: V) = {registry += ((key, value))}
+ 
+  def +=(v: ( K, V)) = {registry += v}
 
   def remove(key: K): Option[V] = {registry.remove(key)}
 
-  def apply(key: K): Option[V] = registry.get(key);
+  def apply(key: K): Option[V] = registry.get(key)
 
 }

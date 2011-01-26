@@ -20,10 +20,7 @@ package org.openmole.core.model.execution
 import org.openmole.core.model.job.IJob
 
 trait IEnvironment {
-
-    def submit(job: IJob)
-
-    def jobRegistry: IExecutionJobRegistry[_ <: IExecutionJob]
-
-    def statistic: IStatistic
+  def submit(job: IJob)
+  def jobRegistry: IExecutionJobRegistry[_ <: IExecutionJob]
+  def statistic: IStatistic
 }

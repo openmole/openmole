@@ -56,7 +56,7 @@ object QualityControl {
 class QualityControl(hysteresis: Int) {
   val _successRate = new MoovingAverage(hysteresis)
   success
-
+  
   def failed = _successRate.apply(0)
   def success = _successRate.apply(1)
   def successRate = _successRate.get

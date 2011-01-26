@@ -21,6 +21,6 @@ import org.openmole.core.model.data.IContext
 
 trait IFiniteDomain[+T] extends IDomain[T] {
   @throws(classOf[Throwable])
-  def computeValues(global: IContext, context: IContext): Iterable[T]
-  override def iterator(global: IContext, context: IContext): Iterator[T] = computeValues(global, context).iterator
+  def computeValues(context: IContext): Iterable[T]
+  override def iterator(context: IContext): Iterator[T] = computeValues(context).iterator
 }

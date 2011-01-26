@@ -21,5 +21,5 @@ import org.openmole.core.model.mole.IMoleExecution
 
 trait IStatistic {
   def apply(moleExecution: IMoleExecution, key: IStatisticKey): IStatisticSamples
-  def +=(oleExecution: IMoleExecution, key: IStatisticKey, sample: SampleType.Value, length: Long)
+  def +=(moleExecution: IMoleExecution, key: IStatisticKey, sample: IStatisticSample)
 }

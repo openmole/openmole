@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.SynchronizedContext
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job
@@ -114,15 +113,15 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     eventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.NORMAL, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.AllJobsWaitingInGroup)
   }
     
-  override def submit(capsule: IGenericCapsule, global: IContext, context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = synchronized {
-    val job = capsule.toJob(global, context, nextJobId)
+  override def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution): Unit = synchronized {
+    val job = capsule.toJob(context, nextJobId)
     submit(job, capsule, subMole, ticket)
   }
    
   def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
     eventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
 
-    MoleJobRegistry += (moleJob, this)
+    MoleJobRegistry += moleJob -> (this, capsule)
     eventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
     eventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
 
@@ -194,11 +193,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
  
-  def start(global: IContext, context: IContext) = {
+  def start(context: IContext) = {
     if (submiter.getState.equals(Thread.State.NEW)) {
       val ticket = nextTicket(rootTicket)
 
-      submit(mole.root, global, context, ticket, SubMoleExecution(this))
+      submit(mole.root, context, ticket, SubMoleExecution(this))
       submiter.start
     } else {
       LOGGER.warning("This MOLE execution has allready been started, this call has no effect.")
@@ -206,7 +205,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
   
   @BeforeObjectModified(name = IMoleExecution.Starting)
-  override def start = start(new SynchronizedContext, new Context)      
+  override def start = start(new Context)      
 
   override def cancel = synchronized { 
     submiter.interrupt
@@ -219,7 +218,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
 
-  override def moleJobs: Iterable[IMoleJob] = { asScalaMap(inProgress).map{ _._1 }}
+  override def moleJobs: Iterable[IMoleJob] = { inProgress.map{ _._1 }}
 
   override def waitUntilEnded = submiter.join
     

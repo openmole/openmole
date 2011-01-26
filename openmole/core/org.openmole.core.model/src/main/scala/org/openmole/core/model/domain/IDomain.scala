@@ -22,6 +22,6 @@ import org.openmole.core.model.data.IContext
 trait IDomain[+T] {
 
   @throws(classOf[Throwable])
-  def iterator(global: IContext, context: IContext): Iterator[T] 
+  def iterator(context: IContext): Iterator[T] 
 
 }

@@ -45,12 +45,12 @@ abstract class AbstractSystemExecTask (name: String,
     case Some(returnValue) => addOutput(returnValue)
   }
   
-  override protected def process(global: IContext, context: IContext, progress: IProgress) = {
+  override protected def process(context: IContext, progress: IProgress) = {
     val tmpDir = workspace.newDir("systemExecTask")
 
-    prepareInputFiles(global, context, progress, tmpDir)
+    prepareInputFiles(context, progress, tmpDir)
     val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(global, context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
       
     try {                    
       // val executor = new DefaultExecutor
@@ -72,7 +72,7 @@ abstract class AbstractSystemExecTask (name: String,
       case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
     }
 
-    fetchOutputFiles(global, context, progress, workDir)
+    fetchOutputFiles(context, progress, workDir)
   }
   
   protected def execute(process: Process, context: IContext): Integer

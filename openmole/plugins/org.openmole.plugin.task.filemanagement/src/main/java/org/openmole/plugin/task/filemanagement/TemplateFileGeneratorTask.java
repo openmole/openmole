@@ -50,7 +50,7 @@ public abstract class TemplateFileGeneratorTask extends Task {
     }
 
     @Override
-    public void process(IContext global, IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError {
+    public void process(IContext context, IProgress progress) throws InternalProcessingError, UserBadDataError {
         try {
 
             File templateFile = getFile(context);
@@ -62,7 +62,7 @@ public abstract class TemplateFileGeneratorTask extends Task {
                 try {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        line = expandData(global, context, line);
+                        line = expandData(context, line);
                         writer.println(line);
                     }
                 } finally {

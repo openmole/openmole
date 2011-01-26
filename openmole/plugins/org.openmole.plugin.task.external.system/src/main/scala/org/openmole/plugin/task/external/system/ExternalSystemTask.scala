@@ -33,13 +33,10 @@ import org.openmole.plugin.task.external.system.internal.Activator._
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
-  def prepareInputFiles(global: IContext, context: IContext, progress: IProgress, tmpDir: File) {
+  def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
    
-    listInputFiles(global, context, progress).foreach( f => {        
+    listInputFiles(context, progress).foreach( f => {        
         val to = new File(tmpDir, f.name)
-        
-        //Logger.getLogger(classOf[ExternalSystemTask].getName).info("Copy " + f.file.getAbsolutePath + " to " + to.getAbsolutePath)
-
         
         to.getAbsoluteFile.getParentFile.mkdirs
         copy(f.file, to)
@@ -55,10 +52,10 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
   }
 
 
-  def fetchOutputFiles(global: IContext, context: IContext, progress: IProgress, localDir: File) = {
+  def fetchOutputFiles(context: IContext, progress: IProgress, localDir: File) = {
     var usedFiles = new TreeSet[File]
 
-    setOutputFilesVariables(global, context,progress,localDir).foreach( f => {
+    setOutputFilesVariables(context,progress,localDir).foreach( f => {
         if (!f.file.exists) {
           throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
         }

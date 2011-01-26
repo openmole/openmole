@@ -59,9 +59,12 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <symbolic.name>${project.artifactId}</symbolic.name>
         <!-- versions of libraries used -->
-	<lib.org.eclipse.osgi.version>3.6.0</lib.org.eclipse.osgi.version>
-	<lib.org.eclipse.equinox.app.version>1.3.0</lib.org.eclipse.equinox.app.version>
-
+	<lib.org.eclipse.osgi.version>3.6.2.R36x_v20101103</lib.org.eclipse.osgi.version>
+	<lib.org.eclipse.equinox.launcher.version>1.1.1.R36x_v20101122_1400</lib.org.eclipse.equinox.launcher.version>
+	<lib.org.eclipse.equinox.app.version>1.3.1.R36x_v20100803</lib.org.eclipse.equinox.app.version>
+	<lib.org.eclipse.core.contenttype.version>3.4.100</lib.org.eclipse.core.contenttype.version>
+	<lib.org.eclipse.core.runtime.version>3.6.0</lib.org.eclipse.core.runtime.version>
+   
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
       	<lib.com.db4o.version>7.12-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>1.1.4</lib.com.ice.tar.version>
@@ -145,8 +148,8 @@
                             <artifactItem>
                                 <groupId>org.eclipse.core</groupId>
                                 <artifactId>org.eclipse.core.contenttype</artifactId>
-                                <version>3.4.100</version>
-                                <destFileName>org.eclipse.core.contenttype_3.4.100.jar</destFileName>
+                                <version>${lib.org.eclipse.core.contenttype.version}</version>
+                                <destFileName>org.eclipse.core.contenttype_${lib.org.eclipse.core.contenttype.version}.jar</destFileName>
                             </artifactItem>
                             <artifactItem>
                                 <groupId>org.eclipse.core</groupId>
@@ -157,20 +160,8 @@
                             <artifactItem>
                                 <groupId>org.eclipse.core</groupId>
                                 <artifactId>org.eclipse.core.runtime</artifactId>
-                                <version>3.6.0</version>
-                                <destFileName>org.eclipse.core.runtime_3.6.0.jar</destFileName>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.eclipse.emf</groupId>
-                                <artifactId>org.eclipse.emf.common</artifactId>
-                                <version>2.6.0</version>
-                                <destFileName>org.eclipse.emf.common_2.6.0.jar</destFileName>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.eclipse.emf</groupId>
-                                <artifactId>org.eclipse.emf.ecore</artifactId>
-                                <version>2.6.0</version>
-                                <destFileName>org.eclipse.emf.ecore_2.6.0.jar</destFileName>
+                                <version>${lib.org.eclipse.core.runtime.version}</version>
+                                <destFileName>org.eclipse.core.runtime_${lib.org.eclipse.core.runtime.version}.jar</destFileName>
                             </artifactItem>
                             <artifactItem>
                                 <groupId>org.eclipse.equinox</groupId>
@@ -187,8 +178,8 @@
                             <artifactItem>
                                 <groupId>org.eclipse.equinox</groupId>
                                 <artifactId>org.eclipse.equinox.launcher</artifactId>
-                                <version>1.1.0</version>
-                                <destFileName>org.eclipse.equinox.launcher_1.1.0.jar</destFileName>
+                                <version>${lib.org.eclipse.equinox.launcher.version}</version>
+                                <destFileName>org.eclipse.equinox.launcher.jar</destFileName>
                             </artifactItem>
                             <artifactItem>
                                 <groupId>org.eclipse.equinox</groupId>

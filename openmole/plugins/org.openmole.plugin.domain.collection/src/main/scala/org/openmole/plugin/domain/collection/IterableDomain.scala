@@ -28,5 +28,5 @@ class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] {
     
   def this(iterable: java.lang.Iterable[_ <: T]) = this(asScalaIterable(iterable))
     
-  override def iterator(global: IContext, context: IContext): Iterator[T] = iterable.iterator
+  override def iterator(context: IContext): Iterator[T] = iterable.iterator
 }

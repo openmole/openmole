@@ -31,13 +31,12 @@ class ListFilesAndNamesDomain(dir: File, filter: Option[FileFilter]) extends IFi
 
   def this(dir: File, pattern: String) = {
     this(dir, Some(new FileFilter {
-
-          override def accept(file: File): Boolean = file.getName.matches(pattern)
-            
-        }))
+          override def accept(file: File): Boolean = file.getName.matches(pattern)     
+        })
+    )
   }
 
-  override def computeValues(global: IContext, context: IContext): Iterable[(File, String)] = {
-    listFiles.computeValues(global,context).map(f => (f,f.getName))
+  override def computeValues(context: IContext): Iterable[(File, String)] = {
+    listFiles.computeValues(context).map(f => (f,f.getName))
   }
 }

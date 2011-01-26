@@ -37,12 +37,12 @@ object ToCloneFinder {
   }
 
   //TODO Improvement condition are evaluated several times
-  def variablesToClone(caps: IGenericCapsule, global: IContext, context: IContext, moleExecution: IMoleExecution): Set[String] = {
+  def variablesToClone(caps: IGenericCapsule, context: IContext, moleExecution: IMoleExecution): Set[String] = {
 
     var counters = new TreeMap[String, DataInfo]
     val levelComputing = LevelComputing(moleExecution)
     for (transition <- caps.outputTransitions) {
-      if (transition.isConditionTrue(global, context)) {
+      if (transition.isConditionTrue(context)) {
         transition.end.capsule.task match {
           case Some(t) =>
             for (data <- t.inputs) {

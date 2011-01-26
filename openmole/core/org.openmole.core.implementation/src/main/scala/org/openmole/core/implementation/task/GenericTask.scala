@@ -106,17 +106,17 @@ abstract class GenericTask(val name: String) extends IGenericTask {
    * @param progress
    */
   @throws(classOf[Throwable])
-  protected def process(global: IContext, context: IContext, progress: IProgress): Unit
+  protected def process(context: IContext, progress: IProgress): Unit
    
 
   /* (non-Javadoc)
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
-  override def perform(global: IContext, context: IContext, progress: IProgress) = {
+  override def perform(context: IContext, progress: IProgress) = {
     try {
       deploy
       init(context)
-      process(global, context, progress)
+      process(context, progress)
       end(context)
     } catch {
       case e => throw new InternalProcessingError(e, "Error in task " + name)

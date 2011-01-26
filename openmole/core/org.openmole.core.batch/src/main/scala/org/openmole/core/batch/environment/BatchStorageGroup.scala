@@ -64,13 +64,13 @@ class BatchStorageGroup {
               val quality = BatchStorageControl.qualityControl(cur.description)
               val fitness = quality match {
                 case Some(q) => 
-                  val v = math.pow(1. * q.success, 2)
+                  val v = math.pow(1. * q.successRate, 2)
                   val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                   if(v < min) min else v
                 case None => 1.
               }
               
-              Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
 
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness

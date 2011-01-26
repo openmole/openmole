@@ -34,28 +34,15 @@ object IMoleJob {
   }
 }
 
-
 trait IMoleJob {
-
   def task: IGenericTask
-
   def state: State.State
-
   def isFinished: Boolean
-
   def context: IContext
-  def globalContext: IContext
-    
-  def perform
-    
+  def perform   
   def finished(executionJob: IContext)
-
   def rethrowException(context: IContext)
-
   def progress: IProgress
-
   def id: MoleJobId
-
   def cancel 
-    
 }

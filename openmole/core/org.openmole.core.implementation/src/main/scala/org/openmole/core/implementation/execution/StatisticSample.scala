@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,10 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.internal
+package org.openmole.core.implementation.execution
 
-import org.openmole.core.model.execution.SampleType
+import org.openmole.core.model.execution.IStatisticSample
 
-trait IWorkloadManagmentStrategy {
-    def whenJobShouldBeResubmited(sample: SampleType.Value, finishedStat: Iterable[Long], runningStat: Iterable[Long]): Long
-}
+class StatisticSample(val submitted: Long, val running: Long, val done: Long) extends IStatisticSample

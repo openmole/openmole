@@ -21,11 +21,11 @@ import org.openmole.core.model.data.IContext
 
 trait IWithRange[+T]  {
     @throws(classOf[Throwable])
-    def range(global: IContext, context: IContext): T
+    def range(context: IContext): T
     
     @throws(classOf[Throwable])
-    def min(global: IContext, context: IContext): T
+    def min(context: IContext): T
     
     @throws(classOf[Throwable])
-    def max(global: IContext, context: IContext): T
+    def max(context: IContext): T
 }

@@ -53,7 +53,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
     
 
-  override def performImpl(global: IContext, context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
     val level = LevelComputing(moleExecution)
 
     val beginLevel = level.level(start)
@@ -78,7 +78,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
     }
 
     end.synchronized  {
-      submitNextJobsIfReady(global, ContextBuffer(context, toClone), destTicket, moleExecution, newSubMole);
+      submitNextJobsIfReady(ContextBuffer(context, toClone), destTicket, moleExecution, newSubMole);
     }
   }
   

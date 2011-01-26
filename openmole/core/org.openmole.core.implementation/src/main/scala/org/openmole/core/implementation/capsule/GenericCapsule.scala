@@ -97,17 +97,12 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
 
-  override def toJob(global: IContext, context: IContext, jobId: MoleJobId): IMoleJob = {
-         
-    _task match {
-      case Some(t) =>
-        val ret = new MoleJob(t, global, context,jobId)
-        eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOW, new GenericCapsuleAdapter, IMoleJob.StateChanged)
-        eventDispatcher.objectChanged(this, IGenericCapsule.JobCreated, Array[Object](ret))
-        return ret
-      case None => throw new UserBadDataError("Reached a capsule with unassigned task.")
-    }
+  override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = { 
+    val t = _task.getOrElse(throw new UserBadDataError("Reached a capsule with unassigned task.")) 
 
+    val ret = new MoleJob(t, context,jobId)
+    eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOW, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+    ret
   }
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
@@ -126,41 +121,26 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   
   private def jobFinished(job: MoleJob) = {
     try {
-      val execution = MoleJobRegistry.remove(job) match {
-        case None => throw new InternalProcessingError("BUG: job not registred")
-        case Some(e) => e
-      }
-      val subMole = execution.subMoleExecution(job) match {
-        case None => throw new InternalProcessingError("BUG: submole not registred for job")
-        case Some(sm) => sm
-      }
-            
-      val ticket = execution.ticket(job) match {
-        case None => throw new InternalProcessingError("BUG: ticket not registred for job")
-        case Some(t) => t
-      }
+      val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
+      val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   
+      val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
  
-      performTransition(job.globalContext, job.context, ticket, execution, subMole)
+      performTransition(job.context, ticket, execution, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
     } finally {
-      eventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed);
+      eventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed)
     }
   }
 
-  protected def performTransition(global: IContext, context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
+  protected def performTransition(context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
     if(outputTransitions.size == 1 && outputDataChannels.isEmpty)
-      outputTransitions.head.perform(global, context, ticket, Set.empty, moleExecution, subMole)
+      outputTransitions.head.perform(context, ticket, Set.empty, moleExecution, subMole)
     else {
-      val toClone = variablesToClone(this, global, context, moleExecution)
+      val toClone = variablesToClone(this, context, moleExecution)
  
-      for (dataChannel <- outputDataChannels) {
-        dataChannel.provides(context, ticket, toClone, moleExecution);
-      }
-
-      for (transition <- outputTransitions) {
-        transition.perform(global, context, ticket, toClone, moleExecution, subMole)
-      }
+      outputDataChannels.foreach{_.provides(context, ticket, toClone, moleExecution)}
+      outputTransitions.foreach{_.perform(context, ticket, toClone, moleExecution, subMole)}
     }
   }
 

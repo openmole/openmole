@@ -26,27 +26,23 @@ import scala.collection.JavaConversions._
 
 class StatisticKey(val key: Array[IGenericTask]) extends IStatisticKey {
 
-    def this(job: IJob) = {
-      this(job.moleJobs.map( _.task ).toArray)
-    }
+  def this(job: IJob) = this(job.moleJobs.toList.map( _.task ).distinct.toArray)
 
-    override def hashCode: Int = {
-      key.deep.hashCode
-    }
+  override def hashCode: Int = key.deep.hashCode
 
-    override def equals(obj: Any): Boolean = {
-      if (obj == null) {
-        return false
-      } 
+  override def equals(obj: Any): Boolean = {
+    if (obj == null) {
+      return false
+    } 
       
-      if (getClass != obj.asInstanceOf[AnyRef].getClass) {
-        return false
-      }
-      val other = obj.asInstanceOf[StatisticKey]
-      if (this.key.deep != other.key.deep) {
-        return false
-      }
-      return true
+    if (getClass != obj.asInstanceOf[AnyRef].getClass) {
+      return false
     }
+    val other = obj.asInstanceOf[StatisticKey]
+    if (this.key.deep != other.key.deep) {
+      return false
+    }
+    return true
+  }
   
 }

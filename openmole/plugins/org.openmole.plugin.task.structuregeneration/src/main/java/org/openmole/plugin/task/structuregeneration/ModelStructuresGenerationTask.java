@@ -60,7 +60,7 @@ public class ModelStructuresGenerationTask extends Task {
     }
 
     @Override
-    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
             context.add(InputData.prototype(), getInputDataStructureClass().newInstance());
             context.add(OutputData.prototype(), getOutputDataStructureClass().newInstance());

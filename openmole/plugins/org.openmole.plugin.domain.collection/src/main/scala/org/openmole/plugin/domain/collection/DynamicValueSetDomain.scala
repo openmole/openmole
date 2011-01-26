@@ -30,10 +30,10 @@ class DynamicValueSetDomain[+T](val values: Iterable[String]) extends IFiniteDom
 
   def this (vals: java.lang.Iterable[String]) = this(JavaConversions.asScalaIterable(vals))
 
-  override def computeValues(global: IContext, context: IContext): Iterable[T] = {
+  override def computeValues(context: IContext): Iterable[T] = {
     var ret = new ArrayBuffer[T](values.size)
     for(s <- values) {
-      ret += VariableExpansion.expandData(global, context, s).asInstanceOf[T]
+      ret += VariableExpansion.expandData(context, s).asInstanceOf[T]
     }
     ret
   }

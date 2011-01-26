@@ -36,7 +36,6 @@ import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.task.InputToGlobalTask
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.model.capsule.ICapsule
@@ -120,24 +119,18 @@ class Builder {
    * @throws UserBadDataError
    * @throws InterruptedException
    */
-  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): MoleTask = {
-
-    
-    puzzle.lastCapsule.task match {
-      case None => throw new UserBadDataError("Task unasigned for last capsule of the puzzle")
-      case Some(task) =>
+  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): MoleTask = {  
+    val task = puzzle.lastCapsule.task.getOrElse(throw new UserBadDataError("Task unasigned for last capsule of the puzzle"))
                   
-        val inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask", task.userOutputs);
+//        val inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask", task.userOutputs);
 
-        val ch = chain(puzzle, TransitionFactory.puzzle(inputToGlobalTask))
-        val moleTask = new MoleTask(taskName, new Mole(ch.firstCapsule))
+//        val ch = chain(puzzle, TransitionFactory.puzzle(inputToGlobalTask))
+    val moleTask = new MoleTask(taskName, new Mole(puzzle.firstCapsule))
 
-        for (data <- task.userOutputs) {
-          moleTask.addOutput(data)
-        }
-        moleTask
-          
+    for (data <- task.userOutputs) {
+      moleTask.addOutput(puzzle.lastCapsule, data)
     }
+    moleTask
   }
 
   /**
@@ -314,20 +307,18 @@ class Builder {
  
   def  explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): IMoleTask = {
         
-    val ft = puzzle.lastCapsule.task match {
-      case None => throw new UserBadDataError("Task unasigned for first capsule of the puzzle")
-      case Some(task) => task
-    }
+    val ft = puzzle.lastCapsule.task.getOrElse(throw new UserBadDataError("Task unasigned for first capsule of the puzzle"))
+    
     // the final task making possible the retrieving of output
-    val inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask", ft.userOutputs.map{ Data.toArray(_)} )
-    val exploPuz = exploration(explo, puzzle, inputToGlobalTask)
+    //val inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask", ft.userOutputs.map{ Data.toArray(_)} )
+    val exploPuz = exploration(explo, puzzle)
     
     // builds a mole containing a exploration, a puzzle, and an aggregation on the inputToGlobalTask
     val moleTask = new MoleTask(taskName, new Mole(exploPuz.firstCapsule))
 
     // sets output available as an array
     for (data <- ft.userOutputs) {
-      moleTask.addOutput(Data.toArray(data))
+      moleTask.addOutput(puzzle.lastCapsule, Data.toArray(data))
     }
     moleTask
    

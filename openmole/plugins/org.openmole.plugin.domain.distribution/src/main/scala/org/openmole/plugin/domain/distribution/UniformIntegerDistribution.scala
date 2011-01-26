@@ -26,7 +26,7 @@ class UniformIntegerDistribution(generator: Random) extends IDomain[Integer] {
  
   def this(seed: Long) = this(new Random(seed))
     
-  override def iterator(global: IContext, context: IContext): Iterator[Integer] = {
+  override def iterator(context: IContext): Iterator[Integer] = {
     new Iterator[Integer] {
       override def hasNext: Boolean = true
       override def next: Integer =  generator.nextInt

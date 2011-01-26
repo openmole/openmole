@@ -26,10 +26,6 @@ import scala.collection.JavaConversions._
 
 class IterableVariableDomain[T](variable: IPrototype[java.lang.Iterable[_ <: T]]) extends IDomain[T] {
 
-  override def iterator(global: IContext, context: IContext): Iterator[T] ={
-    context.value(variable) match {
-      case Some(value) => value.iterator
-      case None => throw new UserBadDataError("Value not found in context for prototype " + variable.toString());
-    }
-  }
+  override def iterator(context: IContext): Iterator[T] = 
+    context.value(variable).getOrElse(throw new UserBadDataError("Value not found in context for prototype " + variable.toString())).iterator  
 }

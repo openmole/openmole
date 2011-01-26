@@ -23,10 +23,10 @@ import java.lang.Integer
 
 class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
 
-  override def  computeValues(global: IContext, context: IContext): Iterable[Integer] = {
-    val nom = expandData(global, context, nominal).toInt
-    val pe = expandData(global, context, percent).toInt
-    val s = expandData(global, context, size).toInt
+  override def  computeValues(context: IContext): Iterable[Integer] = {
+    val nom = expandData(context, nominal).toInt
+    val pe = expandData(context, percent).toInt
+    val s = expandData(context, size).toInt
 
 
     val min = nom * (1 - pe / 100.)

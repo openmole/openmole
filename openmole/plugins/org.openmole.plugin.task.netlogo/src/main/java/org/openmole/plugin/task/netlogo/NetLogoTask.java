@@ -65,10 +65,10 @@ public class NetLogoTask extends ExternalSystemTask {
 
 
     @Override
-    public void process(IContext global, IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
             File tmpDir = Activator.getWorkspace().newDir("netLogoTask");
-            prepareInputFiles(global, context, progress, tmpDir);
+            prepareInputFiles(context, progress, tmpDir);
             File script = new File(tmpDir, relativeScriptPath);
             HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
             try {
@@ -81,14 +81,14 @@ public class NetLogoTask extends ExternalSystemTask {
                 }
 
                 for (String cmd : launchingCommands) {
-                    workspace.command(VariableExpansion.expandData(global, context, cmd));
+                    workspace.command(VariableExpansion.expandData(context, cmd));
                 }
 
                 for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
                     context.add(outBinding._2(), workspace.report(outBinding._1()));
                 }
 
-                fetchOutputFiles(global, context, progress, tmpDir);
+                fetchOutputFiles(context, progress, tmpDir);
             } catch (CompilerException ex) {
                 throw new UserBadDataError(ex);
             } catch (LogoException ex) {

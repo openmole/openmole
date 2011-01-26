@@ -36,19 +36,19 @@ class ZipSamplingCombinasion(reference: ISampling, samplings: Iterable[ISampling
 
   def this(reference: ISampling, head: ISampling, samplings: Array[ISampling]) = this(reference, List(head) ++ samplings) 
 
-  override def build(global: IContext, context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
 
     /* Compute plans */
     val cachedSample = new ArrayBuffer[Iterator[Iterable[IVariable[_]]]](samplings.size)
 
     for(otherSampler <- samplings) {
-      cachedSample += otherSampler.build(global, context).iterator
+      cachedSample += otherSampler.build(context).iterator
     }
 
     /* Compose plans */
     val factorValuesCollection = new ListBuffer[Iterable[IVariable[_]]]
 
-    val valuesIterator = reference.build(global, context).iterator
+    val valuesIterator = reference.build(context).iterator
     var oneFinished = false
 
     while(valuesIterator.hasNext && !oneFinished) {
@@ -65,7 +65,7 @@ class ZipSamplingCombinasion(reference: ISampling, samplings: Iterable[ISampling
       }
     }
 
-    return factorValuesCollection
+    factorValuesCollection
   }
 
 
