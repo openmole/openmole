@@ -92,18 +92,18 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
     }
   }
   
-  def saveInputFile(prot:Any with IPrototype[File], url: String) {
+  def save(prot:Any with IPrototype[File], url: String) {
     toCopy += ((prot, url))
     addInput(prot)
   }
 
-  def saveInputFileAs(prot: IPrototype[File], name: IPrototype[String], dir: String) {
+  def save(prot: IPrototype[File], name: IPrototype[String], dir: String) {
     toCopyWithNameInVariable += ((prot, name, dir))
     addInput(prot)
     addInput(name)
   }
 
-  def saveInputFilesAs(fileProt: IPrototype[Array[File]], nameProt: IPrototype[Array[String]], dirUrl: String) {
+  def saveList(fileProt: IPrototype[Array[File]], nameProt: IPrototype[Array[String]], dirUrl: String) {
     listToCopyWithNameInVariable += ((fileProt,nameProt, dirUrl))
     addInput(fileProt)
     addInput(nameProt)

@@ -52,7 +52,7 @@ public class NetLogoTask extends ExternalSystemTask {
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name);
         this.relativeScriptPath = workspace.getName() + "/" + sriptName;
-        addInFile(workspace);
+        addRessource(workspace);
         this.launchingCommands = launchingCommands;
     }
 
@@ -101,14 +101,16 @@ public class NetLogoTask extends ExternalSystemTask {
         }
     }
 
-    public void addInput(IPrototype prototype, String binding) {
+    public NetLogoTask addInput(IPrototype prototype, String binding) {
         inputBinding.add(new Tuple2<IPrototype, String>(prototype, binding));
         super.addInput(prototype);
+        return this;
     }
 
-    public void addOutput(String binding, IPrototype prototype) {
+    public NetLogoTask addOutput(String binding, IPrototype prototype) {
         outputBinding.add(new Tuple2<String, IPrototype>(binding, prototype));
         super.addOutput(prototype);
+        return this;
     }
 
     private List<Tuple2<IPrototype, String>> getInputBinding() {

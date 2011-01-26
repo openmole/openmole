@@ -125,47 +125,47 @@ abstract class ExternalTask(name: String) extends Task(name) {
     ret.toList
   }
 
-  def exportFilesFromContextAs(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]): this.type = {
+  def addInput(fileList: IPrototype[java.util.List[File]], names: IPrototype[java.util.List[String]]): this.type = {
     inContextFileList += ((fileList, names))
     super.addInput(fileList)
     super.addInput(names)
     this
   }
 
-  def exportFileFromContextAs(fileProt: IPrototype[File], name: String): this.type = {
+  def addInput(fileProt: IPrototype[File], name: String): this.type = {
     inContextFiles += ((fileProt, name))
     super.addInput(fileProt)
     this
   }
 
-  def importFileInContext(v: IPrototype[File], fileName: String): this.type = {
+  def addOutput(fileName: String, v: IPrototype[File]): this.type = {
     outFileNames += ((v, fileName))
     addOutput(v)
     this
   }
 
-  def importFileAndFileNameInContext(v: IPrototype[File], varFileName: IPrototype[String], fileName: String): this.type = {
-    importFileInContext(v, fileName)
+  def addOutput(fileName: String, v: IPrototype[File], varFileName: IPrototype[String]): this.type = {
+    addOutput(fileName, v)
     addOutput(varFileName)
     outFileNamesVar.put(v, varFileName)
     this
   }
 
-  def importFileInContext(v: IPrototype[File], varFileName: IPrototype[String]): this.type = {
+  def addOutput(varFileName: IPrototype[String], v: IPrototype[File]): this.type = {
     addOutput(v)
     outFileNamesFromVar += ((v, varFileName))
     this
   }
 
-  def addInFile(file: File, name: String): this.type = {
+  def addRessource(file: File, name: String): this.type = {
     inFileNames.put(file, name)
     this
   }
 
-  def addInFile(file: File): this.type =  addInFile(file, file.getName)
+  def addRessource(file: File): this.type = addRessource(file, file.getName)
     
-  def addInFile(location: String): this.type = addInFile(new File(location))
+  def addRessource(location: String): this.type = addRessource(new File(location))
 
-  def addInFile(location: String, name: String): this.type =  addInFile(new File(location), name)
+  def addRessource(location: String, name: String): this.type =  addRessource(new File(location), name)
   
 }
