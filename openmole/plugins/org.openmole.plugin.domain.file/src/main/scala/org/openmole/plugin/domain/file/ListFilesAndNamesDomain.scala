@@ -35,6 +35,9 @@ class ListFilesAndNamesDomain(dir: File, filter: Option[FileFilter]) extends IFi
         })
     )
   }
+  
+  def this(dir: String) = this(new File(dir))
+  def this(dir: String, pattern: String) = this(new File(dir), pattern)
 
   override def computeValues(context: IContext): Iterable[(File, String)] = {
     listFiles.computeValues(context).map(f => (f,f.getName))
