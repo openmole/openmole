@@ -52,7 +52,7 @@ public class NetLogoTask extends ExternalSystemTask {
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name);
         this.relativeScriptPath = workspace.getName() + "/" + sriptName;
-        addRessource(workspace);
+        addResource(workspace);
         this.launchingCommands = launchingCommands;
     }
 
