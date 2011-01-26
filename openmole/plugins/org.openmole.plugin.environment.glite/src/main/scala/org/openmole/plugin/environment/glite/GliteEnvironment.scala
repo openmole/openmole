@@ -60,7 +60,7 @@ object GliteEnvironment {
   val CACertificatesSiteLocation = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
-  val OverSubmissionMinJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinJob")
+  val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
   val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
   val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
   val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
@@ -98,7 +98,7 @@ object GliteEnvironment {
  // workspace += (OverSubmissionGridSizeRatio, "0.25")
   workspace += (OverSubmissionInterval, "PT5M")
 
- // workspace += (OverSubmissionMinJob, "100")
+  workspace += (OverSubmissionMinNumberOfJob, "100")
   workspace += (OverSubmissionNumberOfJobUnderMin, "3")
   
   workspace += (JobShakingInterval, "PT5M")

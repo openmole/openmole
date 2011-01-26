@@ -88,8 +88,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"maxNbRunning " + maxNbRunning)
  
-            //val overSubmission = max((maxNbRunning *workspace.preferenceAsDouble(OverSubmissionGridSizeRatio)).toInt, workspace.preferenceAsInt(OverSubmissionMinJob))
-            val overSubmission = maxNbRunning
+            val overSubmission = max(maxNbRunning, workspace.preferenceAsInt(OverSubmissionMinNumberOfJob))
             var nbRessub = overSubmission - stillRunning.size
             //  val key = entry.getKey
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.INFO,"NbRessub " + nbRessub)
