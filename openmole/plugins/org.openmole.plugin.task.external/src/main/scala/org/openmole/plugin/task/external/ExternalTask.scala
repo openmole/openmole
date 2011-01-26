@@ -157,15 +157,15 @@ abstract class ExternalTask(name: String) extends Task(name) {
     this
   }
 
-  def addRessource(file: File, name: String): this.type = {
+  def addResource(file: File, name: String): this.type = {
     inFileNames.put(file, name)
     this
   }
 
-  def addRessource(file: File): this.type = addRessource(file, file.getName)
+  def addResource(file: File): this.type = addResource(file, file.getName)
     
-  def addRessource(location: String): this.type = addRessource(new File(location))
+  def addResource(location: String): this.type = addResource(new File(location))
 
-  def addRessource(location: String, name: String): this.type =  addRessource(new File(location), name)
+  def addResource(location: String, name: String): this.type =  addResource(new File(location), name)
   
 }
