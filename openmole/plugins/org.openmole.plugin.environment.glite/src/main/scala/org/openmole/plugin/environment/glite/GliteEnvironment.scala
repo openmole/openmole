@@ -99,7 +99,7 @@ object GliteEnvironment {
   workspace += (OverSubmissionInterval, "PT5M")
 
   workspace += (OverSubmissionMinNumberOfJob, "100")
-  workspace += (OverSubmissionNumberOfJobUnderMin, "3")
+  workspace += (OverSubmissionNumberOfJobUnderMin, "5")
   
   workspace += (JobShakingInterval, "PT5M")
   workspace += (JobShakingProbabilitySubmitted, "0.1")

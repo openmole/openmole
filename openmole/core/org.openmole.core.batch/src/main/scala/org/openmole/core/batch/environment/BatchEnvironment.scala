@@ -45,11 +45,14 @@ object BatchEnvironment {
 
   val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
-   
+  
+  val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
+  
   workspace += (MemorySizeForRuntime, "512")
   workspace += (QualityHysteresis, "1000")
   workspace += (CheckInterval, "PT2M")
   workspace += (MinValueForSelectionExploration, "0.001")
+  workspace += (DataAllReadyPresentOnStoragePreference, "3.0")
 }
 
 
@@ -154,6 +157,6 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   def selectAJobService: (BatchJobService, AccessToken) = jobServices.selectAService
 
-  def selectAStorage:  (BatchStorage, AccessToken) = storages.selectAService
+  def selectAStorage(usedFiles: Iterable[File]):  (BatchStorage, AccessToken) = storages.selectAService(usedFiles)
 
 }

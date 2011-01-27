@@ -37,7 +37,7 @@ import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.openmole.commons.aspect.caching.Cachable;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
-import org.openmole.commons.tools.io.FileUtil;
+import org.openmole.commons.tools.io.FileUtil$;
 import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.model.task.IResource;
 import org.openmole.misc.executorservice.ExecutorType;
@@ -105,7 +105,7 @@ public class VirtualMachineResource implements IResource {
 
         try {
             vmImage = workspace().newFile();
-            FileUtil.copy(system, vmImage);
+            FileUtil$.MODULE$.copy(system, vmImage);
         } catch(IOException e) {
             throw new InternalProcessingError(e);
         }
@@ -243,7 +243,7 @@ public class VirtualMachineResource implements IResource {
             File qemu = new File(qemuDir, f);
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(qemu));
             try {
-                FileUtil.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
+                FileUtil$.MODULE$.copy(this.getClass().getClassLoader().getResource(qemuJarPath + f).openStream(), outputStream);
                 qemu.setExecutable(true);
             } finally {
                 outputStream.close();
@@ -254,7 +254,7 @@ public class VirtualMachineResource implements IResource {
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
 
             try {
-                FileUtil.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
+                FileUtil$.MODULE$.copy(this.getClass().getClassLoader().getResource(f).openStream(), outputStream);
             } finally {
                 outputStream.close();
             }

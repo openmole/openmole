@@ -18,18 +18,21 @@
 package org.openmole.core.batch.environment
 
 
+import java.io.File
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
-import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.Priority
 import org.openmole.commons.tools.service.RNG
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.UsageControl
+import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.internal.Activator._
-import scala.collection.mutable.ArrayBuffer
+import collection.mutable.ArrayBuffer
+import math.pow
 
 class BatchStorageGroup {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
@@ -41,9 +44,15 @@ class BatchStorageGroup {
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
-  def selectAService: (BatchStorage, AccessToken) = {
+  def selectAService(usedFiles: Iterable[File]): (BatchStorage, AccessToken) = {
     selectingRessource.lock
     try {
+      val totalFileSize = usedFiles.map{_.size}.sum
+      
+      def sizeOnStorage(storage: BatchStorage) = {
+        usedFiles.filter(ReplicaCatalog.isInCatalog(_, storage.description)).map{_.size}.sum
+      }
+      
       var ret: (BatchStorage, AccessToken) = null
       do {
         val resourcesCopy = resources
@@ -62,15 +71,17 @@ class BatchStorageGroup {
             case None =>
             case Some(token) => 
               val quality = BatchStorageControl.qualityControl(cur.description)
-              val fitness = quality match {
-                case Some(q) => 
-                  val v = math.pow(1. * q.successRate, 2)
-                  val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-                  if(v < min) min else v
-                case None => 1.
-              }
+              val fitness = (quality match {
+                  case Some(q) => 
+                    val v = math.pow(1. * q.successRate, 2)
+                    val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                    if(v < min) min else v
+                  case None => 1.
+                }) * (if(totalFileSize != 0) 
+                        (pow((sizeOnStorage(cur).toDouble / totalFileSize) + 1, workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference)))
+                     else 1)
               
-              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
+              Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))
 
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness

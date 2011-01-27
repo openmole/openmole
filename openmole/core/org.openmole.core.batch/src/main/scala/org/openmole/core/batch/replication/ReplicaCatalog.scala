@@ -145,19 +145,22 @@ object ReplicaCatalog {
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = synchronized {
       
     objectServer.query(new Predicate[Replica](classOf[Replica]){
-        
         override def `match`(replica: Replica): Boolean = replica.source.equals(src) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
-      
       })
   }
 
   def isInCatalog(uri: String): Boolean = {
     !objectServer.query(new Predicate[Replica](classOf[Replica]){
-        
         override def `match`(replica: Replica): Boolean = replica.destination.location.equals(uri)
-      
       }).isEmpty
   }
+  
+   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
+    !objectServer.query(new Predicate[Replica](classOf[Replica]){
+        override def `match`(replica: Replica): Boolean = replica.source == src && replica.storageDescription == storageDescription
+      }).isEmpty
+  }
+  
   
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {

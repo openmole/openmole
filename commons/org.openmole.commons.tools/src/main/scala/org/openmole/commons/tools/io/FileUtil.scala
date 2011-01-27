@@ -38,6 +38,8 @@ object FileUtil {
     }
   }
   
+  implicit def file2FileUtil(file: File): FileUtil = new FileUtil(file)
+  
   val DefaultBufferSize = 8 * 1024
 
   def lastModification(file: File): Long = {
@@ -110,17 +112,7 @@ object FileUtil {
     return true
   }
 
-  def recursiveDelete(dir: File): Boolean = {
-    if(!dir.isDirectory) return dir.delete
-    if (dir.exists) {
-      val files = dir.listFiles
-      for (i <- 0 until files.length) {
-        if (files(i).isDirectory) recursiveDelete(files(i))
-        else files(i).delete
-      }
-    }
-    return dir.delete
-  }
+
   
   @throws(classOf[IOException])
   def copy(fromF: File, toF: File) = {
@@ -214,17 +206,36 @@ object FileUtil {
     }
   }
   
-  def deleteDirectory(path: File): Boolean = {
-    if( path.exists ) {		
-      for(file <- path.listFiles) {
-        if(file.isDirectory) {
-          deleteDirectory(file)
-        }
-        else {
-          file.delete
-        }
-      }
+  def recursiveDelete(path: File): Boolean = {
+    if( path.exists && path.isDirectory) {		
+      for(file <- path.listFiles) recursiveDelete(file)
     }
     path.delete
   }
+  
+  def size(file: File): Long = {
+    if(file.exists && file.isDirectory) {
+      (for(f <- file.listFiles) yield size(f)).sum
+    } else file.length
+  }
+}
+
+class FileUtil(file: File) {
+  
+  def lastModification = FileUtil.lastModification(file)
+  def listRecursive(filter: FileFilter) = FileUtil.listRecursive(file, filter)
+  
+  def applyRecursive(operation: File => Unit): Unit = FileUtil.applyRecursive(file, operation, Set.empty)
+  def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = FileUtil.applyRecursive(file, operation, stopPath)
+
+  def dirContainsNoFileRecursive = FileUtil.dirContainsNoFileRecursive(file)
+
+  def recursiveDelete = FileUtil.recursiveDelete(file)
+  
+  @throws(classOf[IOException])
+  def copy(toF: File) = FileUtil.copy(file, toF)
+  
+  def move(to: File) = FileUtil.move(file, to)
+
+  def size = FileUtil.size(file)
 }

@@ -45,36 +45,41 @@ import scala.collection.mutable.ListBuffer
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[CopyToEnvironmentResult] {
 
   private def initCommunication(): CopyToEnvironmentResult = {
-        
-    val storage = environment.selectAStorage
-
-    val communicationStorage = storage._1
-    val token = storage._2
-
+    val jobFile = workspace.newFile("job", ".xml")
+    
     try {
-      val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
+      val serializationResult = serializer.serializeGetPluginClassAndFiles(createJobForRuntime, jobFile)
+      val storage = environment.selectAStorage(serializationResult._1)
+
+      val communicationStorage = storage._1
+      val token = storage._2
+
+      try {
+        val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
             
-      val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
-      val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
+        val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
+        val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
 
-      val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
+        val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
 
-      val jobForRuntime = createJobForRuntime(token, communicationStorage, communicationDir)
-      val executionMessage = createExecutionMessage(jobForRuntime, token, communicationStorage, communicationDir)
+        val executionMessage = createExecutionMessage(jobFile,serializationResult, token, communicationStorage, communicationDir)
 
-      /* ---- upload the execution message ----*/
+        /* ---- upload the execution message ----*/
 
-      val executionMessageFile = workspace.newFile("job", ".xml")
-      serializer.serialize(executionMessage, executionMessageFile)
+        val executionMessageFile = workspace.newFile("job", ".xml")
+        serializer.serialize(executionMessage, executionMessageFile)
 
-      val executionMessageURIFile = new URIFile(executionMessageFile)
-      URIFile.copy(executionMessageURIFile, inputFile, token)
+        val executionMessageURIFile = new URIFile(executionMessageFile)
+        URIFile.copy(executionMessageURIFile, inputFile, token)
 
-      executionMessageFile.delete
+        executionMessageFile.delete
             
-      return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
+        return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
+      } finally {
+        BatchStorageControl.usageControl(communicationStorage.description).releaseToken(token)
+      }
     } finally {
-      BatchStorageControl.usageControl(communicationStorage.description).releaseToken(token)
+      jobFile.delete
     }
   }
 
@@ -130,46 +135,43 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     return new Runtime(runtimeReplica, environmentPluginReplica.toList, authenticationURIFile)
   }
 
-  def createExecutionMessage(jobForRuntime: JobForRuntime, token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): ExecutionMessage = {
+  def serialize(jobForRuntime: JobForRuntime, jobFile: File) = {
+    serializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
+  }
+  
+  def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): ExecutionMessage = {
 
-    val jobFile = workspace.newFile("job", ".xml")
-    
-    try {
-      val serializationResult = serializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
-        
-      val jobURIFile = new URIFile(jobFile)
-      val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
+    val jobURIFile = new URIFile(jobFile)
+    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
 
-      URIFile.copy(jobURIFile, jobForRuntimeFile, token)
-      val jobHash = hashService.computeHash(jobFile)
+    URIFile.copy(jobURIFile, jobForRuntimeFile, token)
+    val jobHash = hashService.computeHash(jobFile)
 
-      val plugins = new TreeSet[File]
-      val pluginReplicas = new ListBuffer[ReplicatedFile]
+    val plugins = new TreeSet[File]
+    val pluginReplicas = new ListBuffer[ReplicatedFile]
 
-      for (c <- serializationResult._2) {
-        for (f <- pluginManager.getPluginAndDependanciesForClass(c)) {
-          plugins += f
-        }
+    for (c <- serializationResult._2) {
+      for (f <- pluginManager.getPluginAndDependanciesForClass(c)) {
+        plugins += f
       }
-
-      for (f <- plugins) {
-        val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
-        pluginReplicas += replicatedPlugin
-      }
-        
-      val files = new ListBuffer[ReplicatedFile]
-        
-      for(file <- serializationResult._1) {
-        files += toReplicatedFile(file, communicationStorage, token)
-      }
-
-      new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir)
-    } finally {
-      jobFile.delete
     }
+
+    for (f <- plugins) {
+      val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
+      pluginReplicas += replicatedPlugin
+    }
+        
+    val files = new ListBuffer[ReplicatedFile]
+        
+    for(file <- serializationResult._1) {
+      files += toReplicatedFile(file, communicationStorage, token)
+    }
+
+    new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir)
+  
   }
 
-  def createJobForRuntime(token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): JobForRuntime = {
+  def createJobForRuntime: JobForRuntime = {
        
     val jobs = new ListBuffer[IMoleJob]
 
