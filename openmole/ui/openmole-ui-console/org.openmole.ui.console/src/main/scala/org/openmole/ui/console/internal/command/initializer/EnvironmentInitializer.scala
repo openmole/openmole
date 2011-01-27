@@ -39,7 +39,7 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
         toSearch = classOf[org.codehaus.groovy.tools.shell.Groovysh].getClassLoader.loadClass(c.getName() + "$")
         obj = shell.execute(c.getName+"$.MODULE$")
       } catch {
-        case e: ClassNotFoundException => Logger.getLogger(classOf[EnvironmentInitializer].getName).log(Level.WARNING,c.getName() + "$ not found.");
+        case e: ClassNotFoundException => Logger.getLogger(classOf[EnvironmentInitializer].getName).log(Level.FINE,c.getName() + "$ not found.");
       }
                     
             
@@ -77,8 +77,7 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
                   new jline.ConsoleReader().readLine(label.toString, '*');
                 } else {
                   val oldVal = Activator.getWorkspace.preference(location)
-                  val defaultVal = Activator.getWorkspace.defaultValue(location)
-                                       
+                  val defaultVal = if(oldVal.isEmpty) Activator.getWorkspace.defaultValue(location) else oldVal
                   label.append(" (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ")
                   new jline.ConsoleReader().readLine(label.toString);
                 }

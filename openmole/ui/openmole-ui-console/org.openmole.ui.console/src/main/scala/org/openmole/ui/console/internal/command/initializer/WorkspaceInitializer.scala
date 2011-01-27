@@ -22,6 +22,9 @@ import org.openmole.misc.workspace.IWorkspace
 class WorkspaceInitializer extends IInitializer {
 
   override def initialize(obj: Object, c: Class[_]) = {
-    obj.asInstanceOf[IWorkspace].password_=(new jline.ConsoleReader().readLine("Enter your password:", '*'))
+    val workspace = obj.asInstanceOf[IWorkspace]
+    val message = (if(workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
+    
+    do {workspace.password_=(new jline.ConsoleReader().readLine(message, '*'))} while(!workspace.passwordIsCorrect)
   }
 }

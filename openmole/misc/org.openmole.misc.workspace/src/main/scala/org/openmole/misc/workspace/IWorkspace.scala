@@ -63,6 +63,10 @@ trait IWorkspace {
   def removePreference(configurationElement: ConfigurationLocation)
 
   def password_=(password: String)
+  
+  def passwordIsCorrect: Boolean
+  
+  def passwordChoosen: Boolean
 
   def reset
 

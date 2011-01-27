@@ -19,6 +19,8 @@ package org.openmole.misc.workspace.internal
 
 import java.io.File
 import java.util.UUID
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.apache.commons.configuration.FileConfiguration
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
@@ -49,10 +51,10 @@ class Workspace extends IWorkspace {
   import IWorkspace._ 
   
   var _location: File = null
-  
+  @transient private var textEncryptor = new BasicTextEncryptor
   val configurations = new HashMap[ConfigurationLocation, () => String]
     
-  @transient private var _password = ""
+  //@transient private var _password = ""
 
   this += (UniqueID, UUID.randomUUID.toString)
   this += (passwordTest, passwordTestString)
@@ -158,12 +160,12 @@ class Workspace extends IWorkspace {
     configuration.save
   }
 
-  @Cachable
+  /*@Cachable
   private def textEncryptor: BasicTextEncryptor = synchronized {
     val tmpTextEncryptor = new BasicTextEncryptor
     tmpTextEncryptor.setPassword(_password)
     tmpTextEncryptor
-  }
+  }*/
 
   override def removePreference(location: ConfigurationLocation) = synchronized {
     val conf = configuration.subset(location.group)
@@ -184,14 +186,26 @@ class Workspace extends IWorkspace {
   override def reset = configurationFile.delete
 
   override def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong
-
-  override def password_=(password: String) = {
-    this._password = password
+  
+  override def password_=(password: String) = synchronized {
+    textEncryptor = new BasicTextEncryptor
+    textEncryptor.setPassword(password)
+    passwordIsCorrect //set preference
+  }
+  
+  override def passwordIsCorrect = {
     try {
       preference(passwordTest)
+      true
     } catch {
-      case (e: EncryptionOperationNotPossibleException) => throw new UserBadDataError(e, "Wrong password")
+      case e => 
+        Logger.getLogger(classOf[Workspace].getName).log(Level.FINE, "Password incorrect", e)
+        false
     }
+  }
+  
+  override def passwordChoosen = {
+    isPreferenceSet(passwordTest)
   }
 
   override def preferenceAsDurationInMs(location: ConfigurationLocation): Long = {
