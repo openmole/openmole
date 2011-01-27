@@ -77,11 +77,10 @@ class BatchStorageGroup {
                     val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                     if(v < min) min else v
                   case None => 1.
-                }) * (if(totalFileSize != 0) 
-                        (pow((sizeOnStorage(cur).toDouble / totalFileSize) + 1, workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference)))
-                     else 1)
+                }) * (if(totalFileSize != 0) (sizeOnStorage(cur).toDouble / totalFileSize) * workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
+                      else 1)
               
-              Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))
+              //Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))
 
               notLoaded += ((cur, token, fitness))
               totalFitness += fitness

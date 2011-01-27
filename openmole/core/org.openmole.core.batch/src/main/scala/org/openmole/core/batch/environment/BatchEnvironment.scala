@@ -52,7 +52,7 @@ object BatchEnvironment {
   workspace += (QualityHysteresis, "1000")
   workspace += (CheckInterval, "PT2M")
   workspace += (MinValueForSelectionExploration, "0.001")
-  workspace += (DataAllReadyPresentOnStoragePreference, "3.0")
+  workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
 }
 
 
