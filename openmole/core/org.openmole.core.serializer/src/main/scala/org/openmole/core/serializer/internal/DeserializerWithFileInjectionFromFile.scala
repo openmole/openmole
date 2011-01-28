@@ -24,11 +24,9 @@ class DeserializerWithFileInjectionFromFile extends Deserializer {
     var files: PartialFunction[File, File] = null
     registerConverter(new FileConverterInjecter(this))
    
-    def clean() = {
+    def clean = {
         files = null
     }
     
-    def getMatchingFile(file: File): File = {
-        files(file)
-    }
+    def getMatchingFile(file: File): File = files(file)
 }

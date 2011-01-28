@@ -23,8 +23,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintStream
-import java.util.TreeMap
-import java.util.TreeMap
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Level
@@ -48,6 +46,7 @@ import org.openmole.runtime.internal.Activator
 import org.openmole.commons.tools.service.Retry._
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
 
 object Runtime {
   val NumberOfLocalTheads = 1
@@ -83,14 +82,14 @@ class Runtime {
     var errorMessage: FileMessage = null
     var tarResultMessage: FileMessage = null
         
-    val filesInfo = new TreeMap[String, (File, Boolean)]
+    val filesInfo = new HashMap[String, (File, Boolean)]
     var contextResult: IURIFile = null
         
     try {
       Activator.getWorkspace.setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
                         
       /*--- get execution message and job for runtime---*/
-      val usedFiles = new TreeMap[File, File]
+      val usedFiles = new HashMap[File, File]
             
       val executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
       val executionMesageFileCache = executionMessageFile.cache
@@ -195,6 +194,8 @@ class Runtime {
           val tos = new TarOutputStream(new FileOutputStream(tarResult))     
           try {
             for (file <- serializationResult._1) {
+              Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
+              
               val is = new StringInputStream(file.getCanonicalPath)
 
               /*val hash = try {

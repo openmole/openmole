@@ -20,6 +20,7 @@ package org.openmole.plugin.task.filemanagement
 import java.io.File
 import java.io.IOException
 
+import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.UserBadDataError
 
@@ -45,6 +46,9 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
       toCopy foreach( p => {
           val from = context.value(p._1).get
           val to = new File(expandData(context, p._2))
+          
+          Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+          
           to.getParentFile.mkdirs
           copy(from, to)
 
@@ -57,8 +61,11 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
           
           val dir = new File(expandData(context, p._3))
           dir.mkdirs
-          
+       
           val to = new File(dir, name)
+          
+          Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+             
           copy(from, to)
 
           if(remove) from.recursiveDelete
@@ -80,8 +87,10 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
             while(itFile.hasNext && itName.hasNext) {
               val to = new File(toDir, itName.next)
               val from = itFile.next
-              copy(from, to)
-
+              
+              Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+              
+              copy(from, to)              
               if(remove) from.recursiveDelete
             }
 

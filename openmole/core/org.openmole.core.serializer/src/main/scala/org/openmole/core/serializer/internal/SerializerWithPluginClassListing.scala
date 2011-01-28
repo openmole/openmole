@@ -50,7 +50,7 @@ class SerializerWithPluginClassListing {
         xstream.toXML(obj, outputStream);
     }
 
-    def clean(): Unit = {
+    def clean: Unit = {
         classes = null
     }
 }

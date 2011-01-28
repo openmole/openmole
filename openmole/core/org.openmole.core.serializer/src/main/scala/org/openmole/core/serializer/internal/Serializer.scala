@@ -115,7 +115,7 @@ class Serializer extends ISerializer {
       try {
         deserializeReplaceFiles[T](is, files)
       } finally {
-        is.close();
+        is.close
       }
     } catch {
       case (ex: IOException) => throw new InternalProcessingError(ex)

@@ -28,7 +28,7 @@ import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.internal.Activator._
@@ -146,7 +146,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
               System.out.println("-----------------" + description + " on remote host-----------------")
               val fis = new FileInputStream(stdOutFile)
               try {
-                FileUtil.copy(fis, System.out);
+                copy(fis, System.out)
               } finally {
                 fis.close
               }
@@ -165,9 +165,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
     if (tarResult == null) throw new InternalProcessingError("TarResult uri result is null.")
 
-    var fileReplacement = new TreeMap[File, File]()(new Ordering[File] {
-        override def compare(x: File, y: File) = x.getAbsolutePath.compare(x.getAbsolutePath)
-      })
+    var fileReplacement = new TreeMap[File, File]
 
     if (!tarResult.isEmpty) {
       val tarResultURIFile = tarResult.file
@@ -187,11 +185,14 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
           var te = tis.getNextEntry
 
           while (te != null) {
-            val dest = workspace.newFile("result", "bin")//new File(workspace.tmpDir, )
+
+            val dest = workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
+            Logger.getLogger(classOf[GetResultFromEnvironment].getName).fine("Archive entry: " + te.getName + " to " + dest.getAbsolutePath)
+            
             val os = new FileOutputStream(dest)
 
             try {
-              FileUtil.copy(tis, os)
+              copy(tis, os)
             } finally {
               os.close
             }
@@ -231,14 +232,11 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
 
     //Download and deserialize the context results
 
-    if (uriFile == null) {
-      throw new InternalProcessingError("Context results URI is null")
-    }
-
+    if (uriFile == null)  throw new InternalProcessingError("Context results URI is null")
     val contextResutsFileCache = uriFile.cache(token)
 
     try {
-      serializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement);
+      serializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
     } finally {
       contextResutsFileCache.delete
     }

@@ -20,7 +20,7 @@ package org.openmole.core.serializer.internal
 import org.apache.commons.pool.BasePoolableObjectFactory
 import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
-trait Factory[T <: { def clean() }]{
+trait Factory[T <: { def clean }]{
    
    val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
 
