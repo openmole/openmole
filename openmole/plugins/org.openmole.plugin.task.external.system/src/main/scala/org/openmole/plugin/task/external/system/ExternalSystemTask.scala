@@ -59,26 +59,24 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
         if (!f.file.exists) {
           throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
         }
-        usedFiles += (f.file)
+        usedFiles += f.file
       }
     )
 
     val unusedFiles = new ListBuffer[File]
     val unusedDirs = new ListBuffer[File]
 
-    applyRecursive(localDir, (file: File) => {
+    localDir.applyRecursive((file: File) => {
           if(file.isFile) unusedFiles += (file)
           else unusedDirs += (file)
         }, usedFiles)
 
-    unusedFiles.foreach( f => {
-      f.delete
-    })
+    unusedFiles.foreach(f =>  f.delete)
 
     //TODO algorithm is no optimal and may be problematic for a huge number of dirs
     unusedDirs.foreach( d => {
       if(d.exists && !usedFiles.contains(d) && dirContainsNoFileRecursive(d)) {
-        recursiveDelete(d)
+        d.recursiveDelete
       }
     })
   }

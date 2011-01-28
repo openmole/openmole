@@ -48,7 +48,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
           to.getParentFile.mkdirs
           copy(from, to)
 
-          if(remove) from.delete
+          if(remove) from.recursiveDelete
         })
 
       toCopyWithNameInVariable foreach( p => {
@@ -61,7 +61,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
           val to = new File(dir, name)
           copy(from, to)
 
-          if(remove) recursiveDelete(from)
+          if(remove) from.recursiveDelete
         })
 
       listToCopyWithNameInVariable foreach ( cpList => {
@@ -82,7 +82,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
               val from = itFile.next
               copy(from, to)
 
-              if(remove) from.delete
+              if(remove) from.recursiveDelete
             }
 
           }
@@ -93,7 +93,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
   }
   
   def save(prot:Any with IPrototype[File], url: String) {
-    toCopy += ((prot, url))
+    toCopy += prot -> url
     addInput(prot)
   }
 

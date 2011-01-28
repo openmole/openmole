@@ -25,6 +25,7 @@ import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.TreeMap
 import java.util.TreeMap
+import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -196,13 +197,14 @@ class Runtime {
             for (file <- serializationResult._1) {
               val is = new StringInputStream(file.getCanonicalPath)
 
-              val hash = try {
-                Activator.getHashService.computeHash(is);
+              /*val hash = try {
+                Activator.getHashService.computeHash(is)
               } finally {
                 is.close
-              }
+              }*/
+              val name = UUID.randomUUID
                             
-              val entry = new TarEntry(hash.toString)
+              val entry = new TarEntry(name.toString)
 
               val toArchive =  if (file.isDirectory) {
                 val toArchive = Activator.getWorkspace.newFile
@@ -222,7 +224,7 @@ class Runtime {
               entry.setSize(toArchive.length)
               tos.putNextEntry(entry)
               try {
-                FileUtil.copy(new FileInputStream(toArchive), tos);
+                FileUtil.copy(new FileInputStream(toArchive), tos)
               } finally {
                 tos.closeEntry
               }

@@ -26,7 +26,7 @@ import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 import org.osgi.framework.ServiceRegistration
 import org.openmole.misc.workspace.IWorkspace
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.service.OSGiActivator
 
 object Activator extends OSGiActivator {
@@ -50,7 +50,7 @@ class Activator extends BundleActivator {
   override def stop(context: BundleContext) = {
     reg.foreach{_.unregister}
     Activator.context = None
-    workspace.foreach{w => FileUtil.recursiveDelete(w.tmpDir.getLocation)}
+    workspace.foreach{w => w.tmpDir.recursiveDelete}
     workspace = None
   }
   

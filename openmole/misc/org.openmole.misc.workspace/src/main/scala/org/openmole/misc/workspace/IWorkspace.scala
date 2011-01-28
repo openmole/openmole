@@ -75,5 +75,5 @@ trait IWorkspace {
   def +=(location: ConfigurationLocation, defaultValue : () => String)
   def +=(location: ConfigurationLocation, defaultValue : String)
   def defaultValue(location: ConfigurationLocation): String
-  
+  def tmpDir: File
 }

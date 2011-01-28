@@ -182,12 +182,12 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
         val tis = new TarInputStream(new FileInputStream(tarResultFile))
 
         try {
-          val destDir = workspace.newDir("tarResult")
+          //val destDir = workspace.newDir("tarResult")
 
           var te = tis.getNextEntry
 
           while (te != null) {
-            val dest = new File(destDir, te.getName)
+            val dest = workspace.newFile("result", "bin")//new File(workspace.tmpDir, )
             val os = new FileOutputStream(dest)
 
             try {
@@ -197,7 +197,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             }
 
             val fileInfo = filesInfo(te.getName)
-            if (fileInfo == null) throw new InternalProcessingError("Filename not found for entry " + te.getName + '.')
+            if (fileInfo == null) throw new InternalProcessingError("FileInfo not found for entry " + te.getName + '.')
 
             val file = if (fileInfo._2) {
               val file = workspace.newDir("tarResult")
@@ -208,6 +208,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
               } finally {
                 destIn.close
               }
+              dest.delete
               file
             } else {
               dest

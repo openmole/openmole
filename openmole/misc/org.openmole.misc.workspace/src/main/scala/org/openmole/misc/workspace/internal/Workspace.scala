@@ -18,6 +18,7 @@
 package org.openmole.misc.workspace.internal
 
 import java.io.File
+import java.io.IOException
 import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -89,8 +90,10 @@ class Workspace extends IWorkspace {
 
   @transient override lazy val sessionUUID = UUID.randomUUID
   
+  
+  
   @Cachable
-  private[internal] def tmpDir: TempDir = {
+  override def tmpDir: File = {
     val tmpLocation = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
 
     if (!tmpLocation.mkdirs) {
@@ -101,11 +104,21 @@ class Workspace extends IWorkspace {
         override def run = FileUtil.recursiveDelete(tmpLocation)
       })
     
-    new TempDir(tmpLocation)
+    tmpLocation
   }
 
-  override def newDir(prefix: String): File =  tmpDir.createNewDir(prefix)
-  override def newFile(prefix: String, suffix: String): File =  tmpDir.createNewFile(prefix, suffix)
+  override def newDir(prefix: String): File = {
+    val tempFile = File.createTempFile(prefix, "", tmpDir)
+
+    if (!tempFile.delete) throw new IOException    
+    if (!tempFile.mkdir) throw new IOException
+
+    tempFile.deleteOnExit
+    tempFile
+  }
+  
+  override def newFile(prefix: String, suffix: String): File =  File.createTempFile(prefix, suffix, tmpDir)
+
 
   @Cachable
   private def configurationFile: File = {
@@ -161,11 +174,11 @@ class Workspace extends IWorkspace {
   }
 
   /*@Cachable
-  private def textEncryptor: BasicTextEncryptor = synchronized {
-    val tmpTextEncryptor = new BasicTextEncryptor
-    tmpTextEncryptor.setPassword(_password)
-    tmpTextEncryptor
-  }*/
+   private def textEncryptor: BasicTextEncryptor = synchronized {
+   val tmpTextEncryptor = new BasicTextEncryptor
+   tmpTextEncryptor.setPassword(_password)
+   tmpTextEncryptor
+   }*/
 
   override def removePreference(location: ConfigurationLocation) = synchronized {
     val conf = configuration.subset(location.group)
