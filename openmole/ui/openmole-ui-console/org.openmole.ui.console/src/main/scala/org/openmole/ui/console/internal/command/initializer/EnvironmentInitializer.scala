@@ -41,6 +41,7 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
         //if (toSearch != null) {
           for (f <- toSearch.getDeclaredFields) {
             val interactiveConfiguration = f.getAnnotation(classOf[InteractiveConfiguration])
+
             if (interactiveConfiguration != null) {
               if (classOf[ConfigurationLocation].isAssignableFrom(f.getType)) {
                 val accessible = f.isAccessible
@@ -56,6 +57,7 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
                 if (enabled) {
 
                   var line = ""
+                  var defaultVal = ""
                   do {
                     val possibleValues = new StringBuilder
                     if (interactiveConfiguration.choices().length != 0) {
@@ -73,17 +75,15 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
                       new jline.ConsoleReader().readLine(label.toString, '*');
                     } else {
                       val oldVal = Activator.getWorkspace.preference(location)
-                      val defaultVal = if (oldVal == null || oldVal.isEmpty) Activator.getWorkspace.defaultValue(location) else oldVal
+                      defaultVal = if (oldVal == null || oldVal.isEmpty) Activator.getWorkspace.defaultValue(location) else oldVal
                       label.append(" (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ")
                       new jline.ConsoleReader().readLine(label.toString);
                     }
-                  } while (!line.isEmpty && interactiveConfiguration.choices().length != 0 && !interactiveConfiguration.choices().contains(line))
+                  } while (interactiveConfiguration.choices().length != 0 && !interactiveConfiguration.choices().contains(line))
 
-                  if (!line.isEmpty()) {
-                    Activator.getWorkspace().setPreference(location, line);
-                  } else {
-                    Activator.getWorkspace().removePreference(location);
-                  }
+                  if (!line.isEmpty()) Activator.getWorkspace().setPreference(location, line)
+                  else  Activator.getWorkspace().setPreference(location, defaultVal)
+
                 }
               }
          //   }
