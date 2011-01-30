@@ -21,7 +21,6 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.commons.tools.obj.SuperClassesLister
-import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.ui.console.internal.Activator
@@ -36,64 +35,64 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
       var toSearch = c;
       var obj: Object = null;
       try {
-        toSearch = classOf[org.codehaus.groovy.tools.shell.Groovysh].getClassLoader.loadClass(c.getName() + "$")
-        obj = shell.execute(c.getName+"$.MODULE$")
-      } catch {
-        case e: ClassNotFoundException => Logger.getLogger(classOf[EnvironmentInitializer].getName).log(Level.FINE,c.getName() + "$ not found.");
-      }
-                    
-            
-      for (f <- toSearch.getDeclaredFields) {
-        val interactiveConfiguration = f.getAnnotation(classOf[InteractiveConfiguration])
-        if (interactiveConfiguration != null) {
-          if (classOf[ConfigurationLocation].isAssignableFrom(f.getType)) {
-            val accessible = f.isAccessible
-            f.setAccessible(true)
-            val location = f.get(obj).asInstanceOf[ConfigurationLocation];
-            f.setAccessible(accessible)
+        toSearch = classOf[org.codehaus.groovy.tools.shell.Groovysh].getClassLoader.loadClass(c.getName + "$")
+        obj = shell.execute(c.getName + "$.MODULE$")
 
-            val enabled = if (!interactiveConfiguration.dependOn().isEmpty()) {
-              val value = Activator.getWorkspace().preference(new ConfigurationLocation(location.group, interactiveConfiguration.dependOn))
-              value.equals(interactiveConfiguration.value());
-            } else  true
-                            
-            if (enabled) {
+        //if (toSearch != null) {
+          for (f <- toSearch.getDeclaredFields) {
+            val interactiveConfiguration = f.getAnnotation(classOf[InteractiveConfiguration])
+            if (interactiveConfiguration != null) {
+              if (classOf[ConfigurationLocation].isAssignableFrom(f.getType)) {
+                val accessible = f.isAccessible
+                f.setAccessible(true)
+                val location = f.get(obj).asInstanceOf[ConfigurationLocation];
+                f.setAccessible(accessible)
 
-              var line = ""
-              do {
-                val possibleValues = new StringBuilder
-                if(interactiveConfiguration.choices().length != 0) {
-                  possibleValues.append(" [")
-                  for(i <- 0 until interactiveConfiguration.choices().length) {
-                    possibleValues.append(interactiveConfiguration.choices()(i))
-                    if(i < interactiveConfiguration.choices().length - 1) possibleValues += ','
+                val enabled = if (!interactiveConfiguration.dependOn().isEmpty()) {
+                  val value = Activator.getWorkspace().preference(new ConfigurationLocation(location.group, interactiveConfiguration.dependOn))
+                  value.equals(interactiveConfiguration.value());
+                } else true
+
+                if (enabled) {
+
+                  var line = ""
+                  do {
+                    val possibleValues = new StringBuilder
+                    if (interactiveConfiguration.choices().length != 0) {
+                      possibleValues.append(" [")
+                      for (i <- 0 until interactiveConfiguration.choices().length) {
+                        possibleValues.append(interactiveConfiguration.choices()(i))
+                        if (i < interactiveConfiguration.choices().length - 1) possibleValues += ','
+                      }
+                      possibleValues.append(']')
+                    }
+
+                    val label = new StringBuilder(interactiveConfiguration.label)
+                    line = if (location.cyphered) {
+                      label.append(": ")
+                      new jline.ConsoleReader().readLine(label.toString, '*');
+                    } else {
+                      val oldVal = Activator.getWorkspace.preference(location)
+                      val defaultVal = if (oldVal == null || oldVal.isEmpty) Activator.getWorkspace.defaultValue(location) else oldVal
+                      label.append(" (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ")
+                      new jline.ConsoleReader().readLine(label.toString);
+                    }
+                  } while (!line.isEmpty && interactiveConfiguration.choices().length != 0 && !interactiveConfiguration.choices().contains(line))
+
+                  if (!line.isEmpty()) {
+                    Activator.getWorkspace().setPreference(location, line);
+                  } else {
+                    Activator.getWorkspace().removePreference(location);
                   }
-                  possibleValues.append(']')
                 }
-
-                val label = new StringBuilder(interactiveConfiguration.label)
-                line = if (location.cyphered) {
-                  label.append(": ")
-                  new jline.ConsoleReader().readLine(label.toString, '*');
-                } else {
-                  val oldVal = Activator.getWorkspace.preference(location)
-                  val defaultVal = if(oldVal.isEmpty) Activator.getWorkspace.defaultValue(location) else oldVal
-                  label.append(" (default=" + defaultVal + "; old=" + oldVal + ")" + possibleValues + ": ")
-                  new jline.ConsoleReader().readLine(label.toString);
-                }
-              } while (!line.isEmpty && interactiveConfiguration.choices().length != 0 && !interactiveConfiguration.choices().contains(line))
-
-              if (!line.isEmpty()) {
-                Activator.getWorkspace().setPreference(location, line);
-              } else {
-                Activator.getWorkspace().removePreference(location);
               }
-            }
-  
+         //   }
           }
-
         }
+      } catch {
+        case e: ClassNotFoundException => Logger.getLogger(classOf[EnvironmentInitializer].getName).log(Level.FINE, c.getName() + "$ not found.");
       }
     }
   }
+
 }
