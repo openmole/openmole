@@ -10,3 +10,6 @@ private
 private/*
 release/
 release/*
+*.iml
+*.ipr
+*.iws
