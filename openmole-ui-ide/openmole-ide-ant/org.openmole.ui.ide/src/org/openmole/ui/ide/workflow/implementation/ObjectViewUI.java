@@ -34,6 +34,10 @@ import org.openmole.ui.ide.workflow.model.IMoleScene;
     protected MoleScene scene;
     protected Properties properties;
 
+    public ObjectViewUI(MoleScene scene){
+        super(scene);
+    }
+
     public ObjectViewUI(MoleScene scene,
                         Properties properties){
         super(scene);

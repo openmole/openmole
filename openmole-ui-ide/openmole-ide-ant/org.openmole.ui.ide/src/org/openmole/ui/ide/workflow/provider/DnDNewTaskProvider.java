@@ -28,6 +28,8 @@ import org.openmole.ui.ide.exception.MoleExceptionManagement;
 import org.openmole.ui.ide.workflow.implementation.MoleScene;
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI;
 import org.openmole.ui.ide.workflow.implementation.TaskUI;
+import org.openmole.ui.ide.workflow.implementation.UIFactory;
+import org.openmole.ui.ide.workflow.model.ICapsuleView;
 
 /**
  *
@@ -35,7 +37,7 @@ import org.openmole.ui.ide.workflow.implementation.TaskUI;
  */
 public class DnDNewTaskProvider extends DnDProvider {
 
-    private CapsuleViewUI capsuleView;
+    private ICapsuleView capsuleView;
 
     public DnDNewTaskProvider(MoleScene molescene,
             CapsuleViewUI cv) {
@@ -43,27 +45,34 @@ public class DnDNewTaskProvider extends DnDProvider {
         this.capsuleView = cv;
     }
 
+    public DnDNewTaskProvider(MoleScene molescene) {
+        super(molescene);
+        this.capsuleView = null;
+    }
+
     @Override
     public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
-        ConnectorState state = ConnectorState.REJECT;
-        if (transferable.isDataFlavorSupported(ApplicationCustomize.TASK_DATA_FLAVOR)) {
-            state = ConnectorState.ACCEPT;
-        }
-        return state;
+        return ConnectorState.ACCEPT;
     }
 
     @Override
     public void accept(Widget widget, Point point, Transferable transferable) {
         try {
+            if (capsuleView == null) {
+                capsuleView = UIFactory.getInstance().createCapsule(scene, point);
+                capsuleView.addInputSlot();
+            }
             capsuleView.encapsule((TaskUI) transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR));
+        } catch (UnsupportedFlavorException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (IOException ex) {
+            MoleExceptionManagement.showException(ex);
+        } catch (UserBadDataError ex) {
+            MoleExceptionManagement.showException(ex);
+        } finally {
             scene.repaint();
             scene.revalidate();
-        } catch (UnsupportedFlavorException ex) {
-             MoleExceptionManagement.showException(ex);
-        } catch (IOException ex) {
-             MoleExceptionManagement.showException(ex);
-        } catch (UserBadDataError ex) {
-             MoleExceptionManagement.showException(ex);
         }
+
     }
 }

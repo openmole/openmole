@@ -41,11 +41,11 @@ import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
  * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
  */
 public class CapsuleViewUI extends ObjectViewUI implements ICapsuleView {
-
     protected ConnectableWidget connectableWidget;
     private ICapsuleModelUI capsuleModel;
     private DnDAddPrototypeProvider dnDAddPrototypeInstanceProvider;
     private CapsuleMenuProvider taskCapsuleMenuProvider;
+
 
     public CapsuleViewUI(MoleScene scene,
             ICapsuleModelUI tcm,

@@ -66,6 +66,7 @@ import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget
 import org.openmole.ui.ide.workflow.implementation.paint.OSlotAnchor;
 import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget;
 import org.openmole.ui.ide.workflow.implementation.paint.SlotAnchor;
+import org.openmole.ui.ide.workflow.provider.DnDNewTaskProvider;
 import org.openmole.ui.ide.workflow.provider.TransitionMenuProvider;
 
 /**
@@ -89,6 +90,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
     private WidgetAction moveAction = ActionFactory.createMoveAction();
     private int currentSlotIndex = 1;
 
+
     public MoleScene() {
         super();
         addChild(capsuleLayer);
@@ -103,6 +105,7 @@ public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
         //  getActions().addAction(ActionFactory.createPanAction());
 
         getActions().addAction(ActionFactory.createAcceptAction(new DnDNewCapsuleProvider(this)));
+        getActions().addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(this)));
 
         setActiveTool(CONNECT);
     }
