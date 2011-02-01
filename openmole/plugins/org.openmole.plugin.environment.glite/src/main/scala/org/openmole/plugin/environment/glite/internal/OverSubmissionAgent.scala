@@ -77,9 +77,6 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
               val windowSize = (jobs.size * workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
               val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
             
-              //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"windowSize " + windowSize  + " windowStart " + windowStart)
-
-            
               val nbSamples = workspace.preferenceAsInt(OverSubmissionNbSampling)
               val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
             
@@ -87,12 +84,10 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
               val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
             
-              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"maxNbRunning " + maxNbRunning)
- 
-              val overSubmission = max(maxNbRunning, workspace.preferenceAsInt(OverSubmissionMinNumberOfJob))
-              overSubmission - stillRunning.size
+              val minOversub = workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+              if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
             } else workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
-            //  val key = entry.getKey
+            
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
             val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
             if (nbRessub > 0) {
