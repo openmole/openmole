@@ -86,7 +86,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
               val minOversub = workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
               if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
-            } else workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+            } else workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
             
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
             val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
