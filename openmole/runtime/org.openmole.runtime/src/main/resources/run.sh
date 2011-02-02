@@ -2,4 +2,4 @@
 
 MEMORY=$1
 shift
-java -Xmx${MEMORY} -jar plugins/org.eclipse.equinox.launcher.jar $@ 
+java -Xmx${MEMORY} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar $@ 
