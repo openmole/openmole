@@ -98,7 +98,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      executorService.getExecutorService(ExecutorType.OWN).submit(r)
+      executorService.executorService(ExecutorType.OWN).submit(r)
     }
 
     while (storageGroup.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
@@ -126,7 +126,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      executorService.getExecutorService(ExecutorType.OWN).submit(test)
+      executorService.executorService(ExecutorType.OWN).submit(test)
     }
     
     while (jobServiceGroup.isEmpty && nbStillRunning.get > 0) done.acquire

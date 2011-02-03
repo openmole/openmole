@@ -148,7 +148,7 @@ public class VirtualMachineResource implements IResource {
 
         final Long timeOut = workspace().preferenceAsDurationInMs(VMBootTime);
 
-        Future connectionFuture = Activator.executorService().getExecutorService(ExecutorType.OWN).submit(new Callable<Void>() {
+        Future connectionFuture = Activator.executorService().executorService(ExecutorType.OWN()).submit(new Callable<Void>() {
 
             @Override
             public Void call() throws Exception {

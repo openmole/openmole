@@ -133,7 +133,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = executorService.getExecutorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob))
+      finalizeExecutionFuture = executorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob))
     }
     if (finalizeExecutionFuture.isDone) {
       finalizeExecutionFuture.get
@@ -145,7 +145,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   private def asynchonousCopy: Boolean = {
     if (copyToEnvironmentResult == null) {
       if (copyToEnvironmentExecFuture == null) {
-        copyToEnvironmentExecFuture = executorService.getExecutorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
+        copyToEnvironmentExecFuture = executorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
       }
 
       if (copyToEnvironmentExecFuture.isDone) {
@@ -173,7 +173,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
   private def clean = {
     if (copyToEnvironmentResult != null) {
-      executorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true))
+      executorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true))
       copyToEnvironmentResult = null
     }
   }
@@ -192,7 +192,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       } finally {
         val bj = batchJob
         if (bj != null) {
-          executorService.getExecutorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          executorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
         }
       }
     }

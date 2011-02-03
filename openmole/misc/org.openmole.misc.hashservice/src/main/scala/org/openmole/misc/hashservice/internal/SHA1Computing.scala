@@ -56,7 +56,7 @@ class SHA1Computing extends IHashService {
     val buffer = new Array[Byte](maxRead)
     val md = new Sha160
 
-    val thread = Activator.getExecutorService.getExecutorService(ExecutorType.OWN)
+    val thread = Activator.getExecutorService.executorService(ExecutorType.OWN)
     val reader = new ReaderRunnable(buffer, is, maxRead)
 
     Stream.continually( {

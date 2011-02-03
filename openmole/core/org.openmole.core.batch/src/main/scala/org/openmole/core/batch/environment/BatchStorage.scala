@@ -78,7 +78,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
     if (persistentSpaceVar == null) {
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
       
-      val service = executorService.getExecutorService(ExecutorType.REMOVE)
+      val service = executorService.executorService(ExecutorType.REMOVE)
       
       for (dir <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, dir)
@@ -99,7 +99,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
 
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
 
-      val service = executorService.getExecutorService(ExecutorType.REMOVE)
+      val service = executorService.executorService(ExecutorType.REMOVE)
       val removalDate = System.currentTimeMillis - workspace.preferenceAsDurationInMs(TmpDirRemoval);
 
       for (dir <- tmpNoTime.list(token)) {
@@ -182,7 +182,7 @@ class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, auth
             return true;
           }
         } finally {
-          executorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
+          executorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
         }
       } finally {
         BatchStorageControl.usageControl(description).releaseToken(token)
