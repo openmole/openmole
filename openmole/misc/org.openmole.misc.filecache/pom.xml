@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>core</artifactId>
+        <artifactId>misc</artifactId>
         <groupId>org.openmole</groupId>
         <version>0.3-SNAPSHOT</version>
     </parent>
