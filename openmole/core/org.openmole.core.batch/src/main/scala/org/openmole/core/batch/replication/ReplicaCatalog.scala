@@ -279,7 +279,7 @@ object ReplicaCatalog {
 
   def clean(replica: Replica): Future[_] = synchronized {
     LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
-    val ret = executorService.getExecutorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
+    val ret = executorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
     remove(replica)
     ret
   }
