@@ -18,31 +18,34 @@
 package org.openmole.core.serializer.internal
 
 import java.io.File
-import java.util.TreeMap
+import org.openmole.commons.tools.io.FileUtil.fileOrdering
 import org.openmole.commons.tools.io.StringInputStream
 import org.openmole.core.serializer.FileInfoHash
+import scala.collection.immutable.TreeMap
+import Activator._
 
 class SerializerWithPathHashInjectionAndPluginListing extends SerializerWithPluginClassListing {
 
-    val files = new TreeMap[File, FileInfoHash]
-    registerConverter(new FilePathHashNotifier(this))
+  var files = new TreeMap[File, FileInfoHash]
+  registerConverter(new FilePathHashNotifier(this))
   
-    def fileUsed(file: File): FileInfoHash = {
-        var hash = files.get(file)
-        if(hash == null) {
-            val pathHash = Activator.getHashService().computeHash(new StringInputStream(file.getAbsolutePath()))
-            val fileHash = Activator.getHashService().computeHash(file)
+  def fileUsed(file: File): FileInfoHash = {
+    var hash = files.getOrElse(file,
+                               {
+        val pathHash = hashService.computeHash(new StringInputStream(file.getAbsolutePath()))
+        val fileHash = hashService.computeHash(file)
             
-            hash = new FileInfoHash(fileHash, pathHash)
+        val hash = new FileInfoHash(fileHash, pathHash)
             
-            files.put(file, hash)
-        }
+        files += file -> hash
         hash
-    }
+      })
+    hash
+  }
     
-    override def clean: Unit = {
-        files.clear
-        super.clean
-    }
+  override def clean: Unit = {
+    files = new TreeMap[File, FileInfoHash]
+    super.clean
+  }
     
 }

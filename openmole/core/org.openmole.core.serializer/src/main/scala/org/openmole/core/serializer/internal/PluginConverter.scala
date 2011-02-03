@@ -23,19 +23,19 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import Activator._
 
 class PluginConverter(serializer: SerializerWithPluginClassListing, reflectionConverter: ReflectionConverter) extends Converter {
 
     override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-        serializer.classUsed(o.getClass());
-        reflectionConverter.marshal(o, writer, mc);
+        serializer.classUsed(o.getClass)
+        reflectionConverter.marshal(o, writer, mc)
     }
 
     override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
         throw new UnsupportedOperationException("Bug: Should never be called.")
     }
 
-    override def canConvert(c: Class[_]): Boolean = {
-        Activator.getPluginManager().isClassProvidedByAPlugin(c);
-    }
+    override def canConvert(c: Class[_]): Boolean = pluginManager.isClassProvidedByAPlugin(c)
+   
 }

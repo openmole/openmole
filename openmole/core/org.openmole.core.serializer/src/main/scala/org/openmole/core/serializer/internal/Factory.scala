@@ -22,22 +22,18 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
 trait Factory[T <: { def clean }]{
    
-   val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory() {
-
-        override def makeObject: T = {
-            Factory.this.makeObject
-        }
-
+  val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
+      override def makeObject: T = Factory.this.makeObject
     })
     
-    def makeObject: T
+  def makeObject: T
     
-    def borrowObject: T = {
-      pool.borrowObject.asInstanceOf[T]
-    }
+  def borrowObject: T = {
+    pool.borrowObject.asInstanceOf[T]
+  }
     
-    def returnObject(serial: T) = {
-        serial.clean
-        pool.returnObject(serial)
-    }
+  def returnObject(serial: T) = {
+    serial.clean
+    pool.returnObject(serial)
+  }
 }
