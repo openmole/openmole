@@ -194,7 +194,7 @@ class Runtime {
           val tos = new TarOutputStream(new FileOutputStream(tarResult))     
           try {
             for (file <- serializationResult._1) {
-              Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
+              //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
               
               val is = new StringInputStream(file.getCanonicalPath)
 
