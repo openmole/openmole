@@ -22,14 +22,11 @@ import org.openmole.core.serializer.FileInfoHash
 
 class DeserializerWithFileInjectionFromPathHash extends Deserializer {
 
-    var files: PartialFunction[FileInfoHash, File] = null
-    registerConverter(new FilePathHashInjecter(this))
+  var files: PartialFunction[FileInfoHash, File] = null
+  registerConverter(new FilePathHashInjecter(this))
 
-    def clean = {
-        files = null
-    }
+  def clean = files = null
     
-    def getMatchingFile(file: FileInfoHash): File = {
-        files(file)
-    }
+  def getMatchingFile(file: FileInfoHash): File = files(file)
+
 }

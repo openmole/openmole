@@ -19,7 +19,8 @@ package org.openmole.core.serializer.internal
 
 import java.io.File
 import java.io.OutputStream
-import java.util.TreeSet
+import org.openmole.commons.tools.io.FileUtil.fileOrdering
+import scala.collection.immutable.TreeSet
 
 class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
 
@@ -28,7 +29,7 @@ class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListin
     
 
     def fileUsed(file: File) = {
-        files.add(file)
+        files += file
     }
 
     override def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream ) = {

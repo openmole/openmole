@@ -22,11 +22,11 @@ import java.io.File
 
 class FileConverterNotifier(serializer: SerializerWithFileAndPluginListing) extends FileConverter {
 
-    override def toString(obj: Object): String = {
-        val file = obj.asInstanceOf[File]
-        serializer.fileUsed(file)
-        super.toString(obj)
-    }
+  override def toString(obj: Object): String = {
+    val file = obj.asInstanceOf[File]
+    serializer.fileUsed(file)
+    super.toString(obj)
+  }
     
 }
 

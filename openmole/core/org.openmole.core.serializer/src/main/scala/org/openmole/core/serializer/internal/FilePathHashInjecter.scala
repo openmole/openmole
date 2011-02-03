@@ -23,10 +23,10 @@ import org.openmole.core.serializer.FileInfoHash
 
 class FilePathHashInjecter(deserializer: DeserializerWithFileInjectionFromPathHash) extends FileConverter {
 
-    override def fromString(str: String): Object = {
-        val hash = super.fromString(str).asInstanceOf[FileInfoHash]
-        val ret = deserializer.getMatchingFile(hash)
-        if(ret == null) throw new XStreamException("No matching file for " + hash.toString)
-        ret;
-    }
+  override def fromString(str: String): Object = {
+    val hash = super.fromString(str).asInstanceOf[FileInfoHash]
+    val ret = deserializer.getMatchingFile(hash)
+    if(ret == null) throw new XStreamException("No matching file for " + hash.toString)
+    ret
+  }
 }

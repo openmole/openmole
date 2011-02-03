@@ -30,168 +30,120 @@ import org.openmole.core.serializer.FileInfoHash
 import org.openmole.commons.tools.io.FileUtil._
 
 import org.openmole.core.serializer.ISerializer
-import scala.collection.JavaConversions._
+import Activator._
 
 class Serializer extends ISerializer {
 
   val xstream = new XStream
 
   override def deserialize[T](file: File): T = {
+    val is = new FileInputStream(file)
     try {
-      val is = new FileInputStream(file)
-      try {
-        return deserialize(is)
-      } finally {
-        is.close
-      }
-    } catch {
-      case (ex: IOException) => throw new InternalProcessingError(ex);
+      return deserialize(is)
+    } finally {
+      is.close
     }
   }
 
   override def deserialize[T](is: InputStream): T = {
-    try {
-      xstream.fromXML(is).asInstanceOf[T]
-    } catch {
-      case(ex: XStreamException) => throw new InternalProcessingError(ex)
-    }
+    xstream.fromXML(is).asInstanceOf[T]
   }
 
   override def serializeFilePathAsHashGetPluginClassAndFiles(obj: Object, dir: File): (Iterable[(File, FileInfoHash)], Iterable[Class[_]], File) = {
+    val serializer = SerializerWithPathHashInjectionAndPluginListingFactory.borrowObject
     try {
-      val serializer = SerializerWithPathHashInjectionAndPluginListingFactory.borrowObject
+      val serialized = workspace.newFile
+
+      val os = new FileOutputStream(serialized)
       try {
-        val serialized = Activator.getWorkspace.newFile
-
-        val os = new FileOutputStream(serialized)
-        try {
-          serializer.toXMLAndListPlugableClasses(obj, os)
-        } finally {
-          os.close
-        }
-
-        val hashName = new File(dir, Activator.getHashService.computeHash(serialized).toString)
-        if(!hashName.exists) move(serialized, hashName)
-
-        (serializer.files, serializer.classes, hashName)
+        serializer.toXMLAndListPlugableClasses(obj, os)
       } finally {
-        SerializerWithPathHashInjectionAndPluginListingFactory.returnObject(serializer)
+        os.close
       }
-    } catch {
-      case(ex: Exception) => throw new InternalProcessingError(ex)
+
+      val hashName = new File(dir, hashService.computeHash(serialized).toString)
+      if(!hashName.exists) move(serialized, hashName)
+
+      (serializer.files, serializer.classes, hashName)
+    } finally {
+      SerializerWithPathHashInjectionAndPluginListingFactory.returnObject(serializer)
     }
   }
 
   override def serializeGetPluginClassAndFiles(obj: Object, file: File): (Iterable[File], Iterable[Class[_]]) = {
+    val os = new FileOutputStream(file)
     try {
-      val os = new FileOutputStream(file)
-      try {
-        return serializeGetPluginClassAndFiles(obj, os);
-      } finally {
-        os.close
-      }
-    } catch {
-      case(ex: IOException) => throw new InternalProcessingError(ex)
+      return serializeGetPluginClassAndFiles(obj, os);
+    } finally {
+      os.close
     }
   }
 
   override def serializeGetPluginClassAndFiles(obj: Object, os: OutputStream): (Iterable[File], Iterable[Class[_]]) = {
+    val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
     try {
-      val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
-      try {
-        serializer.toXMLAndListPlugableClasses(obj, os)
-        (serializer.files, serializer.classes)
-      } finally {
-        SerializerWithFileAndPluginListingFactory.returnObject(serializer)
-      }
-    } catch {
-      case (ex: Exception) => throw new InternalProcessingError(ex)
+      serializer.toXMLAndListPlugableClasses(obj, os)
+      (serializer.files, serializer.classes)
+    } finally {
+      SerializerWithFileAndPluginListingFactory.returnObject(serializer)
     }
   }
 
   override def deserializeReplaceFiles[T](file: File, files: PartialFunction[File, File] ): T = {
+    val is = new FileInputStream(file)
     try {
-      val is = new FileInputStream(file)
-      try {
-        deserializeReplaceFiles[T](is, files)
-      } finally {
-        is.close
-      }
-    } catch {
-      case (ex: IOException) => throw new InternalProcessingError(ex)
+      deserializeReplaceFiles[T](is, files)
+    } finally {
+      is.close
     }
   }
 
   override def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T = {
+    val serializer = DeserializerWithFileInjectionFromFileFactory.borrowObject
     try {
-      val serializer = DeserializerWithFileInjectionFromFileFactory.borrowObject
-      try {
-        serializer.files = files
-        serializer.fromXMLInjectFiles[T](is)
-      } finally {
-        DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
-      }
-    } catch {
-      case(ex: Exception) => throw new InternalProcessingError(ex)
+      serializer.files = files
+      serializer.fromXMLInjectFiles[T](is)
+    } finally {
+      DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
     }
   }
 
   override def serialize(obj: Object, os: OutputStream) = {
-    try {
-      xstream.toXML(obj, os)
-    } catch {
-      case(ex: XStreamException) => throw new InternalProcessingError(ex)
-    }
+    xstream.toXML(obj, os)
   }
 
   override def serialize(obj: Object, file: File): Unit = {
+    val os = new FileOutputStream(file);
     try {
-      val os = new FileOutputStream(file);
-      try {
-        serialize(obj, os)
-      } finally {
-        os.close
-      }
-    } catch {
-      case(ex: IOException) => throw new InternalProcessingError(ex)
+      serialize(obj, os)
+    } finally {
+      os.close
     }
   }
 
   override def serializeAsHash(obj: Object, dir: File) = {
-    try {
-      val serialized = Activator.getWorkspace.newFile
-      serialize(obj, serialized)
-      val hashName = new File(dir, Activator.getHashService.computeHash(serialized).toString)
-      move(serialized, hashName)
-    } catch {
-      case(ex: IOException) => throw new InternalProcessingError(ex)
-    }
+    val serialized = workspace.newFile
+    serialize(obj, serialized)
+    val hashName = new File(dir, hashService.computeHash(serialized).toString)
+    move(serialized, hashName)
   }
 
   override def deserializeReplacePathHash[T](file: File, files: PartialFunction[FileInfoHash, File]): T = {
+    val is = new FileInputStream(file)
     try {
-      val is = new FileInputStream(file)
-      try {
-        deserializeReplacePathHash[T](is, files)
-      } finally {
-        is.close
-      }
-    } catch {
-      case(ex: IOException) => throw new InternalProcessingError(ex)
+      deserializeReplacePathHash[T](is, files)
+    } finally {
+      is.close
     }
   }
 
   override def deserializeReplacePathHash[T](it: InputStream, files: PartialFunction[FileInfoHash, File]) = {
+    val deserializer = DeserializerWithFileInjectionFromPathHashFactory.borrowObject
     try {
-      val deserializer = DeserializerWithFileInjectionFromPathHashFactory.borrowObject
-      try {
-        deserializer.files = files
-        deserializer.fromXMLInjectFiles[T](it)
-      } finally {
-        DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
-      }
-    } catch {
-      case(ex: Exception) => throw new InternalProcessingError(ex)
+      deserializer.files = files
+      deserializer.fromXMLInjectFiles[T](it)
+    } finally {
+      DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
     }
   }
 }
