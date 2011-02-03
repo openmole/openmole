@@ -23,7 +23,9 @@ object Instanciator {
   private val objenesis = new ObjenesisStd
     
   def instanciate[T](c: Class[T]): T = objenesis.newInstance(c).asInstanceOf[T]
-    
+  
+  def instanciate[T](c: Class[T], args: Array[Object]): T = instanciate(c, args: _*)
+ 
   def instanciate[T](c: Class[T], args: Object*): T = {
     //val argsTypes = args.map{_.getClass}.toArray
     val ctr = c.getConstructor(args.map{_.getClass}.toArray[Class[_]]: _*)
