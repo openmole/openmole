@@ -18,13 +18,14 @@
 package org.openmole.commons.tools.obj
 
 import org.objenesis.ObjenesisStd
+import scala.collection.mutable.ListBuffer
 
 object Instanciator {
   private val objenesis = new ObjenesisStd
     
   def instanciate[T](c: Class[T]): T = objenesis.newInstance(c).asInstanceOf[T]
   
-  def instanciate[T](c: Class[T], args: Array[Object]): T = instanciate(c, args: _*)
+  def instanciate[T](c: Class[T], first: Object, args: Array[Object]): T = instanciate(c, (ListBuffer(first) ++ args) : _*)
  
   def instanciate[T](c: Class[T], args: Object*): T = {
     //val argsTypes = args.map{_.getClass}.toArray
