@@ -118,7 +118,6 @@ class Runtime {
         if (!usedFiles.containsKey(repliURI.src)) {
 
           val cache = repliURI.replica.cache
-
           val cacheHash = Activator.getHashService.computeHash(cache)
 
           if (!cacheHash.equals(repliURI.hash)) {
@@ -134,7 +133,6 @@ class Runtime {
             } finally {
               is.close
             }
-            cache.recursiveDelete
             local
           } else {
             cache
@@ -208,8 +206,6 @@ class Runtime {
                 } finally {
                   outputStream.close
                 }
-                
-                file.recursiveDelete
                 toArchive
               } else {
                 file
@@ -223,8 +219,6 @@ class Runtime {
               } finally {
                 tos.closeEntry
               }
-              
-              toArchive.recursiveDelete
               
               filesInfo.put(entry.getName, (file, file.isDirectory))
             }
