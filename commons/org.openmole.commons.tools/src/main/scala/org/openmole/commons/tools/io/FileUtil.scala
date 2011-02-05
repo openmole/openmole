@@ -168,6 +168,16 @@ object FileUtil {
   }
 
   @throws(classOf[IOException])
+  def copy(from: File, to: OutputStream): Unit = {
+    val fromIS = new FileInputStream(from)
+    try {
+      copy(fromIS, to)
+    } finally {
+      fromIS.close
+    }
+  }
+  
+  @throws(classOf[IOException])
   def copy(from: InputStream, to: OutputStream, maxRead: Int, timeout: Long) = {
     val buffer = new Array[Byte](maxRead)
     val executor = Executors.newSingleThreadExecutor
@@ -234,7 +244,8 @@ class FileUtil(file: File) {
   
   @throws(classOf[IOException])
   def copy(toF: File) = FileUtil.copy(file, toF)
-  
+  def copy(to: OutputStream): Unit = FileUtil.copy(file, to)
+
   def move(to: File) = FileUtil.move(file, to)
 
   def size = FileUtil.size(file)

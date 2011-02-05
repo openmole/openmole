@@ -28,7 +28,7 @@ import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.io.StringInputStream
 import org.openmole.commons.tools.io.TarArchiver
 import org.openmole.commons.tools.service.Priority
@@ -56,13 +56,9 @@ object Runtime {
 class Runtime {
 
   import Runtime._
-  
-  
-  
-  
+
   def apply(executionMessageURI: String, resultMessageURI: String, debug: Boolean) = {
     
- 
     val oldOut = System.out
     val oldErr = System.err
 
@@ -72,10 +68,10 @@ class Runtime {
     val outSt = new PrintStream(out)
     val errSt = new PrintStream(err)
 
-       if(!debug) {
-    System.setOut(outSt)
-    System.setErr(errSt)
-       }
+    if(!debug) {
+      System.setOut(outSt)
+      System.setErr(errSt)
+    }
         
     var exception: Throwable = null
     var outputMessage: FileMessage = null
@@ -112,7 +108,7 @@ class Runtime {
       }
 
 
-      Activator.getPluginManager.loadDir(pluginDir);
+      Activator.getPluginManager.loadDir(pluginDir)
 
       /* --- Download the files for the local file cache ---*/
       
@@ -138,9 +134,10 @@ class Runtime {
             } finally {
               is.close
             }
+            cache.recursiveDelete
             local
           } else {
-            cache;
+            cache
           }
 
           usedFiles.put(repliURI.src, local)
@@ -198,11 +195,6 @@ class Runtime {
               
               val is = new StringInputStream(file.getCanonicalPath)
 
-              /*val hash = try {
-                Activator.getHashService.computeHash(is)
-              } finally {
-                is.close
-              }*/
               val name = UUID.randomUUID
                             
               val entry = new TarEntry(name.toString)
@@ -216,6 +208,8 @@ class Runtime {
                 } finally {
                   outputStream.close
                 }
+                
+                file.recursiveDelete
                 toArchive
               } else {
                 file
@@ -225,11 +219,13 @@ class Runtime {
               entry.setSize(toArchive.length)
               tos.putNextEntry(entry)
               try {
-                FileUtil.copy(new FileInputStream(toArchive), tos)
+                toArchive.copy(tos)
               } finally {
                 tos.closeEntry
               }
-
+              
+              toArchive.recursiveDelete
+              
               filesInfo.put(entry.getName, (file, file.isDirectory))
             }
           } finally {
@@ -256,7 +252,6 @@ class Runtime {
         System.setOut(oldOut)
         System.setErr(oldErr)
 
-
         outputMessage = if (out.length() != 0) {
           val output = new GZURIFile(executionMessage.communicationDir.newFileInDir("output", ".txt"))
           URIFile.copy(out, output)
@@ -280,7 +275,7 @@ class Runtime {
       case(t: Throwable) => {
           if(debug) Logger.getLogger(classOf[Runtime].getName).log(Level.SEVERE, "", t)
           exception = t
-      }
+        }
     }
 
     val runtimeResult = new RuntimeResult(outputMessage, errorMessage, tarResultMessage, exception, filesInfo, contextResult)
