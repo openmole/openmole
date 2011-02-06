@@ -117,13 +117,7 @@ object ReplicaCatalog {
   private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
 
     val objectContainer = objectServer
-    val set = objectContainer.query(new Predicate[Replica](classOf[Replica]) {
-
-        override def `match`(replica: Replica): Boolean = {
-          replica.source.equals(srcPath) && replica.hash.equals(hash) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
-        }
-                
-      })
+    val set = objectContainer.queryByExample(new Replica(srcPath, hash, storageDescription, authenticationKey, null))
           
     return set.size match {
       case 0 => None
@@ -135,30 +129,26 @@ object ReplicaCatalog {
           build.append(rep.toString).append(';');
         }
         //LOGGER.log(Level.INFO, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
-        //This could append due to merging process
         Some(fix(set, objectContainer))
     }
 
   }
     
 
-  def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = synchronized {
-      
-    objectServer.query(new Predicate[Replica](classOf[Replica]){
-        override def `match`(replica: Replica): Boolean = replica.source.equals(src) && replica.storageDescription.equals(storageDescription) && replica.authenticationKey.equals(authenticationKey)
-      })
+  def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
+    objectServer.queryByExample(new Replica(src, null, storageDescription, authenticationKey, null))
   }
-
+  
   def isInCatalog(uri: String): Boolean = {
-    !objectServer.query(new Predicate[Replica](classOf[Replica]){
-        override def `match`(replica: Replica): Boolean = replica.destination.location.equals(uri)
-      }).isEmpty
+    val query = objectServer.query
+    query.constrain(classOf[Replica])
+    query.descend("_destination").descend("location").equals(uri)
+    
+    !query.execute.isEmpty
   }
   
    def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    !objectServer.query(new Predicate[Replica](classOf[Replica]){
-        override def `match`(replica: Replica): Boolean = replica.source == src && replica.storageDescription == storageDescription
-      }).isEmpty
+     !objectServer.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty
   }
   
   
@@ -209,58 +199,24 @@ object ReplicaCatalog {
   }
 
   def allReplicas:  Iterable[Replica] = synchronized {
-    val q = objectServer.query();
+    val q = objectServer.query
     q.constrain(classOf[Replica])
     q.execute.toArray(Array[Replica]())
   }
 
   private def insert(replica: Replica, container: EmbeddedObjectContainer): Replica = synchronized {
 
-    val srcToInsert = { 
-      val srcsInbase = container.query(new Predicate[File](classOf[File]) {
-          override def `match`(src: File): Boolean = src.equals(replica.source)
-        })
-        
-      if (!srcsInbase.isEmpty) srcsInbase.get(0)
-      else replica.source
+    def uniq[T](obj: T): T = {
+      val inbase = container.queryByExample(obj)
+      if (!inbase.isEmpty) inbase.get(0)
+      else obj
     }
-
-    val hashToInsert = {
-      val hashsInbase = container.query(new Predicate[IHash](classOf[IHash]) {
-          
-          override def `match`(hash: IHash): Boolean = hash.equals(replica.hash)
-          
-        })
-        
-      if (!hashsInbase.isEmpty) hashsInbase.get(0)
-      else replica.hash
-       
-    }
-        
-    val storageDescriptionToInsert =  {
-      val storagesDescriptionInBase = container.query(new Predicate[BatchStorageDescription](classOf[BatchStorageDescription]) {
-          override def `match`(batchServiceDescription: BatchStorageDescription): Boolean =  batchServiceDescription.equals(replica.storageDescription)
-        })
-        
-      if (!storagesDescriptionInBase.isEmpty) storagesDescriptionInBase.get(0)
-      else replica.storageDescription
-    }
-
-    val authenticationKeyToInsert = {
-      val authenticationKeyInBase = container.query(new Predicate[BatchAuthenticationKey](classOf[BatchAuthenticationKey]) {
-          override def `match`(batchEnvironmentDescription: BatchAuthenticationKey): Boolean = batchEnvironmentDescription.equals(replica.authenticationKey)
-        })
-        
-      if (!authenticationKeyInBase.isEmpty)  authenticationKeyInBase.get(0)
-      else replica.authenticationKey
-    }
+    
+    val srcToInsert = uniq(replica.source)
+    val hashToInsert = uniq(replica.hash)
+    val storageDescriptionToInsert = uniq(replica.storageDescription)
+    val authenticationKeyToInsert = uniq(replica.authenticationKey)
          
-
-    /*ObjectSet<IURIFile> destinations = objectServer.query(destinationToInsert);
-     if (!destinations.isEmpty()) {
-     destinationToInsert = destinations.get(0);
-     }*/
-
     val replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescriptionToInsert, authenticationKeyToInsert, replica.destination)
 
     container.store(replicaToInsert)

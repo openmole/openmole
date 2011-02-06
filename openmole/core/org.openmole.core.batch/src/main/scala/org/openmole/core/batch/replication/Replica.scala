@@ -30,7 +30,6 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDesc
   @transient
   var activator: com.db4o.activation.Activator = null
 
-
   def destination: IURIFile = {
     activate(ActivationPurpose.READ)
     _destination
