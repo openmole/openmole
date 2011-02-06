@@ -26,18 +26,18 @@ import org.openmole.misc.updater.IUpdater
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import java.util.concurrent.TimeUnit
 
-class Updater extends IUpdater {
+object Updater extends IUpdater {
   
     var shutDown = false
     lazy val scheduler =  Executors.newScheduledThreadPool(1,threadFactory)
 
     override def registerForUpdate(updatable: IUpdatableWithVariableDelay, purpose: ExecutorType.Value) = {
-        val task = new UpdaterTask(updatable, this, purpose)
+        val task = new UpdaterTask(updatable, purpose)
         executorService.executorService(purpose).submit(task)
     }
 
     override def delay(updatable: IUpdatableWithVariableDelay, purpose: ExecutorType.Value) = {
-        val task = new UpdaterTask(updatable, Updater.this, purpose)
+        val task = new UpdaterTask(updatable, purpose)
         delay(task)
     }
 

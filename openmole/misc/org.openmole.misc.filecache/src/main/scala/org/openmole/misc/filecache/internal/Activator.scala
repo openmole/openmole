@@ -15,34 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.executorservice.internal
+package org.openmole.misc.filecache.internal
 
 import org.openmole.commons.tools.service.OSGiActivator
-
-import org.openmole.misc.workspace.IWorkspace
-import org.openmole.misc.executorservice.IExecutorService
+import org.openmole.misc.filedeleter.IFileDeleter
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
-import org.osgi.framework.ServiceRegistration
 
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None
   
-  lazy val workspace = getService(classOf[IWorkspace])
+  lazy val fileDeleter = getService(classOf[IFileDeleter])
 }
 
 class Activator extends BundleActivator {
 
-  var msgSerial: ServiceRegistration = null
-
-  override def start(context: BundleContext) = {
-    Activator.context = Some(context)
-    msgSerial = context.registerService(classOf[IExecutorService].getName, ExecutorService, null)
-  }
-
-  override def stop(context: BundleContext) = {
-    Activator.context = None
-    msgSerial.unregister
-  }
+  override def start(context: BundleContext) = Activator.context = Some(context)
+ 
+  override def stop(context: BundleContext) = Activator.context = None
   
 }

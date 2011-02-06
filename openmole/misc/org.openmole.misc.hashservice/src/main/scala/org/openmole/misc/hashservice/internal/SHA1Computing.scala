@@ -29,8 +29,9 @@ import org.openmole.misc.hashservice.IHashService
 import org.openmole.misc.hashservice.SHA1Hash
 import org.openmole.commons.tools.io.ReaderRunnable
 import org.openmole.misc.executorservice.ExecutorType
+import Activator._
 
-class SHA1Computing extends IHashService {
+object SHA1Computing extends IHashService {
 
   override def computeHash(file: File): SHA1Hash = {
     val is = new FileInputStream(file)
@@ -56,7 +57,7 @@ class SHA1Computing extends IHashService {
     val buffer = new Array[Byte](maxRead)
     val md = new Sha160
 
-    val thread = Activator.getExecutorService.executorService(ExecutorType.OWN)
+    val thread = executorService.executorService(ExecutorType.OWN)
     val reader = new ReaderRunnable(buffer, is, maxRead)
 
     Stream.continually( {

@@ -206,6 +206,7 @@ class Runtime {
                 } finally {
                   outputStream.close
                 }
+                
                 toArchive
               } else {
                 file

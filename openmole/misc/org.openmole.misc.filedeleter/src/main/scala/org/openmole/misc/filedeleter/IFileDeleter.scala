@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,25 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.filedeleter.internal;
+package org.openmole.misc.filedeleter
 
-import java.io.File;
+import java.io.File
 
-/**
- *
- * @author reuillon
- */
-public class DeleteOnFinalize {
-    final String path;
-
-    public DeleteOnFinalize(String path) {
-        this.path = path;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        Activator.getDeleter().assynchonousRemove(new File(path));
-    }
-    
+trait IFileDeleter {
+  def assynchonousRemove(file: File)
+  def deleteWhenGarbageCollected(file: File)
 }

@@ -22,13 +22,13 @@ import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 
-class UpdaterTask(val updatable: IUpdatableWithVariableDelay, val updater: Updater, val purpose: ExecutorType.Value) extends Runnable {
+class UpdaterTask(val updatable: IUpdatableWithVariableDelay, val purpose: ExecutorType.Value) extends Runnable {
 
   override def run = {
     try {
       val resubmit = updatable.update
       System.runFinalization
-      if(resubmit) updater.delay(this)
+      if(resubmit) Updater.delay(this)
     } catch {
       case e => Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
     }
