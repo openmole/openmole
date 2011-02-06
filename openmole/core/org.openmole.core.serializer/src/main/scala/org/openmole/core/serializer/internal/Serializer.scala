@@ -32,7 +32,7 @@ import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.core.serializer.ISerializer
 import Activator._
 
-class Serializer extends ISerializer {
+object Serializer extends ISerializer {
 
   val xstream = new XStream
 
