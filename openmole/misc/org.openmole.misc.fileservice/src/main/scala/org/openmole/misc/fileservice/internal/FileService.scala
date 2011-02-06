@@ -42,7 +42,7 @@ object FileService extends IFileService {
   private[internal] val hashCache = new AssociativeCache[String, HashWithLastModified]
   private[internal] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
-  updater.delay(new FileServiceGC(this), ExecutorType.OWN, workspace.preferenceAsDurationInMs(FileService.GCInterval))
+  updater.delay(new FileServiceGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
   override def hash(file: File): IHash = hash(file, file)
 
