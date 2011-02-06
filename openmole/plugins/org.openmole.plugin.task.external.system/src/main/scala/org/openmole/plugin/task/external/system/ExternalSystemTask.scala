@@ -28,7 +28,7 @@ import scala.collection.mutable.ListBuffer
 
 import org.openmole.plugin.task.external.ExternalTask
 import scala.collection.JavaConversions._
-import org.openmole.plugin.task.external.system.internal.Activator._
+//import org.openmole.plugin.task.external.system.internal.Activator._
 
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
