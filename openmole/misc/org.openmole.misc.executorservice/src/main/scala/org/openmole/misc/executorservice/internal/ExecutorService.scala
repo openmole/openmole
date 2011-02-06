@@ -29,9 +29,6 @@ import Activator._
 object ExecutorService {
   val NbTread = new ConfigurationLocation("ExecutorService", "NbThreadsByExecutorTypes")
   workspace += (NbTread, "20")
-}
-
-class ExecutorService extends IExecutorService {
 
   val executorServices = new HashMap[ExecutorType.Value, java.util.concurrent.ExecutorService]
   def nbThreads = workspace.preferenceAsInt(ExecutorService.NbTread)

@@ -30,13 +30,11 @@ import org.openmole.misc.fileservice.IFileService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.executorservice.ExecutorType
 
-object FileService {
-    val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
-    Activator.getWorkspace += (GCInterval, "PT5M")
-}
+import Activator._
 
-
-class FileService extends IFileService {
+object FileService extends IFileService {
+  val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
+  workspace += (GCInterval, "PT5M")
 
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
   class HashWithLastModified(val hash: IHash, val lastModified: Long)
@@ -44,7 +42,7 @@ class FileService extends IFileService {
   private[internal] val hashCache = new AssociativeCache[String, HashWithLastModified]
   private[internal] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
-  Activator.getUpdater.delay(new FileServiceGC(this), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(FileService.GCInterval))
+  updater.delay(new FileServiceGC(this), ExecutorType.OWN, workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
   override def hash(file: File): IHash = hash(file, file)
 
@@ -52,7 +50,7 @@ class FileService extends IFileService {
     
   override def hash(file: File, cacheLength: Object): IHash = {
     invalidateHashCacheIfModified(file, cacheLength)
-    hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(Activator.getHashService.computeHash(file), file.lastModified)).hash
+    hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(hashService.computeHash(file), file.lastModified)).hash
   }
 
   private def invalidateHashCacheIfModified(file: File, cacheLength: Object) = {
@@ -60,7 +58,7 @@ class FileService extends IFileService {
       case None =>
       case Some(hash) => 
         if (hash.lastModified < FileUtil.lastModification(file)) {
-          Logger.getLogger(classOf[FileService].getName).info("Invalidate cache " + file.getAbsolutePath)
+          Logger.getLogger(FileService.getClass.getName).fine("Invalidate cache " + file.getAbsolutePath)
           hashCache.invalidateCache(cacheLength, file.getAbsolutePath)
         }
     }
@@ -71,7 +69,7 @@ class FileService extends IFileService {
     invalidateDirCacheIfModified(file, cacheLenght)
 
     return archiveCache.cache(cacheLenght, file.getAbsolutePath, {
-        val ret = Activator.getWorkspace.newFile("archive", ".tar");
+        val ret = workspace.newFile("archive", ".tar");
         val os = new FileOutputStream(ret)
 
         try {

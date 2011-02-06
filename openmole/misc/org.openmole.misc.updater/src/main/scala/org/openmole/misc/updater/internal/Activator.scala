@@ -39,7 +39,7 @@ class Activator extends BundleActivator {
 
   override def start(context: BundleContext) = {
     Activator.context = Some(context)
-    msgSerial = context.registerService(classOf[IUpdater].getName, new Updater, null)
+    msgSerial = context.registerService(classOf[IUpdater].getName, Updater, null)
   }
 
   override def stop(context: BundleContext) = {
