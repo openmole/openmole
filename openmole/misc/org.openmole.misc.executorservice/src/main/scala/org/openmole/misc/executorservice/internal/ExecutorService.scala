@@ -18,7 +18,6 @@
 package org.openmole.misc.executorservice.internal
 
 import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.executorservice.IExecutorService
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -26,13 +25,12 @@ import org.openmole.commons.tools.service.DaemonThreadFactory._
 import scala.collection.mutable.HashMap
 import Activator._
 
-object ExecutorService {
+object ExecutorService extends IExecutorService {
   val NbTread = new ConfigurationLocation("ExecutorService", "NbThreadsByExecutorTypes")
   workspace += (NbTread, "20")
 
   val executorServices = new HashMap[ExecutorType.Value, java.util.concurrent.ExecutorService]
   def nbThreads = workspace.preferenceAsInt(ExecutorService.NbTread)
-
 
   override def executorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
     if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(threadFactory)

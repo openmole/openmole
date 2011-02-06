@@ -218,9 +218,7 @@ object ReplicaCatalog {
 
     val srcToInsert = { 
       val srcsInbase = container.query(new Predicate[File](classOf[File]) {
-          
           override def `match`(src: File): Boolean = src.equals(replica.source)
-          
         })
         
       if (!srcsInbase.isEmpty) srcsInbase.get(0)
