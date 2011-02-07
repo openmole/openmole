@@ -108,13 +108,13 @@ object ReplicaCatalog {
    
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
-  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
+  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     val set = objectServer.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
     if (!set.isEmpty()) Some(set.get(0))
     else None
   }
 
-  private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = synchronized {
+  private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
 
     val objectContainer = objectServer
     val set = objectContainer.queryByExample(new Replica(srcPath, hash, storageDescription, authenticationKey, null))
@@ -147,7 +147,7 @@ object ReplicaCatalog {
     !query.execute.isEmpty
   }
   
-   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
+  def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
      !objectServer.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty
   }
   
@@ -193,7 +193,7 @@ object ReplicaCatalog {
     }
   }
 
-  private def fix(toFix: Iterable[Replica], container: ObjectContainer): Replica = synchronized {
+  private def fix(toFix: Iterable[Replica], container: ObjectContainer): Replica = {
     for(rep <- toFix.tail) container.delete(rep)
     toFix.head
   }
@@ -204,7 +204,7 @@ object ReplicaCatalog {
     q.execute.toArray(Array[Replica]())
   }
 
-  private def insert(replica: Replica, container: EmbeddedObjectContainer): Replica = synchronized {
+  private def insert(replica: Replica, container: EmbeddedObjectContainer): Replica = {
 
     def uniq[T](obj: T): T = {
       val inbase = container.queryByExample(obj)

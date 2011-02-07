@@ -25,7 +25,7 @@ import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.file.IURIFile
 
-class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDescription, _authenticationKey: BatchAuthenticationKey, _destination: IURIFile) extends Activatable {
+case class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDescription, _authenticationKey: BatchAuthenticationKey, _destination: IURIFile) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -47,7 +47,7 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDesc
 
   def authenticationKey: BatchAuthenticationKey = {
     activate(ActivationPurpose.READ)
-    _authenticationKey;
+    _authenticationKey
   }
 
   override def activate(purpose: ActivationPurpose) {
@@ -75,8 +75,8 @@ class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDesc
     _hash
   }
    
-  override def toString: String = {
+  /*override def toString: String = {
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "]";
-  }
+  }*/
 
 }
