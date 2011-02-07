@@ -107,12 +107,9 @@ object ReplicaCatalog {
   }
   
   def transactional[A](op: ObjectContainer => A): A = {
-    val session = objectServer.ext.openSession
-    try {
-      op(session)
-    } finally {
-      session.close
-    }
+    objectServer.synchronized {
+      op(objectServer)
+    } 
   }
    
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
