@@ -107,7 +107,7 @@ object ReplicaCatalog {
   }
   
   def transactional[A](op: ObjectContainer => A): A = {
-    val session = objectServer.openSession
+    val session = objectServer.ext.openSession
     try {
       op(session)
     } finally {
