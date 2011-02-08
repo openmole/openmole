@@ -286,6 +286,7 @@ object ReplicaCatalog {
     val configuration = Db4oEmbedded.newConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
+    configuration.common.activationDepth(Int.MaxValue)
     //configuration.freespace.discardSmallerThan(50)
 
    /* configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
