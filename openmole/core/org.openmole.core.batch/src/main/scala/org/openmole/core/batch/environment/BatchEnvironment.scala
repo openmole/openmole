@@ -48,7 +48,7 @@ object BatchEnvironment {
   
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
-  workspace += (MemorySizeForRuntime, "512")
+  workspace += (MemorySizeForRuntime, "256")
   workspace += (QualityHysteresis, "1000")
   workspace += (CheckInterval, "PT2M")
   workspace += (MinValueForSelectionExploration, "0.001")
