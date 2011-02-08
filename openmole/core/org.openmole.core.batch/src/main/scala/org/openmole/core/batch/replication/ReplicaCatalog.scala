@@ -155,7 +155,7 @@ object ReplicaCatalog {
   }
   
   def isInCatalog(uri: String): Boolean = {
-    transactionalOp( t => {
+    synchronizedOp( t => {
       val query = t.query
       query.constrain(classOf[Replica])
       query.descend("_destination").descend("location").equals(uri)
@@ -164,7 +164,7 @@ object ReplicaCatalog {
   }
   
   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    transactionalOp(!_.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty)
+    synchronizedOp(!_.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty)
   }
   
   
