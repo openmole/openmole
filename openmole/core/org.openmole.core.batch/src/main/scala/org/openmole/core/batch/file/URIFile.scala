@@ -362,6 +362,8 @@ case class URIFile(val location: String) extends IURIFile {
   override def URI: URI = new URI(location)
   override def toString: String = location
 
+  
+  
   /*override def equals(obj: Any): Boolean = {
     if (obj == null) return false
     if (getClass != obj.asInstanceOf[AnyRef].getClass) return false

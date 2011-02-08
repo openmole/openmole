@@ -103,7 +103,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     val hash = fileService.hash(toReplicate, moleExecution)
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
-    new ReplicatedFile(file, isDir, hash, replica.destination)
+    new ReplicatedFile(file, isDir, hash, replica.destinationURIFile)
   }
 
 

@@ -107,32 +107,32 @@ object ReplicaCatalog {
   }
   
   def synchronizedOp[A](op: ObjectContainer => A): A = {
-    objectServer.synchronized(op(objectServer))
+    /*objectServer.synchronized(*/op(objectServer)//)
   }
    
-  def transactionalOp[A](op: ObjectContainer => A): A = {
-    val transaction = objectServer.ext.openSession
-    try {
-      val ret = op(transaction)
-      transaction.commit
-      ret
-    } finally {
-      transaction.close
-    }
-  }
+  /*def transactionalOp[A](op: ObjectContainer => A): A = {
+   val transaction = objectServer.ext.openSession
+   try {
+   val ret = op(transaction)
+   transaction.commit
+   ret
+   } finally {
+   transaction.close
+   }
+   }*/
   
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     synchronizedOp(container => {
-        val set = container.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
+        val set = container.queryByExample(new Replica(null, storageDescription, hash, authenticationKey, null));
         if (!set.isEmpty()) Some(set.get(0))
         else None})
   }
 
   private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     synchronizedOp(container => {
-        val set = container.queryByExample(new Replica(srcPath, hash, storageDescription, authenticationKey, null))
+        val set = container.queryByExample(new Replica(srcPath.getAbsolutePath, storageDescription, hash, authenticationKey, null))
           
         return set.size match {
           case 0 => None
@@ -151,20 +151,21 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    synchronizedOp(_.queryByExample(new Replica(src, null, storageDescription, authenticationKey, null)))
+    synchronizedOp(_.queryByExample(new Replica(src.getAbsolutePath, storageDescription, null, authenticationKey, null)))
   }
   
   def isInCatalog(uri: String): Boolean = {
-    synchronizedOp( t => {
-      val query = t.query
-      query.constrain(classOf[Replica])
-      query.descend("_destination").descend("location").equals(uri)
-    
-      !query.execute.isEmpty})
+    // transactionalOp( t => {
+    val query = objectServer.query
+    query.constrain(classOf[Replica])
+    query.descend("_destination").equals(uri)
+
+    !query.execute.isEmpty
+    //  })
   }
   
   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    synchronizedOp(!_.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty)
+    !objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription, null, null, null)).isEmpty
   }
   
   
@@ -186,7 +187,7 @@ object ReplicaCatalog {
                 
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
-              val newReplica = new Replica(srcPath, hash, storageDescription, authenticationKey, sameContent.destination)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription, hash, authenticationKey, sameContent.destination)
               insert(newReplica)
               newReplica
             case None =>
@@ -194,7 +195,7 @@ object ReplicaCatalog {
 
               URIFile.copy(src, newFile, token)
 
-              val newReplica = new Replica(srcPath, hash, storage.description, storage.authenticationKey, newFile)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description, hash, storage.authenticationKey, newFile.location)
               insert(newReplica)
               newReplica 
           }
@@ -222,7 +223,7 @@ object ReplicaCatalog {
       })
   }
 
-  private def insert(replica: Replica): Replica = {
+  private def insert(replica: Replica) = {
     synchronizedOp(
       container => { 
         def uniq[T](obj: T): T = {
@@ -231,15 +232,14 @@ object ReplicaCatalog {
           else obj
         }
         try {
-          val srcToInsert = uniq(replica.source)
+          /*val srcToInsert = uniq(replica.source)
           val hashToInsert = uniq(replica.hash)
           val storageDescriptionToInsert = uniq(replica.storageDescription)
-          val authenticationKeyToInsert = uniq(replica.authenticationKey)
+          val authenticationKeyToInsert = uniq(replica.authenticationKey)*/
          
-          val replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescriptionToInsert, authenticationKeyToInsert, replica.destination)
+          //val replicaToInsert = new Replica(replica.source, replica.storageDescription, hash, authenticationKey, replica.destination)
 
-          container.store(replicaToInsert)
-          replicaToInsert
+          container.store(replica)
         } finally {
           container.commit
         }
@@ -251,18 +251,18 @@ object ReplicaCatalog {
         try {
           container.delete(replica)
 
-          val sameSrc = container.queryByExample(new Replica(replica.source, null, null,null, null))
+          /*val sameSrc = container.queryByExample(new Replica(replica.source, null, null,null, null))
           if(sameSrc.isEmpty) container.delete(replica.source)
           
-          val sameHash = container.queryByExample(new Replica(null, replica.hash, null,null, null))
+          val sameHash = container.queryByExample(new Replica(null, null, replica.hash, null, null))
           if(sameHash.isEmpty) container.delete(replica.hash)
           
-          val sameStorageDescription = container.queryByExample(new Replica(null, null, replica.storageDescription, null, null))
+          val sameStorageDescription = container.queryByExample(new Replica(null, replica.storageDescription, null, null, null))
           if(sameStorageDescription.isEmpty) container.delete(replica.storageDescription)
           
           val sameAuthenticationKey = container.queryByExample(new Replica(null, null, null, replica.authenticationKey, null))
           if(sameAuthenticationKey.isEmpty) container.delete(replica.authenticationKey)                                   
-          
+          */
         } finally {
           container.commit
         }
@@ -285,14 +285,15 @@ object ReplicaCatalog {
   private def dB4oConfiguration = {
     val configuration = Db4oEmbedded.newConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
+    configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     //configuration.freespace.discardSmallerThan(50)
 
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
+   /* configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
     configuration.common.objectClass(classOf[URIFile]).objectField("_locatiton").indexed(true)
-    
+    */
     configuration
   }
 

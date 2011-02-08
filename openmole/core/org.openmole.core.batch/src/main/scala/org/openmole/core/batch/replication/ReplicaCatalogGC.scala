@@ -22,17 +22,15 @@ import org.openmole.misc.updater.IUpdatable
 
 class ReplicaCatalogGC extends IUpdatable {
 
-    override def update: Boolean = {
-        for (replica <- ReplicaCatalog.allReplicas) {
+  override def update: Boolean = {
+    for (replica <- ReplicaCatalog.allReplicas) {
 
-            //May be the env pluggin is not loaded in this case a version of the description class is persisted by db4o
-            if (AuthenticationRegistry.isRegistred(replica.authenticationKey)) {
-                if (!replica.source.exists) {
-                    ReplicaCatalog.clean(replica)
-                }
-            }
-        }
-
-        true
+      //May be the env pluggin is not loaded in this case a version of the description class is persisted by db4o
+      if (AuthenticationRegistry.isRegistred(replica.authenticationKey)) {
+        if (!replica.sourceFile.exists)  ReplicaCatalog.clean(replica)
+      }
     }
+
+    true
+  }
 }

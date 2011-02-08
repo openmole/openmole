@@ -23,22 +23,29 @@ import java.io.File
 import org.openmole.commons.tools.service.IHash
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.environment.BatchAuthenticationKey
+import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.batch.file.URIFile
+import com.db4o.config.annotations.Indexed
 
-case class Replica(_source: File, _hash: IHash, _storageDescription: BatchStorageDescription, _authenticationKey: BatchAuthenticationKey, _destination: IURIFile) extends Activatable {
+case class Replica(@Indexed _source: String, @Indexed _storageDescription: BatchStorageDescription, @Indexed _hash: IHash, @Indexed _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
 
-  def destination: IURIFile = {
+  def destination: String = {
     activate(ActivationPurpose.READ)
     _destination
   }
+  
+  def destinationURIFile: IURIFile = new GZURIFile(new URIFile(destination))
 
-  def source: File = {
+  def source: String = {
     activate(ActivationPurpose.READ)
     _source
   }
+  
+  def sourceFile = new File(source)
 
   def storageDescription: BatchStorageDescription = {
     activate(ActivationPurpose.READ)
