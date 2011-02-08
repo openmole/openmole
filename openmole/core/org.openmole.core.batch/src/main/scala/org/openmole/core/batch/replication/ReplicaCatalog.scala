@@ -106,21 +106,32 @@ object ReplicaCatalog {
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
   }
   
-  def transactional[A](op: ObjectContainer => A): A = {
-    synchronized(op(objectServer))
+  def synchronizedOp[A](op: ObjectContainer => A): A = {
+    objectServer.synchronized(op(objectServer))
   }
    
+  def transactionalOp[A](op: ObjectContainer => A): A = {
+    val transaction = objectServer.ext.openSession
+    try {
+      val ret = op(transaction)
+      transaction.commit
+      ret
+    } finally {
+      transaction.close
+    }
+  }
+  
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
-    transactional(container => {
+    synchronizedOp(container => {
         val set = container.queryByExample(new Replica(null, hash, storageDescription, authenticationKey, null));
         if (!set.isEmpty()) Some(set.get(0))
         else None})
   }
 
   private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
-    transactional(container => {
+    synchronizedOp(container => {
         val set = container.queryByExample(new Replica(srcPath, hash, storageDescription, authenticationKey, null))
           
         return set.size match {
@@ -140,19 +151,20 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    transactional(_.queryByExample(new Replica(src, null, storageDescription, authenticationKey, null)))
+    synchronizedOp(_.queryByExample(new Replica(src, null, storageDescription, authenticationKey, null)))
   }
   
   def isInCatalog(uri: String): Boolean = {
-    val query = objectServer.query
-    query.constrain(classOf[Replica])
-    query.descend("_destination").descend("location").equals(uri)
+    transactionalOp( t => {
+      val query = t.query
+      query.constrain(classOf[Replica])
+      query.descend("_destination").descend("location").equals(uri)
     
-    !query.execute.isEmpty
+      !query.execute.isEmpty})
   }
   
   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    !objectServer.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty
+    transactionalOp(!_.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty)
   }
   
   
@@ -202,8 +214,8 @@ object ReplicaCatalog {
     toFix.head
   }
 
-  def allReplicas:  Iterable[Replica] = synchronized {
-    transactional(container => { 
+  def allReplicas:  Iterable[Replica] = {
+    synchronizedOp(container => { 
         val q = container.query
         q.constrain(classOf[Replica])
         q.execute.toArray(Array[Replica]())
@@ -211,7 +223,7 @@ object ReplicaCatalog {
   }
 
   private def insert(replica: Replica): Replica = {
-    transactional(
+    synchronizedOp(
       container => { 
         def uniq[T](obj: T): T = {
           val inbase = container.queryByExample(obj)
@@ -235,7 +247,7 @@ object ReplicaCatalog {
   }
 
   def remove(replica: Replica) = synchronized {
-    transactional(container => {
+    synchronizedOp(container => {
         try {
           container.delete(replica)
 
