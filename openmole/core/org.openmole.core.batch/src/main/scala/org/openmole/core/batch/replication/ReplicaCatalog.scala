@@ -107,9 +107,7 @@ object ReplicaCatalog {
   }
   
   def transactional[A](op: ObjectContainer => A): A = {
-    objectServer.synchronized {
-      op(objectServer)
-    } 
+    objectServer.synchronized(op(objectServer))
   }
    
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
@@ -122,8 +120,6 @@ object ReplicaCatalog {
   }
 
   private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
-
-    //val objectContainer = objectServer
     transactional(container => {
         val set = container.queryByExample(new Replica(srcPath, hash, storageDescription, authenticationKey, null))
           
@@ -148,17 +144,15 @@ object ReplicaCatalog {
   }
   
   def isInCatalog(uri: String): Boolean = {
-    transactional(container => {
-        val query = container.query
-        query.constrain(classOf[Replica])
-        query.descend("_destination").descend("location").equals(uri)
+    val query = objectServer.query
+    query.constrain(classOf[Replica])
+    query.descend("_destination").descend("location").equals(uri)
     
-        !query.execute.isEmpty
-      })
+    !query.execute.isEmpty
   }
   
   def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    transactional(!_.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty)
+    !objectServer.queryByExample(new Replica(src, null, storageDescription, null, null)).isEmpty
   }
   
   
@@ -166,6 +160,7 @@ object ReplicaCatalog {
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
     //LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
     val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
+    
     locks.lock(key)
 
     try {
@@ -216,28 +211,31 @@ object ReplicaCatalog {
   }
 
   private def insert(replica: Replica): Replica = {
-    transactional(container => { 
+    transactional(
+      container => { 
         def uniq[T](obj: T): T = {
           val inbase = container.queryByExample(obj)
           if (!inbase.isEmpty) inbase.get(0)
           else obj
         }
-    
-        val srcToInsert = uniq(replica.source)
-        val hashToInsert = uniq(replica.hash)
-        val storageDescriptionToInsert = uniq(replica.storageDescription)
-        val authenticationKeyToInsert = uniq(replica.authenticationKey)
+        try {
+          val srcToInsert = uniq(replica.source)
+          val hashToInsert = uniq(replica.hash)
+          val storageDescriptionToInsert = uniq(replica.storageDescription)
+          val authenticationKeyToInsert = uniq(replica.authenticationKey)
          
-        val replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescriptionToInsert, authenticationKeyToInsert, replica.destination)
+          val replicaToInsert = new Replica(srcToInsert, hashToInsert, storageDescriptionToInsert, authenticationKeyToInsert, replica.destination)
 
-        container.store(replicaToInsert)
-        replicaToInsert
+          container.store(replicaToInsert)
+          replicaToInsert
+        } finally {
+          container.commit
+        }
       })
   }
 
   def remove(replica: Replica) = synchronized {
     transactional(container => {
-        
         try {
           container.delete(replica)
 
@@ -275,9 +273,8 @@ object ReplicaCatalog {
   private def dB4oConfiguration = {
     val configuration = Db4oEmbedded.newConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
-        
     //configuration.freespace.discardSmallerThan(50)
-        
+
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
