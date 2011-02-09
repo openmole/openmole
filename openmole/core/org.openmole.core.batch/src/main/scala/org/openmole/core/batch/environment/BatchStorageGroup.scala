@@ -50,7 +50,7 @@ class BatchStorageGroup {
       val totalFileSize = usedFiles.map{_.size}.sum
       
       def sizeOnStorage(storage: BatchStorage) = {
-        usedFiles.filter(ReplicaCatalog.isInCatalog(_, storage.description)).map{_.size}.sum
+        usedFiles.filter(ReplicaCatalog.isInCatalog(_, storage)).map{_.size}.sum
       }
       
       var ret: (BatchStorage, AccessToken) = null

@@ -154,8 +154,8 @@ object ReplicaCatalog {
       })
   }
   
-  def isInCatalog(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Boolean = {
-    !getReplica(src, storageDescription, authenticationKey).isEmpty
+  def isInCatalog(src: File, storage: BatchStorage): Boolean = {
+    !getReplica(src, storage.description, storage.authenticationKey).isEmpty
   }
   
   
