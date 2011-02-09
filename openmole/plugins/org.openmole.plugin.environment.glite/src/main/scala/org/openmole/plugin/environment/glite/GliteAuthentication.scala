@@ -114,7 +114,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
   import GliteAuthentication._
     
-  @transient 
+  @transient
   private var proxy: File = null
     
   @transient 

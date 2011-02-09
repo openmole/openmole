@@ -122,7 +122,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
         
-    val authenticationFile = workspace.newFile("envrionmentAuthentication", ".xml")
+    val authenticationFile = workspace.newFile("environmentAuthentication", ".xml")
      
     serializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
     

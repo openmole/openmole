@@ -25,6 +25,8 @@ import com.db4o.ObjectSet
 import com.db4o.config.Configuration
 import com.db4o.defragment.Defragment
 import com.db4o.defragment.DefragmentConfig
+import com.db4o.diagnostic.Diagnostic
+import com.db4o.diagnostic.DiagnosticToConsole
 import com.db4o.query.Predicate
 import com.db4o.ta.TransparentPersistenceSupport
 import java.io.File
@@ -58,7 +60,7 @@ object ReplicaCatalog {
 
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
-  workspace += (GCUpdateInterval, "PT2M")
+  workspace += (GCUpdateInterval, "PT5M")
   workspace += (ObjectRepoLocation, ".objectRepository.bin")
   
   lazy val dbFile = workspace.file(workspace.preference(ObjectRepoLocation))
@@ -77,29 +79,42 @@ object ReplicaCatalog {
     objectServer.synchronized {
       op(objectServer)
     }
-   /* 
-    val transaction = objectServer.openSession
-    try {
-      val ret = op(transaction)
-      transaction.commit
-      ret
-    } finally {
-      transaction.close
-    }*/
+    /* 
+     val transaction = objectServer.openSession
+     try {
+     val ret = op(transaction)
+     transaction.commit
+     ret
+     } finally {
+     transaction.close
+     }*/
   }
   
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     transactionalOp(container => {
-        val set = container.queryByExample(new Replica(null, storageDescription, hash, authenticationKey, null));
+        val query = container.query
+        query.constrain(classOf[Replica])
+        query.descend("_hash").eq(hash)
+        query.descend("_storageDescription").eq(storageDescription)
+        query.descend("_authenticationKey").eq(authenticationKey)
+        
+        val set = query.execute[Replica]
         if (!set.isEmpty()) Some(set.get(0))
         else None})
   }
 
-  private def getReplica(srcPath: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
+  private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     transactionalOp(container => {
-        val set = container.queryByExample(new Replica(srcPath.getAbsolutePath, storageDescription, hash, authenticationKey, null))
+        val query = container.query
+        query.constrain(classOf[Replica])
+        query.descend("_source").eq(src.getAbsolutePath)
+        query.descend("_hash").eq(hash)
+        query.descend("_storageDescription").eq(storageDescription)
+        query.descend("_authenticationKey").eq(authenticationKey)
+        
+        val set = query.execute[Replica]
           
         return set.size match {
           case 0 => None
@@ -118,9 +133,17 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    transactionalOp(_.queryByExample(new Replica(src.getAbsolutePath, storageDescription, null, authenticationKey, null)))
+    transactionalOp( t => {
+        val query = t.query
+        query.constrain(classOf[Replica])
+        query.descend("_source").eq(src.getAbsolutePath)
+        query.descend("_storageDescription").eq(storageDescription)
+        query.descend("_authenticationKey").eq(authenticationKey)
+        query.execute[Replica]
+    })
   }
   
+
   def isInCatalog(uri: String): Boolean = {
     transactionalOp( t => {
         val query = t.query
@@ -131,8 +154,8 @@ object ReplicaCatalog {
       })
   }
   
-  def isInCatalog(src: File, storageDescription: BatchStorageDescription): Boolean = {
-    transactionalOp(!_.queryByExample(new Replica(src.getAbsolutePath, storageDescription, null, null, null)).isEmpty)
+  def isInCatalog(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Boolean = {
+    !getReplica(src, storageDescription, authenticationKey).isEmpty
   }
   
   
@@ -230,6 +253,12 @@ object ReplicaCatalog {
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     configuration.common.activationDepth(Int.MaxValue)
+
+    configuration.common.diagnostic.addListener(new DiagnosticToConsole {	 
+        override def onDiagnostic(diagnostic: Diagnostic) =  {
+          LOGGER.log(Level.FINE, diagnostic.toString)
+        }
+      })
     //configuration.freespace.discardSmallerThan(50)
 
     /* configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)

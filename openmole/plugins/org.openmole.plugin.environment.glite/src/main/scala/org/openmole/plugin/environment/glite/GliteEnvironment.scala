@@ -84,7 +84,7 @@ object GliteEnvironment {
   workspace += (TimeLocation, "PT24H")
   workspace += (DelegationTimeLocation, "P7D")
 
-  workspace += (FetchRessourcesTimeOutLocation, "PT2M")
+  workspace += (FetchRessourcesTimeOutLocation, "PT5M")
   workspace += (CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
   workspace += (LocalThreadsBySELocation, "10")
@@ -173,9 +173,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
   @transient lazy val authenticationKey = new GliteAuthenticationKey(voName, vomsURL)
-
-  
-  private def getBDII: BDII = {
-    new BDII(bdii)
-  }
+ 
+  private def getBDII: BDII = new BDII(bdii)
+ 
 }
