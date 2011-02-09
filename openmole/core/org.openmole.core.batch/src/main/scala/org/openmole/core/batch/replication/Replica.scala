@@ -26,9 +26,8 @@ import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
-import com.db4o.config.annotations.Indexed
 
-case class Replica(@Indexed _source: String, @Indexed _storageDescription: BatchStorageDescription, @Indexed _hash: IHash, @Indexed _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
+case class Replica( _source: String, _storageDescription: BatchStorageDescription, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
