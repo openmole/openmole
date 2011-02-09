@@ -265,7 +265,6 @@ object ReplicaCatalog {
      configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
      configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
      configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
-     configuration.common.objectClass(classOf[URIFile]).objectField("_locatiton").indexed(true)
      
     configuration
   }
