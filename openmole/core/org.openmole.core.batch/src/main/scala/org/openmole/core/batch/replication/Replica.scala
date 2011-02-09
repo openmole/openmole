@@ -82,8 +82,8 @@ case class Replica(@Indexed _source: String, @Indexed _storageDescription: Batch
     _hash
   }
    
-  /*override def toString: String = {
+  override def toString: String = {
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "]";
-  }*/
+  }
 
 }
