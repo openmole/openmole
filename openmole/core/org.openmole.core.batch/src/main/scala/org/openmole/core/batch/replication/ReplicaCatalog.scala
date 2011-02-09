@@ -72,7 +72,12 @@ object ReplicaCatalog {
   }
   
  
+  //Transaction are not working use a big fat lock
   def transactionalOp[A](op: ObjectContainer => A): A = {
+    objectServer.synchronized {
+      op(objectServer)
+    }
+   /* 
     val transaction = objectServer.openSession
     try {
       val ret = op(transaction)
@@ -80,7 +85,7 @@ object ReplicaCatalog {
       ret
     } finally {
       transaction.close
-    }
+    }*/
   }
   
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))

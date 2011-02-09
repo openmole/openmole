@@ -47,17 +47,20 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authent
 
   override protected def generateScriptString(in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream) = {
     val writter = new PrintStream(os)
-
+    
+    assert(runtime.runtime.location != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
     writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.location, "$PWD/openmole.tar.bz2"))
     writter.print(" tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; ")
     writter.print("mkdir envplugins; PLUGIN=0;");
 
     for (plugin <- runtime.environmentPlugins) {
+      assert(plugin.location != null)
       writter.print(mkLcgCpGunZipCmd(environment, plugin.location, "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
-
+    
+    assert(runtime.authentication.location != null)
     writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.location, "$CUR/authentication.xml"))
 
     writter.print("cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
