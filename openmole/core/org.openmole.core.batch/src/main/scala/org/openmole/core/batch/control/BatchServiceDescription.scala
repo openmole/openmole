@@ -30,4 +30,6 @@ class BatchServiceDescription(val description: String) {
     description == other.asInstanceOf[BatchServiceDescription].description
   }
   override def hashCode = description.hashCode
+  
+  override def toString = description
 }
