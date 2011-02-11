@@ -10,6 +10,6 @@ fi
 
 rm -Rf configuration/org*
 rm configuration/*.log
-java -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar\
+java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar\
      -p openmole-plugins,openmole-plugins-ui $@
 cat configuration/*.log

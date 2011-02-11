@@ -52,7 +52,7 @@ class BatchStorageGroup(environment: BatchEnvironment) {
       do {
         val resourcesCopy = resources
         val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authenticationKey)
-        Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
+        //Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
         
         //Among them select one not over loaded
         val notLoaded = new ArrayBuffer[(BatchStorage, AccessToken, Double)]
