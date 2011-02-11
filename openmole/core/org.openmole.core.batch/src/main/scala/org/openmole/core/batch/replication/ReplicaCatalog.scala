@@ -119,14 +119,7 @@ object ReplicaCatalog {
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
-        val query = objectServer.query
-        query.constrain(classOf[Replica])
-        query.descend("_hash").constrain(hash)
-        query.descend("_storageDescription").constrain(storageDescription.toString)
-        query.descend("_authenticationKey").constrain(authenticationKey)
-        
-        val set = query.execute[Replica]
-        
+        val set = objectServer.queryByExample(new Replica(null, storageDescription.toString, hash, authenticationKey, null))
         LOGGER.log(Level.INFO,"Found " + set.size)
         if (!set.isEmpty) Some(set.get(0)) else None
       })
@@ -134,14 +127,8 @@ object ReplicaCatalog {
 
   private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
-        val query = objectServer.query
-        query.constrain(classOf[Replica])
-        query.descend("_source").constrain(src.getAbsolutePath)
-        query.descend("_hash").constrain(hash)
-        query.descend("_storageDescription").constrain(storageDescription.toString)
-        query.descend("_authenticationKey").constrain(authenticationKey)
-        
-        val set = query.execute[Replica]
+        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.toString, hash, authenticationKey, null))
+
         LOGGER.log(Level.INFO,"Found " + set.size)
         
         return set.size match {
@@ -161,26 +148,12 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    lockRead({
-        val query = objectServer.query
-        query.constrain(classOf[Replica])
-        query.descend("_source").constrain(src.getAbsolutePath)
-        query.descend("_storageDescription").constrain(storageDescription.toString)
-        query.descend("_authenticationKey").constrain(authenticationKey)
-          
-        query.execute[Replica]
-      })
+    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.toString, null, authenticationKey, null)))
   }
   
 
   def isInCatalog(uri: String): Boolean = {
-    lockRead({
-        val query = objectServer.query
-        query.constrain(classOf[Replica])
-        query.descend("_destination").constrain(uri)
-
-        !query.execute.isEmpty
-      })
+    lockRead(!objectServer.queryByExample(new Replica(null,null,null,null, uri)).isEmpty)
   }
   
   def inCatalog(src: Iterable[File], storage: BatchStorage): Set[File] = {
@@ -189,16 +162,12 @@ object ReplicaCatalog {
         val query = objectServer.query
         query.constrain(classOf[Replica])
 
-        
-        
         query.descend("_authenticationKey").constrain(storage.authenticationKey)
         query.descend("_storageDescription").constrain(storage.description.toString)
         
         if(!src.isEmpty) 
          src.map{ f => query.descend("_destination").constrain(f) }.reduceLeft( (c1, c2) => c1.or(c2))
-       
-        LOGGER.log(Level.INFO, query.toString)
-        
+               
         var ret = new TreeSet[File]
         
         query.execute[Replica].foreach {
