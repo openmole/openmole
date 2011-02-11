@@ -41,6 +41,7 @@ import org.openmole.commons.tools.service.IHash
 import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.core.batch.internal.Activator._
+import org.openmole.commons.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription
@@ -62,6 +63,7 @@ import scala.collection.mutable.ListBuffer
 object ReplicaCatalog {
   val LOGGER = Logger.getLogger(ReplicaCatalog.getClass.getName)
 
+  
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
   workspace += (GCUpdateInterval, "PT5M")
@@ -69,6 +71,7 @@ object ReplicaCatalog {
   
   lazy val dbFile = workspace.file(workspace.preference(ObjectRepoLocation))
   lazy val locks = new ReplicaLockRepository
+  lazy val readWriteLock = new ReadWriteLock
   
   lazy val objectServer: EmbeddedObjectContainer = {
     val objRepo = workspace.file(workspace.preference(ObjectRepoLocation))
@@ -78,27 +81,45 @@ object ReplicaCatalog {
   }
   
  
-  //Transaction are not working use a big fat lock
-  def transactionalOp[A](op: ObjectContainer => A): A = {
-    objectServer.synchronized {
-      op(objectServer)
+  def lockRead[A](op: => A): A = {
+    readWriteLock.lockRead
+    try {
+      op
+    } finally {
+      readWriteLock.unlockRead
     }
-    /* 
-     val transaction = objectServer.openSession
-     try {
-     val ret = op(transaction)
-     transaction.commit
-     ret
-     } finally {
-     transaction.close
-     }*/
   }
+  
+  def lockWrite[A](op: => A): A = {
+    readWriteLock.lockWrite
+    try {
+      op
+    } finally {
+      readWriteLock.unlockWrite
+    }
+  }
+  
+  //Transaction are not working use a big fat lock
+  /*def transactionalOp[A](op: ObjectContainer => A): A = {
+   objectServer.synchronized {
+   op(objectServer)
+   }*/
+  /* 
+   val transaction = objectServer.openSession
+   try {
+   val ret = op(transaction)
+   transaction.commit
+   ret
+   } finally {
+   transaction.close
+   }*/
+  //}
   
   updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
-    transactionalOp(container => {
-        val query = container.query
+    lockRead({
+        val query = objectServer.query
         query.constrain(classOf[Replica])
         query.descend("_hash").constrain(hash)
         query.descend("_storageDescription").constrain(storageDescription)
@@ -110,8 +131,8 @@ object ReplicaCatalog {
   }
 
   private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
-    transactionalOp(container => {
-        val query = container.query
+    lockRead({
+        val query = objectServer.query
         query.constrain(classOf[Replica])
         query.descend("_source").constrain(src.getAbsolutePath)
         query.descend("_hash").constrain(hash)
@@ -130,15 +151,15 @@ object ReplicaCatalog {
               build.append(rep.toString).append(';');
             }
             //LOGGER.log(Level.INFO, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
-            Some(fix(set, container))
+            Some(fix(set))
         }
       })
   }
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    transactionalOp( t => {
-        val query = t.query
+    lockRead({
+        val query = objectServer.query
         query.constrain(classOf[Replica])
         query.descend("_source").constrain(src.getAbsolutePath)
         query.descend("_storageDescription").constrain(storageDescription)
@@ -149,8 +170,8 @@ object ReplicaCatalog {
   
 
   def isInCatalog(uri: String): Boolean = {
-    transactionalOp( t => {
-        val query = t.query
+    lockRead({
+        val query = objectServer.query
         query.constrain(classOf[Replica])
         query.descend("_destination").constrain(uri)
 
@@ -160,21 +181,22 @@ object ReplicaCatalog {
   
   def inCatalog(src: Iterable[File], storage: BatchStorage): Set[File] = {
     //transactionalOp( t => {
-    val query = objectServer.query
-    query.constrain(classOf[Replica])
+    lockRead({
+        val query = objectServer.query
+        query.constrain(classOf[Replica])
         
-    val constFile = src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2))
-    val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description))
+        val constFile = src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2))
+        val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description))
         
-    query.constraints.and(constFile).and(constStorage)
+        query.constraints.and(constFile).and(constStorage)
         
-    var ret = new TreeSet[File]
+        var ret = new TreeSet[File]
         
-    query.execute[Replica].foreach {
-      replica =>  ret += replica.sourceFile
-    }
+        query.execute[Replica].foreach {
+          replica =>  ret += replica.sourceFile
+        }
         
-    ret
+        ret})
     // })
   }
   
@@ -220,37 +242,38 @@ object ReplicaCatalog {
     }
   }
 
-  private def fix(toFix: Iterable[Replica], container: ObjectContainer): Replica = {
-    for(rep <- toFix.tail) container.delete(rep)
-    toFix.head
+  private def fix(toFix: Iterable[Replica]): Replica = {
+    lockWrite({
+        for(rep <- toFix.tail) objectServer.delete(rep)
+        toFix.head
+      })
   }
 
   def allReplicas:  Iterable[Replica] = {
-    transactionalOp(container => { 
-        val q = container.query
+    lockRead({ 
+        val q = objectServer.query
         q.constrain(classOf[Replica])
         q.execute.toArray(Array[Replica]())
       })
   }
 
   private def insert(replica: Replica) = {
-    transactionalOp(
-      container => { 
+    lockWrite(
+      { 
         try {
-          container.store(replica)
+          objectServer.store(replica)
         } finally {
-          container.commit
+          objectServer.commit
         }
       })
   }
 
   def remove(replica: Replica) = synchronized {
-    transactionalOp(container => {
+    lockWrite({
         try {
-          container.delete(replica)
-
+          objectServer.delete(replica)
         } finally {
-          container.commit
+          objectServer.commit
         }
       })
   }
