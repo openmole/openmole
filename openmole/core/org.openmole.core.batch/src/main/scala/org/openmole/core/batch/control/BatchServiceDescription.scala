@@ -23,4 +23,7 @@ object BatchServiceDescription {
   }
 }
 
-case class BatchServiceDescription(val description: String)
+class BatchServiceDescription(val description: String) {
+  override def equals(other: BatchServiceDescription) = description == other.description
+  override def hashCode = description.hashCode
+}

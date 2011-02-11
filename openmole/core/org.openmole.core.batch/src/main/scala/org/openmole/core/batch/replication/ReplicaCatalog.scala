@@ -297,11 +297,11 @@ object ReplicaCatalog {
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     configuration.common.activationDepth(Int.MaxValue)
 
-    configuration.common.diagnostic.addListener(new DiagnosticToConsole {	 
+    /*configuration.common.diagnostic.addListener(new DiagnosticToConsole {	 
         override def onDiagnostic(diagnostic: Diagnostic) =  {
           LOGGER.log(Level.FINE, diagnostic.toString)
         }
-      })
+      })*/
     //configuration.freespace.discardSmallerThan(50)
 
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
