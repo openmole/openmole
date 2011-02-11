@@ -24,6 +24,10 @@ object BatchServiceDescription {
 }
 
 class BatchServiceDescription(val description: String) {
-  override def equals(other: BatchServiceDescription) = description == other.description
+  override def equals(other: Any): Boolean = {
+    if(other == null) return false
+    if(!classOf[BatchServiceDescription].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) return false
+    description == other.asInstanceOf[BatchServiceDescription].description
+  }
   override def hashCode = description.hashCode
 }
