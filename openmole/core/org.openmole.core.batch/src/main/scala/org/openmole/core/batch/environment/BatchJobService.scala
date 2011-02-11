@@ -26,7 +26,7 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.internal.Activator._
 
-abstract class BatchJobService(authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(authenticationKey, authentication) {
+abstract class BatchJobService(environment: BatchEnvironment, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(environment) {
   
   BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 

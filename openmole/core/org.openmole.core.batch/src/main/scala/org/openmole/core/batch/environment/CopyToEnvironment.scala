@@ -124,7 +124,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         
     val authenticationFile = workspace.newFile("environmentAuthentication", ".xml")
      
-    serializer.serialize(communicationStorage.authentication.asInstanceOf[AnyRef], authenticationFile)
+    serializer.serialize(communicationStorage.environment.authentication, authenticationFile)
     
     //println("Authentication " + authenticationFile.getAbsolutePath)
   

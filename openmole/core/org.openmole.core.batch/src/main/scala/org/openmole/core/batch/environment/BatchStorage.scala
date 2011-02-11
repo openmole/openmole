@@ -54,7 +54,7 @@ object BatchStorage {
   val tmp = "tmp/"
 }
 
-class BatchStorage(val URI: URI, authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication, nbAccess: Int) extends BatchService(authenticationKey, authentication) {
+class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
   
   @transient lazy val description = new BatchStorageDescription(URI)
   

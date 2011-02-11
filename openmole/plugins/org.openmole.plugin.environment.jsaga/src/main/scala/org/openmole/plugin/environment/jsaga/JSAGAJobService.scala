@@ -52,7 +52,7 @@ object JSAGAJobService {
   
 }
 
-abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, key: BatchAuthenticationKey, authentication: BatchAuthentication, nbAccess: Int) extends BatchJobService(key, authentication, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
+abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends BatchJobService(environment, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
 
   override def test: Boolean = {
 
@@ -65,13 +65,6 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       //job.cancel();
       return true
 
-      /* float timeOut = Activator.getWorkspace().getPreferenceAsDurationInS(TestJobDoneTimeOut);
-       if(!job.waitFor(timeOut)) {
-       job.cancel();
-       return false;
-       }
-       State state = job.getState();
-       return state == State.DONE;*/
     } catch {
       case e => Logger.getLogger(JSAGAJobService.getClass.getName).log(Level.FINE, e.getMessage, e)
         return false

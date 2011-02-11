@@ -39,10 +39,10 @@ object GliteJobService {
 }
 
 
-class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, authenticationKey: GliteAuthenticationKey, authentication: GliteAuthentication, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, authenticationKey, authentication, nbAccess)  {
+class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
   override protected def buildJob(id: String): JSAGAJob = {
-    new GliteJob(id, this, super.authentication.expires)
+    new GliteJob(id, this, environment.authentication.expires)
   }
 
   override protected def generateScriptString(in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream) = {

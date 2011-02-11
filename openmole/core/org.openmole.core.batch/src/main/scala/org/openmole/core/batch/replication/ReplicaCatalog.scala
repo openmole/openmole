@@ -99,11 +99,12 @@ object ReplicaCatalog {
     }
   }
   
-  //Transaction are not working use a big fat lock
-  /*def transactionalOp[A](op: ObjectContainer => A): A = {
+  
+ /* def transactionalOp[A](op: ObjectContainer => A): A = {
+    val container = obj
    objectServer.synchronized {
    op(objectServer)
-   }*/
+  }*/
   /* 
    val transaction = objectServer.openSession
    try {
@@ -146,24 +147,24 @@ object ReplicaCatalog {
     lockRead(!objectServer.queryByExample(new Replica(null,null,null,null, uri)).isEmpty)
   }
   
-  def inCatalog(src: Iterable[File], storage: BatchStorage): Set[File] = {
+  def inCatalog(src: Iterable[File], authenticationKey: BatchAuthenticationKey): Map[File, Set[BatchStorageDescription]] = {
     //transactionalOp( t => {
-    if(src.isEmpty) return Set.empty
+    if(src.isEmpty) return Map.empty
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
 
-        query.descend("_authenticationKey").constrain(storage.authenticationKey)
-          .and(query.descend("_storageDescription").constrain(storage.description.toString))
+        query.descend("_authenticationKey").constrain(authenticationKey)
           .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
-        var ret = new TreeSet[File]
+        var ret = new HashMap[File, HashSet[BatchStorageDescription]]
         
         query.execute[Replica].foreach {
-          replica =>  ret += replica.sourceFile
+          replica =>  ret.getOrElseUpdate(replica.sourceFile, new HashSet[BatchStorageDescription]) += replica.storageDescription
         }
         
-        ret})
+        ret.map{ elt => (elt._1, elt._2.toSet) }.toMap
+      })
     // })
   }
   
@@ -171,13 +172,13 @@ object ReplicaCatalog {
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
     //LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
-    val key = new ReplicaLockKey(hash, storage.description, storage.authenticationKey) 
+    val key = new ReplicaLockKey(hash, storage.description, storage.environment.authenticationKey) 
     
     locks.lock(key)
 
     try {
       val storageDescription = storage.description
-      val authenticationKey = storage.authenticationKey
+      val authenticationKey = storage.environment.authenticationKey
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
@@ -194,7 +195,7 @@ object ReplicaCatalog {
 
               URIFile.copy(src, newFile, token)
 
-              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, storage.authenticationKey, newFile.location)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.toString, hash, storage.environment.authenticationKey, newFile.location)
               insert(newReplica)
               newReplica 
           }

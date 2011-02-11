@@ -33,7 +33,7 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.internal.Activator._
 import collection.mutable.ArrayBuffer
 
-class BatchStorageGroup {
+class BatchStorageGroup(environment: BatchEnvironment) {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release
   }
@@ -51,7 +51,9 @@ class BatchStorageGroup {
       var ret: (BatchStorage, AccessToken) = null
       do {
         val resourcesCopy = resources
-
+        val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authenticationKey)
+        Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
+        
         //Among them select one not over loaded
         val notLoaded = new ArrayBuffer[(BatchStorage, AccessToken, Double)]
         var totalFitness = 0.
@@ -66,10 +68,10 @@ class BatchStorageGroup {
             case None =>
             case Some(token) => 
               val quality = BatchStorageControl.qualityControl(cur.description)
-              val onStorage = ReplicaCatalog.inCatalog(usedFiles, cur)
               
               //Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
-              val sizeOnStorage = usedFiles.filter(onStorage.contains(_)).map(_.size).sum
+              val sizeOnStorage = usedFiles.filter(onStorage(_).contains(cur.description)).map(_.size).sum
+
               
               val fitness = (
              

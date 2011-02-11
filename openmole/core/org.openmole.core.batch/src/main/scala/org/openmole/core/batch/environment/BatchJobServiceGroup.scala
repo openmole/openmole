@@ -30,7 +30,7 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.internal.Activator._
 import scala.collection.mutable.ArrayBuffer
 
-class BatchJobServiceGroup {
+class BatchJobServiceGroup(val environment: BatchEnvironment) {
 
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release

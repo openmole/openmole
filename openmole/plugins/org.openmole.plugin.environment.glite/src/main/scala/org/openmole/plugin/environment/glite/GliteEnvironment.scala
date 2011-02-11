@@ -150,7 +150,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
       try {
         val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
 
-        val jobService = new GliteJobService(wms, this, authenticationKey, authentication, threadsByWMS)
+        val jobService = new GliteJobService(wms, this, threadsByWMS)
         jobServices += jobService
       } catch {
         case (e: URISyntaxException) => Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
@@ -164,7 +164,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
     val stors = getBDII.querySRMURIs(voName, workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
 
     for (stor <- stors) {
-      val storage = new BatchStorage(stor, authenticationKey, authentication,threadsBySE)
+      val storage = new BatchStorage(this, stor, threadsBySE)
       allStorages += storage
     }
 

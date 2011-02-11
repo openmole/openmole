@@ -17,22 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.commons.exception.InternalProcessingError
-
-
-abstract class BatchService(val authenticationKey: BatchAuthenticationKey) {
-
-  def this(authenticationKey: BatchAuthenticationKey, authentication: BatchAuthentication) = {
-    this(authenticationKey)
-    AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
-  }
-  
-  def authentication: BatchAuthentication = {
-    AuthenticationRegistry.registred(authenticationKey) match {
-      case None => throw new InternalProcessingError("No authentication registred for batch service")
-      case Some(a) => a
-    }
-  }
-
-    
-}
+abstract class BatchService(val environment: BatchEnvironment)

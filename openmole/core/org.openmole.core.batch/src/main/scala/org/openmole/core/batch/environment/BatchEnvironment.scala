@@ -22,8 +22,6 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicInteger
 
 import java.util.concurrent.locks.ReentrantLock
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.internal.Activator._
@@ -57,11 +55,14 @@ object BatchEnvironment {
 
 
 abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment[BatchExecutionJob] {
+  
+  AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
+  
   @transient private lazy val _storagesLock = new ReentrantLock
   @transient private lazy val _jobServicesLock = new ReentrantLock
   
-  @transient private lazy val _jobServices = new BatchJobServiceGroup
-  @transient private lazy val _storages = new BatchStorageGroup
+  @transient private lazy val _jobServices = new BatchJobServiceGroup(this)
+  @transient private lazy val _storages = new BatchStorageGroup(this)
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
@@ -154,6 +155,9 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
 
   def allStorages: Iterable[BatchStorage]
   def allJobServices: Iterable[BatchJobService]
+  
+  def authenticationKey: BatchAuthenticationKey
+  def authentication: BatchAuthentication
   
   def selectAJobService: (BatchJobService, AccessToken) = jobServices.selectAService
 
