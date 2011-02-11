@@ -68,7 +68,7 @@ class BatchStorageGroup {
               val quality = BatchStorageControl.qualityControl(cur.description)
               val onStorage = ReplicaCatalog.inCatalog(usedFiles, cur)
               
-              Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
+              //Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
               val sizeOnStorage = usedFiles.filter(onStorage.contains(_)).map(_.size).sum
               
               val fitness = (
