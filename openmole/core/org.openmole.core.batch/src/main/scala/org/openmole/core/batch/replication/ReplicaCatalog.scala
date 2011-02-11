@@ -186,7 +186,7 @@ object ReplicaCatalog {
         query.constrain(classOf[Replica])
         
         val constFile = src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2))
-        val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description))
+        val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description.toString))
         
         query.constraints.and(constFile).and(constStorage)
         
