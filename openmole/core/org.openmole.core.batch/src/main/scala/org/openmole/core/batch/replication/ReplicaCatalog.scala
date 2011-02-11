@@ -160,9 +160,9 @@ object ReplicaCatalog {
         val query = objectServer.query
         query.constrain(classOf[Replica])
 
-        query.descend("_authenticationKey").constrain(storage.authenticationKey).equal
-          .and(query.descend("_storageDescription").constrain(storage.description.toString)).equal
-          .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath).equal }.reduceLeft( (c1, c2) => c1.or(c2)))
+        query.descend("_authenticationKey").constrain(storage.authenticationKey)
+          .and(query.descend("_storageDescription").constrain(storage.description.toString))
+          .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
         var ret = new TreeSet[File]
         
