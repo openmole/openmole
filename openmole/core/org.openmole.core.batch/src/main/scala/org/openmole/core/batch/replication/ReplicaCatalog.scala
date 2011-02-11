@@ -236,7 +236,7 @@ object ReplicaCatalog {
       { 
         try {
           objectServer.store(replica)
-          LOGGER.log(Level.INFO,"Insert " + replica.toString)
+          //LOGGER.log(Level.INFO,"Insert " + replica.toString)
         } finally {
           objectServer.commit
         }
