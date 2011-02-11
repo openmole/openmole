@@ -131,14 +131,7 @@ object ReplicaCatalog {
           return set.size match {
           case 0 => None
           case 1 => Some(set.get(0))
-          case _ =>
-
-            /*val build = new StringBuilder
-            for (rep <- set.iterator) {
-              build.append(rep.toString).append(';');
-            }*/
-            //LOGGER.log(Level.INFO, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
-            Some(fix(set))
+          case _ => Some(fix(set))
         }
       })
   }
@@ -207,6 +200,7 @@ object ReplicaCatalog {
           }
         case Some(r) => {
      //       LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
+            objectServer.activate(r, Int.MaxValue)
             r
           }
       }   
