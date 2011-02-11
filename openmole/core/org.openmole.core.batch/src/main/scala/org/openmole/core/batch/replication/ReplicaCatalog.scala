@@ -53,6 +53,10 @@ import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.misc.workspace.ConfigurationLocation
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.TreeMap
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 object ReplicaCatalog {
@@ -96,9 +100,9 @@ object ReplicaCatalog {
     transactionalOp(container => {
         val query = container.query
         query.constrain(classOf[Replica])
-        query.descend("_hash").eq(hash)
-        query.descend("_storageDescription").eq(storageDescription)
-        query.descend("_authenticationKey").eq(authenticationKey)
+        query.descend("_hash").constrain(hash)
+        query.descend("_storageDescription").constrain(storageDescription)
+        query.descend("_authenticationKey").constrain(authenticationKey)
         
         val set = query.execute[Replica]
         if (!set.isEmpty()) Some(set.get(0))
@@ -109,10 +113,10 @@ object ReplicaCatalog {
     transactionalOp(container => {
         val query = container.query
         query.constrain(classOf[Replica])
-        query.descend("_source").eq(src.getAbsolutePath)
-        query.descend("_hash").eq(hash)
-        query.descend("_storageDescription").eq(storageDescription)
-        query.descend("_authenticationKey").eq(authenticationKey)
+        query.descend("_source").constrain(src.getAbsolutePath)
+        query.descend("_hash").constrain(hash)
+        query.descend("_storageDescription").constrain(storageDescription)
+        query.descend("_authenticationKey").constrain(authenticationKey)
         
         val set = query.execute[Replica]
           
@@ -136,11 +140,11 @@ object ReplicaCatalog {
     transactionalOp( t => {
         val query = t.query
         query.constrain(classOf[Replica])
-        query.descend("_source").eq(src.getAbsolutePath)
-        query.descend("_storageDescription").eq(storageDescription)
-        query.descend("_authenticationKey").eq(authenticationKey)
+        query.descend("_source").constrain(src.getAbsolutePath)
+        query.descend("_storageDescription").constrain(storageDescription)
+        query.descend("_authenticationKey").constrain(authenticationKey)
         query.execute[Replica]
-    })
+      })
   }
   
 
@@ -148,14 +152,30 @@ object ReplicaCatalog {
     transactionalOp( t => {
         val query = t.query
         query.constrain(classOf[Replica])
-        query.descend("_destination").equals(uri)
+        query.descend("_destination").constrain(uri)
 
         !query.execute.isEmpty
       })
   }
   
-  def isInCatalog(src: File, storage: BatchStorage): Boolean = {
-    !getReplica(src, storage.description, storage.authenticationKey).isEmpty
+  def inCatalog(src: Iterable[File], storage: BatchStorage): Set[File] = {
+    //transactionalOp( t => {
+    val query = objectServer.query
+    query.constrain(classOf[Replica])
+        
+    val constFile = src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2))
+    val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description))
+        
+    query.constraints.and(constFile).and(constStorage)
+        
+    var ret = new TreeSet[File]
+        
+    query.execute[Replica].foreach {
+      replica =>  ret += replica.sourceFile
+    }
+        
+    ret
+    // })
   }
   
   
@@ -177,7 +197,7 @@ object ReplicaCatalog {
                 
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
-              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription, hash, authenticationKey, sameContent.destination)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription.description, hash, authenticationKey, sameContent.destination)
               insert(newReplica)
               newReplica
             case None =>
@@ -185,7 +205,7 @@ object ReplicaCatalog {
 
               URIFile.copy(src, newFile, token)
 
-              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description, hash, storage.authenticationKey, newFile.location)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, storage.authenticationKey, newFile.location)
               insert(newReplica)
               newReplica 
           }
@@ -261,10 +281,10 @@ object ReplicaCatalog {
       })
     //configuration.freespace.discardSmallerThan(50)
 
-     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
-     configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
-     configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
      
     configuration
   }

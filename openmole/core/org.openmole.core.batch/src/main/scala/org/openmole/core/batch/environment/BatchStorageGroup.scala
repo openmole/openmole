@@ -32,7 +32,6 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.internal.Activator._
 import collection.mutable.ArrayBuffer
-import math.pow
 
 class BatchStorageGroup {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
@@ -48,11 +47,7 @@ class BatchStorageGroup {
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum
-      
-      def sizeOnStorage(storage: BatchStorage) = {
-        usedFiles.filter(ReplicaCatalog.isInCatalog(_, storage)).map{_.size}.sum
-      }
-      
+
       var ret: (BatchStorage, AccessToken) = null
       do {
         val resourcesCopy = resources
@@ -71,13 +66,20 @@ class BatchStorageGroup {
             case None =>
             case Some(token) => 
               val quality = BatchStorageControl.qualityControl(cur.description)
-              val fitness = (quality match {
+              val onStorage = ReplicaCatalog.inCatalog(usedFiles, cur)
+              
+              Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
+              val sizeOnStorage = usedFiles.filter(onStorage.contains(_)).map(_.size).sum
+              
+              val fitness = (
+             
+                quality match {
                   case Some(q) => 
                     val v = math.pow(1. * q.successRate, 2)
                     val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                     if(v < min) min else v
                   case None => 1.
-                }) * (if(totalFileSize != 0) (sizeOnStorage(cur).toDouble / totalFileSize) * workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
+                }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
                       else 1)
               
               //Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))

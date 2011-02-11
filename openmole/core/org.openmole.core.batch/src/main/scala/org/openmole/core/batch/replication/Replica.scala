@@ -27,7 +27,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 
-case class Replica( _source: String, _storageDescription: BatchStorageDescription, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
+case class Replica( _source: String, _storageDescription: String, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -46,10 +46,12 @@ case class Replica( _source: String, _storageDescription: BatchStorageDescriptio
   
   def sourceFile = new File(source)
 
-  def storageDescription: BatchStorageDescription = {
+  def storageDescriptionString: String = {
     activate(ActivationPurpose.READ)
     _storageDescription
   }
+  
+  def storageDescription: BatchStorageDescription = new BatchStorageDescription(storageDescriptionString)
 
   def authenticationKey: BatchAuthenticationKey = {
     activate(ActivationPurpose.READ)
