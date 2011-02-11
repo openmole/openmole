@@ -215,7 +215,7 @@ object ReplicaCatalog {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
-                                
+          LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
           for (toClean <- getReplica(srcPath, storageDescription, authenticationKey).iterator) clean(toClean)
                 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -233,7 +233,7 @@ object ReplicaCatalog {
               newReplica 
           }
         case Some(r) => {
-            //LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath)
+            LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
             r
           }
       }   
@@ -263,6 +263,7 @@ object ReplicaCatalog {
       { 
         try {
           objectServer.store(replica)
+          LOGGER.log(Level.INFO,"Insert " + replica.toString)
         } finally {
           objectServer.commit
         }
