@@ -158,7 +158,7 @@ object ReplicaCatalog {
           .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
         var ret = new HashMap[File, HashSet[BatchStorageDescription]] {
-          override def default = HashSet.empty
+          override def default(f: File) = HashSet.empty
         }
         
         query.execute[Replica].foreach {
