@@ -120,7 +120,6 @@ object ReplicaCatalog {
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(null, storageDescription.toString, hash, authenticationKey, null))
-        LOGGER.log(Level.INFO,"Found " + set.size)
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
@@ -129,17 +128,15 @@ object ReplicaCatalog {
     lockRead({
         val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.toString, hash, authenticationKey, null))
 
-        LOGGER.log(Level.INFO,"Found " + set.size)
-        
-        return set.size match {
+          return set.size match {
           case 0 => None
           case 1 => Some(set.get(0))
           case _ =>
 
-            val build = new StringBuilder
+            /*val build = new StringBuilder
             for (rep <- set.iterator) {
               build.append(rep.toString).append(';');
-            }
+            }*/
             //LOGGER.log(Level.INFO, "Replica catalog corrupted (going to be repared), {0} records: {1}", Array(set.size, build.toString));
             Some(fix(set))
         }
@@ -158,15 +155,14 @@ object ReplicaCatalog {
   
   def inCatalog(src: Iterable[File], storage: BatchStorage): Set[File] = {
     //transactionalOp( t => {
+    if(src.isEmpty) return Set.empty
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
 
-        query.descend("_authenticationKey").constrain(storage.authenticationKey)
-        query.descend("_storageDescription").constrain(storage.description.toString)
-        
-        if(!src.isEmpty) 
-         src.map{ f => query.descend("_destination").constrain(f) }.reduceLeft( (c1, c2) => c1.or(c2))
+        query.descend("_authenticationKey").constrain(storage.authenticationKey).equal
+          .and(query.descend("_storageDescription").constrain(storage.description.toString)).equal
+          .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath).equal }.reduceLeft( (c1, c2) => c1.or(c2)))
                
         var ret = new TreeSet[File]
         
@@ -192,7 +188,7 @@ object ReplicaCatalog {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
-          LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
+    //      LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
           for (toClean <- getReplica(srcPath, storageDescription, authenticationKey).iterator) clean(toClean)
                 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -210,7 +206,7 @@ object ReplicaCatalog {
               newReplica 
           }
         case Some(r) => {
-            LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
+     //       LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
             r
           }
       }   
