@@ -121,26 +121,29 @@ object ReplicaCatalog {
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
-        query.descend("_hash").constrain(hash)
-        query.descend("_storageDescription").constrain(storageDescription)
-        query.descend("_authenticationKey").constrain(authenticationKey)
+          .and(query.descend("_hash").constrain(hash))
+          .and(query.descend("_storageDescription").constrain(storageDescription.toString))
+          .and(query.descend("_authenticationKey").constrain(authenticationKey))
         
         val set = query.execute[Replica]
-        if (!set.isEmpty()) Some(set.get(0))
-        else None})
+        
+        LOGGER.log(Level.INFO,"Found " + set.size)
+        if (!set.isEmpty) Some(set.get(0)) else None
+      })
   }
 
   private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
-        query.descend("_source").constrain(src.getAbsolutePath)
-        query.descend("_hash").constrain(hash)
-        query.descend("_storageDescription").constrain(storageDescription)
-        query.descend("_authenticationKey").constrain(authenticationKey)
+          .and(query.descend("_source").constrain(src.getAbsolutePath))
+          .and(query.descend("_hash").constrain(hash))
+          .and(query.descend("_storageDescription").constrain(storageDescription.toString))
+          .and(query.descend("_authenticationKey").constrain(authenticationKey))
         
         val set = query.execute[Replica]
-          
+        LOGGER.log(Level.INFO,"Found " + set.size)
+        
         return set.size match {
           case 0 => None
           case 1 => Some(set.get(0))
@@ -161,9 +164,10 @@ object ReplicaCatalog {
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
-        query.descend("_source").constrain(src.getAbsolutePath)
-        query.descend("_storageDescription").constrain(storageDescription)
-        query.descend("_authenticationKey").constrain(authenticationKey)
+          .and(query.descend("_source").constrain(src.getAbsolutePath))
+          .and(query.descend("_storageDescription").constrain(storageDescription.toString))
+          .and(query.descend("_authenticationKey").constrain(authenticationKey))
+          
         query.execute[Replica]
       })
   }
@@ -173,7 +177,7 @@ object ReplicaCatalog {
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
-        query.descend("_destination").constrain(uri)
+          .and(query.descend("_destination").constrain(uri))
 
         !query.execute.isEmpty
       })
@@ -184,11 +188,8 @@ object ReplicaCatalog {
     lockRead({
         val query = objectServer.query
         query.constrain(classOf[Replica])
-        
-        val constFile = src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2))
-        val constStorage = query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description.toString))
-        
-        query.constraints.and(constFile).and(constStorage)
+            .and(src.map{ f => query.descend("_destination").constrain(f)}.reduceLeft( (c1, c2) => c1.or(c2)))
+            .and(query.descend("_authenticationKey").constrain(storage.authenticationKey).and(query.descend("_storageDescription").constrain(storage.description.toString)))
         
         var ret = new TreeSet[File]
         
