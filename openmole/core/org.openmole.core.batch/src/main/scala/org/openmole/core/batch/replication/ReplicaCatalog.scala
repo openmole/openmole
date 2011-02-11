@@ -157,9 +157,7 @@ object ReplicaCatalog {
         query.descend("_authenticationKey").constrain(authenticationKey)
           .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
-        var ret = new HashMap[File, HashSet[BatchStorageDescription]] {
-          override def default(f: File) = HashSet.empty
-        }
+        var ret = new HashMap[File, HashSet[BatchStorageDescription]] 
         
         query.execute[Replica].foreach {
           replica =>  ret.getOrElseUpdate(replica.sourceFile, new HashSet[BatchStorageDescription]) += replica.storageDescription

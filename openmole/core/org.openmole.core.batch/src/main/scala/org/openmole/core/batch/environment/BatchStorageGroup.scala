@@ -70,7 +70,7 @@ class BatchStorageGroup(environment: BatchEnvironment) {
               val quality = BatchStorageControl.qualityControl(cur.description)
               
               //Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
-              val sizeOnStorage = usedFiles.filter(onStorage(_).contains(cur.description)).map(_.size).sum
+              val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
               
               val fitness = (
              
