@@ -47,11 +47,11 @@ class BatchStorageGroup(environment: BatchEnvironment) {
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum
+      val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authenticationKey)
 
       var ret: (BatchStorage, AccessToken) = null
       do {
         val resourcesCopy = resources
-        val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authenticationKey)
         //Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
         
         //Among them select one not over loaded
