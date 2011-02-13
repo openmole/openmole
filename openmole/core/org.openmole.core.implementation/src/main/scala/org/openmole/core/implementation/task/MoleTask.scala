@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.task
 
+import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.MultipleException
@@ -61,11 +62,14 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
         case State.FAILED =>
            throwables += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
         case State.COMPLETED =>
-           MoleJobRegistry(moleJob).foreach{ 
+           MoleJobRegistry(moleJob).foreach { 
              e => outputCapsules.get(e._2).foreach {
                prototypes => 
                 val ctx = new Context
-                for(p <- prototypes) moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
+                for(p <- prototypes) {
+                  Logger.getLogger(classOf[MoleTask].getName).fine(e.get.toString + " " + p.toString)
+                  moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
+                }
                 contexts += ctx
              }
            }
@@ -89,7 +93,7 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
     val execution = new MoleExecution(mole)
 
     val resultGathering = new ResultGathering
-    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobFinished);
+    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobFinished)
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
@@ -105,14 +109,10 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
     }
   }
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): Unit = {
-    addOutput(capsule, new Data(prototype))
-  }
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): Unit = addOutput(capsule, new Data(prototype))
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): Unit = {
-    addOutput(capsule, new Data(prototype, masks))
-  }
-
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): Unit = addOutput(capsule, new Data(prototype, masks))
+ 
   def addOutput(capsule: IGenericCapsule, data: IData[_]): Unit = {
     addOutput(data)
     outputCapsules.getOrElseUpdate(capsule, new ListBuffer[String]) += data.prototype.name
