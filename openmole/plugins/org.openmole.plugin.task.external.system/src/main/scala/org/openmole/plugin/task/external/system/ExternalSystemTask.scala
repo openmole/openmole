@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.external.system
 
+import java.util.logging.Logger
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._

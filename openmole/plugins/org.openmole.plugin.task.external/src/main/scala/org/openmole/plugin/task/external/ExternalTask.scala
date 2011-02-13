@@ -104,10 +104,13 @@ abstract class ExternalTask(name: String) extends Task(name) {
     var ret = new ListBuffer[ToGet]
 
     outFileNames.foreach(p => {
+
         val filename = expandData(context, p._2)
         val fo = new File(localDir,filename)
 
-        ret += (new ToGet(filename, fo))
+        Logger.getLogger(classOf[ExternalTask].getName).fine("Get output file " + fo.getAbsolutePath + " in " + p._1)
+        
+        ret += new ToGet(filename, fo)
 
         context += (p._1, fo)
         outFileNamesVar.get(p._1).foreach {
@@ -118,7 +121,9 @@ abstract class ExternalTask(name: String) extends Task(name) {
     outFileNamesFromVar foreach ( p => {
         val filename = context.value(p._2).getOrElse(throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + name))
         val fo = new File(localDir, filename)
-        ret += (new ToGet(filename, fo))
+        Logger.getLogger(classOf[ExternalTask].getName).fine("Get output file " + fo.getAbsolutePath + " in " + p._1)
+
+        ret += new ToGet(filename, fo)
         context += (p._1, fo)
       })
 
