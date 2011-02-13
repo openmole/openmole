@@ -58,6 +58,9 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
 
+      Logger.getLogger(classOf[MoleTask].getName).fine(moleJob.task.name + " " + moleJob.state.toString)
+
+      
       moleJob.state match {
         case State.FAILED =>
            throwables += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
