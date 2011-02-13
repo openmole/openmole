@@ -153,7 +153,7 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
   def addOutput(varFileName: IPrototype[String], v: IPrototype[File]): this.type = {
     addOutput(v)
-    outFileNamesFromVar += ((v, varFileName))
+    outFileNamesFromVar += v -> varFileName
     this
   }
 

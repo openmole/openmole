@@ -20,7 +20,10 @@ package org.openmole.core.implementation.data
 import org.openmole.core.model.data.IPrototype
 
 object Prototype {
-  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = new Prototype[Array[T]](prototype.name, classOf[Array[T]])
+  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = {
+    val arrayClass = java.lang.reflect.Array.newInstance(prototype.`type`, 0).getClass
+    new Prototype(prototype.name, arrayClass).asInstanceOf[IPrototype[Array[T]]]
+  }
 }
 
 case class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T] {
