@@ -67,7 +67,7 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
                prototypes => 
                 val ctx = new Context
                 for(p <- prototypes) {
-                  Logger.getLogger(classOf[MoleTask].getName).fine(e.get.toString + " " + p.toString)
+                  Logger.getLogger(classOf[MoleTask].getName).fine(e._2.toString + " " + p.toString)
                   moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
                 }
                 contexts += ctx
