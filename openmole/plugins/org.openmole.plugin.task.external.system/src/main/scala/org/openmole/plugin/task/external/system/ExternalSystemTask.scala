@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.external.system
 
-import java.util.logging.Logger
 import org.openmole.commons.exception.UserBadDataError
 import java.io.File
 import org.openmole.commons.tools.io.FileUtil._
@@ -28,8 +27,6 @@ import scala.collection.mutable.ListBuffer
 
 import org.openmole.plugin.task.external.ExternalTask
 import scala.collection.JavaConversions._
-//import org.openmole.plugin.task.external.system.internal.Activator._
-
 
 abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 

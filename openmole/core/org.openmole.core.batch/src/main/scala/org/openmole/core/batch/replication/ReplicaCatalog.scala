@@ -143,8 +143,8 @@ object ReplicaCatalog {
   }
   
 
-  def isInCatalog(uri: String): Boolean = {
-    lockRead(!objectServer.queryByExample(new Replica(null,null,null,null, uri)).isEmpty)
+  def inCatalog(storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Set[String] = {
+    lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.toString,null, authenticationKey, null)).map{_.destination}.toSet)
   }
   
   def inCatalog(src: Iterable[File], authenticationKey: BatchAuthenticationKey): Map[File, Set[BatchStorageDescription]] = {

@@ -79,10 +79,10 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
       
       val service = executorService.executorService(ExecutorType.REMOVE)
-      
+      val inCatalog = ReplicaCatalog.inCatalog(description, environment.authenticationKey)
       for (dir <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, dir)
-        if(!ReplicaCatalog.isInCatalog(child.location)) {
+        if(!inCatalog.contains(child.location)) {
           //LOGGER.log(Level.FINE, "Removing {0} because it is not in catalog anymore.", dir)
           service.submit(new URIFileCleaner(child, false))
         } //else LOGGER.log(Level.FINE, "Not removing {0} because it is in catalog.", dir)

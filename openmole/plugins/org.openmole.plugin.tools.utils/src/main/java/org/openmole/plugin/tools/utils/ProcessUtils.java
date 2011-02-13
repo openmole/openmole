@@ -21,10 +21,6 @@ import org.apache.commons.exec.ProcessDestroyer;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 
-/**
- *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
- */
 public class ProcessUtils {
 
     static ProcessDestroyer processDestroyer = new ShutdownHookProcessDestroyer();
