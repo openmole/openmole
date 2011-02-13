@@ -84,7 +84,7 @@
         <lib.org.nuiton.j2r.version>1.0.0</lib.org.nuiton.j2r.version>
         <lib.org.gnu.crypto.version>2.0.1</lib.org.gnu.crypto.version>
         <lib.com.ibm.icu.version>4.0.1</lib.com.ibm.icu.version>
-        <lib.org.aspectj.version>1.6.9</lib.org.aspectj.version>
+        <lib.org.aspectj.version>1.6.10</lib.org.aspectj.version>
         <lib.com.springsource.org.apache.log4j.version>1.2.15</lib.com.springsource.org.apache.log4j.version>
         <lib.net.sourceforge.jline.version>0.9.94</lib.net.sourceforge.jline.version>
         <lib.org.objectweb.asm.version>3.2</lib.org.objectweb.asm.version>

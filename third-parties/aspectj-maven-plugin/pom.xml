@@ -9,10 +9,9 @@
     <artifactId>aspectj-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <name>AspectJ compiler Maven Plugin</name>
-    <version>1.3</version>
+    <version>${lib.org.aspectj.version}</version>
     <url>http://mojo.codehaus.org/aspectj-maven-plugin</url>
 
-    <inceptionYear>2005</inceptionYear>
     <properties>
       <aspectj.version>${lib.org.aspectj.version}</aspectj.version>
     </properties>
@@ -21,9 +20,6 @@
       Handles AspectJ usage within maven.
       Functionality provided is: weaving of aspects (or existing aspects from libraries) with the test and/or main classes, weaving of pre-existing jars and ajdoc reporting.
     </description>
-    <prerequisites>
-      <maven>2.0.6</maven> <!-- due to plex utils 1.5.6 -->
-    </prerequisites>
     <licenses>
         <license>
             <name>The MIT License</name>

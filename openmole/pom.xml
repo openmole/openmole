@@ -57,7 +57,7 @@
             <plugin>
                 <groupId>org.openmole</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.3</version>
+                <version>${lib.org.aspectj.version}</version>
                 <configuration>
                     <complianceLevel>1.6</complianceLevel>
                     <showWeaveInfo>true</showWeaveInfo>
