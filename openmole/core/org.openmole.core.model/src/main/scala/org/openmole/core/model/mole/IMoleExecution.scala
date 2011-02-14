@@ -29,8 +29,9 @@ import org.openmole.core.model.job.ITicket
 object IMoleExecution {
     final val Starting = "Starting"
     final val Finished = "Finished"
+    final val OneJobStatusChanged = "OneJobStatusChanged"
     final val OneJobSubmitted = "OneJobSubmitted"
-    final val OneJobFinished = "OneJobFinished"
+//    final val OneJobFinished = "OneJobFinished"
 }
 
 trait IMoleExecution {

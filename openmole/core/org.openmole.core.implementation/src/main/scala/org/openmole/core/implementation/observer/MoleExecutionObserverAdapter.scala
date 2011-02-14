@@ -22,6 +22,7 @@ import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleExecution
 
 
@@ -30,7 +31,7 @@ class MoleExecutionObserverAdapter private (moleExecutionObserver: IMoleExecutio
   def this(moleExecution: IMoleExecution, moleExecutionObserver: IMoleExecutionObserver) = {
     this(moleExecutionObserver)
     eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
-    eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobFinished)
+    eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobStatusChanged)
     eventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
   }
   
@@ -38,7 +39,11 @@ class MoleExecutionObserverAdapter private (moleExecutionObserver: IMoleExecutio
   class MoleExecutionOneJobFinishedAdapter extends IObjectListenerWithArgs[IMoleExecution]  {
 
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
-      moleExecutionObserver.moleJobFinished(args(0).asInstanceOf[IMoleJob])
+      val moleJob = args(0).asInstanceOf[IMoleJob]
+      moleJob.state match {
+        case State.COMPLETED => moleExecutionObserver.moleJobFinished(moleJob)
+        case _ =>
+      }
     }
 
   }

@@ -21,8 +21,6 @@ import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.commons.tools.service.Priority
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.transition.Slot
@@ -39,12 +37,12 @@ import scala.collection.mutable.HashSet
 import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.tools.ToCloneFinder.variablesToClone
 
-
 abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
 
   class GenericCapsuleAdapter extends IObjectListener[MoleJob] {
 
     override def eventOccured(obj: MoleJob) = {
+      //Logger.getLogger(classOf[GenericCapsule[_,_]].getName).fine("Event " + obj.task.name + " " + obj.state)
       obj.state match {
         case COMPLETED => jobFinished(obj)
         case _ =>
@@ -101,15 +99,13 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     val t = _task.getOrElse(throw new UserBadDataError("Reached a capsule with unassigned task.")) 
 
     val ret = new MoleJob(t, context,jobId)
-    eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOW, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+    eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
     ret
   }
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
-  override def task: Option[TASK] = {
-    _task
-  }
+  override def task: Option[TASK] = _task
   
   def task_=(task: TASK) = {
     _task = Some(task)

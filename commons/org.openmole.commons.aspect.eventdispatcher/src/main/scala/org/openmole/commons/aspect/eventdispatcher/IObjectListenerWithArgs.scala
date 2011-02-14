@@ -17,6 +17,6 @@
 
 package org.openmole.commons.aspect.eventdispatcher
 
-trait IObjectListenerWithArgs[-T] {
+trait IObjectListenerWithArgs[T] {
   def eventOccured(obj: T, args: Array[Object])
 }

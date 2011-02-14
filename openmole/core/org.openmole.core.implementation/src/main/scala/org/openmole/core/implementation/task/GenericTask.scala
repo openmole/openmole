@@ -81,7 +81,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
           if ( v.value == null || p.`type`.isAssignableFrom(v.value.asInstanceOf[AnyRef].getClass)) {
             vars += v
           } else {
-            Logger.getLogger(classOf[GenericTask].getName).log(Level.WARNING, "Variable {0} of type {1} has been found but type doesn''t match : {2} in task {3}.",  Array[Object](p.name, p.`type`.getName, v.prototype.`type`.getName, name))
+            Logger.getLogger(classOf[GenericTask].getName).log(Level.WARNING, "Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.getName +") is instance of class " + v.value.asInstanceOf[AnyRef].getClass + " and doesn't match the expected class " + p.`type`.getName + " in task" + name + ".")
           }
       }
     }

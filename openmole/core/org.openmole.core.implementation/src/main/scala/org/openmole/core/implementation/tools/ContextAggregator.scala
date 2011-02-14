@@ -24,6 +24,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
+import org.openmole.commons.tools.service.ManifestUtil._
 
 object ContextAggregator {
 
@@ -34,14 +35,15 @@ object ContextAggregator {
   def aggregate(aggregate: IDataSet, forceArrays: Boolean, toAgregate: Iterable[IContext]): IContext = {
     val inContext = new Context
     
-    var mergingVars = new TreeMap[String, ListBuffer[Any]]
+    var mergingVars = new TreeMap[String, ListBuffer[IVariable[_]]]
 
     for (current <- toAgregate) {
       for (data <- aggregate) {
-        if (current.containsVariableWithName(data.prototype)) {
-            val tmp = current.value(data.prototype).get  
+        current.variable(data.prototype) match {
+          case None =>
+          case Some(tmp) =>  
             mergingVars.get(data.prototype.name) match {
-              case None => mergingVars += ((data.prototype.name, ListBuffer(tmp)))
+              case None => mergingVars += data.prototype.name -> ListBuffer(tmp)
               case Some(buff) => buff += tmp
             }
         }
@@ -49,9 +51,14 @@ object ContextAggregator {
     }
 
     for(merged <- mergingVars) {
-      if(forceArrays || merged._2.size > 1)
-        inContext += new Variable(Prototype.toArray(aggregate(merged._1).get.prototype).asInstanceOf[IPrototype[Any]], merged._2.toArray) 
-      else inContext += new Variable(aggregate(merged._1).get.prototype.asInstanceOf[IPrototype[Any]], merged._2.head)
+      if(forceArrays || merged._2.size > 1) {  
+        val m = intersect(merged._2.map{_.prototype.`type`}: _*)
+        val array = m.newArray(merged._2.size).asInstanceOf[Array[Any]]
+        merged._2.map{_.value}.zipWithIndex.foreach{e => array(e._2) = e._1}
+        
+        inContext += new Variable(Prototype.toArray(aggregate(merged._1).get.prototype).asInstanceOf[IPrototype[Any]], array) 
+      }
+      else inContext += new Variable(aggregate(merged._1).get.prototype.asInstanceOf[IPrototype[Any]], merged._2.head.value)
     }  
     
     inContext

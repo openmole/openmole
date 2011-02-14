@@ -46,7 +46,7 @@ import org.openmole.core.model.execution.IProgress
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) extends Task(name) with IMoleTask {
+class MoleTask(name: String, val mole: IMole, val toArray: Boolean) extends Task(name) with IMoleTask {
 
   def this(name: String, mole: IMole) = this(name, mole, false)
   
@@ -58,19 +58,19 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
 
-      Logger.getLogger(classOf[MoleTask].getName).fine(moleJob.task.name + " " + moleJob.state.toString)
+      //Logger.getLogger(classOf[MoleTask].getName).fine(moleJob.task.name + " " + moleJob.state.toString)
 
       moleJob.state match {
         case State.FAILED =>
           throwables += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
         case State.COMPLETED =>
-          val e = MoleJobRegistry(moleJob).getOrElse(throw new InternalProcessingError(moleJob.task.name + " not found in registry."))
+          val e = MoleJobRegistry(moleJob).getOrElse(throw new InternalProcessingError("Capsule for " + moleJob.task.name + " not found in registry."))
           outputCapsules.get(e._2) match {
-            case None => Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
+            case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
             case Some(prototypes) => 
               val ctx = new Context
               for(p <- prototypes) {
-                Logger.getLogger(classOf[MoleTask].getName).fine(e._2.toString + " " + p.toString)
+                //Logger.getLogger(classOf[MoleTask].getName).fine(e._2.toString + " " + p.toString)
                 moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
               }
               contexts += ctx
@@ -94,9 +94,9 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean = false) exte
     }
 
     val execution = new MoleExecution(mole)
-
     val resultGathering = new ResultGathering
-    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobFinished)
+    
+    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobStatusChanged)
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded

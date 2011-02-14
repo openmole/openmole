@@ -21,13 +21,13 @@ trait IEventDispatcher {
     def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListener[T] , event: String)
     def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListener[T], event: String)
 
-    def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListenerWithArgs[T] , event: String)
+    def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListenerWithArgs[T], event: String)
     def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListenerWithArgs[T], event: String)
 
     def registerForObjectConstructedSynchronous[T](c: Class[T], priority: Int, listner: IObjectListener[T])
     def registerForObjectConstructedAsynchronous[T](c: Class[T], listner: IObjectListener[T])
     
-    def objectChanged(obj: Object, event: String)
-    def objectChanged(obj: Object, event: String, args: Array[Object])
+    def objectChanged[T](obj: T, event: String)
+    def objectChanged[T](obj: T, event: String, args: Array[Object])
     def objectConstructed(obj: Object)
 }

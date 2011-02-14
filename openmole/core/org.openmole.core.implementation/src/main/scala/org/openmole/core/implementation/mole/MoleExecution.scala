@@ -26,7 +26,6 @@ import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job
-import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IEnvironment
@@ -49,13 +48,11 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable.SynchronizedMap
 import scala.collection.JavaConversions._
 
 object MoleExecution {
   val LOGGER = Logger.getLogger(classOf[MoleExecution].getName)
 }
-
 
 class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection, moleJobGrouping: IMoleJobGrouping) extends IMoleExecution {
 
@@ -71,6 +68,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   class MoleExecutionAdapterForMoleJob extends IObjectListener[IMoleJob] {
     override def eventOccured(job: IMoleJob) = {
+      
+      //Logger.getLogger(classOf[MoleExecution].getName).fine("Event " + job.task.name + " " + job.state)
+
+      eventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job))
+      
       job.state match {
         case State.FAILED => jobFailed(job)
         case _ =>
@@ -225,7 +227,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private def jobFailed(job: IMoleJob) =  jobOutputTransitionsPerformed(job)
 
   private def jobOutputTransitionsPerformed(job: IMoleJob) = synchronized {
-    eventDispatcher.objectChanged(this, IMoleExecution.OneJobFinished, Array(job))
+//    eventDispatcher.objectChanged(this, IMoleExecution.OneJobFinished, Array(job))
 
     val jobInfo = inProgress.get(job) match {
       case None => throw new InternalProcessingError("Error in mole execution job info not found")

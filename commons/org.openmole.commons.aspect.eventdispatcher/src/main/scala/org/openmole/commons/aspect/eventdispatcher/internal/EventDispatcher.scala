@@ -20,6 +20,7 @@ package org.openmole.commons.aspect.eventdispatcher.internal
 import java.util.concurrent.Executors
 
 import org.openmole.commons.tools.service.Priority
+import java.util.logging.Logger
 import org.openmole.commons.aspect.eventdispatcher.IEventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
@@ -47,8 +48,9 @@ class EventDispatcher extends IEventDispatcher {
     asynchronousObjectChangedMap.register(obj.asInstanceOf[AnyRef], Priority.NORMAL, listner.asInstanceOf[IObjectListener[AnyRef]], event)
   }
     
-  override def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListener[T], event: String) = {
+  override def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListener[T], event: String) = {  
     synchronousObjectChangedMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListener[AnyRef]], event)
+    //Logger.getLogger(classOf[EventDispatcher].getName).fine("All listners " + synchronousObjectChangedMap.toString)  
   }
   
   
@@ -69,9 +71,10 @@ class EventDispatcher extends IEventDispatcher {
   }
   
   
-  def objectChanged(obj: Object, event: String, args: Array[Object]) = {
-    val objectChangedWithTypeAsynchronouslisteners = asynchronousObjectChangedMap.get(obj, event)
-    val objectChangedWithTypeAsynchronouslistenersWithArgs = asynchronousObjectChangedWithArgsMap.get(obj, event)
+  override def objectChanged[T](obj: T, event: String, args: Array[Object]) = {
+    //Logger.getLogger(classOf[EventDispatcher].getName).fine("Signal event " + event + " signaled from " + obj.toString)
+    val objectChangedWithTypeAsynchronouslisteners = asynchronousObjectChangedMap.get(obj.asInstanceOf[AnyRef], event)
+    val objectChangedWithTypeAsynchronouslistenersWithArgs = asynchronousObjectChangedWithArgsMap.get(obj.asInstanceOf[AnyRef], event)
 
     //Avoid creating threads if no listners
     if (objectChangedWithTypeAsynchronouslisteners.iterator.hasNext) {
@@ -84,7 +87,7 @@ class EventDispatcher extends IEventDispatcher {
 
             objectChangedWithTypeAsynchronouslisteners.synchronized  {
               for (listner <- objectChangedWithTypeAsynchronouslisteners) {
-                listner.eventOccured(obj)
+                listner.eventOccured(obj.asInstanceOf[AnyRef])
               }
             }
 
@@ -92,7 +95,7 @@ class EventDispatcher extends IEventDispatcher {
 
             objectChangedWithTypeAsynchronouslistenersWithArgs.synchronized {
               for (listner <- objectChangedWithTypeAsynchronouslistenersWithArgs) {
-                listner.eventOccured(obj, args)
+                listner.eventOccured(obj.asInstanceOf[AnyRef], args)
               }
             }
           }
@@ -101,30 +104,29 @@ class EventDispatcher extends IEventDispatcher {
     
     /* --- Listners without args ---*/
 
-    val listeners = synchronousObjectChangedMap.get(obj, event)
+    val listeners = synchronousObjectChangedMap.get(obj.asInstanceOf[AnyRef], event)
      
     listeners.synchronized  {
       for (listner <- listeners) {
-        listner.eventOccured(obj)
+        //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
+        listner.eventOccured(obj.asInstanceOf[AnyRef])
       }
     }
 
     /* --- Listners with args ---*/
 
-    val listenersWithArgs = synchronousObjectChangedWithArgsMap.get(obj, event)
+    val listenersWithArgs = synchronousObjectChangedWithArgsMap.get(obj.asInstanceOf[AnyRef], event)
 
     listenersWithArgs.synchronized {
       for (listner <- listenersWithArgs) {
-        listner.eventOccured(obj, args)
+        //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
+        listner.eventOccured(obj.asInstanceOf[AnyRef], args)
       }
     }
     
   }
-    
-  
-  override def objectChanged(obj: Object, event: String) = {
-    objectChanged(obj, event, Array.empty)
-  }
+   
+  override def objectChanged[T](obj: T, event: String) = objectChanged(obj.asInstanceOf[AnyRef], event, Array.empty)
 
   override def objectConstructed(obj: Object) = {
 

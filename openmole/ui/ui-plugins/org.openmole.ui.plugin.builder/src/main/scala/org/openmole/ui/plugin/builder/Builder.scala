@@ -314,7 +314,7 @@ class Builder {
     val exploPuz = exploration(explo, puzzle)
     
     // builds a mole containing a exploration, a puzzle, and an aggregation on the inputToGlobalTask
-    val moleTask = new MoleTask(taskName, new Mole(exploPuz.firstCapsule))
+    val moleTask = new MoleTask(taskName, new Mole(exploPuz.firstCapsule), true)
 
     // sets output available as an array
     for (data <- ft.userOutputs) {

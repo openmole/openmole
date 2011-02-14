@@ -88,7 +88,7 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
               val to = new File(toDir, itName.next)
               val from = itFile.next
               
-              Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+              //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
               
               copy(from, to)              
               if(remove) from.recursiveDelete

@@ -17,24 +17,27 @@
 
 package org.openmole.commons.aspect.eventdispatcher.internal
 
+import scala.collection.immutable.SortedMap
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
 
 class SortedListners[T] extends Iterable[T] {
   
-  var listners = new TreeMap[Int, ListBuffer[T]]
+  var listners: SortedMap[Int, ListBuffer[T]] = TreeMap.empty[Int, ListBuffer[T]](new Ordering[Int] {
+      def compare(a: Int, b: Int) = (a - b)
+    })
  
-  def register(priority: Int, listner: T) = {
+  def register(priority: Int, listner: T) = synchronized {
     listners.get(priority) match {
       case Some(listnersBuf) =>  listnersBuf += listner
-      case None => listners += ((priority, ListBuffer(listner)))
+      case None => listners += priority -> ListBuffer(listner)
     }
   }
 
-  override def iterator: Iterator[T] = {
+  override def iterator: Iterator[T] = synchronized {  
     new Iterator[T] {
       val it = listners.valuesIterator
-      var curSetIt = it.next.iterator
+      var curSetIt = if(it.hasNext) it.next.iterator else Iterator.empty
       
       override def hasNext = {it.hasNext || curSetIt.hasNext}
         
@@ -44,4 +47,5 @@ class SortedListners[T] extends Iterable[T] {
       }
     }
   }
+  
 }

@@ -17,49 +17,24 @@
 
 package org.openmole.commons.aspect.eventdispatcher.internal
 
-import scala.collection.immutable.TreeMap
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
-
-class ObjectListenerMap[T] {
+class ObjectListenerMap[L] {
     
-  val listnerTypeMap = new WeakHashMap[Object, TreeMap[String, SortedListners[T]]]
+  val listnerTypeMap = new WeakHashMap[AnyRef, HashMap[String, SortedListners[L]]]
   
-  private def getOrCreateListners(obj: Object, event: String):  SortedListners[T] = {
-    listnerTypeMap.synchronized {
-      listnerTypeMap.get(obj) match { 
-        case Some(listners) => 
-          listners.get(event) match {
-            case Some(sortedListners) => 
-              sortedListners
-            case None => 
-              val sortedListners = new SortedListners[T]
-              val added = listners + ((event, sortedListners))
-              listnerTypeMap += ((obj, added))
-              sortedListners
-          }
-        case None => 
-          val sortedListners = new SortedListners[T]
-          listnerTypeMap += ((obj, TreeMap[String, SortedListners[T]]((event, sortedListners))))
-          sortedListners
-      } 
-    }
+  private def getOrCreateListners(obj: AnyRef, event: String): SortedListners[L] = {
+    listnerTypeMap.getOrElseUpdate(obj, new HashMap[String, SortedListners[L]]).getOrElseUpdate(event, new SortedListners[L])
   }
 
-  def get(obj: Object, event: String): Iterable[T] = {
-    listnerTypeMap.get(obj) match {
-      case None => Iterable.empty
-      case Some(map) => map.get(event) match {
-          case None => Iterable.empty
-          case Some(listners) => listners
-        }
-    }
+  def get(obj: AnyRef, event: String): Iterable[L] = synchronized {
+    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event, Iterable.empty)
   }
 
-  def register(obj: Object, priority: Int, listner: T, event: String) = {
-    val sortedListners = getOrCreateListners(obj, event)
-    sortedListners.synchronized {
-      sortedListners.register(priority, listner)
-    }
+  def register(obj: AnyRef, priority: Int, listner: L, event: String) = synchronized {
+    getOrCreateListners(obj, event).register(priority, listner)
   }
+  
 }
