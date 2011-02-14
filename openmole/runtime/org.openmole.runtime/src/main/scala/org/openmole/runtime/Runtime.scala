@@ -191,10 +191,9 @@ class Runtime {
             for (file <- serializationResult._1) {
               //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
               
-              val is = new StringInputStream(file.getCanonicalPath)
+              //val is = new StringInputStream(file.getCanonicalPath)
 
-              val name = UUID.randomUUID
-                            
+              val name = UUID.randomUUID        
               val entry = new TarEntry(name.toString)
 
               val toArchive =  if (file.isDirectory) {
