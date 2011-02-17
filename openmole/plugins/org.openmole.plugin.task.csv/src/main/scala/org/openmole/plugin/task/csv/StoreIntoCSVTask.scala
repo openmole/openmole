@@ -98,6 +98,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
       val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
             
       val file = new File(VariableExpansion.expandData(context, fileName))
+      file.getParentFile.mkdirs
       val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quoteChar)
 
       try {
