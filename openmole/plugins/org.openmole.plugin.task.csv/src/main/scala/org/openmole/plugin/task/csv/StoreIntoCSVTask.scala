@@ -32,7 +32,7 @@ import org.openmole.commons.exception.UserBadDataError
  * into CSV files. It is in particular possible to store data (as prototypes) aggregated in an
  * array. The number of data to store in columns is not limited.
  */
-class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IPrototype[Iterable[_]], String)],delimiter: Char, quoteChar: Char) extends Task(name) {
+class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IPrototype[Array[_]], String)],delimiter: Char, quoteChar: Char) extends Task(name) {
 
   /**
    * Creates an instance of StoreIntoCSVTask with a specific delimiter and
@@ -78,7 +78,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
    *
    * @param prototype
    */
-  def addColumn(prototype: IPrototype[Iterable[_]]): this.type = addColumn(prototype, prototype.name)
+  def addColumn(prototype: IPrototype[Array[_]]): this.type = addColumn(prototype, prototype.name)
 
   /**
    * Add a prototype to be stored, specifying explicitely the name of the column header to be saved
@@ -86,7 +86,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
    * @param prototype
    * @param columnName, the name of the column header
    */
-  def addColumn(prototype: IPrototype[Iterable[_]], columnName: String): this.type = {
+  def addColumn(prototype: IPrototype[Array[_]], columnName: String): this.type = {
     columns = columns.toList :+ ((prototype, columnName))
     addInput(prototype)
     this
