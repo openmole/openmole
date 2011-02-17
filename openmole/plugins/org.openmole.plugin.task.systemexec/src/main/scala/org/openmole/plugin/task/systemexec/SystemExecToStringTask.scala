@@ -57,6 +57,9 @@ class SystemExecToStringTask(name: String,
   def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer], outString: IPrototype[String], errString: IPrototype[String]) = {
     this(name, cmd, Some(returnValue), false, relativeDir, outString, errString)
   }
+
+  addOutput(outString)
+  addOutput(errString)
   
   override protected def execute(process: Process, context: IContext):Integer = {    
     val outStringBuilder = new StringBuilder
