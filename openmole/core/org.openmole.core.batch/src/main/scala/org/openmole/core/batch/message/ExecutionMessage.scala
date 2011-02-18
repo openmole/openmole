@@ -19,4 +19,4 @@ package org.openmole.core.batch.message
 
 import org.openmole.core.batch.file.IURIFile
 
-class ExecutionMessage(val plugins: Iterable[ReplicatedFile], val files: Iterable[ReplicatedFile], val jobForRuntime: FileMessage, val communicationDir: IURIFile)
+class ExecutionMessage(val plugins: Iterable[ReplicatedFile], val files: Iterable[ReplicatedFile], val jobs: FileMessage, val communicationDir: IURIFile)

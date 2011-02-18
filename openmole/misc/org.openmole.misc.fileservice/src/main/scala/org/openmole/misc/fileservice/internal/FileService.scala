@@ -17,12 +17,13 @@
 
 package org.openmole.misc.fileservice.internal
 
+import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.logging.Logger
 import org.openmole.commons.tools.cache.AssociativeCache
 import org.openmole.commons.tools.io.FileUtil
-import org.openmole.commons.tools.io.TarArchiver
+import org.openmole.commons.tools.io.TarArchiver._
 import org.openmole.commons.tools.service.IHash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
@@ -70,10 +71,9 @@ object FileService extends IFileService {
 
     return archiveCache.cache(cacheLenght, file.getAbsolutePath, {
         val ret = workspace.newFile("archive", ".tar");
-        val os = new FileOutputStream(ret)
-
+        val os = new TarOutputStream(new FileOutputStream(ret))
         try {
-          TarArchiver.createDirArchiveWithRelativePathNoVariableContent(file, os)
+          os.createDirArchiveWithRelativePathNoVariableContent(file)
         } finally {
           os.close
         }

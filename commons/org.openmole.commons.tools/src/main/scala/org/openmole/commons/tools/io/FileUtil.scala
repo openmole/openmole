@@ -38,7 +38,9 @@ object FileUtil {
     }
   }
   
-  implicit def file2FileUtil(file: File): FileUtil = new FileUtil(file)
+  implicit def File2FileDecorator(file: File) = new FileUtilDecorator(file)
+  implicit def InputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
+
   
   val DefaultBufferSize = 8 * 1024
 
@@ -53,9 +55,8 @@ object FileUtil {
       while (!toProceed.isEmpty) {
         val f = toProceed.remove(0)
 
-        if (f.lastModified > lastModification) {
-          lastModification = f.lastModified
-        }
+        if (f.lastModified > lastModification) lastModification = f.lastModified
+      
         if (f.isDirectory) {
           for (child <- f.listFiles) {
             toProceed += child
@@ -64,7 +65,7 @@ object FileUtil {
       }
     }
 
-    return lastModification
+    lastModification
   }
 
   
@@ -86,7 +87,7 @@ object FileUtil {
       val f = toProceed.remove(0)
       if (!stopPath.contains(f)) {
         operation(f)
-        if (f.isDirectory()) {
+        if (f.isDirectory) {
           for (child <- f.listFiles) {
             toProceed += child
           }
@@ -102,14 +103,11 @@ object FileUtil {
     while (!toProceed.isEmpty) {
       val f = toProceed.remove(0)
       for (sub <- f.listFiles) {
-        if (sub.isFile) {
-          return false
-        } else if (sub.isDirectory) {
-          toProceed += sub
-        }
+        if (sub.isFile) return false
+        else if (sub.isDirectory) toProceed += sub
       }
     }
-    return true
+    true
   }
 
 
@@ -170,11 +168,7 @@ object FileUtil {
   @throws(classOf[IOException])
   def copy(from: File, to: OutputStream): Unit = {
     val fromIS = new FileInputStream(from)
-    try {
-      copy(fromIS, to)
-    } finally {
-      fromIS.close
-    }
+    try {copy(fromIS, to)} finally {fromIS.close}
   }
   
   @throws(classOf[IOException])
@@ -228,25 +222,35 @@ object FileUtil {
       (for(f <- file.listFiles) yield size(f)).sum
     } else file.length
   }
+  
+  
+  class FileUtilDecorator(file: File) {
+  
+    def lastModification = FileUtil.lastModification(file)
+    def listRecursive(filter: FileFilter) = FileUtil.listRecursive(file, filter)
+  
+    def applyRecursive(operation: File => Unit): Unit = FileUtil.applyRecursive(file, operation, Set.empty)
+    def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = FileUtil.applyRecursive(file, operation, stopPath)
+
+    def dirContainsNoFileRecursive = FileUtil.dirContainsNoFileRecursive(file)
+
+    def recursiveDelete = FileUtil.recursiveDelete(file)
+  
+    def copy(toF: String) = FileUtil.copy(file, new File(toF))
+  
+    @throws(classOf[IOException])
+    def copy(toF: File) = FileUtil.copy(file, toF)
+    def copy(to: OutputStream): Unit = FileUtil.copy(file, to)
+
+    def move(to: File) = FileUtil.move(file, to)
+
+    def size = FileUtil.size(file)
+  }
+
+  class InputStreamDecorator(is: InputStream) {
+    def copy(os: OutputStream) = FileUtil.copy(is, os)
+  }
+  
 }
 
-class FileUtil(file: File) {
-  
-  def lastModification = FileUtil.lastModification(file)
-  def listRecursive(filter: FileFilter) = FileUtil.listRecursive(file, filter)
-  
-  def applyRecursive(operation: File => Unit): Unit = FileUtil.applyRecursive(file, operation, Set.empty)
-  def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = FileUtil.applyRecursive(file, operation, stopPath)
 
-  def dirContainsNoFileRecursive = FileUtil.dirContainsNoFileRecursive(file)
-
-  def recursiveDelete = FileUtil.recursiveDelete(file)
-  
-  @throws(classOf[IOException])
-  def copy(toF: File) = FileUtil.copy(file, toF)
-  def copy(to: OutputStream): Unit = FileUtil.copy(file, to)
-
-  def move(to: File) = FileUtil.move(file, to)
-
-  def size = FileUtil.size(file)
-}

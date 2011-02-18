@@ -17,38 +17,39 @@
 
 package org.openmole.core.batch.environment
 
+import com.ice.tar.TarOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.Callable
-import java.util.logging.Logger
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
-import org.openmole.core.batch.message.JobForRuntime
 import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.core.model.job.IMoleJob
-
+import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.commons.tools.io.TarArchiver._
 
 import scala.io.Source._
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[CopyToEnvironmentResult] {
 
-  private def initCommunication(): CopyToEnvironmentResult = {
-    val jobFile = workspace.newFile("job", ".xml")
+  private def initCommunication: CopyToEnvironmentResult = {
+    val jobFile = workspace.newFile("job", ".tar")
     
     try {
-      val serializationResult = serializer.serializeGetPluginClassAndFiles(createJobForRuntime, jobFile)
+      val serializationResult = serializeJob(jobFile)
       val storage = environment.selectAStorage(serializationResult._1)
 
       val communicationStorage = storage._1
@@ -67,25 +68,40 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         /* ---- upload the execution message ----*/
 
         val executionMessageFile = workspace.newFile("job", ".xml")
-        serializer.serialize(executionMessage, executionMessageFile)
-
-        val executionMessageURIFile = new URIFile(executionMessageFile)
-        URIFile.copy(executionMessageURIFile, inputFile, token)
-
-        executionMessageFile.delete
+        try {
+          serializer.serialize(executionMessage, executionMessageFile)
+          URIFile.copy(new URIFile(executionMessageFile), inputFile, token)
+        } finally executionMessageFile.delete
             
-        return new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
-      } finally {
-        BatchStorageControl.usageControl(communicationStorage.description).releaseToken(token)
-      }
-    } finally {
-      jobFile.delete
-    }
+        new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
+      } finally BatchStorageControl.usageControl(communicationStorage.description).releaseToken(token)
+    } finally jobFile.delete
   }
 
-  override def call: CopyToEnvironmentResult = {
-    initCommunication
+  def serializeJob(file: File) = {
+    val files = new HashSet[File]
+    val classes = new HashSet[Class[_]]
+    
+    val tos = new TarOutputStream(new FileOutputStream(file))   
+    try {
+      for(moleJob <- job.moleJobs) moleJob.synchronized {    
+        if(!moleJob.isFinished) {
+          val moleJobFile = workspace.newFile("job", ".tar")
+          try {
+            val serializationResult = serializer.serializeGetPluginClassAndFiles(moleJob, moleJobFile)
+            files ++= serializationResult._1
+            classes ++= serializationResult._2
+          
+            tos.addFile(moleJobFile, UUID.randomUUID.toString)
+          } finally moleJobFile.delete
+        }
+      }
+    } finally tos.close
+    (files, classes)
   }
+  
+  
+  override def call: CopyToEnvironmentResult = initCommunication
 
   def toReplicatedFile(file: File, storage: BatchStorage, token: AccessToken): ReplicatedFile = {
     val isDir = file.isDirectory
@@ -95,7 +111,6 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      //Logger.getLogger(classOf[CopyToEnvironment].getName).info("Archive for dir " + file)
       val cache = fileService.archiveForDir(file, moleExecution)
       toReplicate = cache.file(false)
       cache
@@ -113,36 +128,23 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val environmentPlugins = pluginManager.getPluginAndDependanciesForClass(environment.getClass)
     val runtimeFile = environment.runtime
 
-    for (environmentPlugin <- environmentPlugins) {     
-      val replicatedFile = toReplicatedFile(environmentPlugin, communicationStorage, token)
-      val pluginURIFile = replicatedFile.replica
-             
-      environmentPluginReplica += pluginURIFile
-    }
-
+    for (environmentPlugin <- environmentPlugins) environmentPluginReplica += toReplicatedFile(environmentPlugin, communicationStorage, token).replica
+            
     val runtimeReplica = toReplicatedFile(runtimeFile, communicationStorage, token).replica
-        
-    val authenticationFile = workspace.newFile("environmentAuthentication", ".xml")
-     
-    serializer.serialize(communicationStorage.environment.authentication, authenticationFile)
     
-    //println("Authentication " + authenticationFile.getAbsolutePath)
-  
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
-    URIFile.copy(authenticationFile, authenticationURIFile, token)
-    authenticationFile.delete
+    val authenticationFile = workspace.newFile("environmentAuthentication", ".xml")
+    try {
+      serializer.serialize(communicationStorage.environment.authentication, authenticationFile)
+      URIFile.copy(authenticationFile, authenticationURIFile, token)
+    } finally authenticationFile.delete
         
-    return new Runtime(runtimeReplica, environmentPluginReplica.toList, authenticationURIFile)
-  }
-
-  def serialize(jobForRuntime: JobForRuntime, jobFile: File) = {
-    serializer.serializeGetPluginClassAndFiles(jobForRuntime, jobFile)
+    new Runtime(runtimeReplica, environmentPluginReplica.toList, authenticationURIFile)
   }
   
   def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): ExecutionMessage = {
-
     val jobURIFile = new URIFile(jobFile)
-    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".xml"))
+    val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 
     URIFile.copy(jobURIFile, jobForRuntimeFile, token)
     val jobHash = hashService.computeHash(jobFile)
@@ -150,39 +152,13 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val plugins = new TreeSet[File]
     val pluginReplicas = new ListBuffer[ReplicatedFile]
 
-    for (c <- serializationResult._2) {
-      for (f <- pluginManager.getPluginAndDependanciesForClass(c)) {
-        plugins += f
-      }
-    }
-
-    for (f <- plugins) {
-      val replicatedPlugin = toReplicatedFile(f, communicationStorage, token)
-      pluginReplicas += replicatedPlugin
-    }
+    for (c <- serializationResult._2 ; f <- pluginManager.getPluginAndDependanciesForClass(c)) plugins += f
+    for (f <- plugins) pluginReplicas += toReplicatedFile(f, communicationStorage, token)
         
     val files = new ListBuffer[ReplicatedFile]
-        
-    for(file <- serializationResult._1) {
-      files += toReplicatedFile(file, communicationStorage, token)
-    }
+    for(file <- serializationResult._1) files += toReplicatedFile(file, communicationStorage, token)
 
     new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile, jobHash), communicationDir)
-  
   }
 
-  def createJobForRuntime: JobForRuntime = {
-       
-    val jobs = new ListBuffer[IMoleJob]
-
-    for (moleJob <- job.moleJobs) {
-      moleJob.synchronized {
-        if (!moleJob.isFinished) {
-          jobs += moleJob
-        }
-      }
-    }
-
-    new JobForRuntime(jobs.toList)
-  }
 }

@@ -21,89 +21,84 @@ import com.ice.tar.TarEntry
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
+import org.openmole.commons.tools.io.FileUtil._
 
-object TarArchiver extends IArchiver {
+object TarArchiver {
+  
+  private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry => Unit ) = {
+    if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
+    //val tos = new TarOutputStream(archive)
+    // try {
+    val toArchive = new Stack[(File, String)]
+    toArchive.push((baseDir, ""))
 
-  override def createDirArchiveWithRelativePathNoVariableContent(baseDir: File, archive: OutputStream) = {
-    createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, (e:TarEntry) => e.setModTime(0))
-  }
+    while (!toArchive.isEmpty) {
+      val cur = toArchive.pop
 
-  override def createDirArchiveWithRelativePath(baseDir: File, archive: OutputStream) = {
-    createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir, archive, {(e)=>})
-  }
-
-  private def createDirArchiveWithRelativePathWithAdditionnalCommand(baseDir: File, archive: OutputStream, additionnalCommand: TarEntry => Unit ) = {
-    if (!baseDir.isDirectory) {
-      throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
-    }
-
-    val tos = new TarOutputStream(archive)
-
-    //tos.setLongFileMode(TarOutputStream.LONGFILE_GNU)
-
-    try {
-      val toArchive = new Stack[(File, String)]
-      toArchive.push((baseDir, ""))
-
-      while (!toArchive.isEmpty) {
-        val cur = toArchive.pop
-
-        if (cur._1.isDirectory) {
-          for (name <- cur._1.list.sorted) {
-            toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
-          }
-        } else {
-          val e = new TarEntry(cur._2)
-          e.setSize(cur._1.length)
-          additionnalCommand(e)
-          tos.putNextEntry(e)
-          try {
-            val fis = new FileInputStream(cur._1)
-            try {
-              FileUtil.copy(fis, tos)
-            } finally {
-              fis.close
-            }
-          } finally {
-            tos.closeEntry
-          }
+      if (cur._1.isDirectory) {
+        for (name <- cur._1.list.sorted) {
+          toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
         }
+      } else {
+        val e = new TarEntry(cur._2)
+        e.setSize(cur._1.length)
+        additionnalCommand(e)
+        tos.putNextEntry(e)
+        try cur._1.copy(tos) finally tos.closeEntry
       }
-    } finally {
-      tos.close
     }
+
   }
 
-
-  override def extractDirArchiveWithRelativePath(baseDir: File, archive: InputStream) = {
-    if (!baseDir.isDirectory) {
-      throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
+  class TarOutputStreamComplement(tos: TarOutputStream) {
+    def addFile(f: File, name: String) = {
+      val entry = new TarEntry(name)
+      entry.setSize(f.length)
+      tos.putNextEntry(entry)
+      try f.copy(tos) finally tos.closeEntry
     }
-    val tis = new TarInputStream(archive)
+    
+    def createDirArchiveWithRelativePathNoVariableContent(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, (e:TarEntry) => e.setModTime(0))
+ 
+    def createDirArchiveWithRelativePath(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, {(e)=>})
+  
+  }
+ 
+  implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream): TarOutputStreamComplement = new TarOutputStreamComplement(tos)
+  
+  class TarInputStreamComplement(tis: TarInputStream) {
+    
+    def applyAndClose[T](f: TarEntry => T): Iterable[T] = try {
+      val ret = new ListBuffer[T]
+      
+      var e = tis.getNextEntry
+      while(e != null) {
+        ret += f(e)
+        e = tis.getNextEntry
+      }
+      ret
+    } finally tis.close
+    
+    def extractDirArchiveWithRelativePathAndClose(baseDir: File) = try {
+      if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
 
-    try {
       var e = tis.getNextEntry
       while (e != null) {
         val dest = new File(baseDir, e.getName)
         dest.getParentFile.mkdirs
         val fos = new FileOutputStream(dest)
-        try {
-          FileUtil.copy(tis, fos)
-        } finally {
-          fos.close
-        }
+        try tis.copy(fos) finally fos.close
 
         e = tis.getNextEntry
       }
-    } finally {
-      tis.close
-    }
-
+    } finally tis.close
   }
+  
+  
+  implicit def TarInputStream2TarInputStreamComplement(tis: TarInputStream): TarInputStreamComplement = new TarInputStreamComplement(tis)
+  
 }

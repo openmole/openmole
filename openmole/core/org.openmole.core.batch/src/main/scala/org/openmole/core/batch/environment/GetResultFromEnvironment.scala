@@ -29,7 +29,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileUtil._
-import org.openmole.commons.tools.io.TarArchiver
+import org.openmole.commons.tools.io.TarArchiver._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.message.ContextResults
@@ -145,11 +145,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
               val fis = new FileInputStream(stdOutFile)
-              try {
-                copy(fis, System.out)
-              } finally {
-                fis.close
-              }
+              try {copy(fis, System.out)} finally {fis.close}
               System.out.println("-------------------------------------------------------")
             }
           } finally {
@@ -179,23 +175,12 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
 
         val tis = new TarInputStream(new FileInputStream(tarResultFile))
 
-        try {
-          //val destDir = workspace.newDir("tarResult")
-
-          var te = tis.getNextEntry
-
-          while (te != null) {
-
+        tis.applyAndClose(te => {
             val dest = workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
-            Logger.getLogger(classOf[GetResultFromEnvironment].getName).fine("Archive entry: " + te.getName + " to " + dest.getAbsolutePath)
-            
+             
             val os = new FileOutputStream(dest)
 
-            try {
-              copy(tis, os)
-            } finally {
-              os.close
-            }
+            try {copy(tis, os)} finally {os.close}
 
             val fileInfo = filesInfo(te.getName)
             if (fileInfo == null) throw new InternalProcessingError("FileInfo not found for entry " + te.getName + '.')
@@ -203,24 +188,14 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             val file = if (fileInfo._2) {
               val file = workspace.newDir("tarResult")
 
-              val destIn = new FileInputStream(dest)
-              try {
-                TarArchiver.extractDirArchiveWithRelativePath(file, destIn)
-              } finally {
-                destIn.close
-              }
+              new TarInputStream(new FileInputStream(dest)).extractDirArchiveWithRelativePathAndClose(file)
               dest.delete
               file
             } else {
               dest
             }
             fileReplacement += fileInfo._1 -> file
-            te = tis.getNextEntry
-          }
-
-        } finally {
-          tis.close
-        }
+          })
       } finally {
         tarResultFile.delete
       }
