@@ -19,13 +19,13 @@ package org.openmole.core.implementation.task
 
 
 import java.io.File
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.task.IResource
+import org.openmole.misc.pluginmanager.PluginManager
 
 class PluginResource(plugin: File) extends IResource {
 
     def this(fileLocation: String) = this(new File(fileLocation))
    
-    override def deploy = pluginManager.load(plugin)
+    override def deploy = PluginManager.load(plugin)
    
 }

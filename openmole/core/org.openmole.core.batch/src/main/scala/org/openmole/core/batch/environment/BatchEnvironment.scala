@@ -24,13 +24,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
+import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.workspace.Workspace
 
 object BatchEnvironment {
   
@@ -46,11 +48,11 @@ object BatchEnvironment {
   
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
-  workspace += (MemorySizeForRuntime, "512")
-  workspace += (QualityHysteresis, "1000")
-  workspace += (CheckInterval, "PT2M")
-  workspace += (MinValueForSelectionExploration, "0.001")
-  workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
+  Workspace += (MemorySizeForRuntime, "512")
+  Workspace += (QualityHysteresis, "1000")
+  Workspace += (CheckInterval, "PT2M")
+  Workspace += (MinValueForSelectionExploration, "0.001")
+  Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
 }
 
 
@@ -66,18 +68,18 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
-    case None => workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+    case None => Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
   }
   
-  updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN)
+  Updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN)
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
-    updater.delay(bej, ExecutorType.UPDATE)
+    Updater.delay(bej, ExecutorType.UPDATE)
     jobRegistry.register(bej)
   }
   
-  @transient lazy val runtime: File = new File(workspace.preference(BatchEnvironment.RuntimeLocation))
+  @transient lazy val runtime: File = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
   
   protected def selectStorages(storageGroup: BatchStorageGroup) = {
         
@@ -99,7 +101,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      executorService.executorService(ExecutorType.OWN).submit(r)
+      ExecutorService.executorService(ExecutorType.OWN).submit(r)
     }
 
     while (storageGroup.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
@@ -127,7 +129,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
         }
       }
 
-      executorService.executorService(ExecutorType.OWN).submit(test)
+      ExecutorService.executorService(ExecutorType.OWN).submit(test)
     }
     
     while (jobServiceGroup.isEmpty && nbStillRunning.get > 0) done.acquire

@@ -28,8 +28,8 @@ import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.plugin.task.external.ExternalTask
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.resource.virtual.IVirtualMachine
-import org.openmole.plugin.task.external.virtual.internal.Activator._
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
@@ -79,7 +79,7 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
           session.close
         }
 
-        fetchOutputFiles(context, progress, workDir, workspace.newDir, sftp)
+        fetchOutputFiles(context, progress, workDir, Workspace.newDir, sftp)
         delete(sftp,tmpDir)
       } finally {
         sftp.close
@@ -93,8 +93,8 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
     val connection = new Connection(virtualMachine.host, virtualMachine.port)
 
     //Not supossed to fail but sometimes it does
- //   retry( () => {
-  //      try{
+    //   retry( () => {
+    //      try{
     var connected = false
     while(!connected) {
       try {
@@ -105,10 +105,10 @@ abstract class ExternalVirtualTask(name: String, relativeDir: String) extends Ex
       }
     }
     
-   //     } catch {
+    //     } catch {
     //      case e: Exception => throw e
-     //   }
-     // } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
+    //   }
+    // } ,workspace.getPreferenceAsInt(Configuration.SSHConnectionRetry))
     
     val isAuthenticated = connection.authenticateWithPassword(user, password)
 

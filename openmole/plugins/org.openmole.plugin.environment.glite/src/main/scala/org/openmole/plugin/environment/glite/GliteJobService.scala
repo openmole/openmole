@@ -25,7 +25,7 @@ import org.ogf.saga.job.JobDescription
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.plugin.environment.glite.internal.Activator._
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
 
@@ -35,7 +35,7 @@ object GliteJobService {
   val ConfigGroup = GliteJobService.getClass.getSimpleName
   val LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut")
     
-  workspace += (LCGCPTimeOut, "PT2M")
+  Workspace += (LCGCPTimeOut, "PT2M")
 }
 
 
@@ -100,7 +100,7 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     builder.toString
   }
 
-  private def getTimeOut: String = workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
+  private def getTimeOut: String = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
   
 
   override protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]): JobDescription = {

@@ -22,6 +22,7 @@ import java.io.File
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Logger
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.tools.service.Priority
 import org.openmole.commons.tools.service.RNG
@@ -30,8 +31,8 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.batch.internal.Activator._
 import collection.mutable.ArrayBuffer
+import org.openmole.misc.workspace.Workspace
 
 class BatchStorageGroup(environment: BatchEnvironment) {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
@@ -77,10 +78,10 @@ class BatchStorageGroup(environment: BatchEnvironment) {
                 quality match {
                   case Some(q) => 
                     val v = math.pow(1. * q.successRate, 2)
-                    val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                    val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                     if(v < min) min else v
                   case None => 1.
-                }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
+                }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * Workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
                       else 1)
               
               //Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))
@@ -112,7 +113,7 @@ class BatchStorageGroup(environment: BatchEnvironment) {
 
     resources :+= service
     val usageControl = BatchStorageControl.usageControl(service.description)
-    eventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+    EventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     
     waiting.release
   }

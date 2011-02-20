@@ -20,7 +20,6 @@ package org.openmole.core.implementation.execution.local
 import java.util.LinkedList
 import java.util.concurrent.Semaphore
 import org.openmole.core.implementation.execution.Environment
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.ExecutionState
@@ -28,6 +27,7 @@ import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.workspace.ConfigurationLocation
+import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.SynchronizedPriorityQueue
 
 object LocalExecutionEnvironment extends Environment[IExecutionJob] {
@@ -43,13 +43,13 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
   
   val DefaultNumberOfThreads = new ConfigurationLocation(LocalExecutionEnvironment.getClass.getSimpleName, "ThreadNumber")
 
-  workspace += (DefaultNumberOfThreads, Integer.toString(1))
+  Workspace += (DefaultNumberOfThreads, Integer.toString(1))
     
   private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
   private val jobInQueue = new Semaphore(0)
   
   private val executers = new LinkedList[LocalExecuter]
-  private var nbThreadVar = workspace.preferenceAsInt(DefaultNumberOfThreads)
+  private var nbThreadVar = Workspace.preferenceAsInt(DefaultNumberOfThreads)
        
   addExecuters(nbThread)
     

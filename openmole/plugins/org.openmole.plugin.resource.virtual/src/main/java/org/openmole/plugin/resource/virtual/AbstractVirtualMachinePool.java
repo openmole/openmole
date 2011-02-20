@@ -14,13 +14,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.resource.virtual;
 
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import static org.openmole.plugin.resource.virtual.internal.Activator.*;
-
+import org.openmole.misc.workspace.Workspace;
 
 /**
  *
@@ -28,18 +26,17 @@ import static org.openmole.plugin.resource.virtual.internal.Activator.*;
  */
 public abstract class AbstractVirtualMachinePool implements IVirtualMachinePool {
 
-  final static String Group = IVirtualMachinePool.class.getSimpleName();
-  final static ConfigurationLocation unusedVMKeepOn = new ConfigurationLocation(Group, "UnusedVMKeepOn");
+    final static String Group = IVirtualMachinePool.class.getSimpleName();
+    final static ConfigurationLocation unusedVMKeepOn = new ConfigurationLocation(Group, "UnusedVMKeepOn");
 
-  static {
-    workspace().$plus$eq(unusedVMKeepOn, "PT2M");
-  }
+    static {
+        Workspace.$plus$eq(unusedVMKeepOn, "PT2M");
+    }
 
-  long delay() throws InternalProcessingError {
-      return workspace().preferenceAsDurationInMs(unusedVMKeepOn);
-  }
-
-  private final VirtualMachineResource resource;
+    long delay() throws InternalProcessingError {
+        return Workspace.preferenceAsDurationInMs(unusedVMKeepOn);
+    }
+    private final VirtualMachineResource resource;
 
     public AbstractVirtualMachinePool(VirtualMachineResource resource) {
         this.resource = resource;
@@ -48,6 +45,4 @@ public abstract class AbstractVirtualMachinePool implements IVirtualMachinePool 
     public VirtualMachineResource resource() {
         return resource;
     }
-
-
 }

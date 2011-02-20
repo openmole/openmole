@@ -21,7 +21,7 @@ import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.commons.tools.service.HierarchicalRegistry
 import org.openmole.core.model.execution.IEnvironment
-import org.openmole.misc.workspace.IWorkspace
+import org.openmole.misc.workspace.Workspace
 import org.openmole.ui.console.internal.command.initializer.EnvironmentInitializer
 import org.openmole.ui.console.internal.command.initializer.IInitializer
 import org.openmole.ui.console.internal.command.initializer.WorkspaceInitializer
@@ -31,7 +31,7 @@ import scala.collection.JavaConversions._
 class Init(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
   
   private val initializers = new HierarchicalRegistry[IInitializer] 
-  initializers.register(classOf[IWorkspace], new WorkspaceInitializer)
+  initializers.register(Workspace.getClass, new WorkspaceInitializer)
   initializers.register(classOf[IEnvironment], new EnvironmentInitializer(muteShell))
   
 

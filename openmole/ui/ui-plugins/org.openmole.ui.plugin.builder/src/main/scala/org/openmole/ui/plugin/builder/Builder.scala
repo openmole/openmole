@@ -28,6 +28,7 @@ import org.openmole.commons.exception.UserBadDataError
 import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.capsule.ExplorationCapsule
 import org.openmole.core.implementation.data.Data
+import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
@@ -37,14 +38,18 @@ import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.MoleTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.transition.ExplorationTransition
+import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IExplorationCapsule
 import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -58,6 +63,7 @@ import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.structuregenerator.ComplexNode
 import org.openmole.core.structuregenerator.PrototypeNode
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast
+import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast
 import org.openmole.ui.plugin.transitionfactory.TransitionFactory
 import org.openmole.ui.plugin.transitionfactory.TransitionFactory._
 
@@ -301,11 +307,8 @@ class Builder {
    * @throws InternalProcessingError
    * @throws UserBadDataError
    * @throws InterruptedException
-   */
-  //FIXME?Doesn't compile for now bug in the compiler 2.8.1.RC4
-  
- 
-  def  explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): IMoleTask = {
+   */ 
+  def explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): IMoleTask = {
         
     val ft = puzzle.lastCapsule.task.getOrElse(throw new UserBadDataError("Task unasigned for first capsule of the puzzle"))
     
@@ -314,17 +317,42 @@ class Builder {
     val exploPuz = exploration(explo, puzzle)
     
     // builds a mole containing a exploration, a puzzle, and an aggregation on the inputToGlobalTask
-    val moleTask = new MoleTask(taskName, new Mole(exploPuz.firstCapsule), true)
+    val moleTask = new MoleTask(taskName, new Mole(exploPuz.firstCapsule))
 
     // sets output available as an array
     for (data <- ft.userOutputs) {
+      moleTask.forceArray(data)
       moleTask.addOutput(puzzle.lastCapsule, Data.toArray(data))
     }
     moleTask
-   
   }
     
-
+  def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], nb: Int) = {
+    val prototype = new Prototype(iterationName, classOf[Int])
+    
+    val loopOnCapsule = new Capsule(new Task(iterationName + "_loopOn") {
+      addParameter(prototype, 0)
+      
+      override protected def filterOutput(context: IContext) = {}
+      override def process(context: IContext, progress: IProgress) = {}
+    })
+    
+    val decrementCapsule = new Capsule(new Task(iterationName + "_decrement") {
+      addInput(prototype)
+      addOutput(prototype)
+      
+      override protected def filterOutput(context: IContext) = {}
+      override def process(context: IContext, progress: IProgress) = {
+        context += (prototype, context.value(prototype).get + 1)
+      }
+    })
+     
+    new Transition(loopOnCapsule, puzzle.firstCapsule)
+    new Transition(puzzle.lastCapsule, decrementCapsule)
+    new Transition(decrementCapsule, loopOnCapsule, prototype.name + "<=" + nb)
+    new DataChannel(loopOnCapsule, decrementCapsule, prototype)
+    new PuzzleFirstAndLast(loopOnCapsule, decrementCapsule)
+  }
       
   /**
    * Builds a prototype node.
@@ -354,5 +382,4 @@ class Builder {
    */
   def complexNode(name: String, parent: ComplexNode): ComplexNode = new ComplexNode(name, parent)
         
-     
 }

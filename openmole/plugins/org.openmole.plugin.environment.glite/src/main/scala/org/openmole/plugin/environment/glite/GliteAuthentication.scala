@@ -34,23 +34,25 @@ import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.plugin.environment.glite.internal.Activator._
+import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.ProxyChecker
 import org.openmole.plugin.environment.glite.internal.ProxyChecker
 
 import scala.collection.JavaConversions._
 
 object GliteAuthentication {
-  def getCertType: String = workspace.preference(GliteEnvironment.CertificateType)
+  def getCertType: String = Workspace.preference(GliteEnvironment.CertificateType)
   
-  def getP12CertPath: String = workspace.preference(GliteEnvironment.P12CertificateLocation)
+  def getP12CertPath: String = Workspace.preference(GliteEnvironment.P12CertificateLocation)
  
-  def getCertPath: String = workspace.preference(GliteEnvironment.CertificatePathLocation)
+  def getCertPath: String = Workspace.preference(GliteEnvironment.CertificatePathLocation)
 
-  def getKeyPath: String = workspace.preference(GliteEnvironment.KeyPathLocation)
+  def getKeyPath: String = Workspace.preference(GliteEnvironment.KeyPathLocation)
 
-  def getTimeString: String = workspace.preference(GliteEnvironment.TimeLocation)
+  def getTimeString: String = Workspace.preference(GliteEnvironment.TimeLocation)
   
   def getTime: Long = {
     try {
@@ -60,7 +62,7 @@ object GliteAuthentication {
     }
   }
 
-  def getDelegationTimeString: String = workspace.preference(GliteEnvironment.DelegationTimeLocation)
+  def getDelegationTimeString: String = Workspace.preference(GliteEnvironment.DelegationTimeLocation)
   
 
   def dowloadCACertificates(uri: URI, dir: File) = {
@@ -134,11 +136,11 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       if (caDir.exists) {
         caDir
       } else {
-        val tmp = workspace.file("CACertificates")
+        val tmp = Workspace.file("CACertificates")
 
         if (!tmp.exists || !new File(tmp, ".complete").exists) {
           tmp.mkdir();
-          dowloadCACertificates(new URI(workspace.preference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
+          dowloadCACertificates(new URI(Workspace.preference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
           new File(tmp, ".complete").createNewFile
         }
         tmp
@@ -155,13 +157,13 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   }
 
   private def createContextFromPreferences = {
-    val ctx = JSagaSessionService.createContext
+    val ctx = JSAGASessionService.createContext
     val proxyDuration = initContext(ctx)
 
-    val interval = (proxyDuration * workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+    val interval = (proxyDuration * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
 
-    updater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval)
-    JSagaSessionService.addContext(ctx)
+    Updater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval)
+    JSAGASessionService.addContext(ctx)
   }
 
   def initContext(ctx: Context): Long = {
@@ -187,7 +189,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     }
             
     if (proxy == null) {
-      proxy = workspace.newFile("proxy", ".x509")
+      proxy = Workspace.newFile("proxy", ".x509")
 
       if (getCertType.equalsIgnoreCase("p12")) {
         ctx.setAttribute(VOMSContext.USERCERTKEY, getP12CertPath)
@@ -201,7 +203,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       }
 
       val keyPassword = {
-        val pass = workspace.preference(GliteEnvironment.PasswordLocation)
+        val pass = Workspace.preference(GliteEnvironment.PasswordLocation)
         //Logger.getLogger(classOf[GliteAuthentication].getName).info(pass)
         if(pass == null) "" else pass
       }
@@ -226,13 +228,13 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   }
 
   private def createContextFromFile(proxyFile: File) = {
-    val ctx = JSagaSessionService.createContext
+    val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
     ctx.setAttribute(Context.TYPE, "GlobusLegacy")
 
-    JSagaSessionService.addContext(ctx)
+    JSAGASessionService.addContext(ctx)
   }
 
 }

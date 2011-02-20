@@ -31,7 +31,6 @@ import org.openmole.core.model.task.{IGenericTask,IResource}
 import org.openmole.core.model.execution.IProgress
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.ArraySeq
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
@@ -61,7 +60,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
           case Some(v) => 
             if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError("Input data named \"" + p.name + "\" required by the task \"" + name + "\" has the wrong type: \"" + v.prototype.`type`.getName + "\" instead of \"" + p.`type`.getName + "\" required")
         }
-
       }
     }
   }
@@ -74,14 +72,13 @@ abstract class GenericTask(val name: String) extends IGenericTask {
       context.variable(p) match {
         case None => 
           if (!d.mode.isOptional) {
-            Logger.getLogger(classOf[GenericTask].getName).log(Level.WARNING, "Variable {0} of type {1} not found in output of task {2}.", Array[Object](p.name, p.`type`.getName, name))
+            throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.getName +" in not optional and has not found in output of task" + name +".")
           }
         case Some(v) =>
-          
           if ( v.value == null || p.`type`.isAssignableFrom(v.value.asInstanceOf[AnyRef].getClass)) {
             vars += v
           } else {
-            Logger.getLogger(classOf[GenericTask].getName).log(Level.WARNING, "Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.getName +") is instance of class " + v.value.asInstanceOf[AnyRef].getClass + " and doesn't match the expected class " + p.`type`.getName + " in task" + name + ".")
+            throw new UserBadDataError("Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.getName +") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.getName + "' in task" + name + ".")
           }
       }
     }
@@ -123,62 +120,46 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     }
   }
 
-  private def end(context: IContext) = {
-    filterOutput(context)
-  }
+  private def end(context: IContext) = filterOutput(context)
 
-  /* (non-Javadoc)
-   * @see org.openmole.core.processors.ITask#addOutPrototype(org.openmole.core.data.structure.Prototype)
-   */
-  override def addOutput(prototype: IPrototype[_]): Unit = {
-    addOutput(new Data(prototype))
-  }
+  override def addOutput(prototype: IPrototype[_]): this.type = addOutput(new Data(prototype))
 
-  override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): Unit = {
-    addOutput(new Data(prototype, masks));
-  }
-
-
-  override def addOutput(data: IData[_]): Unit = {
+  override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
+ 
+  override def addOutput(data: IData[_]): this.type =  {
     _outputs += ((data.prototype.name, data))
+    this
   }
-
-  override def addResource(resource: IResource): Unit = {
+  
+  override def addResource(resource: IResource): this.type = {
     _resources += resource
+    this
+  }
+  
+  override def addInput(prototype: IPrototype[_]): this.type = addInput(new Data(prototype))
+
+  override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
+
+  override def addInput(data: IData[_]): this.type = {
+    _inputs += ((data.prototype.name,data))
+    this
   }
 
-  override def addInput(prototype: IPrototype[_]): Unit = {
-    addInput(new Data(prototype))
-  }
-
-  override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): Unit = {
-    addInput(new Data(prototype, masks))
-  }
-
-
-  override def addInput(data: IData[_]): Unit = {
-     _inputs += ((data.prototype.name,data))
-  }
-
-  override def addInput(dataSet: IDataSet): Unit = {
+  override def addInput(dataSet: IDataSet): this.type = {
     for(data <- dataSet) addInput(data)     
+    this
   }
 
-  override def addOutput(dataSet: IDataSet) = {
+  override def addOutput(dataSet: IDataSet): this.type = {
     for(data <- dataSet) addOutput(data)
+    this
   }
 
-  override def containsInput(name: String): Boolean = {
-    _inputs.contains(name)
-  }
+  override def containsInput(name: String): Boolean =  _inputs.contains(name)
 
-  override def containsInput(prototype: IPrototype[_]): Boolean = {
-    containsInput(prototype.name)
-  }
+  override def containsInput(prototype: IPrototype[_]): Boolean = containsInput(prototype.name)
 
-  override def containsOutput(name: String): Boolean = {
-    _outputs.contains(name)
-  }
+  override def containsOutput(name: String): Boolean =  _outputs.contains(name)
 
   override def containsOutput(prototype: IPrototype[_]): Boolean = {
     _outputs.contains(prototype.name)
@@ -197,17 +178,16 @@ abstract class GenericTask(val name: String) extends IGenericTask {
 
   def resources: Iterable[IResource] = _resources
  
-  override def deploy = {
-    for (resource <- resources)  resource.deploy   
-  }
+  override def deploy = for (resource <- resources) resource.deploy   
     
-  override def addParameter(parameter: IParameter[_]): Unit = {
+  override def addParameter(parameter: IParameter[_]): this.type = {
     _parameters += ((parameter.variable.prototype.name,parameter))
+    this
   }
     
-  override def addParameter[T](prototype: IPrototype[T] , value: T): Unit = addParameter(new Parameter[T](prototype, value))
+  override def addParameter[T](prototype: IPrototype[T] , value: T): this.type = addParameter(new Parameter[T](prototype, value))
     
-  override def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): Unit = addParameter(new Parameter[T](prototype, value, `override`))
+  override def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type = addParameter(new Parameter[T](prototype, value, `override`))
     
   override def parameters: Iterable[IParameter[_]]= _parameters.values
    

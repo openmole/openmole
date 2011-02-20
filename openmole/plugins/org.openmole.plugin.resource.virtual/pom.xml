@@ -63,7 +63,6 @@
 
     <properties>
 	<qemu.directory>target/qemu</qemu.directory>
-	<bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
     </properties>
 
     <build>

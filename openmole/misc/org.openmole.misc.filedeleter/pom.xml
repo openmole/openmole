@@ -36,12 +36,6 @@
 
     <packaging>bundle</packaging>
 
-    <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-    </properties>
-
-
-
 </project>
 
 

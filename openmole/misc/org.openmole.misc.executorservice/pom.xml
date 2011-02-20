@@ -36,11 +36,4 @@
 
     <packaging>bundle</packaging>
 
-    <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-        <!--<symbolic.name>${project.artifactId};singleton:=true</symbolic.name>-->
-    </properties>
-
-
-
 </project>

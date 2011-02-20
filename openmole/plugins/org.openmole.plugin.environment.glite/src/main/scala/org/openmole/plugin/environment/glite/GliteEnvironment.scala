@@ -18,6 +18,8 @@
 package org.openmole.plugin.environment.glite
 
 
+import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 import java.net.URI
@@ -26,7 +28,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.batch.environment.BatchStorage
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.plugin.environment.glite.internal.Activator._
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
@@ -74,36 +76,36 @@ object GliteEnvironment {
   val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
   val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
 
-  workspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
+  Workspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
 
-  workspace += (KeyPathLocation, () => System.getProperty("user.home") + "/.globus/userkey.pem")
+  Workspace += (KeyPathLocation, () => System.getProperty("user.home") + "/.globus/userkey.pem")
 
-  workspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
+  Workspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
 
-  workspace += (CertificateType, "pem")
-  workspace += (TimeLocation, "PT24H")
-  workspace += (DelegationTimeLocation, "P7D")
+  Workspace += (CertificateType, "pem")
+  Workspace += (TimeLocation, "PT24H")
+  Workspace += (DelegationTimeLocation, "P7D")
 
-  workspace += (FetchRessourcesTimeOutLocation, "PT5M")
-  workspace += (CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
+  Workspace += (FetchRessourcesTimeOutLocation, "PT5M")
+  Workspace += (CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
-  workspace += (LocalThreadsBySELocation, "10")
-  workspace += (LocalThreadsByWMSLocation, "10")
+  Workspace += (LocalThreadsBySELocation, "10")
+  Workspace += (LocalThreadsByWMSLocation, "10")
 
-  workspace += (ProxyRenewalRatio, "0.2")
+  Workspace += (ProxyRenewalRatio, "0.2")
 
-  workspace += (OverSubmissionNbSampling, "10")
-  workspace += (OverSubmissionSamplingWindowFactor, "5")
+  Workspace += (OverSubmissionNbSampling, "10")
+  Workspace += (OverSubmissionSamplingWindowFactor, "5")
   
- // workspace += (OverSubmissionGridSizeRatio, "0.25")
-  workspace += (OverSubmissionInterval, "PT5M")
+ // Workspace += (OverSubmissionGridSizeRatio, "0.25")
+  Workspace += (OverSubmissionInterval, "PT5M")
 
-  workspace += (OverSubmissionMinNumberOfJob, "100")
-  workspace += (OverSubmissionNumberOfJobUnderMin, "5")
+  Workspace += (OverSubmissionMinNumberOfJob, "100")
+  Workspace += (OverSubmissionNumberOfJobUnderMin, "5")
   
-  workspace += (JobShakingInterval, "PT5M")
-  workspace += (JobShakingProbabilitySubmitted, "0.1")
-  workspace += (JobShakingProbabilityQueued, "0.01")
+  Workspace += (JobShakingInterval, "PT5M")
+  Workspace += (JobShakingProbabilitySubmitted, "0.1")
+  Workspace += (JobShakingProbabilityQueued, "0.01")
  
 }
 
@@ -111,10 +113,10 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   import GliteEnvironment._
 
-  val threadsBySE = workspace.preferenceAsInt(LocalThreadsBySELocation)
-  val threadsByWMS = workspace.preferenceAsInt(LocalThreadsByWMSLocation)
+  val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySELocation)
+  val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
        
-  updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
+  Updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
  // Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
@@ -142,7 +144,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: String, myProxyUserId: String, myProxyPass: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) =this(voName, vomsURL, bdii, Some(new MyProxy(myProxy, myProxyUserId,myProxyPass)), Some(attributes.toMap), Some(memoryForRuntime), fqan)
   
   override def allJobServices: Iterable[GliteJobService] = {
-    val jss = getBDII.queryWMSURIs(voName, workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
+    val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
     val jobServices = new ListBuffer[GliteJobService]
 
@@ -161,7 +163,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   override def allStorages: Iterable[BatchStorage] = {
     val allStorages = new ListBuffer[BatchStorage]
-    val stors = getBDII.querySRMURIs(voName, workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
+    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
 
     for (stor <- stors) {
       val storage = new BatchStorage(this, stor, threadsBySE)

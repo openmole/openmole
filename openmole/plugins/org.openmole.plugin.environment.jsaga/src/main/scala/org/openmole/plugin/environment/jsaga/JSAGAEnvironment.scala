@@ -19,21 +19,21 @@ package org.openmole.plugin.environment.jsaga
 
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.plugin.environment.jsaga.internal.Activator
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 
 object JSAGAEnvironment {
-    val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
+  val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
 
-    Activator.getWorkspace += (DefaultRequieredMemory, "1024")
+  Workspace += (DefaultRequieredMemory, "1024")
 }
 
 
 abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]], inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
-    import JSAGAEnvironment._
+  import JSAGAEnvironment._
     
-    val attributes = inAttributes match {
-      case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> Activator.getWorkspace.preference(DefaultRequieredMemory)}
-      case None => Map(MEMORY -> Activator.getWorkspace.preference(DefaultRequieredMemory))
-    }
+  val attributes = inAttributes match {
+    case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> Workspace.preference(DefaultRequieredMemory)}
+    case None => Map(MEMORY -> Workspace.preference(DefaultRequieredMemory))
+  }
 }

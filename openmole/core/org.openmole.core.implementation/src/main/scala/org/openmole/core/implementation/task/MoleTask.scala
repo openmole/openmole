@@ -18,18 +18,19 @@
 package org.openmole.core.implementation.task
 
 import java.util.logging.Logger
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.exception.MultipleException
 import org.openmole.commons.exception.UserBadDataError
 import org.openmole.commons.tools.service.Priority
+import org.openmole.commons.tools.obj.ClassUtils._
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.MoleJobRegistry
-import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
@@ -43,17 +44,19 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
+import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-class MoleTask(name: String, val mole: IMole, val toArray: Boolean) extends Task(name) with IMoleTask {
+class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask {
 
-  def this(name: String, mole: IMole) = this(name, mole, false)
+  //def this(name: String, mole: IMole) = this(name, mole, false)
+  var forceArray = List.empty[IPrototype[_]]
   
   class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
 
     val throwables = new ListBuffer[Throwable] 
-    val contexts = new ListBuffer[IContext] 
+    val variables = new ListBuffer[IVariable[_]] 
     
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
@@ -73,7 +76,7 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean) extends Task
                 //Logger.getLogger(classOf[MoleTask].getName).fine(e._2.toString + " " + p.toString)
                 moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
               }
-              contexts += ctx
+              variables ++= ctx
           }
           
         case _ =>
@@ -96,12 +99,14 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean) extends Task
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
     
-    eventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobStatusChanged)
+    EventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobStatusChanged)
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    ContextAggregator.aggregate(userOutputs, toArray, resultGathering.contexts).foreach {
+    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forceArray.map( e => e.name -> manifest(e.`type`))
+    
+    aggregate(userOutputs, toArrayMap, resultGathering.variables).foreach {
       context += _
     }
 
@@ -124,5 +129,10 @@ class MoleTask(name: String, val mole: IMole, val toArray: Boolean) extends Task
   override def inputs: IDataSet = {
     val firstTask = mole.root.task.getOrElse(throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name))
     new DataSet(super.inputs ++ firstTask.inputs)
+  }
+  
+  override def forceArray(prototype: IPrototype[_]): this.type = {
+    forceArray = prototype +: forceArray
+    this
   }
 }

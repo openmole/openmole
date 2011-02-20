@@ -20,21 +20,20 @@ package org.openmole.core.implementation.tools
 import groovy.lang.Binding
 import org.openmole.commons.tools.groovy.IGroovyProxy
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.misc.workspace.IWorkspace
+import org.openmole.misc.workspace.Workspace
 
 
 object GroovyContextAdapter{
-  val contextVar = new Prototype[IContext]("context", classOf[IContext])
-  val workspaceVar = new Prototype[IWorkspace]("workspace", classOf[IWorkspace])
-    
+  val contextVar = new Prototype("context", classOf[IContext])
+  val workspaceVar = new Prototype("workspace", Workspace.getClass)
+  
   def fromContextToBinding(context: IContext) = {
     val binding = new Binding
 
     binding.setVariable(contextVar.name, context)
-    binding.setVariable(workspaceVar.name, workspace)
+    binding.setVariable(workspaceVar.name, Workspace)
     context.variables.values.foreach{in => binding.setVariable(in.prototype.name, in.value)}
 
     binding

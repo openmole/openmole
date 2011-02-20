@@ -20,7 +20,7 @@
 package org.openmole.ui.plugin.builder.internal;
 
 import org.openmole.ui.plugin.builder.Builder;
-import org.openmole.ui.console.IConsole;
+import org.openmole.ui.console.Console;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -33,15 +33,9 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bc) throws Exception {
-        ServiceReference serviceReference = bc.getServiceReference(IConsole.class.getName());
-        if (serviceReference != null) {
-            ((IConsole) bc.getService(serviceReference)).setVariable("builder", new Builder());
-        } else {
-            System.out.println("No service found for IConsole");
-        }
+        Console.setVariable("builder", new Builder());
     }
 
     @Override
-    public void stop(BundleContext bc) throws Exception {
-    }
+    public void stop(BundleContext bc) throws Exception {}
 }

@@ -29,8 +29,8 @@ import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.data.IContext;
 import org.openmole.commons.exception.InternalProcessingError;
 import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.workspace.Workspace;
 import org.openmole.plugin.task.external.system.ExternalSystemTask;
-import org.openmole.plugin.task.netlogo.internal.Activator;
 import scala.Tuple2;
 
 /**
@@ -67,7 +67,7 @@ public class NetLogoTask extends ExternalSystemTask {
     @Override
     public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
-            File tmpDir = Activator.getWorkspace().newDir("netLogoTask");
+            File tmpDir = Workspace.newDir("netLogoTask");
             prepareInputFiles(context, progress, tmpDir);
             File script = new File(tmpDir, relativeScriptPath);
             HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();

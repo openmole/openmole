@@ -32,13 +32,13 @@ import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
-import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
+import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.ConfigurationLocation
 
-import org.openmole.misc.workspace.IWorkspace
+import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
 object BatchStorage {
@@ -47,8 +47,8 @@ object BatchStorage {
   val TmpDirRemoval = new ConfigurationLocation("BatchStorage", "TmpDirRemoval")
   val TmpDirRegenerate = new ConfigurationLocation("BatchStorage", "TmpDirRegenerate")
     
-  workspace += (TmpDirRemoval, "P30D")
-  workspace += (TmpDirRegenerate, "P1D")
+  Workspace += (TmpDirRemoval, "P30D")
+  Workspace += (TmpDirRegenerate, "P1D")
     
   val persistent = "persistent/"
   val tmp = "tmp/"
@@ -58,7 +58,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
   
   @transient lazy val description = new BatchStorageDescription(URI)
   
-  BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+  BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   import BatchStorage._
   
@@ -78,7 +78,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
     if (persistentSpaceVar == null) {
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
       
-      val service = executorService.executorService(ExecutorType.REMOVE)
+      val service = ExecutorService.executorService(ExecutorType.REMOVE)
       val inCatalog = ReplicaCatalog.inCatalog(description, environment.authenticationKey)
       for (dir <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, dir)
@@ -94,13 +94,13 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
 
   def tmpSpace(token: AccessToken): IURIFile = synchronized {
 
-    if (tmpSpaceVar == null || time + workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
+    if (tmpSpaceVar == null || time + Workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
       time = System.currentTimeMillis
 
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
 
-      val service = executorService.executorService(ExecutorType.REMOVE)
-      val removalDate = System.currentTimeMillis - workspace.preferenceAsDurationInMs(TmpDirRemoval);
+      val service = ExecutorService.executorService(ExecutorType.REMOVE)
+      val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
 
       for (dir <- tmpNoTime.list(token)) {
         val child = new URIFile(tmpNoTime, dir)
@@ -132,7 +132,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
   def baseDir(token: AccessToken): IURIFile = synchronized {
     if (baseSpaceVar == null) {
       val storeFile = new URIFile(URI.toString)
-      baseSpaceVar = storeFile.mkdirIfNotExist(workspace.preference(IWorkspace.UniqueID) + '/', token)
+      baseSpaceVar = storeFile.mkdirIfNotExist(Workspace.preference(Workspace.UniqueID) + '/', token)
     }
     baseSpaceVar
   }
@@ -151,7 +151,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
         RNG.nextBytes(rdm)
 
         val testFile = tmpSpace(token).newFileInDir("test", ".bin")
-        val tmpFile = workspace.newFile("test", ".bin")
+        val tmpFile = Workspace.newFile("test", ".bin")
 
         try {
           //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
@@ -182,7 +182,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
             return true;
           }
         } finally {
-          executorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
+          ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
         }
       } finally {
         BatchStorageControl.usageControl(description).releaseToken(token)

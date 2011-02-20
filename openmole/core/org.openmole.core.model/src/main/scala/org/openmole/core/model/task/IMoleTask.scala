@@ -23,15 +23,27 @@ package org.openmole.core.model.task
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
+import org.openmole.core.model.data.IData
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.IMole
 
 trait IMoleTask extends ITask {
 
-    /**
-     *
-     * Get the mole executed by this task.
-     *
-     * @return the mole executed by this task
-     */
-    def mole: IMole
+  /**
+   *
+   * Get the mole executed by this task.
+   *
+   * @return the mole executed by this task
+   */
+  def mole: IMole
+    
+  def forceArray(prototype: IPrototype[_]): this.type
+  
+  def forceArray(data: IData[_]): this.type = forceArray(data.prototype)
+  
+  def forceArray(dataSet: IDataSet): this.type = {
+    dataSet.foreach(forceArray(_))
+    this
+  }
 }

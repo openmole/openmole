@@ -87,9 +87,8 @@ trait IDataChannel {
    * 
    * @param ticket the ticket of the current execution
    * @param moleExecution the current mole execution
-   * @return a new context containing the variable wich has gone through this
-   * data channel
+   * @return the variables wich have been transmited through this data channel
    */
-  def consums(sticket: ITicket, moleExecution: IMoleExecution): IContext
+  def consums(sticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]]
 
 }

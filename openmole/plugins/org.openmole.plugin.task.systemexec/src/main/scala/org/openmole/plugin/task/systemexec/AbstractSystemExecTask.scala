@@ -23,10 +23,10 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import java.io.IOException
-import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
@@ -46,7 +46,7 @@ abstract class AbstractSystemExecTask (name: String,
   }
   
   override protected def process(context: IContext, progress: IProgress) = {
-    val tmpDir = workspace.newDir("systemExecTask")
+    val tmpDir = Workspace.newDir("systemExecTask")
 
     prepareInputFiles(context, progress, tmpDir)
     val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)

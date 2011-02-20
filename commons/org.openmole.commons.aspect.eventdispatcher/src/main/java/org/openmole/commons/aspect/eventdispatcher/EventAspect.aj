@@ -2,7 +2,6 @@ package org.openmole.commons.aspect.eventdispatcher;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openmole.commons.aspect.eventdispatcher.internal.Activator;
 import java.lang.InterruptedException;
 import java.lang.reflect.Method;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -20,7 +19,7 @@ public aspect EventAspect {
                 String type = annotation.name();
                 Object[] args = thisJoinPoint.getArgs();
 
-                Activator.eventDispatcher().<Object>objectChanged(object,type, args);
+                EventDispatcher.<Object>objectChanged(object,type, args);
 	}
 
 
@@ -31,7 +30,7 @@ public aspect EventAspect {
                 Method method = ((MethodSignature) thisJoinPointStaticPart.getSignature()).getMethod();
                 ObjectModified annotation = method.getAnnotation(ObjectModified.class);
 
-                Activator.eventDispatcher().<Object>objectChanged(object,annotation.name(), thisJoinPoint.getArgs());
+                EventDispatcher.<Object>objectChanged(object,annotation.name(), thisJoinPoint.getArgs());
 	}
 
         after() : execution(*.new(..)) && @annotation(org.openmole.commons.aspect.eventdispatcher.ObjectConstructed) {
@@ -45,7 +44,7 @@ public aspect EventAspect {
 
                // Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,"ctr: " + thisJoinPointStaticPart.getSignature().toString());
 
-                Activator.eventDispatcher().objectConstructed(object);
+                EventDispatcher.objectConstructed(object);
 		//Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.INFO,object.toString() + " "+ method);
 
 		//return ret;

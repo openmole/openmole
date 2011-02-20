@@ -19,10 +19,10 @@ package org.openmole.runtime
 
 import java.util.concurrent.Semaphore
 import java.util.logging.Logger
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.tools.service.Priority
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.runtime.internal.Activator
 
 class AllFinished extends IObjectListener[IMoleJob] {
 
@@ -34,7 +34,7 @@ class AllFinished extends IObjectListener[IMoleJob] {
   def registerJob(job: IMoleJob) = synchronized {
     allFinished.drainPermits
     nbJobs += 1
-    Activator.getEventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOW, this, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOW, this, IMoleJob.StateChanged)
   }
 
   def waitAllFinished = {

@@ -22,15 +22,15 @@ import java.util.logging.Logger
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
+import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ListBuffer
 import scala.ref.WeakReference
-import org.openmole.core.batch.internal.Activator._
 
 class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
 
   def this(environment: BatchEnvironment) = this(new WeakReference(environment))
   
-  override def delay = workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval)
+  override def delay = Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval)
   
   override def update: Boolean = {
     val environment = environmentRef.get match {

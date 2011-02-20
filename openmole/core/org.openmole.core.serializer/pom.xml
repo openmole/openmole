@@ -71,7 +71,6 @@
    <packaging>bundle</packaging>
 
     <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
 	<eclipse.buddypolicy>global</eclipse.buddypolicy>
     </properties>
 

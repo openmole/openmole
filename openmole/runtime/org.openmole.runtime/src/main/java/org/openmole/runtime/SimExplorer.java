@@ -30,7 +30,10 @@ import org.apache.commons.cli.ParseException;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.openmole.runtime.internal.Activator;
+import org.openmole.core.batch.jsaga.JSAGASessionService;
+import org.openmole.misc.pluginmanager.PluginManager;
+import org.openmole.misc.workspace.Workspace;
+import org.openmole.core.serializer.Serializer;
 
 public class SimExplorer implements IApplication {
 
@@ -61,27 +64,27 @@ public class SimExplorer implements IApplication {
                 return IApplication.EXIT_OK;
             }
 
-            Activator.getWorkspace().location_$eq(new File(cmdLine.getOptionValue("w")));
+            Workspace.location_$eq(new File(cmdLine.getOptionValue("w")));
 
             //init jsaga
-            Activator.getJSagaSessionService();
+            JSAGASessionService.session();
 
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
             String executionMessageURI = cmdLine.getOptionValue("i");
 
             File environmentPluginDir = new File(environmentPluginDirPath);
-            Activator.getPluginManager().loadDir(environmentPluginDir);
+            PluginManager.loadDir(environmentPluginDir);
 
             
             if ( cmdLine.hasOption("l") ) {
-                Activator.getWorkspace().password_$eq(cmdLine.getOptionValue("l"));
+                Workspace.password_$eq(cmdLine.getOptionValue("l"));
                 debug = true;
             }
             
             if (cmdLine.hasOption("a")) {
                 /* get env and init */
                 File envFile = new File(cmdLine.getOptionValue("a"));
-                BatchAuthentication authentication = Activator.getSerialiser().deserialize(envFile);
+                BatchAuthentication authentication = Serializer.deserialize(envFile);
                 authentication.initialize();
                 if(!debug) envFile.delete();
             }

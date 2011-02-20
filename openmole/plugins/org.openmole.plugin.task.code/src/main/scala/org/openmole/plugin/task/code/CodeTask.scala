@@ -21,14 +21,14 @@ import java.io.File
 import java.util.logging.Logger
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IProgress
-import org.openmole.plugin.task.code.internal.Activator
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import org.openmole.plugin.tools.code.{IContextToCode,ISourceCode}
 
 abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
 
   override protected def process(context: IContext, progress: IProgress) = {
-    val pwd = Activator.getWorkspace.newDir
+    val pwd = Workspace.newDir
     prepareInputFiles(context, progress, pwd.getCanonicalFile)
 
     contextToCode.execute(context, Iterable.empty, progress, userOutputs)

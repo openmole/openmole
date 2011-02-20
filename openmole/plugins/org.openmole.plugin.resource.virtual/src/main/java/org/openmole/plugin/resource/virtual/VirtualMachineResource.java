@@ -16,6 +16,8 @@
  */
 package org.openmole.plugin.resource.virtual;
 
+import org.openmole.misc.executorservice.ExecutorService;
+import org.openmole.misc.workspace.Workspace;
 import java.io.FileOutputStream;
 import ch.ethz.ssh2.Connection;
 import java.io.BufferedOutputStream;
@@ -42,8 +44,6 @@ import org.openmole.commons.tools.io.StringBuilderOutputStream;
 import org.openmole.core.model.task.IResource;
 import org.openmole.misc.executorservice.ExecutorType;
 import org.openmole.misc.workspace.ConfigurationLocation;
-import org.openmole.plugin.resource.virtual.internal.Activator;
-import static org.openmole.plugin.resource.virtual.internal.Activator.*;
 import static org.openmole.commons.tools.io.Network.*;
 import static org.openmole.plugin.tools.utils.ProcessUtils.*;
 
@@ -56,7 +56,7 @@ public class VirtualMachineResource implements IResource {
     final static ConfigurationLocation VMBootTime = new ConfigurationLocation(VirtualMachineResource.class.getSimpleName(), "VMBootTime");
 
     static {
-        workspace().$plus$eq(VMBootTime, "PT5M");
+        Workspace.$plus$eq(VMBootTime, "PT5M");
     }
     final static String[] CommonFiles = {"bios.bin"};
     final static String Executable = "qemu";
@@ -104,7 +104,7 @@ public class VirtualMachineResource implements IResource {
         final File vmImage;
 
         try {
-            vmImage = workspace().newFile();
+            vmImage = Workspace.newFile();
             FileUtil$.MODULE$.copy(system, vmImage);
         } catch(IOException e) {
             throw new InternalProcessingError(e);
@@ -146,9 +146,9 @@ public class VirtualMachineResource implements IResource {
         //First connection
         //final Connection connection = new Connection(ret.host(), ret.port());
 
-        final Long timeOut = workspace().preferenceAsDurationInMs(VMBootTime);
+        final Long timeOut = Workspace.preferenceAsDurationInMs(VMBootTime);
 
-        Future connectionFuture = Activator.executorService().executorService(ExecutorType.OWN()).submit(new Callable<Void>() {
+        Future connectionFuture = ExecutorService.executorService(ExecutorType.OWN()).submit(new Callable<Void>() {
 
             @Override
             public Void call() throws Exception {
@@ -205,7 +205,7 @@ public class VirtualMachineResource implements IResource {
     private File getQEmuDir() throws IOException, InternalProcessingError, InterruptedException {
         final String os = System.getProperty("os.name");
 
-        final File qemuDir = workspace().newDir();
+        final File qemuDir = Workspace.newDir();
         final String qemuJarPath;
         final String[] toCopy;
 

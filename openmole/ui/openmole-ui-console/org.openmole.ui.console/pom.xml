@@ -184,7 +184,6 @@
         <product.plugins.directory>${product.directory}/plugins/</product.plugins.directory>
         <product.configuration.directory>${product.directory}/configuration/</product.configuration.directory>
         <symbolic.name>${project.artifactId};singleton:=true</symbolic.name>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>
 

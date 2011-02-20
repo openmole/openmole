@@ -17,10 +17,10 @@
 
 package org.openmole.core.implementation.transition
 
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.commons.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.commons.tools.service.Priority
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -38,17 +38,12 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
   class AggregationTransitionAdapter extends IObjectListenerWithArgs[ISubMoleExecution] {
 
     override def eventOccured(subMole: ISubMoleExecution, args: Array[Object]) = {
-      if (!classOf[IMoleJob].isAssignableFrom(args(0).getClass)) {
-        throw new InternalProcessingError("BUG: argument of the event has the wrong type.");
-      }
-
       val lastJob = args(0).asInstanceOf[IMoleJob]
       val moleExecution = args(1).asInstanceOf[IMoleExecution]
       val ticket = args(2).asInstanceOf[ITicket];
       subMoleFinished(subMole, lastJob, ticket, moleExecution)
     }
   }
-
 
   def this(start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
     
@@ -76,9 +71,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     
     val resultContexts = registry.consult(this, parent) match {
       case None => 
-        val res = new ContextBuffer(true)
+        val res = new ContextBuffer
         registry.register(this, parent, res)
-        eventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
+        EventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
         res
       case Some(res) => res
     }

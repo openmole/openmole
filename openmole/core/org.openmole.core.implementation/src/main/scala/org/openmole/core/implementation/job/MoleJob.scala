@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Progress
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.task.GenericTask
 import org.openmole.core.implementation.tools.LocalHostName
 import org.openmole.core.model.data.IContext
@@ -30,7 +29,7 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.task.IGenericTask
-import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified}
+import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified, EventDispatcher}
 import scala.collection.mutable.ArrayBuffer
 
 object MoleJob {
@@ -61,7 +60,7 @@ class MoleJob  @ObjectConstructed() (val task: IGenericTask, private var _contex
       timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
      // MoleJob.LOGGER.info("After " + task.name + " " + timeStamps.map{ _.state.toString } + timeStamps.getClass)
       _state = state
-      eventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
+      EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
     }
   }
 

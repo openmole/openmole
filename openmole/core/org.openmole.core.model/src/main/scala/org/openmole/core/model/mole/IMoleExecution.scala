@@ -38,14 +38,14 @@ trait IMoleExecution {
 
     @throws(classOf[InternalProcessingError])
     @throws(classOf[UserBadDataError])
-    def start
+    def start: this.type
     
     @throws(classOf[InternalProcessingError])
     @throws(classOf[UserBadDataError])
-    def cancel
+    def cancel: this.type
     
     @throws(classOf[InterruptedException])
-    def waitUntilEnded
+    def waitUntilEnded: this.type
     def isFinished: Boolean
 
     def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)

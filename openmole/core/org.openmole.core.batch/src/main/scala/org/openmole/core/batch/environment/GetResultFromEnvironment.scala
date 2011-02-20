@@ -31,7 +31,6 @@ import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.commons.tools.io.TarArchiver._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.internal.Activator._
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
@@ -46,6 +45,9 @@ import org.openmole.core.model.execution.ExecutionState._
 //import scala.collection.JavaConversions._
 
 import org.openmole.core.model.job.State
+import org.openmole.core.serializer.Serializer
+import org.openmole.misc.hashservice.HashService
+import org.openmole.misc.workspace.Workspace
 import scala.Boolean._
 import scala.collection.immutable.TreeMap
 
@@ -123,7 +125,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   private def getRuntimeResult(outputFile: IURIFile, token: AccessToken): RuntimeResult = {
     val resultFile = outputFile.cache(token)
     try {
-      serializer.deserialize(resultFile)
+      Serializer.deserialize(resultFile)
     } finally {
       resultFile.delete
     }
@@ -137,7 +139,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
         if (!message.isEmpty) {
           val stdOutFile = message.file.cache(token)
           try {
-            val stdOutHash = hashService.computeHash(stdOutFile)
+            val stdOutHash = HashService.computeHash(stdOutFile)
             if (!stdOutHash.equals(message.hash)) {
               LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.")
             }
@@ -168,7 +170,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
       val tarResultFile = tarResultURIFile.cache(token)
 
       try {
-        val tarResulHash = hashService.computeHash(tarResultFile)
+        val tarResulHash = HashService.computeHash(tarResultFile)
         if (!tarResulHash.equals(tarResult.hash)) {
           throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
         }
@@ -176,7 +178,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
         val tis = new TarInputStream(new FileInputStream(tarResultFile))
 
         tis.applyAndClose(te => {
-            val dest = workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
+            val dest = Workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
              
             val os = new FileOutputStream(dest)
 
@@ -186,7 +188,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             if (fileInfo == null) throw new InternalProcessingError("FileInfo not found for entry " + te.getName + '.')
 
             val file = if (fileInfo._2) {
-              val file = workspace.newDir("tarResult")
+              val file = Workspace.newDir("tarResult")
 
               new TarInputStream(new FileInputStream(dest)).extractDirArchiveWithRelativePathAndClose(file)
               dest.delete
@@ -211,7 +213,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
     val contextResutsFileCache = uriFile.cache(token)
 
     try {
-      serializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
+      Serializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
     } finally {
       contextResutsFileCache.delete
     }

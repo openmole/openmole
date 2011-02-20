@@ -19,6 +19,7 @@
  */
 package org.openmole.plugin.task.filemanagement;
 
+import org.openmole.misc.workspace.Workspace;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -35,7 +36,6 @@ import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
 import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.data.IContext;
-import org.openmole.plugin.task.filemanagement.internal.Activator;
 
 import static org.openmole.core.implementation.tools.VariableExpansion.*;
 
@@ -54,7 +54,7 @@ public abstract class TemplateFileGeneratorTask extends Task {
         try {
 
             File templateFile = getFile(context);
-            File outputFile = Activator.getWorkspace().newFile("output", "template");
+            File outputFile = Workspace.newFile("output", "template");
 
             BufferedReader reader = new BufferedReader(new FileReader(templateFile));
             try {

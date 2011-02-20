@@ -39,16 +39,17 @@ import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.BatchJobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.plugin.environment.jsaga.internal.Activator
+import org.openmole.misc.workspace.Workspace
 import scala.io.Source._
 
 object JSAGAJobService {
   val CreationTimeout = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "CreationTimout")
   val TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "TestJobDoneTimeOut")
 
-  Activator.getWorkspace += (CreationTimeout, "PT2M")
-  Activator.getWorkspace += (TestJobDoneTimeOut, "PT30M")
+  Workspace += (CreationTimeout, "PT2M")
+  Workspace += (TestJobDoneTimeOut, "PT30M")
   
 }
 
@@ -73,7 +74,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
 
   override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
 
-    val script = Activator.getWorkspace.newFile("script", ".sh")
+    val script = Workspace.newFile("script", ".sh")
     try {
       val os = new BufferedOutputStream(new FileOutputStream(script))
       try {
@@ -98,15 +99,14 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
   @transient lazy val jobServiceCache = {
     val task = {
       val url = URLFactory.createURL(jobServiceURI.toString());
-      JobFactory.createJobService(TaskMode.ASYNC, Activator.getJSagaSessionService().getSession(), url);
+      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session, url);
     } 
 
-    task.get(Activator.getWorkspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
+    task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
 
   protected def buildJob(id: String): JSAGAJob = new JSAGAJob(id, this)
   
-    
   protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]): JobDescription = {
     JSAGAJobBuilder.jobDescription(runtime, script, attributes)
   }

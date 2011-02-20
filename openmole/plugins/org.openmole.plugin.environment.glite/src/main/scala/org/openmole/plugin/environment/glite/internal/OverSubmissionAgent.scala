@@ -28,10 +28,10 @@ import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.job.IJob
-import org.openmole.plugin.environment.glite.internal.Activator._
 import org.openmole.commons.tools.cache.AssociativeCache
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.plugin.environment.glite.GliteEnvironment._
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.GliteEnvironment
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
@@ -45,7 +45,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
   def this (environment: GliteEnvironment) = this(new WeakReference(environment))
   
-  override def delay = workspace.preferenceAsDurationInMs(OverSubmissionInterval)
+  override def delay = Workspace.preferenceAsDurationInMs(OverSubmissionInterval)
 
   override def update: Boolean = {
     Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"oversubmission started")
@@ -74,22 +74,22 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
 
             var nbRessub = if(!samples.isEmpty) {
-              val windowSize = (jobs.size * workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
+              val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
               val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
             
-              val nbSamples = workspace.preferenceAsInt(OverSubmissionNbSampling)
+              val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
               val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
             
               Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
             
               val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
             
-              val minOversub = workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+              val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
               if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
-            } else workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
+            } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
             
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
-            val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+            val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
             if (nbRessub > 0) {
               // Resubmit nbRessub jobs in a fair manner
               val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]

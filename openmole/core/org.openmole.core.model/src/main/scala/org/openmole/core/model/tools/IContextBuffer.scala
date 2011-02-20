@@ -19,8 +19,7 @@ package org.openmole.core.model.tools
 
 import org.openmole.core.model.data.IContext
 
-trait IContextBuffer {
-  def toContext: IContext
+trait IContextBuffer extends Iterable[IVariableBuffer] {
   def += (variable: IVariableBuffer): this.type
   def ++= (context: IContext, toClone: Set[String]): this.type
   def ++= (context: IContext, toClone: Set[String], varNames: Iterable[String]): this.type

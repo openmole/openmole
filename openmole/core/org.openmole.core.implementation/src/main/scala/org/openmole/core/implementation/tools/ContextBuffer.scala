@@ -27,26 +27,26 @@ import org.openmole.core.model.tools.IVariableBuffer
 import org.openmole.core.implementation.data.Prototype._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
-import org.openmole.commons.tools.service.ManifestUtil._
 
 object ContextBuffer {
   
   def apply(context: IContext, toClone: Set[String]): ContextBuffer = {
-    val ret = new ContextBuffer(false)
+    val ret = new ContextBuffer
     ret ++= (context, toClone)
   }
   
   def apply(context: IContext, toClone: Set[String], varNames: Iterable[String]): ContextBuffer = {
-    val ret = new ContextBuffer(false)
+    val ret = new ContextBuffer
     ret ++= (context, toClone, varNames)
   }
 }
 
 
-class ContextBuffer(forceArray: Boolean) extends IContextBuffer {
+class ContextBuffer extends IContextBuffer {
   val variableBuffers = new ListBuffer[IVariableBuffer]
   
-  override def toContext = {
+  override def iterator = variableBuffers.iterator
+ /* override def toContext = {
     var variableByName = new TreeMap[String, ListBuffer[IVariable[_]]] 
     
     for(buff <- variableBuffers) {
@@ -76,7 +76,7 @@ class ContextBuffer(forceArray: Boolean) extends IContextBuffer {
       }
     }
     ret
-  }
+  }*/
   
   override def += (v: IVariableBuffer): this.type = {
     variableBuffers += v

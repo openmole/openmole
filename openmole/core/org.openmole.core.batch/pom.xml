@@ -52,11 +52,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.jsagasession</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.serializer</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -84,6 +79,11 @@
             <groupId>org.openmole</groupId>
             <artifactId>com.ice.tar</artifactId>
             <version>${lib.com.ice.tar.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>fr.in2p3.jsaga</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
         </dependency>
     </dependencies>
 

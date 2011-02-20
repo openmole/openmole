@@ -194,8 +194,6 @@
         <export.packages>!${bundle.namespace}.internal.*,${bundle.namespace}.*;version="${project.version}"</export.packages>
         <include.resources>src/main/resources/plugin.xml</include.resources>
         <symbolic.name>${project.artifactId};singleton:=true</symbolic.name>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-        <bundle.activationpolicy>lazy</bundle.activationpolicy>
     </properties>
 
 

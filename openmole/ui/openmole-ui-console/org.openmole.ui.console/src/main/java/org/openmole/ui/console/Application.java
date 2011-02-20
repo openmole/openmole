@@ -13,21 +13,15 @@ import org.apache.commons.cli.ParseException;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.openmole.ui.console.internal.Activator;
-import org.openmole.ui.console.internal.Console;
+import org.openmole.core.structuregenerator.StructureGenerator;
+import org.openmole.misc.pluginmanager.PluginManager;
+import org.openmole.misc.workspace.Workspace;
 import org.openmole.ui.console.internal.command.Init;
 import org.openmole.ui.console.internal.command.Print;
-import org.openmole.misc.workspace.IWorkspace$;
-/**
- * Hello world!
- *
- */
+
+
 public class Application implements IApplication {
 
-    final public static String pluginManager = "plugin";
-    final public static String structureGenerator = "structure";
-    final public static String workspace = "workspace";
-    final public static String registry = "registry";
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
@@ -50,40 +44,34 @@ public class Application implements IApplication {
         }
 
         
-        File workspaceLocation = IWorkspace$.MODULE$.defaultLocation();
+        File workspaceLocation = Workspace.defaultLocation();
         if (cmd.hasOption(workspaceDir.getOpt())) {
             workspaceLocation = new File(cmd.getOptionValue(workspaceDir.getOpt()));
         }
 
-        if(IWorkspace$.MODULE$.isAlreadyRunningAt(workspaceLocation)) {
-            Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + IWorkspace$.MODULE$.running() + "'.");
+        if(Workspace.isAlreadyRunningAt(workspaceLocation)) {
+            Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + Workspace.running() + "'.");
             return IApplication.EXIT_OK;
         }
         
-        Activator.getWorkspace().location_$eq(workspaceLocation);
-        
-        // Init Console
-        Console console = Activator.getConsole();
-        console.setVariable(pluginManager, Activator.getPluginManager());
-        console.setVariable(structureGenerator, Activator.getStructureGenerator());
-        console.setVariable(workspace, Activator.getWorkspace());
+        Workspace.location_$eq(workspaceLocation);
 
-        Groovysh g = console.getGroovysh();
-        Groovysh muteShell = console.getMuteGroovysh();
+        Groovysh g = Console.groovysh();
+        Groovysh muteShell = Console.muteGroovysh();
         g.leftShift(new Print(g, "print", "\\pr"));
         g.leftShift(new Init(g, muteShell, "init", "\\in"));
 
-        console.run("init " + workspace);
+        Console.run("init " + Console.workspace());
         
         // Process CLI options
         if (cmd.hasOption(optionPluginsDir.getOpt())) {
             for (String directory : cmd.getOptionValue(optionPluginsDir.getOpt()).split(",")) {
-                Activator.getPluginManager().loadDir(directory);
+                PluginManager.loadDir(directory);
             }
         }
         
         // Run
-        console.getGroovysh().run();
+        Console.groovysh().run();
         return IApplication.EXIT_OK;
     }
 

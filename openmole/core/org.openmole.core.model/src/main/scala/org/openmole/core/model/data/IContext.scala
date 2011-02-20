@@ -104,7 +104,8 @@ trait IContext extends Iterable[IVariable[_]] {
    * @return the context itself
    */
   def +=[T] (proto: IPrototype[T], value: T): this.type
-  
+  def +=[T] (tuple: (IPrototype[T],T)): this.type = this.+=(tuple._1, tuple._2)
+
   /**
    * Add a collection of variables to this context
    *

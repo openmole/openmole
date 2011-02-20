@@ -22,7 +22,6 @@ import java.io.IOException
 import java.util.TreeSet
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.observer.IMoleExecutionObserver
 import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -31,6 +30,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.commons.tools.io.FileUtil._
 import org.openmole.core.model.persistence.PersistentContext._
+import org.openmole.core.serializer.Serializer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
@@ -62,7 +62,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
         if(!filter.contains(variable.prototype.name)) context += variable
       }
 
-      val serialization = serializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))
+      val serialization = Serializer.serializeFilePathAsHashGetPluginClassAndFiles(context, new File(dir, CONTEXT))
 
       val ctxLink = new File(dir, CONTEXT_LINK)
       val link = new File(ctxLink,  serialization._3 + SEPARATOR + ordinal.toString)
@@ -75,7 +75,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
         for (f <- serialization._1) {         
           val file = new File(files, f._2.fileHash.toString)
           if (!file.exists) {
-            copy(f._1, file);
+            copy(f._1, file)
           }
         }
       } catch {

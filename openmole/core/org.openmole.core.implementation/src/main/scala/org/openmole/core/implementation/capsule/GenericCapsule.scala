@@ -17,11 +17,10 @@
 
 package org.openmole.core.implementation.capsule
 
-import java.util.logging.Logger
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.commons.tools.service.Priority
-import org.openmole.core.implementation.internal.Activator._
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -35,7 +34,18 @@ import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 
 import org.openmole.core.implementation.mole.MoleJobRegistry
-import org.openmole.core.implementation.tools.ToCloneFinder.variablesToClone
+import org.openmole.core.implementation.tools.ToCloneFinder._
+
+object GenericCapsule {
+  
+  implicit def GenericCapsule2Decorator(caps: IGenericCapsule) = new GenericCapsuleDecorator(caps)
+  
+  class GenericCapsuleDecorator(caps: IGenericCapsule) {
+    def decapsulate = caps.task.getOrElse(throw new UserBadDataError("No task has been set for capsule")) 
+  }
+  
+}
+
 
 abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
 
@@ -99,13 +109,14 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     val t = _task.getOrElse(throw new UserBadDataError("Reached a capsule with unassigned task.")) 
 
     val ret = new MoleJob(t, context,jobId)
-    eventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
     ret
   }
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
   override def task: Option[TASK] = _task
+ // override def taskOrException: TASK = _task.getOrElse()
   
   def task_=(task: TASK) = {
     _task = Some(task)
@@ -125,16 +136,16 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
     } finally {
-      eventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed)
+      EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed)
     }
   }
 
-  protected def performTransition(context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {
+  protected def performTransition(context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {    
     if(outputTransitions.size == 1 && outputDataChannels.isEmpty)
       outputTransitions.head.perform(context, ticket, Set.empty, moleExecution, subMole)
     else {
       val toClone = variablesToClone(this, context, moleExecution)
- 
+
       outputDataChannels.foreach{_.provides(context, ticket, toClone, moleExecution)}
       outputTransitions.foreach{_.perform(context, ticket, toClone, moleExecution, subMole)}
     }

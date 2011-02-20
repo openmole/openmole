@@ -39,8 +39,8 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.commons.tools.service.IHash
 import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.core.batch.internal.Activator._
 import org.openmole.commons.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
@@ -51,8 +51,10 @@ import org.openmole.core.batch.environment.BatchStorage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
+import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 
+import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet
@@ -66,15 +68,15 @@ object ReplicaCatalog {
   
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
-  workspace += (GCUpdateInterval, "PT5M")
-  workspace += (ObjectRepoLocation, ".objectRepository.bin")
+  Workspace += (GCUpdateInterval, "PT5M")
+  Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   
-  lazy val dbFile = workspace.file(workspace.preference(ObjectRepoLocation))
+  lazy val dbFile = Workspace.file(Workspace.preference(ObjectRepoLocation))
   lazy val locks = new ReplicaLockRepository
   lazy val readWriteLock = new ReadWriteLock
   
   lazy val objectServer: EmbeddedObjectContainer = {
-    val objRepo = workspace.file(workspace.preference(ObjectRepoLocation))
+    val objRepo = Workspace.file(Workspace.preference(ObjectRepoLocation))
             
     if(objRepo.exists) defrag(objRepo)
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
@@ -116,7 +118,7 @@ object ReplicaCatalog {
    }*/
   //}
   
-  updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, workspace.preferenceAsDurationInMs(GCUpdateInterval))
+  Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
@@ -250,7 +252,7 @@ object ReplicaCatalog {
 
   def clean(replica: Replica): Future[_] = synchronized {
     LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
-    val ret = executorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
+    val ret = ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
     remove(replica)
     ret
   }

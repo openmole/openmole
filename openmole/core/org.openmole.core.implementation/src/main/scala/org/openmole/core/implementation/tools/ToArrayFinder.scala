@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2011 reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.core.implementation.tools
+
+import org.openmole.commons.tools.obj.ClassUtils._
+import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.implementation.capsule.GenericCapsule._
+import org.openmole.core.model.transition.IAggregationTransition
+import scala.collection.immutable.TreeMap
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
+
+object ToArrayFinder {
+  
+  def toArrayManifests(caps: IGenericCapsule) = {
+    val toArray = new HashMap[String, ListBuffer[Class[_]]]
+    var forceArray = new TreeSet[String]
+    
+    caps.intputSlots.foreach(_.transitions.foreach( t => t.start.decapsulate.userOutputs.foreach{
+          output => {
+            toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Class[_]]) += output.prototype.`type`
+            if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
+          }
+        }))
+        
+    caps.inputDataChannels.foreach{_.data.foreach {
+        d => toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Class[_]]) += d.prototype.`type`
+      }}
+    
+   TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection( elt._2: _*)}
+    
+   
+//TreeMap.empty[String, Manifest[_]] ++ caps.decapsulate.inputs.filter(d => toArray.contains(d.prototype.name)).map( d => (d.prototype.name, javaType(d.prototype.`type`)))
+    
+    //TreeMap.empty[String, Manifest[_]] ++ seen.filter(elt => elt._2.size > 1).map(elt => elt._1 -> intersect(elt._2.map(_.prototype.`type`): _*))
+  }
+}

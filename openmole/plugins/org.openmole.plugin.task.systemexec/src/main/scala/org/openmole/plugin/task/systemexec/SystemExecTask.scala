@@ -21,7 +21,6 @@ import org.openmole.plugin.tools.utils.ProcessUtils._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
-import org.openmole.plugin.task.systemexec.internal.Activator._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import java.lang.Integer
 import scala.collection.JavaConversions._

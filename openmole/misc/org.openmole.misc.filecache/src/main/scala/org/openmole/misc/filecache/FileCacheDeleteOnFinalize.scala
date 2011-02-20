@@ -18,12 +18,12 @@
 package org.openmole.misc.filecache
 
 import java.io.File
-import org.openmole.misc.filecache.internal.Activator._
+import org.openmole.misc.filedeleter.FileDeleter
 
 class FileCacheDeleteOnFinalize(file: File, var persist: Boolean = false) extends IFileCache {
 
     override protected def finalize = {
-        if(!persist) fileDeleter.assynchonousRemove(file)
+        if(!persist) FileDeleter.assynchonousRemove(file)
         super.finalize
     }
 

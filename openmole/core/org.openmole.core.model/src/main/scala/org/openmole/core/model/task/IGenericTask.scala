@@ -69,7 +69,7 @@ trait IGenericTask {
    *
    * @param ressource the resource to be added
    */
-  def addResource(resource: IResource)
+  def addResource(resource: IResource): this.type
   
   /**
    *
@@ -86,11 +86,11 @@ trait IGenericTask {
    *
    * @param data the data added in input
    */
-  def addInput(data: IData[_]) 
+  def addInput(data: IData[_]): this.type
     
-  def addInput(dataSet: IDataSet)
+  def addInput(dataSet: IDataSet): this.type
 
-  def addInput(prototype: IPrototype[_], masks: Array[DataModeMask])
+  def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type
 
   /**
    *
@@ -98,7 +98,7 @@ trait IGenericTask {
    *
    * @param prototype the prototype of the data
    */
-  def addInput(prototype: IPrototype[_])
+  def addInput(prototype: IPrototype[_]): this.type
 
   def containsInput(name: String): Boolean
   def containsInput(name: IPrototype[_]): Boolean
@@ -110,10 +110,10 @@ trait IGenericTask {
    *
    * @param data the data to add
    */
-  def addOutput(data: IData[_])
-  def addOutput(dataSet: IDataSet)
+  def addOutput(data: IData[_]): this.type
+  def addOutput(dataSet: IDataSet): this.type
 
-  def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask])
+  def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type
 
   /**
    *
@@ -121,7 +121,7 @@ trait IGenericTask {
    *
    * @param prototype prototype the prototype of the data
    */
-  def addOutput(prototype: IPrototype[_])
+  def addOutput(prototype: IPrototype[_]): this.type
 
   def containsOutput(name: String): Boolean
   def containsOutput(name: IPrototype[_]): Boolean
@@ -134,7 +134,7 @@ trait IGenericTask {
    *
    * @param parameter     the parameter to add
    */
-  def addParameter(parameter: IParameter[_])
+  def addParameter(parameter: IParameter[_]): this.type
 
   /**
    *
@@ -144,7 +144,7 @@ trait IGenericTask {
    * @param prototype     the prototype of the parameter
    * @param value         the value of the parameter
    */
-  def addParameter[T](prototype: IPrototype[T], value: T)
+  def addParameter[T](prototype: IPrototype[T], value: T): this.type
 
   /**
    *
@@ -155,7 +155,7 @@ trait IGenericTask {
    * @param value         value the value of the parameter
    * @param override      true if the parameter should override an existing value
    */
-  def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean)
+  def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type
   
   /**
    *

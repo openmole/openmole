@@ -21,10 +21,12 @@ import java.util.logging.Logger
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.capsule.GenericCapsule._
 import org.openmole.core.implementation.tools.CloningService
-import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
@@ -33,7 +35,7 @@ import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.transition.ISlot
-import org.openmole.core.implementation.tools.ToCloneFinder.variablesToClone
+import org.openmole.core.implementation.tools.ToArrayFinder._
 import scala.collection.mutable.ListBuffer
 
 abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends IGenericTransition {
@@ -53,25 +55,32 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
   protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
     val registry = moleExecution.localCommunication.transitionRegistry
     registry.register(this, ticket, context)
-
+ 
     if (nextTaskReady(ticket, moleExecution)) {
-      val combinaison = new ListBuffer[IContext]
+      val combinaison = new ListBuffer[IVariable[_]]
 
-      for (t <- end.transitions) combinaison += {
-        (registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG Context not registred for transtion"))).toContext
+      for (t <- end.transitions) combinaison ++= {
+        (registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG Context not registred for transtion"))).map{_.toVariable}
       }
             
       end.capsule.inputDataChannels.foreach {
-        iDc => combinaison += iDc.consums(ticket, moleExecution)
+        iDc => combinaison ++= iDc.consums(ticket, moleExecution)
       }
       
       val newTicket =  if (end.capsule.intputSlots.size <= 1) ticket else {
         moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
       } 
 
-      val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("End task capsule of the transition is no assigned"))  
-      val newContext = ContextAggregator.aggregate(endTask.inputs, false, combinaison)
-
+      val endTask = end.capsule.decapsulate 
+      
+      val toAggregate = combinaison.groupBy(_.prototype.name)
+      
+      /*endTask.inputs.foreach {
+        d => if(!toAggregate.contains(d.prototype.name)) throw new UserBadDataError("Variable " +)
+      }*/
+      
+      val toArray = toArrayManifests(end.capsule)
+      val newContext = aggregate(endTask.inputs, toArray, combinaison)
       moleExecution.submit(end.capsule, newContext, newTicket, subMole)
     }
   }
@@ -85,9 +94,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
   }
 
 
-  override def isConditionTrue(context: IContext): Boolean = {
-    condition.evaluate(context)
-  }
+  override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
   protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
   protected def plugStart

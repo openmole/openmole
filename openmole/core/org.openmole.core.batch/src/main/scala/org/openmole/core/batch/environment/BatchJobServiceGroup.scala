@@ -20,6 +20,7 @@ package org.openmole.core.batch.environment
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Logger
+import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
 import org.openmole.commons.aspect.eventdispatcher.IObjectListener
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.service.Priority
@@ -27,7 +28,7 @@ import org.openmole.commons.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.internal.Activator._
+import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ArrayBuffer
 
 class BatchJobServiceGroup(val environment: BatchEnvironment) {
@@ -71,7 +72,7 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
               val nbSubmitted = quality.submitted
               val fitness = (if(quality.submitted > 0) {
                   val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
-                  val min = workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                  val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                   if(v < min) min else v
                 } else quality.successRate) 
               
@@ -106,7 +107,7 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
     synchronized {
       resources :+= service
       val usageControl = BatchJobServiceControl.usageControl(service.description)
-      eventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+      EventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     }
     waiting.release
   }

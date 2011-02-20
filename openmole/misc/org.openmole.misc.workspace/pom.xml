@@ -35,18 +35,6 @@
             <artifactId>org.apache.commons.configuration</artifactId>
             <version>${lib.org.apache.commons.configuration.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>com.springsource.javax.servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>com.springsource.javax.el</artifactId>
-        </dependency>
-	<dependency>
-            <groupId>org.apache.log4j</groupId>
-            <artifactId>com.springsource.org.apache.log4j</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.log4j</artifactId>
@@ -76,10 +64,6 @@
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
-
-    <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-    </properties>
 
 </project>
 
