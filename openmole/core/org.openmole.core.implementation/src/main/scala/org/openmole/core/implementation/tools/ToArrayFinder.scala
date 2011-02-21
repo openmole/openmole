@@ -32,22 +32,17 @@ object ToArrayFinder {
     val toArray = new HashMap[String, ListBuffer[Class[_]]]
     var forceArray = new TreeSet[String]
     
-    caps.intputSlots.foreach(_.transitions.foreach( t => t.start.decapsulate.userOutputs.foreach{
-          output => {
-            toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Class[_]]) += output.prototype.`type`
-            if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
-          }
-        }))
-        
-    caps.inputDataChannels.foreach{_.data.foreach {
-        d => toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Class[_]]) += d.prototype.`type`
-      }}
+    for(c <- caps.intputSlots ; t <- c.transitions ; output <- t.start.decapsulate.userOutputs){
+      if(!t.filtered.contains(output.prototype.name)) {
+        toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Class[_]]) += output.prototype.`type`
+        if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
+      }
+    }
+       
+    for(c <- caps.inputDataChannels ; d <- c.data) {
+      toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Class[_]]) += d.prototype.`type`
+    }
     
-   TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection( elt._2: _*)}
-    
-   
-//TreeMap.empty[String, Manifest[_]] ++ caps.decapsulate.inputs.filter(d => toArray.contains(d.prototype.name)).map( d => (d.prototype.name, javaType(d.prototype.`type`)))
-    
-    //TreeMap.empty[String, Manifest[_]] ++ seen.filter(elt => elt._2.size > 1).map(elt => elt._1 -> intersect(elt._2.map(_.prototype.`type`): _*))
+    TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection( elt._2: _*)}
   }
 }

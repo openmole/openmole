@@ -25,7 +25,6 @@ package org.openmole.core.model.data
  */
 trait IData[T] {
 
-
     /**
      * The mode is meta-information on the IData. It indicates the manner a task
      * uses it. For a list of modalties see {@see DataModeMask}.
@@ -33,7 +32,6 @@ trait IData[T] {
      * @return mode of the data
      */
     def mode: IDataMode
-
 
     /**
      * Data chunks are named and typed. Get the prototype (type and name) of 

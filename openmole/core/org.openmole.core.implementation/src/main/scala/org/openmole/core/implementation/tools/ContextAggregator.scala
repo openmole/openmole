@@ -19,18 +19,12 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.implementation.data.{DataSet,Variable,Prototype, Context}
 import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
-import scala.collection.immutable.TreeMap
-import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import org.openmole.commons.exception.InternalProcessingError
 import org.openmole.commons.tools.obj.ClassUtils._
 
 object ContextAggregator {
-
-  /* def dataIn1WhichAreAlsoIn2(one: IDataSet, two: IDataSet): IDataSet = {
-   new DataSet(for (data <- one ; if two.contains(data.prototype.name)) yield data)
-   }*/
  
   def aggregate(aggregate: IDataSet, toArrayFonc: PartialFunction[String, Manifest[_]] , toAggregateList: Iterable[IVariable[_]]): IContext = {
     val inContext = new Context   
@@ -40,9 +34,10 @@ object ContextAggregator {
       if(toArrayFonc.isDefinedAt(d.prototype.name)) { 
         val merging = toAggregate(d.prototype.name)
         val manifest = toArrayFonc(d.prototype.name)
-        //println("type" + manifest.erasure.toString)
+        
         val array = manifest.newArray(merging.size).asInstanceOf[Array[Any]]
         merging.map{_.value}.zipWithIndex.foreach{e => array(e._2) = e._1}
+        
         inContext += new Variable(new Prototype(d.prototype.name, manifest.arrayManifest.erasure).asInstanceOf[IPrototype[Any]], array) 
       } else if (toAggregate(d.prototype.name).size > 1) {
         throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        
