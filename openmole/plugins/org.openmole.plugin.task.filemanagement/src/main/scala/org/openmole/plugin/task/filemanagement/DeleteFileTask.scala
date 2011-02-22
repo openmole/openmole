@@ -30,9 +30,9 @@ class DeleteFileTask(name: String) extends Task(name) {
         
   override def process(context: IContext, progress: IProgress)  = {
     def toValue[T](p:IPrototype[T]) = context.value(p).getOrElse(throw new UserBadDataError("Unknown variable " + p.toString))
-    
+   
     toDelete.map(toValue(_)).foreach(_.delete)
-    toDeleteList.flatMap(toValue(_)).foreach(_.delete)                
+    toDeleteList.flatMap(toValue(_)).foreach(_.delete)
   }
    
   def deleteInputFile(prot : IPrototype[File]) = {
