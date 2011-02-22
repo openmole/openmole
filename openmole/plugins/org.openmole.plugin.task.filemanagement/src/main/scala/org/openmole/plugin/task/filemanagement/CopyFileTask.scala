@@ -18,11 +18,8 @@
 package org.openmole.plugin.task.filemanagement
 
 import java.io.File
-import java.io.IOException
 
 import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
@@ -42,63 +39,59 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[Array[File]],IPrototype[Array[String]],String)]()
 
   override def process(context: IContext, progress: IProgress)  {
-    try{
-      toCopy foreach( p => {
-          val from = context.value(p._1).get
-          val to = new File(expandData(context, p._2))
+    toCopy foreach( p => {
+        val from = context.value(p._1).get
+        val to = new File(expandData(context, p._2))
           
-          Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+        Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
           
-          to.getParentFile.mkdirs
-          copy(from, to)
+        to.getParentFile.mkdirs
+        copy(from, to)
 
-          if(remove) from.recursiveDelete
-        })
+        if(remove) from.recursiveDelete
+      })
 
-      toCopyWithNameInVariable foreach( p => {
-          val from = context.value(p._1).get
-          val name = context.value(p._2).get
+    toCopyWithNameInVariable foreach( p => {
+        val from = context.value(p._1).get
+        val name = context.value(p._2).get
           
-          val dir = new File(expandData(context, p._3))
-          dir.mkdirs
+        val dir = new File(expandData(context, p._3))
+        dir.mkdirs
        
-          val to = new File(dir, name)
+        val to = new File(dir, name)
           
-          Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+        Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
              
-          copy(from, to)
+        copy(from, to)
 
-          if(remove) from.recursiveDelete
-        })
+        if(remove) from.recursiveDelete
+      })
 
-      listToCopyWithNameInVariable foreach ( cpList => {
-          val files = context.value(cpList._1).get
-          val names = context.value(cpList._2).get
-          val urlDir = cpList._3
+    listToCopyWithNameInVariable foreach ( cpList => {
+        val files = context.value(cpList._1).get
+        val names = context.value(cpList._2).get
+        val urlDir = cpList._3
 
-          if(files != null && names != null) {
+        if(files != null && names != null) {
 
-            val toDir = new File(expandData(context, urlDir))
-            toDir.mkdirs
+          val toDir = new File(expandData(context, urlDir))
+          toDir.mkdirs
             
-            val itFile = files.iterator
-            val itName = names.iterator
+          val itFile = files.iterator
+          val itName = names.iterator
 
-            while(itFile.hasNext && itName.hasNext) {
-              val to = new File(toDir, itName.next)
-              val from = itFile.next
+          while(itFile.hasNext && itName.hasNext) {
+            val to = new File(toDir, itName.next)
+            val from = itFile.next
               
-              //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+            //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
               
-              copy(from, to)              
-              if(remove) from.recursiveDelete
-            }
-
+            copy(from, to)              
+            if(remove) from.recursiveDelete
           }
-        } )
-    } catch {
-      case e: IOException => throw new InternalProcessingError(e)
-    }
+
+        }
+      } )
   }
   
   def save(prot:Any with IPrototype[File], url: String) {
