@@ -52,11 +52,9 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     for (d <- inputs) {
      if (!d.mode.isOptional) {
         val p = d.prototype
-
         context.variable(p.name) match {
-          case None =>  throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.getName + "\" required by the task \"" + name + "\" has not been found");
-          case Some(v) => 
-            if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError("Input data named \"" + p.name + "\" required by the task \"" + name + "\" has the wrong type: \"" + v.prototype.`type`.getName + "\" instead of \"" + p.`type`.getName + "\" required")
+          case None => throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.getName + "\" required by the task \"" + name + "\" has not been found");
+          case Some(v) => if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError("Input data named \"" + p.name + "\" required by the task \"" + name + "\" has the wrong type: \"" + v.prototype.`type`.getName + "\" instead of \"" + p.`type`.getName + "\" required")
         }
       }
     }
@@ -64,20 +62,15 @@ abstract class GenericTask(val name: String) extends IGenericTask {
 
   protected def filterOutput(context: IContext): Unit = {
     val vars = new ListBuffer[IVariable[_]]
-    
+   
     for (d <- outputs) {
       val p = d.prototype
       context.variable(p) match {
         case None => 
-          if (!d.mode.isOptional) {
-            throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.getName +" in not optional and has not found in output of task" + name +".")
-          }
+          if (!d.mode.isOptional) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.getName +" in not optional and has not found in output of task" + name +".")
         case Some(v) =>
-          if ( v.value == null || p.`type`.isAssignableFrom(v.value.asInstanceOf[AnyRef].getClass)) {
-            vars += v
-          } else {
-            throw new UserBadDataError("Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.getName +") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.getName + "' in task" + name + ".")
-          }
+          if ( v.value == null || p.`type`.isAssignableFrom(v.value.asInstanceOf[AnyRef].getClass)) vars += v
+          else throw new UserBadDataError("Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.getName +") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.getName + "' in task" + name + ".")
       }
     }
 
