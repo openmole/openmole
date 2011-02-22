@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.task
+package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.capsule.Capsule
@@ -23,7 +23,8 @@ import org.openmole.core.implementation.capsule.ExplorationCapsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.transition.ExplorationTransition
+import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.sampling.ISampling
@@ -34,9 +35,9 @@ import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class ExplorationTaskSpec extends FlatSpec with ShouldMatchers {
+class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
 
-  "Exploration task" should "generate a sampling that lead to submit one MoleJob for each value in the sampling" in {
+  "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
      
     val data = List("A","B","C")
     val i = new Prototype("i", classOf[String])

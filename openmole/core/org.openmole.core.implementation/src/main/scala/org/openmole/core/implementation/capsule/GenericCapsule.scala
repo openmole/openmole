@@ -116,7 +116,6 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
   override def task: Option[TASK] = _task
- // override def taskOrException: TASK = _task.getOrElse()
   
   def task_=(task: TASK) = {
     _task = Some(task)

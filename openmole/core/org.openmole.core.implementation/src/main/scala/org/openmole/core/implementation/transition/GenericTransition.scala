@@ -57,7 +57,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
       val endTask = end.capsule.decapsulate 
       val toAggregate = combinaison.groupBy(_.prototype.name)
       
-      val toArray = toArrayManifests(end.capsule)
+      val toArray = toArrayManifests(end.capsule)      
       val newContext = aggregate(endTask.inputs, toArray, combinaison)
       moleExecution.submit(end.capsule, newContext, newTicket, subMole)
     }
