@@ -18,18 +18,24 @@
 package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.IPrototype
+import org.openmole.commons.tools.obj.ClassUtils._
+import scala.reflect.Manifest
 
 object Prototype {
   def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = {
-    val arrayClass = java.lang.reflect.Array.newInstance(prototype.`type`, 0).getClass
-    new Prototype(prototype.name, arrayClass).asInstanceOf[IPrototype[Array[T]]]
+    new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
   }
 }
 
-case class Prototype[T](val name: String, val `type`: Class[T]) extends IPrototype[T] {
+case class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] {
 
-  override def isAssignableFrom(p: IPrototype[_]): Boolean = `type`.isAssignableFrom(p.`type`)
+  def this(name: String, `type`: Class[T]) = this(name, `type`.toManifest)
+  
+  override def isAssignableFrom(p: IPrototype[_]): Boolean = `type` <:< p.`type`
+  
+  override def accepts(obj: Any): Boolean = {
+    obj == null || `type` >:> manifest(obj.asInstanceOf[AnyRef].getClass) 
+  }
 
-  override def toString: String = '(' + `type`.getName + ')' + name
-
+  override def toString: String = '(' + `type`.toString + ')' + name
 }

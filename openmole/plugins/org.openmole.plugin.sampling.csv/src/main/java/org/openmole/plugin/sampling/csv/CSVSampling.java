@@ -150,7 +150,7 @@ public class CSVSampling implements ISampling {
                 for (int i : headerPrototypes.keySet()) {
                     IPrototype p = headerPrototypes.get(i);
                     if (pathMapping.containsKey(p)) values.add(new Variable(p, new FileMapping(pathMapping.get(p)).convert(nextLine[i])));
-                    else values.add(new Variable(p, StringConvertor.getConvertor(p.type()).convert(nextLine[i])));
+                    else values.add(new Variable(p, StringConvertor.getConvertor(p.type().erasure()).convert(nextLine[i])));
                 }
                 listOfListOfValues.add(JavaConversions.asScalaIterable(values));
             }

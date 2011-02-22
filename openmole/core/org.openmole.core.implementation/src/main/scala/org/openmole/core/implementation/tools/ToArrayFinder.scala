@@ -29,18 +29,18 @@ import scala.collection.mutable.ListBuffer
 object ToArrayFinder {
   
   def toArrayManifests(caps: IGenericCapsule) = {
-    val toArray = new HashMap[String, ListBuffer[Class[_]]]
+    val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     var forceArray = new TreeSet[String]
     
     for(t <- caps.intputSlots.flatMap(_.transitions) ; output <- t.start.decapsulate.userOutputs){
       if(!t.filtered.contains(output.prototype.name)) {
-        toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Class[_]]) += output.prototype.`type`
+        toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
         if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
       }
     }
        
     for(d <- caps.inputDataChannels.flatMap(_.data)) {
-      toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Class[_]]) += d.prototype.`type`
+      toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
     }
     
     TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection( elt._2: _*)}
