@@ -59,9 +59,7 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
   def this(start: IExplorationCapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
   
-  
   override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
-
     val values = context.value(ExplorationTask.Sample.prototype).getOrElse(throw new InternalProcessingError("BUG Sample not found in the exploration transition"))
     val subSubMole = SubMoleExecution(moleExecution, subMole)
 
@@ -85,17 +83,18 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
         }
       }
       
-      val valueMap = value.map{ elt => ((elt.prototype.name, elt.value)) }.toMap
+      val valueMap = value.groupBy{_.prototype.name}
       
       for(data <- notFound) {
         val prototype = data.prototype
-        valueMap.get(prototype.name).foreach {
-          value => {
-              //Logger.getLogger(classOf[ExplorationTransition].getName).info("Add variable " + prototype)
-              if(value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass))
-                destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
-              else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype.`type`)
-          }
+        valueMap.get(prototype.name) match {
+          case Some(variable) =>
+            if(variable.size > 1) Logger.getLogger(classOf[ExplorationTransition].getName).warning("Misformed sampling prototype " + prototype + " has been found " + variable.size + " times in a single row.") 
+            val value = variable.head.value
+            if(value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass))
+              destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
+            else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype)
+          case None =>
         }
       }
  

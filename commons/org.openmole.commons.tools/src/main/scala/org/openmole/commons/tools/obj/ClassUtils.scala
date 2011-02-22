@@ -91,10 +91,8 @@ object ClassUtils {
     if(classes.isEmpty) classOf[Any]
     else classes.head
   }
-  
-  
+ 
   def intersect(tps: JType*): Manifest[_] = intersectionType(tps map manifest: _*)
-
   
   def manifest(tp: JType): Manifest[_] = tp match {
     case x: Class[_]            => classType(x)

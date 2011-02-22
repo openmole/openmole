@@ -78,7 +78,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
     }
 
     end.synchronized  {
-      submitNextJobsIfReady(ContextBuffer(context, toClone), destTicket, moleExecution, newSubMole);
+      submitNextJobsIfReady(ContextBuffer(context, toClone), destTicket, moleExecution, newSubMole)
     }
   }
   
