@@ -91,7 +91,7 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
           case Some(variable) =>
             if(variable.size > 1) Logger.getLogger(classOf[ExplorationTransition].getName).warning("Misformed sampling prototype " + prototype + " has been found " + variable.size + " times in a single row.") 
             val value = variable.head.value
-            if(value == null || prototype.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass))
+            if(prototype.accepts(value))
               destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
             else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype)
           case None =>

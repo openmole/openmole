@@ -332,7 +332,7 @@ public class StructureGenerator {
 
         res.append("List<");
         if (node.getInnerNode() instanceof PrototypeNode) {
-            res.append(((PrototypeNode) node.getInnerNode()).prototype().type().getCanonicalName());
+            res.append(((PrototypeNode) node.getInnerNode()).prototype().type().erasure().getCanonicalName());
         } else if (node.getInnerNode() instanceof SequenceNode) {
             SequenceNode<?> inner = (SequenceNode<?>) node.getInnerNode();
             String n = buildSequenceNodeAttribute(new NodePath<SequenceNode<?>>(nodePath.getPath(), inner), toBuild);
@@ -351,7 +351,7 @@ public class StructureGenerator {
     }
 
     private String buildPrototypeAttribute(Prototype<?> node) {
-        return node.type().getCanonicalName();
+        return node.type().erasure().getCanonicalName();
     }
 
     class NodePath<T extends StructureNode> implements Comparable<NodePath> {

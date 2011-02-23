@@ -104,7 +104,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forceArray.map( e => e.name -> manifest(e.`type`))
+    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forceArray.map( e => e.name -> e.`type`)
     
     aggregate(userOutputs, toArrayMap, resultGathering.variables).foreach {
       context += _

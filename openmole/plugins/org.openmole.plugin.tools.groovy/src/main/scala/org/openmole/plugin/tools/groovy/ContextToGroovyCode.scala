@@ -68,10 +68,10 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
       variables.get(out.name) match {
         case null =>
         case value =>
-          if (value == null || out.`type`.isAssignableFrom(value.asInstanceOf[AnyRef].getClass)) {
+          if (out.accepts(value)) {
             context += (out.asInstanceOf[IPrototype[Any]], value)
           } else {
-            throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.getName + ".")
+            throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
           }
       }
     }

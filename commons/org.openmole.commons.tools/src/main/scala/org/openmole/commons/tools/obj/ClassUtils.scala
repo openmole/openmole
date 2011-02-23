@@ -18,15 +18,17 @@
 package org.openmole.commons.tools.obj
 
 import scala.collection.mutable.ListBuffer
+import java.lang.reflect.{ Type => JType, Array => _, _ }
+import scala.reflect.Manifest.{classType, intersectionType, arrayType, wildcardType }
 
 object ClassUtils {
   
-  implicit def Class2ClassDecorator(c: Class[_]) = new ClassDecorator(c)
+  implicit def Class2ClassDecorator[T](c: Class[T]) = new ClassDecorator[T](c)
   
-  class ClassDecorator(c: Class[_]) {
+  class ClassDecorator[T](c: Class[T]) {
     def listSuperClasses = {
       new Iterator[Class[_]] {
-        var cur = c
+        var cur: Class[_] = c
         override def hasNext = cur != null
         override def next: Class[_] = {
           val ret = cur
@@ -36,7 +38,7 @@ object ClassUtils {
       }.toIterable
     }
     
-    def listSuperClassesAndInterfaces: Iterable[Class[_]] = {
+    def listSuperClassesAndInterfaces = {
       val toExplore = new ListBuffer[Class[_]]
       toExplore += c
 
@@ -54,7 +56,7 @@ object ClassUtils {
     }
 
 
-    def listImplementedInterfaces: Iterable[Class[_]] = {
+    def listImplementedInterfaces = {
       val toExplore = new ListBuffer[Class[_]]
       toExplore += c
 
@@ -74,25 +76,26 @@ object ClassUtils {
 
       ret
     }
+    
+    def toManifest = classType[T](c)
   }
   
-  import java.lang.reflect.{ Type => JType, Array => _, _ }
-  import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
-
+  def intersection(t: Manifest[_]*) = {
+    def intesectionClass(t1: Class[_], t2: Class[_]) = {
+      val classes = (t1.listSuperClasses.toSet & t2.listSuperClasses.toSet)
+      if(classes.isEmpty) classOf[Any]
+      else classes.head
+    }
  
-  def intersection(t: Class[_]*) = {
-    val c = t.reduceLeft((t1, t2) => intesectionClass(t1,t2))
-    val interfaces = t.map(_.listImplementedInterfaces.toSet).reduceLeft((t1, t2) => t1 & t2)
+    val c = t.map(_.erasure).reduceLeft((t1, t2) => intesectionClass(t1,t2))
+    val interfaces = t.map(_.erasure.listImplementedInterfaces.toSet).reduceLeft((t1, t2) => t1 & t2)
+    
     intersect((List(c) ++ interfaces): _*)
   }
-  
-  def intesectionClass(t1: Class[_], t2: Class[_]) = {
-    val classes = (t1.listSuperClasses.toSet & t2.listSuperClasses.toSet)
-    if(classes.isEmpty) classOf[Any]
-    else classes.head
-  }
- 
+
   def intersect(tps: JType*): Manifest[_] = intersectionType(tps map manifest: _*)
+  
+  def nanifest[T](cls: Class[T]): Manifest[T] = classType(cls)
   
   def manifest(tp: JType): Manifest[_] = tp match {
     case x: Class[_]            => classType(x)

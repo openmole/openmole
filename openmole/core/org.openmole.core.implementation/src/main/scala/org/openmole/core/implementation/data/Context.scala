@@ -62,7 +62,7 @@ class Context extends IContext {
   override def contains(proto: IPrototype[_]): Boolean = {
     variable(proto.name) match {
       case None => false
-      case Some(v) => proto.`type`.isAssignableFrom(v.prototype.`type`)
+      case Some(v) => proto.isAssignableFrom(v.prototype)
     }
   }
 

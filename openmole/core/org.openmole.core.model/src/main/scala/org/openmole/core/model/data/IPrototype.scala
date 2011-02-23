@@ -39,7 +39,7 @@ trait IPrototype[T] {
    *
    * @return the type of the prototype
    */
-  def `type`: Class[T]
+  def `type`: Manifest[T]
 
   /**
    * Test if this prototype can be assigned from another prototype. This work 
@@ -50,6 +50,7 @@ trait IPrototype[T] {
    */
   def isAssignableFrom(prototype: IPrototype[_]): Boolean
 
+  def accepts(obj: Any): Boolean
   /*override def equals(obj: Any): Boolean = (name, `type`).equals(obj)
 
   override def hashCode: Int = (name, `type`).hashCode*/
