@@ -18,7 +18,8 @@
 package org.openmole.plugin.task.filemanagement
 
 import java.io.File
-import java.io.PrintWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
@@ -33,15 +34,10 @@ abstract class AbstractTemplateFileGeneratorTask(name: String, output: IData[Fil
   def this(name: String, outputPrototype: IPrototype[File]) = this(name,new Data(outputPrototype))
   addOutput(output)
   
-  override def process(context: IContext, progress: IProgress)  {
-    val templateFile = file(context)
+  override def process(context: IContext, progress: IProgress) = {
     val outputFile = Workspace.newFile("output", "template")
-    val writer = new PrintWriter(outputFile)
-      
-    try scala.io.Source.fromFile(templateFile).getLines.map(l => {expandData(context,l);writer.println(l)})
-    finally writer.close
-    
-    context.add(output.prototype,outputFile)
+    expandBufferData(context,new FileInputStream(file(context)),new FileOutputStream(outputFile))
+    context.add(output.prototype,outputFile) 
   }
    
   def file(context: IContext): File

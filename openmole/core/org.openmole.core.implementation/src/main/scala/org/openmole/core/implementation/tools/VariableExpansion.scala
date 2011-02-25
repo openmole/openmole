@@ -17,8 +17,15 @@
 
 package org.openmole.core.implementation.tools
 
+import com.ibm.icu.text.UTF16
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.io.InputStream
 import org.openmole.commons.tools.groovy.GroovyProxy
 
+import org.openmole.commons.tools.io.FileUtil
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
@@ -59,29 +66,29 @@ object VariableExpansion {
     var cur = 0
     
     breakable { do {
-      val beginIndex = ret.indexOf(eval)
-      if(beginIndex == -1) break
-      var cur = beginIndex + 2
-      var curLevel = 0
+        val beginIndex = ret.indexOf(eval)
+        if(beginIndex == -1) break
+        var cur = beginIndex + 2
+        var curLevel = 0
       
-      breakable { while (cur < ret.length) {
-          val curChar = ret.charAt(cur)
+        breakable { while (cur < ret.length) {
+            val curChar = ret.charAt(cur)
 
-          if (curChar == patternEnd) {
-            if(curLevel == 0) break
-            curLevel -= 1
-          } else if (curChar == patternBegin) {
-            curLevel += 1                
+            if (curChar == patternEnd) {
+              if(curLevel == 0) break
+              curLevel -= 1
+            } else if (curChar == patternBegin) {
+              curLevel += 1                
+            }
+            cur += 1
           }
-          cur += 1
         }
-      }
 
-      if (cur < ret.length) {
-        val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
-        ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
-      } else break
-    } while (true) }
+        if (cur < ret.length) {
+          val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
+          ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
+        } else break
+      } while (true) }
 
 
     ret
@@ -128,4 +135,51 @@ object VariableExpansion {
         shell.execute(allVariables).toString
     }
   }
+  
+  
+  def expandBufferData(context: IContext,is: InputStream,os: OutputStream)= {
+    val isreader = new InputStreamReader(is, "UTF-8");
+    val oswriter = new OutputStreamWriter(os)
+    
+    var openbrace = 0
+    var closebrace = 0
+    var n = 0
+    var expandTime = false
+    var esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
+    
+    def appendChar(c: Int)= esbuilder.append(UTF16.valueOf(n))
+   
+    try{
+      while({n = isreader.read; n} != -1) {
+        n match {
+          case '{' => {
+              openbrace+= 1
+              expandTime= true
+              if (openbrace > 1) appendChar(n)
+              else esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
+            }
+          case '}' => {
+              closebrace+= 1
+              appendChar(n)
+              if (openbrace == closebrace) {
+                oswriter.write(expandData(context,esbuilder.toString))
+                expandTime= false
+                openbrace= 0
+                closebrace= 0
+              }
+            }
+          case _ => {
+              if (expandTime)
+                appendChar(n)
+              else if (n !='$')
+                oswriter.write(UTF16.valueOf(n))
+            }
+        }    
+      }
+    }
+    finally {
+      oswriter.close()
+    }
+  }
+  
 }

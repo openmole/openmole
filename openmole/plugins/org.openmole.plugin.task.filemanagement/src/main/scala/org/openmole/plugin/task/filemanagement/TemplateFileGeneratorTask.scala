@@ -27,23 +27,3 @@ class TemplateFileGeneratorTask(name: String, template: File,outputPrototype: IP
   
   override def file(context: IContext)  = template
 }
-
-//final File template;
-//
-//    public TemplateFileGeneratorFromLocalFileTask(String name, File template, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
-//        super(name, outputPrototype);
-//        this.template = template;
-//    }
-//
-//    public TemplateFileGeneratorFromLocalFileTask(String name,String templateName, IPrototype<File> outputPrototype) throws UserBadDataError, InternalProcessingError {
-//        this(name, new File(templateName),outputPrototype);
-//    }
-//
-//    @Override
-//    File getFile(IContext context) {
-//        return template;
-//    }
-//    
-//    public File template() {
-//        return template;
-//    }

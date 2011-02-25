@@ -18,17 +18,27 @@
 package org.openmole.plugin.task.filemanagement
 
 import java.io.File
-import org.openmole.core.implementation.data.Data
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IPrototype
+import java.io.PrintWriter
 
-class TemplateFileGeneratorFromInputTask(name: String, templateFile: IData[File],outputPrototype: IPrototype[File]) extends AbstractTemplateFileGeneratorTask(name,outputPrototype){
+object TemplateData {
 
-  def this(name: String,tF: IPrototype[File],outputPrototype: IPrototype[File]) = this(name,new Data[File](tF),outputPrototype)
-  addInput(templateFile)
+  def templateFile(): File = {
+    val template = File.createTempFile("file", ".test")
+    val writer = new PrintWriter(template)
+    writer.println("My first line")
+    writer.println("${2*3}")
+    writer.print("${\"I am ${6*5} year old\"}")
+    writer.close
+    template
+  }
   
-  override def file(context: IContext) = {
-    context.value(templateFile.prototype).get
+  def targetFile(): File = {
+    val target = File.createTempFile("target", ".test")
+    val writert = new PrintWriter(target)
+    writert.println("My first line")
+    writert.println("6")
+    writert.print("I am 30 year old")
+    writert.close
+    target
   }
 }
