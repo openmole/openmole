@@ -66,6 +66,7 @@
 	<lib.org.eclipse.core.runtime.version>3.6.0</lib.org.eclipse.core.runtime.version>
    
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
+        <lib.org.aspectj.version>1.6.10</lib.org.aspectj.version>
         <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
       	<lib.com.db4o.version>7.13-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
