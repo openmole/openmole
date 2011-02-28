@@ -19,7 +19,7 @@ package org.openmole.plugin.sampling.lhs
 
 import java.util.Arrays
 import java.util.Collections
-import org.openmole.commons.tools.service.RNG
+import org.openmole.misc.tools.service.RNG
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext

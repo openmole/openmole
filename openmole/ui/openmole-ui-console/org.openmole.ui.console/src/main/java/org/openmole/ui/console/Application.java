@@ -50,12 +50,13 @@ public class Application implements IApplication {
         }
 
         if(Workspace.isAlreadyRunningAt(workspaceLocation)) {
-            Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + Workspace.running() + "'.");
+            Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running()).getAbsolutePath() + "'.");
             return IApplication.EXIT_OK;
         }
-        
-        Workspace.location_$eq(workspaceLocation);
 
+        if(cmd.hasOption(workspaceDir.getOpt())) Workspace.instance_$eq(new Workspace(workspaceLocation));
+
+        
         Groovysh g = Console.groovysh();
         Groovysh muteShell = Console.muteGroovysh();
         g.leftShift(new Print(g, "print", "\\pr"));

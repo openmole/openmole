@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain

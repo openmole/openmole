@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.commons.tools.obj.ClassUtils._
+import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.implementation.capsule.GenericCapsule._
 import org.openmole.core.model.transition.IAggregationTransition

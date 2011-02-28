@@ -25,7 +25,7 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 
 /**
  * The StoreIntoCSVTask task is dedicated to the storage of data of the workflow

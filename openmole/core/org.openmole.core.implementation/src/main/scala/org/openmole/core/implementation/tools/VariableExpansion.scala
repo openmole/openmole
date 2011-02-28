@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.commons.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.groovy.GroovyProxy
 
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.data.IContext

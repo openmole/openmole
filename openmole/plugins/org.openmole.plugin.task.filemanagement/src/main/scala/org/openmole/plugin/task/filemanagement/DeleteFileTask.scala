@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.filemanagement
 
 import java.io.File
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.{IContext,IPrototype}
 import org.openmole.core.model.execution.IProgress

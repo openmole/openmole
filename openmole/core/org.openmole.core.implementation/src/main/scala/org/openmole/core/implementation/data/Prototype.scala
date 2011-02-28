@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.IPrototype
-import org.openmole.commons.tools.obj.ClassUtils._
+import org.openmole.misc.tools.obj.ClassUtils._
 import scala.reflect.Manifest
 
 object Prototype {

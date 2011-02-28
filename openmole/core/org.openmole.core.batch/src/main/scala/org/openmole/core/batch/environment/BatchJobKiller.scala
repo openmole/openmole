@@ -19,7 +19,7 @@ package org.openmole.core.batch.environment
 
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.commons.tools.service.Retry._
+import org.openmole.misc.tools.service.Retry._
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 

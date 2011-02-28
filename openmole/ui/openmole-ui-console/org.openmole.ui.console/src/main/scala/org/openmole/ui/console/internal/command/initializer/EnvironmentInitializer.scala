@@ -20,7 +20,7 @@ package org.openmole.ui.console.internal.command.initializer
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.codehaus.groovy.tools.shell.Shell
-import org.openmole.commons.tools.obj.ClassUtils._
+import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.misc.workspace.Workspace

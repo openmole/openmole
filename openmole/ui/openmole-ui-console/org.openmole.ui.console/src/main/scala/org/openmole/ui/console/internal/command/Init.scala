@@ -19,7 +19,7 @@ package org.openmole.ui.console.internal.command
 
 import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
-import org.openmole.commons.tools.service.HierarchicalRegistry
+import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.workspace.Workspace
 import org.openmole.ui.console.internal.command.initializer.EnvironmentInitializer

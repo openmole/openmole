@@ -18,7 +18,7 @@
 package org.openmole.core.batch.message
 
 import java.io.File
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.service.IHash
 import org.openmole.core.batch.file.IURIFile
 
 class ReplicatedFile(val src: File, val directory: Boolean, val hash: IHash, val replica: IURIFile)

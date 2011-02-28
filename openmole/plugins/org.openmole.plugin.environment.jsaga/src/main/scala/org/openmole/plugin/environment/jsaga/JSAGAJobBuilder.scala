@@ -23,7 +23,7 @@ import org.joda.time.format.ISOPeriodFormat
 
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._

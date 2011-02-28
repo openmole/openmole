@@ -17,28 +17,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.commons.tools</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.core.file</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.commons.exception</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -46,17 +41,17 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
        <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
             <version>${lib.org.codehaus.groovy.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.apache.ant</artifactId>
             <version>${lib.org.apache.ant.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.pluginmanager</artifactId>
             <version>${project.version}</version>
         </dependency>

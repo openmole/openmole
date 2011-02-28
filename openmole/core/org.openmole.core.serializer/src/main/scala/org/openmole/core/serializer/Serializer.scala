@@ -25,8 +25,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.io.FileUtil._
 
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.workspace.Workspace

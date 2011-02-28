@@ -21,7 +21,7 @@ import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.XStreamException
 import com.thoughtworks.xstream.converters.SingleValueConverter
 import java.io.InputStream
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 
 class Deserializer {
     private val xstream = new XStream

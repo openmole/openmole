@@ -19,7 +19,7 @@ package org.openmole.core.serializer
 
 import java.io.File
 import java.io.OutputStream
-import org.openmole.commons.tools.io.FileUtil.fileOrdering
+import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import scala.collection.immutable.TreeSet
 
 class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {

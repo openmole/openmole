@@ -28,8 +28,8 @@ import org.jfree.data.KeyToGroupMap
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
 import org.jfree.data.statistics.HistogramDataset
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._

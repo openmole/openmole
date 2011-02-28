@@ -18,7 +18,17 @@
     <dependencies>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.exception</artifactId>
+            <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -39,11 +49,6 @@
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.log4j</artifactId>
             <version>${lib.org.apache.log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.aspect.caching</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>

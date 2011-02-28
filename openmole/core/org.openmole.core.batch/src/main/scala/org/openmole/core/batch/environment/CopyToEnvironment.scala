@@ -34,8 +34,8 @@ import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.commons.tools.io.FileUtil._
-import org.openmole.commons.tools.io.TarArchiver._
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 
 import scala.io.Source._
 import org.openmole.core.serializer.Serializer

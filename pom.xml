@@ -13,7 +13,7 @@
     <modules>
 	<!--<module>maven-plugin</module>-->
         <module>openmole</module>
-        <module>commons</module>
+        <!--<module>commons</module>-->
         <!--<module>libraries</module>-->
     </modules>
 
@@ -66,8 +66,9 @@
 	<lib.org.eclipse.core.runtime.version>3.6.0</lib.org.eclipse.core.runtime.version>
    
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
+        <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
       	<lib.com.db4o.version>7.13-SNAPSHOT</lib.com.db4o.version>
-        <lib.com.ice.tar.version>1.1.4</lib.com.ice.tar.version>
+        <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.3.1</lib.com.thoughtworks.xstream.version>
         <lib.fr.in2p3.jsaga.version>0.9.13-SNAPSHOT</lib.fr.in2p3.jsaga.version>
@@ -84,7 +85,7 @@
         <lib.org.nuiton.j2r.version>1.0.0</lib.org.nuiton.j2r.version>
         <lib.org.gnu.crypto.version>2.0.1</lib.org.gnu.crypto.version>
         <lib.com.ibm.icu.version>4.0.1</lib.com.ibm.icu.version>
-        <lib.org.aspectj.version>1.6.10</lib.org.aspectj.version>
+        <!--<lib.org.aspectj.version>1.6.10</lib.org.aspectj.version>-->
         <lib.com.springsource.org.apache.log4j.version>1.2.15</lib.com.springsource.org.apache.log4j.version>
         <lib.net.sourceforge.jline.version>0.9.94</lib.net.sourceforge.jline.version>
         <lib.org.objectweb.asm.version>3.2</lib.org.objectweb.asm.version>
@@ -92,7 +93,7 @@
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
-        <lib.org.scala-lang.scala.version>2.8.1</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.9.0-SNAPSHOT</lib.org.scala-lang.scala.version>
         <lib.org.objenesis.version>1.2</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
@@ -256,7 +257,7 @@
                         <Bundle-Name>${bundle.name}</Bundle-Name>
                         <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
                         <Bundle-Description>${bundle.description}</Bundle-Description>
-                        <Import-Package>${import.packages},org.aspectj.lang,org.aspectj.runtime.internal,org.aspectj.runtime.reflect</Import-Package>
+                        <Import-Package>${import.packages}</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
 			<!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->

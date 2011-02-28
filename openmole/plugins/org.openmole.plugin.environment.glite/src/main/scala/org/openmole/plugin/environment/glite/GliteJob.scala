@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
-import org.openmole.commons.tools.service.RNG
+import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState

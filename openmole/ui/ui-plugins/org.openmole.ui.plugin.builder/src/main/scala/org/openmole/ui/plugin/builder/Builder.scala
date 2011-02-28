@@ -24,7 +24,7 @@ package org.openmole.ui.plugin.builder
  * @author nicolas.dumoulin@openmole.org
  */
 
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.capsule.ExplorationCapsule
 import org.openmole.core.implementation.data.Data

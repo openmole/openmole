@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import java.io.File
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress

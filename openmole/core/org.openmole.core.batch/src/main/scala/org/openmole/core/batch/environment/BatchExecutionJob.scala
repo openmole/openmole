@@ -24,7 +24,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.BatchJobServiceControl
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.implementation.execution.ExecutionJob

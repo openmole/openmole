@@ -18,7 +18,7 @@
 package org.openmole.misc.updater.internal
 
 import java.util.concurrent.Executors
-import org.openmole.commons.tools.service.DaemonThreadFactory._
+import org.openmole.misc.tools.service.DaemonThreadFactory._
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.IUpdatable

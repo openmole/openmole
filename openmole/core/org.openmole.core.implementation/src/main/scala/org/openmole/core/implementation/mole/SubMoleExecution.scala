@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.mole.IMoleExecution
 
 object SubMoleExecution {

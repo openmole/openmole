@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.TemporaryErrorException
 import scala.collection.immutable.HashMap
 

@@ -64,7 +64,7 @@ public class SimExplorer implements IApplication {
                 return IApplication.EXIT_OK;
             }
 
-            Workspace.location_$eq(new File(cmdLine.getOptionValue("w")));
+            Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
 
             //init jsaga
             JSAGASessionService.session();
@@ -77,7 +77,7 @@ public class SimExplorer implements IApplication {
 
             
             if ( cmdLine.hasOption("l") ) {
-                Workspace.password_$eq(cmdLine.getOptionValue("l"));
+                Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
                 debug = true;
             }
             

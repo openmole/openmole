@@ -33,8 +33,8 @@ import scala.collection.Iterator;
 import au.com.bytecode.opencsv.CSVReader;
 
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.core.implementation.data.DataSet;
 import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.sampling.Sampling;

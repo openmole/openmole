@@ -8,8 +8,8 @@ package org.openmole.plugin.task.filemanagement;
 import java.io.File;
 import org.openmole.core.model.data.IData;
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.data.IContext;
 

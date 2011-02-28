@@ -24,7 +24,7 @@ import java.math.BigInteger
 import java.util.logging.Level
 import java.util.logging.Logger
 
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.workspace.Workspace

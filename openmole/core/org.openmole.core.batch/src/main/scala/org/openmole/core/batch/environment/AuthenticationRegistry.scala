@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.commons.tools.service.LockRepository
+import org.openmole.misc.tools.service.LockRepository
 import scala.collection.mutable.HashMap
 
 object AuthenticationRegistry {

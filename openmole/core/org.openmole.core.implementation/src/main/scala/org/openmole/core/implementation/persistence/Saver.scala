@@ -20,7 +20,7 @@ package org.openmole.core.implementation.persistence
 import java.io.File
 import java.io.IOException
 import java.util.TreeSet
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.observer.IMoleExecutionObserver
 import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
@@ -28,7 +28,7 @@ import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.persistence.PersistentContext._
 import org.openmole.core.serializer.Serializer
 import scala.collection.JavaConversions

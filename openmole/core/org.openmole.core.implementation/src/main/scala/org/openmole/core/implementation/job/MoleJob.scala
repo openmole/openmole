@@ -29,15 +29,15 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.task.IGenericTask
-import org.openmole.commons.aspect.eventdispatcher.{ObjectConstructed,ObjectModified, EventDispatcher}
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ArrayBuffer
 
 object MoleJob {
   val LOGGER = Logger.getLogger(classOf[MoleJob].getName)
 }
 
-class MoleJob  @ObjectConstructed() (val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
-  
+class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
+    
   val progress = new Progress
     
   @volatile  private var _state: State = null

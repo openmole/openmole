@@ -17,10 +17,10 @@
 
 package org.openmole.core.implementation.observer
 
-import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
-import org.openmole.commons.aspect.eventdispatcher.IObjectListener
-import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
-import org.openmole.commons.tools.service.Priority
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
+import org.openmole.misc.tools.service.Priority
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleExecution

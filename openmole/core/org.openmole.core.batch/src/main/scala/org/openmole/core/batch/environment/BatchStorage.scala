@@ -23,8 +23,8 @@ import java.io.IOException
 import java.net.URI
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.service.RNG
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchStorageControl
 import org.openmole.core.batch.control.BatchStorageDescription

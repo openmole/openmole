@@ -25,17 +25,15 @@ import java.util.logging.Logger
 import org.apache.commons.configuration.FileConfiguration
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
-import org.jasypt.exceptions.EncryptionOperationNotPossibleException
 import org.jasypt.util.text.BasicTextEncryptor
 import org.joda.time.format.ISOPeriodFormat
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.aspect.caching.Cachable;
-import org.openmole.commons.aspect.caching.ChangeState;
 import scala.collection.mutable.HashMap
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.logging.LoggerService
 
 object Workspace {
+  
   val OpenMoleDir = ".openmole"
   val ConfigurationFile = ".preferences"
   val GlobalGroup = "Global"
@@ -43,45 +41,44 @@ object Workspace {
   val running = ".running"
   val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
 
-  lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
-  def isAlreadyRunningAt(location: File) = new File(location, running).exists
-
   private val group = "Workspace"
   private val fixedPrefix = "file"
   private val fixedPostfix = ".wf"
   private val fixedDir = "dir"
+  
   private val passwordTest = new ConfigurationLocation(group, "passwordTest", true)
+  private val LevelConfiguration = new ConfigurationLocation(group, "LoggingLevel")
+  
   private val passwordTestString = "test"
-
-  private var _location: File = null
-  @transient private var textEncryptor = new BasicTextEncryptor
+  
   private val configurations = new HashMap[ConfigurationLocation, () => String]
-    
-  //@transient private var _password = ""
 
   this += (UniqueID, UUID.randomUUID.toString)
   this += (passwordTest, passwordTestString)
+  this += (LevelConfiguration, Level.INFO.toString)
   
-  @ChangeState
-  def location_= (location: File) = {
-    new File(locationInternal, running).delete
-    _location = location
-    val run = new File(_location, running)
-    run.createNewFile
-    run.deleteOnExit
+  def isAlreadyRunningAt(location: File) = new File(location, running).exists
+  
+  lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
+  
+  def instance = synchronized {
+    if(_instance == null) _instance = new Workspace(defaultLocation)
+    _instance
   }
   
-  def locationInternal = {
-    if(_location == null) defaultLocation
-    else _location
+  def instance_=(wp: Workspace) = {
+    if(_instance != null) _instance.clean
+    _instance = wp
   }
+    
+  private var _instance: Workspace = null
   
-  def location: File = {
-    val ret = locationInternal
-    if (!ret.exists) ret.mkdirs
-    ret
-  }
-
+  Runtime.getRuntime.addShutdownHook(new Thread {
+      override def run = synchronized {
+        instance.clean
+      }
+    })
+  
   def += (location: ConfigurationLocation, defaultValue: () => String) = synchronized {
     configurations(location) = defaultValue
   }
@@ -89,26 +86,82 @@ object Workspace {
   def += (location: ConfigurationLocation,  defaultValue: String) = synchronized {
     configurations(location) = () => defaultValue
   }
+  
+  
+  def newDir(prefix: String): File = instance.newDir(prefix)
+  
+  def newFile(prefix: String, suffix: String): File =  instance.newFile(prefix, suffix)
+
+  def defaultValue(location: ConfigurationLocation): String = instance.defaultValue(location)
+  
+  def preference(location: ConfigurationLocation): String = instance.preference(location)
+
+  def setPreference(location: ConfigurationLocation, value: String) = instance.setPreference(location,value)
+
+  def removePreference(location: ConfigurationLocation) = instance.removePreference(location)
+
+  def file(name: String): File = instance.file(name)
+
+  def preferenceAsInt(location: ConfigurationLocation): Int = instance.preferenceAsInt(location)
+  
+  def preferenceAsDouble(location: ConfigurationLocation): Double = instance.preferenceAsDouble(location)
+  
+  def newFile: File = instance.newFile
+  
+  def newDir: File = instance.newDir
+
+  def reset = instance.reset
+
+  def preferenceAsLong(location: ConfigurationLocation): Long = instance.preferenceAsLong(location)
+  
+  def password_=(password: String) = instance.password_=(password)
+  
+  def passwordIsCorrect = instance.passwordIsCorrect
+  
+  def passwordChoosen = instance.passwordChoosen
+
+  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = instance.preferenceAsDurationInMs(location)
+
+  def preferenceAsDurationInS(location: ConfigurationLocation): Int = instance.preferenceAsDurationInS(location)
+
+  def isPreferenceSet(location: ConfigurationLocation): Boolean = instance.isPreferenceSet(location)
+}
+
+
+class Workspace(location: File) {
+
+  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, LevelConfiguration}
+  
+  location.mkdirs
+  val run = new File(location, running)
+  run.createNewFile
+  
+  val tmpDir = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
+  tmpDir.mkdirs
+  
+  @transient private var textEncryptor = new BasicTextEncryptor
+  
+  @transient private lazy val configurationFile: File = {
+    val file = new File(location, ConfigurationFile)
+    file.createNewFile
+    file
+  }
+  
+  @transient private lazy val configuration: FileConfiguration = synchronized {
+    val configuration = new PropertiesConfiguration(configurationFile)
+    configuration.setReloadingStrategy(new FileChangedReloadingStrategy)
+    configuration
+  }
 
   @transient lazy val sessionUUID = UUID.randomUUID
   
+  LoggerService.setLevel(Level.parse(preference(LevelConfiguration)))
   
-  
-  @Cachable
-  def tmpDir: File = {
-    val tmpLocation = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
-
-    if (!tmpLocation.mkdirs) {
-      throw new InternalProcessingError("Cannot create tmp dir " + tmpLocation.getAbsolutePath)
-    }
-    
-    Runtime.getRuntime.addShutdownHook(new Thread {
-        override def run = FileUtil.recursiveDelete(tmpLocation)
-      })
-    
-    tmpLocation
+  def clean = {
+    run.delete
+    tmpDir.recursiveDelete
   }
-
+  
   def newDir(prefix: String): File = {
     val tempFile = File.createTempFile(prefix, "", tmpDir)
 
@@ -120,21 +173,6 @@ object Workspace {
   }
   
   def newFile(prefix: String, suffix: String): File =  File.createTempFile(prefix, suffix, tmpDir)
-
-
-  @Cachable
-  private def configurationFile: File = {
-    val file = new File(location, ConfigurationFile)
-    file.createNewFile
-    file
-  }
-
-  @Cachable
-  private def configuration: FileConfiguration = synchronized {
-    val configuration = new PropertiesConfiguration(configurationFile)
-    configuration.setReloadingStrategy(new FileChangedReloadingStrategy)
-    return configuration
-  }
 
   def defaultValue(location: ConfigurationLocation): String = {
     configurations.get(location) match {
@@ -165,7 +203,6 @@ object Workspace {
     } else {
       return textEncryptor.decrypt(confVal)
     }
-
   }
 
   def setPreference(location: ConfigurationLocation, value: String) = synchronized {
@@ -174,13 +211,6 @@ object Workspace {
     conf.setProperty(location.name, prop)
     configuration.save
   }
-
-  /*@Cachable
-   private def textEncryptor: BasicTextEncryptor = synchronized {
-   val tmpTextEncryptor = new BasicTextEncryptor
-   tmpTextEncryptor.setPassword(_password)
-   tmpTextEncryptor
-   }*/
 
   def removePreference(location: ConfigurationLocation) = synchronized {
     val conf = configuration.subset(location.group)
@@ -197,8 +227,9 @@ object Workspace {
   
   def newDir: File = newDir(fixedDir)
 
-  @ChangeState
-  def reset = configurationFile.delete
+  def reset = {
+    configurationFile.delete
+  }
 
   def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong
   

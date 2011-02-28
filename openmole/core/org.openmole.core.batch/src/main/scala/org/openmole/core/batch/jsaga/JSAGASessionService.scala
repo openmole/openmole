@@ -23,7 +23,7 @@ import java.util.logging.Logger
 import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.internal.Activator
 import org.openmole.misc.workspace.Workspace
 import org.osgi.framework.BundleContext

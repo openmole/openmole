@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openmole.core.execution.IExecutionEnvironmentProvider;
-import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.geclipse.IGEclipseExecutionEnvironment;
 
 public class PBSEnvironmentProvider implements IExecutionEnvironmentProvider{

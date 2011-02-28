@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution

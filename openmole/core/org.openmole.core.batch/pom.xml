@@ -28,12 +28,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.tools</artifactId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.aspect.eventdispatcher</artifactId>
+            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

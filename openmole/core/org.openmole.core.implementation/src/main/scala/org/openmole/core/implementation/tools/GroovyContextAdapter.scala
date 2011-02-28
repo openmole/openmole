@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.tools
 
 import groovy.lang.Binding
-import org.openmole.commons.tools.groovy.IGroovyProxy
+import org.openmole.misc.tools.groovy.IGroovyProxy
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable

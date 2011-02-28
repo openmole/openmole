@@ -28,7 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.openmole.commons.tools.io.FileUtil;
+import org.openmole.misc.tools.io.FileUtil;
 
 /**
  *

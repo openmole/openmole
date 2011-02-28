@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.transition
 
 import java.util.logging.Logger
-import org.openmole.commons.exception.{InternalProcessingError,UserBadDataError}
+import org.openmole.misc.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.SubMoleExecution

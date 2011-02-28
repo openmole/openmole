@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import java.util.concurrent.TimeUnit
 
 object BotomlessTokenPool extends IAccessTokenPool {

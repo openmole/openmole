@@ -22,7 +22,7 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.net.URI
 import org.ogf.saga.job.JobDescription
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace

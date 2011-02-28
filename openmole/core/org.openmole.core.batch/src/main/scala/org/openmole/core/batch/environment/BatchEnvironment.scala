@@ -22,7 +22,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicInteger
 
 import java.util.concurrent.locks.ReentrantLock
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation

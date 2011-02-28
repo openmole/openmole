@@ -21,10 +21,10 @@ import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.logging.Logger
-import org.openmole.commons.tools.cache.AssociativeCache
-import org.openmole.commons.tools.io.FileUtil
-import org.openmole.commons.tools.io.TarArchiver._
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.cache.AssociativeCache
+import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.TarArchiver._
+import org.openmole.misc.tools.service.IHash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
 import org.openmole.misc.hashservice.HashService

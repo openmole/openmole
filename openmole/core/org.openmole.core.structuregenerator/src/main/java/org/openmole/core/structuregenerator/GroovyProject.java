@@ -11,8 +11,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 
 import org.codehaus.groovy.ant.Groovyc;
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.misc.workspace.Workspace;
 
 public class GroovyProject {
@@ -29,7 +29,7 @@ public class GroovyProject {
         nameSpaceSuffix = UUID.randomUUID().toString();
         nameSpaceSuffix = "generatedpackage" + nameSpaceSuffix.replace("-", "");
 
-        projDir = Workspace.newDir("groovy");
+        projDir = Workspace.instance().newDir("groovy");
 
         srcDir = new File(projDir, "src");
         srcDir.mkdir();      

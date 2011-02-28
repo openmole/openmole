@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.replication
 
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.service.IHash
 import org.openmole.core.batch.control.BatchStorageDescription
 import org.openmole.core.batch.environment.BatchAuthenticationKey
 

@@ -17,6 +17,6 @@
 
 package org.openmole.core.batch.replication
 
-import org.openmole.commons.tools.service.LockRepository
+import org.openmole.misc.tools.service.LockRepository
 
 class ReplicaLockRepository extends LockRepository[ReplicaLockKey]

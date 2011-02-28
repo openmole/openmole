@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken

@@ -18,7 +18,7 @@
 package org.openmole.ui.console.internal.command
 
 import org.codehaus.groovy.tools.shell.Shell
-import org.openmole.commons.tools.service.HierarchicalRegistry
+import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.IMoleExecution

@@ -16,6 +16,9 @@
     <artifactId>misc</artifactId>
 
     <modules>
+	<module>org.openmole.misc.eventdispatcher</module>
+	<module>org.openmole.misc.exception</module>
+	<module>org.openmole.misc.tools</module>
         <module>org.openmole.misc.executorservice</module>
         <module>org.openmole.misc.hashservice</module>
         <module>org.openmole.misc.pluginmanager</module>

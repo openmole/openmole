@@ -20,7 +20,7 @@ package org.openmole.misc.pluginmanager
 import java.io.File
 import java.io.FileFilter
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.pluginmanager.internal.Activator
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap

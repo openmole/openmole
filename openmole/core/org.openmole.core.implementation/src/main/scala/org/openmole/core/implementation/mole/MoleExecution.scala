@@ -36,16 +36,15 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.apache.commons.collections15.multimap.MultiHashMap
-import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
-import org.openmole.commons.aspect.eventdispatcher.IObjectListener
-import org.openmole.commons.aspect.eventdispatcher.BeforeObjectModified
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.core.model.job.ITicket
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.service.Priority
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConversions._
@@ -61,6 +60,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   def this(mole: IMole, environmentSelection: IEnvironmentSelection) = this(mole, environmentSelection, MoleJobGrouping.Empty)
       
   import MoleExecution._
+  import IMoleExecution._
   
   class MoleExecutionAdapterForMoleJobOutputTransitionPerformed extends IObjectListener[IMoleJob] {
     override def eventOccured(job: IMoleJob) = jobOutputTransitionsPerformed(job)
@@ -207,9 +207,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     this
   }
   
-  @BeforeObjectModified(name = IMoleExecution.Starting)
-  override def start = start(new Context)      
-
+  override def start = {
+    EventDispatcher.objectChanged(this, Starting)
+    start(new Context)      
+  }
+  
   override def cancel: this.type = {
     synchronized { 
       submiter.interrupt

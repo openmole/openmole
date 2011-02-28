@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.commons.aspect.eventdispatcher.ObjectModified
+import org.openmole.misc.eventdispatcher.EventDispatcher
 
 import java.util.concurrent.TimeUnit
 
@@ -57,8 +57,10 @@ class UsageControl(tokenPool: IAccessTokenPool) {
 
   def tryGetToken: Option[AccessToken] = tokenPool.tryGetToken
   
-  @ObjectModified(name = UsageControl.ResourceReleased)
-  def releaseToken(token: AccessToken) = tokenPool.releaseToken(token)
+  def releaseToken(token: AccessToken) = {
+    tokenPool.releaseToken(token)
+    EventDispatcher.objectChanged(this, UsageControl.ResourceReleased)
+  }
  
   def load: Int = tokenPool.load
   

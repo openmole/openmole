@@ -23,8 +23,8 @@ import java.io.IOException
 import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
@@ -32,7 +32,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil
 
 import org.openmole.core.implementation.tools.VariableExpansion._
 

@@ -17,7 +17,7 @@
 
 package org.openmole.runtime
 
-import org.openmole.commons.aspect.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId

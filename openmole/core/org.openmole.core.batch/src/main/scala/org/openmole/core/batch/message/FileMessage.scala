@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.message
 
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.service.IHash
 import org.openmole.core.batch.file.IURIFile
 
 object FileMessage {

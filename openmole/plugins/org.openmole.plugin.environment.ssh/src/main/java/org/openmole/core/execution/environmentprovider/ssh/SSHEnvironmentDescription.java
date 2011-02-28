@@ -1,7 +1,7 @@
 package org.openmole.core.authenticationregistry.ssh;
 
 
-import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.core.implementation.execution.batch.BatchEnvironmentDescription;
 import org.openmole.core.model.execution.batch.IBatchEnvironment;
 

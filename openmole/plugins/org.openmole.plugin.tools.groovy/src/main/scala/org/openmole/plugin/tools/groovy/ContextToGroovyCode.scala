@@ -21,9 +21,9 @@ package org.openmole.plugin.tools.groovy
 
 import groovy.lang.Binding
 import java.io.File
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.groovy.GroovyProxyPool
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.groovy.GroovyProxyPool
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.tools.GroovyContextAdapter
 import org.openmole.core.model.data.IContext

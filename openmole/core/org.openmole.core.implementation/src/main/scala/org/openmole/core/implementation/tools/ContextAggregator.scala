@@ -21,8 +21,8 @@ import org.openmole.core.implementation.data.{DataSet,Variable,Prototype, Contex
 import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.obj.ClassUtils._
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object ContextAggregator {
  

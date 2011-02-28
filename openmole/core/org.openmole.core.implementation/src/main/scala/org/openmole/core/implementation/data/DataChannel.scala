@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.data
 
 
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.capsule.IGenericCapsule

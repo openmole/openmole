@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import org.openmole.commons.tools.obj.Instanciator;
+import org.openmole.misc.tools.obj.Instanciator;
 
 /**
  *

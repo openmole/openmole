@@ -17,6 +17,6 @@
 
 package org.openmole.core.serializer
 
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.service.IHash
 
 class FileInfoHash(val fileHash: IHash, val filePathHash: IHash) extends (IHash, IHash)(fileHash, filePathHash)

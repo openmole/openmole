@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing

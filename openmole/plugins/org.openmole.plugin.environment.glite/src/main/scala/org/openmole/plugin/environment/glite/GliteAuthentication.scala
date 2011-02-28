@@ -30,8 +30,8 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
-import org.openmole.commons.exception.UserBadDataError
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.io.FileUtil
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService

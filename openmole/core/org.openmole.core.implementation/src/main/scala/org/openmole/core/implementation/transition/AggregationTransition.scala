@@ -17,10 +17,10 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
-import org.openmole.commons.aspect.eventdispatcher.IObjectListenerWithArgs
-import org.openmole.commons.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.commons.tools.service.Priority
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
+import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule

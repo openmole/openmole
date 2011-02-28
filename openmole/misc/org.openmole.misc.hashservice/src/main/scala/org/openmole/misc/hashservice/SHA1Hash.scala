@@ -18,7 +18,7 @@
 package org.openmole.misc.hashservice
 
 
-import org.openmole.commons.tools.service.IHash
+import org.openmole.misc.tools.service.IHash
 
 class SHA1Hash(val content: Array[Byte]) extends IHash {
 

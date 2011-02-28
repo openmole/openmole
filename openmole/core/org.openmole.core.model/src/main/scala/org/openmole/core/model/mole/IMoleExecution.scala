@@ -18,8 +18,8 @@
 package org.openmole.core.model.mole
 
 
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob

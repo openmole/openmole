@@ -30,8 +30,8 @@ import org.jfree.data.statistics.HistogramDataset
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import Utils._
 
 import org.jfree.chart.StandardChartTheme._

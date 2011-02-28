@@ -19,7 +19,7 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.transition.ICondition
-import org.openmole.commons.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.core.implementation.tools.GroovyContextAdapter
 
 class Condition(code: String) extends ICondition {

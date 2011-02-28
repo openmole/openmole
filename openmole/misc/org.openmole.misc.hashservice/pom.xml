@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.exception</artifactId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.tools</artifactId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

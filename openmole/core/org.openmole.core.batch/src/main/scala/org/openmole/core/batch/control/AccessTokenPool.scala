@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.SynchronizedSet
 import java.util.concurrent.TimeUnit

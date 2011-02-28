@@ -27,11 +27,11 @@ import java.io.PrintStream
 import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.commons.aspect.eventdispatcher.EventDispatcher
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileUtil._
-import org.openmole.commons.tools.io.TarArchiver._
-import org.openmole.commons.tools.service.Priority
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
+import org.openmole.misc.tools.service.Priority
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
@@ -41,7 +41,7 @@ import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.commons.tools.service.Retry._
+import org.openmole.misc.tools.service.Retry._
 import org.openmole.core.serializer.Serializer
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.pluginmanager.PluginManager

@@ -19,7 +19,7 @@ package org.openmole.misc.executorservice
 
 import java.util.concurrent.Executors
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.commons.tools.service.DaemonThreadFactory._
+import org.openmole.misc.tools.service.DaemonThreadFactory._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 

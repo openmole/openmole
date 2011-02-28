@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.exception</artifactId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

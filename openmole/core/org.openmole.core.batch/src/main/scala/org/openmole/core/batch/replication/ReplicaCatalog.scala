@@ -37,11 +37,11 @@ import java.net.URI
 import java.util.concurrent.Future
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.commons.tools.service.IHash
-import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.tools.service.IHash
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.commons.tools.service.ReadWriteLock
+import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription

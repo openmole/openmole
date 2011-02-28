@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task.structuregeneration;
 
-import org.openmole.commons.exception.InternalProcessingError;
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.InternalProcessingError;
+import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.core.implementation.task.Task;
 import org.openmole.core.implementation.data.Data;
 import org.openmole.core.model.execution.IProgress;

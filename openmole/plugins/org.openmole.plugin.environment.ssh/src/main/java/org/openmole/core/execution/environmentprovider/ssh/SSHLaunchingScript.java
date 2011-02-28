@@ -1,6 +1,6 @@
 package org.openmole.core.authenticationregistry.ssh;
 
-import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.core.authenticationregistry.jsaga.model.IJSAGALaunchingScript;
 import org.openmole.core.model.execution.batch.IRuntime;
 

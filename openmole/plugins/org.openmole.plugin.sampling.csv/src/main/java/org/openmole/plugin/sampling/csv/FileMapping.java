@@ -6,7 +6,7 @@
 package org.openmole.plugin.sampling.csv;
 
 import java.io.File;
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.UserBadDataError;
 
 /**
  *

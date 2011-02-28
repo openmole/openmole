@@ -38,12 +38,12 @@ import org.ogf.saga.task.TaskMode
 import org.ogf.saga.url.URL
 import org.ogf.saga.url.URLFactory
 import org.ogf.saga.namespace.Flags
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.tools.io.FileUtil
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.io.FileUtil
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.commons.tools.io.Network._
+import org.openmole.misc.tools.io.Network._
 
 import org.openmole.core.batch.control.BatchStorageControl._
 import org.openmole.core.batch.control.BatchServiceDescription

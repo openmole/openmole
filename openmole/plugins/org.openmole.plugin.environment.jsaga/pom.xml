@@ -28,23 +28,13 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.file</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.exception</artifactId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
        
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.tools</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.commons.aspect.caching</artifactId>
+            <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

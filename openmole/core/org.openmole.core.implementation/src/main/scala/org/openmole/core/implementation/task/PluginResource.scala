@@ -24,8 +24,7 @@ import org.openmole.misc.pluginmanager.PluginManager
 
 class PluginResource(plugin: File) extends IResource {
 
-    def this(fileLocation: String) = this(new File(fileLocation))
-   
-    override def deploy = PluginManager.load(plugin)
-   
+  def this(fileLocation: String) = this(new File(fileLocation))
+ 
+  override def deploy = PluginManager.load(plugin)  
 }

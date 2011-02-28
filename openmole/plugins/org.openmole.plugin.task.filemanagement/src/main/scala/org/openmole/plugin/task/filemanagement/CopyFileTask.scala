@@ -21,8 +21,8 @@ import java.io.File
 import java.io.IOException
 
 import java.util.logging.Logger
-import org.openmole.commons.exception.InternalProcessingError
-import org.openmole.commons.exception.UserBadDataError
+import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
@@ -30,7 +30,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import scala.collection.mutable.ListBuffer
 
-import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {

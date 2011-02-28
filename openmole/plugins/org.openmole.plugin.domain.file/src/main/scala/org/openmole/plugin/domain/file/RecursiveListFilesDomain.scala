@@ -21,7 +21,7 @@ import java.io.File
 import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import org.openmole.commons.tools.io.FileUtil._
+import org.openmole.misc.tools.io.FileUtil._
 
 class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IFiniteDomain[File] {
 

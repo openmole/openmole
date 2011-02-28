@@ -19,7 +19,7 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.model.data.IPrototype
 import org.openmole.plugin.tools.utils.ProcessUtils._
-import org.openmole.commons.tools.io.StringBuilderOutputStream
+import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import java.io.PrintStream

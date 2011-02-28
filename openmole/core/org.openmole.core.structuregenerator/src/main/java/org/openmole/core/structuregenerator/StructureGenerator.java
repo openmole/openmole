@@ -19,9 +19,9 @@
  */
 package org.openmole.core.structuregenerator;
 
-import org.openmole.commons.exception.UserBadDataError;
+import org.openmole.misc.exception.UserBadDataError;
 import org.osgi.framework.Bundle;
-import org.openmole.commons.exception.InternalProcessingError;
+import org.openmole.misc.exception.InternalProcessingError;
 
 
 import java.io.BufferedWriter;
@@ -43,7 +43,7 @@ import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.structuregenerator.SequenceNode;
 import org.openmole.core.structuregenerator.StructureNode;
-import org.openmole.commons.tools.io.FileUtil$;
+import org.openmole.misc.tools.io.FileUtil$;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 
@@ -67,7 +67,7 @@ public class StructureGenerator {
             //structures = packProcessorList(application, gp.getPackDir(), gp.getNameSpace());
             gp.compile();
 
-            jar = Workspace.newFile("structure", ".jar");
+            jar = Workspace.instance().newFile("structure", ".jar");
             mkJar(gp.getBinDir(), jar, gp.getManifest());
         } catch (IOException e) {
             throw new InternalProcessingError(e);

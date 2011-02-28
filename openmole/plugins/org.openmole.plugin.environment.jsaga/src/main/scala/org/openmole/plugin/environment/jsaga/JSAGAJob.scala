@@ -22,7 +22,7 @@ import fr.in2p3.jsaga.impl.job.service.ReconnectionException
 import java.util.logging.Logger
 import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.job.Job
-import org.openmole.commons.exception.InternalProcessingError
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.TemporaryErrorException
 import org.openmole.core.model.execution.ExecutionState

@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.internal
 
-import org.openmole.commons.tools.service.OSGiActivator
+import org.openmole.misc.tools.service.OSGiActivator
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
