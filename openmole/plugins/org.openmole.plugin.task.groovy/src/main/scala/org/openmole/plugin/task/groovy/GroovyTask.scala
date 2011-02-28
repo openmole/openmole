@@ -30,7 +30,7 @@ class GroovyTask(name: String) extends CodeTask(name) {
   var imports = new ListBuffer[String]
   var _code: ISourceCode = new StringSourceCode("")
   
-  @transient override lazy val contextToCode = new ContextToGroovyCode(_code.code, libs)
+  @transient override lazy val contextToCode = new ContextToGroovyCode(code, libs)
   
   private def code: String = {
     imports.map( "import " + _ ).reduceLeft( (l, r) => l + '\n' + r) + '\n' + _code.code
