@@ -34,7 +34,6 @@ class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
   private lazy val compiledScript = {
     val groovyShell = new GroovyShell
     for(jar <- jars) {
-      Logger.getLogger(classOf[GroovyProxy].toString).fine("Adding " + jar.toURI.toURL + " to classpath.")
       groovyShell.getClassLoader.addURL(jar.toURI.toURL)
     }
     try {
