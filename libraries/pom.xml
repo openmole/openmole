@@ -69,8 +69,8 @@
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
         <libraries.export.packages>*,${export.packages}</libraries.export.packages>
-        <bundle.name>${pom.name}</bundle.name>
-        <bundle.description>${pom.name}</bundle.description>
+        <bundle.name>${project.name}</bundle.name>
+        <bundle.description>${project.name}</bundle.description>
 	<bundle.classpath>.</bundle.classpath>
     </properties>
 
