@@ -33,7 +33,8 @@ class GroovyTask(name: String) extends CodeTask(name) {
   @transient override lazy val contextToCode = new ContextToGroovyCode(code, libs)
   
   private def code: String = {
-    imports.map( "import " + _ ).reduceLeft( (l, r) => l + '\n' + r) + '\n' + _code.code
+    if(!imports.isEmpty) imports.map( "import " + _ ).reduceLeft( (l, r) => l + '\n' + r) + '\n' + _code.code
+    else _code.code
   }
   
   def addImport(imp: String): this.type = {imports += imp; this}
