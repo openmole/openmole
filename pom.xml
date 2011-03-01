@@ -11,10 +11,11 @@
     <version>0.3-SNAPSHOT</version>
 
     <modules>
-	<!--<module>maven-plugin</module>-->
+	<module>libraries</module>
+	<module>third-parties</module>
         <module>openmole</module>
-        <!--<module>commons</module>-->
-        <!--<module>libraries</module>-->
+	<module>runtime</module>
+	<module>ui</module>
     </modules>
 
     <dependencyManagement>

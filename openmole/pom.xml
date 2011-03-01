@@ -19,7 +19,6 @@
         <module>core</module>
         <module>plugins</module>
         <module>misc</module>
-        <module>ui</module>
     </modules>
 
     <dependencies>
