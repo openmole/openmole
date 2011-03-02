@@ -152,20 +152,15 @@ abstract class GenericTask(val name: String) extends IGenericTask {
 
   override def containsOutput(name: String): Boolean =  _outputs.contains(name)
 
-  override def containsOutput(prototype: IPrototype[_]): Boolean = {
-    _outputs.contains(prototype.name)
-  }
+  override def containsOutput(prototype: IPrototype[_]): Boolean = _outputs.contains(prototype.name)
 
   override def inputs: IDataSet = new DataSet(_inputs)
     
   override def outputs: IDataSet = new DataSet(_outputs)
  
-  //FIXME lazy val in scala 2.9.0 
-  //@transient override lazy val 
-  override def userInputs: IDataSet =  new DataSet(inputs.filter(!_.mode.isSystem))
+  @transient override lazy val userInputs: IDataSet =  new DataSet(inputs.filter(!_.mode.isSystem))
    
-  //@transient override lazy val 
-  override def userOutputs: IDataSet = new DataSet(outputs.filter(!_.mode.isSystem))
+  @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filter(!_.mode.isSystem))
 
   def resources: Iterable[IResource] = _resources
  
