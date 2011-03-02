@@ -24,11 +24,11 @@ import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.batch.internal.Activator
 import org.openmole.misc.workspace.Workspace
 import org.osgi.framework.BundleContext
 import org.osgi.service.url.URLConstants
 import org.osgi.service.url.URLStreamHandlerService
+import org.openmole.core.batch.internal.Activator
 
 object JSAGASessionService {
   private val JSAGAConfigFile = "jsaga-universe.xml"
@@ -45,7 +45,7 @@ object JSAGASessionService {
 
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
-    if (universe != null)  System.setProperty("jsaga.universe", universe.toString());
+    if (universe != null)  System.setProperty("jsaga.universe", universe.toString)
     else Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
       
     val timeout = this.getClass.getClassLoader.getResource(JSAGATimeOutFile)
