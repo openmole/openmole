@@ -19,6 +19,7 @@ package org.openmole.core.model.mole
 
 
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
@@ -27,42 +28,46 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITicket
 
 object IMoleExecution {
-    final val Starting = "Starting"
-    final val Finished = "Finished"
-    final val OneJobStatusChanged = "OneJobStatusChanged"
-    final val OneJobSubmitted = "OneJobSubmitted"
+  final val Starting = "Starting"
+  final val Finished = "Finished"
+  final val OneJobStatusChanged = "OneJobStatusChanged"
+  final val OneJobSubmitted = "OneJobSubmitted"
 //    final val OneJobFinished = "OneJobFinished"
 }
 
 trait IMoleExecution {
 
-    @throws(classOf[InternalProcessingError])
-    @throws(classOf[UserBadDataError])
-    def start: this.type
+  @throws(classOf[InternalProcessingError])
+  @throws(classOf[UserBadDataError])
+  def start: this.type
     
-    @throws(classOf[InternalProcessingError])
-    @throws(classOf[UserBadDataError])
-    def cancel: this.type
+  @throws(classOf[InternalProcessingError])
+  @throws(classOf[UserBadDataError])
+  def cancel: this.type
     
-    @throws(classOf[InterruptedException])
-    def waitUntilEnded: this.type
-    def isFinished: Boolean
+  @throws(classOf[InterruptedException])
+  @throws(classOf[MultipleException])
+  def waitUntilEnded: this.type
+      
+  def exceptions: Iterable[Throwable]
+  
+  def isFinished: Boolean
 
-    def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
+  def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
 
-    def mole: IMole
+  def mole: IMole
 
-    def rootTicket: ITicket
-    def nextTicket(parent: ITicket): ITicket
-    def register(subMoleExecution: ISubMoleExecution)
+  def rootTicket: ITicket
+  def nextTicket(parent: ITicket): ITicket
+  def register(subMoleExecution: ISubMoleExecution)
 
-    def nextJobId: MoleJobId
+  def nextJobId: MoleJobId
 
-    def localCommunication: ILocalCommunication
+  def localCommunication: ILocalCommunication
 
-    def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
+  def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
     
-    def ticket(job: IMoleJob): Option[ITicket]
+  def ticket(job: IMoleJob): Option[ITicket]
     
-    def moleJobs: Iterable[IMoleJob]
+  def moleJobs: Iterable[IMoleJob]
 }

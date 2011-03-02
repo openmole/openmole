@@ -27,6 +27,7 @@ import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.sampling.ISampling
@@ -41,12 +42,10 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
   "Aggregation transition" should "turn results of exploration into a array of values" in {
      
-    val data = List("A","B","C")
+    val data = List("A","A","B","C")
     val i = new Prototype("i", classOf[String])
      
-    val sampling = new ISampling {
-      override def build(context: IContext) = data.map{v => List(new Variable(i, v))}
-    }
+    val sampling = new ExplicitSampling(i, data)
     
     val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
      

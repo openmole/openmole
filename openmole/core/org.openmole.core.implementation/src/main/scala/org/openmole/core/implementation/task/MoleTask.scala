@@ -55,7 +55,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
   
   class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
 
-    val throwables = new ListBuffer[Throwable] 
     val variables = new ListBuffer[IVariable[_]] 
     
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
@@ -64,8 +63,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
       //Logger.getLogger(classOf[MoleTask].getName).fine(moleJob.task.name + " " + moleJob.state.toString)
 
       moleJob.state match {
-        case State.FAILED =>
-          throwables += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
         case State.COMPLETED =>
           val e = MoleJobRegistry(moleJob).getOrElse(throw new InternalProcessingError("Capsule for " + moleJob.task.name + " not found in registry."))
           outputCapsules.get(e._2) match {
@@ -108,12 +105,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     
     aggregate(userOutputs, toArrayMap, resultGathering.variables).foreach {
       context += _
-    }
-
-    val exceptions = resultGathering.throwables
-
-    if (!exceptions.isEmpty) {
-      context += (GenericTask.Exception.prototype, new MultipleException(exceptions))
     }
   }
 

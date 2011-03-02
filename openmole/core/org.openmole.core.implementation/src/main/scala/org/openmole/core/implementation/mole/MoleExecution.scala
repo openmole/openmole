@@ -36,6 +36,7 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.apache.commons.collections15.multimap.MultiHashMap
+import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.core.model.job.ITicket
@@ -46,7 +47,9 @@ import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.task.GenericTask
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
 object MoleExecution {
@@ -103,6 +106,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob
   private val moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution
   private val moleJobOutputTransitionPerformed = new MoleExecutionAdapterForMoleJobOutputTransitionPerformed
+  
+  val exceptions = new ListBuffer[Throwable]
   
   @transient lazy val submiter = {
     val t = new Thread(new Submiter)
@@ -230,13 +235,16 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def waitUntilEnded = {
     submiter.join
+    if(!exceptions.isEmpty) throw new MultipleException(exceptions)
     this
   }
     
-  private def jobFailed(job: IMoleJob) =  jobOutputTransitionsPerformed(job)
+  private def jobFailed(moleJob: IMoleJob) = {
+    exceptions += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
+    jobOutputTransitionsPerformed(moleJob)
+  }
 
   private def jobOutputTransitionsPerformed(job: IMoleJob) = synchronized {
-//    eventDispatcher.objectChanged(this, IMoleExecution.OneJobFinished, Array(job))
 
     val jobInfo = inProgress.get(job) match {
       case None => throw new InternalProcessingError("Error in mole execution job info not found")

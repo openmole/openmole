@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,15 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-package org.openmole.plugin.domain.distribution
+package org.openmole.core.implementation.sampling
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.data.Variable
 
-class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
-
-  override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
-
+class ExplicitSampling[T](prototype: IPrototype[T], data: Iterable[T]) extends ISampling {
+  override def build(context: IContext) = data.map{v => List(new Variable(prototype, v))}
 }

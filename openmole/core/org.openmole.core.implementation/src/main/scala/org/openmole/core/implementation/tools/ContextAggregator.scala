@@ -19,9 +19,9 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.implementation.data.{DataSet,Variable,Prototype, Context}
 import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
+import org.openmole.misc.exception.InternalProcessingError
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.obj.ClassUtils._
 
 object ContextAggregator {
@@ -36,7 +36,7 @@ object ContextAggregator {
         val manifest = toArrayFonc(d.prototype.name)
         
         val array = manifest.newArray(merging.size).asInstanceOf[Array[Any]]
-        merging.map{_.value}.zipWithIndex.foreach{e => array(e._2) = e._1}
+        merging.zipWithIndex.foreach{e => array(e._2) = e._1.value}
         
         inContext += new Variable(new Prototype(d.prototype.name, manifest.arrayManifest.erasure).asInstanceOf[IPrototype[Any]], array) 
       } else if (toAggregate(d.prototype.name).size > 1) {
