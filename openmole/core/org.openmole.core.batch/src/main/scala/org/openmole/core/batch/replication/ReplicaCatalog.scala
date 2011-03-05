@@ -122,14 +122,14 @@ object ReplicaCatalog {
  
   private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
-        val set = objectServer.queryByExample(new Replica(null, storageDescription.toString, hash, authenticationKey, null))
+        val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
 
   private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
     lockRead({
-        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.toString, hash, authenticationKey, null))
+        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null))
 
           return set.size match {
           case 0 => None
@@ -141,12 +141,12 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
-    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.toString, null, authenticationKey, null)))
+    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null)))
   }
   
 
   def inCatalog(storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Set[String] = {
-    lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.toString,null, authenticationKey, null)).map{_.destination}.toSet)
+    lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null)).map{_.destination}.toSet)
   }
   
   def inCatalog(src: Iterable[File], authenticationKey: BatchAuthenticationKey): Map[File, Set[BatchStorageDescription]] = {
@@ -184,7 +184,7 @@ object ReplicaCatalog {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
-    //      LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
+          //LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
           for (toClean <- getReplica(srcPath, storageDescription, authenticationKey).iterator) clean(toClean)
                 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -197,12 +197,12 @@ object ReplicaCatalog {
 
               URIFile.copy(src, newFile, token)
 
-              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.toString, hash, storage.environment.authenticationKey, newFile.location)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, storage.environment.authenticationKey, newFile.location)
               insert(newReplica)
               newReplica 
           }
         case Some(r) => {
-     //       LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
+            //LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
             objectServer.activate(r, Int.MaxValue)
             r
           }
