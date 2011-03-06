@@ -31,62 +31,14 @@ import scala.util.control.Breaks._
 
 class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}]) extends Sampling(factors) {
 
-  def this(factors : Array[(IFactor[T,IDomain[T]]) forSome{type T}]) = this(factors.toIterable)
+  def this(factors: Array[(IFactor[T,IDomain[T]]) forSome{type T}]) = this(factors.toIterable)
+
+  def this(factors: IFactor[T,IDomain[T]] forSome{type T}*) = this(factors.toIterable)
 
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
-    var size = 1
-        
-    val values = (for (factor <- factors) yield {
-        val factorValue = (factor.prototype, factor.domain.iterator(context).toIndexedSeq)
-        if(factorValue._2.size == 0) {
-//          Logger.getLogger(classOf[CompleteSampling].getName).info("Factor " + factorValue._1.name + " empty.")
-          return Iterable.empty
-        }
-        size *= factorValue._2.size
-        factorValue
-      }).toIndexedSeq
-
-    val curIndexes = new ArraySeq[Int](factors.size)
-    
-    val iterators = values.map{_._2.iterator}
-    val listOfListOfValues = new ArrayBuffer[Iterable[IVariable[_]]](size)
-
-    var end = false
-    // Fetching each list of values
-    while (!end) {
-
-      // Append the values to the list
-      val factorValues = new ArrayBuffer[IVariable[_]](factors.size)
-
-      for (i <- 0 until factors.size) {
-        val curVal = values(i)
-        //FIXME downcasting
-        factorValues += new Variable(curVal._1.asInstanceOf[IPrototype[Any]], curVal._2(curIndexes(i)))
-      }
-
-      listOfListOfValues += factorValues
-
-      // preparing the next value
-      breakable {
-        for (i <- 0 until factors.size) {
-          if (curIndexes(i) < values(i)._2.size - 1) {
-            curIndexes(i) += 1
-            break
-          } else {
-            if (i == factors.size - 1) {
-              // The last vector has no more values, so the loop is ended
-              end = true
-              break
-            }
-            // else, we reset the current vector, and let increment the next vector
-            curIndexes(i) = 0
-          }
-        } }
-    }
- 
-    //Logger.getLogger(classOf[CompleteSampling].getName).info("Size of sampling " + listOfListOfValues.size)
-    
-    listOfListOfValues
+    val values = factors.map{f => f.domain.iterator(context).toList}
+    val composed = values.view.map{_.map(e => List(e))}.reduceRight((v1, v2) => v1.flatMap(e1 => v2.map{e2 =>  e1 ::: e2}))
+    composed.map{comp => factors.zip(comp).map{case (f,v) => new Variable(f.prototype.asInstanceOf[IPrototype[Any]], v)}}
   }
 
 }
