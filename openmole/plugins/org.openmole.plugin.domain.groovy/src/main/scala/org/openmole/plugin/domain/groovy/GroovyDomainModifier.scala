@@ -23,22 +23,12 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.implementation.data.Variable
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
-class GroovyDomainModifier[T](domain: IDomain[T], prototype: IPrototype[T], code: String) extends IDomain[T] {
+class GroovyDomainModifier[-I,+O](prototype: IPrototype[I], domain: IDomain[I], code: String) extends IDomain[O] {
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
-  override def iterator(context: IContext): Iterator[T] = {
-    new Iterator[T] {
-
-      val iterator = domain.iterator(context)
-
-      override def hasNext: Boolean =  iterator.hasNext 
-
-      override def next: T = {
-        val next = iterator.next
-        contextToGroovyCode.execute(context, List(new Variable[T](prototype, next))).asInstanceOf[T]
-      }
-    }
+  override def iterator(context: IContext): Iterator[O] = {
+    domain.iterator(context).map(e => contextToGroovyCode.execute(context, List(new Variable[I](prototype, e))).asInstanceOf[O])
   }
 
 }
