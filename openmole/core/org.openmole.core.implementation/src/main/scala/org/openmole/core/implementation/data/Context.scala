@@ -20,6 +20,13 @@ package org.openmole.core.implementation.data
 import org.openmole.core.model.data.{IContext,IVariable,IPrototype}
 import scala.collection.immutable.TreeMap
 
+object Context {
+  def apply(variables: Iterable[IVariable[_]]) = {
+    val ctx = new Context
+    ctx ++= variables
+  }
+}
+
 class Context extends IContext {
 
   var _variables = new TreeMap[String, IVariable[_]]

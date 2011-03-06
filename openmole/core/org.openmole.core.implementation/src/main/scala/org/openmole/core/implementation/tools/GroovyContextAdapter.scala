@@ -18,38 +18,23 @@
 package org.openmole.core.implementation.tools
 
 import groovy.lang.Binding
-import org.openmole.misc.tools.groovy.IGroovyProxy
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
+import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.misc.workspace.Workspace
 
 
-object GroovyContextAdapter{
-  val contextVar = new Prototype("context", classOf[IContext])
+object GroovyContextAdapter {
   val workspaceVar = new Prototype("workspace", Workspace.getClass)
   
-  def fromContextToBinding(context: IContext) = {
+  def toBinding(variables: Iterable[IVariable[_]]) = {
     val binding = new Binding
-
-    binding.setVariable(contextVar.name, context)
     binding.setVariable(workspaceVar.name, Workspace)
-    context.variables.values.foreach{in => binding.setVariable(in.prototype.name, in.value)}
-
+    variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
     binding
   }
 }
 
-trait GroovyContextAdapter extends IGroovyProxy {
-  
-  //override def execute(binding: Binding): Object = groovyShellProxy.execute(binding)
-  def execute(variables: Iterable[IVariable[_]]): Object =  {
-    val binding = new Binding
-    
-    for(v <- variables) binding.setVariable(v.prototype.name, v.value)
-    execute(binding)
-  }
-  
-  def execute(binding: IContext): Object = execute(GroovyContextAdapter.fromContextToBinding(binding))
-    
-}
+trait GroovyContextAdapter extends GroovyProxy { 
+  def execute(variables: Iterable[IVariable[_]]): Object = execute(GroovyContextAdapter.toBinding(variables))
+}  

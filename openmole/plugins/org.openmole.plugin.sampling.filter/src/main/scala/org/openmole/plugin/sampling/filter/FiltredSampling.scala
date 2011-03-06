@@ -20,16 +20,13 @@ package org.openmole.plugin.sampling.filter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.data.Context
 
 class FiltredSampling(sampling: ISampling, filters: Array[IFilter]) extends ISampling {
 
+  def this(sampling: ISampling, filters: IFilter*) = this(sampling, filters.toArray)
+  
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
-    val samples = sampling.build(context)
-    for(sample <- samples; if({
-          var filtred = false
-          val filterIt = filters.iterator
-          while(filterIt.hasNext && !filtred) filtred = filterIt.next.apply(sample)
-          filtred
-        })) yield sample 
+    sampling.build(context).filter(sample => !filters.exists(!_(Context(sample))))
   }
 }

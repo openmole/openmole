@@ -25,7 +25,7 @@ import java.io.File
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 
-class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
+class GroovyProxy(code: String, jars: Iterable[File]) {
 
   @transient 
   private lazy val compiledScript = {
@@ -46,7 +46,11 @@ class GroovyProxy(code: String, jars: Iterable[File]) extends IGroovyProxy {
    * @return the result of your script if a variable is returned.
    * @throws InternalProcessingError 
    */
-  def execute(binding: Binding): Object = {
+  def execute(binding: Binding): Object = compiledScript.synchronized {
+    executeUnsynchronized(binding)
+  }
+  
+  def executeUnsynchronized(binding: Binding): Object = {
     compiledScript.setBinding(binding)
     val ret = compiledScript.run
     InvokerHelper.removeClass(compiledScript.getClass)

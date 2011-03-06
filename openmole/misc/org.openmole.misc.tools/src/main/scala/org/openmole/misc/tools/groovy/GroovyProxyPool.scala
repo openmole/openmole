@@ -19,28 +19,27 @@ package org.openmole.misc.tools.groovy
 
 import groovy.lang.Binding
 import java.io.File
-import java.util.logging.Logger
 import org.apache.commons.pool.BasePoolableObjectFactory
 import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
 class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
 
   @transient lazy private val bufferPool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-      override def makeObject: GroovyProxy = new GroovyProxy(code, jars)
+      override def makeObject = new GroovyProxy(code, jars)
     })
   
   @throws(classOf[Throwable])
   def execute(binding: Binding): Object = {
     val proxy = borrowObject
     try {
-      proxy.execute(binding)
+      proxy.executeUnsynchronized(binding)
     } finally {
       returnObject(proxy)
     }
   }
 
-  private def returnObject(o: IGroovyProxy) = bufferPool.returnObject(o)
+  private def returnObject(o: GroovyProxy) = bufferPool.returnObject(o)
 
-  private def borrowObject: IGroovyProxy = bufferPool.borrowObject.asInstanceOf[IGroovyProxy]
+  private def borrowObject: GroovyProxy = bufferPool.borrowObject.asInstanceOf[GroovyProxy]
 
 }

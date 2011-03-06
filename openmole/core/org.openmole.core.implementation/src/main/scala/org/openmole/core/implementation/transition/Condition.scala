@@ -24,14 +24,10 @@ import org.openmole.core.implementation.tools.GroovyContextAdapter
 
 class Condition(code: String) extends ICondition {
 
-  @transient lazy val groovyProxy = {
-    new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
-  }
+  @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
   
   override def evaluate(context: IContext): Boolean = {
-    groovyProxy.synchronized {
-      groovyProxy.execute(context).asInstanceOf[Boolean]
-    }           
+    groovyProxy.execute(context).asInstanceOf[Boolean]           
   }
 
 }

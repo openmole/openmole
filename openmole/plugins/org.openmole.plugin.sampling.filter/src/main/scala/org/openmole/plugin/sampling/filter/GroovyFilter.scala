@@ -19,12 +19,10 @@ package org.openmole.plugin.sampling.filter
 
 import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.core.implementation.tools.GroovyContextAdapter
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.IContext
 
 class GroovyFilter(code: String) extends IFilter {
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
   
-  @throws(classOf[Throwable])
-  def apply(factorsValues: Iterable[IVariable[_]]): Boolean =  groovyProxy.execute(factorsValues).asInstanceOf[Boolean]
-  
+  def apply(factorsValues: IContext) = groovyProxy.execute(factorsValues).asInstanceOf[Boolean]  
 }
