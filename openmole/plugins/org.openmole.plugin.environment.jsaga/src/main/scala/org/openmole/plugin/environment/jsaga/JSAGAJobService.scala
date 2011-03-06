@@ -50,7 +50,6 @@ object JSAGAJobService {
 
   Workspace += (CreationTimeout, "PT2M")
   Workspace += (TestJobDoneTimeOut, "PT30M")
-  
 }
 
 abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends BatchJobService(environment, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
@@ -67,7 +66,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       return true
 
     } catch {
-      case e => Logger.getLogger(JSAGAJobService.getClass.getName).log(Level.FINE, e.getMessage, e)
+      case e => Logger.getLogger(JSAGAJobService.getClass.getName).log(Level.FINE, jobServiceURI + ": " + e.getMessage, e)
         return false
     } 
   }

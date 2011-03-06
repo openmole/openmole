@@ -117,7 +117,6 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
        
   Updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
- // Activator.getUpdater.registerForUpdate(new JobShaker(this, Activator.getWorkspace.preferenceAsDouble(JobShakingProbability)), ExecutorType.OWN, Activator.getWorkspace.preferenceAsDurationInMs(JobShakingInterval))
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
 
@@ -164,6 +163,8 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
         case (e: URISyntaxException) => Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
       }
     }
+    
+    Logger.getLogger(classOf[GliteEnvironment].getName).fine(jobServices.toString)
     jobServices.toList
   }
 

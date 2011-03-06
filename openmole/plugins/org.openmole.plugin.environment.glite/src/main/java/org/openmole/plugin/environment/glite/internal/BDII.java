@@ -67,7 +67,7 @@ public class BDII {
                 if (!resForPath.isEmpty()) {
                     String path = resForPath.get(0).getAttributes().get("GlueVOInfoPath").get().toString();
                     ids.put(id, path);
-                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Found {0} for {1}", new Object[]{path, id});
+                    //Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Found {0} for {1}", new Object[]{path, id});
                 }
                 /*path
                 a = r.getAttributes().get("GlueSAPath");
@@ -114,7 +114,7 @@ public class BDII {
 
                 // System.out.println(httpgURI.getHost());
                 if (ids.containsKey(httpgURI.getHost())) {
-                    Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Constructing url for host {0}", httpgURI.getHost());
+                    //Logger.getLogger(BDII.class.getName()).log(Level.FINE, "Constructing url for host {0}", httpgURI.getHost());
                     StringBuilder srmURI = new StringBuilder();
 
                     srmURI.append("srm");
@@ -131,7 +131,7 @@ public class BDII {
                     String srmURIString = srmURI.toString();
                     srmURIs.add(URI.create(srmURIString));
 
-                  //srm  srmIds.add(httpgURI.getHost());
+                    //srm  srmIds.add(httpgURI.getHost());
                 } else {
                     Logger.getLogger(BDII.class.getName()).log(Level.FINE, "No path found in BDII for host {0}", httpgURI.getHost());
                 }
@@ -148,7 +148,7 @@ public class BDII {
 
 
         /*	searchPhrase = "(&(objectClass=GlueSEAccessProtocol)(|";
-
+        
         for(String id : ids.keySet()) {
         searchPhrase += "(GlueChunkKey=GlueSEUniqueID=" + id + ")";
         }
@@ -161,19 +161,19 @@ public class BDII {
         //final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss"; //$NON-NLS-1$
         // Calendar cal = Calendar.getInstance();
         //SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
-
+        
         String id = GlueUtility.getStringAttribute( "GlueChunkKey", attributes ); //$NON-NLS-1$
         id = id.substring( id.indexOf( '=' ) + 1 );
-
+        
         //String Endpoint = GlueUtility.getStringAttribute( "GlueSEAccessProtocolEndpoint", attributes ); //$NON-NLS-1$
         Long port = GlueUtility.getLongAttribute( "GlueSEAccessProtocolPort", attributes ); //$NON-NLS-1$
         String type = GlueUtility.getStringAttribute( "GlueSEAccessProtocolType", attributes ); //$NON-NLS-1$
         //  String Version = GlueUtility.getStringAttribute( "GlueSEAccessProtocolVersion", attributes ); //$NON-NLS-1$
-
+        
         if(!srmIds.contains(id)) {
-
+        
         StringBuilder url = new StringBuilder();
-
+        
         url.append(type);
         url.append("://");
         url.append(id);
@@ -182,16 +182,16 @@ public class BDII {
         url.append(port);
         }
         url.append(ids.get(id));
-
+        
         url.append('/');
-
+        
         URI uri = URI.create(url.toString());
-
+        
         if(uri.getScheme().equals("gsiftp")) {
         srmURIs.add(uri);
         }
         }
-
+        
         }*/
 
         /*for(URI uri: srmURIs) {
