@@ -17,15 +17,13 @@
 
 package org.openmole.plugin.tools.groovy
 
-
-
 import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.groovy.GroovyProxyPool
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.tools.GroovyContextAdapter
+import org.openmole.core.implementation.tools.GroovyContextAdapter._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
@@ -36,8 +34,7 @@ import org.openmole.plugin.tools.code.IContextToCode
 
 class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContextToCode {
 
-  @transient
-  lazy val editorPool = new GroovyProxyPool(source, libs)
+  @transient lazy val editorPool = new GroovyProxyPool(source, libs)
 
   def execute(context: IContext, tmpVariables: Iterable[IVariable[_]]): Object = {
     execute(context, tmpVariables, IProgress.Dummy, Iterable.empty)
@@ -45,7 +42,7 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
 
   
   override def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object = {
-    val binding = GroovyContextAdapter.fromContextToBinding(context)
+    val binding = context.toBinding
 
     for(variable <- tmpVariables) {
       binding.setVariable(variable.prototype.name, variable.value)

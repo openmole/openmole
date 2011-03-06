@@ -27,14 +27,17 @@ import org.openmole.misc.workspace.Workspace
 object GroovyContextAdapter {
   val workspaceVar = new Prototype("workspace", Workspace.getClass)
   
-  def toBinding(variables: Iterable[IVariable[_]]) = {
-    val binding = new Binding
-    binding.setVariable(workspaceVar.name, Workspace)
-    variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
-    binding
+  implicit def variablesDecorator(variables: Iterable[IVariable[_]]) = new Object() {
+    def toBinding = {
+      val binding = new Binding
+      binding.setVariable(workspaceVar.name, Workspace)
+      variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
+      binding
+    }
   }
 }
 
 trait GroovyContextAdapter extends GroovyProxy { 
-  def execute(variables: Iterable[IVariable[_]]): Object = execute(GroovyContextAdapter.toBinding(variables))
+  import GroovyContextAdapter._
+  def execute(variables: Iterable[IVariable[_]]): Object = execute(variables.toBinding)
 }  
