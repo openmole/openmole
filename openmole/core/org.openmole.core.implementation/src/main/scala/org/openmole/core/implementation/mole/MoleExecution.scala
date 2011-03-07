@@ -72,8 +72,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   class MoleExecutionAdapterForMoleJob extends IObjectListener[IMoleJob] {
     override def eventOccured(job: IMoleJob) = {
       
-      //Logger.getLogger(classOf[MoleExecution].getName).fine("Event " + job.task.name + " " + job.state)
-
       EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job))
       
       job.state match {
@@ -114,7 +112,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     t.setDaemon(true)
     t
   }
-
 
   override def register(subMoleExecution: ISubMoleExecution) = {
     EventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.NORMAL, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.AllJobsWaitingInGroup)
@@ -245,7 +242,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   private def jobOutputTransitionsPerformed(job: IMoleJob) = synchronized {
-
     val jobInfo = inProgress.get(job) match {
       case None => throw new InternalProcessingError("Error in mole execution job info not found")
       case Some(ji) => ji
@@ -266,7 +262,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       submiter.interrupt
       EventDispatcher.objectChanged(this, ISubMoleExecution.Finished, Array(job))
     }
-
   }
 
   override def isFinished: Boolean = inProgress.isEmpty

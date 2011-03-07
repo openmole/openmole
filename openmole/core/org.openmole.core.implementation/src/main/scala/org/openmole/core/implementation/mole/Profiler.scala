@@ -17,12 +17,6 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IProfiler
-import org.openmole.core.implementation.observer. IMoleExecutionObserver
 
-
-abstract class Profiler extends IProfiler with IMoleExecutionObserver {  
-  def register(moleExecution: IMoleExecution) = new MoleExecutionObserverAdapter(moleExecution, this)
-}
+abstract class Profiler protected extends MoleExecutionObserver with IProfiler

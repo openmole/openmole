@@ -31,7 +31,7 @@ import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
@@ -79,26 +79,24 @@ object GliteAuthentication {
         try {
           //Bypass the directory
           var tarEntry = tis.getNextEntry
-
           tarEntry = tis.getNextEntry
 
+          var links = List.empty[(File, String)]
+          
           while (tarEntry != null) {
-            var dest = new File(dir, tarEntry.getName)
-            dest = new File(dir, dest.getName())
+            val destForName = new File(dir, tarEntry.getName)
+            val dest = new File(dir, destForName.getName)
 
-            if (dest.exists) {
-              dest.delete
-            }
+            if (dest.exists) dest.delete
+            //Logger.getLogger(classOf[GliteAuthentication].getName).fine(tarEntry.getName + " -> " + tarEntry.getLinkName)
 
-            val os = new FileOutputStream(dest);
-            try {
-              FileUtil.copy(tis, os)
-            } finally {
-              os.close
-            }
-
+            if(!tarEntry.getLinkName.isEmpty) links ::= dest -> tarEntry.getLinkName
+            else tis.copy(dest)
+            
             tarEntry = tis.getNextEntry
           }
+          
+          links.foreach{e => new File(dir, e._2).copy(e._1)}
         } catch {
           case (e: IOException) => Logger.getLogger(classOf[GliteAuthentication].getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);
         } finally {
@@ -136,14 +134,14 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       if (caDir.exists) {
         caDir
       } else {
-        val tmp = Workspace.file("CACertificates")
+        val caDir = Workspace.file("CACertificates")
 
-        if (!tmp.exists || !new File(tmp, ".complete").exists) {
-          tmp.mkdir();
-          dowloadCACertificates(new URI(Workspace.preference(GliteEnvironment.CACertificatesSiteLocation)), tmp);
-          new File(tmp, ".complete").createNewFile
+        if (!caDir.exists || !new File(caDir, ".complete").exists) {
+          caDir.mkdir
+          dowloadCACertificates(new URI(Workspace.preference(GliteEnvironment.CACertificatesSite)), caDir)
+          new File(caDir, ".complete").createNewFile
         }
-        tmp
+        caDir
       }
     }
   }

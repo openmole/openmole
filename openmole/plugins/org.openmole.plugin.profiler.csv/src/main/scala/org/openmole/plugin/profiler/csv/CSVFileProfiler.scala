@@ -25,6 +25,7 @@ import org.openmole.core.implementation.mole.Profiler
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
+import org.openmole.core.model.job.State._
 
 class CSVFileProfiler(file: File) extends Profiler {
 
@@ -38,13 +39,15 @@ class CSVFileProfiler(file: File) extends Profiler {
   
   def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
 
-  override def moleJobFinished(moleJob: IMoleJob) =  {
-    writer.writeNext(toColumns(moleJob))
-    writer.flush
+  override def stateChanged(moleJob: IMoleJob) =  {
+    if(moleJob.state ==  COMPLETED) {
+      writer.writeNext(toColumns(moleJob))
+      writer.flush
+    }
   }
 
-  override def moleExecutionFinished = writer.close
+  override def executionFinished = writer.close
 
-  override def moleExecutionStarting = {}
+  override def executionStarting = {}
 
 }

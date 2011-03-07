@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter
 import java.io.Writer
 import org.openmole.core.implementation.mole.Profiler
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 
@@ -38,15 +39,17 @@ class CSVProfiler(writer: CSVWriter) extends Profiler {
   def this(moleExecution: IMoleExecution) = this(moleExecution, new OutputStreamWriter(System.out))
 
 
-  override def moleJobFinished(moleJob: IMoleJob) = synchronized {
-    writer.writeNext(toColumns(moleJob))
+  override def stateChanged(moleJob: IMoleJob) = synchronized {
+    if(moleJob.state == COMPLETED) {
+      writer.writeNext(toColumns(moleJob))
+      writer.flush
+    }
+  }
+
+  override def executionFinished = {
     writer.flush
   }
 
-  override def moleExecutionFinished = {
-    writer.flush
-  }
-
-  override def moleExecutionStarting = {}
+  override def executionStarting = {}
        
 }

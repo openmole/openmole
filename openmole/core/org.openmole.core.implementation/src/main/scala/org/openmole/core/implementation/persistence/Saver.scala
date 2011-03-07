@@ -22,8 +22,7 @@ import java.io.IOException
 import java.util.TreeSet
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.observer.IMoleExecutionObserver
-import org.openmole.core.implementation.observer.MoleExecutionObserverAdapter
+import org.openmole.core.implementation.mole.MoleExecutionObserver
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
@@ -34,13 +33,13 @@ import org.openmole.core.serializer.Serializer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
-class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecutionObserver {
+class Saver private (taskCapsule: IGenericCapsule, dir: File) extends MoleExecutionObserver {
 
-   var ordinal: Int = 0
+  var ordinal: Int = 0
   
   def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) = {
     this(taskCapsule, dir)
-     new MoleExecutionObserverAdapter(moleExection, this)
+    register(moleExection)
   }
 
   def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = {
@@ -48,7 +47,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
   }
 
 
-  override def moleJobFinished(moleJob: IMoleJob) = {
+  override def stateChanged(moleJob: IMoleJob) = {
     synchronized {
       val filter = new TreeSet[String]
       
@@ -84,7 +83,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
     }
   }
 
-  override def moleExecutionStarting = {
+  override def executionStarting = {
       dir.mkdirs
       new File(dir, FILE).mkdir
       new File(dir, CONTEXT).mkdir
@@ -92,5 +91,5 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends IMoleExecu
       ordinal = 0
   }
 
-  override def moleExecutionFinished = {}
+  override def executionFinished = {}
 }

@@ -49,10 +49,9 @@ object GenericCapsule {
 
 abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
 
-  class GenericCapsuleAdapter extends IObjectListener[MoleJob] {
+  class GenericCapsuleAdapter extends IObjectListener[IMoleJob] {
 
-    override def eventOccured(obj: MoleJob) = {
-      //Logger.getLogger(classOf[GenericCapsule[_,_]].getName).fine("Event " + obj.task.name + " " + obj.state)
+    override def eventOccured(obj: IMoleJob) = {
       obj.state match {
         case COMPLETED => jobFinished(obj)
         case _ =>
@@ -125,7 +124,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     _task = task
   }
   
-  private def jobFinished(job: MoleJob) = {
+  private def jobFinished(job: IMoleJob) = {
     try {
       val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
       val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   

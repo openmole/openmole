@@ -248,7 +248,12 @@ object FileUtil {
   }
 
   class InputStreamDecorator(is: InputStream) {
-    def copy(os: OutputStream) = FileUtil.copy(is, os)
+    def copy(os: OutputStream): Unit = FileUtil.copy(is, os)
+    def copy(file: File): Unit = {
+      val os = new FileOutputStream(file)
+      try copy(os)
+      finally os.close
+    }
   }
   
 }

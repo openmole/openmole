@@ -15,51 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.observer
+package org.openmole.core.implementation.mole
 
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListener
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
-import org.openmole.misc.tools.service.Priority
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.job.State
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
+import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.tools.service.Priority
 
-
-class MoleExecutionObserverAdapter private (moleExecutionObserver: IMoleExecutionObserver) {
-    
-  def this(moleExecution: IMoleExecution, moleExecutionObserver: IMoleExecutionObserver) = {
-    this(moleExecutionObserver)
+trait MoleExecutionObserver {
+  
+  protected def register(moleExecution: IMoleExecution) = {
     EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
     EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobStatusChanged)
     EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
   }
   
+  def stateChanged(moleJob: IMoleJob) = {}
+  def executionStarting = {}
+  def executionFinished = {}
   
   class MoleExecutionOneJobFinishedAdapter extends IObjectListenerWithArgs[IMoleExecution]  {
-
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
       val moleJob = args(0).asInstanceOf[IMoleJob]
-      moleJob.state match {
-        case State.COMPLETED => moleExecutionObserver.moleJobFinished(moleJob)
-        case _ =>
-      }
+      stateChanged(moleJob)
     }
-
   }
 
   class MoleExecutionExecutionStartingAdapter extends IObjectListener[IMoleExecution]  {
-
-    override def eventOccured(obj: IMoleExecution) = {
-      moleExecutionObserver.moleExecutionStarting
-    }
+    override def eventOccured(obj: IMoleExecution) = executionStarting
   }
 
   class MoleExecutionExecutionFinishedAdapter extends IObjectListener[IMoleExecution]  {
-
-    override def eventOccured(obj: IMoleExecution) = {
-      moleExecutionObserver.moleExecutionFinished
-    }
+    override def eventOccured(obj: IMoleExecution) =  executionFinished
   }
-   
+  
 }

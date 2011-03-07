@@ -59,7 +59,7 @@ object GliteEnvironment {
   val DelegationTimeLocation = new ConfigurationLocation("GliteEnvironment", "DelegationTime")
 
   val FetchRessourcesTimeOutLocation = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
-  val CACertificatesSiteLocation = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
+  val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
   val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
@@ -87,7 +87,7 @@ object GliteEnvironment {
   Workspace += (DelegationTimeLocation, "P7D")
 
   Workspace += (FetchRessourcesTimeOutLocation, "PT5M")
-  Workspace += (CACertificatesSiteLocation, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
+  Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
   Workspace += (LocalThreadsBySELocation, "10")
   Workspace += (LocalThreadsByWMSLocation, "10")
