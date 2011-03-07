@@ -31,6 +31,15 @@ import org.openmole.misc.executorservice.ExecutorType
 
 object HashService {
 
+  implicit def fileHashServiceDecorator(file: File) = new Object {
+    def hash = computeHash(file)
+  }
+  
+  implicit def inputStreamHashServiceDecorator(is: InputStream) = new Object {
+    def hash = computeHash(is)
+    def hash(maxRead: Int, timeout: Long) = computeHash(is, maxRead, timeout)
+  }
+  
   def computeHash(file: File): SHA1Hash = {
     val is = new FileInputStream(file)
     try {

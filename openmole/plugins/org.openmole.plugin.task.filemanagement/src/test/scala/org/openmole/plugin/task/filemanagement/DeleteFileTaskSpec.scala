@@ -41,7 +41,7 @@ class DeleteFileTaskSpec extends FlatSpec with ShouldMatchers {
     val context = new Context()
     context +=  p1 -> f1
     
-    t1.process(context, new Progress())
+    t1.process(context, new Progress)
     
     f1.exists should equal (false)
   }

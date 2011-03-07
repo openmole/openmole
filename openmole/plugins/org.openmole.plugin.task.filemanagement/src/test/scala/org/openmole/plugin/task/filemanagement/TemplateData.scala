@@ -22,7 +22,7 @@ import java.io.PrintWriter
 
 object TemplateData {
 
-  def templateFile(): File = {
+  lazy val templateFile: File = {
     val template = File.createTempFile("file", ".test")
     val writer = new PrintWriter(template)
     writer.println("My first line")
@@ -32,7 +32,7 @@ object TemplateData {
     template
   }
   
-  def targetFile(): File = {
+  lazy val targetFile: File = {
     val target = File.createTempFile("target", ".test")
     val writert = new PrintWriter(target)
     writert.println("My first line")
