@@ -25,10 +25,14 @@ import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.ListBuffer
 
-class GroovyTask(name: String) extends CodeTask(name) {
+class GroovyTask(name: String, private var _code: ISourceCode) extends CodeTask(name) {
+  
+  def this(name: String) = this(name, new StringSourceCode(""))
+  def this(name: String, code: String) = this(name, new StringSourceCode(code))
+  def this(name: String, code: File) = this(name, new FileSourceCode(code))
+  
   var libs = new TreeSet[File]
   var imports = new ListBuffer[String]
-  var _code: ISourceCode = new StringSourceCode("")
   
   @transient override lazy val contextToCode = new ContextToGroovyCode(code, libs)
   

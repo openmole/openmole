@@ -27,7 +27,7 @@ import org.openmole.plugin.tools.code.{IContextToCode,ISourceCode}
 
 abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
 
-  override protected def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext, progress: IProgress) = {
     val pwd = Workspace.newDir
     prepareInputFiles(context, progress, pwd.getCanonicalFile)
     contextToCode.execute(context, Iterable.empty, progress, userOutputs)
