@@ -19,7 +19,6 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.implementation.capsule.GenericCapsule._
 import org.openmole.core.model.transition.IAggregationTransition
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet

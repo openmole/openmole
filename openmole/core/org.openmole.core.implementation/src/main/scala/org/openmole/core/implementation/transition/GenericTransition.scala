@@ -18,7 +18,6 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.capsule.GenericCapsule._
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext

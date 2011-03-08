@@ -20,7 +20,7 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State
-import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.EventDispatcher._
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.tools.service.Priority
@@ -28,9 +28,12 @@ import org.openmole.misc.tools.service.Priority
 trait MoleExecutionObserver {
   
   protected def register(moleExecution: IMoleExecution) = {
-    EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionExecutionStartingAdapter, IMoleExecution.Starting)
-    EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.HIGH, new MoleExecutionOneJobFinishedAdapter, IMoleExecution.OneJobStatusChanged)
-    EventDispatcher.registerForObjectChangedSynchronous(moleExecution, Priority.LOW, new MoleExecutionExecutionFinishedAdapter, IMoleExecution.Finished)
+    import Priority._
+    import IMoleExecution._
+    
+    registerForObjectChangedSynchronous(moleExecution, HIGH, new MoleExecutionExecutionStartingAdapter, Starting)
+    registerForObjectChangedSynchronous(moleExecution, HIGH, new MoleExecutionOneJobFinishedAdapter, OneJobStatusChanged)
+    registerForObjectChangedSynchronous(moleExecution, LOW, new MoleExecutionExecutionFinishedAdapter, Finished)
   }
   
   def stateChanged(moleJob: IMoleJob) = {}
