@@ -33,6 +33,7 @@ object DataSet {
   
   implicit  def fromIterable2Map(lst: Iterable[IData[_]]): Map[String, IData[_]] = toMap(lst.map{ d => (d.prototype.name,d)})
   
+  lazy val empty = new DataSet(Map.empty)
 }
 
 

@@ -53,12 +53,11 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
       val newTicket = 
         if (end.capsule.intputSlots.size <= 1) ticket 
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
-     
-      val endTask = end.capsule.decapsulate 
+
       val toAggregate = combinaison.groupBy(_.prototype.name)
       
       val toArray = toArrayManifests(end.capsule)      
-      val newContext = aggregate(endTask.inputs, toArray, combinaison)
+      val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
       moleExecution.submit(end.capsule, newContext, newTicket, subMole)
     }
   }

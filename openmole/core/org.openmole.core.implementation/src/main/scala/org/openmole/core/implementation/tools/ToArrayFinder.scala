@@ -32,7 +32,7 @@ object ToArrayFinder {
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     var forceArray = new TreeSet[String]
     
-    for(t <- caps.intputSlots.flatMap(_.transitions) ; output <- t.start.decapsulate.userOutputs){
+    for(t <- caps.intputSlots.flatMap(_.transitions) ; output <- t.start.userOutputs){
       if(!t.filtered.contains(output.prototype.name)) {
         toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
         if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name

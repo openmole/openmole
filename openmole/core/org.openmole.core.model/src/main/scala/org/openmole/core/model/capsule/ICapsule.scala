@@ -64,4 +64,5 @@ trait ICapsule extends IGenericCapsule {
    * @return all the output transitions plugged to this capsule
    */
   def outputTransitions: Iterable[ITransition]
+  
 }

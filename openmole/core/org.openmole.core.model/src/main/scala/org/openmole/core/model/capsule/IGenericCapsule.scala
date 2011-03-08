@@ -17,7 +17,7 @@
 
 package org.openmole.core.model.capsule
 
-import org.openmole.core.model.data.{IDataChannel,IContext}
+import org.openmole.core.model.data.{IDataChannel,IContext, IDataSet}
 import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.{IGenericTransition,ISlot}
@@ -126,4 +126,19 @@ trait IGenericCapsule {
    */
   def toJob(context: IContext, jobId: MoleJobId): IMoleJob
 
+  /**
+   *
+   * Get the user input data of the task contained in this capsule.
+   *
+   * @return the input of the task
+   */
+  def userInputs: IDataSet  
+   
+  /**
+   *
+   * Get the user output data of the task contained in this capsule.
+   *
+   * @return the output data of the task
+   */
+  def userOutputs: IDataSet
 }

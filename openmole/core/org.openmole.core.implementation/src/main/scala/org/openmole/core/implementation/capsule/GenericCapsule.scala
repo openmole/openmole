@@ -35,8 +35,10 @@ import scala.collection.mutable.HashSet
 
 import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.tools.ToCloneFinder._
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.model.data.IDataSet
 
-object GenericCapsule {
+/*object GenericCapsule {
   
   implicit def GenericCapsule2Decorator(caps: IGenericCapsule) = new GenericCapsuleDecorator(caps)
   
@@ -44,7 +46,7 @@ object GenericCapsule {
     def decapsulate = caps.task.getOrElse(throw new UserBadDataError("No task has been set for capsule")) 
   }
   
-}
+}*/
 
 
 abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
@@ -79,6 +81,20 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
     
+  override def userInputs: IDataSet  = {
+    task match {
+      case None => DataSet.empty
+      case Some(t) => t.userInputs
+    }
+  }
+  
+  override def userOutputs: IDataSet  = {
+    task match {
+      case None => DataSet.empty
+      case Some(t) => t.userOutputs
+    }
+  }
+  
   def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
   def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels
     

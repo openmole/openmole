@@ -62,7 +62,25 @@ trait IGenericTask {
    * @return the output data of the task
    */
   def outputs: IDataSet
-
+  
+  /**
+   *
+   * Get the input data of the task exepts the one used for the internal usage 
+   * of the workflow system.
+   *
+   * @return the input of the task
+   */
+  def userInputs: IDataSet  
+   
+  /**
+   *
+   * Get the output data of the task exepts the one used for the internal usage 
+   * of the workflow system.
+   *
+   * @return the output data of the task
+   */
+  def userOutputs: IDataSet
+  
   /**
    *
    * Add <code>resource</code> to this task.
@@ -164,9 +182,5 @@ trait IGenericTask {
    * @return the parameters configured for this task.
    */
   def parameters: Iterable[IParameter[_]]
-    
-  def userInputs: IDataSet  
-   
-  def userOutputs: IDataSet
 
 }
