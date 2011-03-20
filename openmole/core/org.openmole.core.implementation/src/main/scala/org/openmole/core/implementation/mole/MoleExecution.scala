@@ -84,8 +84,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   class MoleExecutionAdapterForSubMoleExecution extends IObjectListener[ISubMoleExecution] {
     override def eventOccured(obj: ISubMoleExecution) = submitGroups(obj)
   }
-    
-   
+ 
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
 

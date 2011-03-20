@@ -18,7 +18,6 @@
 package org.openmole.misc.eventdispatcher
 
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
 class ObjectListenerMap[L] {

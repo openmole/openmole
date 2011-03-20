@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.persistence
+package org.openmole.core.implementation.hook
 
 import java.io.File
 import java.io.IOException
 import java.util.TreeSet
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.mole.MoleExecutionObserver
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
@@ -33,19 +32,11 @@ import org.openmole.core.serializer.Serializer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 
-class Saver private (taskCapsule: IGenericCapsule, dir: File) extends MoleExecutionObserver {
+class Saver private (moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) extends MoleExecutionHook(moleExection) {
 
   var ordinal: Int = 0
   
-  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) = {
-    this(taskCapsule, dir)
-    register(moleExection)
-  }
-
-  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = {
-    this(moleExection, taskCapsule, new File(dir));
-  }
-
+  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = this(moleExection, taskCapsule, new File(dir))
 
   override def stateChanged(moleJob: IMoleJob) = {
     synchronized {
@@ -73,9 +64,7 @@ class Saver private (taskCapsule: IGenericCapsule, dir: File) extends MoleExecut
         val files = new File(dir, FILE)
         for (f <- serialization._1) {         
           val file = new File(files, f._2.fileHash.toString)
-          if (!file.exists) {
-            copy(f._1, file)
-          }
+          if (!file.exists) copy(f._1, file)
         }
       } catch {
         case(e: IOException) => throw new InternalProcessingError(e)

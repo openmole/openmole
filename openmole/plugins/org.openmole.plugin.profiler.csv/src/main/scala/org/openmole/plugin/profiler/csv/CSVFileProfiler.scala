@@ -21,22 +21,17 @@ import au.com.bytecode.opencsv.CSVWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import org.openmole.core.implementation.mole.Profiler
+import org.openmole.core.implementation.hook.Profiler
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 import org.openmole.core.model.job.State._
 
-class CSVFileProfiler(file: File) extends Profiler {
+class CSVFileProfiler(moleExecution: IMoleExecution, file: File) extends Profiler(moleExecution) {
 
   file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
 
-  def this(moleExecution: IMoleExecution, file: File) {
-    this(file)
-    register(moleExecution)
-  }
-  
   def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
 
   override def stateChanged(moleJob: IMoleJob) =  {

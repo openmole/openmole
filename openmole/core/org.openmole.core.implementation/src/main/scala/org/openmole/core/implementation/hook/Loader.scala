@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.persistence
+package org.openmole.core.implementation.hook
 
 import java.io.File
 import org.openmole.core.model.data.IContext

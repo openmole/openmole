@@ -21,18 +21,13 @@ package org.openmole.plugin.profiler.csv
 import au.com.bytecode.opencsv.CSVWriter
 import java.io.OutputStreamWriter
 import java.io.Writer
-import org.openmole.core.implementation.mole.Profiler
+import org.openmole.core.implementation.hook.Profiler
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 
-class CSVProfiler(writer: CSVWriter) extends Profiler {
-   
-  def this(moleExecution: IMoleExecution, writter: CSVWriter) = {
-    this(writter)
-    register(moleExecution)
-  }
+class CSVProfiler(moleExecution: IMoleExecution, writer: CSVWriter) extends Profiler(moleExecution) {
     
   def this(moleExecution: IMoleExecution, out: Writer) = this(moleExecution,new CSVWriter(out))
   

@@ -38,4 +38,5 @@ case class Prototype[T](val name: String, val `type`: Manifest[T]) extends IProt
   }
 
   override def toString: String = '(' + `type`.toString + ')' + name
+  
 }

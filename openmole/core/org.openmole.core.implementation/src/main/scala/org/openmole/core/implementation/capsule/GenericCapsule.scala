@@ -38,17 +38,6 @@ import org.openmole.core.implementation.tools.ToCloneFinder._
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
 
-/*object GenericCapsule {
-  
-  implicit def GenericCapsule2Decorator(caps: IGenericCapsule) = new GenericCapsuleDecorator(caps)
-  
-  class GenericCapsuleDecorator(caps: IGenericCapsule) {
-    def decapsulate = caps.task.getOrElse(throw new UserBadDataError("No task has been set for capsule")) 
-  }
-  
-}*/
-
-
 abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
 
   class GenericCapsuleAdapter extends IObjectListener[IMoleJob] {
@@ -146,6 +135,8 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
       val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   
       val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
  
+      EventDispatcher.objectChanged(execution, IMoleExecution.JobInCapsuleFinished, Array(job, this))
+      
       performTransition(job.context, ticket, execution, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)

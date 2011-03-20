@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.tools
 
+import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.transition.IAggregationTransition
@@ -27,6 +28,11 @@ import scala.collection.mutable.ListBuffer
 
 object ToArrayFinder {
   
+  /*def aggregated(slot: IGenericCapsule) = {
+    
+  }
+  */
+ 
   def toArrayManifests(caps: IGenericCapsule) = {
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     var forceArray = new TreeSet[String]

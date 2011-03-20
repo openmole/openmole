@@ -30,7 +30,6 @@ import org.openmole.core.model.transition.{IGenericTransition,ISlot}
  * the workflow representation.
  * 
  */
-
 trait IGenericCapsule {
 
   /**
