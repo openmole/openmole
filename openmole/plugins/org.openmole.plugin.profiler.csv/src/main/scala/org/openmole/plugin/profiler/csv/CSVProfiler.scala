@@ -26,13 +26,13 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
+import scala.ref.WeakReference
 
-class CSVProfiler(moleExecution: IMoleExecution, writer: CSVWriter) extends Profiler(moleExecution) {
+class CSVProfiler(moleExecution:  WeakReference[IMoleExecution], writer: CSVWriter) extends Profiler(moleExecution) {
     
-  def this(moleExecution: IMoleExecution, out: Writer) = this(moleExecution,new CSVWriter(out))
+  def this(moleExecution: IMoleExecution, out: Writer) = this(new WeakReference(moleExecution), new CSVWriter(out))
   
-  def this(moleExecution: IMoleExecution) = this(moleExecution, new OutputStreamWriter(System.out))
-
+  def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution), new CSVWriter(new OutputStreamWriter(System.out)))
 
   override def stateChanged(moleJob: IMoleJob) = synchronized {
     if(moleJob.state == COMPLETED) {

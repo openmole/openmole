@@ -18,5 +18,6 @@
 package org.openmole.core.implementation.hook
 
 import org.openmole.core.model.mole.IMoleExecution
+import scala.ref.WeakReference
 
-class Profiler(moleExecution: IMoleExecution) extends MoleExecutionHook(moleExecution)
+class Profiler(moleExecution: WeakReference[IMoleExecution]) extends MoleExecutionHook(moleExecution)

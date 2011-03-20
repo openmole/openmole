@@ -31,12 +31,13 @@ import org.openmole.core.model.persistence.PersistentContext._
 import org.openmole.core.serializer.Serializer
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
+import scala.ref.WeakReference
 
-class Saver private (moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: File) extends MoleExecutionHook(moleExection) {
+class Saver private (moleExection: WeakReference[IMoleExecution], taskCapsule: IGenericCapsule, dir: File) extends MoleExecutionHook(moleExection) {
 
   var ordinal: Int = 0
   
-  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = this(moleExection, taskCapsule, new File(dir))
+  def this(moleExection: IMoleExecution, taskCapsule: IGenericCapsule, dir: String) = this(new WeakReference(moleExection), taskCapsule, new File(dir))
 
   override def stateChanged(moleJob: IMoleJob) = {
     synchronized {

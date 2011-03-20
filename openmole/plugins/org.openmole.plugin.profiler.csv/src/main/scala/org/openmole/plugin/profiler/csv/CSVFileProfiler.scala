@@ -26,14 +26,17 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.plugin.profiler.csv.MoleJobInfoToCSV._
 import org.openmole.core.model.job.State._
+import scala.ref.WeakReference
 
-class CSVFileProfiler(moleExecution: IMoleExecution, file: File) extends Profiler(moleExecution) {
+class CSVFileProfiler(moleExecution:  WeakReference[IMoleExecution], file: File) extends Profiler(moleExecution) {
+
+  def this(moleExecution: IMoleExecution, file: String) = this(new WeakReference(moleExecution), new File(file))
+
+  def this(moleExecution: IMoleExecution, file: File) = this(new WeakReference(moleExecution), file)
 
   file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
-
-  def this(moleExecution: IMoleExecution, file: String) = this(moleExecution, new File(file))
-
+  
   override def stateChanged(moleJob: IMoleJob) =  {
     if(moleJob.state ==  COMPLETED) {
       writer.writeNext(toColumns(moleJob))
