@@ -41,10 +41,6 @@ class CSVProfiler(moleExecution:  WeakReference[IMoleExecution], writer: CSVWrit
     }
   }
 
-  override def executionFinished = {
-    writer.flush
-  }
-
-  override def executionStarting = {}
+  override def executionFinished =  writer.flush
        
 }

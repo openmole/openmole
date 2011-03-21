@@ -46,6 +46,4 @@ class CSVFileProfiler(moleExecution:  WeakReference[IMoleExecution], file: File)
 
   override def executionFinished = writer.close
 
-  override def executionStarting = {}
-
 }
