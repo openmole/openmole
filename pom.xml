@@ -10,13 +10,13 @@
     <artifactId>openmole-ecosystem</artifactId>
     <version>0.3-SNAPSHOT</version>
 
-    <modules>
+    <!--<modules>
         <module>libraries</module>
         <module>third-parties</module>
         <module>openmole</module>
         <module>runtime</module>
         <module>ui</module>
-    </modules>
+    </modules>-->
 
     <dependencyManagement>
         <dependencies>
