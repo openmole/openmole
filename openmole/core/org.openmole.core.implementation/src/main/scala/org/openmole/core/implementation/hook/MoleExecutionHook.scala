@@ -29,6 +29,8 @@ import scala.ref.WeakReference
 
 class MoleExecutionHook(private var moleExecution: WeakReference[IMoleExecution]) extends IHook {
   
+  def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
+  
   import Priority._
   import IMoleExecution._
   import EventDispatcher._
