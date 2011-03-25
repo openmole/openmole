@@ -42,6 +42,7 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jsaga.JSAGASessionService
+import org.openmole.misc.tools.obj.Id
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.tools.io.Network._
 
@@ -143,7 +144,7 @@ object URIFile {
   private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);
 }
 
-case class URIFile(val location: String) extends IURIFile {
+class URIFile(val location: String) extends IURIFile with Id {
   
   import URIFile._
  
@@ -361,21 +362,8 @@ case class URIFile(val location: String) extends IURIFile {
 
   override def storageDescription = new BatchStorageDescription(new URI(location))
   override def URI: URI = new URI(location)
-  override def toString: String = location
+  
+  override def toString = location
+  override def id = location
 
-  
-  
-  /*override def equals(obj: Any): Boolean = {
-    if (obj == null) return false
-    if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
-  
-    val other = obj.asInstanceOf[URIFile]
-    if (this.location != other.location && (this.location == null || !this.location.equals(other.location))) return false
-    true
-  }
-
-  override def hashCode: Int = {
-    var hash = 3
-    97 * hash + (if(location != null) location.hashCode else 0)
-  }*/
 }

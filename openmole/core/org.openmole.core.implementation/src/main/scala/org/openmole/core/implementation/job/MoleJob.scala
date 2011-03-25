@@ -28,6 +28,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State._
+import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ArrayBuffer
@@ -47,7 +48,7 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
   override def context: IContext = _context
     
   //@ObjectModified(name = IMoleJob.StateChanged)
-  def state_=(state: State) = {
+  def state_=(state: State) = synchronized {
     if(_state == null || !_state.isFinal) {
       val timeStamps = context.value(GenericTask.Timestamps.prototype) match {
         case None => 

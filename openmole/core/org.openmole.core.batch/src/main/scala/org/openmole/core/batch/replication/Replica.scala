@@ -27,7 +27,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 
-case class Replica( _source: String, _storageDescription: String, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
+class Replica( _source: String, _storageDescription: String, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -80,6 +80,17 @@ case class Replica( _source: String, _storageDescription: String, _hash: IHash, 
     _hash
   }
    
+  @transient lazy val tuple = (source, storageDescription, hash, authenticationKey, destination)
+  
+  override def hashCode = tuple.hashCode
+
+  override def equals(other: Any): Boolean = {
+    if(other == null) false
+    else if(!classOf[Replica].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
+    else tuple.equals(other.asInstanceOf[Replica].tuple)
+  }
+
+  
   override def toString: String = {
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "]";
   }

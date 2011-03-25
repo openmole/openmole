@@ -18,5 +18,8 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchAuthenticationKey
+import org.openmole.misc.tools.obj.Id
 
-class GliteAuthenticationKey(voName: String, vomsURL: String) extends (String, String)(voName, vomsURL) with BatchAuthenticationKey
+class GliteAuthenticationKey(voName: String, vomsURL: String) extends BatchAuthenticationKey with Id {  
+  override def id = (voName, vomsURL) 
+}

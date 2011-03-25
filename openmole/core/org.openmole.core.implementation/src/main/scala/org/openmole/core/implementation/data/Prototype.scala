@@ -19,6 +19,7 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.misc.tools.obj.Id
 import scala.reflect.Manifest
 
 object Prototype {
@@ -27,7 +28,7 @@ object Prototype {
   }
 }
 
-case class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] {
+class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] with Id {
 
   def this(name: String, `type`: Class[T]) = this(name, `type`.toManifest)
   
@@ -37,6 +38,6 @@ case class Prototype[T](val name: String, val `type`: Manifest[T]) extends IProt
     obj == null || `type` >:> manifest(obj.asInstanceOf[AnyRef].getClass) 
   }
 
+  override def id = (name, `type`)
   override def toString: String = '(' + `type`.toString + ')' + name
-  
 }

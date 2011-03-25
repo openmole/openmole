@@ -31,7 +31,7 @@ import scala.collection.immutable.TreeSet
 
 class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJobRegistry[EXECUTIONJOB] {
 
-  private def ExecutionJobOrderOnTime = new Ordering[EXECUTIONJOB] {
+  implicit private def ExecutionJobOrderOnTime = new Ordering[EXECUTIONJOB] {
     override def compare(o1: EXECUTIONJOB, o2: EXECUTIONJOB): Int = {
       val comp = o2.creationTime.compare(o1.creationTime)
       if(comp != 0) comp
@@ -44,9 +44,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
 
   override def allJobs: Iterable[IJob] = jobs.keySet
 
-  override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = {
-    jobs.getOrElse(job, Iterable.empty)
-  }
+  override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = jobs.getOrElse(job, Iterable.empty)
 
   override def remove(ejob: EXECUTIONJOB) = {
     jobs.get(ejob.job) match {
@@ -58,17 +56,10 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   override def isEmpty: Boolean = jobs.isEmpty
 
   override def register(ejob: EXECUTIONJOB) = synchronized {
-    jobs(ejob.job) = jobs.get(ejob.job) match {
-      case Some(ejobs) => ejobs + ejob
-      case None => TreeSet[EXECUTIONJOB](ejob)(ExecutionJobOrderOnTime)
-    }  
+    jobs(ejob.job) = jobs.getOrElseUpdate(ejob.job, TreeSet.empty[EXECUTIONJOB]) + ejob
     val category = new StatisticKey(ejob.job)
-    categories(category) = categories.get(category) match {
-      case Some(jobs) => jobs + ejob.job
-      case None => HashSet(ejob.job)
-    }
+    categories(category) = categories.getOrElseUpdate(category, HashSet.empty[IJob]) += ejob.job
   }
-
     
   override def nbExecutionJobs(job: IJob): Int =  executionJobs(job).size
 

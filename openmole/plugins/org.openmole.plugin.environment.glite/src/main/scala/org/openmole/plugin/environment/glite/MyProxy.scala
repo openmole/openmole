@@ -17,4 +17,8 @@
 
 package org.openmole.plugin.environment.glite
 
-class MyProxy(val url: String, val userId: String, val pass: String) extends (String, String, String)(url, userId, pass)
+import org.openmole.misc.tools.obj.Id
+
+class MyProxy(val url: String, val userId: String, val pass: String) extends Id {
+  override def id = (url, userId, pass)
+}

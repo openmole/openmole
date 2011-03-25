@@ -25,7 +25,7 @@ import org.osgi.service.packageadmin.PackageAdmin
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None
   
-  lazy val packageAdmin =  getService(classOf[PackageAdmin])
+  lazy val packageAdmin = getService(classOf[PackageAdmin])
 }
 
 class Activator extends BundleActivator {

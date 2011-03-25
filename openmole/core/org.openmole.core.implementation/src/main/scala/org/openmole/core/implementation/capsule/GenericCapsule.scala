@@ -29,6 +29,7 @@ import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.data.{IContext,IDataChannel}
 import org.openmole.core.model.job.{IMoleJob,MoleJobId,ITicket}
+import org.openmole.core.model.job.State
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet

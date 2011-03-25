@@ -17,11 +17,13 @@
 
 package org.openmole.core.model.job
 
+import org.openmole.misc.tools.obj.Id
+
 object MoleJobId {
   
   implicit val ordering = new Ordering[MoleJobId] {
     override def compare(left: MoleJobId, right: MoleJobId) = {
-      val comp = left.id.compare(right.id)
+      val comp = left.jobId.compare(right.jobId)
       if(comp != 0) comp 
       else left.executionId.compare(right.executionId)
     }
@@ -29,5 +31,7 @@ object MoleJobId {
   
 }
 
-case class MoleJobId(val executionId: String, val id: Long) 
+class MoleJobId(val executionId: String, val jobId: Long) extends Id {
+  override def id = (executionId, id)
+}
 

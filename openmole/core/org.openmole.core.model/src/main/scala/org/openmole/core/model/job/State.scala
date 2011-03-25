@@ -60,8 +60,4 @@ object State extends Enumeration {
    * 
    */
   val CANCELED = new State("Canceled", true)
-    
-
-  
- 
 }

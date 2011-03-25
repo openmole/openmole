@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.execution
+package org.openmole.misc.tools.obj
 
-object ExecutionState extends Enumeration {
-
-  class ExecutionState(name: String, val isFinal: Boolean = false) extends Val(name) 
+trait Id {
+  def id: AnyRef
   
-  val READY = new ExecutionState("Ready")
-  val SUBMITTED = new ExecutionState("Submitted")
-  val RUNNING = new ExecutionState("Running")
-  val DONE = new ExecutionState("Done", true)
-  val FAILED = new ExecutionState("Failed")
-  val KILLED = new ExecutionState("Killed", true)
-}
+  override def hashCode = id.hashCode
 
+  override def equals(other: Any): Boolean = {
+    if(other == null) false
+    else if(!classOf[Id].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
+    else id.equals(other.asInstanceOf[Id].id)
+  }
+  
+  override def toString = id.toString
+}

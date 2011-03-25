@@ -39,7 +39,7 @@ object GenericTask {
 
 
 abstract class GenericTask(val name: String) extends IGenericTask {
-
+  
   private var _inputs = new TreeMap[String, IData[_]]
   private var _outputs = new TreeMap[String, IData[_]]
   private var _resources = new HashSet[IResource]

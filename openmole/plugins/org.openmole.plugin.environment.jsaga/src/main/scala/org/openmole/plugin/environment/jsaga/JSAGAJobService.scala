@@ -77,7 +77,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     try {
       val os = new BufferedOutputStream(new FileOutputStream(script))
       try {
-        generateScriptString(inputFile.toString, outputFile.toString, runtime, environment.memorySizeForRuntime.intValue, os)
+        generateScriptString(inputFile.location, outputFile.location, runtime, environment.memorySizeForRuntime.intValue, os)
       } finally {
         os.close
       }
