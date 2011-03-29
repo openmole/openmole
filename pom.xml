@@ -124,6 +124,7 @@
         <bundle.namespace>${project.artifactId}</bundle.namespace>
         <bundle.activationpolicy>lazy</bundle.activationpolicy>
         <embed-transitive>false</embed-transitive>
+	<include></include>
     </properties>
 
     <build>
@@ -267,6 +268,7 @@
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
                         <Bundle-Activator>${bundle.activator}</Bundle-Activator>
                         <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>
+			<_include>${include}</_include>
                     </instructions>
                 </configuration>
             </plugin>

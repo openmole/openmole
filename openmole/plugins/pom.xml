@@ -15,6 +15,10 @@
 
     <artifactId>plugins</artifactId>
 
+    <properties>
+	<include></include>
+    </properties>
+
     <modules>
         <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>

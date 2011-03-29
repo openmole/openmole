@@ -21,7 +21,7 @@
 
     <name>${project.artifactId} ${project.version}</name>
     <description>Exceptions defined for SimExplorer runtime</description>
-
+   
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
