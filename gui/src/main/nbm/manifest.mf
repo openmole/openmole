@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Localizing-Bundle: org/openmole/ui/ide/Bundle.properties
+OpenIDE-Module-Layer: org/openmole/ui/ide/layer.xml
+OpenIDE-Module-Requires: org.openide.windows.WindowManager

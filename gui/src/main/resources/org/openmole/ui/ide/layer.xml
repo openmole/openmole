@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+ 
+    <folder name="Actions">
+        <folder name="File">
+            <file name="org-openmole-ui-ide-OpenXMLAction.instance">
+                <attr name="delegate" newvalue="org.openmole.ui.ide.OpenXMLAction"/>
+                <attr name="displayName" bundlevalue="org.openmole.ui.ide.Bundle#CTL_OpenAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="noIconInMenu" boolvalue="false"/>
+            </file>
+            <file name="org-openmole-ui-ide-SaveXMLAction.instance">
+                <attr name="delegate" newvalue="org.openmole.ui.ide.SaveXMLAction"/>
+                <attr name="displayName" bundlevalue="org.openmole.ui.ide.Bundle#CTL_SaveXMLAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="noIconInMenu" boolvalue="false"/>
+            </file>
+        </folder>
+        <folder name="Window">
+            <file name="org-openmole-ui-ide-MoleSceneAction.instance">
+                <attr name="component" methodvalue="org.openmole.ui.ide.MoleSceneTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="org.openmole.ui.ide.Bundle#CTL_MoleSceneAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+            <file name="org-openmole-ui-ide-OutputAction.instance">
+                <attr name="component" methodvalue="org.openmole.ui.ide.OutputTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="org.openmole.ui.ide.Bundle#CTL_OutputAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="File">
+            <file name="org-openmole-ui-ide-OpenAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/File/org-openmole-ui-ide-OpenXMLAction.instance"/>
+                <attr name="position" intvalue="1300"/>
+            </file>
+            <file name="org-openmole-ui-ide-SaveXMLAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/File/org-openmole-ui-ide-SaveXMLAction.instance"/>
+                <attr name="position" intvalue="1200"/>
+            </file>
+        </folder>
+        <folder name="Window">
+            <file name="MoleSceneAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ui-ide-MoleSceneAction.instance"/>
+            </file>
+            <file name="OutputAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ui-ide-OutputAction.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="MoleSceneTopComponent.settings" url="MoleSceneTopComponentSettings.xml"/>
+            <file name="OutputTopComponent.settings" url="OutputTopComponentSettings.xml"/>
+        </folder>
+        <folder name="Modes">
+            <folder name="editor">
+                <file name="MoleSceneTopComponent.wstcref" url="MoleSceneTopComponentWstcref.xml"/>
+            </folder>
+            <folder name="output">
+                <file name="OutputTopComponent.wstcref" url="OutputTopComponentWstcref.xml"/>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>
