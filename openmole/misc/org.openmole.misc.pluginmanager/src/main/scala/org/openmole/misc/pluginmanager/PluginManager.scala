@@ -19,6 +19,7 @@ package org.openmole.misc.pluginmanager
 
 import java.io.File
 import java.io.FileFilter
+import java.net.URL
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.pluginmanager.internal.Activator
@@ -26,35 +27,75 @@ import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleException
+import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 
 object PluginManager {
-  private val defaultPatern = ".*\\.jar";
+
+  val OpenMOLEscope = "OpenMOLE-scope"
+  private implicit def bundleDecorator(b: Bundle) = new {
     
-  private val files = new DualHashBidiMap[Bundle, File]
-  private val resolvedBundlesDirectDependencies = new HashMap[Bundle, Iterable[Bundle]]
-  private val resolvedBundlesAllDependencies = new HashMap[Bundle, Iterable[Bundle]]
-
-  def load(path: File): Bundle = synchronized {
-    try {
-      val b = installBundle(path)
-
-      b match {
-        case Some(bundle) =>
-          if (!resolvedBundlesDirectDependencies.containsKey(bundle)) {
-            bundle.start
-            resolvedBundlesDirectDependencies += bundle -> getDirectDependencieBundles(bundle)
-          }
-          bundle
-        case None => getBundleForFile(path)
-      }
-    } catch {
-      case ex: BundleException => throw new InternalProcessingError(ex, "Installing " + path.getAbsolutePath() + " " + ex.getLocalizedMessage());
+    def isSystem = b.getLocation.toLowerCase.contains("system bundle")
+    
+    def isProvided = b.getHeaders.get(OpenMOLEscope) match {
+      case null => false
+      case s: String => s.toLowerCase == "provided"
+      case _ => false
+    }
+    
+    def file = {
+      val location = if(b.getLocation.startsWith("reference:")) 
+        b.getLocation.substring("reference:".length)
+      else  if(b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
+      else b.getLocation
+      
+      new File(new URL(if(location.endsWith("/")) location.substring(0, location.length - 1) else location).getFile)
     }
   }
+  
+  {
+    //Activator.packageAdmin.resolveBundles(null)
+    updateDependencies
+    
+    /*Activator.contextOrException.getBundles.foreach {
+     b => if(!b.isSystem) println(b.file.getAbsolutePath + " " + b.isProvided)
+     }*/
+    
+    Activator.contextOrException.addBundleListener(new BundleListener {
+        override def bundleChanged(event: BundleEvent) = {
+          val b = event.getBundle
+          if(event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) {
+            updateDependencies
+            //println("RESOLVED " + b.file.getAbsolutePath + " " + b.isProvided)
+          }
+        } 
+      })
+  }
+  
+  private val defaultPatern = ".*\\.jar";
 
-  def loadDir(path: File, pattern: String): Iterable[Bundle] = {
+  private var files = Map.empty[File, Bundle]
+  private var resolvedDirectDependencies = HashMap.empty[Bundle, ListBuffer[Bundle]]
+  private var resolvedPluginDependenciesCache = HashMap.empty[Bundle, Iterable[Bundle]]
+  private var providedDependencies = Set.empty[Bundle]
+
+  def isClassProvidedByAPlugin(c: Class[_]) = {
+    val b = Activator.packageAdmin.getBundle(c)
+    if(b != null) !providedDependencies.contains(b)
+    else false
+  }
+
+  def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
+    allPluginDependencies(Activator.packageAdmin.getBundle(c)).map{_.file}
+  }
+
+  def load(path: File): Unit = synchronized { installBundle(path).foreach{_.start} }
+
+  def loadDir(path: String): Unit = loadDir(new File(path))
+  def loadDir(path: File): Unit = loadDir(path, defaultPatern)
+  def loadDir(path: File, pattern: String): Unit = {
     loadDir(path, new FileFilter {
         override def accept(file: File): Boolean = {
           file.isFile && file.exists && file.getName().matches(pattern)
@@ -62,135 +103,72 @@ object PluginManager {
       })
   }
 
-  def loadDir(path: File, fiter: FileFilter): Iterable[Bundle] = synchronized {
-    if (!path.exists || !path.isDirectory) return Iterable.empty
-
-    val bundlesRet = new ListBuffer[Bundle]
-    val bundles = new ListBuffer[Bundle]
-
-    for (f <- path.listFiles(fiter)) {
-      var b = installBundle(f)
-
-      if (b.isDefined && !resolvedBundlesDirectDependencies.containsKey(b.get)) {
-        bundles.add(b.get)
-        resolvedBundlesDirectDependencies.put(b.get, Iterable.empty)
-      }
-                
-      if (b.isDefined) bundlesRet.add(b.get)
-      else bundlesRet.add(getBundleForFile(f))
+  def loadDir(path: File, fiter: FileFilter): Unit = synchronized {
+    if (path.exists && path.isDirectory) {
+      val bundles = path.listFiles(fiter).map{f => installBundle(f)}.toList
+      bundles.foreach{_.foreach{_.start}}
     }
-
-    for (b <- bundles) {
-      try b.start
-      catch {
-        case ex: BundleException => throw new InternalProcessingError(ex, "Installing " + b.getLocation() + " " + ex.getLocalizedMessage());
-      }
-    }
-
-    for (b <- bundles) {
-      resolvedBundlesDirectDependencies.put(b, getDirectDependencieBundles(b))
-    }
-
-    bundlesRet
   }
 
-  private def getDirectDependencieBundles(b: Bundle): Set[Bundle] = {
-    //TODO find a way to do that faster
-    (for (bundle <- resolvedBundlesDirectDependencies.keySet; ib <- getDependingBundles(bundle) ; if (ib.equals(b))) yield bundle).toSet
-  }
-
-  def getResolvedDirectDependencies(b: Bundle): Iterable[Bundle] = synchronized {
-    resolvedBundlesDirectDependencies.getOrElse(b, Iterable.empty)
-  }
-
-  def getAllDependencies(b: Bundle): Iterable[Bundle] = synchronized {
-    resolvedBundlesAllDependencies.getOrElseUpdate(b, {
-        val deps = new HashSet[Bundle]
-        val toProced = new ListBuffer[Bundle]
-
-        toProced += b
-
-        while (!toProced.isEmpty) {
-          val cur = toProced.remove(0)
-
-          for (dep <- getResolvedDirectDependencies(cur)) {
-            if (!deps.contains(dep)) {
-              deps.add(dep)
-              toProced += dep
-            }
-          }
-        }
-        deps
-      })
+  def bundle(file: File) = files.get(file.getAbsoluteFile)
+  
+  private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] = {
+    //val filtredBundles =  bundles.filter(predicate)
+    val ret = HashSet.empty[Bundle]
+    val filtred = HashSet.empty[Bundle]
+    var toProceed = ListBuffer.empty[Bundle] ++ bundles
     
-  }
-
-  def getPluginForClass(c: Class[_]): File = synchronized {
-    val b = Activator.packageAdmin.getBundle(c)
-    files.get(b)
-  }
-
-  def getPluginAndDependanciesForClass(c: Class[_]): Iterable[File] = synchronized {
-    val b = Activator.packageAdmin.getBundle(c)
-    if (b == null) return Iterable.empty
-
-    val ret = new ListBuffer[File]
-
-    val plugin = files.get(b)
-    if (plugin != null) ret += plugin
-
-    for (dep <- getAllDependencies(b)) {
-      val depPlugin = files.get(dep);
-      if (depPlugin != null) ret += depPlugin
+    while(!toProceed.isEmpty) {
+      val cur = toProceed.remove(0)
+      ret += cur
+      toProceed ++= resolvedDirectDependencies.getOrElse(cur, Iterable.empty).filter(b => !ret.contains(b))
     }
-
+    
     ret
   }
 
-  def load(path: String): Bundle = load(new File(path))
-
-  def isClassProvidedByAPlugin(c: Class[_]): Boolean = resolvedBundlesDirectDependencies.containsKey(Activator.packageAdmin.getBundle(c))
-
-  def unload(path: File) = synchronized {
-    val b = getBundle(path)
-    for (db <- getDependingBundles(b)) unloadBundle(db);
-
-    unloadBundle(b)
+  private def allPluginDependencies(b: Bundle) = synchronized {
+    resolvedPluginDependenciesCache.getOrElseUpdate(b,dependencies(List(b)).filter(b => !providedDependencies.contains(b)))
   }
 
-  private def unloadBundle(bundle: Bundle ) = {
-    if (bundle != null) {
-      bundle.uninstall
-      files.remove(bundle)
-      resolvedBundlesDirectDependencies.remove(bundle)
+  private def installBundle(f: File) = {
+    val file = f.getAbsoluteFile
+
+    if (!files.contains(file)) {
+      val ret = Activator.contextOrException.installBundle(file.toURI.toString)
+      files += file -> ret
+      Some(ret)
+    } else None
+  }
+
+  private def updateDependencies = synchronized {
+    val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
+    
+    val resolvedDirectDependenciesTmp = new HashMap[Bundle, ListBuffer[Bundle]]
+    bundles.foreach {
+      b => dependingBundles(b).foreach {
+        db => {
+          //println(db + " depend on " + b)
+          resolvedDirectDependenciesTmp.getOrElseUpdate(db, new ListBuffer[Bundle]) += b
+        }
+      }
     }
+    
+    resolvedDirectDependencies = resolvedDirectDependenciesTmp
+    resolvedPluginDependenciesCache = HashMap.empty[Bundle, Iterable[Bundle]]
+    
+    providedDependencies = dependencies(bundles.filter(b => b.isProvided)).toSet
+    files = bundles.map(b => b.file.getAbsoluteFile -> b).toMap
   }
-
-  def getBundle(path: File): Bundle = synchronized(files.getKey(path))
-
-  private def getDependingBundles(b: Bundle): Iterable[Bundle] = {
+  
+  private def dependingBundles(b: Bundle): Iterable[Bundle] = {
     val exportedPackages = Activator.packageAdmin.getExportedPackages(b)
 
     if (exportedPackages != null) {
       for (exportedPackage <- exportedPackages ; ib <- exportedPackage.getImportingBundles) yield ib 
     } else Iterable.empty
   }
+  
+  def load(path: String): Unit = load(new File(path))
 
-  def unload(path: String): Unit = unload(new File(path))
-
-  def loadDir(path: File): Iterable[Bundle] = loadDir(path, defaultPatern)
-
-  def loadDir(path: String): Iterable[Bundle] = loadDir(new File(path))
-    
-  private def getBundleForFile(f: File): Bundle = files.getKey(f.getAbsoluteFile)
-    
-  private def installBundle(f: File): Option[Bundle] = {
-    val file = f.getAbsoluteFile
-        
-    if (!files.containsValue(file)) {
-      val ret = Activator.context.getOrElse(throw new InternalProcessingError("Context has not been initialized")).installBundle(file.toURI.toString)
-      files.put(ret, file);
-      Some(ret)
-    } else None
-  }
 }

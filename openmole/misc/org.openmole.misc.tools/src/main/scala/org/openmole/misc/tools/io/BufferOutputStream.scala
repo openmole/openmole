@@ -15,18 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.service
+package org.openmole.misc.tools.io
 
-import org.openmole.misc.exception.InternalProcessingError
-import org.osgi.framework.BundleContext
+import java.io.OutputStream
+import scala.collection.mutable.ListBuffer
 
-trait OSGiActivator {
-  def context: Option[BundleContext]
-  def contextOrException = context.getOrElse(throw new InternalProcessingError("Context uninitialized"))
-  
-  def getService[T](interface: Class[T]): T = {
-    val ctx = contextOrException
-    val ref = ctx.getServiceReference(interface.getName)
-    ctx.getService(ref).asInstanceOf[T]
-  }
+class BufferOutputStream extends OutputStream {
+  val buffer = new ListBuffer[Int]
+  override def write(b: Int) = buffer += b
 }

@@ -74,8 +74,7 @@ public class StructureGenerator {
         }
 
         PluginManager.load(jar);
-
-        Bundle b = PluginManager.getBundle(jar);
+        Bundle b = PluginManager.bundle(jar).get();
         //loadClassesInProcessorList(application, gp, b);
         gp.clean();
         try {

@@ -93,6 +93,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
             val serializationResult = Serializer.serializeGetPluginClassAndFiles(moleJob, moleJobFile)
+            
             files ++= serializationResult._1
             classes ++= serializationResult._2
           
@@ -129,7 +130,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   def replicateTheRuntime(token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): Runtime = {
     val environmentPluginReplica = new ListBuffer[IURIFile]
 
-    val environmentPlugins = PluginManager.getPluginAndDependanciesForClass(environment.getClass)
+    val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
     val runtimeFile = environment.runtime
 
     for (environmentPlugin <- environmentPlugins) environmentPluginReplica += toReplicatedFile(environmentPlugin, communicationStorage, token).replica
@@ -156,9 +157,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val plugins = new TreeSet[File]
     val pluginReplicas = new ListBuffer[ReplicatedFile]
 
-    for (c <- serializationResult._2 ; f <- PluginManager.getPluginAndDependanciesForClass(c)) plugins += f
+    for (c <- serializationResult._2) plugins ++= PluginManager.pluginsForClass(c)
     for (f <- plugins) pluginReplicas += toReplicatedFile(f, communicationStorage, token)
-        
+
     val files = new ListBuffer[ReplicatedFile]
     for(file <- serializationResult._1) files += toReplicatedFile(file, communicationStorage, token)
 

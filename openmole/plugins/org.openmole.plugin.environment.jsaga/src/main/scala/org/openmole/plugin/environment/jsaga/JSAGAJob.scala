@@ -39,7 +39,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
   private def translateStatus(job: Job, state: State): ES = {
     import State._
     
-    subState = job.getMetric(fr.in2p3.jsaga.impl.job.instance.AbstractSyncJobImpl.JOB_SUBSTATE).getAttribute(Metric.VALUE)
+    subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
     
     state match {
       case NEW => ExecutionState.SUBMITTED

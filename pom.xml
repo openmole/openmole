@@ -264,11 +264,11 @@
                         <Import-Package>${import.packages}</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
-			<!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
+						<!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
                         <Bundle-Activator>${bundle.activator}</Bundle-Activator>
                         <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>
-			<_include>${include}</_include>
+						<_include>${include}</_include>
                     </instructions>
                 </configuration>
             </plugin>

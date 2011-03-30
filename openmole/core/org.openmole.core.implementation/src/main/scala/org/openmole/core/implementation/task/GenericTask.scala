@@ -40,10 +40,10 @@ object GenericTask {
 
 abstract class GenericTask(val name: String) extends IGenericTask {
   
-  private var _inputs = new TreeMap[String, IData[_]]
-  private var _outputs = new TreeMap[String, IData[_]]
-  private var _resources = new HashSet[IResource]
-  private var _parameters = new TreeMap[String, IParameter[_]]
+  private var _inputs = TreeMap.empty[String, IData[_]]
+  private var _outputs = TreeMap.empty[String, IData[_]]
+  private var _parameters = TreeMap.empty[String, IParameter[_]]
+  private val _resources = HashSet.empty[IResource]
   
   addOutput(GenericTask.Timestamps)
   addOutput(GenericTask.Exception)
@@ -118,7 +118,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
  
   override def addOutput(data: IData[_]): this.type =  {
-    _outputs += ((data.prototype.name, data))
+    _outputs += data.prototype.name -> data
     this
   }
   
@@ -132,7 +132,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
 
   override def addInput(data: IData[_]): this.type = {
-    _inputs += ((data.prototype.name,data))
+    _inputs += data.prototype.name -> data
     this
   }
 
