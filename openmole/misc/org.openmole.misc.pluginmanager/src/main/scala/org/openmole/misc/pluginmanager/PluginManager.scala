@@ -33,62 +33,57 @@ import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 
 object PluginManager {
+  
+  private val defaultPatern = ".*\\.jar";
 
-  val OpenMOLEscope = "OpenMOLE-scope"
+  private var files = Map.empty[File, Long]
+  private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
+  private var resolvedPluginDependenciesCache = HashMap.empty[Long, Iterable[Long]]
+  private var providedDependencies = Set.empty[Long]
+
+  updateDependencies
+    
+  Activator.contextOrException.addBundleListener(new BundleListener {
+      override def bundleChanged(event: BundleEvent) = {
+        val b = event.getBundle
+        if(event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) {
+          updateDependencies
+        }
+      } 
+    })
+  
+  
+  val OpenMOLEScope = "OpenMOLE-Scope"
   private implicit def bundleDecorator(b: Bundle) = new {
     
     def isSystem = b.getLocation.toLowerCase.contains("system bundle")
     
-    def isProvided = b.getHeaders.get(OpenMOLEscope) match {
-      case null => false
-      case s: String => s.toLowerCase == "provided"
-      case _ => false
-    }
+    def isProvided = b.getHeaders.toMap.exists{case(k,v) => k.toString.toLowerCase.contains("openmole-scope") &&  v.toString.toLowerCase.contains("provided")}
     
     def file = {
-      val location = if(b.getLocation.startsWith("reference:")) 
+      val url = if(b.getLocation.startsWith("reference:")) 
         b.getLocation.substring("reference:".length)
       else  if(b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
       else b.getLocation
-      
-      new File(new URL(if(location.endsWith("/")) location.substring(0, location.length - 1) else location).getFile)
+
+      val location = {
+        val protocol = url.indexOf(':')
+        val noProtocol = if(protocol == -1) url else url.substring(protocol + 1)
+        if(noProtocol.endsWith("/")) noProtocol.substring(0, noProtocol.length - 1)
+        else noProtocol
+      }
+      new File(location)
     }
   }
   
-  {
-    //Activator.packageAdmin.resolveBundles(null)
-    updateDependencies
-    
-    /*Activator.contextOrException.getBundles.foreach {
-     b => if(!b.isSystem) println(b.file.getAbsolutePath + " " + b.isProvided)
-     }*/
-    
-    Activator.contextOrException.addBundleListener(new BundleListener {
-        override def bundleChanged(event: BundleEvent) = {
-          val b = event.getBundle
-          if(event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) {
-            updateDependencies
-            //println("RESOLVED " + b.file.getAbsolutePath + " " + b.isProvided)
-          }
-        } 
-      })
-  }
-  
-  private val defaultPatern = ".*\\.jar";
-
-  private var files = Map.empty[File, Bundle]
-  private var resolvedDirectDependencies = HashMap.empty[Bundle, ListBuffer[Bundle]]
-  private var resolvedPluginDependenciesCache = HashMap.empty[Bundle, Iterable[Bundle]]
-  private var providedDependencies = Set.empty[Bundle]
-
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = Activator.packageAdmin.getBundle(c)
-    if(b != null) !providedDependencies.contains(b)
+    if(b != null) !providedDependencies.contains(b.getBundleId)
     else false
   }
 
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
-    allPluginDependencies(Activator.packageAdmin.getBundle(c)).map{_.file}
+    allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map{ l => Activator.contextOrException.getBundle(l).file}
   }
 
   def load(path: File): Unit = synchronized { installBundle(path).foreach{_.start} }
@@ -110,24 +105,24 @@ object PluginManager {
     }
   }
 
-  def bundle(file: File) = files.get(file.getAbsoluteFile)
+  def bundle(file: File) = files.get(file.getAbsoluteFile).map{id => Activator.contextOrException.getBundle(id)}
   
-  private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] = {
-    //val filtredBundles =  bundles.filter(predicate)
-    val ret = HashSet.empty[Bundle]
-    val filtred = HashSet.empty[Bundle]
-    var toProceed = ListBuffer.empty[Bundle] ++ bundles
+  private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
+    
+    val ret = new HashSet[Long]
+    val filtred =  new HashSet[Long]
+    var toProceed = new ListBuffer[Long] ++ bundles
     
     while(!toProceed.isEmpty) {
       val cur = toProceed.remove(0)
       ret += cur
       toProceed ++= resolvedDirectDependencies.getOrElse(cur, Iterable.empty).filter(b => !ret.contains(b))
     }
-    
+
     ret
   }
 
-  private def allPluginDependencies(b: Bundle) = synchronized {
+  private def allPluginDependencies(b: Long) = synchronized {
     resolvedPluginDependenciesCache.getOrElseUpdate(b,dependencies(List(b)).filter(b => !providedDependencies.contains(b)))
   }
 
@@ -136,7 +131,7 @@ object PluginManager {
 
     if (!files.contains(file)) {
       val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-      files += file -> ret
+      files += file -> ret.getBundleId
       Some(ret)
     } else None
   }
@@ -144,21 +139,18 @@ object PluginManager {
   private def updateDependencies = synchronized {
     val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
     
-    val resolvedDirectDependenciesTmp = new HashMap[Bundle, ListBuffer[Bundle]]
+    resolvedDirectDependencies = new HashMap[Long, HashSet[Long]]
     bundles.foreach {
       b => dependingBundles(b).foreach {
         db => {
-          //println(db + " depend on " + b)
-          resolvedDirectDependenciesTmp.getOrElseUpdate(db, new ListBuffer[Bundle]) += b
+          resolvedDirectDependencies.getOrElseUpdate(db.getBundleId, new HashSet[Long]) += b.getBundleId
         }
       }
     }
     
-    resolvedDirectDependencies = resolvedDirectDependenciesTmp
-    resolvedPluginDependenciesCache = HashMap.empty[Bundle, Iterable[Bundle]]
-    
-    providedDependencies = dependencies(bundles.filter(b => b.isProvided)).toSet
-    files = bundles.map(b => b.file.getAbsoluteFile -> b).toMap
+    resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
+    providedDependencies = dependencies(bundles.filter(b => b.isProvided).map{_.getBundleId}).toSet
+    files = bundles.map(b => b.file.getAbsoluteFile -> b.getBundleId).toMap
   }
   
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
