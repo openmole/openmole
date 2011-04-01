@@ -96,7 +96,7 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
 
   override def submit(job: IJob) = {
     val ejob = new LocalExecutionJob(job, nextExecutionJobId)
-    jobRegistry.register(ejob)
+    //jobRegistry.register(ejob)
     submit(ejob)
   }
 

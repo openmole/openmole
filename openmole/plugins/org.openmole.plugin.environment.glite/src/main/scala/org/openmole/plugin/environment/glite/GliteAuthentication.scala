@@ -161,7 +161,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     val interval = (proxyDuration * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
 
     Updater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval)
-    JSAGASessionService.addContext(ctx)
+
   }
 
   def initContext(ctx: Context): Long = {
@@ -219,8 +219,8 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     //Logger.getLogger(classOf[GliteAuthentication].getName).info(voName)
     ctx.setAttribute(Context.USERVO, voName)
 
-    ctx.getAttribute(Context.USERID)
- 
+    JSAGASessionService.addContext(ctx)
+    
     proxyDuration
 
   }

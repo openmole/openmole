@@ -26,29 +26,34 @@ import org.openmole.core.model.job.IJob
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-import scala.collection.immutable.TreeSet
-
+import java.util.Comparator
+import java.util.TreeSet
+import scala.collection.JavaConversions._
 
 class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJobRegistry[EXECUTIONJOB] {
 
-  implicit private def ExecutionJobOrderOnTime = new Ordering[EXECUTIONJOB] {
+  private def ExecutionJobOrderOnTime = new Comparator[EXECUTIONJOB] {
     override def compare(o1: EXECUTIONJOB, o2: EXECUTIONJOB): Int = {
       val comp = o2.creationTime.compare(o1.creationTime)
       if(comp != 0) comp
       else IExecutionJobId.order.compare(o2.id, o1.id)
-    }     
+    }
   }
-
+  
+  //FIXME Move to tree map
   var jobs = new HashMap[IJob, TreeSet[EXECUTIONJOB]]
   var categories = new HashMap[IStatisticKey, HashSet[IJob]]
 
   override def allJobs: Iterable[IJob] = jobs.keySet
 
-  override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = jobs.getOrElse(job, Iterable.empty)
+  override def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = jobs.get(job) match {
+    case Some(ejobs) => ejobs
+    case None => Iterable.empty
+  }
 
   override def remove(ejob: EXECUTIONJOB) = {
     jobs.get(ejob.job) match {
-      case Some(ejobs) => jobs(ejob.job) = ejobs - ejob
+      case Some(ejobs) => ejobs -= ejob
       case None =>
     }     
   }
@@ -56,9 +61,9 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
   override def isEmpty: Boolean = jobs.isEmpty
 
   override def register(ejob: EXECUTIONJOB) = synchronized {
-    jobs(ejob.job) = jobs.getOrElseUpdate(ejob.job, TreeSet.empty[EXECUTIONJOB]) + ejob
+    jobs.getOrElseUpdate(ejob.job, new TreeSet[EXECUTIONJOB](ExecutionJobOrderOnTime)) += ejob
     val category = new StatisticKey(ejob.job)
-    categories(category) = categories.getOrElseUpdate(category, HashSet.empty[IJob]) += ejob.job
+    categories.getOrElseUpdate(category, new HashSet[IJob]) += ejob.job
   }
     
   override def nbExecutionJobs(job: IJob): Int =  executionJobs(job).size
@@ -77,9 +82,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob] extends IExecutionJob
     }
   }
 
-  override def allExecutionJobs:  Iterable[EXECUTIONJOB] = {
-    for (job <- allJobs ; ejob <- jobs.getOrElse(job, Iterable.empty)) yield ejob
-  }
+  override def allExecutionJobs:  Iterable[EXECUTIONJOB] = for (job <- allJobs ; ejob <- executionJobs(job)) yield ejob
 
   override def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] = {
     jobs.get(job) match {

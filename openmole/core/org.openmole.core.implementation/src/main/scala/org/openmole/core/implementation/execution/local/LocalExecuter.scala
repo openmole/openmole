@@ -63,7 +63,7 @@ class LocalExecuter extends Runnable {
           LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
 
         } finally {
-          LocalExecutionEnvironment.jobRegistry.removeJob(job);
+          //LocalExecutionEnvironment.jobRegistry.removeJob(job);
         }
       } catch {
         case (e: InterruptedException) => 

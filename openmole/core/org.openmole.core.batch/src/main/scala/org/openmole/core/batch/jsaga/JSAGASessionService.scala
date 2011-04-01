@@ -66,6 +66,10 @@ object JSAGASessionService {
   
   lazy val session = SessionFactory.createSession(false)
   
-  def addContext(context: Context) = session.addContext(context)
+  def addContext(context: Context) = {
+    if(session.listContexts.contains(context)) session.removeContext(context)
+    session.addContext(context)
+  }
+  
   def createContext: Context = ContextFactory.createContext
 }
