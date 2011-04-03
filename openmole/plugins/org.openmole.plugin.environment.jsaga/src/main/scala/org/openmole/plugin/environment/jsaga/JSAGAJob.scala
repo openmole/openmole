@@ -41,10 +41,12 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
     
     subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
     
+    //Logger.getLogger(classOf[JSAGAJob].getName).fine("Substate " + subState.toString + " " + SubState.RUNNING_SUBMITTED.toString + " " + SubState.RUNNING_QUEUED.toString)
+    
     state match {
       case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
-        if (subState == SubState.RUNNING_SUBMITTED.toString || subState == SubState.RUNNING_QUEUED.toString) ExecutionState.SUBMITTED
+        if (subState.contains(SubState.RUNNING_SUBMITTED.toString) || subState.contains(SubState.RUNNING_QUEUED.toString)) ExecutionState.SUBMITTED
         else ExecutionState.RUNNING        
       case DONE => ExecutionState.DONE
       case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
