@@ -29,4 +29,6 @@ trait OSGiActivator {
     val ref = ctx.getServiceReference(interface.getName)
     ctx.getService(ref).asInstanceOf[T]
   }
+  
+  def enabled = context.isDefined
 }

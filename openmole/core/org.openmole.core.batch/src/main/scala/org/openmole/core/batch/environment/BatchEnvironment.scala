@@ -56,7 +56,9 @@ object BatchEnvironment {
 }
 
 
-abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment[BatchExecutionJob] {
+abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment {
+  
+  val jobRegistry = new ExecutionJobRegistry[BatchExecutionJob]
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
   
@@ -110,7 +112,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     
   }
 
-  protected def selectWorkingJobServices(jobServiceGroup: BatchJobServiceGroup) = {
+  /*protected def selectWorkingJobServices(jobServiceGroup: BatchJobServiceGroup) = {
     val allJobServicesList = allJobServices
     val done = new Semaphore(0)
     val nbStillRunning = new AtomicInteger(allJobServicesList.size)
@@ -136,13 +138,14 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
 
     if (jobServiceGroup.isEmpty) throw new InternalProcessingError("No job submission service available")
 
-  }
+  }*/
 
 
   def jobServices: BatchJobServiceGroup = {
     _jobServicesLock.lock 
     try {
-      if (_jobServices.isEmpty) selectWorkingJobServices(_jobServices)
+      if (_jobServices.isEmpty) _jobServices ++= allJobServices
+        //selectWorkingJobServices(_jobServices)
       _jobServices
     } finally _jobServicesLock.unlock 
   }
@@ -150,7 +153,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   def storages: BatchStorageGroup = {
     _storagesLock.lock
     try {
-      if (_storages.isEmpty)  selectStorages(_storages)
+      if (_storages.isEmpty) selectStorages(_storages)
       _storages
     } finally _storagesLock.unlock
   }

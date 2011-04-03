@@ -32,10 +32,9 @@ object Environment {
 }
 
 
-abstract class Environment[EXECUTIONJOB <: IExecutionJob] extends IEnvironment {
+abstract class Environment extends IEnvironment {
    
   val statistic = new Statistic(Workspace.preferenceAsInt(Environment.StatisticsHistorySize))
-  val jobRegistry = new ExecutionJobRegistry[EXECUTIONJOB]
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 

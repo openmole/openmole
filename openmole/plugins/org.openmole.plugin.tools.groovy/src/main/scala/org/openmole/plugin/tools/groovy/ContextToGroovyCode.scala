@@ -40,7 +40,6 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
     execute(context, tmpVariables, IProgress.Dummy, Iterable.empty)
   }
 
-  
   override def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object = {
     val binding = context.toBinding
 
@@ -55,7 +54,6 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
     fetchVariables(context, output, binding)
     ret
   }
-
 
   def fetchVariables(context: IContext, output: Iterable[IData[_]], binding: Binding) = {
     val variables = binding.getVariables

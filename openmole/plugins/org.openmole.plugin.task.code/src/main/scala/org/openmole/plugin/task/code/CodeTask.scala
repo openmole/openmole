@@ -35,4 +35,5 @@ abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
   }
 
   def contextToCode: IContextToCode
+
 }

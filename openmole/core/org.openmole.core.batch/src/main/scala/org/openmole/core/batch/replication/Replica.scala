@@ -62,10 +62,9 @@ class Replica( _source: String, _storageDescription: String, _hash: IHash, _auth
     if (activator != null) activator.activate(purpose)
   }
 
-  override def bind(activator: com.db4o.activation.Activator) = synchronized {
+  override def bind(activator: com.db4o.activation.Activator) = {
     if (this.activator != activator) {
       if (activator != null && this.activator != null) throw new IllegalStateException
-
       this.activator = activator
     }
   }

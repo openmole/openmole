@@ -36,7 +36,6 @@ import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.Network.IConnectable
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.tools.io.StringBuilderOutputStream
-import org.openmole.core.model.task.IResource
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
@@ -51,7 +50,7 @@ object VirtualMachineResource {
   val executable = "qemu"
 }
 
-class VirtualMachineResource(val system: File, val user: String, val password: String, memory: Int, vcore: Int) extends IResource {
+class VirtualMachineResource(val system: File, val user: String, val password: String, memory: Int, vcore: Int) {
 
   import VirtualMachineResource._
 
@@ -207,6 +206,4 @@ class VirtualMachineResource(val system: File, val user: String, val password: S
     qemuDir
   }
 
-   
-  override def deploy {}
 }

@@ -30,7 +30,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.SynchronizedPriorityQueue
 
-object LocalExecutionEnvironment extends Environment[IExecutionJob] {
+object LocalExecutionEnvironment extends Environment {
   
   implicit def jobOrdering = new Ordering[LocalExecutionJob] {
     override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
@@ -66,7 +66,8 @@ object LocalExecutionEnvironment extends Environment[IExecutionJob] {
   }
 
   def nbThread: Int = nbThreadVar
-
+  def nbJobInQueue = jobs.size
+  
   def setNbThread(newNbThread: Int) = {
     synchronized {
       if (nbThread != newNbThread) {

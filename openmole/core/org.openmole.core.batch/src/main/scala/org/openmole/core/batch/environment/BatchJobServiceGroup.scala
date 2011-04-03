@@ -111,6 +111,8 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
     }
     waiting.release
   }
+  
+  def ++=(services: Iterable[BatchJobService]) = services.foreach{s => this += s}
 
   def isEmpty: Boolean = resources.isEmpty
 

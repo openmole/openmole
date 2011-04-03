@@ -86,6 +86,12 @@ object PluginManager {
     allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map{ l => Activator.contextOrException.getBundle(l).file}
   }
 
+  
+  def load(files: Iterable[File]) = synchronized {
+    val bundles = files.map{f => installBundle(f)}.toList
+    bundles.foreach{_.foreach{_.start}}
+  }
+  
   def load(path: File): Unit = synchronized { installBundle(path).foreach{_.start} }
 
   def loadDir(path: String): Unit = loadDir(new File(path))
@@ -98,12 +104,8 @@ object PluginManager {
       })
   }
 
-  def loadDir(path: File, fiter: FileFilter): Unit = synchronized {
-    if (path.exists && path.isDirectory) {
-      val bundles = path.listFiles(fiter).map{f => installBundle(f)}.toList
-      bundles.foreach{_.foreach{_.start}}
-    }
-  }
+  def loadDir(path: File, fiter: FileFilter): Unit = 
+    if (path.exists && path.isDirectory) load(path.listFiles(fiter))
 
   def bundle(file: File) = files.get(file.getAbsoluteFile).map{id => Activator.contextOrException.getBundle(id)}
   
@@ -162,5 +164,4 @@ object PluginManager {
   }
   
   def load(path: String): Unit = load(new File(path))
-
 }

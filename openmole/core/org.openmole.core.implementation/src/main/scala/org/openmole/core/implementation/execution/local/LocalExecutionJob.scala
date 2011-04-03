@@ -25,6 +25,6 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
 
-class LocalExecutionJob(job: IJob, id: IExecutionJobId) extends ExecutionJob[Environment[IExecutionJob]](LocalExecutionEnvironment, job, id) {
+class LocalExecutionJob(job: IJob, id: IExecutionJobId) extends ExecutionJob(LocalExecutionEnvironment, job, id) {
     var state: ExecutionState = READY
 }

@@ -20,8 +20,10 @@ package org.openmole.misc.tools.groovy
 import scala.collection.JavaConversions._
 import scala.collection.JavaConversions
 import groovy.lang.Binding
+import groovy.lang.GroovyClassLoader
 import groovy.lang.GroovyShell
 import java.io.File
+import java.net.URLClassLoader
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 
@@ -29,10 +31,9 @@ class GroovyProxy(code: String, jars: Iterable[File]) {
 
   @transient 
   private lazy val compiledScript = {
-    val groovyShell = new GroovyShell(classOf[GroovyShell].getClassLoader)
-    for(jar <- jars) {
-      groovyShell.getClassLoader.addURL(jar.toURI.toURL)
-    }
+    val classLoader = new URLClassLoader(jars.map{jar => jar.getAbsoluteFile.toURI.toURL}.toArray, classOf[GroovyShell].getClassLoader)
+
+    val groovyShell = new GroovyShell(classLoader)
     try {
       groovyShell.parse("package script\n" + code)
     } catch {

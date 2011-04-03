@@ -173,7 +173,7 @@ object ReplicaCatalog {
   
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
-    //LOGGER.log(Level.INFO, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
+    //LOGGER.log(Level.FINE, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
     val key = new ReplicaLockKey(hash, storage.description, storage.environment.authenticationKey) 
     
     locks.lock(key)
@@ -184,15 +184,19 @@ object ReplicaCatalog {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
-          //LOGGER.log(Level.INFO, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
-          for (toClean <- getReplica(srcPath, storageDescription, authenticationKey).iterator) clean(toClean)
+          //LOGGER.log(Level.FINE, "Not found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)            
+          getReplica(srcPath, storageDescription, authenticationKey).foreach{r => clean(r)}
                 
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
+              //LOGGER.log(Level.FINE, "Replica with same content found for {0}.", srcPath.getAbsolutePath + " " + storage)            
+
               val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription.description, hash, authenticationKey, sameContent.destination)
               insert(newReplica)
               newReplica
             case None =>
+              //LOGGER.log(Level.FINE, "Replicating {0}.", srcPath.getAbsolutePath + " " + storage)            
+
               val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
 
               URIFile.copy(src, newFile, token)
@@ -202,7 +206,7 @@ object ReplicaCatalog {
               newReplica 
           }
         case Some(r) => {
-            //LOGGER.log(Level.INFO, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
+            //LOGGER.log(Level.FINE, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
             objectServer.activate(r, Int.MaxValue)
             r
           }

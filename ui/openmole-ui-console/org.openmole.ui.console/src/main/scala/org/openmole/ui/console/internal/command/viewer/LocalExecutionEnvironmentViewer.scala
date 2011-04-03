@@ -17,26 +17,13 @@
 
 package org.openmole.ui.console.internal.command.viewer
 
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 
-class EnvironmentViewer extends IViewer {
+class LocalExecutionEnvironmentViewer extends IViewer {
 
   override def view(obj: Object, args: Array[String]) {
-    val accounting = new Array[AtomicInteger](ExecutionState.values.size)
-    //Map<ExecutionState.ExecutionState, AtomicInteger> accounting = new EnumMap<ExecutionState.ExecutionState, AtomicInteger>(ExecutionState.ExecutionState.class);
-
-    for (state <- ExecutionState.values) {
-      accounting(state.id) = new AtomicInteger
-    }
-
-    for (executionJob <- obj.asInstanceOf[IEnvironment].jobRegistry.allExecutionJobs) {
-      accounting(executionJob.state.id).incrementAndGet
-    }
-
-    for (state <- ExecutionState.values) {
-      System.out.println(state.toString + ": " + accounting(state.id))
-    }
+    val env = LocalExecutionEnvironment
+    println("Queued jobs: " + env.nbJobInQueue)
+    println("Number of threads: " + env.nbThread)
   }
 }

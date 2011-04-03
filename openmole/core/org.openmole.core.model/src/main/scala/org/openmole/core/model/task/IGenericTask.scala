@@ -80,23 +80,6 @@ trait IGenericTask {
    * @return the output data of the task
    */
   def userOutputs: IDataSet
-  
-  /**
-   *
-   * Add <code>resource</code> to this task.
-   *
-   * @param ressource the resource to be added
-   */
-  def addResource(resource: IResource): this.type
-  
-  /**
-   *
-   * Deploy the resource locally.
-   *
-   * @throws InternalProcessingError something went wrong for a reason that can't be directly related to a user defined parameter
-   * @throws UserBadDataError something went wrong for a reason that can be directly related to a user defined parameter
-   */
-  def deploy
 
   /**
    *

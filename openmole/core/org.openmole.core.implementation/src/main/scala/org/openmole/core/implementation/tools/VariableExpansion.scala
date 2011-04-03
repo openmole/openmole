@@ -24,8 +24,8 @@ import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.InputStream
-import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable

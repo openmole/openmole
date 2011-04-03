@@ -113,7 +113,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = { 
     val t = _task.getOrElse(throw new UserBadDataError("Reached a capsule with unassigned task.")) 
 
-    val ret = new MoleJob(t, context,jobId)
+    val ret = new MoleJob(t, context, jobId)
     EventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
     ret
   }

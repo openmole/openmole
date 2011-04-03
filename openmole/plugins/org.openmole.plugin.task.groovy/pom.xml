@@ -22,13 +22,18 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.tools.groovy</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.code</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.pluginmanager</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

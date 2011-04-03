@@ -23,16 +23,17 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer
-import org.openmole.ui.console.internal.command.viewer.EnvironmentViewer
+import org.openmole.ui.console.internal.command.viewer.LocalExecutionEnvironmentViewer
 import org.openmole.ui.console.internal.command.viewer.IViewer
 import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer
 import java.util.List
 import scala.collection.JavaConversions._
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 
 class Print(shell: Shell, string: String, string1: String) extends UICommand(shell, string, string1) {
   private val viewers = new HierarchicalRegistry[IViewer]
 
-  viewers.register(classOf[IEnvironment], new EnvironmentViewer)
+  viewers.register(LocalExecutionEnvironment.getClass, new LocalExecutionEnvironmentViewer)
   viewers.register(classOf[BatchEnvironment], new BatchEnvironmentViewer)
   viewers.register(classOf[IMoleExecution], new MoleExecutionViewer)
     

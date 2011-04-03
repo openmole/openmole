@@ -28,10 +28,11 @@ import org.apache.commons.cli.ParseException
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.IEnvironment
 import scala.collection.mutable.HashMap
 
 class BatchEnvironmentViewer extends IViewer {
-  val environmentViewer = new EnvironmentViewer
+  //val environmentViewer = new EnvironmentViewer
 
   override def view(obj: Object, args: Array[String]) = {
     import IViewer.Separator
@@ -47,11 +48,25 @@ class BatchEnvironmentViewer extends IViewer {
         commandLine.getOptionValue('v').toInt
       } else 0
 
-      environmentViewer.view(obj, args)
+      val accounting = new Array[AtomicInteger](ExecutionState.values.size)
+      val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
+
+      for (state <- ExecutionState.values) {
+        accounting(state.id) = new AtomicInteger
+      }
+
+      for (executionJob <- executionJobRegistry.allExecutionJobs) {
+        accounting(executionJob.state.id).incrementAndGet
+      }
+
+      for (state <- ExecutionState.values) {
+        System.out.println(state.toString + ": " + accounting(state.id))
+      }
+
+      
       if (v >= 1) {
         System.out.println(Separator)
         val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
-        val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
 
         for (executionJob <-  executionJobRegistry.allExecutionJobs) {
           val batchJob = executionJob.batchJob

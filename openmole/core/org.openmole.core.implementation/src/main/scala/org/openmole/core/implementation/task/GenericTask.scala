@@ -19,13 +19,14 @@ package org.openmole.core.implementation.task
 
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
+import java.io.File
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.{IContext,IData,IParameter,IVariable,IPrototype,DataModeMask, IDataSet}
 import org.openmole.core.model.job.ITimeStamp
-import org.openmole.core.model.task.{IGenericTask,IResource}
+import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.execution.IProgress
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
@@ -43,7 +44,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   private var _inputs = TreeMap.empty[String, IData[_]]
   private var _outputs = TreeMap.empty[String, IData[_]]
   private var _parameters = TreeMap.empty[String, IParameter[_]]
-  private val _resources = HashSet.empty[IResource]
   
   addOutput(GenericTask.Timestamps)
   addOutput(GenericTask.Exception)
@@ -102,7 +102,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
    */
   override def perform(context: IContext, progress: IProgress) = {
     try {
-      deploy
       init(context)
       process(context, progress)
       end(context)
@@ -119,11 +118,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
  
   override def addOutput(data: IData[_]): this.type =  {
     _outputs += data.prototype.name -> data
-    this
-  }
-  
-  override def addResource(resource: IResource): this.type = {
-    _resources += resource
     this
   }
   
@@ -161,10 +155,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   @transient override lazy val userInputs: IDataSet =  new DataSet(inputs.filter(!_.mode.isSystem))
    
   @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filter(!_.mode.isSystem))
-
-  def resources: Iterable[IResource] = _resources
- 
-  override def deploy = for (resource <- resources) resource.deploy   
     
   override def addParameter(parameter: IParameter[_]): this.type = {
     _parameters += ((parameter.variable.prototype.name,parameter))

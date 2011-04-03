@@ -41,5 +41,4 @@ class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
   private def returnObject(o: GroovyProxy) = bufferPool.returnObject(o)
 
   private def borrowObject: GroovyProxy = bufferPool.borrowObject.asInstanceOf[GroovyProxy]
-
 }

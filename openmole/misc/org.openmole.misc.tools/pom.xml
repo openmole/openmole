@@ -57,13 +57,13 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.apache.commons.pool</artifactId>
-            <version>${lib.org.apache.commons.pool.version}</version>
+            <artifactId>org.objenesis</artifactId>
+            <version>${lib.org.objenesis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.objenesis</artifactId>
-            <version>${lib.org.objenesis.version}</version>
+            <artifactId>org.apache.commons.pool</artifactId>
+            <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
     </dependencies>
 
