@@ -39,9 +39,8 @@ object SubMoleExecution {
 
 class SubMoleExecution(val parent: Option[ISubMoleExecution]) extends ISubMoleExecution {
 
-  private var _nbJobInProgress = 0
-  private var _nbJobWaitingInGroup = 0
-
+  @volatile private var _nbJobInProgress = 0
+  @volatile private var _nbJobWaitingInGroup = 0
 
   override def nbJobInProgess = _nbJobInProgress
 
@@ -58,9 +57,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution]) extends ISubMoleEx
     checkAllJobsWaitingInGroup
   }
 
-  override def decNbJobWaitingInGroup(value: Int) {
-    _nbJobWaitingInGroup -= value
-  }
+  override def decNbJobWaitingInGroup(value: Int) = _nbJobWaitingInGroup -= value
 
   private def checkAllJobsWaitingInGroup =  {
     if(nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0) {
