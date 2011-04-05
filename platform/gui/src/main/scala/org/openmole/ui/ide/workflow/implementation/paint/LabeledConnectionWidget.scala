@@ -13,11 +13,10 @@ import org.netbeans.api.visual.widget.Scene
 import org.openmole.ui.ide.commons.ApplicationCustomize
 import org.netbeans.api.visual.layout.LayoutFactory
 
-class LabeledConnectionWidget(scene: Scene, condition: String) extends ConnectionWidget(scene) {
-
+class LabeledConnectionWidget(val scene: Scene, condition: String) extends ConnectionWidget(scene) {
   val conditionLabel = new LabelWidget(scene, condition)
   conditionLabel.setBackground(ApplicationCustomize.CONDITION_LABEL_BACKGROUND_COLOR)
-  conditionLabel.setBorder(BorderFactory.createLineBorder(ApplicationCustomize.CONDITION_LABEL_BORDER_COLOR, 2))
+  conditionLabel.setBorder(BorderFactory.createLineBorder(2,ApplicationCustomize.CONDITION_LABEL_BORDER_COLOR))
   conditionLabel.setOpaque(true)
   addChild(conditionLabel)
   setConstraint(conditionLabel, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)

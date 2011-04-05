@@ -6,21 +6,24 @@
 package org.openmole.ui.ide.workflow.implementation.paint
 
 import java.awt.Color
-import java.util.HashSet
 import java.awt.BasicStroke
 import java.awt.Container
 import java.awt.Graphics2D
+import org.openmole.ui.ide.control.MoleScenesManager
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.workflow.implementation.MoleScene
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI
 import org.openmole.ui.ide.workflow.model.IObjectViewUI
+import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ui.ide.commons.ApplicationCustomize
+import scala.collection.mutable.HashSet
 
-class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI[_], val taskModel: Option[IGenericTaskModelUI[_]]= None) extends MyWidget(scene, objectView){
+class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI, val taskModel: Option[IGenericTaskModelUI]= None) extends MyWidget(scene, objectView){
 
-  var islots= new HashSet[ISlotWidget]
+  var islots= HashSet.empty[ISlotWidget]
   val oslot= new OSlotWidget(scene,objectView)
   addChild(oslot)
-  createActions(MoleScene.MOVE).addAction(ActionFactory.createMoveAction)
+  createActions(scene.MOVE).addAction(ActionFactory.createMoveAction)
   
   def setDetailedView= {
     setWidthHint
@@ -54,20 +57,22 @@ class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI[_], val task
       graphics.setColor(new Color(0, 0, 0))
       var x = taskWidth / 2 + 9
       
-      List.merge(taskModel.getPrototypesIn,taskModel.get.getPrototypesOut).foreach({
-          val i= (i >= taskModel.get.getPrototypesIn.length)
-          val st = p.name
+      var i=0
+      (taskModel.get.prototypesIn.toList:::taskModel.get.prototypesOut.toList).foreach(p=> {
+          if (i >= taskModel.get.prototypesIn.size) i= 0
+          var st = p.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h= 35 + i * 22
-          graphics.drawImage(ApplicationCustomize.typeImage(proto.getType().getSimpleName),
+          graphics.drawImage(ApplicationCustomize.typeImageMap(p.entityType.getSimpleName),
                              x - taskWidth / 2, h - 13,
                              new Container)
-          if (MoleScenesManager.detailedView) graphics.drawString(new AttributedString(st).getIterator, x - taskWidth / 2 + 24, h)
+          if (MoleScenesManager.detailedView) graphics.drawString(st, x - taskWidth / 2 + 24, h)
           x += taskWidth / 2 - 1
+          i+= 1
         })
       
 
-      val newH= Math.max(taskModel.get.getPrototypesIn.size, taskModel.get.getPrototypesOut.size) * 22 + 45
+      val newH= Math.max(taskModel.get.prototypesIn.size, taskModel.get.prototypesOut.size) * 22 + 45
       val delta= bodyArea.height - newH
       if (delta < 0) {
         bodyArea.setSize(bodyArea.width, newH)

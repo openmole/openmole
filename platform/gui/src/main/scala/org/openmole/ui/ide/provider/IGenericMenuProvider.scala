@@ -21,12 +21,13 @@ import java.awt.Point
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.action.PopupMenuProvider
+import scala.collection.mutable.HashSet
 
 trait IGenericMenuProvider extends PopupMenuProvider{
   
-  def items: Set[JMenuItem]
+  def items: HashSet[JMenuItem]
   
-  def menus: Set[JMenu]
+  def menus: HashSet[JMenu]
   
   def currentPoint: Point
 }

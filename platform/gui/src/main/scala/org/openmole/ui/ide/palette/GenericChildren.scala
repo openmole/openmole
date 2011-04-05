@@ -15,24 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.ide.workflow.implementation
+package org.openmole.ui.ide.palette
 
-import java.awt.Color
-import org.netbeans.api.visual.widget.Widget
-import org.openide.util.ImageUtilities
-import org.openmole.ui.ide.workflow.model.IObjectViewUI
+import org.openide.nodes.Index
 
-class ObjectViewUI(scene: MoleScene) extends Widget(scene) with IObjectViewUI{
-  var backgroundColor= color(PropertyManager.BG_COLOR)
-  
-  var borderColor= color(PropertyManager.BORDER_COLOR)
-               
-  var backgroundImage= ImageUtilities.loadImage(properties.getProperty(PropertyManager.BG_IMG))
-  
-  def color(colorString: String)= {
-    val colors= properties.getProperty(colorString).split(",")
-    new Color(colors(0).toInt,
-              colors(1).toInt,
-              colors(2).toInt)
-  }
+abstract class GenericChildren extends Index.ArrayChildren with IGenericChildren{
+
+  override def refreshNodes= refresh
 }
+//import org.openide.nodes.Index;
+//
+///**
+// *
+// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
+// */
+//public abstract class GenericChildren  extends Index.ArrayChildren  implements IGenericChildren{
+//
+//    @Override
+//    public void refreshNodes() {
+//        refresh();
+//    }
+//}

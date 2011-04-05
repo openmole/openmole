@@ -12,7 +12,7 @@ import org.openide.loaders.DataObject
 import org.openide.text.CloneableEditorSupport
 import org.openmole.ui.ide.workflow.model.ICapsuleView
 
-class TaskSettingsManager extends TabManager{
+object TaskSettingsManager extends TabManager{
 
   override def addTab(displayed: Object)= {
     
@@ -26,7 +26,7 @@ class TaskSettingsManager extends TabManager{
     editorPane.getDocument.putProperty(Document.StreamDescriptionProperty, dob)
     editorPane.setText("package dummy;")
     
-    addMapping(tcv, editorPane,tcv.capsuleModel.taskModel.name)
+    addMapping(tcv, editorPane,tcv.capsuleModel.taskModel.get.name)
     MoleScenesManager.addChild(tcv.scene, editorPane)
   } 
 }

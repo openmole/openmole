@@ -43,7 +43,7 @@ abstract class TabManager extends ITabManager{
     tabbedPane.get.add(name,tabMap.get(obj))
   }
   
-  def setTabbedPane(tPane: JTabbedPane)= tabbedPane= Some(tPane)
+  def setTabbedPane(tPane: JTabbedPane) = tabbedPane = Some(tPane)
   
   def getCurrentObject: Option[Object]= Some(tabMap.getKey(tabbedPane.get.getSelectedComponent))
   

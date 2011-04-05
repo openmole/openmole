@@ -14,7 +14,7 @@ object MoleConcepts extends Enumeration {
   val SAMPLING_INSTANCE= new Concept("sampling")
   
  
-  class Concept(name: String) 
+  class Concept(val name: String) 
   
 //  extends Val(name)
 //  protected final def Value(name: String): Concept = new Concept(name)

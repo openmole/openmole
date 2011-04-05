@@ -15,38 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.ide.dialog
+package org.openmole.ui.ide.palette
 
-import org.openmole.ui.ide.workflow.implementation.Preferences
-import org.openmole.ui.ide.workflow.implementation.TaskUI
-import org.openmole.ui.ide.workflow.implementation.TasksUI
+class SamplingCategory extends ICategory{
 
-class TaskManager extends IManager{
+  val name= "Samplings"
 
-  override def entityInstance(name: String,t: Class[_])= {
-    new TaskUI(name, t)
-  }
-  
-  override def container= TasksUI
-  
-  override def classTypes= Preferences.coreTaskClasses
+  val children= new SamplingChildren
 }
 
-//public class TaskManager implements IManager{
+///**
+// *
+// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
+// */
+//public class SamplingCategory implements ICategory{
+//
+//    private final static String name = "Samplings";
 //
 //    @Override
-//    public IEntityUI getEntityInstance(String name, Class type) {
-//        return new TaskUI(name, type);
+//    public String getName() {
+//        return name;
 //    }
 //
 //    @Override
-//    public IContainerUI getContainer() {
-//        return TasksUI.getInstance();
-//    }
-//
-//    @Override
-//    public Set<Class<?>> getClassTypes() {
-//        return Preferences.getInstance().getCoreTaskClasses();
+//    public GenericChildren getChildren() {
+//        return new SamplingChildren();
 //    }
 //
 //}

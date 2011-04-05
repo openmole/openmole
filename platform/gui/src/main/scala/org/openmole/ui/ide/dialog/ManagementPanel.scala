@@ -21,31 +21,38 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JButton
 import javax.swing.JList
+import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.JScrollPane
+import javax.swing.JRadioButton
 import javax.swing.JTextField
+import java.awt.GridLayout
 import javax.swing.ListSelectionModel
 import javax.swing.event.ListSelectionListener
+import javax.swing.event.ListSelectionEvent
 import javax.swing.ButtonGroup
+import javax.swing.ButtonModel
 import javax.swing.DefaultListCellRenderer
 import javax.swing.DefaultListModel
 import org.openmole.ui.ide.exception.MoleExceptionManagement
 import org.openmole.ui.ide.workflow.model.IEntityUI
+import scala.collection.mutable.HashMap
 
 
 class ManagementPanel(manager: IManager) extends JPanel(new BorderLayout) with ListSelectionListener with ActionListener{
   val listModel= new DefaultListModel
+  val buttonModelMap=  new HashMap[String, ButtonModel]
   val updateString = "Update"
   val removeString = "Remove"
     
   manager.container.getAll.foreach(listModel.addElement(_))
   
-  val list = new JList(listModel)
-  list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
-  list.setSelectedIndex(0)
-  list.addListSelectionListener(this)
-  list.setCellRenderer(new CellRenderer)
-  val listScrollPane = new JScrollPane(list)
+  val li = new JList(listModel)
+  li.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+  li.setSelectedIndex(0)
+  li.addListSelectionListener(this)
+  li.setCellRenderer(new CellRenderer)
+  val listScrollPane = new JScrollPane(li)
   
   val nameField = new JTextField(10)
   nameField.addActionListener(new AddButtonListener)
@@ -92,17 +99,17 @@ class ManagementPanel(manager: IManager) extends JPanel(new BorderLayout) with L
         
   def addEntity(entity: IEntityUI)= {
     listModel.addElement(entity)
-    list.setSelectedIndex(listModel.getSize)
-    manager.geaddEntitytContainer.register(entity)
+    li.setSelectedIndex(listModel.getSize)
+    manager.container.register(entity)
   }
 
 
   override def valueChanged(e: ListSelectionEvent)= {
-    if (!list.isSelectionEmpty) {
-      listModel.get(list.getSelectedIndex) match {
-        case en: IEntityUI=> {listModel.get(list.getSelectedIndex)
+    if (!li.isSelectionEmpty) {
+      listModel.get(li.getSelectedIndex) match {
+        case en: IEntityUI=> {listModel.get(li.getSelectedIndex)
                               nameField.setText(en.name)
-                              typeButtonGroup.setSelected(buttonModelMap.get(en.entityType.getCanonicalName), true)
+                              typeButtonGroup.setSelected(buttonModelMap(en.entityType.getCanonicalName), true)
           }
       }
     }
@@ -111,8 +118,8 @@ class ManagementPanel(manager: IManager) extends JPanel(new BorderLayout) with L
   override def actionPerformed(ae: ActionEvent)= throw new UnsupportedOperationException("Not supported yet.")
   
   class CellRenderer extends DefaultListCellRenderer {
-    override def getListCellRendererComponent(list: JList, value: Object, index: Int, iss: Boolean, chf: Boolean)={
-      super.getListCellRendererComponent(list, value, index, iss, chf)
+    override def getListCellRendererComponent(li: JList, value: Object, index: Int, iss: Boolean, chf: Boolean)={
+      super.getListCellRendererComponent(li, value, index, iss, chf)
       value match{
         case en: IEntityUI=>   setText(en.name + " :: " + en.entityType.getSimpleName)
         case _=> MoleExceptionManagement.giveInformation("List renderer can not be set.")                       
@@ -127,21 +134,22 @@ class ManagementPanel(manager: IManager) extends JPanel(new BorderLayout) with L
         addEntity(manager.entityInstance(nameField.getText, Class.forName(typeButtonGroup.getSelection.getActionCommand)))
       }
       nameField.setText("")
-      list.clearSelection
+      li.clearSelection
     }
   }
  
   class RemoveButtonListener extends ActionListener {
-    override def actionPerformed(ActionEvent: e){
+    override def actionPerformed(e: ActionEvent){
       
-      manager.container.removeEntity(exists.getOrElse(MoleExceptionManagement.showException("The entity does not exist.")))
-//      if(exists.isDefined){
-//        manager.container.removeEntity(entity)
-//      } else MoleExceptionManagement.showException("The entity " + entity.getName() + " does not exist.")
+      //manager.container.removeEntity(exists.getOrElse(MoleExceptionManagement.showException("The entity does not exist.")))
+      val entity= exists
+      if(entity.isDefined){
+        manager.container.removeEntity(entity.get)
+      } else MoleExceptionManagement.showException("The entity " + entity.get.name + " does not exist.")
       if(listModel.isEmpty){
         nameField.setText("")
       } else {
-        list.setSelectedIndex(0)
+        li.setSelectedIndex(0)
       }
     }
   }

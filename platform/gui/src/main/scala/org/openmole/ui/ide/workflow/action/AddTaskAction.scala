@@ -23,7 +23,7 @@ import org.openmole.ui.ide.workflow.implementation.MoleScene
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.workflow.implementation.TaskUI
 
-class AddTaskAction(moleScene: MoleScene ,capsuleView: CapsuleViewUI[_],taskUI: TaskUI) extends ActionListener{
+class AddTaskAction(moleScene: MoleScene ,capsuleView: CapsuleViewUI,taskUI: TaskUI) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
     capsuleView.encapsule(taskUI)
     moleScene.validate

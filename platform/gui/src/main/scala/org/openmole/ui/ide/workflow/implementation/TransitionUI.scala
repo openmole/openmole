@@ -8,7 +8,8 @@ package org.openmole.ui.ide.workflow.implementation
 import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget
 import org.openmole.ui.ide.workflow.model.ICapsuleView
 
-class TransitionUI(source: ICapsuleView, target: ISlotWidget, var condition: Option[String]= None)
+class TransitionUI(val source: ICapsuleView,val target: ISlotWidget, var condition: Option[String]= None){}
+
 
 //    private ICapsuleView source;
 //    private ISlotWidget target;

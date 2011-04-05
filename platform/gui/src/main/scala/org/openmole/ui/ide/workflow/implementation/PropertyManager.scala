@@ -41,7 +41,7 @@ object PropertyManager {
     
     val actual= new File(cat.name)
     try{
-      actual.listFiles.foreach(f=> Preferences.register(cat,classOf[f.getName],read(f.getPath)))
+      actual.listFiles.foreach(f=> Preferences.register(cat,Class.forName(f.getName),read(f.getPath)))
     } catch {
       case ex: ClassNotFoundException => MoleExceptionManagement.showException(ex)
     }  

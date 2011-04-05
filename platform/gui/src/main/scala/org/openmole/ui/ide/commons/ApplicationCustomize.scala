@@ -19,7 +19,6 @@ import org.openmole.ui.ide.workflow.implementation.SamplingUI
 
 object ApplicationCustomize{
   
-  
   val TASK_HEADER_BACKGROUND_COLOR= new Color(68, 120, 33)
   val TASK_SELECTION_COLOR= new Color(255, 100, 0)
   val CONDITION_LABEL_BACKGROUND_COLOR= new Color(255, 238, 170)
@@ -53,7 +52,7 @@ object ApplicationCustomize{
   val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingUI], "Samplings")
   
   var typeImageMap= new HashMap[String, Image]
-  Preferences.getPrototypeTypeClasses.foreach(c=> typeImageMap+= c.getSimpleName-> ImageUtilities.loadImage("img/" + c.getSimpleName + ".png"))
+  Preferences.prototypeTypeClasses.foreach(c=> typeImageMap+= c.getSimpleName-> ImageUtilities.loadImage("img/" + c.getSimpleName + ".png"))
 
 }
 //

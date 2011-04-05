@@ -6,25 +6,29 @@
 package org.openmole.ui.ide.workflow.implementation
 
 import java.util.Properties
+import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ui.ide.control.MoleScenesManager
 import org.openmole.ui.ide.workflow.action.TaskActions
-import org.openmole.ui.ide.workflow.provider.CapsuleMenuProvider
-import org.openmole.ui.ide.workflow.implementation.MoleScene
+import org.openmole.ui.ide.palette.MoleConcepts
+import org.openmole.ui.ide.provider.CapsuleMenuProvider
 import org.openmole.ui.ide.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI
 import org.openmole.ui.ide.workflow.model.ICapsuleView
-import org.openmole.ui.ide.workflow.provider.DnDAddPrototypeProvider
+import org.openmole.ui.ide.workflow.model.IObjectViewUI
+import org.openmole.ui.ide.provider.DnDAddPrototypeProvider
+import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI
 
-class CapsuleViewUI[T<: IGenericCapsule](scene: MoleScene, capsuleModel: ICapsuleModelUI[T], properties: Properties) extends ObjectViewUI(scene) with ICapsuleView{
+class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI,var properties: Properties) extends Widget(scene) with IObjectViewUI with ICapsuleView{
 
-  createActions(MoleScene.MOVE).addAction (ActionFactory.createMoveAction)
+  createActions(scene.MOVE).addAction (ActionFactory.createMoveAction)
   
-  val connectableWidget= new ConnectableWidget(scene,this)
+  override lazy val connectableWidget= new ConnectableWidget(scene,this)
   val dnDAddPrototypeProvider= new DnDAddPrototypeProvider(scene, this)
-  val taskCapsuleMenuProvider= new CapsuleMenuProvider
+  val taskCapsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
   def defineStartingCapsule(on: Boolean){
     capsuleModel.defineStartingCapsule(on)
@@ -33,26 +37,27 @@ class CapsuleViewUI[T<: IGenericCapsule](scene: MoleScene, capsuleModel: ICapsul
   }
   
   override def encapsule(taskUI: TaskUI)= {
-    capsuleModel.setTaskModel(UIFactory.createTaskModelInstance( Preferences.getModel(Category.TASK_INSTANCE, taskUI.getType), taskUI))
-    properties = Preferences.getProperties(Category.TASK_INSTANCE, taskUI.getType)
-    changeConnectableWidget
-    dnDAddPrototypeProvider.setEncapsulated(true)
+    capsuleModel.setTaskModel(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType).getClass.asInstanceOf[Class[GenericTaskModelUI]]))
+
+    properties = Preferences.properties(MoleConcepts.TASK_INSTANCE, taskUI.entityType)
+    // changeConnectableWidget
+    dnDAddPrototypeProvider.encapsulated= true
     MoleScenesManager.incrementNodeName
     connectableWidget.addTitle(taskUI.name)
     taskCapsuleMenuProvider.addTaskMenus
-    getActions.addAction(new TaskActions(capsuleModel.taskModel, this))
+    getActions.addAction(new TaskActions(capsuleModel.taskModel.get, this))
   }
   
-  def changeConnectableWidget= {
-    connectableWidget.setBackgroundCol(getBackgroundColor)
-    connectableWidget.setBorderCol(getBorderColor);
-    connectableWidget.setBackgroundImaqe(getBackgroundImage)
-    connectableWidget.setTaskModel(capsuleModel.getTaskModel)
-  }
+//  def changeConnectableWidget= {
+//    connectableWidget.objectView.backgroundColor= backgroundColor
+//    connectableWidget.setBorderCol(getBorderColor);
+//    connectableWidget.setBackgroundImaqe(getBackgroundImage)
+//    connectableWidget.setTaskModel(capsuleModel.getTaskModel)
+//  }
   
   def addInputSlot: ISlotWidget=  {
     capsuleModel.addInputSlot
-    val im = new ISlotWidget(scene, this,capsuleModel.nbInputslots,capsuleModel.startingCapsule)
+    val im = new ISlotWidget(scene, this,capsuleModel.nbInputSlots,capsuleModel.startingCapsule)
     connectableWidget.addInputSlot(im)
     scene.refresh
     im

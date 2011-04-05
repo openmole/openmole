@@ -29,7 +29,7 @@ class GenericMenuProvider extends IGenericMenuProvider{
   var menus= HashSet.empty[JMenu]
   var currentPoint= new Point(0,0)
   
-  override def popupMenu(widget: Widget, point: Point)= {
+  override def getPopupMenu(widget: Widget, point: Point)= {
     currentPoint= point
     PopupMenuProviderFactory.fillPopupMenu(this)
   }

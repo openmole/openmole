@@ -9,35 +9,23 @@ import org.openmole.misc.exception.UserBadDataError
 import scala.collection.mutable.HashMap
 
 trait IContainerUI {
-//  def register(entityUI: IEntityUI)
-//
-//  def removeEntity(entityUI: IEntityUI)
-//  
-//  def get(st: String, entityType: Class[_]): IEntityUI
-//  
-  def getAll: Set[IEntityUI]
-//  
-//  def clearAll
-//  
-//  def contains(entityUI: IEntityUI)
+  def getAll= entities.values
   
   var entities= new HashMap[Tuple2[String,Class[_]],IEntityUI] 
   
   def getEntityTuple(entity: IEntityUI): Tuple2[String,Class[_]]= Tuple2[String,Class[_]](entity.name,entity.entityType)
   
-  override def register(entity: IEntityUI)= entities+= getEntityTuple(entity)-> entity
+  def register(entity: IEntityUI)= entities+= getEntityTuple(entity)-> entity
   
-  override def removeEntity(entity: IEntityUI)= entities.remove(getEntityTuple(entity))
+  def removeEntity(entity: IEntityUI)= entities.remove(getEntityTuple(entity))
   
-  override def get(st: String, entityType: Class[_]): IEntityUI= {
-    entities.getOrElse(Tuple2[String,Class[_]](st,entityType),throw new UserBadDataError("The entity " + st + " :: " + entityType.toString + " doest not exist."))
-  }
+  def get(st: String, entityType: Class[_]): IEntityUI= entities.getOrElse(Tuple2[String,Class[_]](st,entityType),throw new UserBadDataError("The entity " + st + " :: " + entityType.toString + " doest not exist."))
   
-  override def contains(entity: IEntityUI): Boolean= entities.contains(getEntityTuple(entity))
+  def contains(entity: IEntityUI): Boolean= entities.contains(getEntityTuple(entity))
   
   //override def getAll= entities.values
   
-  override def clearAll {entities.clear}
+  def clearAll= entities.clear
 }
 
 

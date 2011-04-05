@@ -16,7 +16,7 @@ trait ITabManager {
   
   def addMapping(o: Object, c: Component, name: String)
   
-  def addMap(displayed: Object)
+  def addTab(displayed: Object)
 }
 
 //    void removeTab(Object object);

@@ -27,11 +27,11 @@ import org.openmole.ui.ide.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI
 
-class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI[_]) extends DnDProvider(molescene){
+class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends DnDProvider(molescene){
 
   var encapsulated= false
   
-  override def isAcceptable(widget: Widget,point: Point,transferable: Transferable) {
+  override def isAcceptable(widget: Widget,point: Point,transferable: Transferable): ConnectorState=  {
     var state= ConnectorState.REJECT
     if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) && encapsulated == true) {
       state = ConnectorState.ACCEPT
@@ -43,10 +43,10 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI[_]) exte
   
   override def accept(widget: Widget, point: Point,t: Transferable)= {
     val proto = t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeUI]
-    if (point.x < view.connectableWidget.getWidgetWidth / 2) {
-      view.capsuleModel.taskModel.addPrototype(proto, IOType.INPUT)
+    if (point.x < view.connectableWidget.widgetWidth / 2) {
+      view.capsuleModel.taskModel.get.addPrototype(proto, IOType.INPUT)
     } else {
-      view.capsuleModel.taskModel.addPrototype(proto, IOType.OUTPUT)
+      view.capsuleModel.taskModel.get.addPrototype(proto, IOType.OUTPUT)
     }
   }
 }

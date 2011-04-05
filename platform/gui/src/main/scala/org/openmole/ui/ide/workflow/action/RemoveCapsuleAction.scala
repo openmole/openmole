@@ -22,7 +22,7 @@ import java.awt.event.ActionListener
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.workflow.implementation.MoleScene
 
-class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleViewUI[_]) extends ActionListener{
+class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleViewUI) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent)= {
     val id = scene.manager.capsuleViewID(capsule)

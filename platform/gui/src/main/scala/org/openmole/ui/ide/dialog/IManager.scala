@@ -17,11 +17,11 @@
 
 package org.openmole.ui.ide.dialog
 
-import org.openmole.ui.ide.workflow.implementation.EntityUI
+import org.openmole.ui.ide.workflow.model.IEntityUI
 import org.openmole.ui.ide.workflow.model.IContainerUI
 
 trait IManager {
-  def entityInstance(name: String, t: Class[_<:EntityUI])
+  def entityInstance(name: String, t: Class[_]): IEntityUI
 
   def container: IContainerUI
   

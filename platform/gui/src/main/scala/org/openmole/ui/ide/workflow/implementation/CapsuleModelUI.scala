@@ -6,21 +6,26 @@
 package org.openmole.ui.ide.workflow.implementation
 
 import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.task.IGenericTask
 import org.openmole.ui.ide.workflow.model.ICapsuleModelUI
 import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI
 
-class CapsuleModelUI[T<: IGenericCapsule](val taskModel: Option[IGenericTaskModelUI[IGenericTask]] = None, var nbInputSlots: Int = 1) extends ObjectModelUI[T] with ICapsuleModelUI[T]{
+class CapsuleModelUI(var taskModel: Option[IGenericTaskModelUI] = None, var nbInputSlots: Int = 1) extends ICapsuleModelUI{
 
   val category= "Task Tapsules"
   var startingCapsule= false
+  var containsTask= false
   
-  def this(taskModel: IGenericTaskModelUI[IGenericTask])= this(Some(taskModel))
-  def this(tModel: IGenericTaskModelUI[IGenericTask], capsModule: CapsuleModelUI[T])= this(tModel, capsModule.nbInputSlots)
+  def this(taskModel: IGenericTaskModelUI)= this(Some(taskModel))
+//  def this(tModel: IGenericTaskModelUI[IGenericTask], capsModule: CapsuleModelUI[T])= this(tModel, capsModule.nbInputSlots)
   
   def addInputSlot= nbInputSlots+= 1
   
   def removeInputSlot= nbInputSlots-= 1
+  
+  def setTaskModel(tModel: IGenericTaskModelUI)={
+    taskModel= Some(tModel)
+    containsTask= true
+  }
   
   override def defineStartingCapsule(on: Boolean)= {
     startingCapsule= on

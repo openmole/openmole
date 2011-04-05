@@ -30,22 +30,26 @@ object MoleScenesManager extends TabManager{
     removeAllTabs
   }
   
-  def removeMoleScene(moleScene: MoleScene)= {
+  def removeMoleScene(moleScene: IMoleScene)= {
     moleScenes.remove(moleScene)
     removeTab(moleScene)
   }
   
-  def addMoleScene(ms: IMoleScene)= {
-    moleScenes ±= ms
-    childTabs += ms-> Set.empty[Component]
+  def addMoleScene(ms: IMoleScene): this.type= {
+    moleScenes+= ms
+    childTabs+= ms-> Set.empty[Component]
+    this
   }
   
-  def addMoleScene= addMoleScene(new MoleScene)
+  def addMoleScene: this.type= {
+    addMoleScene(new MoleScene)
+    this
+  }
   
   def addChild(sc: IMoleScene, co: Component)= childTabs(sc)+= co
   
   def removeCurrentSceneAndChilds(curs: IMoleScene)= {
-    childTabs(curs).foreach(TaskSettingsManager.removeTab(co))
+    childTabs(curs).foreach(TaskSettingsManager.removeTab(_))
     removeMoleScene(curs)
   }
   

@@ -1,37 +1,120 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ui.ide.workflow.implementation
 
 import java.awt.Dimension
 import java.awt.Image
+import java.awt.Point	
+import org.netbeans.api.visual.anchor.AnchorShape
+import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
+import org.netbeans.api.visual.layout.LayoutFactory
+import org.netbeans.api.visual.widget.ConnectionWidget
+import org.netbeans.api.visual.widget.Scene
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
+import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ui.ide.commons.ApplicationCustomize
 import org.openmole.ui.ide.provider.MoleSceneMenuProvider
 import org.openmole.ui.ide.workflow.model.IMoleScene
 import org.netbeans.api.visual.widget.LayerWidget
+import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
+import org.openmole.ui.ide.provider.DnDNewTaskProvider
+import org.openmole.ui.ide.workflow.model.ICapsuleView
+import org.netbeans.api.visual.action.ConnectorState
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotWidget
+import org.openmole.ui.ide.workflow.implementation.paint.LabeledConnectionWidget
+import org.openmole.ui.ide.workflow.implementation.paint.OSlotWidget
+import org.netbeans.api.visual.action.ReconnectProvider
+import org.openmole.ui.ide.workflow.implementation.paint.ISlotAnchor
+import org.openmole.ui.ide.workflow.implementation.paint.OSlotAnchor
+import org.openmole.ui.ide.workflow.action.TransitionActions
+import org.openmole.ui.ide.provider.TransitionMenuProvider
 
 class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   val manager = new MoleSceneManager
   val MOVE= "move"
+  val CONNECT = "connect"
+  var obUI: Option[Widget]= None
   val capsuleLayer= new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
-  
-  
+  var currentSlotIndex= 1
   addChild(capsuleLayer)
   addChild(connectLayer)
+  
+  val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
+  val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
+  val moveAction = ActionFactory.createMoveAction
   
   setPreferredSize(new Dimension((ApplicationCustomize.SCREEN_WIDTH * 0.8).toInt, (ApplicationCustomize.SCREEN_HEIGHT * 0.8).toInt));
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   
+  getActions.addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(this)))
+  setActiveTool(CONNECT)
+
+  def createEdge(sourceNodeID:String, targetNodeID: String)= {
+    val ed= manager.getEdgeID
+    setEdgeSource(ed,sourceNodeID)
+    setEdgeTarget(ed,targetNodeID)
+  }
   
+  override def initCapsuleAdd(w: ICapsuleView)= obUI= Some(w.asInstanceOf[Widget])
+  
+  override def refresh= {validate; repaint}
+  
+  override def attachNodeWidget(n: String)= {
+    capsuleLayer.addChild(obUI.get)
+    obUI.get.createActions(CONNECT).addAction(connectAction)
+    obUI.get.createActions(CONNECT).addAction(moveAction)
+    obUI.get.getActions.addAction(createObjectHoverAction)
+    obUI.get
+  } 
+  
+  override def attachEdgeWidget(e: String)= {
+    val connectionWidget = new LabeledConnectionWidget(this,manager.getTransition(e).condition.get)
+    connectLayer.addChild(connectionWidget);
+    connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
+    connectionWidget.getActions.addAction(createObjectHoverAction)
+    connectionWidget.getActions.addAction(createSelectAction)
+    connectionWidget.getActions.addAction(reconnectAction)
+    connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
+    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget,e)));
+    connectionWidget
+  }
+
+  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
+    val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
+    cw.setSourceAnchor(new OSlotAnchor(findWidget(sourceNode).asInstanceOf[CapsuleViewUI]))
+    cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+  }
+  
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String)= findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new ISlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleViewUI]), this.currentSlotIndex))
+  
+  override def setLayout= {
+    val graphLayout = GraphLayoutFactory.createHierarchicalGraphLayout(this, true)
+    graphLayout.layoutGraph(this)
+    val sceneGraphLayout = LayoutFactory.createSceneGraphLayout(this, graphLayout)
+    sceneGraphLayout.invokeLayout
+  }
+    
   def getImageFromTransferable(transferable: Transferable): Image= {
     try{
       transferable.getTransferData(DataFlavor.imageFlavor) match {
@@ -40,7 +123,127 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     } catch {case _ => ImageUtilities.loadImage("ressources/shape1.png")}
   }
   
+  
+  class MoleSceneConnectProvider extends ConnectProvider {
+    var source: Option[String]= None
+    var target: Option[String]= None
+    
+    override def isSourceWidget(sourceWidget: Widget): Boolean= {
+      val o= findObject(sourceWidget)
+      source= None
+      if (isNode(o)) 
+        source= Some(o.asInstanceOf[String])
+      sourceWidget match {
+        case x: CapsuleViewUI=> source.isDefined
+      }
+      false
+    }
+    
+    override def isTargetWidget(sourceWidget: Widget, targetWidget: Widget)= {
+      val o= findObject(targetWidget)
+      target= None
+      if(isNode(o))
+        target= Some(o.asInstanceOf[String])
+      targetWidget match {
+        case x: ISlotWidget=> {
+            val iw= targetWidget.asInstanceOf[ISlotWidget]
+            if (! iw.startingSlot){
+              MoleScene.this.currentSlotIndex = iw.index
+              source match{
+                case Some(target) => ConnectorState.ACCEPT
+                case None => ConnectorState.REJECT_AND_STOP
+              }
+            }
+          }
+      }
+      o match{
+        case None=> ConnectorState.REJECT
+        case _=> ConnectorState.REJECT_AND_STOP
+      }
+    }
+
+    override def hasCustomTargetWidgetResolver(scene: Scene): Boolean= false
+    
+    override def resolveTargetWidget(scene: Scene, sceneLocation: Point): Widget= null
+  
+    override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
+      manager.registerTransition(new TransitionUI(sourceWidget.asInstanceOf[CapsuleViewUI], targetWidget.asInstanceOf[ISlotWidget]))
+      MoleScene.this.createEdge(source.get, target.get)
+    }
+  }
+  
+  
+  
+  class MoleSceneReconnectProvider extends ReconnectProvider {
+
+    var edge: Option[String]= None
+    var originalNode: Option[String]= None
+    var replacementNode: Option[String]= None
+    
+    override def reconnectingStarted(connectionWidget: ConnectionWidget,reconnectingSource: Boolean)= {}
+    
+    override def reconnectingFinished(connectionWidget: ConnectionWidget,reconnectingSource: Boolean)= {}
+    
+    def findConnection(connectionWidget: ConnectionWidget)= {
+      val o= findObject(connectionWidget)
+      edge= None
+      if (isEdge(o)) edge= Some(o.asInstanceOf[String])
+      originalNode= edge
+    }
+    
+    override def isSourceReconnectable(connectionWidget: ConnectionWidget)= {
+      findConnection(connectionWidget)
+      if (originalNode.isDefined) originalNode= Some(getEdgeSource(edge.get))
+      originalNode.isDefined
+    }
+    
+    override def isTargetReconnectable(connectionWidget: ConnectionWidget)= {
+      findConnection(connectionWidget)
+      if (originalNode.isDefined) originalNode= Some(getEdgeTarget(edge.get))
+      originalNode.isDefined
+    }
+    
+    override def isReplacementWidget(connectionWidget: ConnectionWidget, replacementWidget: Widget, reconnectingSource: Boolean)= {
+      val o= findObject(connectionWidget)
+      replacementNode= None
+      replacementWidget match {
+        case x: OSlotWidget=> ConnectorState.ACCEPT
+        case x: ISlotWidget=> {
+            val iw= replacementWidget.asInstanceOf[ISlotWidget]
+            MoleScene.this.currentSlotIndex = iw.index
+            ConnectorState.ACCEPT
+          }
+          if (o.equals(null)) ConnectorState.REJECT_AND_STOP
+          else ConnectorState.REJECT
+      }
+      
+    }
+   
+    override def hasCustomReplacementWidgetResolver(scene: Scene)= false
+    
+    override def resolveReplacementWidget(scene: Scene,sceneLocation: Point)= null
+    
+    override def reconnect(connectionWidget: ConnectionWidget,replacementWidget: Widget,reconnectingSource: Boolean)= {
+      val t= manager.getTransition(edge.get)
+      manager.removeTransition(edge.get)
+      if (replacementWidget == null) removeEdge(edge.get)
+      else if (reconnectingSource) {
+        setEdgeSource(edge.get, replacementNode.get)
+        manager.registerTransition(edge.get,new TransitionUI(replacementWidget.asInstanceOf[OSlotWidget].capsule, t.target))
+      }
+      else {
+        val targetView= replacementWidget.asInstanceOf[ISlotWidget]
+        connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsuleView, MoleScene.this.currentSlotIndex))
+        setEdgeTarget(edge.get, replacementNode.get)
+        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView))
+      }
+      MoleScene.this.repaint
+    }
+
+  }
 }
+
+
 
 
 //public class MoleScene extends GraphScene.StringGraph implements IMoleScene {
@@ -342,4 +545,3 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
 //        }
 //        return o instanceof Image ? (Image) o : ImageUtilities.loadImage("ressources/shape1.png");
 //    }
-//}

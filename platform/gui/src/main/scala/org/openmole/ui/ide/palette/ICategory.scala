@@ -15,22 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.ide.workflow.action
+package org.openmole.ui.ide.palette
 
-import org.netbeans.api.visual.action.WidgetAction
-import org.openmole.ui.ide.workflow.model.ICapsuleView
-import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI
-
-class TaskActions(model: IGenericTaskModelUI, view: ICapsuleView) extends WidgetAction.Adapter {
+trait ICategory {
+  def name: String
+  
+  def children: GenericChildren
 }
+
+//package org.openmole.ui.ide.palette;
 //
-//public class TaskActions extends WidgetAction.Adapter {
-//
-//    private IGenericTaskModelUI model;
-//    private ICapsuleView view;
-//
-//    public TaskActions(IGenericTaskModelUI m,
-//                       ICapsuleView v) {
-//        model = m;
-//        view = v;
-//    }
+///**
+// *
+// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
+// */
+//public interface ICategory {
+//    String getName();
+//    GenericChildren getChildren();
+//}

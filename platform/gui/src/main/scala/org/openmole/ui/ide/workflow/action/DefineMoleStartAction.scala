@@ -22,11 +22,11 @@ import java.awt.event.ActionListener
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.workflow.implementation.MoleScene
 
-class DefineMoleStartAction(moleScene: MoleScene,capsule: CapsuleViewUI[_]) extends ActionListener{
+class DefineMoleStartAction(moleScene: MoleScene,capsule: CapsuleViewUI) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent)= {
     capsule.defineStartingCapsule(true)
-    moleScene.manager.setStartingCapsule(capsuleView)
+    moleScene.manager.setStartingCapsule(capsule)
   }
 }
 //import java.awt.event.ActionEvent;

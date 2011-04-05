@@ -6,15 +6,17 @@
 package org.openmole.ui.ide.control
 
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
+import org.openmole.ui.ide.workflow.model.IMoleScene
 
 object TabsManager {
 
-  def getCurrentObject= MoleScenesManager.getCurrentObject.getOrElse(TaskSettingsManager.getCurrentObject)
+  def getCurrentObject: Object= MoleScenesManager.getCurrentObject.getOrElse(TaskSettingsManager.getCurrentObject)
 
-  def getCurrentScene= {
-    getCurrentObject match{
-      case x: CapsuleViewUI[_]=> x.scene
-      case _=> getCurrentObject
+  def getCurrentScene: IMoleScene= {
+    val o= getCurrentObject
+    o match{
+      case x: CapsuleViewUI=> x.scene
+      case _=> o.asInstanceOf[IMoleScene]
     }
   }
   

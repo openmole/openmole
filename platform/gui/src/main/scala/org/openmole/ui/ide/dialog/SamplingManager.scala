@@ -16,7 +16,7 @@
  */
 package org.openmole.ui.ide.dialog
 
-import org.openmole.ui.ide.implementation.Preferences
+import org.openmole.ui.ide.workflow.implementation.Preferences
 import org.openmole.ui.ide.workflow.implementation.SamplingUI
 import org.openmole.ui.ide.workflow.implementation.SamplingsUI
 

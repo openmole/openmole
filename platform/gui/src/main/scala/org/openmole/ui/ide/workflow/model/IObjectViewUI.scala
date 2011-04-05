@@ -14,11 +14,18 @@ import java.util.Properties
 trait IObjectViewUI {
   def properties: Properties
   
-  def backgroundColor: Color
+  var backgroundColor= color(PropertyManager.BG_COLOR)
   
-  def borderColor: Color
+  var borderColor= color(PropertyManager.BORDER_COLOR)
                
-  def backgroundImage: Image
+  var backgroundImage= ImageUtilities.loadImage(properties.getProperty(PropertyManager.BG_IMG))
+  
+  def color(colorString: String)= {
+    val colors= properties.getProperty(colorString).split(",")
+    new Color(colors(0).toInt,
+              colors(1).toInt,
+              colors(2).toInt)
+  }  
 }
 
 //interface IObjectViewUI{

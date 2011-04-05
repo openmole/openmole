@@ -24,11 +24,11 @@ import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.commons.IOType
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI
 
-class AddExistingPrototypeAction(prototype: IEntityUI,capsuleViewUI: CapsuleViewUI[_],t: IOType.Value) extends ActionListener{
+class AddExistingPrototypeAction(prototype: IEntityUI,capsuleViewUI: CapsuleViewUI,t: IOType.Value) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent) {
     prototype match {
-      case p: PrototypeUI=> capsuleViewUI.capsuleModel.taskModel.addPrototype(p, t)
+      case p: PrototypeUI=> capsuleViewUI.capsuleModel.taskModel.get.addPrototype(p, t)
     }
     capsuleViewUI.repaint
   }

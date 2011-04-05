@@ -5,12 +5,7 @@
 
 package org.openmole.ui.ide.workflow.implementation
 
-import org.openmole.core.model.task.IGenericTask
-
-class TaskModelUI[T<: IGenericTask](taskUI: TaskUI) extends GenericTaskModelUI[T](taskUI){
-
-  override def proceed= throw new UnsupportedOperationException("proceed in TaskModelUI is not supported yet.")
-}
+class TaskModelUI(taskUI: TaskUI) extends GenericTaskModelUI(taskUI){}
 //
 //public class TaskModelUI<T extends IGenericTask> extends GenericTaskModelUI{
 //

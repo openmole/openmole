@@ -65,9 +65,9 @@ public final class MoleSceneTopComponent extends TopComponent {
 //        PluginManager.getPluginForClass(NetLogoTask.class);
 //        System.out.println("après pm " + PluginManager.getPluginForClass(NetLogoTask.class).getAbsolutePath());
 
-        MoleScenesManager.getInstance().setTabbedPane(tabbedPane);
-        TaskSettingsManager.getInstance().setTabbedPane(tabbedPane);
-        MoleScenesManager.getInstance().display(MoleScenesManager.getInstance().addMoleScene());
+        MoleScenesManager.setTabbedPane(tabbedPane);
+        TaskSettingsManager.setTabbedPane(tabbedPane);
+        MoleScenesManager.display(MoleScenesManager.getInstance().addMoleScene());
 
         palette = PaletteSupport.createPalette();
 

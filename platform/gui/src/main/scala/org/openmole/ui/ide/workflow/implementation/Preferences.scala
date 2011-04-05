@@ -6,33 +6,34 @@
 package org.openmole.ui.ide.workflow.implementation
 
 import org.openmole.ui.ide.palette.MoleConcepts
-import org.openmole.ui.ide.workflow.model.IObjectModelUI
 import org.openmole.misc.tools.service.HierarchicalRegistry
 import java.util.Properties
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.WeakHashMap
 
+import org.openmole.ui.ide.workflow.model.IGenericTaskModelUI
+
 object Preferences {
   val propertyTypes= List(MoleConcepts.TASK_INSTANCE, MoleConcepts.CAPSULE_INSTANCE, MoleConcepts.PROTOTYPE_INSTANCE,MoleConcepts.SAMPLING_INSTANCE) 
-  var models= new HashMap[MoleConcepts.Concept,HierarchicalRegistry[Class[_<:IObjectModelUI[_]]]]
+  var models= new HashMap[MoleConcepts.Concept,HierarchicalRegistry[Class[_]]]
   var properties= new HashMap[MoleConcepts.Concept,HashMap[Class[_],Properties]]
-  var coreClasses= new WeakHashMap[Class[_<: IObjectModelUI[_]],Class[_]]
+  var coreClasses= new WeakHashMap[Class[_],Class[_]]
   
   def clearModels()= models.clear
   
   def clearProperties()= properties.clear
   
-  def register()= {
+  def register(): Unit= {
     if (models.isEmpty) propertyTypes.foreach(PropertyManager.readProperties(_))
   }
   
-  def register(cat: MoleConcepts.Concept, coreClass: Class[_],prop: Properties)= {
+  def register(cat: MoleConcepts.Concept, coreClass: Class[_],prop: Properties): Unit= {
     // registerModel(cat,coreClass,ClassOf[prop.getProperty(PropertyManager.IMPL)])
     registerProperties(cat,coreClass,prop)
   }
   
-  def registerModel(cat: MoleConcepts.Concept, coreClass: Class[_], modelClass: Class[_<:IObjectModelUI[_]])= {
-    if (models.isEmpty) propertyTypes.foreach(models.put(_,new HierarchicalRegistry[Class[_<:IObjectModelUI[_]]]))
+  def registerModel(cat: MoleConcepts.Concept, coreClass: Class[_], modelClass: Class[_])= {
+    if (models.isEmpty) propertyTypes.foreach(models.put(_,new HierarchicalRegistry[Class[_]]))
     coreClasses+= modelClass-> coreClass
     models(cat).register(coreClass, modelClass)
   }
@@ -42,27 +43,32 @@ object Preferences {
     properties(cat)+= coreClass-> prop
   }
   
-  def getProperties(cat: MoleConcepts.Concept, coreClass: Class[_]): Properties = {
+  def properties(cat: MoleConcepts.Concept, coreClass: Class[_]): Properties = {
     register
     properties(cat)(coreClass)
   }
   
-  def getModel(cat: MoleConcepts.Concept, coreClass: Class[_]): Class[_<: IObjectModelUI[_]]= {
+//  def taskModel(cat: MoleConcepts.Concept, coreClass: Class[_])= {
+//    register
+//    models(cat).closestRegistred(coreClass).iterator.next.asInstanceOf[IGenericTaskModelUI[_]]
+//  }
+  
+  def model(cat: MoleConcepts.Concept, coreClass: Class[_])= {
     register
-    models(cat).closestRegistred(coreClass).iterator.next
+    models(cat).closestRegistred(coreClass).iterator.next 
   }
   
-  def coreTaskClasses= {
+  def coreTaskClasses: Set[Class[_]]= {
     register
     models(MoleConcepts.TASK_INSTANCE).allRegistred
   }
   
-  def prototypeTypeClasses= {
+  def prototypeTypeClasses: Set[Class[_]]= {
     register
     models(MoleConcepts.PROTOTYPE_INSTANCE).allRegistred
   }
   
-  def samplingTypeClasses= {
+  def samplingTypeClasses: Set[Class[_]]= {
   register
   models(MoleConcepts.SAMPLING_INSTANCE).allRegistred
   }

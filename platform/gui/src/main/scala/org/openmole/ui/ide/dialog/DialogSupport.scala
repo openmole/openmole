@@ -25,7 +25,7 @@ import org.openide.DialogDisplayer
 object DialogSupport {
 
   def showDialog(panel: JPanel)= {
-    val dialogDescriptor = new DialogDescriptor(panel,panel.getName,true,{new JButton("Close")},null,DialogDescriptor.DEFAULT_ALIGN,null,null)
+    val dialogDescriptor = new DialogDescriptor(panel,panel.getName,true,Array[Object](new JButton("Close")),null,DialogDescriptor.DEFAULT_ALIGN,null,null)
     dialogDescriptor.setValid(false)
     val dialog = DialogDisplayer.getDefault.createDialog(dialogDescriptor)
     dialog.setVisible(true)

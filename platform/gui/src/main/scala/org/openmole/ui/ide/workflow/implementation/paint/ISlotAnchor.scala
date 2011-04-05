@@ -10,7 +10,7 @@ import org.netbeans.api.visual.anchor.Anchor
 import org.netbeans.api.visual.anchor.Anchor.Entry
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 
-class ISlotAnchor(relatedWidget: CapsuleViewUI[_],index: Int) extends SlotAnchor(relatedWidget) {
+class ISlotAnchor(relatedWidget: CapsuleViewUI,index: Int) extends SlotAnchor(relatedWidget) {
 
     val x = 8
     

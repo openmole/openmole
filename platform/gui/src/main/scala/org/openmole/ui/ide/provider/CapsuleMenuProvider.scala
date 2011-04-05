@@ -32,10 +32,11 @@ import org.openmole.ui.ide.workflow.action.DefineMoleStartAction
 import org.openmole.ui.ide.workflow.action.RemoveCapsuleAction
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.ui.ide.workflow.implementation.PrototypesUI
+import org.openmole.ui.ide.workflow.implementation.TaskUI
 import org.openmole.ui.ide.workflow.implementation.TasksUI
 import scala.collection.mutable.ListBuffer
 
-class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI[_]) extends GenericMenuProvider {
+class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends GenericMenuProvider {
   var encapsulated= false
   var inPrototypeMenu= new JMenu
   var outPrototypeMenu= new JMenu
@@ -50,6 +51,7 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI[_]) exten
   
   items+= (itIS,itR,itStart)
   
+  def addTaskMenus= encapsulated= true
   
   override def getPopupMenu(widget: Widget, point: Point)= {
     if (encapsulated) {
@@ -69,7 +71,7 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI[_]) exten
          TasksUI.getAll.foreach(t=> {
            val it= new JMenuItem(t.name + " :: " + t.entityType.getSimpleName)
            it.addActionListener(new AddTaskAction(scene,capsuleView, t.asInstanceOf[TaskUI]));
-           colTask::= it
+           colTask+= it
           })
       }
     }

@@ -12,7 +12,7 @@ import org.openmole.ui.ide.control.MoleScenesManager
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 import org.openmole.core.model.capsule.IGenericCapsule
 
-class OSlotAnchor(relatedWidget: CapsuleViewUI[_]) extends SlotAnchor(relatedWidget) {
+class OSlotAnchor(relatedWidget: CapsuleViewUI) extends SlotAnchor(relatedWidget) {
 
   val x= ApplicationCustomize.TASK_CONTAINER_WIDTH + 22
   val y= ApplicationCustomize.TASK_TITLE_HEIGHT + 22

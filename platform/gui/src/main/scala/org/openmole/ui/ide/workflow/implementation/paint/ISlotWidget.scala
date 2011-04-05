@@ -10,7 +10,7 @@
  import org.openmole.ui.ide.commons.ApplicationCustomize
  import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 
- class ISlotWidget(scene: Scene,capsuleView: CapsuleViewUI[_],index: Int,startingSlot: Boolean) extends SlotWidget(scene,capsuleView){
+ class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI,val index: Int,val startingSlot: Boolean) extends SlotWidget(scene,capsuleView){
     if (startingSlot)
       setImage(ApplicationCustomize.IMAGE_START_SLOT)
     else

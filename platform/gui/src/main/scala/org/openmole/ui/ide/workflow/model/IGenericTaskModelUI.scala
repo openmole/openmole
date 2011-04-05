@@ -5,18 +5,18 @@
 
 package org.openmole.ui.ide.workflow.model
 
-import org.openmole.core.model.task.IGenericTask
 import org.openmole.ui.ide.commons.IOType._
 import org.openmole.ui.ide.workflow.implementation.PrototypeUI
+import scala.collection.mutable.HashSet
 
-trait IGenericTaskModelUI[T<: IGenericTask] extends IObjectModelUI[T] {
-  def proceed
-
+trait IGenericTaskModelUI {
+  def name: String
+  
   def addPrototype(p: PrototypeUI,ioType: IOType)
   
-  def getPrototypesIn: Set[PrototypeUI]
+  def prototypesIn: HashSet[PrototypeUI]
   
-  def getPrototypesOut: Set[PrototypeUI]
+  def prototypesOut: HashSet[PrototypeUI]
 }
 //public interface IGenericTaskModelUI<T extends IGenericTask> extends IObjectModelUI<T>{
 //    public void proceed();
@@ -25,4 +25,4 @@ trait IGenericTaskModelUI[T<: IGenericTask] extends IObjectModelUI[T] {
 //    Set<PrototypeUI> getPrototypesOut();
 //    String getName();
 //    Class getType();
-//}
+//}var prototypesOut= HashSet.empty[PrototypeUI]

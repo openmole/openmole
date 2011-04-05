@@ -9,7 +9,7 @@ import org.netbeans.api.visual.anchor.Anchor
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 
-abstract class SlotAnchor(relatedWidget: CapsuleViewUI[_]) extends Anchor(relatedWidget){}
+abstract class SlotAnchor(relatedWidget: CapsuleViewUI) extends Anchor(relatedWidget){}
 //
 //SlotAnchor  extends Anchor {
 //    CapsuleViewUI relatedWidget;

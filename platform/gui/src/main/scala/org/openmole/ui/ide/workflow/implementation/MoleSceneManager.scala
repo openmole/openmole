@@ -6,21 +6,22 @@
 package org.openmole.ui.ide.workflow.implementation
 
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.ui.ide.workflow.model.ICapsuleView
+import scala.collection.JavaConversions
+import scala.collection.mutable.HashSet
 
-class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI[_]]= None) {
+class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
 
   var capsuleViews= new DualHashBidiMap[String, ICapsuleView]
   var transitions= new DualHashBidiMap[String, TransitionUI]
-  var capsuleConnection= new HashMap[ICapsuleView, Collection[TransitionUI]]
+  var capsuleConnection= new HashMap[ICapsuleView, HashSet[TransitionUI]]
   var nodeID= 0
   var edgeID= 0
   var name: Option[String]= None
   
-  def setStartingCapsule(stCapsule: CapsuleViewUI[_]) {
+  def setStartingCapsule(stCapsule: CapsuleViewUI) {
     if (startingCapsule.isDefined)
       startingCapsule.get.defineStartingCapsule(false)
     startingCapsule= Some(stCapsule)
@@ -38,27 +39,27 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI[_]]= None) {
   }
   
   def removeCapsuleView(nodeID: String)= {
-    capsuleConnection(capsuleViews(nodeID)).foreach(transitions.removeValue(_))
+    capsuleConnection(capsuleViews.get(nodeID)).foreach(transitions.removeValue(_))
     capsuleViews.remove(nodeID)
   }
   
-  def getCapsuleViewID(cv: ICapsuleView)= capsuleViews.getKey(cv)
+  def capsuleViewID(cv: ICapsuleView)= capsuleViews.getKey(cv)
   
   def getTransitions= transitions.values 
   
-  def getTransition(edgeID: String)= transitions(edgeID)
+  def getTransition(edgeID: String)= transitions.get(edgeID)
   
   def removeTransition(edge: String)= transitions.remove(edge)
   
-  def registerTransition(transition: TransitionUI)= {
+  def registerTransition(transition: TransitionUI): Unit= {
     edgeID+= 1
     registerTransition(getEdgeID,transition)
   }
   
-  def registerTransition(edgeID: String,transition: TransitionUI)= {
+  def registerTransition(edgeID: String,transition: TransitionUI): Unit= {
     transitions.put(edgeID, transition)
-    capsuleConnection.get(transition.source).add(transition)
-    capsuleConnection.get(transition.target.getCapsuleView).add(transition)
+    capsuleConnection(transition.source)+= transition
+    capsuleConnection(transition.target.capsuleView)+= transition
   }
 }
 

@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-nodes</artifactId>
-            <version>RELEASE70-BETA</version>
+            <version>RELEASE70-BETA2</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>

@@ -10,7 +10,7 @@ import org.netbeans.api.visual.widget.Scene
 import org.openmole.ui.ide.commons.ApplicationCustomize
 import org.openmole.ui.ide.workflow.implementation.CapsuleViewUI
 
-class OSlotWidget(scene: Scene, capsule: CapsuleViewUI[_]) extends SlotWidget(scene, capsule){
+class OSlotWidget(scene: Scene,val capsule: CapsuleViewUI) extends SlotWidget(scene, capsule){
   setImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT)
   setDetailedView(ApplicationCustomize.TASK_CONTAINER_WIDTH)
   

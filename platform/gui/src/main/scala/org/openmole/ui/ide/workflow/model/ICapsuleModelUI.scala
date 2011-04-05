@@ -5,17 +5,14 @@
 
 package org.openmole.ui.ide.workflow.model
 
-import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.task.IGenericTask
-
-trait ICapsuleModelUI[T<: IGenericCapsule] extends IObjectModelUI[T] {
+trait ICapsuleModelUI {
   def startingCapsule: Boolean
   
   def containsTask: Boolean
 
-  def taskModel: IGenericTaskModelUI[IGenericTask]
+  def taskModel: Option[IGenericTaskModelUI]
   
-  def setTaskModel(taskModel: IGenericTaskModelUI[IGenericTask])
+  def setTaskModel(taskModel: IGenericTaskModelUI)
   
   def defineStartingCapsule(on: Boolean)
   

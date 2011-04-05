@@ -6,9 +6,9 @@
 package org.openmole.ui.ide.workflow.model
 
 trait IEntityUI {
-  def entityType: Class[_]
+  def entityType: Class[_]= entityType
   
-  def name: String
+  def name: String= name
 }
 
 //public interface IEntityUI {

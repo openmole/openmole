@@ -26,6 +26,8 @@ class MyWidget(scene: MoleScene,objectView: IObjectViewUI,var title: Option[Stri
   
   //def this(scene: MoleScene, w: MyWidget,title: String)= this(scene,w.objectView,Some(title))
   
+  def widgetWidth= widgetArea.width
+  
   def setWidthHint= {
     if (MoleScenesManager.detailedView) {
       taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH
