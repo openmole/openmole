@@ -24,6 +24,8 @@ class GenericTaskModelUI(taskUI: TaskUI) extends IGenericTaskModelUI {
   def addPrototypeIn(p: PrototypeUI)= prototypesIn+= p
   
   def addPrototypeOut(p: PrototypeUI)= prototypesOut+= p
+  
+  def getType= taskUI.entityType
 }
 //
 //public abstract class GenericTaskModelUI<T extends IGenericTask> extends ObjectModelUI implements IGenericTaskModelUI {

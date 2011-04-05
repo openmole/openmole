@@ -14,7 +14,7 @@ public final class OpenXMLAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            GUISerializer.getInstance().unserialize("/tmp/mole.xml");
+            GUISerializer.unserialize("/tmp/mole.xml");
         } catch (Throwable ex) {
             MoleExceptionManagement.showException(ex);
         } finally {

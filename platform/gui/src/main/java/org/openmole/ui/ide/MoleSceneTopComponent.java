@@ -25,14 +25,14 @@ import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.control.TaskSettingsManager;
 import org.openmole.ui.ide.dialog.PrototypeManager;
 import org.openmole.ui.ide.dialog.SamplingManager;
 import org.openmole.ui.ide.dialog.TaskManager;
 import org.openmole.ui.ide.palette.PaletteSupport;
+import org.openmole.ui.ide.control.MoleScenesManager;
 import org.openmole.ui.ide.workflow.action.AddMoleSceneAction;
-import org.openmole.ui.ide.workflow.action.EnableTaskDetailedView;
+import org.openmole.ui.ide.workflow.action.EnableTaskDetailedViewAction;
 import org.openmole.ui.ide.workflow.action.ManageEntityAction;
 import org.openmole.ui.ide.workflow.action.RemoveAllMoleSceneAction;
 import org.openmole.ui.ide.workflow.action.RemoveMoleSceneAction;
@@ -67,7 +67,7 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         MoleScenesManager.setTabbedPane(tabbedPane);
         TaskSettingsManager.setTabbedPane(tabbedPane);
-        MoleScenesManager.display(MoleScenesManager.getInstance().addMoleScene());
+        MoleScenesManager.display(MoleScenesManager.addMoleScene());
 
         palette = PaletteSupport.createPalette();
 
@@ -75,7 +75,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         ic.add(palette);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
-        detailedViewButton.addActionListener(new EnableTaskDetailedView());
+        detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
         JButton newPrototypeButton = new JButton("Prototypes");
         newPrototypeButton.addActionListener(new ManageEntityAction(new PrototypeManager()));

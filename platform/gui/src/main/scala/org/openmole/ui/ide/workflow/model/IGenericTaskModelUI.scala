@@ -12,6 +12,8 @@ import scala.collection.mutable.HashSet
 trait IGenericTaskModelUI {
   def name: String
   
+  def getType: Class[_]
+  
   def addPrototype(p: PrototypeUI,ioType: IOType)
   
   def prototypesIn: HashSet[PrototypeUI]

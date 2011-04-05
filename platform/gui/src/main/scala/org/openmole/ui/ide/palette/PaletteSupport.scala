@@ -39,6 +39,7 @@ object PaletteSupport {
     paletteRoot.setName("Palette Root")
     Preferences.clearProperties
     Preferences.clearModels
+    controller
   }
   
   class MyActions extends PaletteActions{
