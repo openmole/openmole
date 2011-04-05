@@ -35,7 +35,7 @@ class CSVProfiler(moleExecution:  WeakReference[IMoleExecution], writer: CSVWrit
   def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution), new CSVWriter(new OutputStreamWriter(System.out)))
 
   override def stateChanged(moleJob: IMoleJob) = synchronized {
-    if(moleJob.state == COMPLETED) {
+    if(moleJob.state.isFinal) {
       writer.writeNext(toColumns(moleJob))
       writer.flush
     }

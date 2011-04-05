@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.transition
 
+import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
@@ -83,6 +84,8 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
   }
 
   def subMoleFinished(subMole: ISubMoleExecution, job: IMoleJob, ticket: ITicket, moleExecution: IMoleExecution) = {
+    Logger.getLogger(classOf[AggregationTransition].getName).fine("Aggregation transition triggered")
+    
     def registry =  moleExecution.localCommunication.aggregationTransitionRegistry
 
     val newTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))

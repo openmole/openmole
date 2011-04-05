@@ -26,25 +26,19 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
   val registries = new WeakHashMap[ITicket, IRegistry[K, V]]
 
   def registry(ticket: ITicket): IRegistry[K, V] = synchronized {
-    registries.getOrElse(ticket, {val ret = new Registry[K, V]
-                                  registries(ticket) = ret
-                                  ret}
-    )        
+    registries.getOrElseUpate(ticket, new Registry[K, V]) 
   }
 
-  override def consult(key: K, ticket: ITicket): Option[V] = {
-    registry(ticket)(key)
-  }
+  override def consult(key: K, ticket: ITicket): Option[V] = registry(ticket)(key)
 
-  override def isRegistred(key: K, ticket: ITicket): Boolean = {
-    registry(ticket).isRegistred(key)
-  }
+  override def isRegistred(key: K, ticket: ITicket): Boolean = registry(ticket).isRegistred(key)
 
-  override def register(key: K, ticket: ITicket, value: V) = {
-    registry(ticket) += (key, value)
-  }
+  override def register(key: K, ticket: ITicket, value: V) = registry(ticket) += (key, value)
 
-  override def remove(key: K, ticket: ITicket): Option[V] = {
-    registry(ticket).remove(key)
+  override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
+    registry(ticket).remove(key) match {
+      case Some(v) => if(v.isEmpty) registries -= ticket
+      case None =>
+    }
   }
 }

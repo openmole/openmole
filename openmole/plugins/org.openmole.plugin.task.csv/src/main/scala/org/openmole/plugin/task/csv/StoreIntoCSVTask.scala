@@ -105,7 +105,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
         //header
         val columnIts = valuesList.map{_.iterator}
 
-        writer.writeNext( columns.map(_._2).toArray)          
+        writer.writeNext(columns.map(_._2).toArray)          
         val listSize = valuesList.map{_.size}.min
             
         //body

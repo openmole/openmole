@@ -38,7 +38,7 @@ class CSVFileProfiler(moleExecution:  WeakReference[IMoleExecution], file: File)
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
   
   override def stateChanged(moleJob: IMoleJob) =  {
-    if(moleJob.state ==  COMPLETED) {
+    if(moleJob.state.isFinal) {
       writer.writeNext(toColumns(moleJob))
       writer.flush
     }
