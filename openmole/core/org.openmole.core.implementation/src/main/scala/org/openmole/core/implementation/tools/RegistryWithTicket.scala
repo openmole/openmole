@@ -23,10 +23,10 @@ import scala.collection.mutable.WeakHashMap
 
 class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
 
-  val registries = new WeakHashMap[ITicket, IRegistry[K, V]]
+  val registries = new WeakHashMap[ITicket, Registry[K, V]]
 
-  def registry(ticket: ITicket): IRegistry[K, V] = synchronized {
-    registries.getOrElseUpate(ticket, new Registry[K, V]) 
+  def registry(ticket: ITicket): Registry[K, V] = synchronized {
+    registries.getOrElseUpdate(ticket, new Registry[K, V]) 
   }
 
   override def consult(key: K, ticket: ITicket): Option[V] = registry(ticket)(key)
@@ -36,9 +36,8 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
   override def register(key: K, ticket: ITicket, value: V) = registry(ticket) += (key, value)
 
   override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
-    registry(ticket).remove(key) match {
-      case Some(v) => if(v.isEmpty) registries -= ticket
-      case None =>
-    }
+    var ret = registry(ticket).remove(key)
+    if(registries(ticket).isEmpty) registries -= ticket
+    ret
   }
 }
