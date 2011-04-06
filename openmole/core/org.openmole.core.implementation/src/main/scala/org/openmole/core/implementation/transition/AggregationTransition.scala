@@ -84,8 +84,6 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
   }
 
   def subMoleFinished(subMole: ISubMoleExecution, job: IMoleJob, ticket: ITicket, moleExecution: IMoleExecution) = {
-    Logger.getLogger(classOf[AggregationTransition].getName).fine("Aggregation transition triggered")
-    
     def registry =  moleExecution.localCommunication.aggregationTransitionRegistry
 
     val newTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
@@ -93,7 +91,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))
     val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
     val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-    
+
     //Variable have are clonned in other transitions if necessary
     submitNextJobsIfReady(result, newTicket, moleExecution, subMoleParent)
   }

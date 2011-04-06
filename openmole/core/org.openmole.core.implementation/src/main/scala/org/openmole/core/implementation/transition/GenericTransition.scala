@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.transition
 
+import java.util.logging.Logger
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.capsule.IGenericCapsule
@@ -44,11 +45,11 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
   protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
     val registry = moleExecution.localCommunication.transitionRegistry
     registry.register(this, ticket, context)
- 
+
     if (nextTaskReady(ticket, moleExecution)) {
-      val combinaison = end.transitions.flatMap(registry.remove(_, ticket).get).map{_.toVariable} ++ 
-                        end.capsule.inputDataChannels.flatMap{_.consums(ticket, moleExecution)}
-      
+      val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
+                        end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
+                        
       val newTicket = 
         if (end.capsule.intputSlots.size <= 1) ticket 
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
@@ -57,6 +58,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
       
       val toArray = toArrayManifests(end.capsule)      
       val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
+ 
       moleExecution.submit(end.capsule, newContext, newTicket, subMole)
     }
   }
@@ -65,7 +67,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
     if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
       for(name <- filtered) context -= name
-      performImpl(context, ticket, toClone, scheduler, subMole);
+      performImpl(context, ticket, toClone, scheduler, subMole)
     }
   }
 

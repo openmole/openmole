@@ -41,7 +41,7 @@ object LocalExecutionEnvironment extends Environment {
     }
   }
   
-  val DefaultNumberOfThreads = new ConfigurationLocation(LocalExecutionEnvironment.getClass.getSimpleName, "ThreadNumber")
+  val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
   Workspace += (DefaultNumberOfThreads, Integer.toString(1))
     
