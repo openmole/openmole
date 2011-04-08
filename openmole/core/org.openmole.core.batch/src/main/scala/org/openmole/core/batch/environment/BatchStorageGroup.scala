@@ -48,7 +48,7 @@ class BatchStorageGroup(environment: BatchEnvironment) {
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum
-      val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authenticationKey)
+      val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)
 
       var ret: (BatchStorage, AccessToken) = null
       do {

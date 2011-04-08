@@ -22,12 +22,11 @@ import com.db4o.ta.Activatable
 import java.io.File
 import org.openmole.misc.tools.service.IHash
 import org.openmole.core.batch.control.BatchStorageDescription
-import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 
-class Replica( _source: String, _storageDescription: String, _hash: IHash, _authenticationKey: BatchAuthenticationKey, _destination: String) extends Activatable {
+class Replica( _source: String, _storageDescription: String, _hash: IHash, _authenticationKey: String, _destination: String) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -39,21 +38,21 @@ class Replica( _source: String, _storageDescription: String, _hash: IHash, _auth
   
   def destinationURIFile: IURIFile = new GZURIFile(new URIFile(destination))
 
-  def source: String = {
+  def source = {
     activate(ActivationPurpose.READ)
     _source
   }
   
   def sourceFile = new File(source)
 
-  def storageDescriptionString: String = {
+  def storageDescriptionString = {
     activate(ActivationPurpose.READ)
     _storageDescription
   }
   
-  def storageDescription: BatchStorageDescription = new BatchStorageDescription(storageDescriptionString)
+  def storageDescription = new BatchStorageDescription(storageDescriptionString)
 
-  def authenticationKey: BatchAuthenticationKey = {
+  def authenticationKey = {
     activate(ActivationPurpose.READ)
     _authenticationKey
   }
@@ -69,12 +68,12 @@ class Replica( _source: String, _storageDescription: String, _hash: IHash, _auth
     }
   }
 
-  def hashOfSrcMatch(hash: IHash): Boolean = {
-    if (this.hash == null || hash == null) return false
-    this.hash.equals(hash)
+  def hashOfSrcMatch(hash: IHash) = {
+    if (this.hash == null || hash == null) false
+    else this.hash.equals(hash)
   }
 
-  def hash: IHash = {
+  def hash = {
     activate(ActivationPurpose.READ)
     _hash
   }
@@ -89,9 +88,7 @@ class Replica( _source: String, _storageDescription: String, _hash: IHash, _auth
     else tuple.equals(other.asInstanceOf[Replica].tuple)
   }
 
-  
-  override def toString: String = {
+  override def toString = 
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "]";
-  }
 
 }

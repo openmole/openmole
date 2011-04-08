@@ -21,14 +21,15 @@ import org.openmole.misc.tools.service.LockRepository
 import scala.collection.mutable.HashMap
 
 object AuthenticationRegistry {
-  @transient private lazy val lockRepository = new LockRepository[BatchAuthenticationKey]
-  private val registry = new HashMap[BatchAuthenticationKey, BatchAuthentication]
+  @transient private lazy val lockRepository = new LockRepository[String]
+  private val registry = new HashMap[String, BatchAuthentication]
     
-  def isRegistred(authenticationKey: BatchAuthenticationKey): Boolean = {
+  def isRegistred(authenticationKey: String): Boolean = {
     registry.contains(authenticationKey)
   }
 
-  def initAndRegisterIfNotAllreadyIs(key: BatchAuthenticationKey, authentication: BatchAuthentication) = synchronized {
+  def initAndRegisterIfNotAllreadyIs(authentication: BatchAuthentication) = synchronized {
+    val key = authentication.key
     lockRepository.lock(key)
     try {
       if(!isRegistred(key)) {
@@ -40,7 +41,7 @@ object AuthenticationRegistry {
     }
   }
                                                                                     
-  def registred (key: BatchAuthenticationKey): Option[BatchAuthentication] = synchronized {
+  def registred (key: String): Option[BatchAuthentication] = synchronized {
     registry.get(key)
   }
 

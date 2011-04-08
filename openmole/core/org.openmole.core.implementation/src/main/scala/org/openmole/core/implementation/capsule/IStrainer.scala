@@ -17,9 +17,8 @@
 
 package org.openmole.core.implementation.capsule
 
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.capsule.IGenericCapsule
 
-class StrainerCapsule(task: Option[ITask]) extends Capsule(task) {
-  def this(task: ITask) = this(Some(task))
-  def this() = this(None)
+trait IStrainer extends IGenericCapsule {
+
 }

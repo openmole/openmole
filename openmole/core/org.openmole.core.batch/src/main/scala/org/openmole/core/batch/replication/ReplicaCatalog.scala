@@ -45,8 +45,6 @@ import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.BatchStorageDescription
-import org.openmole.core.batch.environment.BatchAuthenticationKey
-import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.environment.BatchStorage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
@@ -120,14 +118,14 @@ object ReplicaCatalog {
   
   Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
-  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Option[Replica] = {
+  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
 
-  private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: BatchAuthenticationKey): Option[Replica] = {
+  private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null))
 
@@ -140,16 +138,16 @@ object ReplicaCatalog {
   }
     
 
-  def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): ObjectSet[Replica] = {
+  def getReplica(src: File, storageDescription: BatchStorageDescription, authenticationKey: String): ObjectSet[Replica] = {
     lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null)))
   }
   
 
-  def inCatalog(storageDescription: BatchStorageDescription, authenticationKey: BatchAuthenticationKey): Set[String] = {
+  def inCatalog(storageDescription: BatchStorageDescription, authenticationKey: String): Set[String] = {
     lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null)).map{_.destination}.toSet)
   }
   
-  def inCatalog(src: Iterable[File], authenticationKey: BatchAuthenticationKey): Map[File, Set[BatchStorageDescription]] = {
+  def inCatalog(src: Iterable[File], authenticationKey: String): Map[File, Set[BatchStorageDescription]] = {
     //transactionalOp( t => {
     if(src.isEmpty) return Map.empty
     lockRead({
@@ -174,13 +172,13 @@ object ReplicaCatalog {
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
     //LOGGER.log(Level.FINE, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
-    val key = new ReplicaLockKey(hash, storage.description, storage.environment.authenticationKey) 
+    val key = new ReplicaLockKey(hash, storage.description, storage.environment.authentication.key) 
     
     locks.lock(key)
 
     try {
       val storageDescription = storage.description
-      val authenticationKey = storage.environment.authenticationKey
+      val authenticationKey = storage.environment.authentication.key
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None =>
@@ -201,7 +199,7 @@ object ReplicaCatalog {
 
               URIFile.copy(src, newFile, token)
 
-              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, storage.environment.authenticationKey, newFile.location)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, authenticationKey, newFile.location)
               insert(newReplica)
               newReplica 
           }

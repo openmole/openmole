@@ -181,7 +181,6 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   }
 
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
-  @transient lazy val authenticationKey = new GliteAuthenticationKey(voName, vomsURL)
  
   private def getBDII: BDII = new BDII(bdii)
  

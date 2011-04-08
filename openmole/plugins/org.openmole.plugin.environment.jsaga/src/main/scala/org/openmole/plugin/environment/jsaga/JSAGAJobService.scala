@@ -33,7 +33,6 @@ import org.ogf.saga.job.JobService
 import org.ogf.saga.url.URLFactory
 import org.openmole.core.batch.control.BatchJobServiceDescription
 import org.openmole.core.batch.environment.BatchAuthentication
-import org.openmole.core.batch.environment.BatchAuthenticationKey
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.BatchJobService

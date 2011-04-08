@@ -120,6 +120,8 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   @transient 
   private var _proxyExpiresTime = Long.MaxValue
   
+  override def key = "glite:" + (voName, vomsURL).toString
+  
   override def expires = _proxyExpiresTime
 
   //FIXME lazy val in scala 2.9.0 

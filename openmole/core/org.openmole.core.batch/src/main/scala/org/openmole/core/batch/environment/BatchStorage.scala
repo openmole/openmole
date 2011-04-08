@@ -79,7 +79,7 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
       
       val service = ExecutorService.executorService(ExecutorType.REMOVE)
-      val inCatalog = ReplicaCatalog.inCatalog(description, environment.authenticationKey)
+      val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
       for (dir <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, dir)
         if(!inCatalog.contains(child.location)) {

@@ -23,4 +23,6 @@ trait BatchAuthentication {
   def initialize
   
   def expires: Long = Long.MaxValue
+  
+  def key: String
 }

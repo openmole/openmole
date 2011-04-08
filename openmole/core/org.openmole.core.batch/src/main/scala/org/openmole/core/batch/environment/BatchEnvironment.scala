@@ -60,7 +60,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   val jobRegistry = new ExecutionJobRegistry[BatchExecutionJob]
   
-  AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authenticationKey, authentication)
+  AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
   
   @transient private lazy val _storagesLock = new ReentrantLock
   @transient private lazy val _jobServicesLock = new ReentrantLock
@@ -161,7 +161,6 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   def allStorages: Iterable[BatchStorage]
   def allJobServices: Iterable[BatchJobService]
   
-  def authenticationKey: BatchAuthenticationKey
   def authentication: BatchAuthentication
   
   def selectAJobService: (BatchJobService, AccessToken) = jobServices.selectAService
