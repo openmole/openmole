@@ -43,7 +43,6 @@ class RecursiveListFilesAndNamesDomain(dir: File, filter: FileFilter) extends IF
   
   def this(dir: File) = this(dir, false)
 
-  override def computeValues(context: IContext): Iterable[(File, String)] = {
-    listRecursive(dir, filter).map{ f: File => (f, f.getAbsolutePath.substring(dir.getAbsolutePath.size + 1))}
-  }
+  override def computeValues(context: IContext): Iterable[(File, String)] =
+    dir.listRecursive(filter).map{f => (f, f.getAbsolutePath.substring(dir.getAbsolutePath.size + 1))}
 }

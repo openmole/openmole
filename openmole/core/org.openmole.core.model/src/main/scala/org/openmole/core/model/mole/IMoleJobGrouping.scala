@@ -20,6 +20,6 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.capsule.IGenericCapsule
 
 trait IMoleJobGrouping {
-    def apply(capsule: IGenericCapsule): Option[IGroupingStrategy]
-    def set(capsule: IGenericCapsule, strategy: IGroupingStrategy)
+  def apply(capsule: IGenericCapsule): Option[IGroupingStrategy]
+  // def set(capsule: IGenericCapsule, strategy: IGroupingStrategy)
 }

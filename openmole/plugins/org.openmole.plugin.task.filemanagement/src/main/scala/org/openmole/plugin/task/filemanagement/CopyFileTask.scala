@@ -39,19 +39,19 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[Array[File]],IPrototype[Array[String]],String)]()
 
   override def process(context: IContext, progress: IProgress)  {
-    toCopy foreach( p => {
+    toCopy.foreach(p => {
         val from = context.value(p._1).get
         val to = new File(expandData(context, p._2))
           
-        Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+        //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
           
         to.getParentFile.mkdirs
-        copy(from, to)
+        from.copy(to)
 
         if(remove) from.recursiveDelete
       })
 
-    toCopyWithNameInVariable foreach( p => {
+    toCopyWithNameInVariable foreach(p => {
         val from = context.value(p._1).get
         val name = context.value(p._2).get
           
@@ -60,14 +60,14 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
        
         val to = new File(dir, name)
           
-        Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
+        //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
              
-        copy(from, to)
+        from.copy(to)
 
         if(remove) from.recursiveDelete
       })
 
-    listToCopyWithNameInVariable foreach ( cpList => {
+    listToCopyWithNameInVariable foreach (cpList => {
         val files = context.value(cpList._1).get
         val names = context.value(cpList._2).get
         val urlDir = cpList._3
@@ -86,12 +86,12 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
               
             //Logger.getLogger(classOf[CopyFileTask].getName).fine("From " + from.getAbsolutePath + " to " + to.getAbsolutePath)
               
-            copy(from, to)              
+            from.copy(to)              
             if(remove) from.recursiveDelete
           }
 
         }
-      } )
+      })
   }
   
   def save(prot:Any with IPrototype[File], url: String) {
@@ -110,6 +110,5 @@ class CopyFileTask(name: String, remove: Boolean = false) extends Task(name) {
     addInput(fileProt)
     addInput(nameProt)
   }
-
 
 }

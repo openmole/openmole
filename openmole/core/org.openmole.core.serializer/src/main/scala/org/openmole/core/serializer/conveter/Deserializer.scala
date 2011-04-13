@@ -15,42 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
-
-
+package org.openmole.core.serializer.converter
 
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.SingleValueConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import java.io.OutputStream
-import scala.collection.mutable.HashSet
+import java.io.InputStream
 
-class SerializerWithPluginClassListing {
+class Deserializer {
+  private val xstream = new XStream
+  protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
 
-    private val xstream = new XStream
-    var classes: HashSet[Class[_]] = null
-
-    registerConverter(new PluginConverter(this, new ReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider())));
- 
-    protected def registerConverter(converter: Converter) = {
-        xstream.registerConverter(converter)
-    }
+  def registerConverter(converter: Converter) =  xstream.registerConverter(converter)
+  def registerConverter(converter: SingleValueConverter) =  xstream.registerConverter(converter)
     
-    protected def registerConverter(converter: SingleValueConverter) =  {
-        xstream.registerConverter(converter)
-    }
-    
-    def classUsed(c: Class[_]) {
-        classes.add(c)
-    }
-
-    def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
-        classes = new HashSet[Class[_]]
-        xstream.toXML(obj, outputStream);
-    }
-
-    def clean: Unit = {
-        classes = null
-    }
+  def fromXMLInjectFiles[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
 }

@@ -15,21 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import com.thoughtworks.xstream.XStreamException
-import com.thoughtworks.xstream.converters.extended.FileConverter
-import java.io.File
-
-class FilePathHashNotifier(serializer: SerializerWithPathHashInjectionAndPluginListing) extends FileConverter {
-
-    override def toString(obj: Object): String = {
-        val file = obj.asInstanceOf[File]
-        try {
-            return serializer.fileUsed(file).toString
-        } catch {
-          case (ex: Exception) => throw new XStreamException(ex)
-        }
-
-    }
+object SerializerWithFileAndPluginListingFactory extends Factory[SerializerWithFileAndPluginListing] {
+   def makeObject = new SerializerWithFileAndPluginListing
 }

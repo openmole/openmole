@@ -38,7 +38,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 
 import scala.io.Source._
-import org.openmole.core.serializer.Serializer
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.fileservice.internal.FileService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.pluginmanager.PluginManager
@@ -73,7 +73,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
         val executionMessageFile = Workspace.newFile("job", ".xml")
         try {
-          Serializer.serialize(executionMessage, executionMessageFile)
+          SerializerService.serialize(executionMessage, executionMessageFile)
           URIFile.copy(new URIFile(executionMessageFile), inputFile, token)
         } finally executionMessageFile.delete
             
@@ -92,10 +92,10 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         if(!moleJob.isFinished) {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
-            val serializationResult = Serializer.serializeGetPluginClassAndFiles(moleJob, moleJobFile)
+            val serializationResult = SerializerService.serializeGetPluginClassAndFiles(moleJob, moleJobFile)
             
-            files ++= serializationResult._1
-            classes ++= serializationResult._2
+            files ++= serializationResult.files
+            classes ++= serializationResult.classes
           
             tos.addFile(moleJobFile, UUID.randomUUID.toString)
           } finally moleJobFile.delete
@@ -140,7 +140,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
     try {
-      Serializer.serialize(communicationStorage.environment.authentication, authenticationFile)
+      SerializerService.serialize(communicationStorage.environment.authentication, authenticationFile)
       URIFile.copy(authenticationFile, authenticationURIFile, token)
     } finally authenticationFile.delete
         

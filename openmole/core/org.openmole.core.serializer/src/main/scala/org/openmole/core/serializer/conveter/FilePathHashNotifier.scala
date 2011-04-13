@@ -15,27 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
+import com.thoughtworks.xstream.XStreamException
+import com.thoughtworks.xstream.converters.extended.FileConverter
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
+import org.openmole.core.serializer.structure.FileInfo
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
-import org.openmole.misc.pluginmanager.PluginManager
+import java.io.File
 
-class PluginConverter(serializer: SerializerWithPluginClassListing, reflectionConverter: ReflectionConverter) extends Converter {
+class FilePathHashNotifier(serializer: SerializerWithPathHashInjection, reflectionConverter: ReflectionConverter)  extends Converter {
 
-    override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-        serializer.classUsed(o.getClass)
-        reflectionConverter.marshal(o, writer, mc)
-    }
+  
+  override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
+    val file = o.asInstanceOf[File]
+    reflectionConverter.marshal(serializer.fileUsed(file), writer, mc)
+  }
+  
+  override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
+    throw new UnsupportedOperationException("Bug: Should never be called.")
+  }
 
-    override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
-        throw new UnsupportedOperationException("Bug: Should never be called.")
-    }
-
-    override def canConvert(c: Class[_]): Boolean = PluginManager.isClassProvidedByAPlugin(c)
-   
+  override def canConvert(c: Class[_]): Boolean = classOf[File].isAssignableFrom(c)
+  
 }

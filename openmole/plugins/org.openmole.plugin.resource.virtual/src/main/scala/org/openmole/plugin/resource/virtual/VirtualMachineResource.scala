@@ -32,7 +32,7 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.ShutdownHookProcessDestroyer
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Network.IConnectable
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.tools.io.StringBuilderOutputStream
@@ -64,12 +64,11 @@ class VirtualMachineResource(val system: File, val user: String, val password: S
   
   def this(system: String, user: String, password: String) = this(new File(system), user, password)
     
-  
   def launchAVirtualMachine: IVirtualMachine = {
     if (!system.isFile) throw new UserBadDataError("Image " + system.getAbsolutePath() + " doesn't exist or is not a file.");
         
     val vmImage = Workspace.newFile
-    FileUtil.copy(system, vmImage)
+    system.copy(vmImage)
  
     class VirtualMachineConnector extends IConnectable {
 
@@ -186,7 +185,7 @@ class VirtualMachineResource(val system: File, val user: String, val password: S
       try {
         val is = this.getClass.getClassLoader.getResource(qemuJarPath + f).openStream
         try {
-          FileUtil.copy(is, outputStream)
+          is.copy(outputStream)
           qemu.setExecutable(true)
         } finally is.close
       } finally {
@@ -198,10 +197,9 @@ class VirtualMachineResource(val system: File, val user: String, val password: S
       val outputStream = new BufferedOutputStream(new FileOutputStream(dest))
 
       try {
-        FileUtil.copy(this.getClass.getClassLoader.getResource(f).openStream, outputStream)
-      } finally {
-        outputStream.close
-      }
+        val is = this.getClass.getClassLoader.getResource(f).openStream
+        try is.copy(outputStream) finally is.close
+      } finally outputStream.close
     }
     qemuDir
   }

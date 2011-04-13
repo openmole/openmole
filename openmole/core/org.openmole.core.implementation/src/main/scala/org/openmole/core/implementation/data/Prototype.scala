@@ -30,12 +30,12 @@ object Prototype {
 
 class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] with Id {
 
-  def this(name: String, `type`: Class[T]) = this(name, `type`.toManifest)
+  def this(name: String, `type`: Class[T]) = this(name, `type`.equivalence.toManifest)
   
   override def isAssignableFrom(p: IPrototype[_]): Boolean = `type` <:< p.`type`
   
   override def accepts(obj: Any): Boolean = {
-    obj == null || `type` >:> manifest(obj.asInstanceOf[AnyRef].getClass) 
+    obj == null || `type` >:> manifest(clazzOf(obj))
   }
 
   override def id = (name, `type`)

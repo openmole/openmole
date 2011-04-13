@@ -15,25 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import org.apache.commons.pool.BasePoolableObjectFactory
-import org.apache.commons.pool.impl.SoftReferenceObjectPool
-
-trait Factory[T <: { def clean }]{
-   
-  val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-      override def makeObject: T = Factory.this.makeObject
-    })
-    
-  def makeObject: T
-    
-  def borrowObject: T = {
-    pool.borrowObject.asInstanceOf[T]
-  }
-    
-  def returnObject(serial: T) = {
-    serial.clean
-    pool.returnObject(serial)
-  }
+object DeserializerWithFileInjectionFromPathHashFactory extends Factory[DeserializerWithFileInjectionFromPathHash] {
+  def makeObject = new DeserializerWithFileInjectionFromPathHash
 }

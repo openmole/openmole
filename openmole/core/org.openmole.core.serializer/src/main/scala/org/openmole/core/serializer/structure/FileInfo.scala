@@ -15,8 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.structure
 
 import org.openmole.misc.tools.service.IHash
 
-class FileInfoHash(val fileHash: IHash, val filePathHash: IHash) extends (IHash, IHash)(fileHash, filePathHash)
+class FileInfo(val fileHash: IHash, val filePathHash: IHash, val isDir: Boolean) {
+  override def toString = "fileHash = " + fileHash + ", filePathHash = " + filePathHash + ", isDir=" + isDir
+}

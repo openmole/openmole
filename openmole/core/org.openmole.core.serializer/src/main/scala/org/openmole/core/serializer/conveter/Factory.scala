@@ -15,17 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import com.thoughtworks.xstream.XStreamException
-import com.thoughtworks.xstream.converters.extended.FileConverter
+import org.apache.commons.pool.BasePoolableObjectFactory
+import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
-class FilePathHashInjecter(deserializer: DeserializerWithFileInjectionFromPathHash) extends FileConverter {
-
-  override def fromString(str: String): Object = {
-    val hash = super.fromString(str).asInstanceOf[FileInfoHash]
-    val ret = deserializer.getMatchingFile(hash)
-    if(ret == null) throw new XStreamException("No matching file for " + hash.toString)
-    ret
+trait Factory[T <: { def clean }]{
+   
+  val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
+      override def makeObject: T = Factory.this.makeObject
+    })
+    
+  def makeObject: T
+    
+  def borrowObject: T = {
+    pool.borrowObject.asInstanceOf[T]
+  }
+    
+  def returnObject(serial: T) = {
+    serial.clean
+    pool.returnObject(serial)
   }
 }

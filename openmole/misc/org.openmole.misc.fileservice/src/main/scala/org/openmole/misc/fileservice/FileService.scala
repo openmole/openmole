@@ -22,7 +22,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.logging.Logger
 import org.openmole.misc.tools.cache.AssociativeCache
-import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.IHash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
@@ -58,7 +58,7 @@ object FileService {
     val hashWithLastModified = hashCache.cached(cacheLength, file.getAbsolutePath) match {
       case None =>
       case Some(hash) => 
-        if (hash.lastModified < FileUtil.lastModification(file)) {
+        if (hash.lastModified < file.lastModification) {
           Logger.getLogger(FileService.getClass.getName).fine("Invalidate cache " + file.getAbsolutePath)
           hashCache.invalidateCache(cacheLength, file.getAbsolutePath)
         }
@@ -78,7 +78,7 @@ object FileService {
           os.close
         }
 
-        new CachedArchiveForDir(ret, FileUtil.lastModification(file))
+        new CachedArchiveForDir(ret, file.lastModification)
       })
   }
 
@@ -86,7 +86,7 @@ object FileService {
     archiveCache.cached(cacheLenght, file.getAbsolutePath) match {
       case None =>
       case Some(cached) => 
-        if (cached.lastModified < FileUtil.lastModification(file)) {
+        if (cached.lastModified < file.lastModification) {
           archiveCache.invalidateCache(cacheLenght, file.getAbsolutePath)
         }
     }

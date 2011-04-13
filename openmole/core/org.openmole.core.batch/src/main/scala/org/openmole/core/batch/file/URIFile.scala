@@ -39,7 +39,7 @@ import org.ogf.saga.url.URL
 import org.ogf.saga.url.URLFactory
 import org.ogf.saga.namespace.Flags
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.tools.obj.Id
@@ -91,20 +91,14 @@ object URIFile {
     else withToken(srcDescrption, copy(src, dest, _, destToken))
   }
 
-  def copy(src: File, dest: IURIFile): Unit =  withToken(dest.storageDescription, copy(src, dest,_))
+  def copy(src: File, dest: IURIFile): Unit = withToken(dest.storageDescription, copy(src, dest,_))
 
   def copy(src: File, dest: IURIFile, token: AccessToken): Unit =  {
     val is = new FileInputStream(src)
     try {
       val os = dest.openOutputStream(token)
-      try {
-        withFailureControl(dest.storageDescription, FileUtil.copy(is, os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
-      } finally {
-        os.close
-      }
-    } finally {
-      is.close
-    }
+      try withFailureControl(dest.storageDescription, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout))) finally os.close
+    } finally is.close
   }
 
   def copy(src: IURIFile, dest: IURIFile): Unit = {
@@ -130,15 +124,11 @@ object URIFile {
 
       try {
         withFailureControl(srcDesc,
-          if(!same) withFailureControl(destDesc,FileUtil.copy(is, os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
-          else FileUtil.copy(is, os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
+          if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
+          else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
         )              
-      } finally {
-        os.close
-      }
-    } finally {
-      is.close
-    }
+      } finally os.close
+    } finally is.close
   }
 
   private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);

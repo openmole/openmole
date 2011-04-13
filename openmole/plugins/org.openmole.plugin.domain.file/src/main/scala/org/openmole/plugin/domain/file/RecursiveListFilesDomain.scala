@@ -27,12 +27,10 @@ class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IFiniteDom
 
   def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
     this(dir, new FileFilter {       
-        override def accept(file: File): Boolean = {
-          file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
-        }    
+        override def accept(file: File) = file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
       })
   }
     
-  override def computeValues(context: IContext): Iterable[File] = listRecursive(dir, filter)
+  override def computeValues(context: IContext) = dir.listRecursive(filter)
   
 }

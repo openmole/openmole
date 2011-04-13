@@ -29,6 +29,11 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import scala.collection.mutable.ListBuffer
+import com.ice.tar.TarInputStream
+import com.ice.tar.TarOutputStream
+import TarArchiver._
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 object FileUtil {
 
@@ -38,217 +43,200 @@ object FileUtil {
     }
   }
   
-  implicit def File2FileDecorator(file: File) = new FileUtilDecorator(file)
-  implicit def InputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
-
-  
   val DefaultBufferSize = 8 * 1024
 
-  def lastModification(file: File): Long = {
+  def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
-    var lastModification = file.lastModified
+  implicit def File2FileDecorator(file: File) = new FileDecorator(file)
+  implicit def InputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
 
-    if (file.isDirectory) {
+  class FileDecorator(file: File) {
+    
+    def lastModification = {
+      var lastModification = file.lastModified
+
+      if (file.isDirectory) {
+        val toProceed = new ListBuffer[File]
+        toProceed += file
+
+        while (!toProceed.isEmpty) {
+          val f = toProceed.remove(0)
+
+          if (f.lastModified > lastModification) lastModification = f.lastModified
+      
+          if (f.isDirectory) {
+            for (child <- f.listFiles) {
+              toProceed += child
+            }
+          }
+        }
+      }
+      lastModification
+    }
+    
+    def listRecursive(filter: FileFilter) = {
+      val ret = new ListBuffer[File]
+      applyRecursive((f: File) => if(filter.accept(f)) ret += f)
+      ret
+    }
+    
+    def applyRecursive(operation: File => Unit): Unit = 
+      applyRecursive(operation, Set.empty)
+
+    def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = {
       val toProceed = new ListBuffer[File]
       toProceed += file
 
       while (!toProceed.isEmpty) {
         val f = toProceed.remove(0)
-
-        if (f.lastModified > lastModification) lastModification = f.lastModified
-      
-        if (f.isDirectory) {
-          for (child <- f.listFiles) {
-            toProceed += child
+        if (!stopPath.contains(f)) {
+          operation(f)
+          if (f.isDirectory) {
+            for (child <- f.listFiles)  toProceed += child
           }
         }
       }
     }
-
-    lastModification
-  }
-
-  
-  def listRecursive(file: File, filter: FileFilter): Iterable[File] = {
-    val ret = new ListBuffer[File]
-    applyRecursive(file, { f: File => if(filter.accept(f)) ret += f})
-    ret
-  }
-  
-  def applyRecursive(file: File, operation: File => Unit): Unit = {
-    applyRecursive(file, operation, Set.empty)
-  }
-
-  def applyRecursive(file: File, operation: File => Unit, stopPath: Set[File]): Unit = {
-    val toProceed = new ListBuffer[File]
-    toProceed += file
-
-    while (!toProceed.isEmpty) {
-      val f = toProceed.remove(0)
-      if (!stopPath.contains(f)) {
-        operation(f)
-        if (f.isDirectory) {
-          for (child <- f.listFiles) {
-            toProceed += child
-          }
-        }
-      }
-    }
-  }
-
-  def dirContainsNoFileRecursive(dir: File): Boolean = {
-    val toProceed = new ListBuffer[File]
-    toProceed += dir
-
-    while (!toProceed.isEmpty) {
-      val f = toProceed.remove(0)
-      for (sub <- f.listFiles) {
-        if (sub.isFile) return false
-        else if (sub.isDirectory) toProceed += sub
-      }
-    }
-    true
-  }
-
-
-  
-  @throws(classOf[IOException])
-  def copy(fromF: File, toF: File) = {
-    val toCopy = new ListBuffer[(File, File)]
-    toCopy += ((fromF, toF))
-
-    while (!toCopy.isEmpty) {
-      val cur = toCopy.remove(0)
-      val curFrom = cur._1
-      val curTo = cur._2
-      if (curFrom.isDirectory) {
-
-        curTo.mkdir
-
-        for (child <- curFrom.listFiles) {
-          val to = new File(curTo, child.getName)
-          toCopy += ((child, to))
-        }
-      } else {
-        copyFile(curFrom, curTo)
-      }
-    }
-
-  }
-  
-  @throws(classOf[IOException])
-  def copyFile(fromF: File, toF: File): Unit = {
-    val from = new FileInputStream(fromF).getChannel
-
-    try {
-      val to = new FileOutputStream(toF).getChannel
-      try {
-        copy(from, to)
-      } finally {
-        to.close
-      }
-    } finally {
-      from.close
-    }
-  }
-  
-  @throws(classOf[IOException])
-  def copy(source: FileChannel, destination: FileChannel): Unit = {
-    destination.transferFrom(source, 0, source.size)
-  }
-  
-  @throws(classOf[IOException])
-  def copy(from: InputStream, to: OutputStream): Unit = {
-    val buffer = new Array[Byte](DefaultBufferSize)
-    Stream.continually(from.read(buffer)).takeWhile(_ != -1).foreach{ 
-      count => to.write(buffer, 0, count)
-    }
-  }
-
-  @throws(classOf[IOException])
-  def copy(from: File, to: OutputStream): Unit = {
-    val fromIS = new FileInputStream(from)
-    try {copy(fromIS, to)} finally {fromIS.close}
-  }
-  
-  @throws(classOf[IOException])
-  def copy(from: InputStream, to: OutputStream, maxRead: Int, timeout: Long) = {
-    val buffer = new Array[Byte](maxRead)
-    val executor = Executors.newSingleThreadExecutor
-    val reader = new ReaderRunnable(buffer, from, maxRead)
     
-    Stream.continually(
-      {
-        val futureRead = executor.submit(reader)
-            
-        try {
-          futureRead.get(timeout, TimeUnit.MILLISECONDS)
-        } catch {
-          case (e: TimeoutException) =>
-            futureRead.cancel(true)
-            throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e)
+    def dirContainsNoFileRecursive: Boolean = {
+      val toProceed = new ListBuffer[File]
+      toProceed += file
+
+      while (!toProceed.isEmpty) {
+        val f = toProceed.remove(0)
+        for (sub <- f.listFiles) {
+          if (sub.isFile) return false
+          else if (sub.isDirectory) toProceed += sub
         }
-      }).takeWhile(_ != -1).foreach{ 
-      count => 
-                
-      val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
+      }
+      true
+    }
+
+    def copy(toF: File) = {
+      val toCopy = new ListBuffer[(File, File)]
+      toCopy += ((file, toF))
+
+      while (!toCopy.isEmpty) {
+        val cur = toCopy.remove(0)
+        val curFrom = cur._1
+        val curTo = cur._2
+        if (curFrom.isDirectory) {
+          curTo.mkdir
+
+          for (child <- curFrom.listFiles) {
+            val to = new File(curTo, child.getName)
+            toCopy += ((child, to))
+          }
+        } else curFrom.copyFile(curTo)
+      }
+    }
+    
+    def copyFile(toF: File): Unit = {
+      val from = new FileInputStream(file).getChannel
 
       try {
-        futureWrite.get(timeout, TimeUnit.MILLISECONDS)
-      } catch  {
-        case (e: TimeoutException) =>
-          futureWrite.cancel(true)
-          throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
-      } 
-    }     
-  }
-
-  def move(from: File, to: File) = {
-    if (!from.renameTo(to)) {
-      copy(from, to)
-      from.delete
+        val to = new FileOutputStream(toF).getChannel
+        try FileUtil.copy(from, to) finally to.close
+      } finally from.close
     }
-  }
-  
-  def recursiveDelete(path: File): Boolean = {
-    if( path.exists && path.isDirectory) {		
-      for(file <- path.listFiles) recursiveDelete(file)
+    
+    def copyCompressFile(toF: File): Unit = {
+      val to = new GZIPOutputStream(new FileOutputStream(toF))
+      try file.copy(to) finally to.close
     }
-    path.delete
-  }
-  
-  def size(file: File): Long = {
-    if(file.exists && file.isDirectory) {
-      (for(f <- file.listFiles) yield size(f)).sum
-    } else file.length
-  }
-  
-  
-  class FileUtilDecorator(file: File) {
-  
-    def lastModification = FileUtil.lastModification(file)
-    def listRecursive(filter: FileFilter) = FileUtil.listRecursive(file, filter)
-  
-    def applyRecursive(operation: File => Unit): Unit = FileUtil.applyRecursive(file, operation, Set.empty)
-    def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = FileUtil.applyRecursive(file, operation, stopPath)
+    
+    def copyUncompressFile(toF: File): Unit = {
+      val from = new GZIPInputStream(new FileInputStream(file))
 
-    def dirContainsNoFileRecursive = FileUtil.dirContainsNoFileRecursive(file)
-
-    def recursiveDelete = FileUtil.recursiveDelete(file)
+      try from.copy(toF) 
+      finally from.close
+    }
+    
+    def copy(to: OutputStream): Unit = {
+      val fromIS = new FileInputStream(file)
+      try fromIS.copy(to) finally fromIS.close
+    }
+    
+    def move(to: File) = {
+      if (!file.renameTo(to)) {
+        copy(to)
+        recursiveDelete
+      }
+    }
   
-    def copy(toF: String) = FileUtil.copy(file, new File(toF))
+    def recursiveDelete: Boolean = {
+      if(file.exists && file.isDirectory) {		
+        for(f <- file.listFiles) f.recursiveDelete
+      }
+      file.delete
+    }
+    
+    def size: Long = {
+      if(file.exists && file.isDirectory) {
+        (for(f <- file.listFiles) yield f.size).sum
+      } else file.length
+    }
   
-    @throws(classOf[IOException])
-    def copy(toF: File) = FileUtil.copy(file, toF)
-    def copy(to: OutputStream): Unit = FileUtil.copy(file, to)
-
-    def move(to: File) = FileUtil.move(file, to)
-
-    def size = FileUtil.size(file)
+    def archiveDirWithRelativePathNoVariableContent(dest: File) = {
+      val os = new TarOutputStream(new FileOutputStream(file))
+      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
+      finally os.close
+    }
+  
+    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
+      val os = new TarOutputStream(new GZIPOutputStream(new FileOutputStream(file)))
+      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
+      finally os.close
+    }
+    
+    def extractDirArchiveWithRelativePath(dest: File) = {
+      new TarInputStream(new FileInputStream(file)).extractDirArchiveWithRelativePathAndClose(dest)
+    }  
+    
+    def extractUncompressDirArchiveWithRelativePath(dest: File) =
+      new TarInputStream(new GZIPInputStream(new FileInputStream(file))).extractDirArchiveWithRelativePathAndClose(dest)
+    
   }
 
   class InputStreamDecorator(is: InputStream) {
-    def copy(os: OutputStream): Unit = FileUtil.copy(is, os)
+    def copy(to: OutputStream): Unit = {
+      val buffer = new Array[Byte](DefaultBufferSize)
+      Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach{ 
+        count => to.write(buffer, 0, count)
+      }
+    }
+
+    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+      val buffer = new Array[Byte](maxRead)
+      val executor = Executors.newSingleThreadExecutor
+      val reader = new ReaderRunnable(buffer, is, maxRead)
+    
+      Stream.continually(
+        {
+          val futureRead = executor.submit(reader)
+            
+          try {
+            futureRead.get(timeout, TimeUnit.MILLISECONDS)
+          } catch {
+            case (e: TimeoutException) =>
+              futureRead.cancel(true)
+              throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e)
+          }
+        }).takeWhile(_ != -1).foreach{ 
+        count => 
+                
+        val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
+
+        try {
+          futureWrite.get(timeout, TimeUnit.MILLISECONDS)
+        } catch  {
+          case (e: TimeoutException) =>
+            futureWrite.cancel(true)
+            throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
+        } 
+      }     
+    }
+
     def copy(file: File): Unit = {
       val os = new FileOutputStream(file)
       try copy(os)

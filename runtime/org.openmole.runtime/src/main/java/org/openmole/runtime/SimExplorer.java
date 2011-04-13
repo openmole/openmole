@@ -33,7 +33,7 @@ import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.core.batch.jsaga.JSAGASessionService;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
-import org.openmole.core.serializer.Serializer;
+import org.openmole.core.serializer.SerializerService;
 
 public class SimExplorer implements IApplication {
 
@@ -84,7 +84,7 @@ public class SimExplorer implements IApplication {
             if (cmdLine.hasOption("a")) {
                 /* get env and init */
                 File envFile = new File(cmdLine.getOptionValue("a"));
-                BatchAuthentication authentication = Serializer.deserialize(envFile);
+                BatchAuthentication authentication = SerializerService.deserialize(envFile);
                 authentication.initialize();
                 if(!debug) envFile.delete();
             }

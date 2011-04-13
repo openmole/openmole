@@ -15,12 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.persistence
+package org.openmole.core.serializer.converter
 
-object PersistentContext {
-  val LINK = "link"
-  val FILE = "file"
-  val CONTEXT = "context"
-  val CONTEXT_LINK = CONTEXT + LINK
-  val SEPARATOR = "_"
+object SerializerWithPathHashInjectionFactory extends Factory[SerializerWithPathHashInjection] {
+  def makeObject = new SerializerWithPathHashInjection
 }

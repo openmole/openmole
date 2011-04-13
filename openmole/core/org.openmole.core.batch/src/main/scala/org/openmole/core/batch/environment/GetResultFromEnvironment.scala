@@ -45,7 +45,7 @@ import org.openmole.core.model.execution.ExecutionState._
 //import scala.collection.JavaConversions._
 
 import org.openmole.core.model.job.State
-import org.openmole.core.serializer.Serializer
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.workspace.Workspace
 import scala.Boolean._
@@ -125,7 +125,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   private def getRuntimeResult(outputFile: IURIFile, token: AccessToken): RuntimeResult = {
     val resultFile = outputFile.cache(token)
     try {
-      Serializer.deserialize(resultFile)
+      SerializerService.deserialize(resultFile)
     } finally {
       resultFile.delete
     }
@@ -147,7 +147,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
               val fis = new FileInputStream(stdOutFile)
-              try {copy(fis, System.out)} finally {fis.close}
+              try fis.copy(System.out) finally fis.close
               System.out.println("-------------------------------------------------------")
             }
           } finally {
@@ -182,7 +182,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
              
             val os = new FileOutputStream(dest)
 
-            try {copy(tis, os)} finally {os.close}
+            try tis.copy(os) finally os.close
 
             val fileInfo = filesInfo(te.getName)
             if (fileInfo == null) throw new InternalProcessingError("FileInfo not found for entry " + te.getName + '.')
@@ -193,9 +193,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
               new TarInputStream(new FileInputStream(dest)).extractDirArchiveWithRelativePathAndClose(file)
               dest.delete
               file
-            } else {
-              dest
-            }
+            } else dest
             fileReplacement += fileInfo._1 -> file
           })
       } finally {
@@ -206,16 +204,10 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   }
 
   private def getContextResults(uriFile: IURIFile, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {
-
-    //Download and deserialize the context results
-
-    if (uriFile == null)  throw new InternalProcessingError("Context results URI is null")
+    if (uriFile == null) throw new InternalProcessingError("Context results URI is null")
     val contextResutsFileCache = uriFile.cache(token)
 
-    try {
-      Serializer.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
-    } finally {
-      contextResutsFileCache.delete
-    }
+    try SerializerService.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
+    finally contextResutsFileCache.delete
   }
 }

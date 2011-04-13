@@ -29,32 +29,11 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object TarArchiver {
   
-  private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry => Unit ) = {
-    if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
-    //val tos = new TarOutputStream(archive)
-    // try {
-    val toArchive = new Stack[(File, String)]
-    toArchive.push((baseDir, ""))
+  implicit def TarInputStream2TarInputStreamDecorator(tis: TarInputStream) = new TarInputStreamDecorator(tis)
+  implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream) = new TarOutputStreamDecorator(tos)
 
-    while (!toArchive.isEmpty) {
-      val cur = toArchive.pop
 
-      if (cur._1.isDirectory) {
-        for (name <- cur._1.list.sorted) {
-          toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
-        }
-      } else {
-        val e = new TarEntry(cur._2)
-        e.setSize(cur._1.length)
-        additionnalCommand(e)
-        tos.putNextEntry(e)
-        try cur._1.copy(tos) finally tos.closeEntry
-      }
-    }
-
-  }
-
-  class TarOutputStreamComplement(tos: TarOutputStream) {
+  class TarOutputStreamDecorator(tos: TarOutputStream) {
     def addFile(f: File, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(f.length)
@@ -63,14 +42,10 @@ object TarArchiver {
     }
     
     def createDirArchiveWithRelativePathNoVariableContent(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, (e:TarEntry) => e.setModTime(0))
- 
     def createDirArchiveWithRelativePath(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, {(e)=>})
-  
   }
- 
-  implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream): TarOutputStreamComplement = new TarOutputStreamComplement(tos)
   
-  class TarInputStreamComplement(tis: TarInputStream) {
+  class TarInputStreamDecorator(tis: TarInputStream) {
     
     def applyAndClose[T](f: TarEntry => T): Iterable[T] = try {
       val ret = new ListBuffer[T]
@@ -97,8 +72,30 @@ object TarArchiver {
       }
     } finally tis.close
   }
-  
-  
-  implicit def TarInputStream2TarInputStreamComplement(tis: TarInputStream): TarInputStreamComplement = new TarInputStreamComplement(tis)
+
+  private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry => Unit ) = {
+    if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
+    //val tos = new TarOutputStream(archive)
+    // try {
+    val toArchive = new Stack[(File, String)]
+    toArchive.push((baseDir, ""))
+
+    while (!toArchive.isEmpty) {
+      val cur = toArchive.pop
+
+      if (cur._1.isDirectory) {
+        for (name <- cur._1.list.sorted) {
+          toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
+        }
+      } else {
+        val e = new TarEntry(cur._2)
+        e.setSize(cur._1.length)
+        additionnalCommand(e)
+        tos.putNextEntry(e)
+        try cur._1.copy(tos) finally tos.closeEntry
+      }
+    }
+
+  }
   
 }

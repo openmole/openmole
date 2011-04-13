@@ -15,8 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-object DeserializerWithFileInjectionFromFileFactory extends Factory[DeserializerWithFileInjectionFromFile] {
-  def makeObject = new DeserializerWithFileInjectionFromFile
+import java.io.File
+
+class DeserializerWithFileInjectionFromFile extends Deserializer {
+  
+    var files: PartialFunction[File, File] = null
+    registerConverter(new FileConverterInjecter(this))
+   
+    def clean = {
+        files = null
+    }
+    
+    def getMatchingFile(file: File): File = files(file)
 }

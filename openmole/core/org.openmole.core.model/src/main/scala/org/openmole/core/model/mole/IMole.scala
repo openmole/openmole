@@ -20,7 +20,6 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.task.IGenericTask
 
-
 trait IMole {
 
   def root: IGenericCapsule

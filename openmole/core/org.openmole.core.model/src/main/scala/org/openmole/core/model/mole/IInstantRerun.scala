@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 romain
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,18 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.model.mole
 
-import com.thoughtworks.xstream.converters.extended.FileConverter
-import java.io.File
+import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.capsule.IGenericCapsule
 
-class FileConverterNotifier(serializer: SerializerWithFileAndPluginListing) extends FileConverter {
-
-  override def toString(obj: Object): String = {
-    val file = obj.asInstanceOf[File]
-    serializer.fileUsed(file)
-    super.toString(obj)
+object IInstantRerun {
+  def empty = new IInstantRerun {
+    override def rerun(job: IMoleJob, capsule: IGenericCapsule) = false
+    override def jobFinished(job: IMoleJob, capsule: IGenericCapsule) = {}
   }
-    
 }
 
+trait IInstantRerun {
+  def rerun(job: IMoleJob, capsule: IGenericCapsule): Boolean
+  def jobFinished(job: IMoleJob, capsule: IGenericCapsule)
+}

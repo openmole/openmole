@@ -23,7 +23,9 @@ import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.data.IContext
 
 object IMoleJob {
+  
   final val TransitionPerformed = "TransitionPerformed"
+  final val JobFailed = "JobFailed"
   final val StateChanged = "StateChanged"
     
   implicit val ordering = new Ordering[IMoleJob] {
@@ -40,7 +42,7 @@ trait IMoleJob {
   def isFinished: Boolean
   def context: IContext
   def perform   
-  def finished(executionJob: IContext)
+  def finished(context: IContext)
   def rethrowException(context: IContext)
   def progress: IProgress
   def id: MoleJobId

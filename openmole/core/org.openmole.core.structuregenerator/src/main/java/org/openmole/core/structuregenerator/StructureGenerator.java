@@ -43,7 +43,7 @@ import org.openmole.core.structuregenerator.PrototypeNode;
 import org.openmole.core.implementation.data.Prototype;
 import org.openmole.core.structuregenerator.SequenceNode;
 import org.openmole.core.structuregenerator.StructureNode;
-import org.openmole.misc.tools.io.FileUtil$;
+import org.openmole.misc.tools.io.FileUtil.InputStreamDecorator;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 
@@ -216,8 +216,7 @@ public class StructureGenerator {
                 anEntry.setTime(f.lastModified());
                 zos.putNextEntry(anEntry);
 
-                FileUtil$.MODULE$.copy(fis, zos);
-
+                new InputStreamDecorator(fis).copy(zos);
             } finally {
                 fis.close();
             }

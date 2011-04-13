@@ -24,7 +24,7 @@ import java.math.BigInteger
 import java.util.logging.Level
 import java.util.logging.Logger
 
-import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.workspace.Workspace
@@ -49,7 +49,7 @@ object CloningService {
           val toClone = o.asInstanceOf[File]
           val cloned = if (toClone.isDirectory) Workspace.newDir else Workspace.newFile
                     
-          FileUtil.copy(toClone, cloned)
+          toClone.copy(toClone)
           cloned
         }
       })

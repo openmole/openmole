@@ -15,18 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import com.thoughtworks.xstream.XStreamException
-import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
+import java.io.OutputStream
+import org.openmole.misc.tools.io.FileUtil.fileOrdering
+import scala.collection.immutable.TreeSet
 
-class FileConverterInjecter(deserializer: DeserializerWithFileInjectionFromFile) extends FileConverter {
+class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
 
-    override def fromString(str: String): Object = {
-        val file = super.fromString(str).asInstanceOf[File]
-        val ret = deserializer.getMatchingFile(file)
-        if(ret == null) throw new XStreamException("No matching file for " + file.getAbsolutePath)
-        ret
+    var files: TreeSet[File] = null
+    registerConverter(new FileConverterNotifier(this))
+
+    def fileUsed(file: File) = {
+        files += file
+    }
+
+    override def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
+        files = new TreeSet[File]
+        super.toXMLAndListPlugableClasses(obj, outputStream)
+    }
+
+    override def clean = {
+        super.clean
+        files = null
     }
 }

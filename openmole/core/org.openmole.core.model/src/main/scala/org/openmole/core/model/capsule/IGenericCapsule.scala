@@ -21,6 +21,7 @@ import org.openmole.core.model.data.{IDataChannel,IContext, IDataSet}
 import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.{IGenericTransition,ISlot}
+import org.openmole.misc.exception.UserBadDataError
 
 
 /**
@@ -39,6 +40,8 @@ trait IGenericCapsule {
    * @return Some(task) inside this capsule or None if not the task has not been assigned
    */
   def task: Option[IGenericTask]
+  
+  def taskOrException = task.getOrElse(throw new UserBadDataError("Capsule task is unassigned.")) 
   
   /**
    * Get all data channels ending at this capsule.

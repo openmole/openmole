@@ -15,26 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.XStreamException
-import com.thoughtworks.xstream.converters.SingleValueConverter
-import java.io.InputStream
-import org.openmole.misc.exception.InternalProcessingError
+import com.thoughtworks.xstream.converters.extended.FileConverter
+import java.io.File
 
-class Deserializer {
-    private val xstream = new XStream
-    
-    def registerConverter(converter: SingleValueConverter) = {
-        xstream.registerConverter(converter)
-    }
+class FileConverterInjecter(deserializer: DeserializerWithFileInjectionFromFile) extends FileConverter {
 
-    def fromXMLInjectFiles[T](is: InputStream): T = {
-        try {
-            xstream.fromXML(is).asInstanceOf[T]
-        } catch {
-          case (ex: XStreamException) => throw new InternalProcessingError(ex)
-        }
+    override def fromString(str: String): Object = {
+        val file = super.fromString(str).asInstanceOf[File]
+        val ret = deserializer.getMatchingFile(file)
+        if(ret == null) throw new XStreamException("No matching file for " + file.getAbsolutePath)
+        ret
     }
 }

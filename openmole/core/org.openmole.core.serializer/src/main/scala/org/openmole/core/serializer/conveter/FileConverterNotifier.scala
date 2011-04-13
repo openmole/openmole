@@ -15,8 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-object DeserializerWithFileInjectionFromPathHashFactory extends Factory[DeserializerWithFileInjectionFromPathHash] {
-  def makeObject = new DeserializerWithFileInjectionFromPathHash
+import com.thoughtworks.xstream.converters.extended.FileConverter
+import java.io.File
+
+class FileConverterNotifier(serializer: SerializerWithFileAndPluginListing) extends FileConverter {
+
+  override def toString(obj: Object): String = {
+    val file = obj.asInstanceOf[File]
+    serializer.fileUsed(file)
+    super.toString(obj)
+  }
+    
 }
+

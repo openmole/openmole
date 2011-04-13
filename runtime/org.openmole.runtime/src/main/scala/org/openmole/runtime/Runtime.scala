@@ -42,7 +42,7 @@ import org.openmole.core.batch.message.RuntimeResult
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.tools.service.Retry._
-import org.openmole.core.serializer.Serializer
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
@@ -90,7 +90,7 @@ class Runtime {
             
       val executionMessageFile = new GZURIFile(new URIFile(executionMessageURI));
       val executionMesageFileCache = executionMessageFile.cache
-      val executionMessage = Serializer.deserialize[ExecutionMessage](executionMesageFileCache)
+      val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
       executionMesageFileCache.delete
             
       val pluginDir = Workspace.newDir
@@ -141,7 +141,7 @@ class Runtime {
       }
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))     
-      val allMoleJobs =  tis.applyAndClose( e => {Serializer.deserializeReplaceFiles[IMoleJob](tis, usedFiles)})
+      val allMoleJobs =  tis.applyAndClose( e => {SerializerService.deserializeReplaceFiles[IMoleJob](tis, usedFiles)})
 
       //val jobForRuntime = Activator.getSerialiser.deserializeReplaceFiles[JobForRuntime](jobForRuntimeFileCache, usedFiles)
       jobsFileCache.delete
@@ -164,7 +164,7 @@ class Runtime {
         val contextResults = new ContextResults(saver.results)
         val contextResultFile = Workspace.newFile
 
-        val serializationResult = Serializer.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
+        val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
 
         val uploadedcontextResults = new GZURIFile(executionMessage.communicationDir.newFileInDir("uplodedTar", ".tgz"))
 
@@ -178,10 +178,10 @@ class Runtime {
         val tarResult = Workspace.newFile("result", ".tar")
 
       
-        if (!serializationResult._1.isEmpty) {
+        if (!serializationResult.files.isEmpty) {
           val tos = new TarOutputStream(new FileOutputStream(tarResult))     
           try {
-            for (file <- serializationResult._1) {
+            for (file <- serializationResult.files) {
               //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
 
               val name = UUID.randomUUID        
@@ -252,7 +252,7 @@ class Runtime {
     val runtimeResult = new RuntimeResult(outputMessage, errorMessage, tarResultMessage, exception, filesInfo, contextResult)
         
     val outputLocal = Workspace.newFile("output", ".res")
-    Serializer.serialize(runtimeResult, outputLocal)
+    SerializerService.serialize(runtimeResult, outputLocal)
     try {
       val output = new GZURIFile(new URIFile(resultMessageURI))
       retry(URIFile.copy(outputLocal, output), NbRetry)

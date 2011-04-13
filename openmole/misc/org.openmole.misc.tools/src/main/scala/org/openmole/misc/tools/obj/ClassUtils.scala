@@ -20,12 +20,15 @@ package org.openmole.misc.tools.obj
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type => JType, Array => _, _ }
 import scala.reflect.Manifest.{classType, intersectionType, arrayType, wildcardType }
+import scala.reflect.ClassManifest
 
 object ClassUtils {
   
   implicit def Class2ClassDecorator[T](c: Class[T]) = new ClassDecorator[T](c)
   
   class ClassDecorator[T](c: Class[T]) {
+    def equivalence = classEquivalence(c).asInstanceOf[Class[T]]
+    
     def listSuperClasses = {
       new Iterator[Class[_]] {
         var cur: Class[_] = c
@@ -114,4 +117,32 @@ object ClassUtils {
     case x: TypeVariable[_]     => intersect(x.getBounds(): _*)
   }
  
+  
+  def classEquivalence(c: Class[_]) = {
+    if(c == classOf[Byte]) classOf[java.lang.Byte]
+    else if(c == classOf[Short]) classOf[java.lang.Short]
+    else if(c == classOf[Integer]) classOf[java.lang.Integer]
+    else if(c == classOf[Long]) classOf[java.lang.Long]
+    else if(c == classOf[Float]) classOf[java.lang.Float]
+    else if(c == classOf[Double]) classOf[java.lang.Double]
+    else if(c == classOf[Char]) classOf[java.lang.Character]
+    else if(c == classOf[Boolean]) classOf[java.lang.Boolean]
+    else c
+  }
+  
+  def clazzOf(v: Any) = {
+    v match {
+      /*case _: Byte => classOf[Byte]
+      case _: Short => classOf[Short]
+      case _: Int => classOf[Int]
+      case _: Long => classOf[Long]
+      case _: Float => classOf[Float]
+      case _: Double => classOf[Double]
+      case _: Char => classOf[Char]
+      case _: Boolean => classOf[Boolean]
+      case _: Unit => classOf[Unit]*/
+      case null => classOf[Null]
+      case r: AnyRef => r.getClass
+    }
+  }
 }

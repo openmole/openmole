@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 romain
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.structure
 
-object SerializerWithFileAndPluginListingFactory extends Factory[SerializerWithFileAndPluginListing] {
-   def makeObject = new SerializerWithFileAndPluginListing
-}
+import java.io.File
+
+class PluginClassAndFiles(val files: Iterable[File], val classes: Iterable[Class[_]]) 

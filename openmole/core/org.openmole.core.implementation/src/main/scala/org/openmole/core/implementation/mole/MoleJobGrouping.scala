@@ -32,6 +32,6 @@ class MoleJobGrouping(groupers: HashMap[IGenericCapsule, IGroupingStrategy]) ext
     
     override def apply(capsule: IGenericCapsule): Option[IGroupingStrategy] = groupers.get(capsule);
    
-    override def set(capsule: IGenericCapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy);
+    def set(capsule: IGenericCapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy);
    
 }

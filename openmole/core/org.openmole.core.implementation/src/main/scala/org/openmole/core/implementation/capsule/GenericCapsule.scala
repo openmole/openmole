@@ -46,6 +46,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     override def eventOccured(obj: IMoleJob) = {
       obj.state match {
         case COMPLETED => jobFinished(obj)
+        case FAILED => jobFailed(obj)
         case _ =>
       }
     }
@@ -111,9 +112,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   }
 
   override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = { 
-    val t = _task.getOrElse(throw new UserBadDataError("Reached a capsule with unassigned task.")) 
-
-    val ret = new MoleJob(t, context, jobId)
+    val ret = new MoleJob(taskOrException, context, jobId)
     EventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
     ret
   }
@@ -130,19 +129,23 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     _task = task
   }
   
+  private def jobFailed(job: IMoleJob) = {
+    val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
+    EventDispatcher.objectChanged(job, IMoleJob.JobFailed, Array(this))
+  }
+  
   private def jobFinished(job: IMoleJob) = {
     try {
       val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
       val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   
       val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
- 
-      EventDispatcher.objectChanged(execution, IMoleExecution.JobInCapsuleFinished, Array(job, this))
       
+      EventDispatcher.objectChanged(execution, IMoleExecution.JobInCapsuleFinished, Array(job, this))
       performTransition(job.context, ticket, execution, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
     } finally {
-      EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed)
+      EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed, Array(this))
     }
   }
 

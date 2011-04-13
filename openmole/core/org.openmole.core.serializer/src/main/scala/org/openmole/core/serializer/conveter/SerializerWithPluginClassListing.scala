@@ -15,17 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-import java.io.File
+import java.io.OutputStream
+import scala.collection.mutable.HashSet
 
-class DeserializerWithFileInjectionFromPathHash extends Deserializer {
+class SerializerWithPluginClassListing extends Serializer {
+ 
+  var classes: HashSet[Class[_]] = null
+  registerConverter(new PluginConverter(this, reflectionConverter))
+     
+  def classUsed(c: Class[_]) = classes.add(c)
 
-  var files: PartialFunction[FileInfoHash, File] = null
-  registerConverter(new FilePathHashInjecter(this))
+  def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
+    classes = new HashSet[Class[_]]
+    xstream.toXML(obj, outputStream)
+  }
 
-  def clean = files = null
-    
-  def getMatchingFile(file: FileInfoHash): File = files(file)
-
+  def clean: Unit = {
+    classes = null
+  }
 }

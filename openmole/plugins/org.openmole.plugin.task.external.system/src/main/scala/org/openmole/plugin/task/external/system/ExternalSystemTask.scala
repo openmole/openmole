@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.external.system
 
-import java.util.logging.Logger
 import org.openmole.misc.exception.UserBadDataError
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
@@ -33,30 +32,26 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
   def prepareInputFiles(context: IContext, progress: IProgress, tmpDir: File) {
    
-    listInputFiles(context, progress).foreach( f => {        
+    listInputFiles(context, progress).foreach(f => {        
         val to = new File(tmpDir, f.name)
         
         to.getAbsoluteFile.getParentFile.mkdirs
-        copy(f.file, to)
+        f.file.copy(to)
 
-        applyRecursive(to, (file: File) => {
-              if (file.isFile) {
-                file.setExecutable(true)
-              }
-              file.deleteOnExit
-            })
-      }
-    )
+        to.applyRecursive{f => 
+          if (f.isFile) f.setExecutable(true)
+          f.deleteOnExit
+        }
+      })
   }
 
 
   def fetchOutputFiles(context: IContext, progress: IProgress, localDir: File) = {
     var usedFiles = new TreeSet[File]
 
-    setOutputFilesVariables(context,progress,localDir).foreach( f => {
-        if (!f.file.exists) {
+    setOutputFilesVariables(context,progress,localDir).foreach(f => {
+        if (!f.file.exists) 
           throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
-        }
         usedFiles += f.file
       }
     )
@@ -64,18 +59,14 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
     val unusedFiles = new ListBuffer[File]
     val unusedDirs = new ListBuffer[File]
 
-    localDir.applyRecursive((file: File) => {
-          if(file.isFile) unusedFiles += (file)
-          else unusedDirs += (file)
-        }, usedFiles)
+    localDir.applyRecursive(f => {
+        if(f.isFile) unusedFiles += f
+        else unusedDirs += f
+      }, usedFiles)
 
-    unusedFiles.foreach(f =>  f.delete)
+    unusedFiles.foreach(f => f.delete)
 
     //TODO algorithm is no optimal and may be problematic for a huge number of dirs
-    unusedDirs.foreach( d => {
-      if(d.exists && !usedFiles.contains(d) && dirContainsNoFileRecursive(d)) {
-        d.recursiveDelete
-      }
-    })
+    unusedDirs.foreach{d => if(d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete}
   }
 }

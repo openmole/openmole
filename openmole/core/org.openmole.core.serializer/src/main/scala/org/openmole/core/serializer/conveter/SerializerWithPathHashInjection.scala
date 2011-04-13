@@ -15,36 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.misc.tools.io.StringInputStream
 import org.openmole.misc.hashservice.HashService
 import scala.collection.immutable.TreeMap
+import java.io.OutputStream
+import org.openmole.core.serializer.structure.FileInfo
 
-class SerializerWithPathHashInjectionAndPluginListing extends SerializerWithPluginClassListing {
+class SerializerWithPathHashInjection extends Serializer {
 
-  var files = new TreeMap[File, FileInfoHash]
-  registerConverter(new FilePathHashNotifier(this))
+  var files = new TreeMap[File, FileInfo]
+  registerConverter(new FilePathHashNotifier(this, reflectionConverter))
   
-  def fileUsed(file: File): FileInfoHash = {
+  override def toXML(obj: Object, outputStream: OutputStream) = {
+    clean
+    super.toXML(obj, outputStream)
+  }
+  
+  def fileUsed(file: File) = {
     var hash = files.getOrElse(file,
-                               {
-        val pathHash = HashService.computeHash(new StringInputStream(file.getAbsolutePath()))
+      {
+        val pathHash = HashService.computeHash(new StringInputStream(file.getAbsolutePath))
         val fileHash = HashService.computeHash(file)
             
-        val hash = new FileInfoHash(fileHash, pathHash)
-            
+        val hash = new FileInfo(fileHash, pathHash, file.isDirectory)
         files += file -> hash
         hash
       })
     hash
   }
     
-  override def clean: Unit = {
-    files = new TreeMap[File, FileInfoHash]
-    super.clean
+  def clean = {
+    files = new TreeMap[File, FileInfo]
   }
     
 }

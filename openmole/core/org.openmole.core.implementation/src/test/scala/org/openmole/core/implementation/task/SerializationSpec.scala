@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.task
 
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.serializer.Serializer
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.io.BufferInputStream
 import org.openmole.misc.tools.io.BufferOutputStream
 import org.scalatest.FlatSpec
@@ -37,11 +37,8 @@ class SerializationSpec extends FlatSpec with ShouldMatchers {
     
     val builder = new BufferOutputStream
     
-    Serializer.serialize(t, builder)
-    
-    //println(builder.toString)
-    
-    val t2 = Serializer.deserialize[EmptyTask](new BufferInputStream(builder.buffer))
+    SerializerService.serialize(t, builder)   
+    val t2 = SerializerService.deserialize[EmptyTask](new BufferInputStream(builder.buffer))
     
     t2.inputs.contains(p.name) should equal (true)
     t2.outputs.contains(p.name) should equal (true)

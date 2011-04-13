@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer
+package org.openmole.core.serializer.converter
 
-object SerializerWithPathHashInjectionAndPluginListingFactory extends Factory[SerializerWithPathHashInjectionAndPluginListing] {
-  def makeObject = new SerializerWithPathHashInjectionAndPluginListing
+object DeserializerWithFileInjectionFromFileFactory extends Factory[DeserializerWithFileInjectionFromFile] {
+  def makeObject = new DeserializerWithFileInjectionFromFile
 }
