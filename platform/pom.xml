@@ -2,25 +2,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.openmole</groupId>
-    <artifactId>openmole-gui</artifactId>
+    <groupId>org.openmole.ide</groupId>
+    <artifactId>org.openmole.ide.platform</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>openmole-gui - NB App Parent</name>
-
-    <repositories>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
+    <name>platform</name>
+    
+    <repositories> 
+        <repository>
+            <id>scala-tools.org</id>
+            <name>Scala-Tools Maven2 Repository</name>
+            <url>http://scala-tools.org/repo-snapshots</url>
+        </repository>    
+        <repository>
+            <id>maven.openmole.org.snapshots</id>
+            <name>OpenMOLE snapshots repository</name>
+            <url>http://maven.openmole.org/snapshots/</url>
+        </repository>
+        <repository>
+            <id>maven.openmole.org</id>
+            <name>OpenMole repository</name>
+            <url>http://maven.openmole.org/public/</url>
+        </repository>
         <repository>
             <id>netbeans</id>
             <name>NetBeans</name>
             <url>http://bits.netbeans.org/maven2/</url>
         </repository>
     </repositories>
+    
+    <properties>
+        <openmole.core.version>0.3-SNAPSHOT</openmole.core.version>
+        <openmole.gui.version>1.0-SNAPSHOT</openmole.gui.version>
+        <netbeans.version>RELEASE70-BETA</netbeans.version>
+        <brandingToken>openmole_gui</brandingToken>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lib.org.scala-lang.scala.version>2.9.0.RC1</lib.org.scala-lang.scala.version>
+        <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
+        <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -29,9 +50,99 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>3.6.2.R36x_v20101103</version>
+            <scope>provided</scope>
+        </dependency> 
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.pluginmanager</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${maven.scala.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest</artifactId>
+            <version>${lib.org.scalatest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-windows</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-settings</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-spi-palette</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency> 
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-filesystems</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-nodes</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-loaders</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-visual</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
-
     <build>
+               
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -44,9 +155,8 @@
                         <cluster>${brandingToken}</cluster>
                         <useOSGiDependencies>true</useOSGiDependencies>
                     </configuration>
-                </plugin>
+                </plugin> 
                 <plugin>
-                    <!-- NetBeans 6.9+ requires JDK 6 -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
@@ -55,23 +165,51 @@
                         <target>1.6</target>
                     </configuration>
                 </plugin>
+            </plugins> 
+        </pluginManagement> 
+        
+        
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <executions>
+                    <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>${maven.scala.version}</scalaVersion>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
+                <configuration>
+                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                </configuration>
             </plugin>
-            </plugins>
-        </pluginManagement>
+        </plugins> 
     </build>
 
     <modules>
         <module>branding</module>
         <module>application</module>
-    <module>gui</module>
-  </modules>
+        <module>core</module>
+        <module>plugins</module>
+    </modules>
 
-    <properties>
-        <netbeans.version>RELEASE70-BETA</netbeans.version>
-        <brandingToken>openmole_gui</brandingToken>
-    </properties>
 </project>

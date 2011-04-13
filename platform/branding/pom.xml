@@ -3,15 +3,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-      <groupId>org.openmole</groupId>
-      <artifactId>openmole-gui</artifactId>
-      <version>1.0-SNAPSHOT</version>
+        <groupId>org.openmole.ide</groupId>
+        <artifactId>org.openmole.ide.platform</artifactId>
+        <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>branding</artifactId>
+  <artifactId>org.openmole.ide.branding</artifactId>
   <packaging>nbm</packaging>
 
-  <name>openmole-gui - NB App Branding</name>
+  <name>branding</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

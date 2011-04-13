@@ -1,4 +1,0 @@
-name=Test
-impl= org.openmole.ui.ide.workflow.implementation.TaskModelUI
-bg-color=21,227,226
-border-color=199,152,170
