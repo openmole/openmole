@@ -18,6 +18,7 @@ package org.openmole.plugin.task.netlogo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractCollection;
 import java.util.LinkedList;
 import java.util.List;
 import org.nlogo.api.CompilerException;
@@ -32,6 +33,7 @@ import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.plugin.task.external.system.ExternalSystemTask;
 import scala.Tuple2;
+import scala.Tuple3;
 
 /**
  *
@@ -40,10 +42,8 @@ import scala.Tuple2;
 public class NetLogoTask extends ExternalSystemTask {
 
     Iterable<String> launchingCommands;
-
     List<Tuple2<IPrototype, String>> inputBinding = new LinkedList<Tuple2<IPrototype, String>>();
-    List<Tuple2<String, IPrototype>> outputBinding = new LinkedList<Tuple2<String, IPrototype>>();
-
+    List<Tuple3<String, IPrototype, Boolean>> outputBinding = new LinkedList<Tuple3<String, IPrototype, Boolean>>();
     String relativeScriptPath;
 
     public NetLogoTask(String name,
@@ -60,9 +60,8 @@ public class NetLogoTask extends ExternalSystemTask {
             String workspace,
             String sriptName,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
-            this(name, new File(workspace), sriptName, launchingCommands);
+        this(name, new File(workspace), sriptName, launchingCommands);
     }
-
 
     @Override
     public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
@@ -74,7 +73,7 @@ public class NetLogoTask extends ExternalSystemTask {
             try {
 
                 workspace.open(script.getAbsolutePath());
-                
+
                 for (Tuple2<IPrototype, String> inBinding : getInputBinding()) {
                     Object val = context.value(inBinding._1()).get();
                     workspace.command("set " + inBinding._2() + " " + val.toString());
@@ -84,8 +83,13 @@ public class NetLogoTask extends ExternalSystemTask {
                     workspace.command(VariableExpansion.expandData(context, cmd));
                 }
 
-                for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
-                    context.add(outBinding._2(), workspace.report(outBinding._1()));
+                for (Tuple3<String, IPrototype, Boolean> outBinding : getOutputBinding()) {
+                    Object outputValue = workspace.report(outBinding._1());
+                    if (!outBinding._3()) {
+                        context.add(outBinding._2(), outputValue);
+                    } else {
+                        context.add(outBinding._2(), ((AbstractCollection) outputValue).toArray());
+                    }
                 }
 
                 fetchOutputFiles(context, progress, tmpDir);
@@ -101,14 +105,24 @@ public class NetLogoTask extends ExternalSystemTask {
         }
     }
 
-    public NetLogoTask addInput(IPrototype prototype, String binding) {
+    public NetLogoTask addNetLogoInput(IPrototype prototype) {
+        addInput(prototype);
+        return this;
+    }
+
+    public NetLogoTask addNetLogoInput(IPrototype prototype, String binding) {
         inputBinding.add(new Tuple2<IPrototype, String>(prototype, binding));
         super.addInput(prototype);
         return this;
     }
 
-    public NetLogoTask addOutput(String binding, IPrototype prototype) {
-        outputBinding.add(new Tuple2<String, IPrototype>(binding, prototype));
+    public NetLogoTask addNetLogoOutput(String binding, IPrototype prototype) {
+        addNetLogoOutput(binding, prototype, false);
+        return this;
+    }
+
+    public NetLogoTask addNetLogoOutput(String binding, IPrototype prototype, Boolean toArray) {
+        outputBinding.add(new Tuple3<String, IPrototype, Boolean>(binding, prototype, toArray));
         super.addOutput(prototype);
         return this;
     }
@@ -117,7 +131,7 @@ public class NetLogoTask extends ExternalSystemTask {
         return inputBinding;
     }
 
-    private List<Tuple2<String, IPrototype>> getOutputBinding() {
+    private List<Tuple3<String, IPrototype, Boolean>> getOutputBinding() {
         return outputBinding;
     }
 }
