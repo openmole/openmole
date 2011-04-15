@@ -26,8 +26,6 @@ class Condition(code: String) extends ICondition {
 
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
   
-  override def evaluate(context: IContext): Boolean = {
-    groovyProxy.execute(context).asInstanceOf[Boolean]           
-  }
+  override def evaluate(context: IContext) = groovyProxy.execute(context).asInstanceOf[Boolean]
 
 }

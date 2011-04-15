@@ -42,6 +42,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
 
+  
   protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
     val registry = moleExecution.localCommunication.transitionRegistry
     registry.register(this, ticket, context)
