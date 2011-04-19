@@ -5,6 +5,9 @@
 package org.openmole.ide.core;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -37,8 +40,11 @@ import org.openmole.ide.core.workflow.action.ManageEntityAction;
 import org.openmole.ide.core.workflow.action.RemoveAllMoleSceneAction;
 import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
-import org.openmole.misc.pluginmanager.PluginManager;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 import org.openmole.ide.core.commons.ApplicationCustomize;
+
+import org.openmole.ide.core.workflow.model.IEntityUI;
 
 /**
  * Top component which displays something.
@@ -66,6 +72,15 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         associateLookup(new AbstractLookup(ic));
         ic.add(palette);
+
+        System.out.println("LOOLOO");
+
+        Collection coll = (Collection) Lookup.getDefault().lookupAll(IEntityUI.class);
+        for (Iterator it = coll.iterator(); it.hasNext();) {
+            System.out.println("look:");
+            System.out.println(((IEntityUI) it.next()).name());
+        }
+
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
@@ -112,9 +127,22 @@ public final class MoleSceneTopComponent extends TopComponent {
         //toolBar.setVisible(true);
 
 
+
+        //println("22 LOO :: "+Lookup.getDefault.lookup(classOf[org.openmole.ide.core.workflow.model.IEntityUI]).name)
+        //Lookup.getDefault.lookupAll(classOf[org.openmole.ide.core.workflow.model.IEntityUI]).foreach(t=> {println("LOOKUP :: " +t.name)})
+
     }
 
     public void refreshPalette() {
+        
+        System.out.println("LOOLOO");
+      //  Lookup lkp = Lookup.getDefault();
+//        ServiceLoader<IEntityUI> serviceLoader = ServiceLoader.load(IEntityUI.class);
+//        for (IEntityUI eui : serviceLoader) {
+//            eui.name();
+//        }
+        
+        
         ic.remove(palette);
         palette = PaletteSupport.createPalette();
         ic.add(palette);

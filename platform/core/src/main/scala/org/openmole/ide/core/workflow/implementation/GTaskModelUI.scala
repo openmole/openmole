@@ -6,4 +6,4 @@
 package org.openmole.ide.core.workflow.implementation
 
 
-class GroovyTaskModelUI(taskUI: TaskUI) extends GenericTaskModelUI(taskUI) {}
+class GTaskModelUI(taskUI: TaskUI) extends GenericTaskModelUI(taskUI) {}

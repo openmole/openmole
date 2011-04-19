@@ -11,10 +11,6 @@
     <name>${project.artifactId} ${project.version}</name>
     <packaging>nbm</packaging>
 
-        <!--
-    <repositories>
-    </repositories>
-        -->
     <build>
         <plugins>
             <plugin>
@@ -35,23 +31,21 @@
             <artifactId>org.openmole.ide.core</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.apache.commons.collections15</artifactId>
+            <version>4.01</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.joda.time</artifactId>
+            <version>1.6</version>
+        </dependency>
     </dependencies>
-
-  <!--  <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>  -->
 </project>

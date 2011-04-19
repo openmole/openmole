@@ -11,7 +11,6 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
-
 /**
  * Top component which displays something.
  */
@@ -29,7 +28,6 @@ public final class OutputTopComponent extends TopComponent {
         setName(NbBundle.getMessage(OutputTopComponent.class, "CTL_OutputTopComponent"));
         setToolTipText(NbBundle.getMessage(OutputTopComponent.class, "HINT_OutputTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
-
     }
 
     /** This method is called from within the constructor to
@@ -79,7 +77,7 @@ public final class OutputTopComponent extends TopComponent {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        jTextArea1.append("output\n");
+        jTextArea1.append("OUTPUT\n");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

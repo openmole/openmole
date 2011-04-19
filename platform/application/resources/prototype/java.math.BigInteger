@@ -1,2 +1,2 @@
-impl= org.openmole.ui.ide.workflow.implementation.PrototypeModelUI
+impl= org.openmole.ide.core.workflow.implementation.PrototypeModelUI
 thumb-img=resources/img/thumb/biginteger.png

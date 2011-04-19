@@ -24,14 +24,6 @@ import java.awt.event.ActionListener
 import org.openmole.ide.core.control.MoleScenesManager
 
 class EnableTaskDetailedViewAction extends ActionListener{
-
-  import scala.collection.JavaConversions._
-import org.openmole.ide.core.workflow.implementation.GenericTaskModelUI
-  import org.openide.util.Lookup
-  println("LOOKUP ")
-  Lookup.getDefault.lookupAll(classOf[GenericTaskModelUI]).foreach(t=> {println("LOOKUP :: " +t.toString)})
-  Lookup.getDefault.lookupAll(classOf[org.openmole.ide.core.workflow.implementation.GenericTaskModelUI]).foreach(t=> {println("LOOKUP :: " +t.toString)})
-  
   
   override def actionPerformed(ae: ActionEvent)= {
     MoleScenesManager.detailedView= ae.getSource.asInstanceOf[AbstractButton].isSelected

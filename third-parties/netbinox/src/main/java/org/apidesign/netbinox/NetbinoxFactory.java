@@ -38,7 +38,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 @ServiceProvider(
     service=FrameworkFactory.class,
-    supersedes={ "org.eclipse.osgi.launch.EquinoxFactory" },
     position=-10
 )
 public class NetbinoxFactory implements FrameworkFactory {

@@ -17,7 +17,15 @@
 
 package org.openmole.ide.plugin.task.groovy
 
-import org.openmole.ide.core.workflow.implementation.TaskUI
-import org.openmole.ide.core.workflow.implementation.GenericTaskModelUI
+import org.openmole.ide.core.workflow.model.IEntityUI
+import org.openide.util.lookup.ServiceProvider
 
-class GroovyTaskModelUI(taskUI: TaskUI) extends GenericTaskModelUI(taskUI) {}
+@ServiceProvider(
+    service=classOf[IEntityUI],
+    position=10
+)
+class GroovyTaskModelUI extends IEntityUI {
+  
+  override def name = "toto"
+  override def entityType = classOf[java.lang.String]
+}
