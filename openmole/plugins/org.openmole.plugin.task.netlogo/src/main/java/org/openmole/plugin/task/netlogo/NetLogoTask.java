@@ -88,7 +88,7 @@ public class NetLogoTask extends ExternalSystemTask {
                     if (!outBinding._3()) {
                         context.add(outBinding._2(), outputValue);
                     } else {
-                        context.add(outBinding._2(), ((AbstractCollection) outputValue).toArray());
+                        context.add(outBinding._2(), ((AbstractCollection) outputValue).toArray(outBinding._2().type().newArray2(0)));
                     }
                 }
 
