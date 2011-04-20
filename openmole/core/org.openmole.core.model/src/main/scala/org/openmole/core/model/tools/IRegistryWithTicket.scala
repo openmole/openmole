@@ -18,7 +18,7 @@
 package org.openmole.core.model.tools
 
 
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 /**
  *
  * Registry to register value in fonction of a key and a ticket. The values are

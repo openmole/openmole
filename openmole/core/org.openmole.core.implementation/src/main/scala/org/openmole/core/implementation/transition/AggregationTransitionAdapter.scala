@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,12 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition
+package org.openmole.core.implementation.transition
 
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.transition.IAggregationTransition
+import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.core.model.mole.ITicket
 
-trait IAggregationTransition extends ITransition {
-  def aggregate(subMole: ISubMoleExecution, ticket: ITicket)
-  def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean
+class AggregationTransitionAdapter(transition: IAggregationTransition) extends IObjectListenerWithArgs[ISubMoleExecution] {
+
+    override def eventOccured(subMole: ISubMoleExecution, args: Array[Object]) = {
+      val ticket = args(0).asInstanceOf[ITicket]
+      transition.aggregate(subMole, ticket)
+    }
 }

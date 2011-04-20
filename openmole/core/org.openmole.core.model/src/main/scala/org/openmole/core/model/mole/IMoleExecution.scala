@@ -18,14 +18,17 @@
 package org.openmole.core.model.mole
 
 
+import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.tools.IRegistryWithTicket
+import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.job.ITicket
 
 object IMoleExecution {
   final val Starting = "Starting"
@@ -61,12 +64,9 @@ trait IMoleExecution {
   def nextTicket(parent: ITicket): ITicket
   def register(subMoleExecution: ISubMoleExecution)
 
-  def nextJobId: MoleJobId
-
-  def localCommunication: ILocalCommunication
-
+  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContextBuffer]
   def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
-    
+      
   def ticket(job: IMoleJob): Option[ITicket]
     
   def moleJobs: Iterable[IMoleJob]

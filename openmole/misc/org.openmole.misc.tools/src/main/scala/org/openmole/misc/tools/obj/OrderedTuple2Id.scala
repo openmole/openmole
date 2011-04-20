@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,14 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.job
+package org.openmole.misc.tools.obj
 
-import org.openmole.misc.tools.obj.Id
-import org.openmole.misc.tools.obj.OrderedTuple2Id
 
-object MoleJobId {
-  implicit val moleJobIdOrdering = OrderedTuple2Id.orderedTuple2IdOrdering[String, Long, MoleJobId]
+object OrderedTuple2Id {
+  implicit def orderedTuple2IdOrdering[T1 <% Ordered[T1], T2 <% Ordered[T2], O <: OrderedTuple2Id[T1, T2]] = new Ordering[O] {
+    override def compare(n1: O, n2: O) = {
+      val cmpId = n1._1.compare(n2._1)
+      if(cmpId != 0) cmpId
+      else n1._2.compare(n2._2)
+    }
+  }
 }
 
-class MoleJobId(val executionId: String, val jobId: Long) extends OrderedTuple2Id(executionId, jobId)
 
+class OrderedTuple2Id[+T1 <% Ordered[T1], +T2 <% Ordered[T2]](val _1: T1, val _2: T2) extends Id {
+  def id = (_1, _2)
+}

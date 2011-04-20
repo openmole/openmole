@@ -40,15 +40,19 @@ import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
@@ -80,10 +84,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
 
-  class MoleExecutionAdapterForMoleJobFailed extends IObjectListenerWithArgs[IMoleJob] {
+  class MoleExecutionAdapterForMoleJobFailedOrCanceled extends IObjectListenerWithArgs[IMoleJob] {
     override def eventOccured(job: IMoleJob, args: Array[Object]) = {
       val capsule = args(0).asInstanceOf[IGenericCapsule]
-      jobFailed(job, capsule)
+      jobFailedOrCanceled(job, capsule)
     }
   }
   
@@ -99,21 +103,21 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
  
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
-
+  
   private val executionId = UUID.randomUUID.toString  
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
 
   private val categorizer = new DualHashBidiMap[(ISubMoleExecution, IGenericCapsule, IMoleJobGroup), Job]
-  private val jobsGrouping = new MultiHashMap[ISubMoleExecution, Job]
 
   private val moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob
   private val moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution
   private val moleJobOutputTransitionPerformed = new MoleExecutionAdapterForMoleJobOutputTransitionPerformed
-  private val moleExecutionAdapterForMoleJobFailed = new MoleExecutionAdapterForMoleJobFailed
+  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new MoleExecutionAdapterForMoleJobFailedOrCanceled
 
-  val rootTicket = Ticket(executionId, ticketNumber.getAndIncrement)
-  val localCommunication = new LocalCommunication
+  val rootTicket = Ticket(executionId, ticketNumber.getAndIncrement)  
+  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]
+
   val exceptions = new ListBuffer[Throwable]
   
   @transient lazy val submiter = {
@@ -137,10 +141,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     MoleJobRegistry += moleJob -> (this, capsule)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
-    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailed, IMoleJob.JobFailed)
+    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
 
     inProgress += moleJob -> (subMole, ticket)
-    subMole.incNbJobInProgress(1)
+    subMole += moleJob
+//subMole.incNbJobInProgress(1)
 
     if(!instantRerun.rerun(moleJob, capsule))  {
       moleJobGrouping(capsule) match {
@@ -152,7 +157,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
             case null =>
               val j = new Job
               categorizer.put(key, j)
-              jobsGrouping.put(subMole, j)
+              subMole.addWaiting(j)
+              //jobsGrouping.put(subMole, j)
               j
             case j => j
           }
@@ -167,7 +173,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
 
-  private def submit(job: Job, capsule: IGenericCapsule): Unit = {
+  private def submit(job: IJob, capsule: IGenericCapsule): Unit = {
     JobRegistry += job -> this
     
     environmentSelection.select(capsule) match {
@@ -177,11 +183,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   private def submitGroups(subMoleExecution: ISubMoleExecution) = synchronized {
-    val jobs = jobsGrouping.remove(subMoleExecution)
+    val jobs = subMoleExecution.removeAllWaiting
 
     for (job <- jobs) {
       val info = categorizer.removeValue(job)
-      subMoleExecution.decNbJobWaitingInGroup(job.moleJobs.size)
       submit(job, info._2)
     }
   }
@@ -246,8 +251,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     this
   }
     
-  private def jobFailed(moleJob: IMoleJob, capsule: IGenericCapsule) = {
-    exceptions += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
+  private def jobFailedOrCanceled(moleJob: IMoleJob, capsule: IGenericCapsule) = {
+    if(moleJob.state == State.FAILED) exceptions += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 
@@ -262,17 +267,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     val subMole = jobInfo._1
     val ticket = jobInfo._2
         
-    subMole.decNbJobInProgress(1)
-
+    subMole -= job
     instantRerun.jobFinished(job, capsule)
     
-    if (subMole.nbJobInProgess == 0) {
-      EventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(job, this, ticket))
-    }
-
+    if (subMole.nbJobInProgess == 0) EventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(ticket))
+   
     if (isFinished) {
       submiter.interrupt
-      EventDispatcher.objectChanged(this, ISubMoleExecution.Finished, Array(job))
+      EventDispatcher.objectChanged(this, IMoleExecution.Finished)
     }
   }
 
@@ -280,10 +282,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  override def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
+  private def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
     
   override def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution] = {
-    inProgress.get(job) match{
+    inProgress.get(job) match {
       case None => None
       case Some(j) => Some(j._1)
     }

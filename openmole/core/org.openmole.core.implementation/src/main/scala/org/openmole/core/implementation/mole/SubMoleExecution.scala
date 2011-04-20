@@ -18,18 +18,28 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.transition.IAggregationTransition
+import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.implementation.tools.RegistryWithTicket
+import org.openmole.core.model.job.IJob
+import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IMoleExecution
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.HashSet
 
 object SubMoleExecution {
+  
   def apply(moleExecution: IMoleExecution): SubMoleExecution = {
-    val ret = new SubMoleExecution(None)
+    val ret = new SubMoleExecution(None, moleExecution)
     moleExecution.register(ret)
     ret
   }
   
   def apply(moleExecution: IMoleExecution, parent: ISubMoleExecution): SubMoleExecution =  {
-    val ret = new SubMoleExecution(Some(parent))
+    val ret = new SubMoleExecution(Some(parent), moleExecution)
     moleExecution.register(ret)
     ret
   }
@@ -37,48 +47,99 @@ object SubMoleExecution {
 }
 
 
-class SubMoleExecution(val parent: Option[ISubMoleExecution]) extends ISubMoleExecution {
+class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution: IMoleExecution) extends ISubMoleExecution {
 
-  @volatile private var _nbJobInProgress = 0
-  @volatile private var _nbJobWaitingInGroup = 0
+  private var submittedJobs = TreeSet[IMoleJob]()
+  private var waiting = List[IJob]()
+  private var _nbJobInProgress = 0
+  private var _nbJobWaitingInGroup = 0
+  private var childs = new HashSet[ISubMoleExecution]
+  private var _canceled = false
+  
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContextBuffer]
+  val transitionRegistry = new RegistryWithTicket[IGenericTransition, IContextBuffer]
 
-  override def nbJobInProgess = _nbJobInProgress
+  parrentApply(p => p.addChild(this))
 
-  override def incNbJobInProgress(nb: Int) = {
-    _nbJobInProgress += nb
-    parent match {
-      case None => 
-      case Some(t) => t.incNbJobInProgress(nb)
-    }
+  override def isRoot = !parent.isDefined
+  
+  override def nbJobInProgess = _nbJobInProgress //_nbJobInProgress
+  
+  override def += (moleJob: IMoleJob) = synchronized {
+    submittedJobs += moleJob
+    incNbJobInProgress(1)
   }
-
-  override def incNbJobWaitingInGroup(nb: Int) = {
-    _nbJobWaitingInGroup += nb
+  
+  override def -= (moleJob: IMoleJob) = synchronized {
+    submittedJobs -= moleJob
+    //println("Remove " + moleJob.state + " from " + this)
+    decNbJobInProgress(1)
+  }
+  
+  override def addWaiting(job: IJob) = synchronized {
+    waiting :+= job
     checkAllJobsWaitingInGroup
   }
-
-  override def decNbJobWaitingInGroup(value: Int) = _nbJobWaitingInGroup -= value
-
-  private def checkAllJobsWaitingInGroup =  {
-    if(nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0) {
-      EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
-    }
+  
+  override def removeAllWaiting: Iterable[IJob]= synchronized {
+    val ret = waiting
+    waiting = List.empty[IJob]
+    decNbJobWaitingInGroup(ret.map{_.moleJobs.size}.sum)
+    ret
+  }
+  
+  override def cancel = synchronized {
+    _canceled = true
+    submittedJobs.foreach{_.cancel}
+    childs.foreach{c => c.cancel}
+    parrentApply(p => p.removeChild(this))
+  }
+  
+  override def addChild(submoleExecution: ISubMoleExecution) = synchronized {
+    childs += submoleExecution
   }
 
-  override def decNbJobInProgress(nb: Int) = {
+  override def removeChild(submoleExecution: ISubMoleExecution) = synchronized {
+    childs -= submoleExecution
+  }
+
+  
+  override def incNbJobInProgress(nb: Int) = synchronized {
+    _nbJobInProgress += nb
+    parrentApply(p => p.incNbJobInProgress(nb))
+  }
+
+  override def decNbJobInProgress(nb: Int) = synchronized {
     _nbJobInProgress -= nb
     checkAllJobsWaitingInGroup
-    parent match {
-      case None =>
-      case Some(t) => t.decNbJobInProgress(nb)
-    }
+    parrentApply(p => p.decNbJobInProgress(nb))
+  }
+  
+  override def incNbJobWaitingInGroup(nb: Int) = synchronized {
+     //   println("Inc waiting " + nb + " " + this)
+    _nbJobWaitingInGroup += nb
+    checkAllJobsWaitingInGroup
+    parrentApply(p => p.incNbJobWaitingInGroup(nb))
   }
 
-  override def isRoot: Boolean = {
+  override def decNbJobWaitingInGroup(nb: Int) = synchronized {
+    _nbJobWaitingInGroup -= nb
+    parrentApply(p => p.decNbJobWaitingInGroup(nb))
+  }
+  
+  override def canceled = _canceled
+  
+  private def parrentApply(f: ISubMoleExecution => Unit) = {
     parent match {
-      case None => true
-      case Some(t) => false
+      case None => 
+      case Some(p) => f(p)
     }
   }
+    
+  private def checkAllJobsWaitingInGroup = {
+    if(nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
+      EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
+  }
+  
 
 }

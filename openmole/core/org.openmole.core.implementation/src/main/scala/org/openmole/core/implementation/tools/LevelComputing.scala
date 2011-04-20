@@ -64,22 +64,16 @@ class LevelComputing(mole: IMole) {
     }
 
     if (capsule.equals(mole.root)) return 1
-        
-
     var minLevel = Int.MaxValue
 
     for (slot <- capsule.intputSlots) {
       for (t <- slot.transitions) {
         var inLevel = level(t.start, allreadySeen)
 
-        if (classOf[IExplorationTransition].isAssignableFrom(t.getClass)) {
-          inLevel += 1
-        } else if (classOf[IAggregationTransition].isAssignableFrom(t.getClass)) {
-          inLevel -= 1
-        }
+        if (classOf[IExplorationTransition].isAssignableFrom(t.getClass)) inLevel += 1
+        else if (classOf[IAggregationTransition].isAssignableFrom(t.getClass)) inLevel -= 1
 
-        if (inLevel < minLevel) minLevel = inLevel
-                
+        if (inLevel < minLevel) minLevel = inLevel     
       }
     }
 

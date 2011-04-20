@@ -27,8 +27,9 @@ import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.mole.{IMoleExecution,ISubMoleExecution}
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.data.{IContext,IDataChannel}
-import org.openmole.core.model.job.{IMoleJob,MoleJobId,ITicket}
+import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.job.State
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
@@ -46,7 +47,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     override def eventOccured(obj: IMoleJob) = {
       obj.state match {
         case COMPLETED => jobFinished(obj)
-        case FAILED => jobFailed(obj)
+        case FAILED | CANCELED => jobFailedOrCanceled(obj)
         case _ =>
       }
     }
@@ -129,9 +130,9 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     _task = task
   }
   
-  private def jobFailed(job: IMoleJob) = {
+  private def jobFailedOrCanceled(job: IMoleJob) = {
     val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
-    EventDispatcher.objectChanged(job, IMoleJob.JobFailed, Array(this))
+    EventDispatcher.objectChanged(job, IMoleJob.JobFailedOrCanceled, Array(this))
   }
   
   private def jobFinished(job: IMoleJob) = {
@@ -141,7 +142,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
       val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
       
       EventDispatcher.objectChanged(execution, IMoleExecution.JobInCapsuleFinished, Array(job, this))
-      performTransition(job.context, ticket, execution, subMole)
+      performTransition(job.context, ticket, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
     } finally {
@@ -149,14 +150,15 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     }
   }
 
-  protected def performTransition(context: IContext, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = {    
+  protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    
     if(outputTransitions.size == 1 && outputDataChannels.isEmpty)
-      outputTransitions.head.perform(context, ticket, Set.empty, moleExecution, subMole)
+      outputTransitions.head.perform(context, ticket, Set.empty, subMole)
     else {
+      import subMole.moleExecution
       val toClone = variablesToClone(this, context, moleExecution)
 
       outputDataChannels.foreach{_.provides(context, ticket, toClone, moleExecution)}
-      outputTransitions.foreach{_.perform(context, ticket, toClone, moleExecution, subMole)}
+      outputTransitions.foreach{_.perform(context, ticket, toClone, subMole)}
     }
   }
 

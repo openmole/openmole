@@ -28,6 +28,7 @@ import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.sampling.ExplicitSampling
+import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.sampling.ISampling
@@ -40,8 +41,9 @@ import scala.collection.mutable.ListBuffer
 @RunWith(classOf[JUnitRunner])
 class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
-  "Aggregation transition" should "turn results of exploration into a array of values" in {
-     
+  "Aggregation transition" should "turn results of exploration into a array of values" in {      
+    var endCapsExecuted = 0
+    
     val data = List("A","A","B","C")
     val i = new Prototype("i", classOf[String])
      
@@ -59,6 +61,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
       override def process(context: IContext, progress: IProgress) = {
         context.contains(toArray(i)) should equal (true)
         context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
+        endCapsExecuted += 1
       }
     }
     
@@ -70,6 +73,133 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     new AggregationTransition(emptyC, testC)
                               
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (1)
+  }
+  
+  
+  "Aggregation transition" should "be triggered before all jobs are finished" in {
+    var endCapsExecuted = 0
+    
+    val data = List("A","A","B","C")
+    val i = new Prototype("i", classOf[String])
+     
+    val sampling = new ExplicitSampling(i, data)
+    
+    val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
+     
+    val emptyT = new EmptyTask("Empty")
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
+    
+    val emptyC = new Capsule(emptyT)
+    
+    val testT = new Task("Test") {
+      override def process(context: IContext, progress: IProgress) = {
+        context.contains(toArray(i)) should equal (true)
+        context.value(toArray(i)).get.size should equal (2)
+        endCapsExecuted += 1
+      }
+    }
+    
+    testT.addInput(toArray(i))
+    
+    val testC = new Capsule(testT)
+    
+    
+    
+    new ExplorationTransition(exc, emptyC)
+    
+    val trigger = new ICondition {
+      override def evaluate(context: IContext) = context.value(toArray(i)).get.size == 2
+    }
+    
+    new AggregationTransition(trigger, emptyC, testC)
+                              
+    new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (1)
+  }
+  
+  "Aggregation transition" should "turn results of exploration into an empty array" in {      
+    var endCapsExecuted = 0
+    
+    val data = List("A","A","B","C")
+    val i = new Prototype("i", classOf[String])
+     
+    val sampling = new ExplicitSampling(i, data)
+    
+    val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
+     
+    val emptyT = new EmptyTask("Empty")    
+    val emptyT2 = new EmptyTask("Empty")
+    emptyT2.addOutput(i)
+    
+    val emptyC = new Capsule(emptyT)
+    val emptyC2 = new Capsule(emptyT2)
+    
+    val testT = new Task("Test") {
+      override def process(context: IContext, progress: IProgress) = {
+        context.contains(toArray(i)) should equal (true)
+        context.value(toArray(i)).get.isEmpty should equal (true)
+        endCapsExecuted += 1
+      }
+    }
+    
+    testT.addInput(toArray(i))
+    
+    val testC = new Capsule(testT)
+    
+    new ExplorationTransition(exc, emptyC)
+    new Transition(emptyC, emptyC2, "false")
+    new AggregationTransition(emptyC2, testC)
+                              
+    new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (1)
+  }
+  
+  "2 aggregation transitions" should "be triggered before all jobs are finished" in {
+    @volatile var endCapsExecuted = 0
+    
+    val data = List("A","A","B","C")
+    val i = new Prototype("i", classOf[String])
+     
+    val sampling = new ExplicitSampling(i, data)
+    
+    val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
+     
+    val emptyT = new EmptyTask("Empty")
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
+    
+    val emptyC = new Capsule(emptyT)
+    val emptyC2 = new Capsule(emptyT)
+    val emptyC3 = new Capsule(emptyT)
+      
+    val testT = new Task("Test") {
+      override def process(context: IContext, progress: IProgress) = {
+        context.contains(toArray(i)) should equal (true)
+        context.value(toArray(i)).get.size should equal (2)
+        endCapsExecuted += 1
+      }
+    }
+    
+    testT.addInput(toArray(i))
+    
+    val testC = new Capsule(testT)
+    val testC2 = new Capsule(testT)
+    
+    new ExplorationTransition(exc, emptyC)
+    new Transition(emptyC, emptyC2)
+    new Transition(emptyC, emptyC3)
+    
+    val trigger = new ICondition {
+      override def evaluate(context: IContext) = context.value(toArray(i)).get.size == 2
+    }
+    
+    new AggregationTransition(trigger, emptyC2, testC) 
+    new AggregationTransition(trigger, emptyC3, testC2)
+    
+    new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (2)
   }
 }
 

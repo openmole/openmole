@@ -17,8 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
-
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 
 object Ticket {
   def apply(category: String, content: Long) = {

@@ -23,7 +23,7 @@ import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext, IVariable}
-import org.openmole.core.model.job.{ITicket}
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.ListBuffer
 
@@ -46,7 +46,7 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
    
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = {
     val levelComputing = LevelComputing(moleExecution)
-    val dataChannelRegistry = moleExecution.localCommunication.dataChannelRegistry
+    val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     val startLevel = levelComputing.level(start)
     val endLevel = levelComputing.level(end)
@@ -78,7 +78,7 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
     val endLevel = levelComputing.level(end)
     val toLowerLevel = endLevel < startLevel
 
-    val dataChannelRegistry = moleExecution.localCommunication.dataChannelRegistry
+    val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     dataChannelRegistry.synchronized {
       if (!toLowerLevel) {

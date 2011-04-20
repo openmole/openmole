@@ -23,7 +23,7 @@ import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.tools.IContextBuffer
@@ -37,17 +37,17 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
   plugStart 
   end += this
 
-  def nextTaskReady(ticket: ITicket, execution: IMoleExecution): Boolean = {
-    val registry = execution.localCommunication.transitionRegistry
+  def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
+    val registry = subMole.transitionRegistry
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
-
   
-  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
-    val registry = moleExecution.localCommunication.transitionRegistry
+  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, subMole: ISubMoleExecution) = synchronized {
+    import subMole.moleExecution
+    val registry = subMole.transitionRegistry
     registry.register(this, ticket, context)
 
-    if (nextTaskReady(ticket, moleExecution)) {
+    if (nextTaskReady(ticket, subMole)) {
       val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
                         end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
                         
@@ -64,17 +64,16 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
     }
   }
 
-  override def perform(context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) = {
+  override def perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
     if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
       for(name <- filtered) context -= name
-      performImpl(context, ticket, toClone, scheduler, subMole)
+      performImpl(context, ticket, toClone, subMole)
     }
   }
 
-
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
-  protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution) 
+  protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) 
   protected def plugStart
 }

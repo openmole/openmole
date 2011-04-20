@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.tools.IRegistryWithTicket
 import scala.collection.mutable.WeakHashMap
 

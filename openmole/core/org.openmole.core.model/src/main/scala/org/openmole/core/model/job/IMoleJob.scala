@@ -25,13 +25,13 @@ import org.openmole.core.model.data.IContext
 object IMoleJob {
   
   final val TransitionPerformed = "TransitionPerformed"
-  final val JobFailed = "JobFailed"
+  final val JobFailedOrCanceled = "JobFailedOrCanceled"
   final val StateChanged = "StateChanged"
     
-  implicit val ordering = new Ordering[IMoleJob] {
+  implicit val moleJobOrdering = new Ordering[IMoleJob] {
     
     override def compare(left: IMoleJob, right: IMoleJob) = {
-      MoleJobId.ordering.compare(left.id, right.id)
+      MoleJobId.moleJobIdOrdering.compare(left.id, right.id)
     }
   }
 }

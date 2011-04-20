@@ -28,7 +28,7 @@ package org.openmole.core.model.data
  *        
  */
 import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 
 trait IDataChannel {

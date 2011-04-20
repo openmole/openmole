@@ -22,7 +22,7 @@ trait Id {
   
   override def hashCode = id.hashCode
 
-  override def equals(other: Any): Boolean = {
+  override def equals(other: Any) = {
     if(other == null) false
     else if(!classOf[Id].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
     else id.equals(other.asInstanceOf[Id].id)

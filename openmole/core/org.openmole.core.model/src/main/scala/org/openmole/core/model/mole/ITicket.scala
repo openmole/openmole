@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.job
+package org.openmole.core.model.mole
 
 object ITicket {
   implicit def ordering = new Ordering[ITicket] {

@@ -19,8 +19,7 @@ package org.openmole.core.model.transition
 
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.{IPrototype,IContext}
-import org.openmole.core.model.job.ITicket
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.ISubMoleExecution
 
 trait IGenericTransition {
@@ -72,7 +71,7 @@ trait IGenericTransition {
      * @param scheduler the scheduler for the execution
      * @param subMole   current submole
      */
-    def perform(from: IContext, ticket: ITicket, toClone: Set[String], scheduler: IMoleExecution, subMole: ISubMoleExecution)
+    def perform(from: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution)
 
 
 }

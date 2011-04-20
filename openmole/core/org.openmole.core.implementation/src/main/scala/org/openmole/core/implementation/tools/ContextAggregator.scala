@@ -30,20 +30,21 @@ object ContextAggregator {
     val inContext = new Context   
     val toAggregate = toAggregateList.groupBy(_.prototype.name)
     
-    for(d <- aggregate; if(toAggregate.isDefinedAt(d.prototype.name))) {
-      if(toArrayFonc.isDefinedAt(d.prototype.name)) { 
-        val merging = toAggregate(d.prototype.name)
+    for(d <- aggregate) {
+      val merging = if(toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
+  
+      if(toArrayFonc.isDefinedAt(d.prototype.name)) {
         val manifest = toArrayFonc(d.prototype.name)
         
         val array = manifest.newArray(merging.size).asInstanceOf[Array[Any]]
         merging.zipWithIndex.foreach{e => array(e._2) = e._1.value}
         
         inContext += new Variable(new Prototype(d.prototype.name, manifest.arrayManifest.erasure).asInstanceOf[IPrototype[Any]], array) 
-      } else if (toAggregate(d.prototype.name).size > 1) {
-        throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        
-      } else inContext += new Variable(d.prototype.asInstanceOf[IPrototype[Any]], toAggregate(d.prototype.name).head.value)
-    }  
-    
+      } else if(!merging.isEmpty) { 
+        if(merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        
+        inContext += new Variable(d.prototype.asInstanceOf[IPrototype[Any]], merging.head.value)
+      }
+    }
     inContext
   }
 

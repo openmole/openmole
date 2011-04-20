@@ -23,30 +23,27 @@ import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.ITicket
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
+import org.openmole.core.model.transition.ICondition._
+import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.model.transition.ISlot
+import org.openmole.misc.tools.obj.ClassUtils._
+import scala.collection.immutable.TreeMap
+import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String]) extends Transition(start, end, condition, filtered) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Set[String] = Set.empty[String], trigger: Option[ICondition] = None) extends Transition(start, end, condition, filtered) with IAggregationTransition {
 
-  class AggregationTransitionAdapter extends IObjectListenerWithArgs[ISubMoleExecution] {
-
-    override def eventOccured(subMole: ISubMoleExecution, args: Array[Object]) = {
-      val lastJob = args(0).asInstanceOf[IMoleJob]
-      val moleExecution = args(1).asInstanceOf[IMoleExecution]
-      val ticket = args(2).asInstanceOf[ITicket];
-      subMoleFinished(subMole, lastJob, ticket, moleExecution)
-    }
-  }
-
-  def this(start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
+  def this(start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, True, Set.empty[String])
     
   def this(start: ICapsule, end: IGenericCapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
 
@@ -64,35 +61,119 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
     
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
-
-    val registry = moleExecution.localCommunication.aggregationTransitionRegistry
-
-    val parent = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
+  
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
     
-    val resultContexts = registry.consult(this, parent) match {
-      case None => 
-        val res = new ContextBuffer
-        registry.register(this, parent, res)
-        EventDispatcher.registerForObjectChangedSynchronous(subMole, Priority.LOW, new AggregationTransitionAdapter, ISubMoleExecution.Finished)
-        res
-      case Some(res) => res
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String], Some(trigger))
+
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
+    
+  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String], Some(trigger))
+    
+  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String], Some(trigger))
+   
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
+    
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet, Some(trigger))
+
+  def this(trigger: ICondition, start: ICapsule, end: IGenericCapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
+    
+  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet, Some(trigger))
+  
+
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule) = this(new Condition(trigger), start, end)  
+  
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule, condition: ICondition) = this(new Condition(trigger), start, end, condition)
+
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule, condition: String) = this(new Condition(trigger), start, end, condition)
+  
+  def this(trigger: String, start: ICapsule , slot: ISlot, condition: String) = this(new Condition(trigger), start, slot, condition)
+    
+  def this(trigger: String, start: ICapsule , slot: ISlot, condition: ICondition) = this(new Condition(trigger), start, slot, condition)
+   
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule, filtred: Array[String]) = this(new Condition(trigger), start, end, filtred)
+    
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule, condition: ICondition, filtred: Array[String]) = this(new Condition(trigger), start, end, condition, filtred)
+
+  def this(trigger: String, start: ICapsule, end: IGenericCapsule, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, end, condition, filtred)
+    
+  def this(trigger: String, start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
+
+  
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = synchronized {
+    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
+    
+    if(!hasBeenPerformed(subMole, parentTicket)) {
+      val resultContexts = subMole.aggregationTransitionRegistry.consult(this, parentTicket).get
+      
+      //Store the result context
+      resultContexts ++= (context, toClone)
+    
+      trigger match {
+        case Some(trigger) => {
+            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.userOutputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
+            val context = ContextAggregator.aggregate(start.userOutputs, toArrayManifests, resultContexts.map{_.toVariable})
+            if(trigger.evaluate(context)) {
+              aggregate(subMole, ticket)
+              if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
+            }
+          }
+        case None =>
+      }
     }
+  }
+
+  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = {
+    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
+    
+    if(!hasBeenPerformed(subMole, parentTicket)) {
+      val result = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
+      val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))
+      val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
+      val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
+
+      //Variable have are clonned in other transitions if necessary
+      submitNextJobsIfReady(result, parentTicket, subMoleParent)
+    }
+  }
+  
+  override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)
+  
+  private def allAggregationTransitionsPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
+  
+  private def oneAggregationTransitionNotPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean = {
+    val alreadySeen = new HashSet[IGenericCapsule]
+    val toProcess = new ListBuffer[(IGenericCapsule,Int)]
+    toProcess += ((this.start, 0))
+    
+    while(!toProcess.isEmpty) {
+      val cur = toProcess.remove(0)
+      val capsule = cur._1
+      val level = cur._2
+      
+      if(!alreadySeen(capsule)) {
+        alreadySeen += capsule
+        capsule.intputSlots.toList.flatMap{_.transitions}.foreach {
+          _ match {
+            case t: IExplorationTransition => if(level > 0) toProcess += ((t.start, level - 1))
+            case t: IAggregationTransition =>
+              if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
+              toProcess += ((t.start, level + 1))
+            case t => toProcess += ((t.start, level))
+          }
+        }
+        capsule.outputTransitions.foreach {
+          _ match {
+            case t: IExplorationTransition => toProcess += ((t.end.capsule, level + 1))
+            case t: IAggregationTransition =>
+              if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
+              if(level > 0) toProcess += ((t.end.capsule, level - 1))
+            case t => toProcess += ((t.end.capsule, level))
+          }
+        }
+      }
+    }
+    false
+  }
  
-    //Store the result context
-    resultContexts ++= (context, toClone)
-  }
-
-  def subMoleFinished(subMole: ISubMoleExecution, job: IMoleJob, ticket: ITicket, moleExecution: IMoleExecution) = {
-    def registry =  moleExecution.localCommunication.aggregationTransitionRegistry
-
-    val newTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
-    val result = registry.remove(this, newTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
-    val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))
-    val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
-    val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-
-    //Variable have are clonned in other transitions if necessary
-    submitNextJobsIfReady(result, newTicket, moleExecution, subMoleParent)
-  }
 }

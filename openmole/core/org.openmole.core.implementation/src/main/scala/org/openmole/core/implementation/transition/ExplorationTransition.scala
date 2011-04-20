@@ -30,12 +30,16 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.ITicket
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.IExplorationTransition
+import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.transition.ISlot
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.tools.service.Priority
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 class ExplorationTransition(override val start: IExplorationCapsule, override val end: ISlot, override val condition: ICondition, override val filtered: Set[String]) extends GenericTransition(start, end, condition, filtered) with IExplorationTransition {
@@ -59,10 +63,13 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
   def this(start: IExplorationCapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
   
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution, subMole: ISubMoleExecution) = synchronized {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = synchronized {
+    import subMole.moleExecution
     val values = context.value(ExplorationTask.Sample.prototype).getOrElse(throw new InternalProcessingError("BUG Sample not found in the exploration transition"))
     val subSubMole = SubMoleExecution(moleExecution, subMole)
-
+    
+    registerAggregationTransitions(ticket, subSubMole)
+    
     var size = 0
         
     val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("Capsule is empty"))
@@ -98,12 +105,41 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
         }
       }
  
-      submitNextJobsIfReady(ContextBuffer(destContext, toClone), newTicket, moleExecution, subSubMole)
+      submitNextJobsIfReady(ContextBuffer(destContext, toClone), newTicket, subSubMole)
     }
 
     subSubMole.decNbJobInProgress(size)
   }
 
   override protected def plugStart = start.addOutputTransition(this)
-    
+  
+  private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {
+    val alreadySeen = new HashSet[IGenericCapsule]
+    val toProcess = new ListBuffer[(IGenericCapsule,Int)]
+    toProcess += ((end.capsule,0))
+
+    while(!toProcess.isEmpty) {
+      val cur = toProcess.remove(0)
+      val capsule = cur._1
+      val level = cur._2
+      
+      if(!alreadySeen(capsule)) {
+        alreadySeen += capsule
+      
+        capsule.outputTransitions.foreach {
+          _ match {
+            case t: IExplorationTransition => toProcess += ((t.end.capsule, level + 1))
+            case t: IAggregationTransition => 
+              if(level > 0) toProcess += ((t.end.capsule, level - 1))
+              else if(level == 0) {
+                subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ContextBuffer)
+                EventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), ISubMoleExecution.Finished)
+              }
+            case t => toProcess += ((t.end.capsule, level))
+          }
+        }
+      }
+    }
+  }
+  
 }
