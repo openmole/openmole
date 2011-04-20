@@ -18,6 +18,11 @@
             </file>
         </folder>
         <folder name="Window">
+            <file name="org-openmole-ide-core-EntityPropertyAction.instance">
+                <attr name="component" methodvalue="org.openmole.ide.core.EntityPropertyTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="org.openmole.ide.core.Bundle#CTL_EntityPropertyAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
             <file name="org-openmole-ide-core-MoleSceneAction.instance">
                 <attr name="component" methodvalue="org.openmole.ide.core.MoleSceneTopComponent.findInstance"/>
                 <attr name="displayName" bundlevalue="org.openmole.ide.core.Bundle#CTL_MoleSceneAction"/>
@@ -42,6 +47,9 @@
             </file>
         </folder>
         <folder name="Window">
+            <file name="EntityPropertyAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-EntityPropertyAction.instance"/>
+            </file>
             <file name="MoleSceneAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-MoleSceneAction.instance"/>
             </file>
@@ -52,6 +60,7 @@
     </folder>
     <folder name="Windows2">
         <folder name="Components">
+            <file name="EntityPropertyTopComponent.settings" url="EntityPropertyTopComponentSettings.xml"/>
             <file name="MoleSceneTopComponent.settings" url="MoleSceneTopComponentSettings.xml"/>
             <file name="OutputTopComponent.settings" url="OutputTopComponentSettings.xml"/>
         </folder>
@@ -61,6 +70,9 @@
             </folder>
             <folder name="output">
                 <file name="OutputTopComponent.wstcref" url="OutputTopComponentWstcref.xml"/>
+            </folder>
+            <folder name="properties">
+                <file name="EntityPropertyTopComponent.wstcref" url="EntityPropertyTopComponentWstcref.xml"/>
             </folder>
         </folder>
     </folder>

@@ -31,11 +31,14 @@ class SamplingConverter extends Converter{
     writer.addAttribute("name", s.name)
     writer.addAttribute("type", s.entityType.getName.toString)
   }
-  
-  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new SamplingUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
+  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) = new Object
+ // override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new SamplingUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
   
   override def canConvert(t: Class[_]) = t.equals(classOf[SamplingUI])
 }
+
+
+
 //package org.openmole.ide.core.serializer;
 //
 //import com.thoughtworks.xstream.converters.Converter;

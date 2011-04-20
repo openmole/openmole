@@ -15,17 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.groovy
+package org.openmole.ide.plugin.sampling.csv
 
-import org.openmole.ide.core.workflow.model.IEntityUI
+import org.openmole.plugin.sampling.csv.CSVSampling
+import org.openmole.ide.core.properties.ISamplingFactoryUI
+import org.openmole.ide.core.properties.PanelUI
 import org.openide.util.lookup.ServiceProvider
 
-@ServiceProvider(
-    service=classOf[IEntityUI],
-    position=10
-)
-class GroovyTaskModelUI extends IEntityUI {
+//@ServiceProvider(
+//    service=classOf[ISamplingFactoryUI],
+//    position=10
+//)
+class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   
-  override def name = "toto"
-  override def entityType = classOf[java.lang.String]
+  override def panel= new CSVSamplingPanelUI
+  
+  override def coreObject(p: PanelUI)= new Object
+  
+  override def coreClass= classOf[CSVSampling]
 }

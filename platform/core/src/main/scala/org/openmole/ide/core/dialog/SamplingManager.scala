@@ -17,12 +17,14 @@
 package org.openmole.ide.core.dialog
 
 import org.openmole.ide.core.workflow.implementation.Preferences
+import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
 import org.openmole.ide.core.workflow.implementation.SamplingsUI
 
 class SamplingManager extends IManager{
 
-  override def entityInstance(name: String,t: Class[_]) = new SamplingUI(name, t)
+ // override def entityInstance(name: String,t: Class[_]) = new SamplingUI(name, t)
+  override def entityInstance(name: String,t: Class[_]) = new TaskUI(name,t)
 
   
   override def container= SamplingsUI

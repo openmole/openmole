@@ -80,5 +80,6 @@
 -->
     <modules>
         <module>org.openmole.ide.plugin.task.groovy</module>
+        <module>org.openmole.ide.plugin.sampling.csv</module>
     </modules>
 </project>

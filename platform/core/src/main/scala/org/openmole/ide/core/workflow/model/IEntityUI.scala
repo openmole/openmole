@@ -5,6 +5,8 @@
 
 package org.openmole.ide.core.workflow.model
 
+import java.awt.Panel
+
 trait IEntityUI {
   def entityType: Class[_]
   
