@@ -18,7 +18,10 @@ package org.openmole.plugin.task.netlogo;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.AbstractCollection;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.nlogo.api.CompilerException;
@@ -88,7 +91,12 @@ public class NetLogoTask extends ExternalSystemTask {
                     if (!outBinding._3()) {
                         context.add(outBinding._2(), outputValue);
                     } else {
-                        context.add(outBinding._2(), ((AbstractCollection) outputValue).toArray(outBinding._2().type().newArray2(0)));
+                        AbstractCollection netlogoCollection = (AbstractCollection) outputValue;
+                        Object array = Array.newInstance(outBinding._2().type().erasure().getComponentType(), netlogoCollection.size());
+                        Iterator it = netlogoCollection.iterator();
+                        for(int i = 0; i < netlogoCollection.size(); i++) {
+                            Array.set(array, i, it.next());
+                        }
                     }
                 }
 
