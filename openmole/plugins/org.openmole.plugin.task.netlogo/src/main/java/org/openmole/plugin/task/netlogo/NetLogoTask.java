@@ -97,7 +97,7 @@ public class NetLogoTask extends ExternalSystemTask {
                         for(int i = 0; i < netlogoCollection.size(); i++) {
                             Array.set(array, i, it.next());
                         }
-                        context.add(outBinding._2(), outputValue);
+                        context.add(outBinding._2(), array);
                     }
                 }
 
