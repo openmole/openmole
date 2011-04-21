@@ -32,37 +32,43 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Lock
 
 object MoleJob {
   val LOGGER = Logger.getLogger(classOf[MoleJob].getName)
 }
 
 class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
-    
+  
+
   val progress = new Progress
     
   @volatile  private var _state: State = null
   state = READY
     
+  
   override def state: State = _state
   override def context: IContext = _context
     
   //@ObjectModified(name = IMoleJob.StateChanged)
-  def state_=(state: State) = synchronized {
-    if(_state == null || !_state.isFinal) {
-      val timeStamps = context.value(GenericTask.Timestamps.prototype) match {
-        case None => 
-          val ret = new ArrayBuffer[ITimeStamp](5)
-          context += (GenericTask.Timestamps.prototype, ret)
-          ret
-        case Some(ts) => ts
-      }
-     // MoleJob.LOGGER.info("Before " + task.name + " " + timeStamps.map{ _.state.toString } + " " + timeStamps.getClass)
-      timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
-     // MoleJob.LOGGER.info("After " + task.name + " " + timeStamps.map{ _.state.toString } + timeStamps.getClass)
-      _state = state
-      EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
+  def state_=(state: State) = {
+    val changed = synchronized {
+      if(_state == null || !_state.isFinal) {
+        val timeStamps = context.value(GenericTask.Timestamps.prototype) match {
+          case None => 
+            val ret = new ArrayBuffer[ITimeStamp](5)
+            context += (GenericTask.Timestamps.prototype, ret)
+            ret
+          case Some(ts) => ts
+        }
+        // MoleJob.LOGGER.info("Before " + task.name + " " + timeStamps.map{ _.state.toString } + " " + timeStamps.getClass)
+        timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
+        // MoleJob.LOGGER.info("After " + task.name + " " + timeStamps.map{ _.state.toString } + timeStamps.getClass)
+        _state = state
+        true
+      } else false
     }
+    if(changed) EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
   }
 
 

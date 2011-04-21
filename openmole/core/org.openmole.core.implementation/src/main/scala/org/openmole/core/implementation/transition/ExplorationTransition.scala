@@ -63,7 +63,7 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
   def this(start: IExplorationCapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
   
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = synchronized {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
     import subMole.moleExecution
     val values = context.value(ExplorationTask.Sample.prototype).getOrElse(throw new InternalProcessingError("BUG Sample not found in the exploration transition"))
     val subSubMole = SubMoleExecution(moleExecution, subMole)

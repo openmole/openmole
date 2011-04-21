@@ -54,80 +54,73 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   private var _nbJobInProgress = 0
   private var _nbJobWaitingInGroup = 0
   private var childs = new HashSet[ISubMoleExecution]
-  private var _canceled = false
   
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContextBuffer]
   val transitionRegistry = new RegistryWithTicket[IGenericTransition, IContextBuffer]
 
+  @transient lazy val internalLock = new Object
+  
   parrentApply(p => p.addChild(this))
 
   override def isRoot = !parent.isDefined
   
   override def nbJobInProgess = _nbJobInProgress //_nbJobInProgress
   
-  override def += (moleJob: IMoleJob) = synchronized {
+  override def += (moleJob: IMoleJob) = internalLock.synchronized {
     submittedJobs += moleJob
     incNbJobInProgress(1)
   }
   
-  override def -= (moleJob: IMoleJob) = synchronized {
+  override def -= (moleJob: IMoleJob) = internalLock.synchronized {
     submittedJobs -= moleJob
     //println("Remove " + moleJob.state + " from " + this)
     decNbJobInProgress(1)
   }
   
-  override def addWaiting(job: IJob) = synchronized {
-    waiting :+= job
-    checkAllJobsWaitingInGroup
-  }
+  override def addWaiting(job: IJob) = 
+    if(internalLock.synchronized {waiting :+= job; checkAllJobsWaitingInGroup}) allWaitingEvent
   
-  override def removeAllWaiting: Iterable[IJob]= synchronized {
+  override def removeAllWaiting: Iterable[IJob]= internalLock.synchronized {
     val ret = waiting
     waiting = List.empty[IJob]
     decNbJobWaitingInGroup(ret.map{_.moleJobs.size}.sum)
     ret
   }
   
-  override def cancel = synchronized {
-    _canceled = true
+  override def cancel = {
     submittedJobs.foreach{_.cancel}
     childs.foreach{c => c.cancel}
     parrentApply(p => p.removeChild(this))
   }
   
-  override def addChild(submoleExecution: ISubMoleExecution) = synchronized {
+  override def addChild(submoleExecution: ISubMoleExecution) = internalLock.synchronized {
     childs += submoleExecution
   }
 
-  override def removeChild(submoleExecution: ISubMoleExecution) = synchronized {
+  override def removeChild(submoleExecution: ISubMoleExecution) = internalLock.synchronized {
     childs -= submoleExecution
   }
 
   
-  override def incNbJobInProgress(nb: Int) = synchronized {
-    _nbJobInProgress += nb
+  override def incNbJobInProgress(nb: Int) =  {
+    internalLock.synchronized {_nbJobInProgress += nb}
     parrentApply(p => p.incNbJobInProgress(nb))
   }
 
-  override def decNbJobInProgress(nb: Int) = synchronized {
-    _nbJobInProgress -= nb
-    checkAllJobsWaitingInGroup
+  override def decNbJobInProgress(nb: Int) = {
+    if(internalLock.synchronized{_nbJobInProgress -= nb; checkAllJobsWaitingInGroup}) allWaitingEvent
     parrentApply(p => p.decNbJobInProgress(nb))
   }
   
-  override def incNbJobWaitingInGroup(nb: Int) = synchronized {
-     //   println("Inc waiting " + nb + " " + this)
-    _nbJobWaitingInGroup += nb
-    checkAllJobsWaitingInGroup
+  override def incNbJobWaitingInGroup(nb: Int) = {
+    if(internalLock.synchronized {_nbJobWaitingInGroup += nb; checkAllJobsWaitingInGroup}) allWaitingEvent
     parrentApply(p => p.incNbJobWaitingInGroup(nb))
   }
 
-  override def decNbJobWaitingInGroup(nb: Int) = synchronized {
+  override def decNbJobWaitingInGroup(nb: Int) = internalLock.synchronized {
     _nbJobWaitingInGroup -= nb
     parrentApply(p => p.decNbJobWaitingInGroup(nb))
   }
-  
-  override def canceled = _canceled
   
   private def parrentApply(f: ISubMoleExecution => Unit) = {
     parent match {
@@ -136,10 +129,9 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     }
   }
     
-  private def checkAllJobsWaitingInGroup = {
-    if(nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
-      EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
-  }
+  private def checkAllJobsWaitingInGroup = (nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
+  
+  private def allWaitingEvent = EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
   
 
 }

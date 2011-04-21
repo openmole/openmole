@@ -100,7 +100,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
   def this(trigger: String, start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
 
   
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = synchronized {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
     
     if(!hasBeenPerformed(subMole, parentTicket)) {
@@ -123,7 +123,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     }
   }
 
-  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = {
+  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
     
     if(!hasBeenPerformed(subMole, parentTicket)) {

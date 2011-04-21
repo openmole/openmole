@@ -143,8 +143,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
 
-    inProgress += moleJob -> (subMole, ticket)
-    subMole += moleJob
+    synchronized {
+      inProgress += moleJob -> (subMole, ticket)
+      subMole += moleJob
+    }
 //subMole.incNbJobInProgress(1)
 
     if(!instantRerun.rerun(moleJob, capsule))  {
@@ -153,15 +155,15 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
           val category = strategy.group(moleJob.context)
 
           val key = (subMole, capsule, category)
-          val job = categorizer.get(key) match {
+          val job = categorizer.synchronized{ categorizer.get(key) match {
             case null =>
               val j = new Job
               categorizer.put(key, j)
               subMole.addWaiting(j)
-              //jobsGrouping.put(subMole, j)
               j
             case j => j
           }
+        }
 
           job += moleJob
           subMole.incNbJobWaitingInGroup(1)
@@ -182,11 +184,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
 
-  private def submitGroups(subMoleExecution: ISubMoleExecution) = synchronized {
+  private def submitGroups(subMoleExecution: ISubMoleExecution) = {
     val jobs = subMoleExecution.removeAllWaiting
 
     for (job <- jobs) {
-      val info = categorizer.removeValue(job)
+      val info = categorizer.synchronized{categorizer.removeValue(job)}
       submit(job, info._2)
     }
   }

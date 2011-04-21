@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.AbstractCollection;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.plugin.task.external.system.ExternalSystemTask;
 import scala.Tuple2;
-import scala.Tuple3;
 
 /**
  *
@@ -46,7 +44,7 @@ public class NetLogoTask extends ExternalSystemTask {
 
     Iterable<String> launchingCommands;
     List<Tuple2<IPrototype, String>> inputBinding = new LinkedList<Tuple2<IPrototype, String>>();
-    List<Tuple3<String, IPrototype, Boolean>> outputBinding = new LinkedList<Tuple3<String, IPrototype, Boolean>>();
+    List<Tuple2<String, IPrototype>> outputBinding = new LinkedList<Tuple2<String, IPrototype>>();
     String relativeScriptPath;
 
     public NetLogoTask(String name,
@@ -86,9 +84,9 @@ public class NetLogoTask extends ExternalSystemTask {
                     workspace.command(VariableExpansion.expandData(context, cmd));
                 }
 
-                for (Tuple3<String, IPrototype, Boolean> outBinding : getOutputBinding()) {
+                for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
                     Object outputValue = workspace.report(outBinding._1());
-                    if (!outBinding._3()) {
+                    if (!outBinding._2().type().erasure().isArray()) {
                         context.add(outBinding._2(), outputValue);
                     } else {
                         AbstractCollection netlogoCollection = (AbstractCollection) outputValue;
@@ -126,12 +124,7 @@ public class NetLogoTask extends ExternalSystemTask {
     }
 
     public NetLogoTask addNetLogoOutput(String binding, IPrototype prototype) {
-        addNetLogoOutput(binding, prototype, false);
-        return this;
-    }
-
-    public NetLogoTask addNetLogoOutput(String binding, IPrototype prototype, Boolean toArray) {
-        outputBinding.add(new Tuple3<String, IPrototype, Boolean>(binding, prototype, toArray));
+        outputBinding.add(new Tuple2<String, IPrototype>(binding, prototype));
         super.addOutput(prototype);
         return this;
     }

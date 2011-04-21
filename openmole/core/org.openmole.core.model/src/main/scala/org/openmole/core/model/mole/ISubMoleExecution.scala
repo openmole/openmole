@@ -52,8 +52,7 @@ trait ISubMoleExecution {
   def decNbJobWaitingInGroup(value: Int)
   
   def cancel
-  def canceled: Boolean
-
+  
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, IContextBuffer]
   def transitionRegistry: IRegistryWithTicket[IGenericTransition, IContextBuffer]
 
