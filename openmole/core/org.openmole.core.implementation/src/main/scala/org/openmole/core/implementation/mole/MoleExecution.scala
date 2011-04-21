@@ -156,14 +156,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
           val key = (subMole, capsule, category)
           val job = categorizer.synchronized{ categorizer.get(key) match {
-            case null =>
-              val j = new Job
-              categorizer.put(key, j)
-              subMole.addWaiting(j)
-              j
-            case j => j
+              case null =>
+                val j = new Job
+                categorizer.put(key, j)
+                subMole.addWaiting(j)
+                j
+              case j => j
+            }
           }
-        }
 
           job += moleJob
           subMole.incNbJobWaitingInGroup(1)
@@ -184,11 +184,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
 
-  private def submitGroups(subMoleExecution: ISubMoleExecution) = {
+  private def submitGroups(subMoleExecution: ISubMoleExecution) = synchronized {
     val jobs = subMoleExecution.removeAllWaiting
 
     for (job <- jobs) {
-      val info = categorizer.synchronized{categorizer.removeValue(job)}
+      val info = categorizer.removeValue(job)
       submit(job, info._2)
     }
   }
@@ -234,13 +234,12 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def cancel: this.type = {
     synchronized { 
       submiter.interrupt
-
-      inProgress.synchronized {
-        for (moleJob <- inProgress.keySet) {
-          moleJob.cancel
-        }
-        inProgress = TreeMap.empty
+      
+      for (moleJob <- inProgress.keySet) {
+        moleJob.cancel
       }
+      inProgress = TreeMap.empty
+      
     }
     this
   }

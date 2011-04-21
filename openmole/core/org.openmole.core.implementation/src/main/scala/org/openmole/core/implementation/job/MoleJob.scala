@@ -40,7 +40,6 @@ object MoleJob {
 
 class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
   
-
   val progress = new Progress
     
   @volatile  private var _state: State = null

@@ -133,7 +133,7 @@ public class NetLogoTask extends ExternalSystemTask {
         return inputBinding;
     }
 
-    private List<Tuple3<String, IPrototype, Boolean>> getOutputBinding() {
+    private List<Tuple2<String, IPrototype>> getOutputBinding() {
         return outputBinding;
     }
 }
