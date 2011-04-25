@@ -40,7 +40,7 @@ import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
 class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
-
+  
   "Aggregation transition" should "turn results of exploration into a array of values" in {      
     var endCapsExecuted = 0
     

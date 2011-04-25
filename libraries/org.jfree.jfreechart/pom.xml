@@ -47,7 +47,6 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
-        <eclipse.buddypolicy>global</eclipse.buddypolicy>
     </properties>
 
 </project>

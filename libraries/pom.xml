@@ -72,7 +72,6 @@
         <bundle.name>${project.name}</bundle.name>
         <bundle.description>${project.name}</bundle.description>
 	<bundle.classpath>.</bundle.classpath>
-	<dynamic.import.package></dynamic.import.package>
     </properties>
 
     <build>
@@ -94,7 +93,6 @@
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>
                         <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
 			<Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
-<DynamicImport-Package>${dynamic.import.package}</DynamicImport-Package>
 		    </instructions>
                 </configuration>
             </plugin>

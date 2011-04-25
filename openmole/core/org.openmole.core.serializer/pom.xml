@@ -71,7 +71,7 @@
    <packaging>bundle</packaging>
 
     <properties>
-	<eclipse.buddypolicy>global</eclipse.buddypolicy>
+	<!--<eclipse.buddypolicy>global</eclipse.buddypolicy>-->
     </properties>
 
 </project>
