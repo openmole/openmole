@@ -17,24 +17,24 @@
 
 package org.openmole.core.implementation.execution
 
+import java.util.Collections
 import java.util.LinkedList
 import org.openmole.core.model.execution.IStatisticSample
 import org.openmole.core.model.execution.IStatisticSamples
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
+
 object StatisticSamples {
   val empty = new StatisticSamples(0)
 }
 
 class StatisticSamples(historySize: Int) extends IStatisticSamples {
  
-  val averages = new LinkedList[IStatisticSample]
+  val averages = Collections.synchronizedList(new LinkedList[IStatisticSample])
 
-  override def iterator: Iterator[IStatisticSample] = synchronized {
-    JavaConversions.asScalaIterable(averages).toList.iterator
-  }
+  override def iterator: Iterator[IStatisticSample] = averages.iterator
 
   override def += (sample: IStatisticSample) = synchronized {
-    if(averages.size >= historySize) averages.removeFirst
+    if(averages.size >= historySize) averages.remove(0)
     
     val it = averages.listIterator(averages.size)
     var inserted = false
