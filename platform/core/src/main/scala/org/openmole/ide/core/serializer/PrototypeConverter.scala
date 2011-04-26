@@ -29,10 +29,11 @@ class PrototypeConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     val s= o.asInstanceOf[PrototypeUI]
     writer.addAttribute("name", s.name)
-    writer.addAttribute("type", s.entityType.getName.toString)
+  //  writer.addAttribute("type", s.entityType.getName.toString)
   }
   
-  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new PrototypeUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
+  //override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new PrototypeUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
+  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new Object
   
   override def canConvert(t: Class[_]) = t.equals(classOf[PrototypeUI])
 }

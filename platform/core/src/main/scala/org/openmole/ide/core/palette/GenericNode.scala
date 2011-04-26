@@ -21,10 +21,11 @@ import java.awt.datatransfer.DataFlavor
 import org.openide.nodes.AbstractNode
 import org.openide.util.lookup.Lookups;
 import org.openide.nodes.Children
+import org.openmole.ide.core.properties.IFactoryUI
 
-class GenericNode(dataFlavor: DataFlavor,iconPath: String,iconName: String) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
-  setIconBaseWithExtension(iconPath)
-  setName(iconName)
+class GenericNode(dataFlavor: DataFlavor,factory: IFactoryUI) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
+  setIconBaseWithExtension(factory.imagePath)
+  setName(factory.coreClass.getSimpleName)
 }
 
 

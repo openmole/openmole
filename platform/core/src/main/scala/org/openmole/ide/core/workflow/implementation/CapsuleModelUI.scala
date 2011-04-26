@@ -6,23 +6,22 @@
 package org.openmole.ide.core.workflow.implementation
 
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
-import org.openmole.ide.core.workflow.model.IGenericTaskModelUI
 
-class CapsuleModelUI(var taskModel: Option[IGenericTaskModelUI] = None, var nbInputSlots: Int = 0) extends ICapsuleModelUI{
+class CapsuleModelUI(var taskUI: Option[TaskUI] = None, var nbInputSlots: Int = 0) extends ICapsuleModelUI{
 
   val category= "Task Tapsules"
   var startingCapsule= false
   var containsTask= false
   
-  def this(taskModel: IGenericTaskModelUI)= this(Some(taskModel))
+  def this(taskUI: TaskUI)= this(Some(taskUI))
 //  def this(tModel: IGenericTaskModelUI[IGenericTask], capsModule: CapsuleModelUI[T])= this(tModel, capsModule.nbInputSlots)
   
   def addInputSlot= nbInputSlots+= 1
   
   def removeInputSlot= nbInputSlots-= 1
   
-  def setTaskModel(tModel: IGenericTaskModelUI)={
-    taskModel= Some(tModel)
+  def setTaskUI(tUI: TaskUI)={
+    taskUI= Some(tUI)
     containsTask= true
   }
   

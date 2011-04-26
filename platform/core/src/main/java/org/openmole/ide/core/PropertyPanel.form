@@ -20,32 +20,37 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
                       <Component id="prototypeToggleButton" linkSize="1" min="-2" max="-2" attributes="2"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="TaskToogleButton" linkSize="1" min="-2" pref="114" max="-2" attributes="2"/>
+                      <Component id="taskToogleButton" linkSize="1" min="-2" pref="114" max="-2" attributes="2"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="SamplingToogleButton" linkSize="1" min="-2" pref="90" max="-2" attributes="2"/>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="EnvironmentToogleButton" linkSize="1" min="-2" max="-2" attributes="2"/>
+                      <Component id="samplingToogleButton" linkSize="1" min="-2" pref="90" max="-2" attributes="2"/>
                   </Group>
-                  <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jTextField1" pref="285" max="32767" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="1">
-                          <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="typeComboBox" max="32767" attributes="0"/>
-                      </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="nameTextField" min="-2" pref="301" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="1">
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="typeComboBox" pref="302" max="32767" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="editToggleButton" linkSize="3" min="-2" pref="48" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="newToggleButton" linkSize="3" min="-2" pref="54" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="environmentToogleButton" linkSize="1" min="-2" max="-2" attributes="2"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -54,22 +59,32 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="SamplingToogleButton" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
-                  <Component id="TaskToogleButton" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
-                  <Component id="EnvironmentToogleButton" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
+                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                      <Component id="samplingToogleButton" alignment="3" min="-2" pref="40" max="-2" attributes="0"/>
+                      <Component id="environmentToogleButton" alignment="3" min="-2" pref="40" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="taskToogleButton" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
                   <Component id="prototypeToggleButton" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="2" attributes="0">
-                  <Component id="jTextField1" alignment="2" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel1" alignment="2" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="2" attributes="0">
+                          <Component id="nameTextField" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" alignment="2" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="2" attributes="0">
+                          <Component id="jLabel2" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="typeComboBox" alignment="2" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                      <Component id="editToggleButton" alignment="3" min="-2" pref="60" max="-2" attributes="0"/>
+                      <Component id="newToggleButton" alignment="3" min="-2" pref="60" max="-2" attributes="0"/>
+                  </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="2" attributes="0">
-                  <Component id="jLabel2" alignment="2" min="-2" max="-2" attributes="0"/>
-                  <Component id="typeComboBox" alignment="2" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace pref="184" max="32767" attributes="0"/>
+              <EmptySpace pref="21" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -82,10 +97,10 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTextField1">
+    <Component class="javax.swing.JTextField" name="nameTextField">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.jTextField1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.nameTextField.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -118,34 +133,54 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="prototypeToggleButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="TaskToogleButton">
+    <Component class="javax.swing.JToggleButton" name="taskToogleButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.TaskToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.taskToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TaskToogleButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="taskToogleButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="SamplingToogleButton">
+    <Component class="javax.swing.JToggleButton" name="samplingToogleButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.SamplingToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.samplingToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SamplingToogleButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="samplingToogleButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="EnvironmentToogleButton">
+    <Component class="javax.swing.JToggleButton" name="environmentToogleButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.EnvironmentToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.environmentToogleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="EnvironmentToogleButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="environmentToogleButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JToggleButton" name="newToggleButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.newToggleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="newToggleButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JToggleButton" name="editToggleButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/openmole/ide/core/Bundle.properties" key="PropertyPanel.editToggleButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="editToggleButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

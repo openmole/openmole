@@ -19,14 +19,18 @@ package org.openmole.ide.core.palette
 
 import java.util.ArrayList
 import org.openide.nodes.Node
+import org.openide.util.Lookup
+import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.commons.ApplicationCustomize
-import org.openmole.ide.core.workflow.implementation.TasksUI
+import scala.collection.JavaConversions._
 
 class TaskChildren extends GenericChildren{
 
   override def initCollection: java.util.List[Node] = {
-    val childrenNodes = new ArrayList[Node](TasksUI.getAll.size)
-    TasksUI.getAll.foreach(t=>{childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,t))})
+    val lookup=  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
+    val childrenNodes = new ArrayList[Node](lookup.size)
+  //  TasksUI.getAll.foreach(t=>{childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,t))})
+    lookup.foreach(t=>{childrenNodes.add(new TaskNode(ApplicationCustomize.TASK_DATA_FLAVOR,t))})
     childrenNodes
   }
 }

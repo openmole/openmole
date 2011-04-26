@@ -44,9 +44,9 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends
   override def accept(widget: Widget, point: Point,t: Transferable)= {
     val proto = t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeUI]
     if (point.x < view.connectableWidget.widgetWidth / 2) {
-      view.capsuleModel.taskModel.get.addPrototype(proto, IOType.INPUT)
+      view.capsuleModel.taskUI.get.addPrototype(proto, IOType.INPUT)
     } else {
-      view.capsuleModel.taskModel.get.addPrototype(proto, IOType.OUTPUT)
+      view.capsuleModel.taskUI.get.addPrototype(proto, IOType.OUTPUT)
     }
   }
 }

@@ -9,7 +9,7 @@ import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
-class SlotWidget(scene: Scene, capsule: CapsuleViewUI) extends ImageWidget(scene){}
+class SlotWidget(scene: Scene) extends ImageWidget(scene){}
 
 //SlotWidget extends ImageWidget{
 //

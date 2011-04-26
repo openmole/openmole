@@ -6,22 +6,23 @@
 package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Color
-import java.awt.BasicStroke
 import java.awt.Container
 import java.awt.Graphics2D
 import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.workflow.implementation.CapsuleModelUI
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.IGenericTaskModelUI
-import org.openmole.ide.core.workflow.model.IObjectViewUI
+import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import scala.collection.mutable.HashSet
 
-class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI, val taskModel: Option[IGenericTaskModelUI]= None) extends MyWidget(scene, objectView){
+class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extends MyWidget(scene, capsuleView.capsuleModel){
 
   var islots= HashSet.empty[ISlotWidget]
-  val oslot= new OSlotWidget(scene,objectView)
+  val oslot= new OSlotWidget(scene,capsuleView)
+  
   addChild(oslot)
   createActions(scene.MOVE).addAction(ActionFactory.createMoveAction)
   
@@ -45,11 +46,9 @@ class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI, val taskMod
     super.paintWidget
     val graphics = getGraphics.asInstanceOf[Graphics2D]
 
-    graphics.setColor(objectView.borderColor)
-    val stroke = new BasicStroke(1.3f, 1, 1)
-    graphics.draw(stroke.createStrokedShape(bodyArea))
+   // graphics.setColor(taskUI.factory.borderColor)
 
-    if (taskModel.isDefined) {
+    if (capsuleView.capsuleModel.taskUI.isDefined) {
       graphics.drawLine(taskWidth / 2,
                         ApplicationCustomize.TASK_TITLE_HEIGHT,
                         taskWidth / 2,
@@ -59,12 +58,12 @@ class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI, val taskMod
       var x = taskWidth / 2 + 9
       
       var i=0
-      (taskModel.get.prototypesIn.toList:::taskModel.get.prototypesOut.toList).foreach(p=> {
-          if (i > taskModel.get.prototypesIn.size) i= 0
+      (capsuleView.capsuleModel.taskUI.get.prototypesIn.toList:::capsuleView.capsuleModel.taskUI.get.prototypesOut.toList).foreach(p=> {
+          if (i > capsuleView.capsuleModel.taskUI.get.prototypesIn.size) i= 0
           var st = p.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h= 35 + i * 22
-          graphics.drawImage(ApplicationCustomize.typeImageMap(p.entityType.getSimpleName),
+          graphics.drawImage(ApplicationCustomize.typeImageMap(p.factory.coreClass.getSimpleName),
                              x - taskWidth / 2, h - 13,
                              new Container)
           if (MoleScenesManager.detailedView) graphics.drawString(st, x - taskWidth / 2 + 24, h)
@@ -72,7 +71,7 @@ class ConnectableWidget(scene: MoleScene, objectView: CapsuleViewUI, val taskMod
           i+= 1
         })
 
-      val newH= Math.max(taskModel.get.prototypesIn.size, taskModel.get.prototypesOut.size) * 22 + 45
+      val newH= Math.max(capsuleView.capsuleModel.taskUI.get.prototypesIn.size, capsuleView.capsuleModel.taskUI.get.prototypesOut.size) * 22 + 45
       val delta= bodyArea.height - newH
       if (delta < 0) {
         bodyArea.setSize(bodyArea.width, newH)

@@ -29,7 +29,7 @@ class SamplingConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     val s= o.asInstanceOf[SamplingUI]
     writer.addAttribute("name", s.name)
-    writer.addAttribute("type", s.entityType.getName.toString)
+   // writer.addAttribute("type", s.entityType.getName.toString)
   }
   override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) = new Object
  // override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new SamplingUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))

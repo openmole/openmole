@@ -13,10 +13,14 @@ import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.commons.ApplicationCustomize
 import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.IObjectViewUI
+import org.openmole.ide.core.workflow.model.ICapsuleModelUI
+import org.openide.util.ImageUtilities
+import java.awt.BasicStroke
 
-class MyWidget(scene: MoleScene,objectView: IObjectViewUI,var title: Option[String]= Some("")) extends Widget(scene) {
+class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[String]= Some("")) extends Widget(scene) {
 
   var taskWidth= ApplicationCustomize.TASK_CONTAINER_WIDTH
   var taskImageOffset= ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET
@@ -53,25 +57,26 @@ class MyWidget(scene: MoleScene,objectView: IObjectViewUI,var title: Option[Stri
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(objectView.backgroundColor)
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factory.backgroundColor else new Color(204,204,204,128))
     graphics.fill(bodyArea)
-    graphics.setColor(objectView.borderColor)
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factory.borderColor else new Color(204,204,204))
 
+    val stroke = new BasicStroke(1.3f, 1, 1)
+    graphics.draw(stroke.createStrokedShape(bodyArea))
+    
     if (title.isDefined) {
       graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)
       graphics.drawString(title.get, 10, 15)
     }
 
-    if (objectView.backgroundImage.isDefined) {
-      graphics.drawImage(objectView.backgroundImage.get,
-                         taskImageOffset,
-                         ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
-                         ApplicationCustomize.TASK_IMAGE_WIDTH,
-                         ApplicationCustomize.TASK_IMAGE_HEIGHT,
-                         objectView.backgroundColor,
-                         new Container)
-    }
+    if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
+                                                         taskImageOffset,
+                                                         ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
+                                                         ApplicationCustomize.TASK_IMAGE_WIDTH,
+                                                         ApplicationCustomize.TASK_IMAGE_HEIGHT,
+                                                         capsuleModel.taskUI.get.factory.backgroundColor,
+                                                         new Container)
   }
 
   def addTitle(titleString: String)= {

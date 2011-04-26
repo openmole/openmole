@@ -20,27 +20,24 @@ package org.openmole.ide.core.provider
 import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.workflow.model.ICapsuleView
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.commons.ApplicationCustomize
 
-class DnDNewTaskProvider(molescene: MoleScene,var capsuleView: Option[ICapsuleView]= None) extends DnDProvider(molescene) {
 
-  
+class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
+
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= ConnectorState.ACCEPT
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
-    println("__ accept "  + capsuleView.isDefined)
-    println("__ accept "  + capsuleView.isEmpty)
-    if (capsuleView.isEmpty){
-    println("__ accept if")
-      capsuleView= Some(UIFactory.createCapsule(molescene, point))
-      capsuleView.get.addInputSlot
-    }
-    capsuleView.get.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[TaskUI])
+    println("+Accept")
+   
+    val capsuleView = UIFactory.createCapsule(molescene,point)
+    capsuleView.addInputSlot
+    capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].entity)
     molescene.repaint
     molescene.revalidate
   }

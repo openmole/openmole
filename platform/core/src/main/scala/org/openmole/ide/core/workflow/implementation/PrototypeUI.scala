@@ -5,8 +5,13 @@
 
 package org.openmole.ide.core.workflow.implementation
 
-class PrototypeUI(name: String, entityType: Class[_]) extends EntityUI(name, entityType) {}
+import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.workflow.model.IEntityUI
 
+class PrototypeUI(var name: String,val factory: IPrototypeFactoryUI) extends IEntityUI{
+  def this(factory: IPrototypeFactoryUI) = this(MoleScenesManager.incrementPrototypeName,factory)
+}
 
 //
 //public class PrototyeUI extends EntityUI{

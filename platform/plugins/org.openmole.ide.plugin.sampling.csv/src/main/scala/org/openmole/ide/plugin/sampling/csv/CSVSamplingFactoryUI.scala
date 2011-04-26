@@ -20,12 +20,7 @@ package org.openmole.ide.plugin.sampling.csv
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.PanelUI
-import org.openide.util.lookup.ServiceProvider
 
-//@ServiceProvider(
-//    service=classOf[ISamplingFactoryUI],
-//    position=10
-//)
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   
   override def panel= new CSVSamplingPanelUI

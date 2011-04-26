@@ -11,7 +11,6 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.ImageUtilities
 import scala.collection.immutable.HashMap
-import org.openmole.ide.core.workflow.implementation.Preferences
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
@@ -52,7 +51,6 @@ object ApplicationCustomize{
   
   val TASK_DEFAULT_PROPERTIES = "resources/task/default"
   var typeImageMap= new HashMap[String, Image]
-  Preferences.prototypeTypeClasses.foreach(c=> typeImageMap+= c.getSimpleName-> ImageUtilities.loadImage("img/" + c.getSimpleName + ".png"))
 
 }
 //

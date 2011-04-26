@@ -18,10 +18,10 @@
 package org.openmole.ide.core.workflow.action
 
 import org.netbeans.api.visual.action.WidgetAction
+import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import org.openmole.ide.core.workflow.model.IGenericTaskModelUI
 
-class TaskActions(model: IGenericTaskModelUI, view: ICapsuleView) extends WidgetAction.Adapter {
+class TaskActions(model: TaskUI, view: ICapsuleView) extends WidgetAction.Adapter {
 }
 //
 //public class TaskActions extends WidgetAction.Adapter {

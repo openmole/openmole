@@ -5,9 +5,13 @@
 
 package org.openmole.ide.core.workflow.implementation
 
+import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.workflow.model.IEntityUI
 
-class SamplingUI(name: String, entityType: Class[_]) extends EntityUI(name, entityType) {}
+class SamplingUI(var name: String,val factory: ISamplingFactoryUI) extends IEntityUI {
+  def this(factory: ISamplingFactoryUI)= this(MoleScenesManager.incrementSamplingName,factory)
+}
 //class SamplingUI extends IEntityUI {
 //  
 //  var name = "SamplingUI"

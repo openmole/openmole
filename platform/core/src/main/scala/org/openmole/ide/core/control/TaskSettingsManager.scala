@@ -28,7 +28,7 @@ object TaskSettingsManager extends TabManager{
     editorPane.getDocument.putProperty(Document.StreamDescriptionProperty, dob)
     editorPane.setText("package dummy;")
     
-    addMapping(tcv, editorPane,tcv.capsuleModel.taskModel.get.name)
+    addMapping(tcv, editorPane,tcv.capsuleModel.taskUI.get.name)
     MoleScenesManager.addChild(tcv.scene, editorPane)
     editorPane
   } 

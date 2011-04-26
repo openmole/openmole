@@ -19,14 +19,19 @@ package org.openmole.ide.core.palette
 
 import java.util.ArrayList
 import org.openide.nodes.Node
+import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.workflow.implementation.SamplingsUI
+import org.openide.util.Lookup
 import org.openmole.ide.core.commons.ApplicationCustomize
+import scala.collection.JavaConversions._
 
 class SamplingChildren extends GenericChildren{
 
   override def initCollection: java.util.List[Node] = {
-    val childrenNodes = new ArrayList[Node](SamplingsUI.getAll.size)
-    SamplingsUI.getAll.foreach(s=>{childrenNodes.add(new SamplingNode(ApplicationCustomize.SAMPLING_DATA_FLAVOR,s))})
+    val lookup=  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
+    val childrenNodes = new ArrayList[Node](lookup.size)
+    lookup.foreach(s=>{childrenNodes.add(new SamplingNode(ApplicationCustomize.SAMPLING_DATA_FLAVOR,s))})    
+   // SamplingsUI.getAll.foreach(s=>{childrenNodes.add(new SamplingNode(ApplicationCustomize.SAMPLING_DATA_FLAVOR,s))})
     childrenNodes
   }
 }

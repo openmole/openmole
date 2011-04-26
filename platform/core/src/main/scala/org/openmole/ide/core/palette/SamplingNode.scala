@@ -18,17 +18,15 @@
 package org.openmole.ide.core.palette
 
 import java.awt.datatransfer.DataFlavor
-import org.openmole.ide.core.workflow.model.IEntityUI
-import org.openmole.ide.core.workflow.implementation.Preferences
-import org.openmole.ide.core.workflow.implementation.PropertyManager
+import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openide.util.datatransfer.ExTransferable
 import org.openmole.ide.core.commons.ApplicationCustomize
 
-class SamplingNode(key: DataFlavor, sampling: IEntityUI) extends GenericNode(key, Preferences.properties(MoleConcepts.SAMPLING_INSTANCE, sampling.entityType).getProperty(PropertyManager.THUMB_IMG), sampling.name) {
+class SamplingNode(key: DataFlavor, samplingFactory: ISamplingFactoryUI) extends GenericNode(key, samplingFactory) {
 
   override def drag= {
     val retValue = ExTransferable.create(super.drag)
-    retValue.put(new ExTransferable.Single(ApplicationCustomize.SAMPLING_DATA_FLAVOR){override def getData= sampling})
+    retValue.put(new ExTransferable.Single(ApplicationCustomize.SAMPLING_DATA_FLAVOR){override def getData= samplingFactory})
     retValue
   }
 }

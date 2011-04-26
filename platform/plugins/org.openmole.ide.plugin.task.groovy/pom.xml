@@ -46,5 +46,10 @@
             <artifactId>org.joda.time</artifactId>
             <version>1.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 </project>

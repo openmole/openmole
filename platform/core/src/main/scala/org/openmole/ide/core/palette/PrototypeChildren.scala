@@ -20,18 +20,18 @@ package org.openmole.ide.core.palette
 import java.util.List
 import java.util.ArrayList
 import org.openide.nodes.Node
+import org.openide.util.Lookup
 import org.openmole.ide.core.commons.ApplicationCustomize
-import org.openmole.ide.core.workflow.model.IEntityUI;
-import org.openmole.ide.core.workflow.implementation.PrototypesUI
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import scala.collection.JavaConversions._
 
 class PrototypeChildren extends GenericChildren {
   override def initCollection: java.util.List[Node] = {
-    val childrenNodes = new ArrayList[Node](PrototypesUI.getAll.size)
-    PrototypesUI.getAll.foreach(p=>{childrenNodes.add(new PrototypeNode(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR,p))})
+    val lookup=  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
+    val childrenNodes = new ArrayList[Node](lookup.size)
+    lookup.foreach(p=>{childrenNodes.add(new PrototypeNode(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR,p))})
     childrenNodes
   }
-
-
 }
 //import java.util.ArrayList;
 //import java.util.Collection;

@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: org.openmole.ide.plugin.task.groovy
+OpenIDE-Module: org.openmole.ide.plugin.sampling.csv
 OpenIDE-Module-Localizing-Bundle: org/openmole/Bundle.properties
 OpenIDE-Module-Layer: org/openmole/layer.xml
-OpenIDE-Module-Provides: org.openmole.ide.core.workflow.model.IEntityUI
+OpenIDE-Module-Provides: org.openmole.ide.core.properties.ISamplingFactoryUI

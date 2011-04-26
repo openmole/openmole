@@ -20,17 +20,14 @@ package org.openmole.ide.core.palette
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import org.openide.util.datatransfer.ExTransferable
-import org.openmole.ide.core.workflow.implementation.Preferences
-import org.openmole.ide.core.workflow.model.IEntityUI
-import org.openmole.ide.core.workflow.implementation.PropertyManager
+import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.commons.ApplicationCustomize
 
-class TaskNode(key: DataFlavor, task: IEntityUI) extends GenericNode(key,Preferences.properties(MoleConcepts.TASK_INSTANCE, task.entityType).getProperty(PropertyManager.THUMB_IMG),task.name){
-
+  
+class TaskNode(key: DataFlavor, taskFactory: ITaskFactoryUI) extends GenericNode(key,taskFactory){
   override def drag: Transferable = {
     val retValue = ExTransferable.create(super.drag)
-    retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_DATA_FLAVOR) {override def getData: Object = return task })
-    println("drag " + retValue.toString)
+    retValue.put( new ExTransferable.Single(ApplicationCustomize.TASK_DATA_FLAVOR) {override def getData: Object = return taskFactory })
     retValue
   }
 }

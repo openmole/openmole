@@ -29,15 +29,14 @@ import org.openide.nodes.Node
 import java.beans.BeanInfo
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
-import org.openmole.ide.core.workflow.implementation.Preferences
 
 object PaletteSupport {
   
   def createPalette = {
     val paletteRoot = new AbstractNode(new CategoryBuilder)
     paletteRoot.setName("Palette Root")
-    Preferences.clearProperties
-    Preferences.clearModels
+  //  Preferences.clearProperties
+  //  Preferences.clearModels
     PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
   }
   

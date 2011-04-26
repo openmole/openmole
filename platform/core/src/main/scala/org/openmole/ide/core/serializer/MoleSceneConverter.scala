@@ -34,16 +34,16 @@ import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import org.openmole.ide.core.workflow.model.IGenericTaskModelUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import org.openide.util.Lookup
 
 class MoleSceneConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     
     var firstSlotID = new HashMap[ICapsuleView, Int]
     var iSlotMapping = new HashMap[ISlotWidget, Int]
-    var taskModels = new HashSet[IGenericTaskModelUI]
+    var taskUIs = new HashSet[TaskUI]
     
     val molescene= o.asInstanceOf[MoleScene]
     var slotcount = 0
@@ -73,21 +73,22 @@ class MoleSceneConverter extends Converter{
         
         //Task
         if (view.capsuleModel.containsTask) {
-          taskModels.add(view.capsuleModel.taskModel.get)
+          taskUIs.add(view.capsuleModel.taskUI.get)
           writer.startNode("task");
-          writer.addAttribute("name", view.capsuleModel.taskModel.get.name)
-          writer.addAttribute("type", view.capsuleModel.taskModel.get.getType.getName.toString)
-          view.capsuleModel.taskModel.get.prototypesIn.foreach(proto=> {
+          writer.addAttribute("name", view.capsuleModel.taskUI.get.name)
+         // writer.addAttribute("type", view.capsuleModel.taskModel.get.getType.getName.toString)
+         // writer.addAttribute("type", view.capsuleModel.taskUI.get.factory)
+          view.capsuleModel.taskUI.get.prototypesIn.foreach(proto=> {
               writer.startNode("iprototype")
               writer.addAttribute("name", proto.name);
-              writer.addAttribute("type", proto.entityType.getName.toString)
+              writer.addAttribute("type", proto.factory.coreClass.getName)
               writer.endNode
             })
                
-          view.capsuleModel.taskModel.get.prototypesOut.foreach(proto=> {
+          view.capsuleModel.taskUI.get.prototypesOut.foreach(proto=> {
               writer.startNode("oprototype")
               writer.addAttribute("name", proto.name)
-              writer.addAttribute("type", proto.entityType.getName.toString)
+              writer.addAttribute("type", proto.factory.coreClass.getName)
               writer.endNode();
             })
           writer.endNode
@@ -128,16 +129,16 @@ class MoleSceneConverter extends Converter{
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> {
                     val n = reader.getAttribute("name")
-                    val taskType = reader.getAttribute("type")
-                    caps.encapsule(new TaskUI(n, Class.forName(taskType)))
+                  //  val taskType = reader.getAttribute("type")
+                    //caps.encapsule(new TaskUI(n, Class.forName(taskType)))
                     while (reader.hasMoreChildren) {
                       reader.moveDown
                       val n2 = reader.getNodeName 
-                      n2 match {
-                        case "iprototype"=>  caps.capsuleModel.taskModel.get.addPrototype(new PrototypeUI(reader.getAttribute("name"),Class.forName(reader.getAttribute("type"))), IOType.INPUT)                 
-                        case "oprototype"=>  caps.capsuleModel.taskModel.get.addPrototype(new PrototypeUI(reader.getAttribute("name"),Class.forName(reader.getAttribute("type"))), IOType.OUTPUT)
-                        case _=> MoleExceptionManagement.showException("Unknown balise "+ n2)
-                      }
+                    // n2 match {
+                     //   case "iprototype"=>  caps.capsuleModel.taskUI.get.addPrototype(new PrototypeUI(reader.getAttribute("name"),Class.forName(reader.getAttribute("type"))), IOType.INPUT)                 
+                     //   case "oprototype"=>  caps.capsuleModel.taskUI.get.addPrototype(new PrototypeUI(reader.getAttribute("name"),Class.forName(reader.getAttribute("type"))), IOType.OUTPUT)
+                     //   case _=> MoleExceptionManagement.showException("Unknown balise "+ n2)
+                    //  }
                       reader.moveUp                  
                     }
                   }

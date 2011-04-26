@@ -20,15 +20,22 @@ package org.openmole.ide.core.workflow.implementation
 import java.awt.Point
 import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import org.openmole.ide.core.workflow.model.IGenericTaskModelUI
 import org.openmole.ide.core.palette.MoleConcepts
 
 object UIFactory {
   // def createTaskModelInstance(modelClass: Class[_ <: GenericTaskModelUI]) = {
-  def createTaskModelInstance(modelClass: Class[_]) = {  
-    println("classe :: " + modelClass.toString)
-    // Instanciator.instanciate(modelClass) 
-  }
+//  def createTaskModelInstance(modelClass: Class[_]) = {  
+//    println("classe :: " + modelClass.toString)
+//    // Instanciator.instanciate(modelClass) 
+//  }
+  
+//  def createCapsule(scene: MoleScene): ICapsuleView = {
+//    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)          
+//    scene.initCapsuleAdd(obUI)
+//    scene.manager.registerCapsuleView(obUI)
+//    scene.addNode(scene.manager.getNodeID)
+//    obUI
+//  }
   
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {
     println("+ createCapsule")
@@ -37,9 +44,7 @@ object UIFactory {
     //                classOf[org.openmole.core.implementation.capsule.Capsule]))
     //   
     // Patch pour faire compiler
-    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI(),Preferences.properties(MoleConcepts.CAPSULE_INSTANCE,
-                                                                                   classOf[java.lang.String]))          
-
+    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)          
     scene.initCapsuleAdd(obUI)
     scene.manager.registerCapsuleView(obUI)
     scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)

@@ -30,10 +30,12 @@ class TaskConverter extends Converter{
     val t= o.asInstanceOf[TaskUI]
     println("marshal : " + t.name)
     writer.addAttribute("name", t.name)
-    writer.addAttribute("type", t.entityType.getName.toString)
+    //writer.addAttribute("type", t.entityType.getName.toString)
   }
   
-  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new TaskUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
+ // override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new TaskUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
+   
+  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new Object
   
   override def canConvert(t: Class[_]) = t.equals(classOf[TaskUI])
 }

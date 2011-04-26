@@ -6,11 +6,12 @@
 package org.openmole.ide.core.workflow.model
 
 import java.awt.Panel
+import org.openmole.ide.core.properties.IFactoryUI
 
 trait IEntityUI {
-  def entityType: Class[_]
-  
   def name: String
+  
+  def factory: IFactoryUI
 }
 
 //public interface IEntityUI {

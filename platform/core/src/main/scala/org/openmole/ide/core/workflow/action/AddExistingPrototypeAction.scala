@@ -28,7 +28,7 @@ class AddExistingPrototypeAction(prototype: IEntityUI,capsuleViewUI: CapsuleView
 
   override def actionPerformed(ae: ActionEvent) {
     prototype match {
-      case p: PrototypeUI=> capsuleViewUI.capsuleModel.taskModel.get.addPrototype(p, t)
+      case p: PrototypeUI=> capsuleViewUI.capsuleModel.taskUI.get.addPrototype(p, t)
     }
     capsuleViewUI.repaint
   }

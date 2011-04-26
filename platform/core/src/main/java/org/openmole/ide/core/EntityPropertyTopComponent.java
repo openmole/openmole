@@ -30,8 +30,10 @@ public final class EntityPropertyTopComponent extends TopComponent {
         setName(NbBundle.getMessage(EntityPropertyTopComponent.class, "CTL_EntityPropertyTopComponent"));
         setToolTipText(NbBundle.getMessage(EntityPropertyTopComponent.class, "HINT_EntityPropertyTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
-        propertyPanel = new PropertyPanel();
+        propertyPanel = new PropertyPanel(this);
         setLayout(new BorderLayout());
+        
+        
         add(propertyPanel, BorderLayout.CENTER);
     }
 

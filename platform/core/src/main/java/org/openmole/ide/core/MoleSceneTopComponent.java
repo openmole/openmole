@@ -29,14 +29,10 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.control.TaskSettingsManager;
-import org.openmole.ide.core.dialog.PrototypeManager;
-import org.openmole.ide.core.dialog.SamplingManager;
-import org.openmole.ide.core.dialog.TaskManager;
 import org.openmole.ide.core.palette.PaletteSupport;
 import org.openmole.ide.core.control.MoleScenesManager;
 import org.openmole.ide.core.workflow.action.AddMoleSceneAction;
 import org.openmole.ide.core.workflow.action.EnableTaskDetailedViewAction;
-import org.openmole.ide.core.workflow.action.ManageEntityAction;
 import org.openmole.ide.core.workflow.action.RemoveAllMoleSceneAction;
 import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
@@ -73,26 +69,8 @@ public final class MoleSceneTopComponent extends TopComponent {
         associateLookup(new AbstractLookup(ic));
         ic.add(palette);
 
-        System.out.println("LOOLOO");
-
-        Collection coll = (Collection) Lookup.getDefault().lookupAll(IEntityUI.class);
-        for (Iterator it = coll.iterator(); it.hasNext();) {
-            System.out.println("look:");
-            System.out.println(((IEntityUI) it.next()).name());
-        }
-
-
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
-
-        JButton newPrototypeButton = new JButton("Prototypes");
-        newPrototypeButton.addActionListener(new ManageEntityAction(new PrototypeManager()));
-
-        JButton newTaskButton = new JButton("Tasks");
-        newTaskButton.addActionListener(new ManageEntityAction(new TaskManager()));
-
-        JButton newSamplingButton = new JButton("Samplings");
-        newSamplingButton.addActionListener(new ManageEntityAction(new SamplingManager()));
 
         JPopupMenu molePopupMenu = new JPopupMenu("Mole");
 
@@ -114,35 +92,14 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(newPrototypeButton);
-        toolBar.add(newTaskButton);
-        toolBar.add(newSamplingButton);
-        toolBar.add(new JToolBar.Separator());
         toolBar.add(bMole);
         //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
         add(tabbedPane, BorderLayout.CENTER);
-
-        //toolBar.setVisible(true);
-
-
-
-        //println("22 LOO :: "+Lookup.getDefault.lookup(classOf[org.openmole.ide.core.workflow.model.IEntityUI]).name)
-        //Lookup.getDefault.lookupAll(classOf[org.openmole.ide.core.workflow.model.IEntityUI]).foreach(t=> {println("LOOKUP :: " +t.name)})
-
     }
 
-    public void refreshPalette() {
-        
-        System.out.println("LOOLOO");
-      //  Lookup lkp = Lookup.getDefault();
-//        ServiceLoader<IEntityUI> serviceLoader = ServiceLoader.load(IEntityUI.class);
-//        for (IEntityUI eui : serviceLoader) {
-//            eui.name();
-//        }
-        
-        
+    public void refreshPalette() {        
         ic.remove(palette);
         palette = PaletteSupport.createPalette();
         ic.add(palette);

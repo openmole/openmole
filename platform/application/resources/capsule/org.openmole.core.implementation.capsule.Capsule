@@ -1,5 +1,0 @@
-name=Capsule
-impl=org.openmole.ide.core.workflow.implementation.CapsuleModelUI
-bg-color=112,112,112
-border-color=179,179,179
-thumb-img=resources/img/thumb/taskCapsule.png

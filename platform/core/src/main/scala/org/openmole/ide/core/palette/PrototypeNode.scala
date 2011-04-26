@@ -19,16 +19,14 @@ package org.openmole.ide.core.palette
 
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
-import org.openmole.ide.core.workflow.model.IEntityUI
-import org.openmole.ide.core.workflow.implementation.PropertyManager
-import org.openmole.ide.core.workflow.implementation.Preferences
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.commons.ApplicationCustomize
 
-class PrototypeNode(key: DataFlavor,prototype: IEntityUI) extends GenericNode(key, Preferences.properties(MoleConcepts.PROTOTYPE_INSTANCE,prototype.entityType).getProperty(PropertyManager.THUMB_IMG), prototype.name) {
+class PrototypeNode(key: DataFlavor,prototypeFactory: IPrototypeFactoryUI) extends GenericNode(key, prototypeFactory) {
 
   override def drag= {
     val retValue = ExTransferable.create(super.drag)
-    retValue.put(new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR){override def getData= prototype})
+    retValue.put(new ExTransferable.Single(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR){override def getData= prototypeFactory})
     retValue
   }
 }
