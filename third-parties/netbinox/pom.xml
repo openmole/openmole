@@ -37,31 +37,31 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-core-netigso</artifactId>
-            <version>RELEASE70-BETA</version>
+            <version>RELEASE70</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-modules</artifactId>
-            <version>RELEASE70-BETA</version>
+            <version>RELEASE70</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>RELEASE70-BETA</version>
+            <version>RELEASE70</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-libs-osgi</artifactId>
-            <version>RELEASE70-BETA</version>
+            <version>RELEASE70</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.6.2.R36x_v20101103</version>
+            <version>3.6.2.R36x_v20110210</version>
             <type>jar</type>
         </dependency>
     </dependencies>
@@ -108,4 +108,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
 </project>
