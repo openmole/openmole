@@ -222,7 +222,7 @@
                                 <artifactItem>
                                     <groupId>com.sun.java</groupId>
                                     <artifactId>java-jre</artifactId>
-                                    <version>6u22</version>
+                                    <version>6u25</version>
                                     <type>tgz</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${product.directory}</outputDirectory>

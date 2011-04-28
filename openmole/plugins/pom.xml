@@ -27,14 +27,11 @@
         <module>org.openmole.plugin.environment.glite</module>
         <module>org.openmole.plugin.groupingstrategy.onvariable</module>
         <module>org.openmole.plugin.groupingstrategy.batch</module>
-	<module>org.openmole.plugin.resource.virtual</module>
         <module>org.openmole.plugin.task.netlogo</module>
         <module>org.openmole.plugin.task.csv</module>
         <module>org.openmole.plugin.task.external</module>
 	<module>org.openmole.plugin.task.external.system</module>
-	<module>org.openmole.plugin.task.external.virtual</module>
         <module>org.openmole.plugin.task.systemexec</module>
-	<module>org.openmole.plugin.task.virtualsystemexec</module>
         <module>org.openmole.plugin.task.code</module>
         <module>org.openmole.plugin.task.groovy</module>
         <module>org.openmole.plugin.task.filemanagement</module>

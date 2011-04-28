@@ -61,12 +61,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.resource.virtual</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.netlogo</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
@@ -80,12 +74,6 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.systemexec</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.virtualsystemexec</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -110,12 +98,6 @@
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.external.system</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.external.virtual</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -249,12 +231,6 @@
             <groupId>org.openmole</groupId>
             <artifactId>ccl.northwestern.edu.netlogo</artifactId>
             <version>${lib.ccl.northwestern.edu.netlogo.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.tools.distrng</artifactId>
-            <version>${lib.org.openmole.tools.distrng.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

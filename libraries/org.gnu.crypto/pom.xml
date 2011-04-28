@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>gnu-crypto</groupId>
+            <groupId>org.gnu.crypto</groupId>
             <artifactId>gnu-crypto</artifactId>
 	    <version>${lib.org.gnu.crypto.version}</version>
             <scope>provided</scope>
