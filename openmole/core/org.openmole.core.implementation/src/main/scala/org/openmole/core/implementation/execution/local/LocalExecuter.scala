@@ -31,7 +31,7 @@ object LocalExecuter {
 }
 
 
-class LocalExecuter extends Runnable {
+class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
 
   import LocalExecuter. _
   
@@ -41,7 +41,7 @@ class LocalExecuter extends Runnable {
     
     while (!stop) {
       try {
-        val executionJob = LocalExecutionEnvironment.takeNextjob
+        val executionJob = environment.takeNextjob
         val job = executionJob.job
 
         try {
@@ -74,7 +74,7 @@ class LocalExecuter extends Runnable {
   }
 
   def jobGoneIdle {
-    LocalExecutionEnvironment.addExecuters(1)
+    environment.addExecuters(1)
     stop = true
   }
 }

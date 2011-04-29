@@ -44,18 +44,26 @@ object LocalExecutionEnvironment extends Environment {
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
   Workspace += (DefaultNumberOfThreads, Integer.toString(1))
-    
+  @transient lazy val default = new LocalExecutionEnvironment(Workspace.preferenceAsInt(DefaultNumberOfThreads))
+   
+  override def submit(job: IJob) = default.submit(job)
+  
+}
+
+class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
+  
+  import LocalExecutionEnvironment._
+  
   private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
   private val jobInQueue = new Semaphore(0)
   
   private val executers = new LinkedList[LocalExecuter]
-  private var nbThreadVar = Workspace.preferenceAsInt(DefaultNumberOfThreads)
        
   addExecuters(nbThread)
     
   private[local] def addExecuters(nbExecuters: Int) = {
     for (i <- 0 until nbExecuters) {
-      val executer = new LocalExecuter
+      val executer = new LocalExecuter(this)
       executers.synchronized {
         val thread = new Thread(executer)
         thread.setDaemon(true)
@@ -96,7 +104,7 @@ object LocalExecutionEnvironment extends Environment {
   }
 
   override def submit(job: IJob) = {
-    val ejob = new LocalExecutionJob(job, nextExecutionJobId)
+    val ejob = new LocalExecutionJob(this, job, nextExecutionJobId)
     //jobRegistry.register(ejob)
     submit(ejob)
   }
@@ -117,6 +125,4 @@ object LocalExecutionEnvironment extends Environment {
     jobInQueue.acquire
     jobs.dequeue
   }
-  
-   
 }
