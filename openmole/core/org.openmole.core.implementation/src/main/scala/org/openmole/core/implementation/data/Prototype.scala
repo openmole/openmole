@@ -37,7 +37,7 @@ class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype
   override def accepts(obj: Any): Boolean = {
     obj == null || `type` >:> manifest(clazzOf(obj))
   }
-
+  
   override def id = (name, `type`)
   override def toString: String = '(' + `type`.toString + ')' + name
 }

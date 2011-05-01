@@ -119,28 +119,30 @@ object ClassUtils {
  
   
   def classEquivalence(c: Class[_]) = {
-    if(c == classOf[Byte]) classOf[java.lang.Byte]
-    else if(c == classOf[Short]) classOf[java.lang.Short]
-    else if(c == classOf[Integer]) classOf[java.lang.Integer]
-    else if(c == classOf[Long]) classOf[java.lang.Long]
-    else if(c == classOf[Float]) classOf[java.lang.Float]
-    else if(c == classOf[Double]) classOf[java.lang.Double]
-    else if(c == classOf[Char]) classOf[java.lang.Character]
-    else if(c == classOf[Boolean]) classOf[java.lang.Boolean]
-    else c
+    if(c.isPrimitive) {
+      if(c == classOf[Byte]) java.lang.Byte.TYPE
+      else if(c == classOf[Short]) java.lang.Short.TYPE
+      else if(c == classOf[Integer]) java.lang.Integer.TYPE
+      else if(c == classOf[Long]) java.lang.Long.TYPE
+      else if(c == classOf[Float]) java.lang.Float.TYPE
+      else if(c == classOf[Double]) java.lang.Double.TYPE
+      else if(c == classOf[Char]) java.lang.Character.TYPE
+      else if(c == classOf[Boolean]) java.lang.Boolean.TYPE
+      else c
+    } else c
   }
   
   def clazzOf(v: Any) = {
     v match {
       /*case _: Byte => classOf[Byte]
-      case _: Short => classOf[Short]
-      case _: Int => classOf[Int]
-      case _: Long => classOf[Long]
-      case _: Float => classOf[Float]
-      case _: Double => classOf[Double]
-      case _: Char => classOf[Char]
-      case _: Boolean => classOf[Boolean]
-      case _: Unit => classOf[Unit]*/
+       case _: Short => classOf[Short]
+       case _: Int => classOf[Int]
+       case _: Long => classOf[Long]
+       case _: Float => classOf[Float]
+       case _: Double => classOf[Double]
+       case _: Char => classOf[Char]
+       case _: Boolean => classOf[Boolean]
+       case _: Unit => classOf[Unit]*/
       case null => classOf[Null]
       case r: AnyRef => r.getClass
     }

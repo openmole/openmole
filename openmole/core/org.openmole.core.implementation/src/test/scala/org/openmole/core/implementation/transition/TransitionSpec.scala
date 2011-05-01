@@ -107,7 +107,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     new MoleExecution(new Mole(initc)).start.waitUntilEnded
   }
   
-  "A conjoctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
+  "A conjonctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
     
     val p1 = new Prototype("p", classOf[java.lang.Long])
     val p2 = new Prototype("p", classOf[java.lang.Integer])
@@ -136,7 +136,8 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
         //println(context.value(pArtoStringray).map(_.intL))
         context.value(pArray).get.map(_.intValue).contains(1) should equal (true)
         context.value(pArray).get.map(_.intValue).contains(2) should equal (true)
-        context.value(pArray).get.getClass should equal (classOf[Array[Number]])
+  
+        context.value(pArray).get.getClass should equal (classOf[Array[java.lang.Number]])
       }
     }
     
