@@ -156,7 +156,7 @@ class Runtime {
         for (toProcess <- allMoleJobs) {
           EventDispatcher.registerForObjectChangedSynchronous(toProcess, Priority.HIGH, saver, IMoleJob.StateChanged)
           allFinished.registerJob(toProcess)
-          LocalExecutionEnvironment.submit(toProcess)
+          LocalExecutionEnvironment.default.submit(toProcess)
         }
 
         allFinished.waitAllFinished
