@@ -5,20 +5,12 @@
 
 package org.openmole.ide.core.properties
 
-import java.awt.Color
 import org.openmole.ide.core.workflow.implementation.EnvironmentUI
 
-trait IEnvironmentFactoryUI extends IFactoryUI {
-  override def entity(name: String) = new EnvironmentUI(name, this)
+trait IEnvironmentFactoryUI extends IFactoryUI{
+  override def buildEntity(name: String, panel: PanelUI) = new EnvironmentUI(name, coreClass,panel)
   
-  // Default border task color
-  override def borderColor = new Color(255,0,255)
-  
-  // Default background task color
-  override def backgroundColor = new Color(255,0,255,128)
-  
-  // Default background task image
-  override def imagePath = "img/thumb/default.png"
+  override def buildEntity(panel: PanelUI) = new EnvironmentUI(coreClass,panel)
 }
 
 

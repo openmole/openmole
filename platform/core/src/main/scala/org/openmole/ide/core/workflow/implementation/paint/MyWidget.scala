@@ -57,9 +57,9 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factory.backgroundColor else new Color(204,204,204,128))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.backgroundColor else new Color(204,204,204,128))
     graphics.fill(bodyArea)
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factory.borderColor else new Color(204,204,204))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.borderColor else new Color(204,204,204))
 
     val stroke = new BasicStroke(1.3f, 1, 1)
     graphics.draw(stroke.createStrokedShape(bodyArea))
@@ -70,13 +70,13 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
       graphics.drawString(title.get, 10, 15)
     }
 
-    if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
+   /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
                                                          taskImageOffset,
                                                          ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
                                                          ApplicationCustomize.TASK_IMAGE_WIDTH,
                                                          ApplicationCustomize.TASK_IMAGE_HEIGHT,
                                                          capsuleModel.taskUI.get.factory.backgroundColor,
-                                                         new Container)
+                                                         new Container)*/
   }
 
   def addTitle(titleString: String)= {

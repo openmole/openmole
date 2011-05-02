@@ -18,11 +18,22 @@
 package org.openmole.ide.core.palette
 
 import org.openide.nodes.Index
+import org.openide.nodes.Node
+import java.awt.datatransfer.DataFlavor
+import java.util.ArrayList
 
-abstract class GenericChildren extends Index.ArrayChildren with IGenericChildren{
+class GenericChildren(collection: Iterable[PaletteElementFactory], dataFlavor: DataFlavor) extends Index.ArrayChildren{
 
-  override def refreshNodes= refresh
+  def refreshNodes= refresh
+  
+  override def initCollection: java.util.List[Node] = {
+    val childrenNodes = new ArrayList[Node](collection.size)
+    collection.foreach(pef=>{childrenNodes.add(new GenericNode(dataFlavor,pef))})
+    childrenNodes
+  }
 }
+  
+
 //import org.openide.nodes.Index;
 //
 ///**

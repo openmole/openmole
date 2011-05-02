@@ -5,21 +5,11 @@
 
 package org.openmole.ide.core.properties
 
-import java.awt.Color
 import org.openmole.ide.core.workflow.implementation.SamplingUI
 
-trait ISamplingFactoryUI extends IFactoryUI {
+trait ISamplingFactoryUI extends IFactoryUI{
   
-  override def entity(name: String) = new SamplingUI(name, this)
+  override def buildEntity(name: String, panel: PanelUI) = new SamplingUI(name,coreClass, panel)
   
-  override def entity = new SamplingUI(this)
-  
-  // Default border task color
-  override def borderColor = new Color(0,255,0)
-  
-  // Default background task color
-  override def backgroundColor = new Color(0,255,0,128)
-  
-  // Default background task image
-  override def imagePath = "img/thumb/default.png"
+  override def buildEntity (panel: PanelUI) = new SamplingUI(coreClass,panel)
 }

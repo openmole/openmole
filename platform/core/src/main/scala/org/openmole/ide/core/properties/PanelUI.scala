@@ -5,10 +5,7 @@
 
 package org.openmole.ide.core.properties
 
-import java.awt.Panel
 
-trait PanelUI extends Panel{
-  def name: String
-  
-  def entityType: Class[_]
+trait PanelUI{
+  def coreObject(name: String): Object
 }

@@ -15,15 +15,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 package org.apidesign.netbinox;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.Map;
-import org.eclipse.osgi.framework.internal.core.PackageAdminImpl;
+import java.util.Properties;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.launch.Equinox;
-import org.openide.util.Lookup;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -34,26 +36,46 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 class Netbinox extends Equinox {
-
     public Netbinox(Map configuration) {
         super(configuration);
     }
+    
+    @Override
+    public void init() throws BundleException {
+        super.init();
+        if (Boolean.getBoolean("osgi.framework.useSystemProperties")) {
+            Properties prev = FrameworkProperties.getProperties();
+            try {
+                Field f = FrameworkProperties.class.getDeclaredField("properties"); // NOI18N
+                f.setAccessible(true);
+                f.set(null, null);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            Properties newP = FrameworkProperties.getProperties();
+            for (Map.Entry en : prev.entrySet()) {
+                if (en.getKey() instanceof String && en.getValue() instanceof String) {
+                    newP.setProperty((String)en.getKey(), (String)en.getValue());
+                }
+            }
+            assert System.getProperties() == FrameworkProperties.getProperties();
+        }
+    }
+    
+    
 
     @Override
     public BundleContext getBundleContext() {
         return new Context(super.getBundleContext());
     }
-
+    
     private static final class Context implements BundleContext {
-
         private final BundleContext delegate;
 
         public Context(BundleContext delegate) {

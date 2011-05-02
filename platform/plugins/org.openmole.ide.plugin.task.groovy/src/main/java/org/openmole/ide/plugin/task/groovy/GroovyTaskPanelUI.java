@@ -12,6 +12,7 @@ package org.openmole.ide.plugin.task.groovy;
 
 import java.awt.Panel;
 import org.openmole.ide.core.properties.PanelUI;
+import org.openmole.plugin.task.groovy.GroovyTask;
 
 
 /**
@@ -79,12 +80,8 @@ public class GroovyTaskPanelUI extends Panel implements PanelUI {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public Class<?> entityType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Object coreObject(String name) {
+        return new GroovyTask(name,jTextArea1.getText());
     }
 
-    @Override
-    public String name() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

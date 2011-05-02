@@ -17,6 +17,12 @@
                 <attr name="noIconInMenu" boolvalue="false"/>
             </file>
         </folder>
+        <folder name="Profile">
+            <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.instance_hidden"/>
+        </folder>
+        <folder name="System">
+            <file name="org-openide-actions-GarbageCollectAction.instance_hidden"/>
+        </folder>
         <folder name="Window">
             <file name="org-openmole-ide-core-EntityPropertyAction.instance">
                 <attr name="component" methodvalue="org.openmole.ide.core.EntityPropertyTopComponent.findInstance"/>
@@ -46,6 +52,7 @@
                 <attr name="position" intvalue="1200"/>
             </file>
         </folder>
+        <file name="GoTo_hidden"/>
         <folder name="Window">
             <file name="EntityPropertyAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-EntityPropertyAction.instance"/>
@@ -56,7 +63,18 @@
             <file name="OutputAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-OutputAction.instance"/>
             </file>
+            <file name="ViewFavoritesTabAction.shadow_hidden"/>
+            <file name="org-netbeans-core-windows-actions-GlobalPropertiesAction.shadow_hidden"/>
         </folder>
+    </folder>
+    <folder name="Shortcuts">
+        <file name="AS-Y.shadow_hidden"/>
+    </folder>
+    <folder name="Toolbars">
+        <file name="Clipboard_hidden"/>
+        <file name="File_hidden"/>
+        <file name="Memory_hidden"/>
+        <file name="UndoRedo_hidden"/>
     </folder>
     <folder name="Windows2">
         <folder name="Components">

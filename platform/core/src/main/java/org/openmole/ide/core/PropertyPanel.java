@@ -10,22 +10,20 @@
  */
 package org.openmole.ide.core;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Iterator;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.openide.util.Lookup;
+import org.openmole.ide.core.palette.PaletteElementFactories;
+import org.openmole.ide.core.palette.PaletteElementFactory;
+import org.openmole.ide.core.properties.NativeFactories;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.IFactoryUI;
-import org.openmole.ide.core.properties.ISamplingFactoryUI;
-import org.openmole.ide.core.properties.ITaskFactoryUI;
+import org.openmole.ide.core.properties.NativeFactories;
+import org.openmole.ide.core.properties.PrototypeFactoryUI;
+import scala.collection.Iterable;
+import scala.collection.JavaConversions;
+import scala.collection.JavaConversions.*;
 
 /**
  *
@@ -33,52 +31,45 @@ import org.openmole.ide.core.properties.ITaskFactoryUI;
  */
 public class PropertyPanel extends javax.swing.JPanel {
 
-    EntityPropertyTopComponent entityComponent;
+    boolean newMode = false;
 
     /** Creates new form PropertyPanel */
-    public PropertyPanel(EntityPropertyTopComponent ec) {
-        entityComponent = ec;
+    public PropertyPanel() {
         initComponents();
-
-        typeComboBox.removeAllItems();
         typeComboBox.setRenderer(new ItemRenderer());
-        typeComboBox.addItemListener(new ItemListener() {
-
-            @Override
-            public void itemStateChanged(ItemEvent ie) {
-                System.out.println(((IFactoryUI) typeComboBox.getSelectedItem()).coreClass() + " PANEL :: " + ((IFactoryUI) typeComboBox.getSelectedItem()).panel());
-                
-                if (entityComponent.getComponents().length == 2) {
-                remove(1);
-            }
-            entityComponent.add((Component)(((IFactoryUI) typeComboBox.getSelectedItem()).panel()));
-            }
-        });
-
-        ButtonGroup group = new ButtonGroup();
-        group.add(prototypeToggleButton);
-        group.add(taskToogleButton);
-        group.add(samplingToogleButton);
-        group.add(environmentToogleButton);
-
-        edit(false);
-        taskToogleButton.setSelected(true);
+        setEditGraphicalContext(false);
     }
 
-    private void fillTypeComboBox(Class typeClass) {
-        typeComboBox.removeAllItems();
-
-        for (Iterator it = Lookup.getDefault().lookupAll(typeClass).iterator(); it.hasNext();) {
-            //  typeComboBox.addItem(((IFactoryUI) it.next()).coreClass().getSimpleName());
-            typeComboBox.addItem((IFactoryUI) it.next());
-            // typeComboBox.addItem(((IFactoryUI) it.next()).coreClass().getSimpleName());
+    private String save(){
+        if (newMode){
+          //  ((IFactoryUI) typeComboBox.getSelectedItem()).buildEntity(nameTextField.getText());
+            PaletteElementFactories.addPrototypeElement(new PaletteElementFactory(nameTextField.getText(),((IFactoryUI) typeComboBox.getSelectedItem())));
+            MoleSceneTopComponent.getDefault().refreshPalette();
         }
+        nameTextField.setEnabled(false);
+        newMode = false;
+        return "Edit";
+    }
+    
+    private void setNewGraphicalContext(){
+        newMode = true;
+        nameTextField.setText("");
+       setEditGraphicalContext(true);
+        // nameTextField.setEnabled(true);
+      //  editToggleButton.setEnabled(true);
+        typeComboBox.setEnabled(true);
+    }
+    
+    private void setEditGraphicalContext(Boolean b) {
+        nameTextField.setEnabled(b);
+        editToggleButton.setText(b ? "Save" : save());
     }
 
-    private void edit(Boolean b) {
+    private void setButtons(Boolean b) {
+        newToggleButton.setEnabled(b);
+        editToggleButton.setEnabled(true);
+        typeComboBox.removeAllItems();
         typeComboBox.setEnabled(b);
-        nameTextField.setEnabled(b);
-        editToggleButton.setText(b ? "Save" : "Edit");
     }
 
     /** This method is called from within the constructor to
@@ -90,17 +81,16 @@ public class PropertyPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         nameTextField = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        typeComboBox = new javax.swing.JComboBox();
-        prototypeToggleButton = new javax.swing.JToggleButton();
-        taskToogleButton = new javax.swing.JToggleButton();
-        samplingToogleButton = new javax.swing.JToggleButton();
-        environmentToogleButton = new javax.swing.JToggleButton();
-        newToggleButton = new javax.swing.JToggleButton();
         editToggleButton = new javax.swing.JToggleButton();
+        typeComboBox = new javax.swing.JComboBox();
+        newToggleButton = new javax.swing.JToggleButton();
+        prototypeToggleButton = new javax.swing.JToggleButton();
+        taskToggleButton = new javax.swing.JToggleButton();
+        samplingToggleButton = new javax.swing.JToggleButton();
+        environmentToggleButton = new javax.swing.JToggleButton();
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.jLabel1.text")); // NOI18N
 
@@ -108,33 +98,16 @@ public class PropertyPanel extends javax.swing.JPanel {
 
         jLabel2.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.jLabel2.text")); // NOI18N
 
-        typeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        prototypeToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.prototypeToggleButton.text")); // NOI18N
-        prototypeToggleButton.addActionListener(new java.awt.event.ActionListener() {
+        editToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.editToggleButton.text")); // NOI18N
+        editToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                prototypeToggleButtonActionPerformed(evt);
+                editToggleButtonActionPerformed(evt);
             }
         });
 
-        taskToogleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.taskToogleButton.text")); // NOI18N
-        taskToogleButton.addActionListener(new java.awt.event.ActionListener() {
+        typeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                taskToogleButtonActionPerformed(evt);
-            }
-        });
-
-        samplingToogleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.samplingToogleButton.text")); // NOI18N
-        samplingToogleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                samplingToogleButtonActionPerformed(evt);
-            }
-        });
-
-        environmentToogleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.environmentToogleButton.text")); // NOI18N
-        environmentToogleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                environmentToogleButtonActionPerformed(evt);
+                typeComboBoxActionPerformed(evt);
             }
         });
 
@@ -145,10 +118,31 @@ public class PropertyPanel extends javax.swing.JPanel {
             }
         });
 
-        editToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.editToggleButton.text")); // NOI18N
-        editToggleButton.addActionListener(new java.awt.event.ActionListener() {
+        prototypeToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.prototypeToggleButton.text")); // NOI18N
+        prototypeToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                editToggleButtonActionPerformed(evt);
+                prototypeToggleButtonActionPerformed(evt);
+            }
+        });
+
+        taskToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.taskToggleButton.text")); // NOI18N
+        taskToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                taskToggleButtonActionPerformed(evt);
+            }
+        });
+
+        samplingToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.samplingToggleButton.text")); // NOI18N
+        samplingToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                samplingToggleButtonActionPerformed(evt);
+            }
+        });
+
+        environmentToggleButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.environmentToggleButton.text")); // NOI18N
+        environmentToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                environmentToggleButtonActionPerformed(evt);
             }
         });
 
@@ -156,48 +150,45 @@ public class PropertyPanel extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(typeComboBox, 0, 262, Short.MAX_VALUE)
+                            .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(taskToggleButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(prototypeToggleButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(taskToogleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(samplingToogleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addGap(18, 18, 18)
-                        .addComponent(typeComboBox, 0, 302, Short.MAX_VALUE)))
+                        .addComponent(samplingToggleButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(editToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(environmentToogleButton))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(editToggleButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(environmentToggleButton))
                 .addContainerGap())
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {environmentToogleButton, prototypeToggleButton, samplingToogleButton, taskToogleButton});
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {editToggleButton, newToggleButton});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {environmentToggleButton, prototypeToggleButton, samplingToggleButton, taskToggleButton});
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(samplingToogleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(environmentToogleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(taskToogleButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(prototypeToggleButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(taskToggleButton)
+                    .addComponent(prototypeToggleButton)
+                    .addComponent(samplingToggleButton)
+                    .addComponent(environmentToggleButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
@@ -210,45 +201,52 @@ public class PropertyPanel extends javax.swing.JPanel {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(editToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void prototypeToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prototypeToggleButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_prototypeToggleButtonActionPerformed
-
-    private void taskToogleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taskToogleButtonActionPerformed
-
-        fillTypeComboBox(ITaskFactoryUI.class);
-    }//GEN-LAST:event_taskToogleButtonActionPerformed
-
-    private void samplingToogleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_samplingToogleButtonActionPerformed
-        fillTypeComboBox(ISamplingFactoryUI.class);
-    }//GEN-LAST:event_samplingToogleButtonActionPerformed
-
-    private void environmentToogleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_environmentToogleButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_environmentToogleButtonActionPerformed
+    private void editToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editToggleButtonActionPerformed
+        setEditGraphicalContext(editToggleButton.isSelected());
+    }//GEN-LAST:event_editToggleButtonActionPerformed
 
     private void newToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newToggleButtonActionPerformed
-        // TODO add your handling code here:
+        setNewGraphicalContext();
     }//GEN-LAST:event_newToggleButtonActionPerformed
 
-    private void editToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editToggleButtonActionPerformed
-        edit(editToggleButton.isSelected());
-    }//GEN-LAST:event_editToggleButtonActionPerformed
+    private void taskToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taskToggleButtonActionPerformed
+        setButtons(false);
+
+    }//GEN-LAST:event_taskToggleButtonActionPerformed
+
+    private void prototypeToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prototypeToggleButtonActionPerformed
+        setButtons(true);
+        for (IFactoryUI pf :JavaConversions.asJavaIterable(NativeFactories.prototypeFactories())) {
+            typeComboBox.addItem(pf);
+        }
+    }//GEN-LAST:event_prototypeToggleButtonActionPerformed
+
+    private void samplingToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_samplingToggleButtonActionPerformed
+        setButtons(false);
+    }//GEN-LAST:event_samplingToggleButtonActionPerformed
+
+    private void environmentToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_environmentToggleButtonActionPerformed
+        setButtons(true);
+    }//GEN-LAST:event_environmentToggleButtonActionPerformed
+
+    private void typeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_typeComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_typeComboBoxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JToggleButton editToggleButton;
-    private javax.swing.JToggleButton environmentToogleButton;
+    private javax.swing.JToggleButton environmentToggleButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField nameTextField;
     private javax.swing.JToggleButton newToggleButton;
     private javax.swing.JToggleButton prototypeToggleButton;
-    private javax.swing.JToggleButton samplingToogleButton;
-    private javax.swing.JToggleButton taskToogleButton;
+    private javax.swing.JToggleButton samplingToggleButton;
+    private javax.swing.JToggleButton taskToggleButton;
     private javax.swing.JComboBox typeComboBox;
     // End of variables declaration//GEN-END:variables
 

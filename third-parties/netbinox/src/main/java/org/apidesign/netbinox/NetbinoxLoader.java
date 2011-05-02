@@ -20,7 +20,10 @@ package org.apidesign.netbinox;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.ProtectionDomain;
+import java.util.logging.Level;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
@@ -45,14 +48,6 @@ final class NetbinoxLoader extends DefaultClassLoader {
     public String toString() {
         return "NetbinoxLoader delegating to " + delegate;
     }
-
-    @Override
-    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        //System.out.println("Class " + name + " loaded " + this.getResource(name));
-        return super.loadClass(name, resolve);
-    }
-    
-    
     
     private static class NoTouchCPM extends ClasspathManager {
         public NoTouchCPM(BaseData data, String[] classpath, BaseClassLoader classloader) {
@@ -80,8 +75,18 @@ final class NetbinoxLoader extends DefaultClassLoader {
 
         @Override
         public ClasspathEntry getExternalClassPath(String cp, BaseData sourcedata, ProtectionDomain sourcedomain) {
-            File file = new File(cp);
-            if (!file.isAbsolute()) {
+            File file;
+            if (cp.startsWith("file:")) { // NOI18N
+                try {
+                    file = new File(new URI(cp));
+                } catch (URISyntaxException ex) {
+                    NetbinoxFactory.LOG.log(Level.SEVERE, "Cannot convert to file: " + cp, ex); // NOI18N
+                    return null;
+                }
+            } else {
+                file = new File(cp);
+            }
+            if (!file.isAbsolute() && !cp.startsWith("file:")) { // NOI18N
                 return null;
             }
             BundleFile bundlefile = createBundleFile(file, sourcedata);

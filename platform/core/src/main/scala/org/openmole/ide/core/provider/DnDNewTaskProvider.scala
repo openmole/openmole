@@ -26,6 +26,9 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.palette.PaletteElementFactory
+import org.openmole.ide.core.workflow.implementation.TaskUI
+
 
 
 class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
@@ -37,7 +40,8 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
    
     val capsuleView = UIFactory.createCapsule(molescene,point)
     capsuleView.addInputSlot
-    capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].entity)
+  //  capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
+    capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
     molescene.repaint
     molescene.revalidate
   }

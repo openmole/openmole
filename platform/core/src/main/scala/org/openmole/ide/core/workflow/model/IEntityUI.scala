@@ -5,13 +5,16 @@
 
 package org.openmole.ide.core.workflow.model
 
-import java.awt.Panel
-import org.openmole.ide.core.properties.IFactoryUI
+import org.openmole.ide.core.properties.PanelUI
 
 trait IEntityUI {
   def name: String
   
-  def factory: IFactoryUI
+  def coreObject = panel.coreObject(name)
+  
+  def coreClass: Class[_]
+  
+  def panel: PanelUI
 }
 
 //public interface IEntityUI {

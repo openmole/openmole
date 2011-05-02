@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.HookConfigurator;
@@ -44,21 +43,17 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
-import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.netbeans.core.netigso.spi.NetigsoArchive;
+import org.openide.util.Lookup;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  *
@@ -85,14 +80,9 @@ BundleFileFactoryHook, FrameworkLog, AdaptorHook {
         hr.addClassLoadingHook(this);
         hr.addBundleFileFactoryHook(this);
         hr.addAdaptorHook(this);
-    
-       /* hr.addWatcher(new BundleWatcher() {
-
-            @Override
-            public void watchBundle(Bundle bundle, int i) {
-
-            }
-        });*/
+        for (HookConfigurator hc : Lookup.getDefault().lookupAll(HookConfigurator.class)) {
+            hc.addHooks(hr);
+        }
     }
 
     public byte[] processClass(String string, byte[] bytes, ClasspathEntry ce, BundleEntry be, ClasspathManager cm) {
@@ -104,7 +94,7 @@ BundleFileFactoryHook, FrameworkLog, AdaptorHook {
     }
 
     public String findLibrary(BaseData bd, String string) {
-        return string;
+        return null;
     }
 
     public ClassLoader getBundleClassLoaderParent() {
@@ -113,14 +103,7 @@ BundleFileFactoryHook, FrameworkLog, AdaptorHook {
 
     public BaseClassLoader createClassLoader(ClassLoader parent, final ClassLoaderDelegate delegate, final BundleProtectionDomain bpd, BaseData bd, String[] classpath) {
         String loc = bd.getBundle().getLocation();
-        //NetbinoxFactory.LOG.log(Level.FINER, "createClassLoader {0}", bd.getLocation());
-        //System.out.println("loader " + bd.getLocation());
-        /*try {
-            bd.getBundle().getBundleContext().installBundle(bd.getLocation());
-        } catch (BundleException ex) {
-            Logger.getLogger(NetbinoxHooks.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        
+        //NetigsoModule.LOG.log(Level.FINER, "createClassLoader {0}", bd.getLocation());
         final String pref = "netigso://"; // NOI18N
         ClassLoader ml = null;
         if (loc != null && loc.startsWith(pref)) {

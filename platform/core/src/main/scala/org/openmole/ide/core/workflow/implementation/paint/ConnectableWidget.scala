@@ -63,7 +63,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
           var st = p.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h= 35 + i * 22
-          graphics.drawImage(ApplicationCustomize.typeImageMap(p.factory.coreClass.getSimpleName),
+          graphics.drawImage(ApplicationCustomize.typeImageMap(p.coreClass.getSimpleName),
                              x - taskWidth / 2, h - 13,
                              new Container)
           if (MoleScenesManager.detailedView) graphics.drawString(st, x - taskWidth / 2 + 24, h)

@@ -20,24 +20,22 @@ package org.apidesign.netbinox;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.osgi.launch.EquinoxFactory;
 import org.netbeans.core.netigso.spi.NetigsoArchive;
 import org.openide.util.lookup.ServiceProvider;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.packageadmin.PackageAdmin;
+
 /**
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 @ServiceProvider(
     service=FrameworkFactory.class,
+    supersedes={ "org.eclipse.osgi.launch.EquinoxFactory" },
     position=-10
 )
 public class NetbinoxFactory implements FrameworkFactory {
@@ -80,13 +78,6 @@ public class NetbinoxFactory implements FrameworkFactory {
             loc = loc.substring(0, exclaim);
         }
         configMap.put("osgi.framework", loc);
-        Netbinox ret = new Netbinox(configMap);
-       /* try {
-            ret.init();
-        } catch (BundleException ex) {
-            throw new RuntimeException("Error initializing equinox.", ex);
-        }*/
-        
-        return ret;
+        return new Netbinox(configMap);
     }
 }

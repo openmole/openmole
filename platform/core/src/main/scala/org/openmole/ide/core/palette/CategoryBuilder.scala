@@ -17,26 +17,40 @@
 
 package org.openmole.ide.core.palette
 
+import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.workflow.implementation.SamplingUI
+import org.openmole.ide.core.workflow.implementation.PrototypeUI
+import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.properties.ISamplingFactoryUI
 import scala.collection.mutable.HashMap
 import org.openide.nodes.Node
 import org.openide.nodes.Children
 import scala.collection.JavaConversions._
+import org.openide.util.Lookup
+import java.awt.datatransfer.DataFlavor
 
 class CategoryBuilder extends Children.Keys[ICategory] {
-  var categories= new HashMap[MoleConcepts.Concept, ICategory]
-  categories+= MoleConcepts.TASK_INSTANCE -> new TaskCategory
-  categories+= MoleConcepts.SAMPLING_INSTANCE -> new SamplingCategory
-  categories+= MoleConcepts.PROTOTYPE_INSTANCE -> new PrototypeCategory
+//  var categories= new HashMap[MoleConcepts.Concept, ICategory]
+//  categories+= MoleConcepts.TASK_INSTANCE -> new TaskCategory
+//  categories+= MoleConcepts.SAMPLING_INSTANCE -> new SamplingCategory
+//  categories+= MoleConcepts.PROTOTYPE_INSTANCE -> new PrototypeCategory
   
   override protected def createNodes(key: ICategory) = Array[Node](new CategoryNode(key.asInstanceOf[ICategory]))
   
   override def addNotify = {
     super.addNotify
-    setKeys(categories.values)
+    // setKeys(categories.values)
+    setKeys(List(
+        new GenericCategory("Task models", new GenericChildren(PaletteElementFactories.taskModelPaletteElementFactories,new DataFlavor(classOf[TaskUI],"TaskModels"))),
+       
+        new GenericCategory("Sampling models", new GenericChildren(PaletteElementFactories.samplingModelPaletteElementFactories,new DataFlavor(classOf[SamplingUI],"SamplingModels"))),
+       
+         //       new GenericCategory("Sampling models", new GenericChildren(JavaConversions.asScalaIterable(Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])),new DataFlavor(classOf[SamplingUI], "Samplings"))),
+        new GenericCategory("Prototype models", new GenericChildren(PaletteElementFactories.prototypeModelPaletteElementFactories,new DataFlavor(classOf[PrototypeUI], "Prototypes")))).toIterable)
   }
-  
-  def prototypeInstanceCategory(cname: MoleConcepts.Concept)= categories(cname)
 }
+
 //package org.openmole.ide.core.palette;
 //
 //import java.util.HashMap;

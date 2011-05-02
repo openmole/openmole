@@ -5,19 +5,16 @@
 
 package org.openmole.ide.core.properties
 
-import java.awt.Color
+import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
 
 trait IPrototypeFactoryUI  extends IFactoryUI {
-  override def entity(name: String) = new PrototypeUI(name, this)
+  override def buildEntity(name: String,panel: PanelUI) = new PrototypeUI(name,coreClass, panel)
   
-  // Default border task color
-  override def borderColor = new Color(0,0,255)
+  override def buildEntity(panel: PanelUI) = new PrototypeUI(coreClass,panel)
   
-  // Default background task color
-  override def backgroundColor = new Color(0,0,255,128)
+  override def panel = null
   
-  // Default background task image
-  override def imagePath = "img/thumb/default.png"
+  def coreObject(name: String): Prototype[_]
 }
 

@@ -26,11 +26,13 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   
   override def panel= new GroovyTaskPanelUI
   
-  override def coreObject(p: PanelUI)= new GroovyTask("groovyTAsk")
+  override def coreObject(name: String)= panel.coreObject(name)
   
   override def coreClass= classOf[GroovyTask]
   
   override def borderColor = new Color(61,104,130)
   
   override def backgroundColor = new Color(61,104,130,128)
+  
+  override def imagePath = "img/thumb/groovyTask.png"
 }

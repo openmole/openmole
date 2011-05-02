@@ -20,7 +20,6 @@ package org.openmole.ide.core.workflow.implementation
 import java.awt.Point
 import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import org.openmole.ide.core.palette.MoleConcepts
 
 object UIFactory {
   // def createTaskModelInstance(modelClass: Class[_ <: GenericTaskModelUI]) = {

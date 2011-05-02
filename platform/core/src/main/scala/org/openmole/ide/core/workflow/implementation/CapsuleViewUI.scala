@@ -11,7 +11,6 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.workflow.action.TaskActions
-import org.openmole.ide.core.palette.MoleConcepts
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget

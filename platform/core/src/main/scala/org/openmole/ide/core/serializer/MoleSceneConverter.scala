@@ -81,14 +81,14 @@ class MoleSceneConverter extends Converter{
           view.capsuleModel.taskUI.get.prototypesIn.foreach(proto=> {
               writer.startNode("iprototype")
               writer.addAttribute("name", proto.name);
-              writer.addAttribute("type", proto.factory.coreClass.getName)
+    //          writer.addAttribute("type", proto.factory.coreClass.getName)
               writer.endNode
             })
                
           view.capsuleModel.taskUI.get.prototypesOut.foreach(proto=> {
               writer.startNode("oprototype")
               writer.addAttribute("name", proto.name)
-              writer.addAttribute("type", proto.factory.coreClass.getName)
+         //     writer.addAttribute("type", proto.factory.coreClass.getName)
               writer.endNode();
             })
           writer.endNode

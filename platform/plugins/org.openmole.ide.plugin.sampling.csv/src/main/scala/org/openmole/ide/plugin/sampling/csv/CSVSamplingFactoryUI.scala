@@ -25,7 +25,9 @@ class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   
   override def panel= new CSVSamplingPanelUI
   
-  override def coreObject(p: PanelUI)= new Object
+  override def coreObject(name: String)= panel.coreObject(name)
+
+  override def coreClass = classOf[CSVSampling] 
   
-  override def coreClass= classOf[CSVSampling]
+  override def imagePath = "img/thumb/csvSampling.png" 
 }

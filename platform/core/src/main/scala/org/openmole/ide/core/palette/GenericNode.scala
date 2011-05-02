@@ -18,16 +18,27 @@
 package org.openmole.ide.core.palette
 
 import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
 import org.openide.nodes.AbstractNode
+import org.openide.util.datatransfer.ExTransferable
 import org.openide.util.lookup.Lookups;
 import org.openide.nodes.Children
-import org.openmole.ide.core.properties.IFactoryUI
 
-class GenericNode(dataFlavor: DataFlavor,factory: IFactoryUI) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
-  setIconBaseWithExtension(factory.imagePath)
-  setName(factory.coreClass.getSimpleName)
+//class GenericNode(dataFlavor: DataFlavor,factory: IFactoryUI,displayName: String) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
+//  setIconBaseWithExtension(factory.imagePath)
+//  setName(displayName)
+//}
+
+class GenericNode(dataFlavor: DataFlavor,elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
+  setIconBaseWithExtension(elementFactory.factoryUI.imagePath)
+  setName(elementFactory.displayName)
+  
+  override def drag: Transferable = {
+    val retValue = ExTransferable.create(super.drag)
+    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
+    retValue
+  }
 }
-
 
 //package org.openmole.ide.core.palette;
 //
