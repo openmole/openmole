@@ -26,6 +26,11 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
   //  capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
+  
+    if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) ) println("PROTOTYPE_DATA_FLAVOR")
+    if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_MODEL_DATA_FLAVOR) ) println("PROTOTYPE_MODEL_DATA_FLAVOR")
+    
+    
     capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
     molescene.repaint
     molescene.revalidate

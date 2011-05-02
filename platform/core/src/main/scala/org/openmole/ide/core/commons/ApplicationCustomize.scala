@@ -11,6 +11,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.ImageUtilities
 import scala.collection.immutable.HashMap
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
@@ -48,6 +49,9 @@ object ApplicationCustomize{
   val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeUI], "Prototypes")
   val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], "Tasks")
   val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingUI], "Samplings")
+  val PROTOTYPE_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "PrototypeModels")
+  val TASK_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "TaskModels")
+  val SAMPLING_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "SamplingModels")
   
   val TASK_DEFAULT_PROPERTIES = "resources/task/default"
   var typeImageMap= new HashMap[String, Image]

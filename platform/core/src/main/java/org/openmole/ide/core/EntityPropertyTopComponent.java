@@ -5,12 +5,22 @@
 package org.openmole.ide.core;
 
 import java.awt.BorderLayout;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.netbeans.api.visual.action.ActionFactory;
+import org.openmole.ide.core.provider.DnDNewEntityProvider;
 
 /**
  * Top component which displays something.
@@ -33,8 +43,15 @@ public final class EntityPropertyTopComponent extends TopComponent {
         propertyPanel = new PropertyPanel();
         setLayout(new BorderLayout());
         
-        
+        propertyPanel.setDropTarget(new DropTarget(propertyPanel,new PanelDropTarget()));
         add(propertyPanel, BorderLayout.CENTER);
+        
+        
+//        
+//        DropTarget dt = new DropTarget(this, new PropertyDropTargetListener());
+//        dt.setDefaultActions(DnDConstants.ACTION_MOVE);
+//        dt.setActive(true);
+//        setDropTarget(dt);
     }
 
     /** This method is called from within the constructor to
@@ -128,5 +145,31 @@ public final class EntityPropertyTopComponent extends TopComponent {
     @Override
     protected String preferredID() {
         return PREFERRED_ID;
+    }
+    public class PanelDropTarget implements DropTargetListener {
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void dragOver(DropTargetDragEvent dtde) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void dropActionChanged(DropTargetDragEvent dtde) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void dragExit(DropTargetEvent dte) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void drop(DropTargetDropEvent dtde) {
+            System.out.println("DROPE !!!");
+        }
     }
 }

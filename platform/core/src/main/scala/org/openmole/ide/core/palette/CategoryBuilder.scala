@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.palette
 
+import org.openmole.ide.core.commons.ApplicationCustomize
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
@@ -42,12 +43,10 @@ class CategoryBuilder extends Children.Keys[ICategory] {
     super.addNotify
     // setKeys(categories.values)
     setKeys(List(
-        new GenericCategory("Task models", new GenericChildren(PaletteElementFactories.taskModelPaletteElementFactories,new DataFlavor(classOf[TaskUI],"TaskModels"))),
-       
-        new GenericCategory("Sampling models", new GenericChildren(PaletteElementFactories.samplingModelPaletteElementFactories,new DataFlavor(classOf[SamplingUI],"SamplingModels"))),
-       
-         //       new GenericCategory("Sampling models", new GenericChildren(JavaConversions.asScalaIterable(Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])),new DataFlavor(classOf[SamplingUI], "Samplings"))),
-        new GenericCategory("Prototype models", new GenericChildren(PaletteElementFactories.prototypeModelPaletteElementFactories,new DataFlavor(classOf[PrototypeUI], "Prototypes")))).toIterable)
+        new GenericCategory("Task models", new GenericChildren(PaletteElementFactories.taskModelPaletteElementFactories,ApplicationCustomize.TASK_MODEL_DATA_FLAVOR)),
+        new GenericCategory("Sampling models", new GenericChildren(PaletteElementFactories.samplingModelPaletteElementFactories,ApplicationCustomize.SAMPLING_MODEL_DATA_FLAVOR)),
+        new GenericCategory("Prototype models", new GenericChildren(PaletteElementFactories.prototypeModelPaletteElementFactories,ApplicationCustomize.PROTOTYPE_MODEL_DATA_FLAVOR)),
+        new GenericCategory("Tasks", new GenericChildren(PaletteElementFactories.taskPaletteElementFactories,ApplicationCustomize.TASK_DATA_FLAVOR))).toIterable)
   }
 }
 

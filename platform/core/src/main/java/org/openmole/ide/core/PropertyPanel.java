@@ -11,9 +11,17 @@
 package org.openmole.ide.core;
 
 import java.awt.Component;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.util.Iterator;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import org.netbeans.api.visual.action.ActionFactory;
 import org.openmole.ide.core.palette.PaletteElementFactories;
 import org.openmole.ide.core.palette.PaletteElementFactory;
 import org.openmole.ide.core.properties.NativeFactories;
@@ -21,6 +29,7 @@ import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.IFactoryUI;
 import org.openmole.ide.core.properties.NativeFactories;
 import org.openmole.ide.core.properties.PrototypeFactoryUI;
+import org.openmole.ide.core.provider.DnDNewEntityProvider;
 import scala.collection.Iterable;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConversions.*;
@@ -40,26 +49,26 @@ public class PropertyPanel extends javax.swing.JPanel {
         setEditGraphicalContext(false);
     }
 
-    private String save(){
-        if (newMode){
-          //  ((IFactoryUI) typeComboBox.getSelectedItem()).buildEntity(nameTextField.getText());
-            PaletteElementFactories.addPrototypeElement(new PaletteElementFactory(nameTextField.getText(),((IFactoryUI) typeComboBox.getSelectedItem())));
+    private String save() {
+        if (newMode) {
+            //  ((IFactoryUI) typeComboBox.getSelectedItem()).buildEntity(nameTextField.getText());
+            PaletteElementFactories.addPrototypeElement(new PaletteElementFactory(nameTextField.getText(), ((IFactoryUI) typeComboBox.getSelectedItem())));
             MoleSceneTopComponent.getDefault().refreshPalette();
         }
         nameTextField.setEnabled(false);
         newMode = false;
         return "Edit";
     }
-    
-    private void setNewGraphicalContext(){
+
+    private void setNewGraphicalContext() {
         newMode = true;
         nameTextField.setText("");
-       setEditGraphicalContext(true);
+        setEditGraphicalContext(true);
         // nameTextField.setEnabled(true);
-      //  editToggleButton.setEnabled(true);
+        //  editToggleButton.setEnabled(true);
         typeComboBox.setEnabled(true);
     }
-    
+
     private void setEditGraphicalContext(Boolean b) {
         nameTextField.setEnabled(b);
         editToggleButton.setText(b ? "Save" : save());
@@ -220,7 +229,7 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     private void prototypeToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prototypeToggleButtonActionPerformed
         setButtons(true);
-        for (IFactoryUI pf :JavaConversions.asJavaIterable(NativeFactories.prototypeFactories())) {
+        for (IFactoryUI pf : JavaConversions.asJavaIterable(NativeFactories.prototypeFactories())) {
             typeComboBox.addItem(pf);
         }
     }//GEN-LAST:event_prototypeToggleButtonActionPerformed
@@ -236,7 +245,6 @@ public class PropertyPanel extends javax.swing.JPanel {
     private void typeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_typeComboBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_typeComboBoxActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton editToggleButton;
     private javax.swing.JToggleButton environmentToggleButton;
@@ -262,4 +270,6 @@ public class PropertyPanel extends javax.swing.JPanel {
             return this;
         }
     }
+
+    
 }

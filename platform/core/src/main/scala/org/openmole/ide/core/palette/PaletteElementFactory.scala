@@ -9,4 +9,5 @@ import org.openmole.ide.core.properties.IFactoryUI
 
 class PaletteElementFactory(val displayName: String,val factoryUI: IFactoryUI) {
   def buildEntity = factoryUI.buildEntity(displayName,factoryUI.panel)
+  def buildNewEntity = factoryUI.buildEntity(factoryUI.panel)
 }
