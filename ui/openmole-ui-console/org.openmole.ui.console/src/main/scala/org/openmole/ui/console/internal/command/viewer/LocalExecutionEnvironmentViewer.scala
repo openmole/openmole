@@ -22,7 +22,7 @@ import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmen
 class LocalExecutionEnvironmentViewer extends IViewer {
 
   override def view(obj: Object, args: Array[String]) {
-    val env = LocalExecutionEnvironment
+    val env = obj.asInstanceOf[LocalExecutionEnvironment]
     println("Queued jobs: " + env.nbJobInQueue)
     println("Number of threads: " + env.nbThread)
   }
