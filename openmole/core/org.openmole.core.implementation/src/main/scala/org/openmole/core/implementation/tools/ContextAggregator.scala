@@ -35,11 +35,10 @@ object ContextAggregator {
   
       if(toArrayFonc.isDefinedAt(d.prototype.name)) {
         val manifest = toArrayFonc(d.prototype.name)
-        
-        val array = manifest.newArray(merging.size).asInstanceOf[Array[AnyVal]]
-        //merging.zipWithIndex.foreach{e => java.lang.reflect.Array.set(e, e._2, e._1.value)}
-        merging.zipWithIndex.foreach{e => array(e._2) = e._1.value.asInstanceOf[AnyVal]}
-        
+
+        val array = manifest.newArray(merging.size)
+        merging.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2, e._1.value)}
+
         inContext += new Variable(new Prototype(d.prototype.name, manifest.arrayManifest).asInstanceOf[IPrototype[Any]], array) 
       } else if(!merging.isEmpty) { 
         if(merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        

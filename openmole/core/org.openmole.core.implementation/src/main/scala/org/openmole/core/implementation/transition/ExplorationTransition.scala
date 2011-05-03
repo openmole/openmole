@@ -81,7 +81,7 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
       val destContext = new Context
 
       val notFound = new ListBuffer[IData[_]]
-
+      
       for (in <- endTask.inputs) {
         context.variable(in.prototype) match {
           case None => notFound += in
@@ -90,19 +90,20 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
       }
       
       val valueMap = value.groupBy{_.prototype.name}
-      
+
       for(data <- notFound) {
         val prototype = data.prototype
         valueMap.get(prototype.name) match {
           case Some(variable) =>
             if(variable.size > 1) Logger.getLogger(classOf[ExplorationTransition].getName).warning("Misformed sampling prototype " + prototype + " has been found " + variable.size + " times in a single row.") 
             val value = variable.head.value
+ 
             if(prototype.accepts(value)) destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
-            else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype)
+            else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype) 
           case None =>
         }
       }
- 
+
       submitNextJobsIfReady(ContextBuffer(destContext, toClone), newTicket, subSubMole)
     }
 

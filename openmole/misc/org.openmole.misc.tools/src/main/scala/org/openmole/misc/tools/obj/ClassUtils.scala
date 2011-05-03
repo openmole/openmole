@@ -122,7 +122,7 @@ object ClassUtils {
     if(c.isPrimitive) {
       if(c == classOf[Byte]) java.lang.Byte.TYPE
       else if(c == classOf[Short]) java.lang.Short.TYPE
-      else if(c == classOf[Integer]) java.lang.Integer.TYPE
+      else if(c == classOf[Int]) java.lang.Integer.TYPE
       else if(c == classOf[Long]) java.lang.Long.TYPE
       else if(c == classOf[Float]) java.lang.Float.TYPE
       else if(c == classOf[Double]) java.lang.Double.TYPE
@@ -134,17 +134,27 @@ object ClassUtils {
   
   def clazzOf(v: Any) = {
     v match {
-      /*case _: Byte => classOf[Byte]
-       case _: Short => classOf[Short]
-       case _: Int => classOf[Int]
-       case _: Long => classOf[Long]
-       case _: Float => classOf[Float]
-       case _: Double => classOf[Double]
-       case _: Char => classOf[Char]
-       case _: Boolean => classOf[Boolean]
-       case _: Unit => classOf[Unit]*/
       case null => classOf[Null]
       case r: AnyRef => r.getClass
     }
   }
+  
+  private val primitiveWrapperMap = Map[Class[_], Class[_]](java.lang.Boolean.TYPE -> classOf[java.lang.Boolean],
+                                        java.lang.Byte.TYPE -> classOf[java.lang.Byte],
+                                        java.lang.Character.TYPE -> classOf[java.lang.Character],
+                                        java.lang.Short.TYPE -> classOf[java.lang.Short],
+                                        java.lang.Integer.TYPE -> classOf[java.lang.Integer],
+                                        java.lang.Long.TYPE -> classOf[java.lang.Long],
+                                        java.lang.Double.TYPE -> classOf[java.lang.Double],
+                                        java.lang.Float.TYPE -> classOf[java.lang.Float])
+     
+  
+  implicit def manifest2ManifestDecorator[T](m: Manifest[T]) = new {
+    def isAssignableFrom(m2: Manifest[_]) = {
+      if(primitiveWrapperMap.contains(m.erasure) || primitiveWrapperMap.contains(m2.erasure))
+        primitiveWrapperMap.getOrElse(m.erasure, m.erasure) == primitiveWrapperMap.getOrElse(m2.erasure, m2.erasure)
+      else m >:> m2
+    }
+  }
+   
 }

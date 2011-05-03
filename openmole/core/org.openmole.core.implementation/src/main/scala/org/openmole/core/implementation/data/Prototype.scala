@@ -35,7 +35,7 @@ class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype
   override def isAssignableFrom(p: IPrototype[_]): Boolean = `type` <:< p.`type`
   
   override def accepts(obj: Any): Boolean = {
-    obj == null || `type` >:> manifest(clazzOf(obj))
+    obj == null || `type`.isAssignableFrom(manifest(clazzOf(obj)))
   }
   
   override def id = (name, `type`)

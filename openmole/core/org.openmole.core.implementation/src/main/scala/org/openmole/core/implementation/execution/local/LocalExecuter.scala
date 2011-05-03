@@ -43,32 +43,25 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
       try {
         val executionJob = environment.takeNextjob
         val job = executionJob.job
+        executionJob.state = ExecutionState.RUNNING
+        val running = System.currentTimeMillis
+        //executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
 
-        try {
-          executionJob.state = ExecutionState.RUNNING
-          val running = System.currentTimeMillis
-          //executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
-
-          for (moleJob <- job.moleJobs) {
-            if (moleJob.state != State.CANCELED) {
-              if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
-                jobGoneIdle
-              }
-              
-              moleJob.perform
-              moleJob.finished(moleJob.context)
+        for (moleJob <- job.moleJobs) {
+          if (moleJob.state != State.CANCELED) {
+            if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
+              jobGoneIdle
             }
+              
+            moleJob.perform
+            moleJob.finished(moleJob.context)
           }
-          executionJob.state = ExecutionState.DONE
-          LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
-
-        } finally {
-          //LocalExecutionEnvironment.jobRegistry.removeJob(job);
         }
+        executionJob.state = ExecutionState.DONE
+        LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
       } catch {
-        case (e: InterruptedException) => 
-          if (!stop) LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e)  
-        case e => LOGGER.log(Level.SEVERE, null, e);
+        case (e: InterruptedException) => if (!stop) LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e)  
+        case e => LOGGER.log(Level.SEVERE, null, e)
       }
     }
   }
