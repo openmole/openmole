@@ -321,8 +321,7 @@ class Builder {
 
     // sets output available as an array
     for (data <- ft.userOutputs) {
-      moleTask.forceArray(data)
-      moleTask.addOutput(puzzle.lastCapsule, Data.toArray(data))
+      moleTask.addOutput(puzzle.lastCapsule, Data.toArray(data), true)
     }
     moleTask
   }
