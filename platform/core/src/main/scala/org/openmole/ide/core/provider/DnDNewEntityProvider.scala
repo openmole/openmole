@@ -6,7 +6,7 @@
 package org.openmole.ide.core.provider
 
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.netbeans.api.visual.action.AcceptProvider
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Widget
@@ -17,9 +17,9 @@ class DnDNewEntityProvider extends AcceptProvider{
 
   override def isAcceptable(widget: Widget,point: Point,transferable: Transferable): ConnectorState=  {
     var state= ConnectorState.REJECT
-    if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) ||
-    transferable.isDataFlavorSupported(ApplicationCustomize.SAMPLING_DATA_FLAVOR)||
-    transferable.isDataFlavorSupported(ApplicationCustomize.TASK_DATA_FLAVOR)) state = ConnectorState.ACCEPT
+    if (transferable.isDataFlavorSupported(Constants.PROTOTYPE_DATA_FLAVOR) ||
+    transferable.isDataFlavorSupported(Constants.SAMPLING_DATA_FLAVOR)||
+    transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR)) state = ConnectorState.ACCEPT
     state
   }
   

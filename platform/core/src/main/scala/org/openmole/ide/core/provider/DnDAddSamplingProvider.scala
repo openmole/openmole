@@ -22,13 +22,13 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 
 class DnDAddSamplingProvider(molescene: MoleScene) extends DnDProvider(molescene){ 
 
   override def  isAcceptable(widget: Widget,point: Point,transferable: Transferable)= {
     var state = ConnectorState.REJECT
-    if (transferable.isDataFlavorSupported(ApplicationCustomize.SAMPLING_DATA_FLAVOR)) {
+    if (transferable.isDataFlavorSupported(Constants.SAMPLING_DATA_FLAVOR)) {
       state= ConnectorState.ACCEPT
     }
     state
@@ -40,7 +40,7 @@ class DnDAddSamplingProvider(molescene: MoleScene) extends DnDProvider(molescene
 //import java.awt.datatransfer.Transferable;
 //import org.netbeans.api.visual.action.ConnectorState;
 //import org.netbeans.api.visual.widget.Widget;
-//import org.openmole.ide.core.commons.ApplicationCustomize;
+//import org.openmole.ide.core.commons.Constants;
 //import org.openmole.ide.core.workflow.implementation.MoleScene;
 
 /**
@@ -59,7 +59,7 @@ class DnDAddSamplingProvider(molescene: MoleScene) extends DnDProvider(molescene
 //
 //        System.out.println("isAcceptable :: " + widget);
 //        ConnectorState state = ConnectorState.REJECT;
-//        if (transferable.isDataFlavorSupported(ApplicationCustomize.SAMPLING_DATA_FLAVOR)) {
+//        if (transferable.isDataFlavorSupported(Constants.SAMPLING_DATA_FLAVOR)) {
 //            state = ConnectorState.ACCEPT;
 //        }
 //        return state;

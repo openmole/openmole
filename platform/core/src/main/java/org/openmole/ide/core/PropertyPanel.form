@@ -19,35 +19,40 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="entityPanelScrollPane" alignment="0" pref="422" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="typeComboBox" pref="262" max="32767" attributes="1"/>
+                                  <Component id="nameTextField" alignment="0" pref="262" max="32767" attributes="1"/>
+                              </Group>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="taskToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="prototypeToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="samplingToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="typeComboBox" pref="262" max="32767" attributes="1"/>
-                          <Component id="nameTextField" alignment="0" pref="262" max="32767" attributes="1"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Group type="102" alignment="1" attributes="1">
+                              <Component id="editToggleButton" max="32767" attributes="1"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="newToggleButton" min="-2" pref="45" max="-2" attributes="1"/>
+                          </Group>
+                          <Component id="environmentToggleButton" linkSize="2" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="taskToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="prototypeToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="samplingToggleButton" linkSize="2" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Group type="102" alignment="1" attributes="1">
-                      <Component id="editToggleButton" max="32767" attributes="1"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="newToggleButton" min="-2" pref="45" max="-2" attributes="1"/>
-                  </Group>
-                  <Component id="environmentToggleButton" linkSize="2" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -79,7 +84,9 @@
                       <Component id="newToggleButton" alignment="3" min="-2" pref="60" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="entityPanelScrollPane" pref="136" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -176,5 +183,9 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="environmentToggleButtonActionPerformed"/>
       </Events>
     </Component>
+    <Container class="javax.swing.JScrollPane" name="entityPanelScrollPane">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+    </Container>
   </SubComponents>
 </Form>

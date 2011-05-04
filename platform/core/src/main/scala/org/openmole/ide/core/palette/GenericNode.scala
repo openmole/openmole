@@ -19,17 +19,20 @@ package org.openmole.ide.core.palette
 
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
+import java.beans.PropertyChangeEvent
+import java.beans.PropertyChangeListener
 import org.openide.nodes.AbstractNode
 import org.openide.util.datatransfer.ExTransferable
-import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.Lookups
 import org.openide.nodes.Children
-
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 //class GenericNode(dataFlavor: DataFlavor,factory: IFactoryUI,displayName: String) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
 //  setIconBaseWithExtension(factory.imagePath)
 //  setName(displayName)
 //}
 
-class GenericNode(dataFlavor: DataFlavor,elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
+class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
   setIconBaseWithExtension(elementFactory.factoryUI.imagePath)
   setName(elementFactory.displayName)
   
@@ -39,6 +42,7 @@ class GenericNode(dataFlavor: DataFlavor,elementFactory: PaletteElementFactory) 
     retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
     retValue
   }
+
 }
 
 //package org.openmole.ide.core.palette;

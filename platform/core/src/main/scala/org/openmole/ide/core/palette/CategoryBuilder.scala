@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.palette
 
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
@@ -26,6 +26,8 @@ import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import scala.collection.mutable.HashMap
 import org.openide.nodes.Node
+import java.beans.PropertyChangeEvent
+import java.beans.PropertyChangeListener
 import org.openide.nodes.Children
 import scala.collection.JavaConversions._
 import org.openide.util.Lookup
@@ -42,12 +44,14 @@ class CategoryBuilder extends Children.Keys[ICategory] {
   override def addNotify = {
     super.addNotify
     // setKeys(categories.values)
+    
     setKeys(List(
-        new GenericCategory("Task models", new GenericChildren(PaletteElementFactories.taskModelPaletteElementFactories,ApplicationCustomize.TASK_MODEL_DATA_FLAVOR)),
-        new GenericCategory("Sampling models", new GenericChildren(PaletteElementFactories.samplingModelPaletteElementFactories,ApplicationCustomize.SAMPLING_MODEL_DATA_FLAVOR)),
-        new GenericCategory("Prototype models", new GenericChildren(PaletteElementFactories.prototypeModelPaletteElementFactories,ApplicationCustomize.PROTOTYPE_MODEL_DATA_FLAVOR)),
-        new GenericCategory("Tasks", new GenericChildren(PaletteElementFactories.taskPaletteElementFactories,ApplicationCustomize.TASK_DATA_FLAVOR))).toIterable)
+        new GenericCategory("TaskModel","Task models" ,new GenericChildren(PaletteElementFactories.paletteElements("TaskModel"),Constants.TASK_MODEL_DATA_FLAVOR)),
+        new GenericCategory("SamplingModel","Sampling models", new GenericChildren(PaletteElementFactories.paletteElements("SamplingModel"),Constants.SAMPLING_MODEL_DATA_FLAVOR)),
+        new GenericCategory("PrototypeModel","Prototype models", new GenericChildren(PaletteElementFactories.paletteElements("PrototypeModel"),Constants.PROTOTYPE_MODEL_DATA_FLAVOR)),
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(PaletteElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR))).toIterable)
   }
+
 }
 
 //package org.openmole.ide.core.palette;

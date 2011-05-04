@@ -10,7 +10,7 @@
  */
 package org.openmole.ide.plugin.task.groovy;
 
-import java.awt.Panel;
+import javax.swing.JPanel;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.plugin.task.groovy.GroovyTask;
 
@@ -19,7 +19,7 @@ import org.openmole.plugin.task.groovy.GroovyTask;
  *
  * @author mathieu
  */
-public class GroovyTaskPanelUI extends Panel implements PanelUI {
+public class GroovyTaskPanelUI extends JPanel implements PanelUI {
 
     /** Creates new form GroovyTaskPanelUI */
     public GroovyTaskPanelUI() {

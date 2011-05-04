@@ -13,7 +13,6 @@ package org.openmole.ide.plugin.sampling.csv;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import org.openmole.ide.core.workflow.implementation.PrototypesUI;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.plugin.sampling.csv.CSVSampling;
 

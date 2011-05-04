@@ -34,5 +34,5 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   
   override def backgroundColor = new Color(61,104,130,128)
   
-  override def imagePath = "img/thumb/groovyTask.png"
+  override def imagePath = "img/thumb/groovyTaskSmall.png"
 }

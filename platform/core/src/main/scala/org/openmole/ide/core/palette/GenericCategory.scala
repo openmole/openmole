@@ -5,7 +5,10 @@
 
 package org.openmole.ide.core.palette
 
-class GenericCategory(val n: String, val c: GenericChildren) extends ICategory{
+
+class GenericCategory(val n: String, val dn: String, val c: GenericChildren) extends ICategory{
+  
   override def name = n
+  override def displayName = dn
   override def children = c
 }

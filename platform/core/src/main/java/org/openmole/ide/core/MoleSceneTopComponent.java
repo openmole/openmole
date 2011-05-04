@@ -5,6 +5,16 @@
 package org.openmole.ide.core;
 
 import java.awt.BorderLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ServiceLoader;
@@ -36,9 +46,13 @@ import org.openmole.ide.core.workflow.action.EnableTaskDetailedViewAction;
 import org.openmole.ide.core.workflow.action.RemoveAllMoleSceneAction;
 import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
+import org.openide.nodes.AbstractNode;
+import org.openide.text.ActiveEditorDrop;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
-import org.openmole.ide.core.commons.ApplicationCustomize;
+import org.openmole.ide.core.commons.Constants;
+import org.openmole.ide.core.palette.GenericNode;
+import org.openmole.ide.core.palette.PaletteElementFactory;
 
 import org.openmole.ide.core.workflow.model.IEntityUI;
 
@@ -47,8 +61,7 @@ import org.openmole.ide.core.workflow.model.IEntityUI;
  */
 @ConvertAsProperties(dtd = "-//org.openmole.ide.core//MoleScene//EN",
 autostore = false)
-public final class MoleSceneTopComponent extends TopComponent {
-
+public final class MoleSceneTopComponent extends TopComponent{
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
@@ -63,11 +76,18 @@ public final class MoleSceneTopComponent extends TopComponent {
         MoleScenesManager.setTabbedPane(tabbedPane);
         TaskSettingsManager.setTabbedPane(tabbedPane);
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
-
+        
         palette = PaletteSupport.createPalette();
+     //   associateLookup( Lookups.fixed( new Object[] { palette } ));
+
 
         associateLookup(new AbstractLookup(ic));
+     //   palette = PaletteSupport.createPalette();
+
         ic.add(palette);
+        
+        
+      //  palette.addPropertyChangeListener(this);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
@@ -99,7 +119,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         add(tabbedPane, BorderLayout.CENTER);
     }
 
-    public void refreshPalette() {        
+    public void refreshPalette() {
         ic.remove(palette);
         palette = PaletteSupport.createPalette();
         ic.add(palette);
@@ -218,4 +238,5 @@ public final class MoleSceneTopComponent extends TopComponent {
     protected String preferredID() {
         return PREFERRED_ID;
     }
+
 }

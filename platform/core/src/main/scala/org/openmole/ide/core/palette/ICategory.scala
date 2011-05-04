@@ -20,6 +20,8 @@ package org.openmole.ide.core.palette
 trait ICategory {
   def name: String
   
+  def displayName: String
+  
   def children: GenericChildren
 }
 

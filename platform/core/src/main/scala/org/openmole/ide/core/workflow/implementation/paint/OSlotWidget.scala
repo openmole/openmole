@@ -7,23 +7,23 @@ package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class OSlotWidget(scene: Scene,val capsule: CapsuleViewUI)  extends SlotWidget(scene){
-  setImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT)
-  setDetailedView(ApplicationCustomize.TASK_CONTAINER_WIDTH)
+  setImage(Constants.IMAGE_OUTPUT_SLOT)
+  setDetailedView(Constants.TASK_CONTAINER_WIDTH)
   
-  def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + ApplicationCustomize.TASK_TITLE_HEIGHT))
+  def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT))
   
 }
 // OSlotWidget extends SlotWidget {
 //    public OSlotWidget(Scene scene,CapsuleViewUI capsule) {
 //        super(scene,capsule);
-//        setImage(ApplicationCustomize.IMAGE_OUTPUT_SLOT);
-//        setDetailedView(ApplicationCustomize.TASK_CONTAINER_WIDTH);
+//        setImage(Constants.IMAGE_OUTPUT_SLOT);
+//        setDetailedView(Constants.TASK_CONTAINER_WIDTH);
 //    }
 //
 //    public void setDetailedView(int w){
-//        setPreferredLocation(new Point(w - 6, 14 + ApplicationCustomize.TASK_TITLE_HEIGHT));
+//        setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT));
 //    }

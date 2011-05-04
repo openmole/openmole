@@ -11,7 +11,7 @@ import java.awt.Rectangle
 import java.awt.Container
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
@@ -22,8 +22,8 @@ import java.awt.BasicStroke
 
 class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[String]= Some("")) extends Widget(scene) {
 
-  var taskWidth= ApplicationCustomize.TASK_CONTAINER_WIDTH
-  var taskImageOffset= ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET
+  var taskWidth= Constants.TASK_CONTAINER_WIDTH
+  var taskImageOffset= Constants.TASK_IMAGE_WIDTH_OFFSET
   val bodyArea = new Rectangle
   val widgetArea= new Rectangle
   var titleArea = new Rectangle
@@ -35,16 +35,16 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
   
   def setWidthHint= {
     if (MoleScenesManager.detailedView) {
-      taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH
-      taskImageOffset = ApplicationCustomize.EXPANDED_TASK_IMAGE_WIDTH_OFFSET
+      taskWidth = Constants.EXPANDED_TASK_CONTAINER_WIDTH
+      taskImageOffset = Constants.EXPANDED_TASK_IMAGE_WIDTH_OFFSET
     }
     else {
-      taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH
-      taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET
+      taskWidth = Constants.TASK_CONTAINER_WIDTH
+      taskImageOffset = Constants.TASK_IMAGE_WIDTH_OFFSET
     }
-    bodyArea.setBounds(new Rectangle(0, 0,taskWidth,ApplicationCustomize.TASK_CONTAINER_HEIGHT))
-    widgetArea.setBounds(new Rectangle(-12, -1,taskWidth + 24,ApplicationCustomize.TASK_CONTAINER_HEIGHT + 2))
-    titleArea.setBounds(new Rectangle(0, 0,taskWidth,ApplicationCustomize.TASK_TITLE_HEIGHT))
+    bodyArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_CONTAINER_HEIGHT))
+    widgetArea.setBounds(new Rectangle(-12, -1,taskWidth + 24,Constants.TASK_CONTAINER_HEIGHT + 2))
+    titleArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_TITLE_HEIGHT))
     setPreferredBounds(widgetArea)
     revalidate
     repaint
@@ -72,15 +72,15 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
 
    /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
                                                          taskImageOffset,
-                                                         ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
-                                                         ApplicationCustomize.TASK_IMAGE_WIDTH,
-                                                         ApplicationCustomize.TASK_IMAGE_HEIGHT,
+                                                         Constants.TASK_IMAGE_HEIGHT_OFFSET,
+                                                         Constants.TASK_IMAGE_WIDTH,
+                                                         Constants.TASK_IMAGE_HEIGHT,
                                                          capsuleModel.taskUI.get.factory.backgroundColor,
                                                          new Container)*/
   }
 
   def addTitle(titleString: String)= {
-    titleArea = new Rectangle(0, 0,taskWidth,ApplicationCustomize.TASK_TITLE_HEIGHT)
+    titleArea = new Rectangle(0, 0,taskWidth,Constants.TASK_TITLE_HEIGHT)
     title = Some(titleString)
     setPreferredBounds(widgetArea)
   }
@@ -98,8 +98,8 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
 //  private boolean title = false;
 //  private boolean image = false;
 //  private String titleString;
-//  protected int taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
-//  protected int taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET;
+//  protected int taskWidth = Constants.TASK_CONTAINER_WIDTH;
+//  protected int taskImageOffset = Constants.TASK_IMAGE_WIDTH_OFFSET;
 //  protected MoleScene scene;
 //
 //  public MyWidget(MoleScene scene,
@@ -112,26 +112,26 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
 //
 //  public void setWidthHint() {
 //    if (MoleScenesManager.getInstance().isDetailedView()) {
-//      taskWidth = ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH;
-//      taskImageOffset = ApplicationCustomize.EXPANDED_TASK_IMAGE_WIDTH_OFFSET;
+//      taskWidth = Constants.EXPANDED_TASK_CONTAINER_WIDTH;
+//      taskImageOffset = Constants.EXPANDED_TASK_IMAGE_WIDTH_OFFSET;
 //    }
 //    else {
-//      taskWidth = ApplicationCustomize.TASK_CONTAINER_WIDTH;
-//      taskImageOffset = ApplicationCustomize.TASK_IMAGE_WIDTH_OFFSET;
+//      taskWidth = Constants.TASK_CONTAINER_WIDTH;
+//      taskImageOffset = Constants.TASK_IMAGE_WIDTH_OFFSET;
 //    }
 //
 //    Rectangle bodyrect = new Rectangle(0, 0,
 //                                       taskWidth,
-//                                       ApplicationCustomize.TASK_CONTAINER_HEIGHT);
+//                                       Constants.TASK_CONTAINER_HEIGHT);
 //
 //    Rectangle widgetrect = new Rectangle(-12, -1,
 //                                         taskWidth + 24,
-//                                         ApplicationCustomize.TASK_CONTAINER_HEIGHT + 2);
+//                                         Constants.TASK_CONTAINER_HEIGHT + 2);
 //    bodyArea.setBounds(bodyrect);
 //    widgetArea.setBounds(widgetrect);
 //    titleArea.setBounds(new Rectangle(0, 0,
 //                                      taskWidth,
-//                                      ApplicationCustomize.TASK_TITLE_HEIGHT));
+//                                      Constants.TASK_TITLE_HEIGHT));
 //    setPreferredBounds(widgetArea);
 //    revalidate();
 //    repaint();
@@ -186,7 +186,7 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
 //  public void addTitle(String titleString) {
 //    titleArea = new Rectangle(0, 0,
 //                              taskWidth,
-//                              ApplicationCustomize.TASK_TITLE_HEIGHT);
+//                              Constants.TASK_TITLE_HEIGHT);
 //
 //    this.title = true;
 //    this.titleString = titleString;
@@ -211,9 +211,9 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
 //    if (image) {
 //      graphics.drawImage(backgroundImaqe,
 //                         taskImageOffset,
-//                         ApplicationCustomize.TASK_IMAGE_HEIGHT_OFFSET,
-//                         ApplicationCustomize.TASK_IMAGE_WIDTH,
-//                         ApplicationCustomize.TASK_IMAGE_HEIGHT,
+//                         Constants.TASK_IMAGE_HEIGHT_OFFSET,
+//                         Constants.TASK_IMAGE_WIDTH,
+//                         Constants.TASK_IMAGE_HEIGHT,
 //                         backgroundCol,
 //                         new Container());
 //    }

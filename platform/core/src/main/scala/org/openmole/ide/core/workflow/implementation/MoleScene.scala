@@ -30,7 +30,7 @@ import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.graph.GraphScene
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.workflow.model.IMoleScene
 import org.netbeans.api.visual.widget.LayerWidget
@@ -66,7 +66,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(capsuleLayer)
   addChild(connectLayer)
   
-  setPreferredSize(new Dimension((ApplicationCustomize.SCREEN_WIDTH * 0.8).toInt, (ApplicationCustomize.SCREEN_HEIGHT * 0.8).toInt));
+  setPreferredSize(new Dimension((Constants.SCREEN_WIDTH * 0.8).toInt, (Constants.SCREEN_HEIGHT * 0.8).toInt));
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   
   getActions.addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(this)))
@@ -292,7 +292,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
 //        addChild(capsuleLayer);
 //        addChild(connectLayer);
 //
-//        setPreferredSize(new Dimension((int) (ApplicationCustomize.SCREEN_WIDTH * 0.8), (int) (ApplicationCustomize.SCREEN_HEIGHT * 0.8)));
+//        setPreferredSize(new Dimension((int) (Constants.SCREEN_WIDTH * 0.8), (int) (Constants.SCREEN_HEIGHT * 0.8)));
 //        // view = createView();
 //        getActions().addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)));
 //        //getActions().addAction(ActionFactory.createRectangularSelectAction(this, taskLayer));

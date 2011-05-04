@@ -5,7 +5,8 @@
 
 package org.openmole.ide.core.properties
 
+import javax.swing.JPanel
 
-trait PanelUI{
+trait PanelUI extends JPanel{
   def coreObject(name: String): Object
 }

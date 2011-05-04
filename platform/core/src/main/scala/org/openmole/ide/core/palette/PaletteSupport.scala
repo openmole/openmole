@@ -18,6 +18,9 @@
 package org.openmole.ide.core.palette
 
 import java.awt.Image
+import java.beans.PropertyChangeEvent
+import java.beans.PropertyChangeListener
+import javax.swing.Action
 import org.netbeans.spi.palette.DragAndDropHandler
 import org.netbeans.spi.palette.PaletteActions
 import org.netbeans.spi.palette.PaletteController
@@ -29,40 +32,55 @@ import org.openide.nodes.Node
 import java.beans.BeanInfo
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
+import org.openmole.ide.core.workflow.action.PaletteItemAction
 
 object PaletteSupport {
   
   def createPalette = {
     val paletteRoot = new AbstractNode(new CategoryBuilder)
     paletteRoot.setName("Palette Root")
-  //  Preferences.clearProperties
-  //  Preferences.clearModels
-    PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
-  }
-  
-  class MyActions extends PaletteActions{
-    override def getImportActions = null
-    override def getCustomPaletteActions = null
-    override def getCustomCategoryActions(lkp: Lookup) = null
-    override def getCustomItemActions(lkp: Lookup) = null
-    override def getPreferredAction(lkp: Lookup) = null
-  }
-  
-  class MyPaletteFilter extends PaletteFilter {
-    override def isValidCategory(lkp: Lookup)= true
-    override def isValidItem(lkp: Lookup)= true
-  }
-  
-  class MyDnDHandler extends DragAndDropHandler {
-    override def customize(exTransferable: ExTransferable, lookup: Lookup)= {
-      val node = lookup.lookup(classOf[Node])
-      val image = node.getIcon(BeanInfo.ICON_COLOR_16x16).asInstanceOf[Image]
-      exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
-          override def getData: Image= return image
-        })
-    }
+    //  Preferences.clearProperties
+    //  Preferences.clearModels
+    val palette = PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
+    palette.addPropertyChangeListener( new MyPropertyChangeListener(palette))
+    palette
   }
 }
+  
+class MyPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
+  override def  propertyChange(pce: PropertyChangeEvent)= {
+    val selItem = palette.getSelectedItem
+    val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
+    if (selItem != null && selCategoryLookup != null){
+      println("OB :: " + PaletteElementFactories.getFactoryUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName).coreObject(selItem.lookup(classOf[Node]).getName).toString)   
+    }
+  }
+}                                
+                                      
+                                      
+class MyActions extends PaletteActions{
+  override def getImportActions = null
+  override def getCustomPaletteActions = null
+  override def getCustomCategoryActions(lkp: Lookup) = null
+  override def getCustomItemActions(lkp: Lookup) = null
+  override def getPreferredAction(lkp: Lookup) = null
+}
+  
+class MyPaletteFilter extends PaletteFilter {
+  override def isValidCategory(lkp: Lookup)= true
+  override def isValidItem(lkp: Lookup)= true
+}
+  
+class MyDnDHandler extends DragAndDropHandler {
+  override def customize(exTransferable: ExTransferable, lookup: Lookup)= {
+    val node = lookup.lookup(classOf[Node])
+    val image = node.getIcon(BeanInfo.ICON_COLOR_16x16).asInstanceOf[Image]
+    exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
+        override def getData: Image= return image
+      })
+  }
+}
+
 //
 //import java.awt.Image;
 //import java.awt.datatransfer.DataFlavor;

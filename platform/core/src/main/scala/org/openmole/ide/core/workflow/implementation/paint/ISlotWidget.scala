@@ -7,12 +7,12 @@ package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene){
-  if (startingSlot) setImage(ApplicationCustomize.IMAGE_START_SLOT)
-  else setImage(ApplicationCustomize.IMAGE_INPUT_SLOT)     
+  if (startingSlot) setImage(Constants.IMAGE_START_SLOT)
+  else setImage(Constants.IMAGE_INPUT_SLOT)     
   setPreferredLocation(new Point(-12, 14 + index * 20))
 }
 
@@ -28,7 +28,7 @@ class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,va
 //        super(scene,capsuleView);
 //        this.index = index;
 //        this.startingSlot = startingSlot;
-//        setImage(startingSlot ? ApplicationCustomize.IMAGE_START_SLOT : ApplicationCustomize.IMAGE_INPUT_SLOT);
+//        setImage(startingSlot ? Constants.IMAGE_START_SLOT : Constants.IMAGE_INPUT_SLOT);
 //        setPreferredLocation(new Point(-12, 14 + index * 20));
 //    }
 //

@@ -14,7 +14,7 @@ import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ActionFactory
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import scala.collection.mutable.HashSet
 
@@ -50,7 +50,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
 
     if (capsuleView.capsuleModel.taskUI.isDefined) {
       graphics.drawLine(taskWidth / 2,
-                        ApplicationCustomize.TASK_TITLE_HEIGHT,
+                        Constants.TASK_TITLE_HEIGHT,
                         taskWidth / 2,
                         widgetArea.height - 3)
 
@@ -63,7 +63,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
           var st = p.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h= 35 + i * 22
-          graphics.drawImage(ApplicationCustomize.typeImageMap(p.coreClass.getSimpleName),
+          graphics.drawImage(Constants.typeImageMap(p.coreClass.getSimpleName),
                              x - taskWidth / 2, h - 13,
                              new Container)
           if (MoleScenesManager.detailedView) graphics.drawString(st, x - taskWidth / 2 + 24, h)
@@ -156,7 +156,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
 //
 //    if (taskModel != TaskModelUI.EMPTY_TASK_MODEL) {
 //      graphics.drawLine(taskWidth / 2,
-//                        ApplicationCustomize.TASK_TITLE_HEIGHT,
+//                        Constants.TASK_TITLE_HEIGHT,
 //                        taskWidth / 2,
 //                        widgetArea.height - 3);
 //
@@ -175,7 +175,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
 //            st = st.substring(0, 8).concat("...");
 //          }
 //          h = 35 + i * 22;
-//          graphics.drawImage(ApplicationCustomize.getInstance().getTypeImage(proto.getType().getSimpleName()),
+//          graphics.drawImage(Constants.getInstance().getTypeImage(proto.getType().getSimpleName()),
 //                             x - taskWidth / 2, h - 13,
 //                             new Container());
 //          AttributedString as = new AttributedString(st);

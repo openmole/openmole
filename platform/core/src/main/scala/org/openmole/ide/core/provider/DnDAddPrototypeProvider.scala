@@ -20,7 +20,7 @@ package org.openmole.ide.core.provider
 import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
@@ -33,16 +33,16 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends
   
   override def isAcceptable(widget: Widget,point: Point,transferable: Transferable): ConnectorState=  {
     var state= ConnectorState.REJECT
-    if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR) && encapsulated == true) {
+    if (transferable.isDataFlavorSupported(Constants.PROTOTYPE_DATA_FLAVOR) && encapsulated == true) {
       state = ConnectorState.ACCEPT
-    } else if (transferable.isDataFlavorSupported(ApplicationCustomize.SAMPLING_DATA_FLAVOR)){
+    } else if (transferable.isDataFlavorSupported(Constants.SAMPLING_DATA_FLAVOR)){
       println("sampling")
     }
     state
   }
   
   override def accept(widget: Widget, point: Point,t: Transferable)= {
-    val proto = t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeUI]
+    val proto = t.getTransferData(Constants.PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeUI]
     if (point.x < view.connectableWidget.widgetWidth / 2) {
       view.capsuleModel.taskUI.get.addPrototype(proto, IOType.INPUT)
     } else {
@@ -69,10 +69,10 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends
 //    @Override
 //    public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
 //        ConnectorState state = ConnectorState.REJECT;
-//        if (transferable.isDataFlavorSupported(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR)
+//        if (transferable.isDataFlavorSupported(Constants.PROTOTYPE_DATA_FLAVOR)
 //                && encapsulated == true) {
 //            state = ConnectorState.ACCEPT;
-//        } else if (transferable.isDataFlavorSupported(ApplicationCustomize.SAMPLING_DATA_FLAVOR)) {
+//        } else if (transferable.isDataFlavorSupported(Constants.SAMPLING_DATA_FLAVOR)) {
 //            System.out.println("sampling ");
 //        }
 //        return state;
@@ -81,7 +81,7 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends
 //    @Override
 //    public void accept(Widget widget, Point point, Transferable t) {
 //        try {
-//            PrototypeUI proto = (PrototypeUI) t.getTransferData(ApplicationCustomize.PROTOTYPE_DATA_FLAVOR);
+//            PrototypeUI proto = (PrototypeUI) t.getTransferData(Constants.PROTOTYPE_DATA_FLAVOR);
 //            if (point.x < view.getConnectableWidget().getWidgetWidth() / 2) {
 //                view.getCapsuleModel().getTaskModel().addPrototype(proto, IOType.INPUT);
 //            } else {

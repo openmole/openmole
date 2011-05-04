@@ -20,6 +20,8 @@ import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.netbeans.api.visual.action.ActionFactory;
+import org.openmole.ide.core.workflow.model.IEntityUI;
+import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.provider.DnDNewEntityProvider;
 
 /**
@@ -54,6 +56,10 @@ public final class EntityPropertyTopComponent extends TopComponent {
 //        setDropTarget(dt);
     }
 
+    public void displayCurrentEntityPanel(IEntityUI entity){
+        propertyPanel.displayCurrentEntity(entity);
+    }
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

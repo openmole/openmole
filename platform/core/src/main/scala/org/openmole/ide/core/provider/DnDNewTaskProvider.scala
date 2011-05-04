@@ -27,8 +27,9 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.UIFactory
+import org.openmole.ide.core.EntityPropertyTopComponent
 import org.openmole.ide.core.MoleSceneTopComponent
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.palette.PaletteElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.TaskUI
@@ -41,22 +42,27 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
     println("+Accept ")
-    println(transferable.isDataFlavorSupported(ApplicationCustomize.TASK_DATA_FLAVOR))
-    println(transferable.isDataFlavorSupported(ApplicationCustomize.TASK_MODEL_DATA_FLAVOR))
+    println(transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))
+    println(transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR))
     
     val capsuleView = UIFactory.createCapsule(molescene,point)
     capsuleView.addInputSlot
-    //  capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
+    //  capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
   
-    if (transferable.isDataFlavorSupported(ApplicationCustomize.TASK_MODEL_DATA_FLAVOR)){
-      val f = transferable.getTransferData(ApplicationCustomize.TASK_MODEL_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
+    if (transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR)){
+      println("++TASK_MODEL_DATA_FLAVOR")
+      val f = transferable.getTransferData(Constants.TASK_MODEL_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
       val entity = f.buildNewEntity.asInstanceOf[TaskUI]
       capsuleView.encapsule(entity)
       PaletteElementFactories.addTaskElement(new PaletteElementFactory(entity.name,f.factoryUI))
       MoleSceneTopComponent.getDefault.refreshPalette
+      EntityPropertyTopComponent.getDefault.displayCurrentEntityPanel(entity)
     }
-    else if (transferable.isDataFlavorSupported(ApplicationCustomize.TASK_DATA_FLAVOR))  
-      capsuleView.encapsule(transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
+    else if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))  {
+      capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
+      println("++TASK_DATA_FLAVOR")
+      
+    }
   
     molescene.repaint
     molescene.revalidate
@@ -70,7 +76,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
 //import org.netbeans.api.visual.action.ConnectorState;
 //import org.netbeans.api.visual.widget.Widget;
 //import org.openmole.commons.exception.UserBadDataError;
-//import org.openmole.ide.core.commons.ApplicationCustomize;
+//import org.openmole.ide.core.commons.Constants;
 //import org.openmole.ide.core.exception.MoleExceptionManagement;
 //import org.openmole.ide.core.implementation.UIFactory;
 //import org.openmole.ide.core.workflow.implementation.MoleScene;
@@ -109,7 +115,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
 //                capsuleView = UIFactory.createCapsule(scene, point);
 //                capsuleView.addInputSlot();
 //            }
-//            capsuleView.encapsule((TaskUI) transferable.getTransferData(ApplicationCustomize.TASK_DATA_FLAVOR));
+//            capsuleView.encapsule((TaskUI) transferable.getTransferData(Constants.TASK_DATA_FLAVOR));
 //        } catch (UnsupportedFlavorException ex) {
 //            MoleExceptionManagement.showException(ex);
 //        } catch (IOException ex) {

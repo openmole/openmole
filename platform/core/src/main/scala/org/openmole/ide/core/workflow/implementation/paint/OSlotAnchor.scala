@@ -7,19 +7,19 @@ package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
-import org.openmole.ide.core.commons.ApplicationCustomize
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class OSlotAnchor(relatedWidget: CapsuleViewUI) extends SlotAnchor(relatedWidget) {
 
-  val x= ApplicationCustomize.TASK_CONTAINER_WIDTH + 10
-  val y= ApplicationCustomize.TASK_TITLE_HEIGHT + 22
+  val x= Constants.TASK_CONTAINER_WIDTH + 10
+  val y= Constants.TASK_TITLE_HEIGHT + 22
   
   override def compute(entry: Anchor.Entry)= {
     var detailedEffect= 0
     if (MoleScenesManager.detailedView)
-      detailedEffect= ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH -ApplicationCustomize.TASK_CONTAINER_WIDTH
+      detailedEffect= Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH
     new Result(relatedWidget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
   }
 }
@@ -27,8 +27,8 @@ class OSlotAnchor(relatedWidget: CapsuleViewUI) extends SlotAnchor(relatedWidget
 //
 // extends SlotAnchor {
 //
-//    private final int x = ApplicationCustomize.TASK_CONTAINER_WIDTH + 22;
-//    protected final int y = ApplicationCustomize.TASK_TITLE_HEIGHT + 22;
+//    private final int x = Constants.TASK_CONTAINER_WIDTH + 22;
+//    protected final int y = Constants.TASK_TITLE_HEIGHT + 22;
 //
 //    public OSlotAnchor(CapsuleViewUI relatedWidget) {
 //        super(relatedWidget);
@@ -36,6 +36,6 @@ class OSlotAnchor(relatedWidget: CapsuleViewUI) extends SlotAnchor(relatedWidget
 //
 //    @Override
 //    public Result compute(Entry entry) {
-//        int detailedEffect = (MoleScenesManager.getInstance().isDetailedView() ? ApplicationCustomize.EXPANDED_TASK_CONTAINER_WIDTH -ApplicationCustomize.TASK_CONTAINER_WIDTH : 0);
+//        int detailedEffect = (MoleScenesManager.getInstance().isDetailedView() ? Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH : 0);
 //        return new Result(relatedWidget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT);
 //    }

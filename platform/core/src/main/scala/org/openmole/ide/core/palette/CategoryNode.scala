@@ -21,7 +21,8 @@ import org.openide.nodes.AbstractNode
 import org.openide.util.lookup.Lookups
 
 class CategoryNode(category: ICategory) extends AbstractNode(category.children,Lookups.singleton(category)){
-  setDisplayName(category.name)
+  setName(category.name)
+  setDisplayName(category.displayName)
 }
 //package org.openmole.ide.core.palette;
 //

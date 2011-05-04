@@ -86,7 +86,7 @@ class CapsuleModelUI(var taskUI: Option[TaskUI] = None, var nbInputSlots: Int = 
 //
 //    @Override
 //    public boolean isSlotAddable() {
-//        return (nbInputSlots < ApplicationCustomize.NB_MAX_SLOTS ? true : false);
+//        return (nbInputSlots < Constants.NB_MAX_SLOTS ? true : false);
 //    }
 //
 //    @Override

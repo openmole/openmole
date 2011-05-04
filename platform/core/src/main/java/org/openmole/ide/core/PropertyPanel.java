@@ -11,26 +11,16 @@
 package org.openmole.ide.core;
 
 import java.awt.Component;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
-import java.util.Iterator;
+import java.awt.Container;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.netbeans.api.visual.action.ActionFactory;
 import org.openmole.ide.core.palette.PaletteElementFactories;
 import org.openmole.ide.core.palette.PaletteElementFactory;
-import org.openmole.ide.core.properties.NativeFactories;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.IFactoryUI;
 import org.openmole.ide.core.properties.NativeFactories;
-import org.openmole.ide.core.properties.PrototypeFactoryUI;
-import org.openmole.ide.core.provider.DnDNewEntityProvider;
-import scala.collection.Iterable;
+import org.openmole.ide.core.workflow.model.IEntityUI;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConversions.*;
 
@@ -47,6 +37,18 @@ public class PropertyPanel extends javax.swing.JPanel {
         initComponents();
         typeComboBox.setRenderer(new ItemRenderer());
         setEditGraphicalContext(false);
+        entityPanelScrollPane.setVisible(false);
+    }
+
+    public void displayCurrentEntity(IEntityUI entity) {
+        JPanel p = (JPanel)entity.panel();
+        nameTextField.setText(entity.name());
+        typeComboBox.removeAllItems();
+        typeComboBox.addItem(entity.coreClass().getSimpleName());
+        typeComboBox.setEditable(false);
+        entityPanelScrollPane.getViewport().removeAll();
+        entityPanelScrollPane.setViewportView(p);
+        entityPanelScrollPane.setVisible(true);
     }
 
     private String save() {
@@ -66,7 +68,7 @@ public class PropertyPanel extends javax.swing.JPanel {
         setEditGraphicalContext(true);
         // nameTextField.setEnabled(true);
         //  editToggleButton.setEnabled(true);
-        typeComboBox.setEnabled(true);
+        typeComboBox.setEditable(true);
     }
 
     private void setEditGraphicalContext(Boolean b) {
@@ -78,7 +80,7 @@ public class PropertyPanel extends javax.swing.JPanel {
         newToggleButton.setEnabled(b);
         editToggleButton.setEnabled(true);
         typeComboBox.removeAllItems();
-        typeComboBox.setEnabled(b);
+        typeComboBox.setEditable(b);
     }
 
     /** This method is called from within the constructor to
@@ -100,6 +102,7 @@ public class PropertyPanel extends javax.swing.JPanel {
         taskToggleButton = new javax.swing.JToggleButton();
         samplingToggleButton = new javax.swing.JToggleButton();
         environmentToggleButton = new javax.swing.JToggleButton();
+        entityPanelScrollPane = new javax.swing.JScrollPane();
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.jLabel1.text")); // NOI18N
 
@@ -162,27 +165,30 @@ public class PropertyPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(typeComboBox, 0, 262, Short.MAX_VALUE)
+                                    .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(taskToggleButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(prototypeToggleButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(samplingToggleButton)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(typeComboBox, 0, 262, Short.MAX_VALUE)
-                            .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(taskToggleButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(prototypeToggleButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(samplingToggleButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(editToggleButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(environmentToggleButton))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(editToggleButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(environmentToggleButton))))
                 .addContainerGap())
         );
 
@@ -210,7 +216,9 @@ public class PropertyPanel extends javax.swing.JPanel {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(editToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(newToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -247,6 +255,7 @@ public class PropertyPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_typeComboBoxActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton editToggleButton;
+    private javax.swing.JScrollPane entityPanelScrollPane;
     private javax.swing.JToggleButton environmentToggleButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -264,12 +273,12 @@ public class PropertyPanel extends javax.swing.JPanel {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value != null) {
+                if (value.getClass().equals(IFactoryUI.class)) {
                 IFactoryUI f = (IFactoryUI) value;
                 setText(f.coreClass().getSimpleName());
+                }
             }
             return this;
         }
     }
-
-    
 }
