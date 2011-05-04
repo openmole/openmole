@@ -50,8 +50,7 @@ import scala.collection.mutable.ListBuffer
 
 class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask {
 
-  //def this(name: String, mole: IMole) = this(name, mole, false)
-  var forceArray = List.empty[IPrototype[_]]
+  var forcedArray = List.empty[IPrototype[_]]
   
   class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
 
@@ -59,8 +58,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
-
-      //Logger.getLogger(classOf[MoleTask].getName).fine(moleJob.task.name + " " + moleJob.state.toString)
 
       moleJob.state match {
         case State.COMPLETED =>
@@ -70,7 +67,6 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
             case Some(prototypes) => 
               val ctx = new Context
               for(p <- prototypes) {
-                //Logger.getLogger(classOf[MoleTask].getName).fine(e._2.toString + " " + p.toString)
                 moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
               }
               variables ++= ctx
@@ -101,29 +97,34 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forceArray.map( e => e.name -> e.`type`)
+    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forcedArray.map( e => e.name -> e.`type`)
     
     aggregate(userOutputs, toArrayMap, resultGathering.variables).foreach {
       context += _
     }
   }
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): Unit = addOutput(capsule, new Data(prototype))
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): Unit = addOutput(capsule, new Data(prototype, masks))
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype, masks), forceArray)
  
-  def addOutput(capsule: IGenericCapsule, data: IData[_]): Unit = {
+  def addOutput(capsule: IGenericCapsule, data: IData[_], forceArray: Boolean): this.type = {
     addOutput(data)
     outputCapsules.getOrElseUpdate(capsule, new ListBuffer[String]) += data.prototype.name
+    if(forceArray) this.forceArray(data.prototype)
+    this
   }
+ 
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): this.type = addOutput(capsule, prototype, false)
+
+  def addOutput(capsule: IGenericCapsule, data: IData[_]): this.type = addOutput(capsule, data, false)
   
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type = addOutput(capsule, prototype, masks, false)
+ 
   override def inputs: IDataSet = {
     val firstTask = mole.root.task.getOrElse(throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name))
     new DataSet(super.inputs ++ firstTask.inputs)
   }
   
-  override def forceArray(prototype: IPrototype[_]): this.type = {
-    forceArray = prototype +: forceArray
-    this
-  }
+  private def forceArray(prototype: IPrototype[_]) = forcedArray = prototype +: forcedArray
 }

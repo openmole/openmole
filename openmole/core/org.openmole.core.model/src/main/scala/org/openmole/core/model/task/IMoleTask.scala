@@ -23,9 +23,11 @@ package org.openmole.core.model.task
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.mole.IMole
 
 trait IMoleTask extends ITask {
@@ -38,12 +40,15 @@ trait IMoleTask extends ITask {
    */
   def mole: IMole
     
-  def forceArray(prototype: IPrototype[_]): this.type
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): this.type
+
+  def addOutput(capsule: IGenericCapsule, data: IData[_]): this.type
   
-  def forceArray(data: IData[_]): this.type = forceArray(data.prototype)
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type
+ 
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_], forceArray: Boolean): this.type
+
+  def addOutput(capsule: IGenericCapsule, data: IData[_], forceArray: Boolean): this.type
   
-  def forceArray(dataSet: IDataSet): this.type = {
-    dataSet.foreach(forceArray(_))
-    this
-  }
+  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type
 }
