@@ -21,15 +21,17 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.core.model.domain.IWithRange
 import org.openmole.core.implementation.tools.VariableExpansion._
-import java.lang.Double
+import math._
 
 class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IWithRange[Double] {
+  
+  def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
   
   override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
     
   override def computeValues(context: IContext): Iterable[Double] = {
-     val mi = java.lang.Math.log(min(context).doubleValue)
-     val ma = java.lang.Math.log(max(context).doubleValue)
+     val mi = log(min(context).doubleValue)
+     val ma = log(max(context).doubleValue)
      val nbst = nbStep(context).intValue - 1
      val st = if(nbst > 0) (math.abs(ma - mi) / nbst)
               else 0
@@ -38,7 +40,7 @@ class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String)
      for (i <- 0 to nbst) yield {
        val ret = cur
        cur += st
-       new Double(java.lang.Math.exp(ret))
+       exp(ret)
      }      
   }
   

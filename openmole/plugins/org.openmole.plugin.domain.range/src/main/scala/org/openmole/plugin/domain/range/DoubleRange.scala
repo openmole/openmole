@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.tools.VariableExpansion._
+import scala.math.Numeric.DoubleAsIfIntegral
 
-import java.lang.Double
+class DoubleRange(min: String, max: String, step: String) extends IntegralRange[Double](min, max, step)(DoubleAsIfIntegral) {
+  def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
 
-class DoubleRange(val min: String, val max: String,val step: String) extends IRange[Double] with IRangeConverter[scala.Double, Double] {
-
-  @transient lazy val underlyingRange = new ScalaDoubleRange(min, max, step)
-  def convert(a: scala.Double): Double = a
-  
-  def this(min: String, max: String) = this(min, max, "1.0")
+  override def step(context: IContext): Double = expandData(context, step).toDouble
+  override def max(context: IContext): Double = expandData(context, max).toDouble
+  override def min(context: IContext): Double = expandData(context, min).toDouble
 }
