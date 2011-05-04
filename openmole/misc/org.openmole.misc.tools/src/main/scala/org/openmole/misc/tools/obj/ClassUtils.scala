@@ -153,7 +153,7 @@ object ClassUtils {
     def isAssignableFrom(m2: Manifest[_]) = {
       if(primitiveWrapperMap.contains(m.erasure) || primitiveWrapperMap.contains(m2.erasure))
         primitiveWrapperMap.getOrElse(m.erasure, m.erasure) == primitiveWrapperMap.getOrElse(m2.erasure, m2.erasure)
-      else m >:> m2
+      else m.erasure.isAssignableFrom(m2.erasure)
     }
   }
    
