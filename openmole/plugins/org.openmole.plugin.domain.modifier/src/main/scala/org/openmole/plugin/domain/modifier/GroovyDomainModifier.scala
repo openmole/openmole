@@ -15,15 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-package org.openmole.plugin.domain.distribution
+package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.implementation.data.Variable
+import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
-class SampledDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
+class GroovyDomainModifier[-I,+O](prototype: IPrototype[I], domain: IDomain[I], code: String) extends IDomain[O] {
 
-  override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
+  @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
+
+  override def iterator(context: IContext): Iterator[O] = {
+    domain.iterator(context).map(e => contextToGroovyCode.execute(context, List(new Variable[I](prototype, e))).asInstanceOf[O])
+  }
 
 }

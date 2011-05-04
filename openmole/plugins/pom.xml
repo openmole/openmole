@@ -40,7 +40,7 @@
         <module>org.openmole.plugin.domain.range</module>
         <module>org.openmole.plugin.domain.relative</module>
         <module>org.openmole.plugin.domain.distribution</module>
-        <module>org.openmole.plugin.domain.groovy</module>
+        <module>org.openmole.plugin.domain.modifier</module>
 	<module>org.openmole.plugin.domain.collection</module>
 	<module>org.openmole.plugin.domain.file</module>
         <module>org.openmole.plugin.sampling.csv</module>

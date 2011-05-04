@@ -8,7 +8,7 @@
         <version>0.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.domain.groovy</artifactId>
+    <artifactId>org.openmole.plugin.domain.modifier</artifactId>
 
     <dependencies>
         <dependency>
