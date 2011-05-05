@@ -25,13 +25,16 @@ class SlicedIterableDomain[T](val domain: IDomain[T], val size: Int) extends IDo
 
   override def iterator(context: IContext): Iterator[java.lang.Iterable[T]] = 
     new Iterator[java.lang.Iterable[T]] {
+      
       private val iterator = domain.iterator(context)
       private var nextSlice = toSlice
       
       private def toSlice = asJavaIterable(iterator.slice(0, size).toIterable)
 
+      //println("Init " + iterator)
+      
       override def next = {
-        val ret = toSlice
+        val ret = nextSlice
         nextSlice = toSlice
         ret
       }
