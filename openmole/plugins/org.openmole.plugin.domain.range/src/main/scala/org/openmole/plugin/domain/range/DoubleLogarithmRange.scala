@@ -28,7 +28,7 @@ class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String)
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
   
   override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
-    
+
   override def computeValues(context: IContext): Iterable[Double] = {
      val mi = log(min(context).doubleValue)
      val ma = log(max(context).doubleValue)

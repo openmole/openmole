@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 romain
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,28 +19,27 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import collection.JavaConversions._
+import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Context
 
-class SlicedIterableDomain[T](val domain: IDomain[T], val size: Int) extends IDomain[java.lang.Iterable[T]] {
+import org.scalatest.FlatSpec
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-  override def iterator(context: IContext): Iterator[java.lang.Iterable[T]] = 
-    new Iterator[java.lang.Iterable[T]] {
-      
-      private val iterator = domain.iterator(context)
-      private var nextSlice = toSlice
-      
-      private def toSlice = asJavaIterable(iterator.slice(0, size).toIterable)
-
-      //println("Init " + iterator)
-      
-      override def next = {
-        val ret = nextSlice
-        nextSlice = toSlice
-        ret
-      }
-      
-      override def hasNext = !nextSlice.isEmpty
-    }
+@RunWith(classOf[JUnitRunner])
+class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
   
-
+  "SlicedIterablesDomain" should "change the values of a domain to iterables" in {
+    val r1 = (1 to 10)
+    
+    val d1 = new IDomain[Int] {
+      override def iterator(context: IContext) = r1.iterator
+    }
+    
+    val md = new GroupedDomain(d1, 3).iterator(new Context)
+    
+    md.toList.size should equal (4)
+  }
+  
 }
