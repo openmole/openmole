@@ -22,7 +22,7 @@ import org.openmole.misc.tools.service.IHash
 
 class SHA1Hash(val content: Array[Byte]) extends IHash {
 
-  override def toString: String =  IHash.hexString(content)
+  override def toString: String = IHash.hexString(content)
 
   override def hashCode: Int = content.deep.hashCode
 

@@ -51,7 +51,7 @@ import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
-
+import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.collection.immutable.TreeMap
@@ -118,14 +118,14 @@ object ReplicaCatalog {
   
   Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
  
-  private def getReplica(hash: IHash, storageDescription: BatchStorageDescription, authenticationKey: String): Option[Replica] = {
+  private def getReplica(hash: String, storageDescription: BatchStorageDescription, authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
 
-  private def getReplica(src: File, hash: IHash, storageDescription: BatchStorageDescription,  authenticationKey: String): Option[Replica] = {
+  private def getReplica(src: File, hash: String, storageDescription: BatchStorageDescription,  authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null))
 
@@ -170,7 +170,7 @@ object ReplicaCatalog {
   
   
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
-  def uploadAndGet(src: File, srcPath: File, hash: IHash, storage: BatchStorage, token: AccessToken): Replica = {
+  def uploadAndGet(src: File, srcPath: File, hash: String, storage: BatchStorage, token: AccessToken): Replica = {
     //LOGGER.log(Level.FINE, "Looking for replica for {0} hash {1}.", Array(srcPath.getAbsolutePath, hash))
     val key = new ReplicaLockKey(hash, storage.description, storage.environment.authentication.key) 
     
