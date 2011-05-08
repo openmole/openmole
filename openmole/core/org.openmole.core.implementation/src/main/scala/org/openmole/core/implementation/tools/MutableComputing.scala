@@ -52,7 +52,7 @@ class MutableComputing {
   
   @transient private val mutableCache = new WeakHashMap[(IGenericCapsule, IPrototype[_]), Mutable]
   
-  def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], levelComputing: LevelComputing): Mutable = {
+  def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], levelComputing: LevelComputing): Mutable = synchronized {
     mutableCache.get(capsule, prototype) match {
       case Some(cachedMutable) => cachedMutable
       case None => 
@@ -63,7 +63,7 @@ class MutableComputing {
   }
   
   
-  def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
+  private def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
   //  Logger.getLogger(classOf[MutableComputing].getName).info(capsule.toString)
     
     if(allreadySeen.contains(capsule)) return No
@@ -87,7 +87,7 @@ class MutableComputing {
   }
   
   
-  def mutableOfNextCapsules(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
+  private def mutableOfNextCapsules(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
     val startCapsuleLevel = levelComputing.level(capsule)
 
     var res = No

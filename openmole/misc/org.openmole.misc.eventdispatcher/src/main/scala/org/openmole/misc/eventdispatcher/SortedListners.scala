@@ -31,6 +31,6 @@ class SortedListners[T] extends Iterable[T] {
     listners += priority -> (listner +: listners.getOrElse(priority, Nil))
   }
 
-  override def iterator: Iterator[T] = listners.flatMap{case (k,v) => v}.iterator
+  override def iterator = listners.flatMap{case (k,v) => v}.iterator
   
 }
