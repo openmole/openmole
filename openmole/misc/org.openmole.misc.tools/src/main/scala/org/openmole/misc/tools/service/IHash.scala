@@ -42,4 +42,7 @@ object IHash {
   }
 }
 
-trait IHash
+trait IHash {
+  def ==(hash: String) = this.toString == hash
+  def !=(hash: String) = !(this == hash)
+}

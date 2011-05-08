@@ -101,7 +101,7 @@ class Runtime {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
         replicaFileCache.renameTo(inPluginDirLocalFile)
 
-        if (!HashService.computeHash(inPluginDirLocalFile).equals(plugin.hash)) {
+        if (!HashService.computeHash(inPluginDirLocalFile).toString.equals(plugin.hash)) {
           throw new InternalProcessingError("Hash of a plugin does't match.")
         }
         usedFiles.put(plugin.src, inPluginDirLocalFile)
@@ -117,9 +117,9 @@ class Runtime {
         if (!usedFiles.containsKey(repliURI.src)) {
 
           val cache = repliURI.replica.cache
-          val cacheHash = HashService.computeHash(cache)
+          val cacheHash = HashService.computeHash(cache).toString
 
-          if (!cacheHash.equals(repliURI.hash)) {
+          if (cacheHash != repliURI.hash) {
             throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.replica.toString)
           }
 
@@ -136,7 +136,7 @@ class Runtime {
       val jobsFile = executionMessage.jobs.file
       val jobsFileCache = jobsFile.cache
 
-      if (!HashService.computeHash(jobsFileCache).equals(executionMessage.jobs.hash)) {
+      if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) {
         throw new InternalProcessingError("Hash of the execution job does't match.");
       }
 
@@ -213,7 +213,7 @@ class Runtime {
 
           retry(URIFile.copy(tarResult, uploadedTar), NbRetry)
 
-          tarResultMessage = new FileMessage(uploadedTar, HashService.computeHash(tarResult));
+          tarResultMessage = new FileMessage(uploadedTar, HashService.computeHash(tarResult).toString)
         } else {
           tarResultMessage = FileMessage.EMPTY_RESULT
         }
@@ -230,13 +230,13 @@ class Runtime {
         outputMessage = if (out.length != 0) {
           val output = new GZURIFile(executionMessage.communicationDir.newFileInDir("output", ".txt"))
           URIFile.copy(out, output)
-          new FileMessage(output, HashService.computeHash(out))
+          new FileMessage(output, HashService.computeHash(out).toString)
         } else FileMessage.EMPTY_RESULT
 
         errorMessage = if (err.length != 0) {                    
           val errout = new GZURIFile(executionMessage.communicationDir.newFileInDir("outputError", ".txt"))
           URIFile.copy(err, errout)
-          new FileMessage(errout, HashService.computeHash(err))
+          new FileMessage(errout, HashService.computeHash(err).toString)
         } else FileMessage.EMPTY_RESULT
         
         out.delete

@@ -24,9 +24,7 @@ object FileMessage {
   val EMPTY_RESULT = new FileMessage(null, null)
 }
 
-class FileMessage(val file: IURIFile, val hash: IHash) {
+class FileMessage(val file: IURIFile, val hash: String) {
    
-    def isEmpty: Boolean = {
-         file == null
-    }
+    def isEmpty = file == null
 }

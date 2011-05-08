@@ -139,8 +139,8 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
         if (!message.isEmpty) {
           val stdOutFile = message.file.cache(token)
           try {
-            val stdOutHash = HashService.computeHash(stdOutFile)
-            if (!stdOutHash.equals(message.hash)) {
+            val stdOutHash = HashService.computeHash(stdOutFile).toString
+            if (stdOutHash != message.hash) {
               LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.")
             }
 
@@ -170,8 +170,8 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
       val tarResultFile = tarResultURIFile.cache(token)
 
       try {
-        val tarResulHash = HashService.computeHash(tarResultFile)
-        if (!tarResulHash.equals(tarResult.hash)) {
+        val tarResulHash = HashService.computeHash(tarResultFile).toString
+        if (tarResulHash != tarResult.hash) {
           throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
         }
 
