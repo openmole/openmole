@@ -27,7 +27,7 @@ class ObjectListenerMap[L] {
   private def getOrCreateListners(obj: AnyRef, event: String): SortedListners[L] = {
     listnerTypeMap.getOrElseUpdate(obj, new HashMap[String, SortedListners[L]]).getOrElseUpdate(event, new SortedListners[L])
   }
-
+  
   def get(obj: AnyRef, event: String): Iterable[L] = synchronized {
     listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event, Iterable.empty)
   }

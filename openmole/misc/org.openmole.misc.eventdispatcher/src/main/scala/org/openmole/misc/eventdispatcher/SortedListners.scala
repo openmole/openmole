@@ -23,18 +23,15 @@ import scala.collection.mutable.ListBuffer
 
 class SortedListners[T] extends Iterable[T] {
   
-  var listners: SortedMap[Int, ListBuffer[T]] = TreeMap.empty[Int, ListBuffer[T]](new Ordering[Int] {
+  var listners: SortedMap[Int, List[T]] = TreeMap.empty[Int, List[T]](new Ordering[Int] {
       def compare(a: Int, b: Int) = (a - b)
     })
  
   def register(priority: Int, listner: T) = synchronized {
-    listners.get(priority) match {
-      case Some(listnersBuf) =>  listnersBuf += listner
-      case None => listners += priority -> ListBuffer(listner)
-    }
+    listners += priority -> (listner +: listners.getOrElse(priority, Nil))
   }
 
-  override def iterator: Iterator[T] = synchronized {  
+  override def iterator: Iterator[T] = {  
     new Iterator[T] {
       val it = listners.valuesIterator
       var curSetIt = if(it.hasNext) it.next.iterator else Iterator.empty
