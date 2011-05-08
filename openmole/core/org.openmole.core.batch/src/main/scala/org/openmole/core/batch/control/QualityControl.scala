@@ -18,6 +18,7 @@
 package org.openmole.core.batch.control
 
 import org.openmole.misc.tools.service.MoovingAverage
+import java.util.logging.Logger
 
 object QualityControl {
   
@@ -54,11 +55,11 @@ object QualityControl {
 }
 
 class QualityControl(hysteresis: Int) {
-  val _successRate = new MoovingAverage(hysteresis)
-  success
+  //Logger.getLogger(classOf[QualityControl].getName).fine("hysteresis " + hysteresis)
+  private val _successRate = new MoovingAverage(hysteresis, 1.)
   
   def failed = _successRate.apply(0)
   def success = _successRate.apply(1)
   def successRate = _successRate.get
-  def reinit = _successRate.clear
+  def reinit = _successRate.reset(1.)
 }

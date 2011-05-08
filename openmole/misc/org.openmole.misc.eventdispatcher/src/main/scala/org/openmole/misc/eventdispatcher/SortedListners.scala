@@ -23,14 +23,13 @@ import scala.collection.mutable.ListBuffer
 
 class SortedListners[T] extends Iterable[T] {
   
-  var listners: SortedMap[Int, List[T]] = TreeMap.empty[Int, List[T]](new Ordering[Int] {
-      def compare(a: Int, b: Int) = (a - b)
+  var listners = TreeMap.empty[Int, List[T]](new Ordering[Int] {
+      override def compare(a: Int, b: Int) = a - b
     })
  
   def register(priority: Int, listner: T) = synchronized {
     listners += priority -> (listner +: listners.getOrElse(priority, Nil))
   }
 
-  override def iterator = listners.toList.flatMap{case (k,v) => v}.iterator
-  
+  override def iterator = synchronized{listners.values.toList.flatten.iterator}
 }
