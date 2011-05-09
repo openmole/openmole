@@ -73,8 +73,13 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
               val fitness = (if(quality.submitted > 0) {
                   val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
                   val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+                  //Logger.getLogger(getClass.getName).info("v = " + v + " ; " + "min = " + min)
                   if(v < min) min else v
-                } else quality.successRate) 
+                } else {
+                  //Logger.getLogger(getClass.getName).info("sucess " + quality.successRate)
+                  quality.successRate
+                }) 
+                
               
               //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
               
@@ -84,18 +89,18 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
           
         }
              
+        //Logger.getLogger(getClass.getName).info("Not loaded " + notLoaded.size)
         if (notLoaded.size > 0) {
           var selected = RNG.nextDouble * totalFitness
           
-          for (service <- notLoaded) {    
+          for (service <- notLoaded) { 
+            //Logger.getLogger(getClass.getName).info("Not loaded test " + ret + " " + selected + " <= " + service._3)
             if(ret == null && selected <= service._3) ret = (service._1, service._2)
             else BatchJobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
             selected -= service._3
           }
-        } else {
-          //Logger.getLogger(getClass.getName).info("Waiting")
-          waiting.acquire
-        }
+        } else waiting.acquire
+        
       } while (ret == null)
       return ret
     } finally {

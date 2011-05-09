@@ -70,6 +70,7 @@ object EventDispatcher {
             for (listner <- objectChangedWithTypeAsynchronouslistenersWithArgs) {
               listner.eventOccured(obj.asInstanceOf[AnyRef], args)
             }
+
           }
         })
     }

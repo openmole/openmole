@@ -117,7 +117,7 @@ class Runtime {
         if (!usedFiles.containsKey(repliURI.src)) {
 
           val cache = repliURI.replica.cache
-          val cacheHash = HashService.computeHash(cache)
+          val cacheHash = HashService.computeHash(cache).toString
 
           if (cacheHash != repliURI.hash) {
             throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.replica.toString)

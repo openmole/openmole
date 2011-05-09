@@ -31,7 +31,7 @@ import org.openmole.misc.executorservice.ExecutorType
 
 object HashService {
 
-  implicit def fileHashServiceDecorator(file: File) = new Object {
+  implicit def fileHashServiceDecorator(file: File) = new {
     def hash = computeHash(file)
   }
   
@@ -48,7 +48,7 @@ object HashService {
       is.close
     }
   }
-
+  
   def computeHash(is: InputStream): SHA1Hash = {
         
     val buffer = new Array[Byte](FileUtil.DefaultBufferSize)
