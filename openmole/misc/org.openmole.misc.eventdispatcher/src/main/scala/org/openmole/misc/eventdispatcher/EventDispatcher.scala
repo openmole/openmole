@@ -18,7 +18,6 @@
 package org.openmole.misc.eventdispatcher
 
 import java.util.concurrent.Executors
-
 import org.openmole.misc.tools.service.Priority
 
 object EventDispatcher {
