@@ -17,16 +17,12 @@
 
 package org.openmole.core.batch.message
 
-import org.openmole.misc.tools.service.IHash
 import org.openmole.core.batch.file.IURIFile
 
 object FileMessage {
   val EMPTY_RESULT = new FileMessage(null, null)
 }
 
-class FileMessage(val file: IURIFile, val hash: IHash) {
-   
-    def isEmpty: Boolean = {
-         file == null
-    }
+class FileMessage(val file: IURIFile, val hash: String) {
+  def isEmpty: Boolean = file == null
 }

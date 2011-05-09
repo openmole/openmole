@@ -29,9 +29,6 @@ object EventDispatcher {
   private val synchronousObjectChangedMap = new ObjectListenerMap[IObjectListener[AnyRef]]
   private val asynchronousObjectChangedWithArgsMap = new ObjectListenerMap[IObjectListenerWithArgs[AnyRef]]
   private val synchronousObjectChangedWithArgsMap = new ObjectListenerMap[IObjectListenerWithArgs[AnyRef]]
-  private val asynchronousObjectConstructedMap = new ClassListenerMap[IObjectListener[AnyRef]]
-  private val synchronousObjectConstructedMap = new ClassListenerMap[IObjectListener[AnyRef]]
-
   
   def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListener[T] , event: String) = {
     asynchronousObjectChangedMap.register(obj.asInstanceOf[AnyRef], Priority.NORMAL, listner.asInstanceOf[IObjectListener[AnyRef]], event)
@@ -49,16 +46,7 @@ object EventDispatcher {
   
   def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListenerWithArgs[T], event: String) = {
     synchronousObjectChangedWithArgsMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
-  }
-    
-  def registerForObjectConstructedSynchronous[T](c: Class[T], priority: Int, listner: IObjectListener[T]) = {
-    synchronousObjectConstructedMap.register(c, priority, listner.asInstanceOf[IObjectListener[AnyRef]])
   }  
-  
-  def registerForObjectConstructedAsynchronous[T](c: Class[T], listner: IObjectListener[T]) = {
-    asynchronousObjectConstructedMap.register(c, Priority.NORMAL, listner.asInstanceOf[IObjectListener[AnyRef]])
-  }
-  
   
   def objectChanged[T](obj: T, event: String, args: Array[Object]) = {
     //Logger.getLogger(classOf[EventDispatcher].getName).fine("Signal event " + event + " signaled from " + obj.toString)
@@ -73,19 +61,14 @@ object EventDispatcher {
           override def run = {
 
             /* --- Listners without args ---*/
-
-            objectChangedWithTypeAsynchronouslisteners.synchronized  {
-              for (listner <- objectChangedWithTypeAsynchronouslisteners) {
-                listner.eventOccured(obj.asInstanceOf[AnyRef])
-              }
+            for (listner <- objectChangedWithTypeAsynchronouslisteners) {
+              listner.eventOccured(obj.asInstanceOf[AnyRef])
             }
 
             /* --- Listners with args ---*/
 
-            objectChangedWithTypeAsynchronouslistenersWithArgs.synchronized {
-              for (listner <- objectChangedWithTypeAsynchronouslistenersWithArgs) {
-                listner.eventOccured(obj.asInstanceOf[AnyRef], args)
-              }
+            for (listner <- objectChangedWithTypeAsynchronouslistenersWithArgs) {
+              listner.eventOccured(obj.asInstanceOf[AnyRef], args)
             }
           }
         })
@@ -94,56 +77,22 @@ object EventDispatcher {
     /* --- Listners without args ---*/
 
     val listeners = synchronousObjectChangedMap.get(obj.asInstanceOf[AnyRef], event)
-     
-    listeners.synchronized  {
-      for (listner <- listeners) {
-        //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
-        listner.eventOccured(obj.asInstanceOf[AnyRef])
-      }
+ 
+    for (listner <- listeners) {
+      //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
+      listner.eventOccured(obj.asInstanceOf[AnyRef])
     }
-
+ 
     /* --- Listners with args ---*/
 
     val listenersWithArgs = synchronousObjectChangedWithArgsMap.get(obj.asInstanceOf[AnyRef], event)
 
-    listenersWithArgs.synchronized {
-      for (listner <- listenersWithArgs) {
-        //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
-        listner.eventOccured(obj.asInstanceOf[AnyRef], args)
-      }
+    for (listner <- listenersWithArgs) {
+      //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
+      listner.eventOccured(obj.asInstanceOf[AnyRef], args)
     }
-    
   }
    
   def objectChanged[T](obj: T, event: String): Unit = objectChanged(obj.asInstanceOf[AnyRef], event, Array.empty)
-
-  def objectConstructed(obj: Object) = {
-
-    val c = obj.getClass
-    val asynchronousObjectConstructedListners = asynchronousObjectConstructedMap.get(c)
-
-
-    //Dont create thread if no assynchronous listner are registred
-    if (asynchronousObjectConstructedListners.iterator.hasNext) {
-      Executor.submit(new Runnable() {
-
-          override def run = {
-            asynchronousObjectConstructedListners.synchronized  {
-              for (listner <- asynchronousObjectConstructedListners) {
-                listner.eventOccured(obj)
-              }
-            }
-          }
-        })
-    }
-
-    val listeners = synchronousObjectConstructedMap.get(c)
-
-    listeners.synchronized {
-      for (listner <- listeners) {
-        listner.eventOccured(obj)
-      }
-    }
-  }
 
 }

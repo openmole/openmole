@@ -121,7 +121,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
       cache
     } else null
 
-    val hash = FileService.hash(toReplicate, moleExecution)
+    val hash = FileService.hash(toReplicate, moleExecution).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.destinationURIFile)
   }
@@ -152,7 +152,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 
     URIFile.copy(jobURIFile, jobForRuntimeFile, token)
-    val jobHash = HashService.computeHash(jobFile)
+    val jobHash = HashService.computeHash(jobFile).toString
 
     val plugins = new TreeSet[File]
     val pluginReplicas = new ListBuffer[ReplicatedFile]

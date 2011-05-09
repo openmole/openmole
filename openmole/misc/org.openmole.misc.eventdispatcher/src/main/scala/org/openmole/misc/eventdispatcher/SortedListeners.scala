@@ -21,31 +21,15 @@ import scala.collection.immutable.SortedMap
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
 
-class SortedListners[T] extends Iterable[T] {
+class SortedListeners[T] extends Iterable[T] {
   
-  var listners: SortedMap[Int, ListBuffer[T]] = TreeMap.empty[Int, ListBuffer[T]](new Ordering[Int] {
+  var listeners = TreeMap.empty[Int, List[T]](new Ordering[Int] {
       def compare(a: Int, b: Int) = (a - b)
     })
  
-  def register(priority: Int, listner: T) = synchronized {
-    listners.get(priority) match {
-      case Some(listnersBuf) =>  listnersBuf += listner
-      case None => listners += priority -> ListBuffer(listner)
-    }
+  def register(priority: Int, listener: T) = synchronized {
+    listeners += priority -> (listener :: listeners.getOrElse(priority, Nil))
   }
 
-  override def iterator: Iterator[T] = synchronized {  
-    new Iterator[T] {
-      val it = listners.valuesIterator
-      var curSetIt = if(it.hasNext) it.next.iterator else Iterator.empty
-      
-      override def hasNext = {it.hasNext || curSetIt.hasNext}
-        
-      override def next = {
-        if(!curSetIt.hasNext) curSetIt = it.next.iterator
-        curSetIt.next
-      }
-    }
-  }
-  
+  override def iterator = listeners.values.flatten.iterator
 }

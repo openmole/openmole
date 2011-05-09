@@ -22,18 +22,18 @@ import scala.collection.mutable.WeakHashMap
 
 class ObjectListenerMap[L] {
     
-  val listnerTypeMap = new WeakHashMap[AnyRef, HashMap[String, SortedListners[L]]]
+  val listnerTypeMap = new WeakHashMap[AnyRef, HashMap[String, SortedListeners[L]]]
   
-  private def getOrCreateListners(obj: AnyRef, event: String): SortedListners[L] = {
-    listnerTypeMap.getOrElseUpdate(obj, new HashMap[String, SortedListners[L]]).getOrElseUpdate(event, new SortedListners[L])
+  private def getOrCreateListeners(obj: AnyRef, event: String): SortedListeners[L] = {
+    listnerTypeMap.getOrElseUpdate(obj, new HashMap[String, SortedListeners[L]]).getOrElseUpdate(event, new SortedListeners[L])
   }
 
   def get(obj: AnyRef, event: String): Iterable[L] = synchronized {
     listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event, Iterable.empty)
   }
 
-  def register(obj: AnyRef, priority: Int, listner: L, event: String) = synchronized {
-    getOrCreateListners(obj, event).register(priority, listner)
+  def register(obj: AnyRef, priority: Int, listener: L, event: String) = synchronized {
+    getOrCreateListeners(obj, event).register(priority, listener)
   }
   
 }
