@@ -24,7 +24,9 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 class IntegerRange(min: String, max: String, step: String) extends IntegralRange[Int](min, max, step) {
   
   def this(min: Int, max: Int, step: Int) = this(min.toString, max.toString, step.toString)
-
+  def this(min: Int, max: Int) = this(min, max, 1)
+  def this(min: String, max: String) = this(min, max, "1")
+  
   override def step(context: IContext): Int = expandData(context, step).toInt
   override def max(context: IContext): Int = expandData(context, max).toInt
   override def min(context: IContext): Int = expandData(context, min).toInt
