@@ -23,7 +23,8 @@ import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 
 class Slot(val capsule: IGenericCapsule) extends ISlot {
-
+  capsule.addInputSlot(this)
+  
   private val _transitions = new HashSet[IGenericTransition]
 
   override def +=(transition: IGenericTransition) = {

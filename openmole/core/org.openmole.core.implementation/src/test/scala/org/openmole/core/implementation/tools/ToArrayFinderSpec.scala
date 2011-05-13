@@ -50,7 +50,8 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(t1c, t2c)
     
-    ToArrayFinder.toArrayManifests(t2c).isEmpty should equal (true)
+    //TODO change this spec
+    ToArrayFinder.toArrayManifests(t2c.intputSlots.head).isEmpty should equal (true)
   }
   
   "To array finder" should "detect a toArray case" in {
@@ -72,7 +73,7 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
 
-    val manifests = ToArrayFinder.toArrayManifests(t3c)
+    val manifests = ToArrayFinder.toArrayManifests(t3c.intputSlots.head)
     manifests.contains(p.name) should equal (true)
     manifests.get(p.name).get.erasure should equal (classOf[Int])
   }

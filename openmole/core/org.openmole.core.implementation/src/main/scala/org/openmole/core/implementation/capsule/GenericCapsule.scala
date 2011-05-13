@@ -59,8 +59,6 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   private val _inputDataChannels = new HashSet[IDataChannel]
   private val _outputDataChannels = new HashSet[IDataChannel]
  
-  addInputSlot(_defaultInputSlot)
-
   override def defaultInputSlot: ISlot = _defaultInputSlot
 
   override def addInputSlot(slot: ISlot): this.type = {

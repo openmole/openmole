@@ -45,38 +45,28 @@ class LevelComputing(mole: IMole) {
   
   @transient private val levelCache = new WeakHashMap[IGenericCapsule, Int]
 
-  def level(capsule: IGenericCapsule): Int = {
-    levelCache.get(capsule) match {
-      case Some(cachedLevel) => cachedLevel
-      case None => 
-        val l = level(capsule, new HashSet[IGenericCapsule])
-        if(l == Int.MaxValue) throw new InternalProcessingError("Error in level computing level could not be equal to MAXVALUE.")
-        levelCache.put(capsule, l)
+  def level(capsule: IGenericCapsule): Int = synchronized {
+    levelCache.getOrElse (capsule, {
+        val l = level(capsule, new HashSet[IGenericCapsule], Int.MaxValue)
+        if(l == Int.MaxValue) throw new InternalProcessingError("Error in level computing level could not be equal to MAXVALUE." + capsule.taskOrException.name)
         l
-    }
+    })
   }
-
-  def level(capsule: IGenericCapsule, allreadySeen: HashSet[IGenericCapsule]): Int = {
-    if (allreadySeen.contains(capsule)) {
-      return Int.MaxValue
-    } else {
-      allreadySeen.add(capsule)
-    }
-
-    if (capsule.equals(mole.root)) return 1
-    var minLevel = Int.MaxValue
-
-    for (slot <- capsule.intputSlots) {
-      for (t <- slot.transitions) {
-        var inLevel = level(t.start, allreadySeen)
-
-        if (classOf[IExplorationTransition].isAssignableFrom(t.getClass)) inLevel += 1
-        else if (classOf[IAggregationTransition].isAssignableFrom(t.getClass)) inLevel -= 1
-
-        if (inLevel < minLevel) minLevel = inLevel     
-      }
-    }
-
-    return minLevel
+  
+  private def level (capsule : IGenericCapsule, alreadySeen: HashSet[IGenericCapsule], lvl : Int): Int = {
+    if (capsule.equals (mole.root)) return 1
+    if (alreadySeen.contains(capsule)) return lvl
+    capsule.intputSlots map (slot => {
+        if (slot.transitions.size > 0)
+          slot.transitions map (t => {
+            val inLevel = levelCache.getOrElse (t.start, level (t.start, alreadySeen + capsule, Int.MaxValue))
+            t match {
+              case _ : IExplorationTransition => inLevel + 1
+              case _ : IAggregationTransition => inLevel - 1
+              case _ => inLevel
+            }
+          }) min
+        else Int.MaxValue
+    }) min
   }
 }

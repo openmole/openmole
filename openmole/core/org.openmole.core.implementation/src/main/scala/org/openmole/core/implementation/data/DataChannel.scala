@@ -63,11 +63,11 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
       }
     }
     
-    def error = throw new InternalProcessingError("No context registred for data channel found in input of task " + end.toString)
+    //def error = throw new InternalProcessingError("No context registered for data channel found in input of task " + end.toString)
 
     {
-      if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket).getOrElse(error)
-      else dataChannelRegistry.consult(this, currentTicket).getOrElse(error)
+      if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket) getOrElse(new ContextBuffer)
+      else dataChannelRegistry.consult(this, currentTicket) getOrElse(new ContextBuffer)
     }.map{_.toVariable}
   }
 

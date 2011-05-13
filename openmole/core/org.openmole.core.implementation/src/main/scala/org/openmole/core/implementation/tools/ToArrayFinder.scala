@@ -27,24 +27,19 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
 object ToArrayFinder {
-  
-  /*def aggregated(slot: IGenericCapsule) = {
-    
-  }
-  */
  
-  def toArrayManifests(caps: IGenericCapsule) = {
+  def toArrayManifests(slot : ISlot) = {
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     var forceArray = new TreeSet[String]
     
-    for(t <- caps.intputSlots.flatMap(_.transitions) ; output <- t.start.userOutputs){
+    for(t <- slot.transitions ; output <- t.start.userOutputs){
       if(!t.filtered.contains(output.prototype.name)) {
         toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
         if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
       }
     }
        
-    for(d <- caps.inputDataChannels.flatMap(_.data)) {
+    for(d <- slot.capsule.inputDataChannels.flatMap(_.data)) {
       toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
     }
     
