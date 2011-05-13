@@ -29,14 +29,14 @@ import scala.collection.JavaConversions._
 
 class ModelElementFactory(val displayName: String, val thumbPath: String, val entityType: String, val factoryUIClass: Class[_]){
   
-   def factoryInstance = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
+   def buildPaletteElementFactory = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
   
   private def factoryInstances: Collection[IFactoryUI] = {
     entityType match {
-      case Constants.TASK=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
-      case Constants.PROTOTYPE=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
-      case Constants.SAMPLING=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
-      case Constants.ENVIRONMENT=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
+      case Constants.TASK_MODEL=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
+      case Constants.PROTOTYPE_MODEL=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
+      case Constants.SAMPLING_MODEL=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
+      case Constants.ENVIRONMENT_MODEL=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
       case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
     }
   }

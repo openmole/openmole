@@ -18,25 +18,23 @@ import scala.collection.mutable.ListBuffer
 object ElementFactories {
   
   lazy val paletteElements = Map(Constants.TASK -> new ListBuffer[PaletteElementFactory],
-                                 Constants.TASK_MODEL -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK_MODEL),
                                  Constants.PROTOTYPE -> new ListBuffer[PaletteElementFactory],
-                                 Constants.PROTOTYPE_MODEL -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE_MODEL),
                                  Constants.SAMPLING -> new ListBuffer[PaletteElementFactory],
-                                 Constants.SAMPLING_MODEL -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING_MODEL),
-                                 Constants.ENVIRONMENT -> new ListBuffer[PaletteElementFactory],
-                                 Constants.ENVIRONMENT_MODEL -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT_MODEL))
+                                 Constants.ENVIRONMENT -> new ListBuffer[PaletteElementFactory])
+  
+  lazy val modelElements = Map(Constants.TASK_MODEL -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK_MODEL),
+                               Constants.PROTOTYPE_MODEL -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE_MODEL),
+                               Constants.SAMPLING_MODEL -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING_MODEL),
+                               Constants.ENVIRONMENT_MODEL -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT_MODEL))
   
   def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
-    val li = new ListBuffer[PaletteElementFactory]
-    println("yy :: " + factoryClass.toString)
-    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{println("loo loo : "+ p.coreClass.getSimpleName);li += new PaletteElementFactory(p.coreClass.getSimpleName,p.imagePath,entityType,p.getClass)})
+    val li = new ListBuffer[ModelElementFactory]
+    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{println("loo loo : "+ p.coreClass.getSimpleName);li += new ModelElementFactory(p.coreClass.getSimpleName,p.imagePath,entityType,p.getClass)})
     li
   }
   
   def addElement(pef: PaletteElementFactory) =  {
     paletteElements(pef.entityType) += pef
-    pef.factory = pef.factoryInstance
-    pef.factory.panelUIData.name = pef.displayName
   }
   
   def getPaletteElementFactory(categoryName: String, name: String): PaletteElementFactory= {

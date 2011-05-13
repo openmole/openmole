@@ -21,6 +21,7 @@ import org.openmole.ide.core.commons.Constants;
 import org.openmole.ide.core.palette.ElementFactories;
 import org.openmole.ide.core.palette.PaletteElementFactory;
 import org.openmole.ide.core.control.MoleScenesManager;
+import org.openmole.ide.core.palette.ModelElementFactory;
 import org.openmole.ide.core.palette.PaletteSupport;
 import org.openmole.ide.core.properties.IFactoryUI;
 import org.openmole.ide.core.properties.IPanelUI;
@@ -75,14 +76,14 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     private void create() {
         if (nameTextField.getText().length() != 0) {
-            PaletteElementFactory currentElementFactory = (PaletteElementFactory) (typeComboBox.getSelectedItem());
-            PaletteElementFactory pef = new PaletteElementFactory(nameTextField.getText(), currentElementFactory.thumbPath(), Constants.simpleEntityName(currentElementFactory.entityType()), currentElementFactory.factoryUIClass());
+            ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
+            PaletteElementFactory pef = new PaletteElementFactory(nameTextField.getText(), currentModelElementFactory.thumbPath(), Constants.simpleEntityName(currentModelElementFactory.entityType()), currentModelElementFactory.buildPaletteElementFactory());
             ElementFactories.addElement(pef);
             MoleSceneTopComponent.getDefault().refreshPalette();
             displayCurrentEntity(pef);
             
-            //initNewEntity(currentElementFactory.entityType());
-            PaletteSupport.selectItem(Constants.simpleEntityName(currentElementFactory.entityType()),currentElementFactory.displayName());
+            //initNewEntity(currentModelElementFactory.entityType());
+            PaletteSupport.selectItem(Constants.simpleEntityName(currentModelElementFactory.entityType()),currentModelElementFactory.displayName());
         }
     }
 //    private String save() {
@@ -121,7 +122,7 @@ public class PropertyPanel extends javax.swing.JPanel {
         //currentEntity = entityType;
         createButton.setVisible(true);
         typeComboBox.removeAllItems();
-        for (PaletteElementFactory pef : JavaConversions.asJavaIterable(ElementFactories.paletteElements().apply(entityType))) {
+        for (ModelElementFactory pef : JavaConversions.asJavaIterable(ElementFactories.modelElements().apply(entityType))) {
             typeComboBox.addItem(pef);
         }
         if (entityPanelScrollPane.getViewport() != null) {
@@ -309,8 +310,8 @@ public class PropertyPanel extends javax.swing.JPanel {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value != null) {
-                if (value.getClass().equals(PaletteElementFactory.class)) {
-                    PaletteElementFactory pef = (PaletteElementFactory) value;
+                if (value.getClass().equals(ModelElementFactory.class)) {
+                    ModelElementFactory pef = (ModelElementFactory) value;
                     setText(pef.displayName());
                 }
             }

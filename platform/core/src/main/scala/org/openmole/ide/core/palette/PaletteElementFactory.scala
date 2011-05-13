@@ -21,16 +21,13 @@ import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.exception.MoleExceptionManagement
-import scala.collection.mutable.ListBuffer
 
 //class PaletteElementFactory(val displayName: String,val factoryUI: IFactoryUI){
-class PaletteElementFactory(val displayName: String, val thumbPath: String, val entityType: String, val factoryUIClass: Class[_]){
+class PaletteElementFactory(val displayName: String, val thumbPath: String, val entityType: String, val factory: IFactoryUI){
   
   // def buildEntity = factoryUI.buildEntity(displayName,factoryUI.panel)
   // def buildNewEntity = factoryUI.buildEntity(factoryUI.panel)
-  var factory: IFactoryUI = null
-  
+  factory.panelUIData.name = displayName
   
   def buildEntity: IEntityUI = {
     entityType match {
@@ -43,15 +40,15 @@ class PaletteElementFactory(val displayName: String, val thumbPath: String, val 
   }
   
  
-  def factoryInstance = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
-  
-  private def factoryInstances: Collection[IFactoryUI] = {
-    entityType match {
-      case Constants.TASK=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
-      case Constants.PROTOTYPE=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
-      case Constants.SAMPLING=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
-      case Constants.ENVIRONMENT=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
-      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
-    }
-  }
+//  def factoryInstance = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
+//  
+//  private def factoryInstances: Collection[IFactoryUI] = {
+//    entityType match {
+//      case Constants.TASK=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
+//      case Constants.PROTOTYPE=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
+//      case Constants.SAMPLING=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
+//      case Constants.ENVIRONMENT=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
+//      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
+//    }
+//  }
 }
