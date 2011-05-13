@@ -1,28 +1,31 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 leclaire
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core;
 
 import java.awt.BorderLayout;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-//import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.netbeans.api.visual.action.ActionFactory;
-import org.openmole.ide.core.workflow.model.IEntityUI;
-import org.openmole.ide.core.properties.PanelUI;
-import org.openmole.ide.core.provider.DnDNewEntityProvider;
 
 /**
  * Top component which displays something.
@@ -35,20 +38,19 @@ public final class EntityPropertyTopComponent extends TopComponent {
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
     private static final String PREFERRED_ID = "EntityPropertyTopComponent";
-    private PropertyPanel propertyPanel;
 
     public EntityPropertyTopComponent() {
         initComponents();
         setName(NbBundle.getMessage(EntityPropertyTopComponent.class, "CTL_EntityPropertyTopComponent"));
         setToolTipText(NbBundle.getMessage(EntityPropertyTopComponent.class, "HINT_EntityPropertyTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
-        propertyPanel = new PropertyPanel();
+
         setLayout(new BorderLayout());
-        
-        propertyPanel.setDropTarget(new DropTarget(propertyPanel,new PanelDropTarget()));
-        add(propertyPanel, BorderLayout.CENTER);
-        
-        
+
+      //  propertyPanel.setDropTarget(new DropTarget(propertyPanel, new PanelDropTarget()));
+        add(PropertyPanel.getDefault(), BorderLayout.CENTER);
+
+
 //        
 //        DropTarget dt = new DropTarget(this, new PropertyDropTargetListener());
 //        dt.setDefaultActions(DnDConstants.ACTION_MOVE);
@@ -56,10 +58,6 @@ public final class EntityPropertyTopComponent extends TopComponent {
 //        setDropTarget(dt);
     }
 
-    public void displayCurrentEntityPanel(IEntityUI entity){
-        propertyPanel.displayCurrentEntity(entity);
-    }
-    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -152,7 +150,9 @@ public final class EntityPropertyTopComponent extends TopComponent {
     protected String preferredID() {
         return PREFERRED_ID;
     }
+
     public class PanelDropTarget implements DropTargetListener {
+
         @Override
         public void dragEnter(DropTargetDragEvent dtde) {
             throw new UnsupportedOperationException("Not supported yet.");

@@ -33,11 +33,7 @@ import scala.collection.JavaConversions._
 import org.openide.util.Lookup
 import java.awt.datatransfer.DataFlavor
 
-class CategoryBuilder extends Children.Keys[ICategory] {
-//  var categories= new HashMap[MoleConcepts.Concept, ICategory]
-//  categories+= MoleConcepts.TASK_INSTANCE -> new TaskCategory
-//  categories+= MoleConcepts.SAMPLING_INSTANCE -> new SamplingCategory
-//  categories+= MoleConcepts.PROTOTYPE_INSTANCE -> new PrototypeCategory
+class CategoryBuilder extends Children.Keys[ICategory]{
   
   override protected def createNodes(key: ICategory) = Array[Node](new CategoryNode(key.asInstanceOf[ICategory]))
   
@@ -46,11 +42,12 @@ class CategoryBuilder extends Children.Keys[ICategory] {
     // setKeys(categories.values)
     
     setKeys(List(
-        new GenericCategory("TaskModel","Task models" ,new GenericChildren(PaletteElementFactories.paletteElements("TaskModel"),Constants.TASK_MODEL_DATA_FLAVOR)),
-        new GenericCategory("SamplingModel","Sampling models", new GenericChildren(PaletteElementFactories.paletteElements("SamplingModel"),Constants.SAMPLING_MODEL_DATA_FLAVOR)),
-        new GenericCategory("PrototypeModel","Prototype models", new GenericChildren(PaletteElementFactories.paletteElements("PrototypeModel"),Constants.PROTOTYPE_MODEL_DATA_FLAVOR)),
-        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(PaletteElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR))).toIterable)
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR)),
+        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.PROTOTYPE_DATA_FLAVOR)),
+        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.SAMPLING_DATA_FLAVOR)),
+        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
   }
+  
 
 }
 

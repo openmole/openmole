@@ -1,40 +1,30 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 leclaire
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core;
 
 import java.awt.BorderLayout;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-//import org.netbeans.ProxyClassLoader;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
@@ -47,21 +37,20 @@ import org.openmole.ide.core.workflow.action.RemoveAllMoleSceneAction;
 import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.nodes.AbstractNode;
-import org.openide.text.ActiveEditorDrop;
-import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
-import org.openmole.ide.core.commons.Constants;
-import org.openmole.ide.core.palette.GenericNode;
-import org.openmole.ide.core.palette.PaletteElementFactory;
+import org.openmole.ide.core.palette.CategoryBuilder;
 
-import org.openmole.ide.core.workflow.model.IEntityUI;
 
 /**
  * Top component which displays something.
  */
 @ConvertAsProperties(dtd = "-//org.openmole.ide.core//MoleScene//EN",
 autostore = false)
-public final class MoleSceneTopComponent extends TopComponent{
+@TopComponent.Description(preferredID = "MoleSceneTopComponent",
+//iconBase="SET/PATH/TO/ICON/HERE", 
+persistenceType = TopComponent.PERSISTENCE_ALWAYS)
+@TopComponent.Registration(mode = "editor", openAtStartup = true)
+public final class MoleSceneTopComponent extends TopComponent {
+
     private static MoleSceneTopComponent instance;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
@@ -76,18 +65,12 @@ public final class MoleSceneTopComponent extends TopComponent{
         MoleScenesManager.setTabbedPane(tabbedPane);
         TaskSettingsManager.setTabbedPane(tabbedPane);
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
-        
-        palette = PaletteSupport.createPalette();
-     //   associateLookup( Lookups.fixed( new Object[] { palette } ));
 
-
+        createPalette();
         associateLookup(new AbstractLookup(ic));
-     //   palette = PaletteSupport.createPalette();
-
         ic.add(palette);
-        
-        
-      //  palette.addPropertyChangeListener(this);
+
+        //  palette.addPropertyChangeListener(this);
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
@@ -117,13 +100,20 @@ public final class MoleSceneTopComponent extends TopComponent{
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
         add(tabbedPane, BorderLayout.CENTER);
+
     }
 
     public void refreshPalette() {
         ic.remove(palette);
-        palette = PaletteSupport.createPalette();
+        createPalette();
         ic.add(palette);
         repaint();
+    }
+
+    public void createPalette() {
+        AbstractNode paletteRoot = new AbstractNode(new CategoryBuilder());
+        paletteRoot.setName("Entities");
+        palette = PaletteSupport.createPalette(paletteRoot);
     }
 
     /** This method is called from within the constructor to
@@ -238,5 +228,4 @@ public final class MoleSceneTopComponent extends TopComponent{
     protected String preferredID() {
         return PREFERRED_ID;
     }
-
 }

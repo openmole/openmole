@@ -46,7 +46,7 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
     
     // changeConnectableWidget
     dnDAddPrototypeProvider.encapsulated= true
-    connectableWidget.addTitle(taskUI.name)
+    connectableWidget.addTitle(taskUI.factoryUI.panelUIData.name)
     capsuleMenuProvider.addTaskMenus
     getActions.addAction(new TaskActions(capsuleModel.taskUI.get, this))
   }

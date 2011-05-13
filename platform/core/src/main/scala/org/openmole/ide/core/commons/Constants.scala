@@ -12,9 +12,10 @@ import java.awt.datatransfer.DataFlavor
 import org.openide.util.ImageUtilities
 import scala.collection.immutable.HashMap
 import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
+import org.openmole.ide.core.workflow.implementation.PrototypeUI
+import org.openmole.ide.core.workflow.implementation.EnvironmentUI
 
 object Constants{
   
@@ -50,17 +51,21 @@ object Constants{
   val PROTOTYPE = "PROTOTYPE"
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
+  val TASK_MODEL = "TASK_MODEL"
+  val PROTOTYPE_MODEL = "PROTOTYPE_MODEL"
+  val SAMPLING_MODEL = "SAMPLING_MODEL"
+  val ENVIRONMENT_MODEL = "ENVIRONMENT_MODEL"
   
-  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeUI], Constants.PROTOTYPE)
-  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], Constants.TASK)
-  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingUI], Constants.SAMPLING)
-  val PROTOTYPE_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "PrototypeModel")
-  val TASK_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "TaskModel")
-  val SAMPLING_MODEL_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "SamplingModel")
+  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeUI], PROTOTYPE)
+  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], TASK)
+  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingUI], SAMPLING)
+  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentUI], ENVIRONMENT)
+  
   
   val TASK_DEFAULT_PROPERTIES = "resources/task/default"
   var typeImageMap= new HashMap[String, Image]
 
+  def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }
 //
 //

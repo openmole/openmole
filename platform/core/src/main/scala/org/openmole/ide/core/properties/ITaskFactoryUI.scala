@@ -10,9 +10,9 @@ import org.openmole.ide.core.workflow.implementation.TaskUI
 
 trait ITaskFactoryUI extends IFactoryUI{
 
-  override def buildEntity(name: String,panel: PanelUI) = new TaskUI(name,coreClass,borderColor,backgroundColor, panel)
-  
-  override def buildEntity(panel: PanelUI) = new TaskUI(coreClass,borderColor,backgroundColor,panel)
+//  override def buildEntity(name: String,panel: PanelUI) = new TaskUI(name,coreClass,borderColor,backgroundColor, panel)
+//  
+//  override def buildEntity(panel: PanelUI) = new TaskUI(coreClass,borderColor,backgroundColor,panel)
   
   def borderColor: Color
   

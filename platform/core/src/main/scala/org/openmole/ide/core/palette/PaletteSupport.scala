@@ -32,27 +32,45 @@ import org.openide.nodes.Node
 import java.beans.BeanInfo
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
-import org.openmole.ide.core.workflow.action.PaletteItemAction
+import org.openmole.ide.core.PropertyPanel
 
 object PaletteSupport {
   
-  def createPalette = {
-    val paletteRoot = new AbstractNode(new CategoryBuilder)
-    paletteRoot.setName("Palette Root")
+  var palette: Option[PaletteController] = None
+  private var paletteRoot: Option[AbstractNode] = None
+  
+  def createPalette(paletteR: AbstractNode) = {
+    //  val paletteRoot = new AbstractNode(categoryBuilder)
+    //  paletteRoot.setName(paletteName)
     //  Preferences.clearProperties
     //  Preferences.clearModels
-    val palette = PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
-    palette.addPropertyChangeListener( new MyPropertyChangeListener(palette))
-    palette
+    paletteRoot = Some(paletteR)
+    palette = Some(PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler))
+    palette.get.addPropertyChangeListener( new MyPropertyChangeListener(palette.get))
+    palette.get
+  }
+  
+  def selectItem(categoryName: String, itemName: String) = {
+  //  val catNode = paletteRoot.get.getChildren.findChild(categoryName)
+  paletteRoot.get.getChildren.getNodes.foreach(n=> {println(n.getName + " :: " + categoryName + " "+n.getName.equals(categoryName));(n.getName.equals(categoryName))})
+  val catNode = paletteRoot.get.getChildren.getNodes.find{n=> (n.getName.equals(categoryName))}.get
+    catNode.getChildren.getNodes.foreach(n=> {println(" +NODE :: " + n.toString)})
+    val itemNode = catNode.getChildren.getNodes.apply(catNode.getChildren.getNodesCount-1)
+      
+    palette.get.setSelectedItem(catNode.getLookup, itemNode.getLookup)
+    
   }
 }
   
+  
+
 class MyPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
   override def  propertyChange(pce: PropertyChangeEvent)= {
     val selItem = palette.getSelectedItem
     val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null){
-      println("OB :: " + PaletteElementFactories.getFactoryUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName).coreObject(selItem.lookup(classOf[Node]).getName).toString)   
+      //  println("OB :: " + ElementFactories.getPaletteElementFactory(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName).factoryInstance.coreObject.toString)   
+      PropertyPanel.getDefault.displayCurrentEntity(ElementFactories.getPaletteElementFactory(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName))
     }
   }
 }                                

@@ -10,22 +10,32 @@
  */
 package org.openmole.ide.plugin.task.groovy;
 
-import javax.swing.JPanel;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.plugin.task.groovy.GroovyTask;
-
 
 /**
  *
  * @author mathieu
  */
-public class GroovyTaskPanelUI extends JPanel implements PanelUI {
+public class GroovyTaskPanelUI extends PanelUI {
 
+    GroovyTaskPanelUIData panelData;
     /** Creates new form GroovyTaskPanelUI */
-    public GroovyTaskPanelUI() {
+    public GroovyTaskPanelUI(GroovyTaskPanelUIData panelData) {
+        super(panelData);
+        this.panelData = panelData;
         initComponents();
     }
 
+    public void saveContent() {
+        System.out.println("++ SAVE groovy " + jTextArea1.getText());
+        panelData.code_$eq(jTextArea1.getText());
+    }
+
+    public void loadContent() {
+        System.out.println("++ LOAD groovy " + panelData.code());
+        jTextArea1.setText(panelData.code());
+    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -78,10 +88,4 @@ public class GroovyTaskPanelUI extends JPanel implements PanelUI {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public Object coreObject(String name) {
-        return new GroovyTask(name,jTextArea1.getText());
-    }
-
 }

@@ -18,15 +18,19 @@
 package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
+import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.properties.PanelUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
+  var panelData = new ExplorationTaskPanelUIData
   
-  override def panel= new ExplorationTaskPanelUI
+  override def panelUIData = panelData
   
-  override def coreObject(name: String)= panel.coreObject(name)
+  override def coreObject= {
+    if (panelData.sampling.isDefined) new ExplorationTask(panelData.name,panelData.sampling.get)
+    else throw new GUIUserBadDataError("Sampling missing to instanciate the exploration task " + panelData.name)
+  }
   
   override def coreClass= classOf[ExplorationTask]
   
@@ -35,4 +39,9 @@ class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def backgroundColor = new Color(255,102,0,128)
   
   override def imagePath = "img/thumb/explorationTaskSmall.png"
+  
+  override def buildPanelUI = new ExplorationTaskPanelUI(panelData)
 }
+
+  
+  

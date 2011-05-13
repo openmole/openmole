@@ -9,7 +9,9 @@ import org.openmole.ide.core.workflow.implementation.SamplingUI
 
 trait ISamplingFactoryUI extends IFactoryUI{
   
-  override def buildEntity(name: String, panel: PanelUI) = new SamplingUI(name,coreClass, panel)
   
-  override def buildEntity (panel: PanelUI) = new SamplingUI(coreClass,panel)
+  
+//  override def buildEntity(name: String, panel: PanelUI) = new SamplingUI(name,coreClass, panel)
+//  
+//  override def buildEntity (panel: PanelUI) = new SamplingUI(coreClass,panel)
 }

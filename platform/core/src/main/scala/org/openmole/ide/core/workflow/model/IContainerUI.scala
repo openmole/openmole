@@ -13,7 +13,7 @@ trait IContainerUI {
   
   var entities= new HashMap[Tuple2[String,Class[_]],IEntityUI] 
   
-  def getEntityTuple(entity: IEntityUI): Tuple2[String,Class[_]]= Tuple2[String,Class[_]](entity.name,entity.coreClass)
+  def getEntityTuple(entity: IEntityUI): Tuple2[String,Class[_]]= Tuple2[String,Class[_]](entity.factoryUI.panelUIData.name,entity.factoryUI.coreClass)
   
   def register(entity: IEntityUI)= entities+= getEntityTuple(entity)-> entity
   

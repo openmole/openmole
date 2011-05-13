@@ -23,10 +23,11 @@ import org.openmole.ide.core.properties.PanelUI
 import org.openmole.plugin.task.groovy.GroovyTask
 
 class GroovyTaskFactoryUI extends ITaskFactoryUI {
+  var panelData = new GroovyTaskPanelUIData
   
-  override def panel= new GroovyTaskPanelUI
+  override def panelUIData = panelData
   
-  override def coreObject(name: String)= panel.coreObject(name)
+  override def coreObject = new GroovyTask(panelData.name,panelData.code)
   
   override def coreClass= classOf[GroovyTask]
   
@@ -35,4 +36,7 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   override def backgroundColor = new Color(61,104,130,128)
   
   override def imagePath = "img/thumb/groovyTaskSmall.png"
+  
+  override def buildPanelUI = new GroovyTaskPanelUI(panelData)
 }
+   

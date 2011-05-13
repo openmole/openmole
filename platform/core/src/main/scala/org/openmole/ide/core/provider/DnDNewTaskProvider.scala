@@ -30,7 +30,7 @@ import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.EntityPropertyTopComponent
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.palette.PaletteElementFactories
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.TaskUI
 
@@ -43,22 +43,23 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
     println("+Accept ")
     println(transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))
-    println(transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR))
     
     val capsuleView = UIFactory.createCapsule(molescene,point)
-    capsuleView.addInputSlot
+   // capsuleView.addInputSlot
     //  capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
   
-    if (transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR)){
-      println("++TASK_MODEL_DATA_FLAVOR")
-      val f = transferable.getTransferData(Constants.TASK_MODEL_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
-      val entity = f.buildNewEntity.asInstanceOf[TaskUI]
-      capsuleView.encapsule(entity)
-      PaletteElementFactories.addTaskElement(new PaletteElementFactory(entity.name,f.factoryUI))
-      MoleSceneTopComponent.getDefault.refreshPalette
-      EntityPropertyTopComponent.getDefault.displayCurrentEntityPanel(entity)
-    }
-    else if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))  {
+//    if (transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR)){
+//      println("++TASK_MODEL_DATA_FLAVOR")
+//      val f = transferable.getTransferData(Constants.TASK_MODEL_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
+//      
+//      //val entity = f.buildNewEntity.asInstanceOf[TaskUI]
+//      val entity = f.buildEntity
+//      capsuleView.encapsule(entity.asInstanceOf[TaskUI])
+//      ElementFactories.addElement(new PaletteElementFactory(entity.factoryUI.panelUIData.name,entity.factoryUI.imagePath,Constants.TASK,entity.factoryUI.getClass))
+//      MoleSceneTopComponent.getDefault.refreshPalette
+//      EntityPropertyTopComponent.getDefault.displayCurrentEntityPanel(entity.factoryUI)
+//    }
+    if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))  {
       capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
       println("++TASK_DATA_FLAVOR")
       

@@ -60,10 +60,10 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
       var i=0
       (capsuleView.capsuleModel.taskUI.get.prototypesIn.toList:::capsuleView.capsuleModel.taskUI.get.prototypesOut.toList).foreach(p=> {
           if (i > capsuleView.capsuleModel.taskUI.get.prototypesIn.size) i= 0
-          var st = p.name
+          var st = p.factoryUI.panelUIData.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h= 35 + i * 22
-          graphics.drawImage(Constants.typeImageMap(p.coreClass.getSimpleName),
+          graphics.drawImage(Constants.typeImageMap(p.factoryUI.coreClass.getSimpleName),
                              x - taskWidth / 2, h - 13,
                              new Container)
           if (MoleScenesManager.detailedView) graphics.drawString(st, x - taskWidth / 2 + 24, h)

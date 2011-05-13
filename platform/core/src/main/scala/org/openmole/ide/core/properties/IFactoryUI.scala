@@ -5,19 +5,18 @@
 
 package org.openmole.ide.core.properties
 
-import org.openmole.ide.core.workflow.model.IEntityUI
-
 trait IFactoryUI {
 
-  def buildEntity(name: String, panel: PanelUI): IEntityUI
-  
-  def buildEntity(panel: PanelUI): IEntityUI
+//  def buildEntity(name: String, panel: PanelUI): IEntityUI
+//  
+//  def buildEntity(panel: PanelUI): IEntityUI
+  def panelUIData: PanelUIData
   
   def coreClass: Class[_]
   
   def imagePath: String 
   
-  def panel: PanelUI
+  def coreObject: Object
   
-  def coreObject(name: String): Object
+  def buildPanelUI: IPanelUI
 }

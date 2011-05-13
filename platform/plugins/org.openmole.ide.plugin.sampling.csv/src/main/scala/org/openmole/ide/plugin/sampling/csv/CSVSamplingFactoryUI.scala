@@ -17,17 +17,31 @@
 
 package org.openmole.ide.plugin.sampling.csv
 
+import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.plugin.sampling.csv.CSVSampling
+import java.io.File
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.PanelUI
 
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
+//class CSVSamplingFactoryUI extends SamplingFactoryUI(new CSVSamplingPanelUIData) {
+  var panelData = new CSVSamplingPanelUIData
   
-  override def panel= new CSVSamplingPanelUI
+  override def panelUIData = panelData
   
-  override def coreObject(name: String)= panel.coreObject(name)
+  override def coreObject= {
+    if (panelData.csvFilePath != "") {
+      val fi = new File(panelData.csvFilePath)
+      if (fi.isFile) new CSVSampling(fi)
+      else throw new GUIUserBadDataError("CSV file " + panelData.csvFilePath + " does not exist")
+    }
+    else throw new GUIUserBadDataError("CSV file path missing to instanciate the CSV sampling " + panelData.name)
+  }
 
   override def coreClass = classOf[CSVSampling] 
   
   override def imagePath = "img/thumb/csvSampling.png" 
+  
+  override def buildPanelUI = new CSVSamplingPanelUI(panelData)
 }

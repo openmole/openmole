@@ -13,19 +13,30 @@ package org.openmole.ide.plugin.task.exploration;
 import javax.swing.JPanel;
 import org.openmole.core.implementation.task.ExplorationTask;
 import org.openmole.ide.core.properties.PanelUI;
-
+import org.openmole.ide.core.properties.PanelUIData;
 
 /**
  *
  * @author mathieu
  */
-public class ExplorationTaskPanelUI extends JPanel implements PanelUI {
+public class ExplorationTaskPanelUI extends PanelUI {
+
+    PanelUIData panelUIData;
 
     /** Creates new form ExplorationTaskPanelUI */
-    public ExplorationTaskPanelUI() {
+    public ExplorationTaskPanelUI(PanelUIData paneldata) {
+        super(paneldata);
+        panelUIData = paneldata;
         initComponents();
     }
 
+    public void saveContent() {
+        System.out.println("in saveContent ExplorationTaskPanelUI");
+    }
+    
+    public void loadContent() {
+        System.out.println("in loadContent ExplorationTaskPanelUI");
+    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -48,11 +59,5 @@ public class ExplorationTaskPanelUI extends JPanel implements PanelUI {
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public Object coreObject(String name) {
-       // return new ExplorationTask(name,);
-        return new Object();
-    }
 
 }

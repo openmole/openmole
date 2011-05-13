@@ -48,6 +48,7 @@ object UIFactory {
     scene.manager.registerCapsuleView(obUI)
     scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
     println("+ createCapsule " + scene.manager.getNodeID)
+    obUI.addInputSlot
     obUI    
   }
 }

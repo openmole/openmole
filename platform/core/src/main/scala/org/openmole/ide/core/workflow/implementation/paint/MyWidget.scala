@@ -57,9 +57,9 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI,var title: Option[
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.backgroundColor else new Color(204,204,204,128))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.backgroundColor else new Color(204,204,204,128))
     graphics.fill(bodyArea)
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.borderColor else new Color(204,204,204))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.borderColor else new Color(204,204,204))
 
     val stroke = new BasicStroke(1.3f, 1, 1)
     graphics.draw(stroke.createStrokedShape(bodyArea))

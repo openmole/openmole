@@ -28,9 +28,9 @@ class TaskConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     println("marshal : ")
     val t= o.asInstanceOf[TaskUI]
-    println("marshal : " + t.name)
-    writer.addAttribute("name", t.name)
-    //writer.addAttribute("type", t.entityType.getName.toString)
+    println("marshal : " + t.factoryUI.panelUIData.name)
+    writer.addAttribute("name", t.factoryUI.panelUIData.name)
+    writer.addAttribute("type", t.factoryUI.getClass.toString)
   }
   
  // override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new TaskUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))

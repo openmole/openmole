@@ -28,7 +28,6 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
   //  capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
   
     if (transferable.isDataFlavorSupported(Constants.PROTOTYPE_DATA_FLAVOR) ) println("PROTOTYPE_DATA_FLAVOR")
-    if (transferable.isDataFlavorSupported(Constants.PROTOTYPE_MODEL_DATA_FLAVOR) ) println("PROTOTYPE_MODEL_DATA_FLAVOR")
     
     
     capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])

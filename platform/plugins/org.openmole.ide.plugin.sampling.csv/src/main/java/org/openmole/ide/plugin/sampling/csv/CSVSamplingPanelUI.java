@@ -14,18 +14,31 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import org.openmole.ide.core.properties.PanelUI;
+import org.openmole.ide.core.properties.PanelUIData;
 import org.openmole.plugin.sampling.csv.CSVSampling;
 
 /**
  *
  * @author mathieu
  */
-public class CSVSamplingPanelUI extends JPanel implements PanelUI {
+public class CSVSamplingPanelUI extends PanelUI {
 
-    private File csvPathFile;
+    CSVSamplingPanelUIData panelData;
     /** Creates new form CSVSamplingPanelUI */
-    public CSVSamplingPanelUI() {
+    public CSVSamplingPanelUI(CSVSamplingPanelUIData panelData) {
+        super(panelData);
         initComponents();
+    }
+
+    public void saveContent() {
+        System.out.println("in saveContent CSVSamplingPanelUI " + csvPathFileTextField);
+        System.out.println("in saveContent CSVSamplingPanelUI " + csvPathFileTextField.getText());
+        panelData.csvFilePath_$eq(csvPathFileTextField.getText());
+    }
+
+    public void loadContent() {
+        System.out.println("in loadContent CSVSamplingPanelUI " + csvPathFileTextField);
+        csvPathFileTextField.setText(panelData.csvFilePath());
     }
 
     /** This method is called from within the constructor to
@@ -38,15 +51,15 @@ public class CSVSamplingPanelUI extends JPanel implements PanelUI {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        cvsPathFileTextField = new javax.swing.JTextField();
+        csvPathFileTextField = new javax.swing.JTextField();
         browseButton = new javax.swing.JButton();
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(CSVSamplingPanelUI.class, "CSVSamplingPanelUI.jLabel1.text")); // NOI18N
 
-        cvsPathFileTextField.setText(org.openide.util.NbBundle.getMessage(CSVSamplingPanelUI.class, "CSVSamplingPanelUI.cvsPathFileTextField.text")); // NOI18N
-        cvsPathFileTextField.addActionListener(new java.awt.event.ActionListener() {
+        csvPathFileTextField.setText(org.openide.util.NbBundle.getMessage(CSVSamplingPanelUI.class, "CSVSamplingPanelUI.csvPathFileTextField.text")); // NOI18N
+        csvPathFileTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cvsPathFileTextFieldActionPerformed(evt);
+                csvPathFileTextFieldActionPerformed(evt);
             }
         });
 
@@ -64,45 +77,41 @@ public class CSVSamplingPanelUI extends JPanel implements PanelUI {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(cvsPathFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(browseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(3, 3, 3)
+                .addComponent(csvPathFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(browseButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(cvsPathFileTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
-                    .addComponent(browseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(csvPathFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(browseButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {browseButton, csvPathFileTextField, jLabel1});
+
     }// </editor-fold>//GEN-END:initComponents
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
         final JFileChooser fc = new JFileChooser();
         fc.showOpenDialog(this);
-        csvPathFile = fc.getSelectedFile();
-        
-      //  for(PrototypeUI p : PrototypesUI().get)
+        csvPathFileTextField.setText(fc.getSelectedFile().getPath());
+
+        //  for(PrototypeUI p : PrototypesUI().get)
     }//GEN-LAST:event_browseButtonActionPerformed
 
-    private void cvsPathFileTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cvsPathFileTextFieldActionPerformed
+    private void csvPathFileTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_csvPathFileTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_cvsPathFileTextFieldActionPerformed
-
+    }//GEN-LAST:event_csvPathFileTextFieldActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;
-    private javax.swing.JTextField cvsPathFileTextField;
+    private javax.swing.JTextField csvPathFileTextField;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public Object coreObject(String name) {
-        CSVSampling csvSampling = new CSVSampling(csvPathFile);
-        return csvSampling;
-    }
 }

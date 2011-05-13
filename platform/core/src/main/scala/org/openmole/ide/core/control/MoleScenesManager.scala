@@ -6,7 +6,9 @@
 package org.openmole.ide.core.control
 
 import java.awt.Component
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JScrollPane
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.model.IMoleScene
 import scala.collection.mutable.HashMap
@@ -16,33 +18,41 @@ import scala.collection.mutable.ListBuffer
 object MoleScenesManager extends TabManager{
 
   var detailedView= false
-  var nodeCounter= 0
-  var samplingCounter= 0
-  var prototypeCounter= 0
-  var environmentCounter= 0
+//  var nodeCounter= 0
+//  var samplingCounter= 0
+//  var prototypeCounter= 0
+//  var environmentCounter= 0
   var count= 0
   var moleScenes= HashSet.empty[IMoleScene]
   var childTabs= new HashMap[IMoleScene, HashSet[Component]]
+  val counters = Map[String,AtomicInteger](Constants.TASK_MODEL-> new AtomicInteger(0), 
+                                           Constants.PROTOTYPE_MODEL-> new AtomicInteger(0), 
+                                           Constants.ENVIRONMENT_MODEL-> new AtomicInteger(0),
+                                           Constants.SAMPLING_MODEL-> new AtomicInteger(0))
   
-  def incrementTaskName: String = {
-    nodeCounter+= 1
-    "task" + nodeCounter
+  def incrementCounter(entityType: String): String = {
+    Constants.simpleEntityName(entityType).toLowerCase + counters(entityType).addAndGet(1)
   }
-  
-  def incrementPrototypeName: String = {
-    prototypeCounter += 1
-    "prototype" + prototypeCounter
-  }
-  
-  def incrementSamplingName: String = {
-    samplingCounter+= 1
-    "sampling" + samplingCounter
-  }
-  
-  def incrementEnvironmentName: String = {
-    environmentCounter+= 1
-    "prototype" + prototypeCounter
-  }
+
+//  def incrementTaskName: String = {
+//    nodeCounter+= 1
+//    "task" + nodeCounter
+//  }
+//  
+//  def incrementPrototypeName: String = {
+//    prototypeCounter += 1
+//    "prototype" + prototypeCounter
+//  }
+//  
+//  def incrementSamplingName: String = {
+//    samplingCounter+= 1
+//    "sampling" + samplingCounter
+//  }
+//  
+//  def incrementEnvironmentName: String = {
+//    environmentCounter+= 1
+//    "prototype" + prototypeCounter
+//  }
   
   def removeMoleScenes= {
     moleScenes.clear
