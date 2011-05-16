@@ -22,13 +22,15 @@ import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.PrototypeUI
 
 class PrototypeConverter extends Converter{
 
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
-    val s= o.asInstanceOf[PrototypeUI]
-    writer.addAttribute("name", s.factoryUI.panelUIData.name)
+  //  val s= o.asInstanceOf[PrototypeUI]
+    val s= o.asInstanceOf[EntityUI]
+    writer.addAttribute("name", s.panelUIData.name)
     writer.addAttribute("type", s.factoryUI.coreClass.getName)
   }
   

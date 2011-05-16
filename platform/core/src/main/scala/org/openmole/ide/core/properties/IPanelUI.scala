@@ -18,7 +18,7 @@
 package org.openmole.ide.core.properties
 
 trait IPanelUI {
-  def saveContent: Unit
+  def saveContent: PanelUIData
   
-  def loadContent: Unit
+  def loadContent(pud: PanelUIData): Unit
 }

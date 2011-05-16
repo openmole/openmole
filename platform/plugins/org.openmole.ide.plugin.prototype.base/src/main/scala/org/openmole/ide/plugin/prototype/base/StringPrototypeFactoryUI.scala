@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,9 +9,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -19,17 +19,13 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.properties.PanelUIData
 
-class BasePrototypeFactoryUI extends IPrototypeFactoryUI {
-  var panelData = new BasePrototypePanelUIData
+class StringPrototypeFactoryUI extends IPrototypeFactoryUI {
   
-  override def panelUIData = panelData
+  override def displayName = "String"
   
-  override def coreObject = new Prototype(panelUIData.name,coreClass)
+  override def coreObject(pud: PanelUIData) = new Prototype(pud.name,classOf[String])
   
-  override def coreClass = classOf[Prototype[_]]
-  
-  override def imagePath = "img/thumb/" + panelData.simpleTypeString.toLowerCase + ".png"
-  
-  override def buildPanelUI = new BasePrototypePanelUI(panelData)
+  override def imagePath = "img/thumb/string.png"
 }

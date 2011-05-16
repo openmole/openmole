@@ -16,20 +16,16 @@ import java.awt.event.ContainerListener;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.openide.util.Lookup;
 import org.openmole.ide.core.commons.Constants;
 import org.openmole.ide.core.palette.ElementFactories;
 import org.openmole.ide.core.palette.PaletteElementFactory;
 import org.openmole.ide.core.control.MoleScenesManager;
 import org.openmole.ide.core.palette.ModelElementFactory;
 import org.openmole.ide.core.palette.PaletteSupport;
-import org.openmole.ide.core.properties.IFactoryUI;
 import org.openmole.ide.core.properties.IPanelUI;
-import org.openmole.ide.core.properties.IPrototypeFactoryUI;
-import org.openmole.ide.core.properties.PanelUI;
+import org.openmole.ide.core.properties.PanelUIData;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConversions.*;
-import scala.reflect.generic.Constants.Constant;
 
 /**
  *
@@ -38,16 +34,13 @@ import scala.reflect.generic.Constants.Constant;
 public class PropertyPanel extends javax.swing.JPanel {
 
     private static PropertyPanel instance;
+    private PaletteElementFactory currentElement;
     private IPanelUI currentPanelUI;
 
-    /** Creates new form PropertyPanel */
     public PropertyPanel() {
         initComponents();
 
         typeComboBox.setRenderer(new ItemRenderer());
-        // setEditGraphicalContext(false);
-
-        entityPanelScrollPane.getViewport().addContainerListener(new PanelListener());
         entityPanelScrollPane.setVisible(false);
     }
 
@@ -55,15 +48,29 @@ public class PropertyPanel extends javax.swing.JPanel {
         return nameTextField.getText();
     }
 
+    public void save(){
+        if (currentElement != null) {
+                if (currentPanelUI != null) {
+                    PanelUIData pdata = currentPanelUI.saveContent();
+                    pdata.name_$eq(nameTextField.getText());
+                    currentElement.entity().updatePanelUIData(pdata);
+                }
+            }
+    }
+    
     public void displayCurrentEntity(PaletteElementFactory elementFactory) {
-        // JPanel p = (JPanel)entity.panel();
+        
+        save();
+        currentElement = elementFactory;
+        currentPanelUI = elementFactory.entity().factoryUI().buildPanelUI();
+        
         createButton.setVisible(false);
-        nameTextField.setText(elementFactory.factory().panelUIData().name());
+        nameTextField.setText(elementFactory.entity().panelUIData().name());
         typeComboBox.removeAllItems();
-        typeComboBox.addItem(elementFactory.factory().coreClass().getSimpleName());
-        // typeComboBox.setEditable(false);
+        typeComboBox.addItem(elementFactory.entity().factoryUI().displayName());
 
-        currentPanelUI = elementFactory.factory().buildPanelUI();
+        currentPanelUI.loadContent(currentElement.entity().panelUIData());
+
         updateViewport((JPanel) currentPanelUI);
         entityPanelScrollPane.setVisible(true);
     }
@@ -77,49 +84,19 @@ public class PropertyPanel extends javax.swing.JPanel {
     private void create() {
         if (nameTextField.getText().length() != 0) {
             ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
-            PaletteElementFactory pef = new PaletteElementFactory(nameTextField.getText(), currentModelElementFactory.thumbPath(), Constants.simpleEntityName(currentModelElementFactory.entityType()), currentModelElementFactory.buildPaletteElementFactory());
-            ElementFactories.addElement(pef);
+            PaletteElementFactory element = currentModelElementFactory.buildPaletteElementFactory();
+          //  PaletteElementFactory element = new PaletteElementFactory(nameTextField.getText(), Constants.simpleEntityName(currentModelElementFactory.entityType()), currentModelElementFactory.buildPaletteElementFactory());
+            ElementFactories.addElement(element);
             MoleSceneTopComponent.getDefault().refreshPalette();
-            displayCurrentEntity(pef);
-            
-            //initNewEntity(currentModelElementFactory.entityType());
-            PaletteSupport.selectItem(Constants.simpleEntityName(currentModelElementFactory.entityType()),currentModelElementFactory.displayName());
+            displayCurrentEntity(element);
+          //  PaletteSupport.selectItem(Constants.simpleEntityName(currentModelElementFactory.entityType()), currentModelElementFactory.displayName());
         }
     }
-//    private String save() {
-//        if (newMode) {
-//            //  ((IFactoryUI) typeComboBox.getSelectedItem()).buildEntity(nameTextField.getText());
-//            // ElementFactories.addPrototypeElement(new PaletteElementFactory(nameTextField.getText(), ((IFactoryUI) typeComboBox.getSelectedItem())));
-//            MoleSceneTopComponent.getDefault().refreshPalette();
-//        }
-//        nameTextField.setEnabled(false);
-//        newMode = false;
-//        return "Edit";
-//    }
-//
-//    private void setNewGraphicalContext() {
-//        newMode = true;
-//        nameTextField.setText("");
-//        setEditGraphicalContext(true);
-//        // nameTextField.setEnabled(true);
-//        //  editToggleButton.setEnabled(true);
-//        typeComboBox.setEditable(true);
-//    }
-//
-//    private void setEditGraphicalContext(Boolean b) {
-//        nameTextField.setEnabled(b);
-//        editToggleButton.setText(b ? "Save" : save());
-//    }
-//
-//    private void setButtons(Boolean b) {
-//        newToggleButton.setEnabled(b);
-//        editToggleButton.setEnabled(true);
-//        typeComboBox.removeAllItems();
-//        typeComboBox.setEditable(b);
-//    }
+
+
 
     private void initNewEntity(String entityType) {
-        //currentEntity = entityType;
+        save();
         createButton.setVisible(true);
         typeComboBox.removeAllItems();
         for (ModelElementFactory pef : JavaConversions.asJavaIterable(ElementFactories.modelElements().apply(entityType))) {
@@ -316,21 +293,6 @@ public class PropertyPanel extends javax.swing.JPanel {
                 }
             }
             return this;
-        }
-    }
-
-    class PanelListener implements ContainerListener {
-
-        @Override
-        public void componentAdded(ContainerEvent ce) {
-            System.out.println("PanelUI added " + currentPanelUI.getClass());
-            currentPanelUI.loadContent();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent ce) {
-            System.out.println("PanelUI closed " + currentPanelUI.getClass());
-            currentPanelUI.saveContent();
         }
     }
 

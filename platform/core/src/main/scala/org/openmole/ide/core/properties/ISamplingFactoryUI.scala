@@ -17,4 +17,6 @@
 
 package org.openmole.ide.core.properties
 
-trait ISamplingFactoryUI extends IFactoryUI
+trait ISamplingFactoryUI extends IFactoryUI { 
+  override def displayName = coreClass.getSimpleName
+}

@@ -11,6 +11,12 @@ import org.openmole.ide.core.properties.PanelUIData
 
 trait IEntityUI {
   def factoryUI: IFactoryUI
+  
+  def panelUIData: PanelUIData
+  
+  def updatePanelUIData(pud: PanelUIData)
+  
+  
   //def coreObject = panel.coreObject(name)
   
   //def coreClass: Class[_]

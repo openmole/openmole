@@ -22,15 +22,14 @@ import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.plugin.sampling.csv.CSVSampling
 import java.io.File
 import org.openmole.ide.core.properties.ISamplingFactoryUI
-import org.openmole.ide.core.properties.PanelUI
 
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
 //class CSVSamplingFactoryUI extends SamplingFactoryUI(new CSVSamplingPanelUIData) {
-  var panelData = new CSVSamplingPanelUIData
   
-  override def panelUIData = panelData
+  override def buildPanelUIData = new CSVSamplingPanelUIData
   
-  override def coreObject= {
+  override def coreObject(pud: PanelUIData) = {
+    val panelData = pud.asInstanceOf[CSVSamplingPanelUIData]    
     if (panelData.csvFilePath != "") {
       val fi = new File(panelData.csvFilePath)
       if (fi.isFile) new CSVSampling(fi)
@@ -43,5 +42,5 @@ class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   
   override def imagePath = "img/thumb/csvSampling.png" 
   
-  override def buildPanelUI = new CSVSamplingPanelUI(panelData)
+  override def buildPanelUI = new CSVSamplingPanelUI
 }

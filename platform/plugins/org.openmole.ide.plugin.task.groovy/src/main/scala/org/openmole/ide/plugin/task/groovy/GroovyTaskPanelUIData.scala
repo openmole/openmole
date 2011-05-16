@@ -7,6 +7,6 @@ package org.openmole.ide.plugin.task.groovy
 
 import org.openmole.ide.core.properties.PanelUIData
 
-class GroovyTaskPanelUIData extends PanelUIData {
-  var code = ""
+class GroovyTaskPanelUIData(var code: String) extends PanelUIData {
+  def this() = this("")  
 }

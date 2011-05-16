@@ -19,7 +19,10 @@ package org.openmole.ide.core.properties
 
 import java.awt.Color
 
-trait ITaskFactoryUI extends IFactoryUI{  
+abstract class ITaskFactoryUI extends IFactoryUI{ 
+  
+  override def displayName = coreClass.getSimpleName 
+  
   def borderColor: Color
   
   def backgroundColor: Color

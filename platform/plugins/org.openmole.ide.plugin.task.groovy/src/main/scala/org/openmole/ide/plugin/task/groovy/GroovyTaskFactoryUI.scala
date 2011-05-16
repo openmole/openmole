@@ -20,14 +20,15 @@ package org.openmole.ide.plugin.task.groovy
 import java.awt.Color
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.PanelUI
+import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.plugin.task.groovy.GroovyTask
 
 class GroovyTaskFactoryUI extends ITaskFactoryUI {
-  var panelData = new GroovyTaskPanelUIData
   
-  override def panelUIData = panelData
-  
-  override def coreObject = new GroovyTask(panelData.name,panelData.code)
+  override def coreObject(pud: PanelUIData) = {
+    val panelData = pud.asInstanceOf[GroovyTaskPanelUIData]
+    new GroovyTask(panelData.name,panelData.code)
+  }
   
   override def coreClass= classOf[GroovyTask]
   
@@ -37,6 +38,7 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   
   override def imagePath = "img/thumb/groovyTaskSmall.png"
   
-  override def buildPanelUI = new GroovyTaskPanelUI(panelData)
+  override def buildPanelUI = new GroovyTaskPanelUI
+  
+  override def buildPanelUIData = new GroovyTaskPanelUIData
 }
-   

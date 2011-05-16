@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,21 +9,23 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.properties.PanelUIData
 
-trait IPrototypeFactoryUI  extends IFactoryUI {
+class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
   
-  override def buildPanelUIData = new PanelUIData
+  override def displayName = "BigDecimal"
   
-  override def buildPanelUI = new EmptyPanelUI
+  override def coreObject(pud: PanelUIData) = new Prototype(pud.name,BigDecimal.getClass)
   
-  override def coreClass = classOf[Prototype[_]]
+  override def imagePath = "img/thumb/bigdecimal.png"
 }

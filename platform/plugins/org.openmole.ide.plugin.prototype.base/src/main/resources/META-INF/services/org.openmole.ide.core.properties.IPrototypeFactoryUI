@@ -1,2 +1,12 @@
-org.openmole.ide.plugin.prototype.base.BasePrototypeFactoryUI
+org.openmole.ide.plugin.prototype.base.IntegerPrototypeFactory
 #position=10
+org.openmole.ide.plugin.prototype.base.DoublePrototypeFactoryUI
+#position=20
+org.openmole.ide.plugin.prototype.base.StringPrototypeFactoryUI
+#position=30
+org.openmole.ide.plugin.prototype.base.FilePrototypeFactoryUI
+#position=40
+org.openmole.ide.plugin.prototype.base.BigIntegerPrototypeFactoryUI
+#position=50
+org.openmole.ide.plugin.prototype.base.BigDecimalPrototypeFactoryUI
+#position=60

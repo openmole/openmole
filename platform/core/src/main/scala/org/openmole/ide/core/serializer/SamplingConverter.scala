@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.serializer
 
+import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.SamplingUI
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.MarshallingContext
@@ -27,9 +28,10 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 class SamplingConverter extends Converter{
 
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
-    val s= o.asInstanceOf[SamplingUI]
-    writer.addAttribute("name", s.factoryUI.panelUIData.name)
-    writer.addAttribute("type", s.factoryUI.getClass.toString)
+ //   val s= o.asInstanceOf[SamplingUI]
+    val s= o.asInstanceOf[EntityUI]
+    writer.addAttribute("name", s.panelUIData.name)
+    writer.addAttribute("type", s.getClass.toString)
   }
   override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) = new Object
  // override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  {

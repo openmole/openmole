@@ -10,12 +10,9 @@
  */
 package org.openmole.ide.plugin.sampling.csv;
 
-import java.io.File;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.PanelUIData;
-import org.openmole.plugin.sampling.csv.CSVSampling;
 
 /**
  *
@@ -23,24 +20,26 @@ import org.openmole.plugin.sampling.csv.CSVSampling;
  */
 public class CSVSamplingPanelUI extends PanelUI {
 
-    CSVSamplingPanelUIData panelData;
     /** Creates new form CSVSamplingPanelUI */
-    public CSVSamplingPanelUI(CSVSamplingPanelUIData panelData) {
-        super(panelData);
+    public CSVSamplingPanelUI() {
         initComponents();
     }
 
-    public void saveContent() {
+    public PanelUIData saveContent() {
+        CSVSamplingPanelUIData panelData = new CSVSamplingPanelUIData();
         System.out.println("in saveContent CSVSamplingPanelUI " + csvPathFileTextField);
         System.out.println("in saveContent CSVSamplingPanelUI " + csvPathFileTextField.getText());
         panelData.csvFilePath_$eq(csvPathFileTextField.getText());
+        return panelData;
     }
 
-    public void loadContent() {
+    public void loadContent(PanelUIData pud) {
+        CSVSamplingPanelUIData panelData = (CSVSamplingPanelUIData) pud;
         System.out.println("in loadContent CSVSamplingPanelUI " + csvPathFileTextField);
         csvPathFileTextField.setText(panelData.csvFilePath());
     }
-
+    
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

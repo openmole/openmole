@@ -23,21 +23,15 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.exception.GUIUserBadDataError
 
 //class PaletteElementFactory(val displayName: String,val factoryUI: IFactoryUI){
-class PaletteElementFactory(val displayName: String, val thumbPath: String, val entityType: String, val factory: IFactoryUI){
+class PaletteElementFactory(var displayName: String, val entityType: String, val entity: IEntityUI){
   
   // def buildEntity = factoryUI.buildEntity(displayName,factoryUI.panel)
   // def buildNewEntity = factoryUI.buildEntity(factoryUI.panel)
-  factory.panelUIData.name = displayName
   
-  def buildEntity: IEntityUI = {
-    entityType match {
-      case Constants.TASK => new TaskUI(this)
-      case Constants.PROTOTYPE => new PrototypeUI(this)
-      case Constants.SAMPLING => new SamplingUI(this)
-      case Constants.ENVIRONMENT => new EnvironmentUI(this)                         
-      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
-    }
-  }
+  entity.panelUIData.name = displayName
+  
+  def refreshDisplayName = displayName = entity.panelUIData.name  
+}
   
  
 //  def factoryInstance = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
@@ -51,4 +45,4 @@ class PaletteElementFactory(val displayName: String, val thumbPath: String, val 
 //      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
 //    }
 //  }
-}
+

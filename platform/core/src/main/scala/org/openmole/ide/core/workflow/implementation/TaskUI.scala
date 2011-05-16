@@ -9,6 +9,7 @@ import org.openmole.ide.core.control.MoleScenesManager
 import java.awt.Color
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.palette.PaletteElementFactory
+import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.PanelUI
 import org.openmole.ide.core.workflow.model.IEntityUI
@@ -18,8 +19,8 @@ import scala.collection.mutable.HashSet
 //  def this(coreClass: Class[_],borderColor: Color, backgroundColor: Color,panel: PanelUI)= this(MoleScenesManager.incrementTaskName,coreClass,borderColor,backgroundColor,panel)
   
 //class TaskUI(taskFactory: ITaskFactoryUI) extends IEntityUI {
-class TaskUI(elementFactory: PaletteElementFactory) extends IEntityUI {
-  override def factoryUI = elementFactory.factory.asInstanceOf[ITaskFactoryUI]
+class TaskUI(factoryUI: IFactoryUI) extends EntityUI(factoryUI) {
+  //override def factoryUI = elemfactory.asInstanceOf[ITaskFactoryUI]
    
   var prototypesIn= HashSet.empty[PrototypeUI]
   var prototypesOut= HashSet.empty[PrototypeUI]

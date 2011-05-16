@@ -33,7 +33,7 @@ import java.awt.event.MouseListener
 //}
 
 class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
-  setIconBaseWithExtension(elementFactory.thumbPath)
+  setIconBaseWithExtension(elementFactory.entity.factoryUI.imagePath)
   setName(elementFactory.displayName)
   
   override def drag: Transferable = {

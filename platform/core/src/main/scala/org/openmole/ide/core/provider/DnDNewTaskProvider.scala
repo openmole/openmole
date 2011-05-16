@@ -60,7 +60,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
 //      EntityPropertyTopComponent.getDefault.displayCurrentEntityPanel(entity.factoryUI)
 //    }
     if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))  {
-      capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].buildEntity.asInstanceOf[TaskUI])
+      capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].entity.asInstanceOf[TaskUI])
       println("++TASK_DATA_FLAVOR")
       
     }

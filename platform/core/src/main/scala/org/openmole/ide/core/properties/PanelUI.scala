@@ -20,4 +20,4 @@ import java.awt.event.ContainerListener
 import javax.swing.JPanel
 import java.awt.event.ContainerEvent
 
-abstract class PanelUI(panelUIData: PanelUIData) extends JPanel with IPanelUI
+abstract class PanelUI extends JPanel with IPanelUI

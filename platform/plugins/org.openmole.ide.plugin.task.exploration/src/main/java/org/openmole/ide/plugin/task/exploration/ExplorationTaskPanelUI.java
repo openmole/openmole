@@ -20,21 +20,20 @@ import org.openmole.ide.core.properties.PanelUIData;
  * @author mathieu
  */
 public class ExplorationTaskPanelUI extends PanelUI {
-
-    PanelUIData panelUIData;
-
     /** Creates new form ExplorationTaskPanelUI */
-    public ExplorationTaskPanelUI(PanelUIData paneldata) {
-        super(paneldata);
-        panelUIData = paneldata;
+    public ExplorationTaskPanelUI() {
         initComponents();
     }
 
-    public void saveContent() {
+    public PanelUIData saveContent() {
+        ExplorationTaskPanelUIData panelData = new ExplorationTaskPanelUIData();
         System.out.println("in saveContent ExplorationTaskPanelUI");
+        return panelData;
+        
     }
     
-    public void loadContent() {
+    public void loadContent(PanelUIData pud) {
+        
         System.out.println("in loadContent ExplorationTaskPanelUI");
     }
     /** This method is called from within the constructor to

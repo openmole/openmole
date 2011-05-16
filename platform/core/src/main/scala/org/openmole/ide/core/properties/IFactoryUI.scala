@@ -18,13 +18,16 @@
 package org.openmole.ide.core.properties
 
 trait IFactoryUI {
-  def panelUIData: PanelUIData
+  
+  def displayName: String
   
   def coreClass: Class[_]
   
   def imagePath: String 
   
-  def coreObject: Object
+  def coreObject(pud: PanelUIData): Object
+  
+  def buildPanelUIData: PanelUIData
   
   def buildPanelUI: IPanelUI
 }

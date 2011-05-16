@@ -17,4 +17,15 @@
 
 package org.openmole.ide.core.properties
 
-class PanelUIData(var name: String)
+import org.openmole.ide.core.exception.GUIUserBadDataError
+import scala.collection.immutable.HashMap
+
+class PanelUIData(var name: String){
+  def this() = this("")
+  
+//  var attributes = new HashMap[String,Any]
+//  
+//  def get(field: String) = attributes.getOrElse(field,throw new GUIUserBadDataError("Field " + field + " not found for entity " + name))
+//  
+//  def assign(field: String, value: Any) = attributes += field -> value
+}

@@ -8,6 +8,6 @@ package org.openmole.ide.plugin.sampling.csv
 
  import org.openmole.ide.core.properties.PanelUIData
 
-class CSVSamplingPanelUIData extends PanelUIData {
-  var csvFilePath= "my csv file path"
+class CSVSamplingPanelUIData(var csvFilePath:String) extends PanelUIData {
+  def this() = this("csv path")
 }

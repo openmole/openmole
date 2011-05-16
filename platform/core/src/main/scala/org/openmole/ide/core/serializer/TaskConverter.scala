@@ -28,8 +28,8 @@ class TaskConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     println("marshal : ")
     val t= o.asInstanceOf[TaskUI]
-    println("marshal : " + t.factoryUI.panelUIData.name)
-    writer.addAttribute("name", t.factoryUI.panelUIData.name)
+    println("marshal : " + t.panelUIData.name)
+    writer.addAttribute("name", t.panelUIData.name)
     writer.addAttribute("type", t.factoryUI.getClass.toString)
   }
   

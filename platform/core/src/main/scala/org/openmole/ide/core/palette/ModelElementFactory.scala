@@ -25,19 +25,37 @@ import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.workflow.implementation.EntityUI
+import org.openmole.ide.core.workflow.implementation.EnvironmentUI
+import org.openmole.ide.core.workflow.implementation.PrototypeUI
+import org.openmole.ide.core.workflow.implementation.SamplingUI
+import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 
-class ModelElementFactory(val displayName: String, val thumbPath: String, val entityType: String, val factoryUIClass: Class[_]){
+class ModelElementFactory(val displayName: String, val entityType: String, val factory: IFactoryUI){
   
-   def buildPaletteElementFactory = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
-  
-  private def factoryInstances: Collection[IFactoryUI] = {
+  private def buildEntity: IEntityUI = {
     entityType match {
-      case Constants.TASK_MODEL=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
-      case Constants.PROTOTYPE_MODEL=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
-      case Constants.SAMPLING_MODEL=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
-      case Constants.ENVIRONMENT_MODEL=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
+      case Constants.TASK => new TaskUI(factory)
+      case Constants.PROTOTYPE => new EntityUI(factory)
+      case Constants.SAMPLING => new EntityUI(factory)
+      case Constants.ENVIRONMENT => new EntityUI(factory)                         
       case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
     }
   }
+  
+  def buildPaletteElementFactory = new PaletteElementFactory(displayName,entityType,buildEntity)
 }
+  
+//   def buildPaletteElementFactory = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get
+//  
+//  private def factoryInstances: Collection[IFactoryUI] = {
+//    entityType match {
+//      case Constants.TASK_MODEL=> Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI])
+//      case Constants.PROTOTYPE_MODEL=> Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI])
+//      case Constants.SAMPLING_MODEL=> Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI])
+//      case Constants.ENVIRONMENT_MODEL=> Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI])
+//      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
+//    }
+//  }
