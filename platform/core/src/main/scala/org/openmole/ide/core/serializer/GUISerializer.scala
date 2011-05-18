@@ -25,6 +25,7 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.workflow.model.IMoleScene
+import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.ide.core.workflow.implementation.EntitiesUI
 import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
@@ -33,19 +34,16 @@ import org.openmole.ide.core.commons.Constants
 
 object GUISerializer {
   val moleSceneClass = classOf[MoleScene]
-  val prototypeClass = classOf[EntityUI]
   val taskClass = classOf[TaskUI]
-  val samplingClass = classOf[EntityUI]
+  val entityClass = classOf[EntityUI]
     
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
-  xstream.registerConverter(new PrototypeConverter)
-  xstream.registerConverter(new TaskConverter);
-  xstream.registerConverter(new SamplingConverter)
+  
   xstream.alias("molescene", moleSceneClass)
-  xstream.alias("prototype", prototypeClass)
+  xstream.alias("prototype", entityClass)
   xstream.alias("task", taskClass)
-  xstream.alias("sampling", samplingClass)
+  xstream.alias("sampling", entityClass)
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -54,17 +52,17 @@ object GUISerializer {
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
     //prototypes
-    EntitiesUI.entities(Constants.PROTOTYPE).getAll.foreach(out.writeObject(_))
+    EntitiesUI.getAll(Constants.PROTOTYPE).foreach(out.writeObject(_))
 
     //tasks
-    EntitiesUI.entities(Constants.TASK).getAll.foreach(out.writeObject(_))
+    EntitiesUI.getAll(Constants.TASK).foreach(out.writeObject(_))
         
     //samplings
-    EntitiesUI.entities(Constants.SAMPLING).getAll.foreach(out.writeObject(_))
+    EntitiesUI.getAll(Constants.SAMPLING).foreach(out.writeObject(_))
 
     //molescenes
-//    MoleScenesManager.moleScenes.foreach(out.writeObject(_))
-
+    MoleScenesManager.moleScenes.foreach(out.writeObject(_))
+    
     out.close
   }
   
@@ -72,9 +70,9 @@ object GUISerializer {
     val reader = new FileReader(new File(fromFile))
     val in = xstream.createObjectInputStream(reader)
    
-    EntitiesUI.entities(Constants.PROTOTYPE).clearAll
-    EntitiesUI.entities(Constants.TASK).clearAll
-    EntitiesUI.entities(Constants.SAMPLING).clearAll
+    EntitiesUI.clearAll(Constants.PROTOTYPE)
+    EntitiesUI.clearAll(Constants.TASK)
+    EntitiesUI.clearAll(Constants.SAMPLING)
     MoleScenesManager.removeMoleScenes
     
     try {

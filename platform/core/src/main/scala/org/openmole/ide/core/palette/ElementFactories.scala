@@ -49,7 +49,6 @@ object ElementFactories {
   def addElement(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType) += pef
   
   def getPaletteElementFactory(categoryName: String, name: String): PaletteElementFactory= {
-    println ("get :: " + name)
     val paletteMap = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name))
     if (paletteMap.contains(name)) paletteMap(name).head
     else throw new GUIUserBadDataError("Not found entity " + name)

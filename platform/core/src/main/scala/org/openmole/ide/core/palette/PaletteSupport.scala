@@ -54,8 +54,7 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
   var currentSelItem = Lookup.EMPTY
   
   override def  propertyChange(pce: PropertyChangeEvent)= {
-    MoleSceneTopComponent.getDefault().refreshPalette();
-    
+        
     PropertyPanel.getDefault.save
     val selItem = palette.getSelectedItem
     val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])

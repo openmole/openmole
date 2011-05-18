@@ -82,6 +82,7 @@ public class PropertyPanel extends javax.swing.JPanel {
 
         updateViewport((JPanel) currentPanelUI);
         entityPanelScrollPane.setVisible(true);
+        locked.put(elementFactory.entity().entityType(), false);
         initEntity = false;
     }
 
@@ -116,7 +117,8 @@ public class PropertyPanel extends javax.swing.JPanel {
         }
         if (entityPanelScrollPane.getViewport() != null) {
             entityPanelScrollPane.getViewport().removeAll();
-            nameTextField.setText(MoleScenesManager.getName(entityType, locked.get(entityType)));
+         //   nameTextField.setText(MoleScenesManager.getName(entityType, locked.get(entityType)));
+            nameTextField.setText(MoleScenesManager.incrementCounter(entityType));
         }
         initEntity = true;
 

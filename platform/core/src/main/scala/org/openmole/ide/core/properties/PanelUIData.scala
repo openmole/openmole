@@ -17,11 +17,9 @@
 
 package org.openmole.ide.core.properties
 
-import org.openmole.ide.core.exception.GUIUserBadDataError
-import scala.collection.immutable.HashMap
-
 class PanelUIData(var name: String){
   def this() = this("")
+ 
   
 //  var attributes = new HashMap[String,Any]
 //  

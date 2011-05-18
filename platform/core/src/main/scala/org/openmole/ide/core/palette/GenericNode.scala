@@ -21,6 +21,7 @@ import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
+import org.netbeans.spi.palette.PaletteController
 import org.openide.nodes.AbstractNode
 import org.openide.util.datatransfer.ExTransferable
 import org.openide.util.lookup.Lookups
@@ -35,12 +36,19 @@ import java.awt.event.MouseListener
 class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
   setIconBaseWithExtension(elementFactory.entity.factoryUI.imagePath)
   setName(elementFactory.displayName)
+  setValue(PaletteController.ATTR_IS_READONLY, false)
   
   override def drag: Transferable = {
     println("DRAG")
     val retValue = ExTransferable.create(super.drag)
     retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
     retValue
+  }
+  
+  override def canDestroy = true
+  
+  override def destroy = {
+    println("destroy")
   }
 
 }

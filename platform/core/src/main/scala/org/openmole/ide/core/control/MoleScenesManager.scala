@@ -43,14 +43,14 @@ object MoleScenesManager extends TabManager{
   
   //def incrementCounter(entityType: String): String = Constants.simpleEntityName(entityType).toLowerCase + counters(entityType).addAndGet(1)
   
-  def getName(entityType: String, increment: Boolean) = {
-    if (increment) incrementCounter(entityType)
-    else getDefaultName(entityType)
-  } 
+//  def getName(entityType: String, increment: Boolean) = {
+//    if (increment) incrementCounter(entityType)
+//    else getDefaultName(entityType)
+//  } 
   
   def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString
   
-  def getDefaultName(entityType: String): String = entityType.toLowerCase + counters(entityType).toString
+  //def getDefaultName(entityType: String): String = entityType.toLowerCase + counters(entityType).toString
     
     
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {

@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.PanelUIData
 
-class IntegerPrototypeFactory  extends IPrototypeFactoryUI {
+class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI {
   
   override def displayName = "Integer"
   

@@ -1,4 +1,4 @@
-org.openmole.ide.plugin.prototype.base.IntegerPrototypeFactory
+org.openmole.ide.plugin.prototype.base.IntegerPrototypeFactoryUI
 #position=10
 org.openmole.ide.plugin.prototype.base.DoublePrototypeFactoryUI
 #position=20
