@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.task.csv;
+package org.openmole.plugin.task.serialization;
 
 import au.com.bytecode.opencsv.CSVWriter
 import java.io.BufferedWriter
@@ -32,7 +32,7 @@ import org.openmole.misc.exception.UserBadDataError
  * into CSV files. It is in particular possible to store data (as prototypes) aggregated in an
  * array. The number of data to store in columns is not limited.
  */
-class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IPrototype[Array[_]], String)],delimiter: Char, quoteChar: Char) extends Task(name) {
+class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IPrototype[Array[_]], String)],delimiter: Char, quoteChar: Char) extends Task(name) {
 
   /**
    * Creates an instance of StoreIntoCSVTask with a specific delimiter and
@@ -45,7 +45,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
    * @throws UserBadDataError
    * @throws InternalProcessingError
    */
-  def this(name: String, fileName: String, delimiter: Char, quotechar: Char) = this(name, fileName, Iterable.empty, delimiter, quotechar)
+  def this(name: String, fileName: String, delimiter: Char, quotechar: Char) = this(name, fileName, List.empty, delimiter, quotechar)
 
   /**
    * Creates an instance of StoreIntoCSVTask with a specific delimiter and default
@@ -87,34 +87,29 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: Iterable[(IP
    * @param columnName, the name of the column header
    */
   def addColumn(prototype: IPrototype[Array[_]], columnName: String): this.type = {
-    columns = columns.toList :+ ((prototype, columnName))
+    columns :+= prototype -> columnName
     addInput(prototype)
     this
   }
 
   override def process(context: IContext, progress: IProgress) = {
+    val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
+
+    val file = new File(VariableExpansion.expandData(context, fileName))
+    file.getParentFile.mkdirs
+    val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quoteChar)
 
     try {
-      val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
+      //header
+      val columnIts = valuesList.map{_.iterator}
 
-      val file = new File(VariableExpansion.expandData(context, fileName))
-      file.getParentFile.mkdirs
-      val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quoteChar)
-
-      try {
-        //header
-        val columnIts = valuesList.map{_.iterator}
-
-        writer.writeNext(columns.map(_._2).toArray)          
-        val listSize = valuesList.map{_.size}.min
+      writer.writeNext(columns.map(_._2).toArray)          
+      val listSize = valuesList.map{_.size}.min
             
-        //body
-        for (i <- 0 until listSize) {
-          writer.writeNext(columnIts.map{elt => val s = elt.next; if(s != null) s.toString; else "null"}.toArray)
-        }
-      } finally {
-        writer.close
+      //body
+      for (i <- 0 until listSize) {
+        writer.writeNext(columnIts.map{elt => val s = elt.next; if(s != null) s.toString; else "null"}.toArray)
       }
-    }
+    } finally writer.close
   }
 }

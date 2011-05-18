@@ -27,8 +27,6 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.serializer.converter._
 import org.openmole.core.serializer.structure.FileInfo
-import org.openmole.misc.hashservice.HashService
-import org.openmole.misc.workspace.Workspace
 
 object SerializerService {
 
@@ -36,61 +34,45 @@ object SerializerService {
 
   def deserialize[T](file: File): T = {
     val is = new FileInputStream(file)
-    try {
-      return deserialize(is)
-    } finally {
-      is.close
-    }
+    try deserialize(is)
+    finally is.close
   }
 
   def deserialize[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
   
-  def serializeFilePathAsHashGetFiles(obj: Object, file: File): Map[File,FileInfo] = {
+  def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File,FileInfo] = {
     val os = new FileOutputStream(file)
-    try {
-      serializeFilePathAsHashGetFiles(obj, os)
-    } finally {
-      os.close
-    }
+    try serializeFilePathAsHashGetFiles(obj, os)
+    finally os.close
   }
 
-  def serializeFilePathAsHashGetFiles(obj: Object, os: OutputStream): Map[File,FileInfo] = {
+  def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File,FileInfo] = {
     val serializer = SerializerWithPathHashInjectionFactory.borrowObject
     try {
-      serializer.toXML(obj, os)
+      serializer.toXML(obj.asInstanceOf[AnyRef], os)
       serializer.files
-    } finally {
-      SerializerWithPathHashInjectionFactory.returnObject(serializer)
-    }
+    } finally SerializerWithPathHashInjectionFactory.returnObject(serializer)
   }
   
   
-  def serializeGetPluginClassAndFiles(obj: Object, file: File): PluginClassAndFiles = {
+  def serializeGetPluginClassAndFiles(obj: Any, file: File): PluginClassAndFiles = {
     val os = new FileOutputStream(file)
-    try {
-      serializeGetPluginClassAndFiles(obj, os);
-    } finally {
-      os.close
-    }
+    try serializeGetPluginClassAndFiles(obj, os)
+    finally os.close
   }
 
-  def serializeGetPluginClassAndFiles(obj: Object, os: OutputStream): PluginClassAndFiles = {
+  def serializeGetPluginClassAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles = {
     val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
     try {
-      serializer.toXMLAndListPlugableClasses(obj, os)
+      serializer.toXMLAndListPlugableClasses(obj.asInstanceOf[AnyRef], os)
       new PluginClassAndFiles(serializer.files, serializer.classes)
-    } finally {
-      SerializerWithFileAndPluginListingFactory.returnObject(serializer)
-    }
+    } finally SerializerWithFileAndPluginListingFactory.returnObject(serializer)
   }
 
   def deserializeReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = {
     val is = new FileInputStream(file)
-    try {
-      deserializeReplaceFiles[T](is, files)
-    } finally {
-      is.close
-    }
+    try deserializeReplaceFiles[T](is, files)
+    finally is.close
   }
 
   def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T = {
@@ -98,38 +80,21 @@ object SerializerService {
     try {
       serializer.files = files
       serializer.fromXMLInjectFiles[T](is)
-    } finally {
-      DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
-    }
+    } finally DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
   }
 
-  def serialize(obj: Object, os: OutputStream) = {
-    xstream.toXML(obj, os)
-  }
+  def serialize(obj: Any, os: OutputStream) = xstream.toXML(obj, os)
 
-  def serialize(obj: Object, file: File): Unit = {
+  def serialize(obj: Any, file: File): Unit = {
     val os = new FileOutputStream(file);
-    try {
-      serialize(obj, os)
-    } finally {
-      os.close
-    }
+    try serialize(obj, os)
+    finally os.close
   }
-
- /* def serializeAsHash(obj: Object, dir: File) = {
-    val serialized = Workspace.newFile
-    serialize(obj, serialized)
-    val hashName = new File(dir, HashService.computeHash(serialized).toString)
-    serialized.move(hashName)
-  }*/
 
   def deserializeReplacePathHash[T](file: File, files: PartialFunction[FileInfo, File]): T = {
     val is = new FileInputStream(file)
-    try {
-      deserializeReplacePathHash[T](is, files)
-    } finally {
-      is.close
-    }
+    try deserializeReplacePathHash[T](is, files)
+    finally is.close
   }
 
   def deserializeReplacePathHash[T](is: InputStream, files: PartialFunction[FileInfo, File]) = {
@@ -137,8 +102,6 @@ object SerializerService {
     try {
       deserializer.files = files
       deserializer.fromXMLInjectFiles[T](is)
-    } finally {
-      DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
-    }
+    } finally DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
   }
 }

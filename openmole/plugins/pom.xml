@@ -28,7 +28,7 @@
         <module>org.openmole.plugin.groupingstrategy.onvariable</module>
         <module>org.openmole.plugin.groupingstrategy.batch</module>
         <module>org.openmole.plugin.task.netlogo</module>
-        <module>org.openmole.plugin.task.csv</module>
+        <module>org.openmole.plugin.task.serialization</module>
         <module>org.openmole.plugin.task.external</module>
 	<module>org.openmole.plugin.task.external.system</module>
         <module>org.openmole.plugin.task.systemexec</module>

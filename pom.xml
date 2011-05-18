@@ -99,7 +99,7 @@
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
-        <lib.org.scala-lang.scala.version>2.9.0.RC5</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.9.0</lib.org.scala-lang.scala.version>
         <lib.org.objenesis.version>1.2</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
