@@ -18,9 +18,10 @@
 package org.openmole.ide.core.palette
 
 import org.openide.util.Lookup
-import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.commons.Constants
@@ -34,20 +35,23 @@ object ElementFactories {
                                  Constants.SAMPLING -> new ListBuffer[PaletteElementFactory],
                                  Constants.ENVIRONMENT -> new ListBuffer[PaletteElementFactory])
   
-  lazy val modelElements = Map(Constants.TASK_MODEL -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK_MODEL),
-                               Constants.PROTOTYPE_MODEL -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE_MODEL),
-                               Constants.SAMPLING_MODEL -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING_MODEL),
-                               Constants.ENVIRONMENT_MODEL -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT_MODEL))
+  lazy val modelElements = Map(Constants.TASK -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK),
+                               Constants.PROTOTYPE -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE),
+                               Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
+                               Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
   
   def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
     val li = new ListBuffer[ModelElementFactory]
-    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p.displayName,Constants.simpleEntityName(entityType),p)})
+    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p.displayName,entityType,p)})
     li
   }
   
-  def addElement(pef: PaletteElementFactory) = paletteElements(pef.entityType) += pef
+  def addElement(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType) += pef
   
   def getPaletteElementFactory(categoryName: String, name: String): PaletteElementFactory= {
-    paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name))(name).head
+    println ("get :: " + name)
+    val paletteMap = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name))
+    if (paletteMap.contains(name)) paletteMap(name).head
+    else throw new GUIUserBadDataError("Not found entity " + name)
   }
 } 

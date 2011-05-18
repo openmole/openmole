@@ -19,8 +19,6 @@ package org.openmole.ide.core.palette
 
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.TaskUI
-import org.openmole.ide.core.workflow.implementation.SamplingUI
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
@@ -39,7 +37,6 @@ class CategoryBuilder extends Children.Keys[ICategory]{
   
   override def addNotify = {
     super.addNotify
-    // setKeys(categories.values)
     
     setKeys(List(
         new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR)),
@@ -47,48 +44,4 @@ class CategoryBuilder extends Children.Keys[ICategory]{
         new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.SAMPLING_DATA_FLAVOR)),
         new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
   }
-  
-
 }
-
-//package org.openmole.ide.core.palette;
-//
-//import java.util.HashMap;
-//import org.openide.nodes.Children;
-//import org.openide.nodes.Node;
-//import org.openmole.ide.core.palette.Category.CategoryName;
-//
-//public class CategoryBuilder extends Children.Keys {
-//
-//    private static CategoryBuilder instance = null;
-//    private HashMap<CategoryName, ICategory> categories = new HashMap<CategoryName, ICategory>();
-//
-//    public CategoryBuilder() {
-//        categories.put(CategoryName.TASK_INSTANCE, new TaskCategory());
-//        categories.put(CategoryName.PROTOTYPE_INSTANCE, new PrototypeCategory());
-//        categories.put(CategoryName.SAMPLING_INSTANCE, new SamplingCategory());
-//    }
-//
-//    @Override
-//    protected Node[] createNodes(Object key) {
-//        ICategory obj = (ICategory) key;
-//        return new Node[]{new CategoryNode(obj)};
-//    }
-//
-//    @Override
-//    protected void addNotify() {
-//        super.addNotify();
-//        setKeys(categories.values());
-//    }
-//
-//    public ICategory getPrototypeInstanceCategory(CategoryName cname) {
-//        return categories.get(cname);
-//    }
-//
-//    public static CategoryBuilder getInstance() {
-//        if (instance == null) {
-//            instance = new CategoryBuilder();
-//        }
-//        return instance;
-//    }
-//}

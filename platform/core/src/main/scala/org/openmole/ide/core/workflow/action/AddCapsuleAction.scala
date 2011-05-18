@@ -19,35 +19,15 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.provider.GenericMenuProvider
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.UIFactory
+
 
 class AddCapsuleAction(moleScene: MoleScene, provider: GenericMenuProvider) extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
-    UIFactory.createCapsule(moleScene,provider.currentPoint).addInputSlot
+    MoleScenesManager.createCapsule(moleScene,provider.currentPoint).addInputSlot
     moleScene.refresh
   }
 }
-
-
-
-//public class AddCapsuleAction implements ActionListener {
-//
-//    private MoleScene moleScene;
-//    private GenericMenuProvider provider;
-//
-//    public AddCapsuleAction(MoleScene moleScene,
-//                            GenericMenuProvider provider) {
-//        this.moleScene = moleScene;
-//        this.provider = provider;
-//    }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        UIFactory.createCapsule(moleScene,
-//                provider.getCurrentPoint()).addInputSlot();
-//        moleScene.refresh();
-//    }
-//}

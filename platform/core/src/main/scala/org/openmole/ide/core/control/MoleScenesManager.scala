@@ -1,59 +1,67 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.control
 
 import java.awt.Component
+import java.awt.Point
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JScrollPane
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.workflow.implementation.CapsuleModelUI
+import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.model.ICapsuleView
 import org.openmole.ide.core.workflow.model.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 
 object MoleScenesManager extends TabManager{
 
   var detailedView= false
-//  var nodeCounter= 0
-//  var samplingCounter= 0
-//  var prototypeCounter= 0
-//  var environmentCounter= 0
   var count= 0
   var moleScenes= HashSet.empty[IMoleScene]
   var childTabs= new HashMap[IMoleScene, HashSet[Component]]
-  val counters = Map[String,AtomicInteger](Constants.TASK_MODEL-> new AtomicInteger(0), 
-                                           Constants.PROTOTYPE_MODEL-> new AtomicInteger(0), 
-                                           Constants.ENVIRONMENT_MODEL-> new AtomicInteger(0),
-                                           Constants.SAMPLING_MODEL-> new AtomicInteger(0))
+  val counters = Map[String,AtomicInteger](Constants.TASK-> new AtomicInteger(0), 
+                                           Constants.PROTOTYPE-> new AtomicInteger(0), 
+                                           Constants.ENVIRONMENT-> new AtomicInteger(0),
+                                           Constants.SAMPLING-> new AtomicInteger(0))
   
-  def incrementCounter(entityType: String): String = {
-    Constants.simpleEntityName(entityType).toLowerCase + counters(entityType).addAndGet(1)
+  //def incrementCounter(entityType: String): String = Constants.simpleEntityName(entityType).toLowerCase + counters(entityType).addAndGet(1)
+  
+  def getName(entityType: String, increment: Boolean) = {
+    if (increment) incrementCounter(entityType)
+    else getDefaultName(entityType)
+  } 
+  
+  def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString
+  
+  def getDefaultName(entityType: String): String = entityType.toLowerCase + counters(entityType).toString
+    
+    
+  def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {
+    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)          
+    scene.initCapsuleAdd(obUI)
+    scene.manager.registerCapsuleView(obUI)
+    scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
+    obUI.addInputSlot
+    obUI    
   }
 
-//  def incrementTaskName: String = {
-//    nodeCounter+= 1
-//    "task" + nodeCounter
-//  }
-//  
-//  def incrementPrototypeName: String = {
-//    prototypeCounter += 1
-//    "prototype" + prototypeCounter
-//  }
-//  
-//  def incrementSamplingName: String = {
-//    samplingCounter+= 1
-//    "sampling" + samplingCounter
-//  }
-//  
-//  def incrementEnvironmentName: String = {
-//    environmentCounter+= 1
-//    "prototype" + prototypeCounter
-//  }
-  
   def removeMoleScenes= {
     moleScenes.clear
     removeAllTabs

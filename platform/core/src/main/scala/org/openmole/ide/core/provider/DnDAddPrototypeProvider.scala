@@ -23,9 +23,9 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 
 class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends DnDProvider(molescene){
 
@@ -42,7 +42,7 @@ class DnDAddPrototypeProvider(molescene: MoleScene, view: CapsuleViewUI) extends
   }
   
   override def accept(widget: Widget, point: Point,t: Transferable)= {
-    val proto = t.getTransferData(Constants.PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeUI]
+    val proto = t.getTransferData(Constants.PROTOTYPE_DATA_FLAVOR).asInstanceOf[EntityUI]
     if (point.x < view.connectableWidget.widgetWidth / 2) {
       view.capsuleModel.taskUI.get.addPrototype(proto, IOType.INPUT)
     } else {

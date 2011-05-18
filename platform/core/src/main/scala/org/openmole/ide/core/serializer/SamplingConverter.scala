@@ -18,7 +18,6 @@
 package org.openmole.ide.core.serializer
 
 import org.openmole.ide.core.workflow.implementation.EntityUI
-import org.openmole.ide.core.workflow.implementation.SamplingUI
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
@@ -39,7 +38,7 @@ class SamplingConverter extends Converter{
    // new SamplingUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
  // }
   
-  override def canConvert(t: Class[_]) = t.equals(classOf[SamplingUI])
+  override def canConvert(t: Class[_]) = t.equals(classOf[EntityUI])
 }
 
 

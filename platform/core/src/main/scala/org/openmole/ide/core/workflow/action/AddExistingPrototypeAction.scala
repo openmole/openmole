@@ -21,48 +21,15 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.workflow.model.IEntityUI
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 
-class AddExistingPrototypeAction(prototype: IEntityUI,capsuleViewUI: CapsuleViewUI,t: IOType.Value) extends ActionListener{
+class AddExistingPrototypeAction(entity: IEntityUI,capsuleViewUI: CapsuleViewUI,t: IOType.Value) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent) {
-    prototype match {
-      case p: PrototypeUI=> capsuleViewUI.capsuleModel.taskUI.get.addPrototype(p, t)
+    if (entity.entityType.equals(Constants.PROTOTYPE)) {
+      capsuleViewUI.capsuleModel.taskUI.get.addPrototype(entity, t)
+      capsuleViewUI.repaint
     }
-    capsuleViewUI.repaint
   }
 }
-//
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.commons.IOType;
-//import org.openmole.ide.core.workflow.implementation.PrototypeUI;
-//import org.openmole.ide.core.workflow.implementation.CapsuleViewUI;
-//import org.openmole.ide.core.workflow.implementation.IEntityUI;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class AddExistingPrototypeAction implements ActionListener {
-//
-//    private PrototypeUI prototype;
-//    private CapsuleViewUI capsuleViewUI;
-//    private IOType type;
-//
-//    public AddExistingPrototypeAction(IEntityUI prototype,
-//                                CapsuleViewUI capsuleViewUI,
-//                                IOType type) {
-//        this.prototype = (PrototypeUI) prototype;
-//        this.capsuleViewUI = capsuleViewUI;
-//        this.type = type;
-//    }
-//    
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        capsuleViewUI.getCapsuleModel().getTaskModel().addPrototype(prototype, type);
-//        capsuleViewUI.repaint();
-//    }
-//
-//}

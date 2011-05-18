@@ -23,7 +23,6 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.ide.core.workflow.implementation.EntityUI
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 
 class PrototypeConverter extends Converter{
 
@@ -37,7 +36,7 @@ class PrototypeConverter extends Converter{
   //override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new PrototypeUI(reader.getAttribute("name"), Class.forName(reader.getAttribute("type")))
   override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  new Object
   
-  override def canConvert(t: Class[_]) = t.equals(classOf[PrototypeUI])
+  override def canConvert(t: Class[_]) = t.equals(classOf[EntityUI])
 }
 
 

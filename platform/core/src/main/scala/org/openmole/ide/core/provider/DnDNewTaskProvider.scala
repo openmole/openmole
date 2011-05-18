@@ -26,10 +26,10 @@ import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.EntityPropertyTopComponent
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.TaskUI
@@ -44,7 +44,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
     println("+Accept ")
     println(transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))
     
-    val capsuleView = UIFactory.createCapsule(molescene,point)
+    val capsuleView = MoleScenesManager.createCapsule(molescene,point)
    // capsuleView.addInputSlot
     //  capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
   
@@ -69,64 +69,3 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
     molescene.revalidate
   }
 }
-  
-//import java.awt.Point;
-//import java.awt.datatransfer.Transferable;
-//import java.awt.datatransfer.UnsupportedFlavorException;
-//import java.io.IOException;
-//import org.netbeans.api.visual.action.ConnectorState;
-//import org.netbeans.api.visual.widget.Widget;
-//import org.openmole.commons.exception.UserBadDataError;
-//import org.openmole.ide.core.commons.Constants;
-//import org.openmole.ide.core.exception.MoleExceptionManagement;
-//import org.openmole.ide.core.implementation.UIFactory;
-//import org.openmole.ide.core.workflow.implementation.MoleScene;
-//import org.openmole.ide.core.workflow.implementation.CapsuleViewUI;
-//import org.openmole.ide.core.workflow.implementation.TaskUI;
-//import org.openmole.ide.core.workflow.model.ICapsuleView;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class DnDNewTaskProvider extends DnDProvider {
-//
-//    private ICapsuleView capsuleView;
-//
-//    public DnDNewTaskProvider(MoleScene molescene,
-//            CapsuleViewUI cv) {
-//        super(molescene);
-//        this.capsuleView = cv;
-//    }
-//
-//    public DnDNewTaskProvider(MoleScene molescene) {
-//        super(molescene);
-//        this.capsuleView = null;
-//    }
-//
-//    @Override
-//    public ConnectorState isAcceptable(Widget widget, Point point, Transferable transferable) {
-//        return ConnectorState.ACCEPT;
-//    }
-//
-//    @Override
-//    public void accept(Widget widget, Point point, Transferable transferable) {
-//        try {
-//            if (capsuleView == null) {
-//                capsuleView = UIFactory.createCapsule(scene, point);
-//                capsuleView.addInputSlot();
-//            }
-//            capsuleView.encapsule((TaskUI) transferable.getTransferData(Constants.TASK_DATA_FLAVOR));
-//        } catch (UnsupportedFlavorException ex) {
-//            MoleExceptionManagement.showException(ex);
-//        } catch (IOException ex) {
-//            MoleExceptionManagement.showException(ex);
-//        } catch (UserBadDataError ex) {
-//            MoleExceptionManagement.showException(ex);
-//        } finally {
-//            scene.repaint();
-//            scene.revalidate();
-//        }
-//
-//    }
-//}

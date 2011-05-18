@@ -26,9 +26,6 @@ import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.workflow.implementation.EntityUI
-import org.openmole.ide.core.workflow.implementation.EnvironmentUI
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
-import org.openmole.ide.core.workflow.implementation.SamplingUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
@@ -38,14 +35,15 @@ class ModelElementFactory(val displayName: String, val entityType: String, val f
   private def buildEntity: IEntityUI = {
     entityType match {
       case Constants.TASK => new TaskUI(factory)
-      case Constants.PROTOTYPE => new EntityUI(factory)
-      case Constants.SAMPLING => new EntityUI(factory)
-      case Constants.ENVIRONMENT => new EntityUI(factory)                         
+      case Constants.PROTOTYPE => new EntityUI(factory,Constants.PROTOTYPE)
+      case Constants.SAMPLING => new EntityUI(factory,Constants.SAMPLING)
+      case Constants.ENVIRONMENT => new EntityUI(factory,Constants.ENVIRONMENT)                         
       case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
     }
   }
   
-  def buildPaletteElementFactory = new PaletteElementFactory(displayName,entityType,buildEntity)
+  def buildPaletteElementFactory(name: String) = new PaletteElementFactory(name,buildEntity)
+
 }
   
 //   def buildPaletteElementFactory = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get

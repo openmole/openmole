@@ -28,9 +28,7 @@ import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.workflow.implementation.TaskUI
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.workflow.implementation.TransitionUI
-import org.openmole.ide.core.workflow.implementation.UIFactory
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.model.ICapsuleView
@@ -120,7 +118,7 @@ class MoleSceneConverter extends Converter{
         case "capsule"=> {
             val p= new Point
             p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
-            val caps = UIFactory.createCapsule(scene, p)
+            val caps = MoleScenesManager.createCapsule(scene, p)
             while (reader.hasMoreChildren) {
               reader.moveDown
               val n1= reader.getNodeName

@@ -25,19 +25,17 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.workflow.model.IMoleScene
-import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.implementation.EntitiesUI
+import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.SamplingUI
-import org.openmole.ide.core.workflow.implementation.PrototypeUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.commons.Constants
 
 object GUISerializer {
   val moleSceneClass = classOf[MoleScene]
-  val prototypeClass = classOf[PrototypeUI]
+  val prototypeClass = classOf[EntityUI]
   val taskClass = classOf[TaskUI]
-  val samplingClass = classOf[SamplingUI]
+  val samplingClass = classOf[EntityUI]
     
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
@@ -65,7 +63,7 @@ object GUISerializer {
     EntitiesUI.entities(Constants.SAMPLING).getAll.foreach(out.writeObject(_))
 
     //molescenes
-    MoleScenesManager.moleScenes.foreach(out.writeObject(_))
+//    MoleScenesManager.moleScenes.foreach(out.writeObject(_))
 
     out.close
   }

@@ -18,14 +18,17 @@
 package org.openmole.ide.core.workflow.implementation
 
 import org.openmole.ide.core.properties.IFactoryUI
-import org.openmole.ide.core.properties.IPanelUIData
 import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.ide.core.workflow.model.IEntityUI
 
-class EntityUI(val factoryUI: IFactoryUI) extends IEntityUI{
+class EntityUI(val factoryUI: IFactoryUI, val entityType : String) extends IEntityUI{
   var panelUIData = factoryUI.buildPanelUIData
+  EntitiesUI.entities(entityType).register(this)
   
-  override def updatePanelUIData(pud: PanelUIData) = panelUIData = pud
+  println("ADD ENTITY :: " + entityType + " " + EntitiesUI.entities(entityType).getAll.size)
   
- // override def panelUIData = panelData
+  override def updatePanelUIData(pud: PanelUIData) = {
+    println ("------------- UpDATE ----------- " + panelUIData.name +" "+ pud.name)
+    panelUIData = pud
+  }
 }
