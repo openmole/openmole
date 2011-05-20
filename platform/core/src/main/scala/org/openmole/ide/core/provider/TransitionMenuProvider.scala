@@ -25,6 +25,7 @@ import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidg
 class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget,edgeID: String) extends GenericMenuProvider {
 
   val itemCondition = new JMenuItem("Edit condition")
+  println("TransitionMenuProvider " + edgeID)
   itemCondition.addActionListener(new AddTransitionConditionAction(scene.manager.getTransition(edgeID),connectionWidget))
 }
 //

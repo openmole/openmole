@@ -20,51 +20,28 @@ package org.openmole.ide.core.provider
 import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.EntityPropertyTopComponent
-import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.netbeans.api.visual.action.ConnectorState
 
 
 
 class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
 
-  override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= ConnectorState.ACCEPT
+  override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
+    if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR)) ConnectorState.ACCEPT
+    else ConnectorState.REJECT
+  }
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
-    println("+Accept ")
-    println(transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))
+    val capsule = MoleScenesManager.createCapsule(molescene,point)
+    capsule.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[TaskUI])
+    capsule.addInputSlot
     
-    val capsuleView = MoleScenesManager.createCapsule(molescene,point)
-   // capsuleView.addInputSlot
-    //  capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[ITaskFactoryUI].buildEntity)
-  
-//    if (transferable.isDataFlavorSupported(Constants.TASK_MODEL_DATA_FLAVOR)){
-//      println("++TASK_MODEL_DATA_FLAVOR")
-//      val f = transferable.getTransferData(Constants.TASK_MODEL_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
-//      
-//      //val entity = f.buildNewEntity.asInstanceOf[TaskUI]
-//      val entity = f.buildEntity
-//      capsuleView.encapsule(entity.asInstanceOf[TaskUI])
-//      ElementFactories.addElement(new PaletteElementFactory(entity.factoryUI.panelUIData.name,entity.factoryUI.imagePath,Constants.TASK,entity.factoryUI.getClass))
-//      MoleSceneTopComponent.getDefault.refreshPalette
-//      EntityPropertyTopComponent.getDefault.displayCurrentEntityPanel(entity.factoryUI)
-//    }
-    if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR))  {
-      capsuleView.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].entity.asInstanceOf[TaskUI])
-      println("++TASK_DATA_FLAVOR")
-      
-    }
-  
     molescene.repaint
     molescene.revalidate
   }

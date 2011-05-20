@@ -36,8 +36,8 @@ import scala.collection.mutable.HashSet
 class TaskUI(factoryUI: IFactoryUI) extends EntityUI(factoryUI,Constants.TASK) {
   //override def factoryUI = elemfactory.asInstanceOf[ITaskFactoryUI]
    
-  var prototypesIn= HashSet.empty[IEntityUI]
-  var prototypesOut= HashSet.empty[IEntityUI]
+  var prototypesIn = HashSet.empty[IEntityUI]
+  var prototypesOut = HashSet.empty[IEntityUI]  
   
   def addPrototype(p: IEntityUI, ioType: IOType.Value)= {
     if (p.entityType.equals(Constants.PROTOTYPE)){

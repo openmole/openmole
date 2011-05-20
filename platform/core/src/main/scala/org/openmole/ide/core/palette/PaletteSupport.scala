@@ -55,7 +55,7 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
   
   override def  propertyChange(pce: PropertyChangeEvent)= {
         
-    PropertyPanel.getDefault.save
+   // PropertyPanel.getDefault.save
     val selItem = palette.getSelectedItem
     val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){

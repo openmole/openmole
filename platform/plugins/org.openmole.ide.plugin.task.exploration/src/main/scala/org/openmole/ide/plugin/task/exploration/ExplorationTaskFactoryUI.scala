@@ -43,6 +43,8 @@ class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def buildPanelUI = new ExplorationTaskPanelUI
   
   override def buildPanelUIData = new ExplorationTaskPanelUIData
+  
+  override def isExplorationTask = true
 }
 
   

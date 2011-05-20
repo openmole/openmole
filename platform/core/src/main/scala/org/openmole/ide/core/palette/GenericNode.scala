@@ -41,7 +41,7 @@ class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFacto
   override def drag: Transferable = {
     println("DRAG")
     val retValue = ExTransferable.create(super.drag)
-    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
+    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory.entity})
     retValue
   }
   

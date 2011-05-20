@@ -68,7 +68,7 @@ public class PropertyPanel extends javax.swing.JPanel {
     }
 
     public void displayCurrentEntity(PaletteElementFactory elementFactory) {
-
+        save();
         currentElement = elementFactory;
         currentPanelUI = elementFactory.entity().factoryUI().buildPanelUI();
 
@@ -96,7 +96,6 @@ public class PropertyPanel extends javax.swing.JPanel {
         if (nameTextField.getText().length() != 0) {
             ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
             PaletteElementFactory element = currentModelElementFactory.buildPaletteElementFactory(nameTextField.getText());
-            ElementFactories.addElement(element);
             MoleSceneTopComponent.getDefault().refreshPalette();
             displayCurrentEntity(element);
             locked.put(currentModelElementFactory.entityType(), false);
@@ -117,7 +116,7 @@ public class PropertyPanel extends javax.swing.JPanel {
         }
         if (entityPanelScrollPane.getViewport() != null) {
             entityPanelScrollPane.getViewport().removeAll();
-         //   nameTextField.setText(MoleScenesManager.getName(entityType, locked.get(entityType)));
+            //   nameTextField.setText(MoleScenesManager.getName(entityType, locked.get(entityType)));
             nameTextField.setText(MoleScenesManager.incrementCounter(entityType));
         }
         initEntity = true;

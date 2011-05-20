@@ -11,8 +11,8 @@ import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene){
-  if (startingSlot) setImage(Constants.IMAGE_START_SLOT)
-  else setImage(Constants.IMAGE_INPUT_SLOT)     
+  if (startingSlot) setImage(Images.IMAGE_START_SLOT)
+  else setImage(Images.IMAGE_INPUT_SLOT)     
   setPreferredLocation(new Point(-12, 14 + index * 20))
 }
 

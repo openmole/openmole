@@ -46,11 +46,19 @@ object ElementFactories {
     li
   }
   
+  def getPaletteElementFactory(categoryName: String, name: String) = {
+    println("AAA :  " + categoryName + " " + name )
+    paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  }
+  
+  def getAll(entityType: String) = paletteElements(entityType)
+  
   def addElement(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType) += pef
   
-  def getPaletteElementFactory(categoryName: String, name: String): PaletteElementFactory= {
-    val paletteMap = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name))
-    if (paletteMap.contains(name)) paletteMap(name).head
-    else throw new GUIUserBadDataError("Not found entity " + name)
-  }
+  def remove(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType).remove(pef)
+  
+  def clearAll(entityType: String) = paletteElements(entityType).clear
+  
+  def clearAll: Unit = paletteElements.foreach(en=> clearAll(en._1))
 } 
+  

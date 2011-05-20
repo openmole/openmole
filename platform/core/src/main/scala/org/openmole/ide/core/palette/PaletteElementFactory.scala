@@ -21,6 +21,7 @@ import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 
 class PaletteElementFactory(defaultName: String, val entity: IEntityUI){
+  ElementFactories.addElement(this)
   entity.panelUIData.name = defaultName
   def displayName = entity.panelUIData.name
 }

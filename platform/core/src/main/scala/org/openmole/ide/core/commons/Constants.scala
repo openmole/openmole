@@ -39,12 +39,7 @@ object Constants{
   val TASK_IMAGE_WIDTH_OFFSET= (TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2
   val EXPANDED_TASK_IMAGE_WIDTH_OFFSET= (EXPANDED_TASK_CONTAINER_WIDTH - TASK_IMAGE_WIDTH) / 2
   val NB_MAX_SLOTS= 5
-  
-  val IMAGE_START_SLOT= ImageUtilities.loadImage("img/startSlot.png")
-  val IMAGE_INPUT_SLOT= ImageUtilities.loadImage("img/inputSlot.png")
-  val IMAGE_OUTPUT_SLOT= ImageUtilities.loadImage("img/outputSlot.png")
-  val TASK_DEFAULT_IMAGE= ImageUtilities.loadImage("img/thumb/default.png")
-  
+    
   val TASK = "TASK"
   val PROTOTYPE = "PROTOTYPE"
   val SAMPLING = "SAMPLING"
@@ -54,10 +49,6 @@ object Constants{
   val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], TASK)
   val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], SAMPLING)
   val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], ENVIRONMENT)
-  
-  
-  val TASK_DEFAULT_PROPERTIES = "resources/task/default"
-  var typeImageMap= new HashMap[String, Image]
 
  // def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }

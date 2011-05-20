@@ -18,18 +18,15 @@
 package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Color
-import java.awt.Image
 import java.awt.Rectangle
-import java.awt.Container
+import java.awt.Font
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.properties.ITaskFactoryUI
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
-import org.openide.util.ImageUtilities
 import java.awt.BasicStroke
 
 class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(scene) {
@@ -38,7 +35,7 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
   var taskImageOffset= Constants.TASK_IMAGE_WIDTH_OFFSET
   val bodyArea = new Rectangle
   val widgetArea= new Rectangle
-  var titleArea = new Rectangle
+  val titleArea = new Rectangle
   setWidthHint
   
   def widgetWidth= widgetArea.width
@@ -68,10 +65,9 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    val tf = capsuleModel.taskUI.get.factoryUI.asInstanceOf[ITaskFactoryUI]
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) tf.backgroundColor else new Color(204,204,204,128))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.asInstanceOf[ITaskFactoryUI].backgroundColor else new Color(204,204,204,128))
     graphics.fill(bodyArea)
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) tf.borderColor else new Color(204,204,204))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.asInstanceOf[ITaskFactoryUI].borderColor else new Color(204,204,204))
 
     val stroke = new BasicStroke(1.3f, 1, 1)
     graphics.draw(stroke.createStrokedShape(bodyArea))
@@ -79,16 +75,17 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
     if (capsuleModel.taskUI.isDefined) {
       graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)
+      graphics.setFont(new Font("Ubuntu", Font.PLAIN, 15))
       graphics.drawString(capsuleModel.taskUI.get.panelUIData.name, 10, 15)
     }
 
-   /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
-                                                         taskImageOffset,
-                                                         Constants.TASK_IMAGE_HEIGHT_OFFSET,
-                                                         Constants.TASK_IMAGE_WIDTH,
-                                                         Constants.TASK_IMAGE_HEIGHT,
-                                                         capsuleModel.taskUI.get.factory.backgroundColor,
-                                                         new Container)*/
+    /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
+     taskImageOffset,
+     Constants.TASK_IMAGE_HEIGHT_OFFSET,
+     Constants.TASK_IMAGE_WIDTH,
+     Constants.TASK_IMAGE_HEIGHT,
+     capsuleModel.taskUI.get.factory.backgroundColor,
+     new Container)*/
   }
   
 }

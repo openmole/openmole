@@ -5,10 +5,8 @@
 
 package org.openmole.ide.core.workflow.implementation
 
-import java.util.Properties
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.workflow.action.TaskActions
 import org.openmole.ide.core.provider.CapsuleMenuProvider
@@ -16,21 +14,21 @@ import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import org.openmole.ide.core.provider.DnDAddPrototypeProvider
 
 class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) extends Widget(scene) with ICapsuleView{
 
   createActions(scene.MOVE).addAction (ActionFactory.createMoveAction)
   
   val connectableWidget= new ConnectableWidget(scene,this)
-  val dnDAddPrototypeProvider= new DnDAddPrototypeProvider(scene, this)
+  // val dnDAddPrototypeProvider= new DnDAddPrototypeProvider(scene, this)
+  val dndTaskIntoCapsuleProvider = new DnDTaskIntoCapsuleProvider(scene, this)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
   addChild(connectableWidget)
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
-  getActions.addAction(ActionFactory.createAcceptAction(new DnDTaskIntoCapsuleProvider(scene, this)))
-  getActions.addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider))
+  getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
+  // getActions.addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider))
   
   def defineStartingCapsule(on: Boolean){
     capsuleModel.defineStartingCapsule(on)
@@ -39,13 +37,14 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
   }
   
   override def encapsule(taskUI: TaskUI)= {
-  //   capsuleModel.setTaskModel(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType).getClass.asInstanceOf[Class[GenericTaskModelUI]]))
+    //   capsuleModel.setTaskModel(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType).getClass.asInstanceOf[Class[GenericTaskModelUI]]))
 
     //capsuleModel.setTaskUI(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType)).asInstanceOf[GenericTaskModelUI])
     capsuleModel.setTaskUI(taskUI)
     
     // changeConnectableWidget
-    dnDAddPrototypeProvider.encapsulated= true
+    //  dnDAddPrototypeProvider.encapsulated= true
+    dndTaskIntoCapsuleProvider.encapsulated= true
     capsuleMenuProvider.addTaskMenus
     getActions.addAction(new TaskActions(capsuleModel.taskUI.get, this))
   }
@@ -58,12 +57,12 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
 //  }
   
   def addInputSlot: ISlotWidget =  {
-      capsuleModel.addInputSlot
-      val im = new ISlotWidget(scene, this,capsuleModel.nbInputSlots,capsuleModel.startingCapsule)
-      connectableWidget.addInputSlot(im)
-      scene.validate
-      scene.refresh
-      im
+    capsuleModel.addInputSlot
+    val im = new ISlotWidget(scene, this,capsuleModel.nbInputSlots,capsuleModel.startingCapsule)
+    connectableWidget.addInputSlot(im)
+    scene.validate
+    scene.refresh
+    im
   }
 
 }

@@ -38,6 +38,8 @@ class CategoryBuilder extends Children.Keys[ICategory]{
   override def addNotify = {
     super.addNotify
     
+    println("SIZE FOR TSASK " + ElementFactories.paletteElements(Constants.TASK).size)
+    println("SIZE FOR PROSTO " + ElementFactories.paletteElements(Constants.PROTOTYPE).size)
     setKeys(List(
         new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR)),
         new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.PROTOTYPE_DATA_FLAVOR)),

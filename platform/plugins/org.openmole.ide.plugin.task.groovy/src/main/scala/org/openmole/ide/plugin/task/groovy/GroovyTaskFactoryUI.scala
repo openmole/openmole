@@ -41,4 +41,6 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   override def buildPanelUI = new GroovyTaskPanelUI
   
   override def buildPanelUIData = new GroovyTaskPanelUIData
+  
+  override def isExplorationTask = false
 }

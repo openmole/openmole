@@ -23,9 +23,9 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction
 import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction
-import org.openmole.ide.core.workflow.implementation.EntitiesUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.action.AddInputSlotAction
 import org.openmole.ide.core.workflow.action.AddTaskAction
@@ -65,12 +65,12 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
         menus.add(inPrototypeMenu);
         menus.add(outPrototypeMenu)
       }
-      if (! EntitiesUI.getAll(Constants.TASK).isEmpty){
+      if (! ElementFactories.getAll(Constants.TASK).isEmpty){
          menus.remove(taskMenu)
          var colTask = new ListBuffer[JMenuItem]
-         EntitiesUI.getAll(Constants.TASK).foreach(t=> {
-             val it= new JMenuItem(t.panelUIData.name + " :: " + t.factoryUI.coreClass.getSimpleName)
-           it.addActionListener(new AddTaskAction(scene,capsuleView, t.asInstanceOf[TaskUI]));
+         ElementFactories.getAll(Constants.TASK).foreach(t=> {
+             val it= new JMenuItem(t.entity.panelUIData.name + " :: " + t.entity.factoryUI.coreClass.getSimpleName)
+           it.addActionListener(new AddTaskAction(scene,capsuleView, t.entity.asInstanceOf[TaskUI]));
            colTask+= it
           })
       }
@@ -81,9 +81,9 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   
   def fillPrototypeMenu(t: IOType.Value)= {
     val prototypeCol = HashSet.empty[JMenuItem]
-    EntitiesUI.getAll(Constants.PROTOTYPE).foreach(p=> {
-        val it= new JMenuItem(p.panelUIData.name + " :: " + p.factoryUI.coreClass.getSimpleName);
-        it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, t));
+    ElementFactories.getAll(Constants.PROTOTYPE).foreach(p=> {
+        val it= new JMenuItem(p.entity.panelUIData.name + " :: " + p.entity.factoryUI.coreClass.getSimpleName);
+        it.addActionListener(new AddExistingPrototypeAction(p.entity, capsuleView, t));
         prototypeCol.add(it)})
     prototypeCol.toSet
   }

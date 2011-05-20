@@ -11,7 +11,7 @@ import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class OSlotWidget(scene: Scene,val capsule: CapsuleViewUI)  extends SlotWidget(scene){
-  setImage(Constants.IMAGE_OUTPUT_SLOT)
+  setImage(Images.IMAGE_OUTPUT_SLOT)
   setDetailedView(Constants.TASK_CONTAINER_WIDTH)
   
   def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT))

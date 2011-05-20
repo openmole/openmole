@@ -58,7 +58,6 @@ object MoleScenesManager extends TabManager{
     scene.initCapsuleAdd(obUI)
     scene.manager.registerCapsuleView(obUI)
     scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
-    obUI.addInputSlot
     obUI    
   }
 

@@ -23,27 +23,25 @@ import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.workflow.model.IMoleScene
-import org.openmole.ide.core.properties.PanelUIData
-import org.openmole.ide.core.workflow.implementation.EntitiesUI
+import org.openmole.ide.core.workflow.model.IEntityUI
+import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
 
 object GUISerializer {
-  val moleSceneClass = classOf[MoleScene]
-  val taskClass = classOf[TaskUI]
-  val entityClass = classOf[EntityUI]
     
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
   
-  xstream.alias("molescene", moleSceneClass)
-  xstream.alias("prototype", entityClass)
-  xstream.alias("task", taskClass)
-  xstream.alias("sampling", entityClass)
+  xstream.alias("molescene", classOf[MoleScene])
+  xstream.alias("entity", classOf[EntityUI])
+  xstream.alias("task", classOf[TaskUI])
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -52,13 +50,13 @@ object GUISerializer {
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
     //prototypes
-    EntitiesUI.getAll(Constants.PROTOTYPE).foreach(out.writeObject(_))
+    ElementFactories.getAll(Constants.PROTOTYPE).foreach(pef=> out.writeObject(pef.entity))
 
     //tasks
-    EntitiesUI.getAll(Constants.TASK).foreach(out.writeObject(_))
+    ElementFactories.getAll(Constants.TASK).foreach(pef=> out.writeObject(pef.entity))
         
     //samplings
-    EntitiesUI.getAll(Constants.SAMPLING).foreach(out.writeObject(_))
+    ElementFactories.getAll(Constants.SAMPLING).foreach(pef=> out.writeObject(pef.entity))
 
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
@@ -70,97 +68,20 @@ object GUISerializer {
     val reader = new FileReader(new File(fromFile))
     val in = xstream.createObjectInputStream(reader)
    
-    EntitiesUI.clearAll(Constants.PROTOTYPE)
-    EntitiesUI.clearAll(Constants.TASK)
-    EntitiesUI.clearAll(Constants.SAMPLING)
+    ElementFactories.clearAll
     MoleScenesManager.removeMoleScenes
     
     try {
       while(true) {
         val readObject = in.readObject
-        readObject.getClass match{
-//          case samplingClass=> SamplingsUI.register(readObject.asInstanceOf[SamplingUI])
-//          case prototypeClass=> PrototypesUI.register(readObject.asInstanceOf[PrototypeUI])
-//          case taskClass=> TasksUI.register(readObject.asInstanceOf[TaskUI])
-//          case moleSceneClass=> MoleScenesManager.addMoleScene(readObject.asInstanceOf[IMoleScene])
-      //    case _=> MoleExceptionManagement.showException("Unknown class " + readObject.getClass)
-          case _=> 
+        readObject match{
+          case x: IEntityUI=> {println("-- unmarsall " + x.entityType);new PaletteElementFactory(x.panelUIData.name,x)}
+          case x: MoleScene=> MoleScenesManager.addMoleScene(x)
+          case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }
     } catch {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
-    }
+    } finally MoleSceneTopComponent.getDefault().refreshPalette();
   }
 }
-//
-//
-//    private static GUISerializer instance;
-//    XStream xstream = new XStream(new DomDriver());
-//    final Class moleSceneClass = MoleScene.class;
-//    final Class prototypeClass = PrototypeUI.class;
-//    final Class taskClass = TaskUI.class;
-//    final Class samplingClass = SamplingUI.class;
-//
-//    public GUISerializer() {
-//        xstream = new XStream(new DomDriver());
-//        xstream.registerConverter(new MoleSceneConverter());
-//        xstream.registerConverter(new PrototypeConverter());
-//        xstream.registerConverter(new TaskConverter());
-//        xstream.registerConverter(new SamplingConverter());
-//        xstream.alias("molescene", moleSceneClass);
-//        xstream.alias("prototype", prototypeClass);
-//        xstream.alias("task", taskClass);
-//        xstream.alias("sampling", samplingClass);
-//    }
-//
-//    public void serialize(String toFile) throws IOException {
-//        FileWriter writer = new FileWriter(new File(toFile));
-//
-//        //root node
-//        ObjectOutputStream out = xstream.createObjectOutputStream(writer, "openmole");
-//
-//        //prototypes
-//        for (Iterator<IEntityUI> itp = PrototypesUI.getInstance().getAll().iterator(); itp.hasNext();) {
-//            out.writeObject(itp.next());
-//        }
-//
-//        //tasks
-//        for (Iterator<IEntityUI> itt = TasksUI.getInstance().getAll().iterator(); itt.hasNext();) {
-//            out.writeObject(itt.next());
-//        }
-//
-//        //samplings
-//        for (Iterator<IEntityUI> its = SamplingsUI.getInstance().getAll().iterator(); its.hasNext();) {
-//            out.writeObject(its.next());
-//        }
-//
-//        //molescenes
-//        for (Iterator<IMoleScene> itms = MoleScenesManager.getInstance().getMoleScenes().iterator(); itms.hasNext();) {
-//            out.writeObject(itms.next());
-//        }
-//
-//        out.close();
-//    }
-//
-//    public void unserialize(String fromFile) throws FileNotFoundException, IOException, EOFException {
-//
-//        FileReader reader = new FileReader(new File(fromFile));
-//
-//        ObjectInputStream in = xstream.createObjectInputStream(reader);
-//        PrototypesUI.getInstance().clearAll();
-//        TasksUI.getInstance().clearAll();
-//        SamplingsUI.getInstance().clearAll();
-//        MoleScenesManager.getInstance().removeMoleScenes();
-//        
-//        Object readObject;
-//        for (int i = 0;; i++) {
-
-//    }
-//
-//    public static GUISerializer getInstance() {
-//        if (instance == null) {
-//            instance = new GUISerializer();
-//        }
-//        return instance;
-//    }
-//}
