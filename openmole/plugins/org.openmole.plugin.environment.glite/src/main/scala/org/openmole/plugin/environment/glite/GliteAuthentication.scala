@@ -124,9 +124,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
   
   override def expires = _proxyExpiresTime
 
-  //FIXME lazy val in scala 2.9.0 
-  //@transient lazy val 
-  def CACertificatesDir: File = {
+  @transient lazy val CACertificatesDir: File = {
     val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
             
     if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists){

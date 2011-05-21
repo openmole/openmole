@@ -41,9 +41,7 @@ object GliteJobService {
 
 class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
-  override protected def buildJob(id: String): JSAGAJob = {
-    new GliteJob(id, this, environment.authentication.expires)
-  }
+  override protected def buildJob(id: String) = new GliteJob(id, this, environment.authentication.expires)
 
   override protected def generateScriptString(in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream) = {
     val writter = new PrintStream(os)
@@ -76,7 +74,7 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
 
   }
 
-  private def mkLcgCpGunZipCmd(env: GliteEnvironment, from: String, to: String): String = {
+  private def mkLcgCpGunZipCmd(env: GliteEnvironment, from: String, to: String) = {
     val builder = new StringBuilder
 
     builder.append("lcg-cp --vo ")
@@ -100,27 +98,22 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     builder.toString
   }
 
-  private def getTimeOut: String = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
+  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
   
 
-  override protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]): JobDescription = {
-    try {
-      val description = super.buildJobDescription(runtime, script, attributes)
+  override protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]) = {
+    val description = super.buildJobDescription(runtime, script, attributes)
 
-      attributes.get(GliteAttributes.REQUIREMENTS) match {
-        case Some(requirement) => val requirements = new StringBuilder
-          requirements.append("JDLRequirements=(")
-          requirements.append(requirement)
-          requirements.append(')')
+    attributes.get(GliteAttributes.REQUIREMENTS) match {
+      case Some(requirement) => val requirements = new StringBuilder
+        requirements.append("JDLRequirements=(")
+        requirements.append(requirement)
+        requirements.append(')')
 
-          description.setVectorAttribute("Extension", Array[String](requirements.toString))
-        case None =>
-      }
-
-      return description;
-    } catch {
-      //FIXME??remove when full scala
-      case ex => throw new InternalProcessingError(ex)
+        description.setVectorAttribute("Extension", Array[String](requirements.toString))
+      case None =>
     }
+
+    description
   }
 }

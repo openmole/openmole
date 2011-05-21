@@ -49,8 +49,8 @@ object JSAGAJobBuilder {
 
   lazy val helloWorld = {
     val helloFile = Workspace.newFile("testhello", ".txt")
+    
     val str = new PrintStream(helloFile)
-
     str.println("Hello")
     str.close
 
@@ -58,7 +58,7 @@ object JSAGAJobBuilder {
 
     hello.setAttribute(JobDescription.EXECUTABLE, "/bin/echo")
     hello.setVectorAttribute(JobDescription.ARGUMENTS, Array[String]("Hello"))
-    hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + helloFile.getName))
+    hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() + ">" + helloFile.getName))
 
     hello     
   }
