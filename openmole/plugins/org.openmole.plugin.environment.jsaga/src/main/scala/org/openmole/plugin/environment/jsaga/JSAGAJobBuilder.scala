@@ -38,14 +38,10 @@ object JSAGAJobBuilder {
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](tmpScript.getName))
     description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](tmpScript.toURI().toURL().toString + ">" + tmpScript.getName))
 
-    for (attribute <- JSAGAAttributes.values) {
-      attributes.get(attribute) match {
-        case Some(value) => 
-          description.setAttribute(attribute, if (attribute.equals(CPU_TIME)) {
-              ISOPeriodFormat.standard.parsePeriod(value).toStandardSeconds.getSeconds.toString
-            } else value)
-        case None =>
-      }
+    attributes.get(CPU_TIME) match {
+      case Some(value) => 
+        description.setAttribute(CPU_TIME, ISOPeriodFormat.standard.parsePeriod(value).toStandardSeconds.getSeconds.toString)
+      case None =>
     }
 
     description
