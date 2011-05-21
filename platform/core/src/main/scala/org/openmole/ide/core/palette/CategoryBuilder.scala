@@ -38,12 +38,10 @@ class CategoryBuilder extends Children.Keys[ICategory]{
   override def addNotify = {
     super.addNotify
     
-    println("SIZE FOR TSASK " + ElementFactories.paletteElements(Constants.TASK).size)
-    println("SIZE FOR PROSTO " + ElementFactories.paletteElements(Constants.PROTOTYPE).size)
     setKeys(List(
         new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR)),
-        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.PROTOTYPE_DATA_FLAVOR)),
-        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.SAMPLING_DATA_FLAVOR)),
-        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
+        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.ENTITY_DATA_FLAVOR)),
+        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.ENTITY_DATA_FLAVOR)),
+        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENTITY_DATA_FLAVOR))).toIterable)
   }
 }

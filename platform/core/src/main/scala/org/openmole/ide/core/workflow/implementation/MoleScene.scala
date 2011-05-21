@@ -85,7 +85,6 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   override def refresh= {validate; repaint}
   
   override def attachNodeWidget(n: String)= {
-    println("attachNodeWidget ")
     capsuleLayer.addChild(obUI.get)
     obUI.get.createActions(CONNECT).addAction(connectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
@@ -94,7 +93,6 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   } 
 
   override def attachEdgeWidget(e: String)= {
-    println("attachEDGE ")
     val connectionWidget = new LabeledConnectionWidget(this,manager.getTransition(e).condition)
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
@@ -107,16 +105,13 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   }
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
-    println(" source anchor")
     val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
     cw.setSourceAnchor(new OSlotAnchor(findWidget(sourceNode).asInstanceOf[CapsuleViewUI]))
     cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
   }
   
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String)= {
-    println(" source anchor")
-    findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new ISlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleViewUI]), currentSlotIndex))
-  }
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new ISlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleViewUI]), currentSlotIndex))
+  
   
   override def setLayout= {
     val graphLayout = GraphLayoutFactory.createHierarchicalGraphLayout(this, true)

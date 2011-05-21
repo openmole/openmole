@@ -26,6 +26,4 @@ abstract class ITaskFactoryUI extends IFactoryUI{
   def borderColor: Color
   
   def backgroundColor: Color
-  
-  def isExplorationTask: Boolean
 }

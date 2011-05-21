@@ -45,10 +45,8 @@ object Constants{
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
   
-  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], PROTOTYPE)
+  val ENTITY_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], PROTOTYPE)
   val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], TASK)
-  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], SAMPLING)
-  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], ENVIRONMENT)
 
  // def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }

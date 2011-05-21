@@ -46,10 +46,7 @@ object ElementFactories {
     li
   }
   
-  def getPaletteElementFactory(categoryName: String, name: String) = {
-    println("AAA :  " + categoryName + " " + name )
-    paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  }
+  def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   
   def getAll(entityType: String) = paletteElements(entityType)
   

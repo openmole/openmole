@@ -34,7 +34,7 @@ class ModelElementFactory(val displayName: String, val entityType: String, val f
   
   private def buildEntity: IEntityUI = {
     entityType match {
-      case Constants.TASK => new TaskUI(factory)
+      case Constants.TASK => new TaskUI(factory.asInstanceOf[IFactoryUI])
       case Constants.PROTOTYPE => new EntityUI(factory,Constants.PROTOTYPE)
       case Constants.SAMPLING => new EntityUI(factory,Constants.SAMPLING)
       case Constants.ENVIRONMENT => new EntityUI(factory,Constants.ENVIRONMENT)                         
