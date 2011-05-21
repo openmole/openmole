@@ -40,7 +40,7 @@ object JSAGAJobBuilder {
 
     attributes.get(CPU_TIME) match {
       case Some(value) => 
-        description.setAttribute(CPU_TIME, ISOPeriodFormat.standard.parsePeriod(value).toStandardSeconds.getSeconds.toString)
+        description.setAttribute(CPU_TIME, ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes.toString)
       case None =>
     }
 
