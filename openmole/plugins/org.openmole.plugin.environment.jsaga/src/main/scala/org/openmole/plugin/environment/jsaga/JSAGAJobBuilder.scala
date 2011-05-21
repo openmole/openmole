@@ -31,34 +31,27 @@ import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 object JSAGAJobBuilder {
 
   def jobDescription(runtime: Runtime, tmpScript: File, attributes: Map[String, String]): JobDescription = {
-    try {
+    val description = JobFactory.createJobDescription
 
-      val description = JobFactory.createJobDescription
+    description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
 
-      description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash");
+    description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](tmpScript.getName))
+    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](tmpScript.toURI().toURL().toString + ">" + tmpScript.getName))
 
-      description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](tmpScript.getName))
-      description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](tmpScript.toURI().toURL().toString + ">" + tmpScript.getName))
-
-      for (attribute <- JSAGAAttributes.values) {
-        attributes.get(attribute) match {
-          case Some(value) => 
-            description.setAttribute(attribute, if (attribute.equals(CPU_TIME)) {
-                ISOPeriodFormat.standard.parsePeriod(value).toStandardSeconds.getSeconds.toString
-              } else value)
-          case None =>
-        }
+    for (attribute <- JSAGAAttributes.values) {
+      attributes.get(attribute) match {
+        case Some(value) => 
+          description.setAttribute(attribute, if (attribute.equals(CPU_TIME)) {
+              ISOPeriodFormat.standard.parsePeriod(value).toStandardSeconds.getSeconds.toString
+            } else value)
+        case None =>
       }
+    }
 
-      description
-    } catch {
-      //FIXME remove when full scala
-      case e => throw new InternalProcessingError(e)
-    } 
+    description
   }
 
-  lazy val helloWorld = try {
-
+  lazy val helloWorld = {
     val helloFile = Workspace.newFile("testhello", ".txt")
     val str = new PrintStream(helloFile)
 
@@ -71,10 +64,7 @@ object JSAGAJobBuilder {
     hello.setVectorAttribute(JobDescription.ARGUMENTS, Array[String]("Hello"))
     hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() /*getSchemeSpecificPart()*/ + ">" + helloFile.getName))
 
-    hello
-  } catch {
-    case e => throw new InternalProcessingError(e)
-  } 
-              
+    hello     
+  }
+  
 }
-
