@@ -20,6 +20,7 @@ package org.openmole.misc.pluginmanager
 import java.io.File
 import java.io.FileFilter
 import java.net.URL
+import java.io.FileInputStream
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.pluginmanager.internal.Activator
@@ -89,10 +90,10 @@ object PluginManager {
   
   def load(files: Iterable[File]) = synchronized {
     val bundles = files.map{f => installBundle(f)}.toList
-    bundles.foreach{_.foreach{_.start}}
+    bundles.foreach{_.start}
   }
   
-  def load(path: File): Unit = synchronized { installBundle(path).foreach{_.start} }
+  def load(path: File): Unit = synchronized { installBundle(path).start }
 
   def loadDir(path: String): Unit = loadDir(new File(path))
   def loadDir(path: File): Unit = loadDir(path, defaultPatern)
@@ -131,11 +132,18 @@ object PluginManager {
   private def installBundle(f: File) = {
     val file = f.getAbsoluteFile
 
-    if (!files.contains(file)) {
-      val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-      files += file -> ret.getBundleId
-      Some(ret)
-    } else None
+    files.get(file) match {
+      case None =>
+        val ret = Activator.contextOrException.installBundle(file.toURI.toString)
+        files += file -> ret.getBundleId
+        ret
+      case Some(bundleId) =>
+        val bundle = Activator.contextOrException.getBundle(bundleId)
+        val is = new FileInputStream(f)
+        try bundle.update(is)
+        finally is.close
+        bundle
+    }
   }
 
   private def updateDependencies = synchronized {
