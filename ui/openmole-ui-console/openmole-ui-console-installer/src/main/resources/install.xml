@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <installation version="1.0">
     <info>
-        <appname>OpenMOLE console</appname>
+        <appname>OpenMOLE</appname>
         <appversion>0.3-SNAPSHOT</appversion>
         <uninstaller write="yes" />
         <javaversion>1.6</javaversion>
         <pack200 />
     </info>
-
+    
+    <packs>
+        <pack name="OpenMOLE Console" required="yes">
+            <description>OpenMOLE</description>
+            <fileset dir="../dependency/org.openmole.ui.console-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH" />
+            <file src="../dependency/org.openmole.runtime.tar.bz2" targetdir="$USER_HOME/.openmole/runtime/" />
+            <fileset dir="../dependency/plugins-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
+            <fileset dir="../dependency/plugins-ui-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
+        </pack>
+    </packs>
+    
     <resources>
         <res id="LicencePanel.licence" src="AGPLv3.txt"/>
     </resources>
@@ -25,16 +35,5 @@
     </locale>
 
     <guiprefs resizable="yes" width="640" height="480" />
-
-    <panels>
-        <panel classname="HelloPanel" />
-        <panel classname="FinishPanel" />
-    </panels>
-
-    <packs>
-        <pack name="main" required="yes">
-            <description>OpenMOLE console</description>
-        </pack>
-    </packs>
 
 </installation>

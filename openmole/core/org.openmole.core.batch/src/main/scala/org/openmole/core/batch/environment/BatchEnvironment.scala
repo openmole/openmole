@@ -26,7 +26,6 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.InteractiveConfiguration
 
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.executorservice.ExecutorService
@@ -38,7 +37,6 @@ object BatchEnvironment {
   
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
     
-  @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
     
   val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
@@ -48,6 +46,7 @@ object BatchEnvironment {
   
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
+  Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.bz2").getAbsolutePath)
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (QualityHysteresis, "1000")
   Workspace += (CheckInterval, "PT2M")

@@ -40,13 +40,6 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
-                                    <artifactId>openmole-ui-console-package</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-                                    <destFileName>org.openmole.ui.console.tar.gz</destFileName>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.openmole</groupId>
                                     <artifactId>org.openmole.runtime</artifactId>
                                     <version>${project.version}</version>
@@ -54,9 +47,35 @@
                                     <destFileName>org.openmole.runtime.tar.bz2</destFileName>
                                 </artifactItem>
                             </artifactItems>
-            <!--  <outputDirectory>${project.build.directory}/wars</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>-->
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>plugins</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>plugins-ui</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>org.openmole.ui.console</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>

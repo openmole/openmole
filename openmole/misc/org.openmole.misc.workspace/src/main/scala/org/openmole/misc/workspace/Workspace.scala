@@ -87,6 +87,7 @@ object Workspace {
     configurations(location) = () => defaultValue
   }
   
+  def location = instance.location
   
   def newDir(prefix: String): File = instance.newDir(prefix)
   
@@ -128,7 +129,7 @@ object Workspace {
 }
 
 
-class Workspace(location: File) {
+class Workspace(val location: File) {
 
   import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, LevelConfiguration}
   
