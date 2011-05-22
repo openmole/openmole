@@ -199,7 +199,7 @@
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <!-- Will copy all dependencies into plugins directory -->
                             <goal>copy-dependencies</goal>
@@ -213,7 +213,7 @@
                     </execution>
                     <execution>
                         <id>unpack-jre</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -240,7 +240,7 @@
                 <executions>
                     <execution>
                         <id>copy-equinox-configuration</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -258,7 +258,7 @@
                     </execution>
                     <execution>
                         <id>copy-run-script</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -281,9 +281,9 @@
 	        <version>2.2</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>assembly</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
