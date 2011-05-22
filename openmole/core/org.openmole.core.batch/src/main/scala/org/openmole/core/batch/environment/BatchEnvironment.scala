@@ -32,11 +32,13 @@ import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.InteractiveConfiguration
 
 object BatchEnvironment {
   
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
     
+  @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
     
   val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
