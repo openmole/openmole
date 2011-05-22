@@ -59,6 +59,43 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>plugins</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>plugins-ui</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>org.openmole.ui.console</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -72,9 +109,6 @@
                             <resources>
                                 <resource>
                                     <directory>../org.openmole.ui.console/target/product/</directory>
-                                    <!--<includes>
-                                        <include>*</include>
-                                    </includes>-->
                                 </resource>
                             </resources>
                         </configuration>
@@ -90,7 +124,7 @@
                             <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../plugins/target/dependency/</directory>
+                                    <directory>./target/dependency/plugins-0.3-SNAPSHOT/</directory>
                                     <includes>
                                         <include>*.jar</include>
                                     </includes>
@@ -108,7 +142,7 @@
                             <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../plugins-ui/target/dependency/</directory>
+                                    <directory>./target/dependency/plugins-ui-0.3-SNAPSHOT/</directory>
                                     <includes>
                                         <include>*.jar</include>
                                     </includes>
@@ -122,7 +156,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <descriptor>src/main/assembly/openmole-console.xml</descriptor>
+                    <descriptor>src/main/assembly/openmole-console-package.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>

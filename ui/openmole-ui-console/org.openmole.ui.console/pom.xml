@@ -12,7 +12,8 @@
         <groupId>org.openmole</groupId>
         <version>0.3-SNAPSHOT</version>
     </parent>
-
+    
+    <groupId>org.openmole.ui.console</groupId>
     <artifactId>org.openmole.ui.console</artifactId>
 
     <dependencies>
@@ -191,7 +192,7 @@
                     <execution>
                         <id>copy-bundles</id>
                         <!-- should be run at install phase to be sure to get the just built artifact when copying current artifact -->
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <!-- Will copy all dependencies into plugins directory -->
                             <goal>copy-dependencies</goal>
@@ -210,7 +211,7 @@
                 <executions>
                     <execution>
                         <id>copy-configuration</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -228,7 +229,7 @@
                     </execution>
                     <execution>
                         <id>copy-launching-scripts</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -246,42 +247,23 @@
                             </resources>
                         </configuration>
                     </execution>
-                 <!-- <execution>
-                        <id>copy-plugin</id>
-                        <phase>install</phase>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <descriptor>src/main/assembly/openmole-console.xml</descriptor>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <outputDirectory>${product.directory}/openmole-plugins</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../plugins/target/dependency/</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
                     </execution>
-                  <execution>
-                        <id>copy-ui-plugin</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${product.directory}/openmole-plugins-ui</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../plugins-ui/target/dependency/</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>-->
                 </executions>
             </plugin>
         </plugins>

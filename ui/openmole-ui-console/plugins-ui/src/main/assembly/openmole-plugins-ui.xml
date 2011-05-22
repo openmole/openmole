@@ -1,0 +1,15 @@
+<assembly>
+  <id>console</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>target/dependency</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>**</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>
