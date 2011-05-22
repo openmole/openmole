@@ -1,0 +1,87 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>openmole-ui-console</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.openmole.ui.console</groupId>
+    <artifactId>openmole-ui-console-installer</artifactId>
+    <version>0.3-SNAPSHOT</version>
+    <packaging>pom</packaging>
+ 
+    <name>OpenMOLE console installer</name>
+ 
+    <url>http://www.openmole.org/</url>
+ 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir>
+ 
+        <izpack.standalone.compiler.version>4.3.2</izpack.standalone.compiler.version>
+    </properties>
+ 
+    <build>
+        <plugins>
+            
+   <!-- IzPack Installer -->
+ 
+            <plugin>
+                <groupId>org.codehaus.izpack</groupId>
+                <artifactId>izpack-maven-plugin</artifactId>
+                <version>1.0-alpha-5</version>
+ 
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>izpack</goal>
+ 
+                        </goals>
+                        <configuration>
+                            <attach>false</attach>
+                            <izpackBasedir>${izpack.staging.dir}</izpackBasedir>
+                        </configuration>
+                    </execution>
+ 
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.izpack</groupId>
+                        <artifactId>izpack-standalone-compiler</artifactId>
+                        <version>${izpack.standalone.compiler.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+ 
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.2</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                            <outputDirectory>${izpack.staging.dir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+

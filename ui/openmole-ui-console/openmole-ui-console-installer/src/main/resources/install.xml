@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installation version="1.0">
+    <info>
+        <appname>OpenMOLE console</appname>
+        <appversion>0.3-SNAPSHOT</appversion>
+        <uninstaller write="yes" />
+        <javaversion>1.6</javaversion>
+        <pack200 />
+    </info>
+
+    <resources>
+        <res id="LicencePanel.licence" src="AGPLv3.txt"/>
+    </resources>
+
+    <panels>
+        <panel classname="HelloPanel" />
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel" />
+        <panel classname="InstallPanel" />
+        <panel classname="SimpleFinishPanel" />
+    </panels>
+
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+
+    <guiprefs resizable="yes" width="640" height="480" />
+
+    <panels>
+        <panel classname="HelloPanel" />
+        <panel classname="FinishPanel" />
+    </panels>
+
+    <packs>
+        <pack name="main" required="yes">
+            <description>OpenMOLE console</description>
+        </pack>
+    </packs>
+
+</installation>

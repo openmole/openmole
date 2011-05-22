@@ -26,13 +26,13 @@
             <groupId>org.openmole.ui.console</groupId>
             <artifactId>plugins</artifactId>
             <version>${project.version}</version>
-	    <type>pom</type>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.openmole.ui.console</groupId>
             <artifactId>plugins-ui</artifactId>
             <version>${project.version}</version>
-	    <type>pom</type>
+            <type>pom</type>
         </dependency>
     </dependencies>
 
@@ -61,7 +61,7 @@
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
-                 <execution>
+                    <execution>
                         <id>copy-openmole</id>
                         <phase>install</phase>
                         <goals>
@@ -80,7 +80,7 @@
                         </configuration>
                     </execution>
  
-                 <execution>
+                    <execution>
                         <id>copy-plugin</id>
                         <phase>install</phase>
                         <goals>
@@ -98,7 +98,7 @@
                             </resources>
                         </configuration>
                     </execution>
-                  <execution>
+                    <execution>
                         <id>copy-ui-plugin</id>
                         <phase>install</phase>
                         <goals>
@@ -121,13 +121,5 @@
         </plugins>
     </build>
 </project>
-
-
-
-
-
-
-
-
 
 
