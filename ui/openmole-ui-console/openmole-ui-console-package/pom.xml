@@ -18,7 +18,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.ui.console</groupId>
             <artifactId>org.openmole.ui.console</artifactId>
             <version>${project.version}</version>
         </dependency>
