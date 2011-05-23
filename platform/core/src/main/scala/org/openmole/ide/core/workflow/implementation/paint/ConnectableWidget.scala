@@ -59,8 +59,9 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
   def addSampling (sw: SamplingWidget)= {
     samplingWidget = Some(sw)
     addChild(sw) 
-    taskHeight += 45
+    taskHeight += 58
     setWidthHint
+    setDetailedView
   }
  
   override def paintWidget= {

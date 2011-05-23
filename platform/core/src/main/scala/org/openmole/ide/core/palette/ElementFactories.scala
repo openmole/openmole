@@ -26,8 +26,10 @@ import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.WeakHashMap
 
 object ElementFactories {
   
@@ -40,6 +42,8 @@ object ElementFactories {
                                Constants.PROTOTYPE -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE),
                                Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
                                Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
+  
+  
   
   def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
     val li = new ListBuffer[ModelElementFactory]

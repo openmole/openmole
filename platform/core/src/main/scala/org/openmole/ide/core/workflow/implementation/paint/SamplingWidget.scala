@@ -30,8 +30,8 @@ class SamplingWidget(scene: MoleScene, factory: IFactoryUI) extends Widget(scene
   
   override def paintWidget= {
     super.paintWidget
-    getGraphics.asInstanceOf[Graphics2D].drawImage(ImageUtilities.loadImage(factory.imagePath),Constants.TASK_CONTAINER_WIDTH/4+1,Constants.TASK_CONTAINER_HEIGHT+10,new Container)
+    getGraphics.asInstanceOf[Graphics2D].drawImage(ImageUtilities.loadImage(factory.imagePath),0,0,new Container)
   }
   
-  def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-44, 14 + Constants.TASK_TITLE_HEIGHT))
+  def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-22,Constants.TASK_CONTAINER_HEIGHT+10))
 }
