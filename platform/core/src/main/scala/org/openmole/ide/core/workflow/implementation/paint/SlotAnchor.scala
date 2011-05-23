@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.workflow.implementation.paint
@@ -8,12 +20,4 @@ package org.openmole.ide.core.workflow.implementation.paint
 import org.netbeans.api.visual.anchor.Anchor
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
-abstract class SlotAnchor(relatedWidget: CapsuleViewUI) extends Anchor(relatedWidget){}
-//
-//SlotAnchor  extends Anchor {
-//    CapsuleViewUI relatedWidget;
-//
-//    public SlotAnchor(CapsuleViewUI relatedWidget) {
-//        super(relatedWidget);
-//        this.relatedWidget = relatedWidget;
-//    }
+abstract class SlotAnchor(relatedWidget: CapsuleViewUI) extends Anchor(relatedWidget)

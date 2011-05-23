@@ -32,6 +32,7 @@ import java.awt.BasicStroke
 class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(scene) {
 
   var taskWidth= Constants.TASK_CONTAINER_WIDTH
+  var taskHeight= Constants.TASK_CONTAINER_HEIGHT
   var taskImageOffset= Constants.TASK_IMAGE_WIDTH_OFFSET
   val bodyArea = new Rectangle
   val widgetArea= new Rectangle
@@ -51,7 +52,7 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
       taskImageOffset = Constants.TASK_IMAGE_WIDTH_OFFSET
     }
     bodyArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_CONTAINER_HEIGHT))
-    widgetArea.setBounds(new Rectangle(-12, -1,taskWidth + 24,Constants.TASK_CONTAINER_HEIGHT + 2))
+    widgetArea.setBounds(new Rectangle(-12, -1,taskWidth + 24,taskHeight+ 2))
     titleArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_TITLE_HEIGHT))
     setPreferredBounds(widgetArea)
     revalidate

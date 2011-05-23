@@ -41,20 +41,10 @@ object MoleScenesManager extends TabManager{
                                            Constants.ENVIRONMENT-> new AtomicInteger(0),
                                            Constants.SAMPLING-> new AtomicInteger(0))
   
-  //def incrementCounter(entityType: String): String = Constants.simpleEntityName(entityType).toLowerCase + counters(entityType).addAndGet(1)
-  
-//  def getName(entityType: String, increment: Boolean) = {
-//    if (increment) incrementCounter(entityType)
-//    else getDefaultName(entityType)
-//  } 
-  
-  def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString
-  
-  //def getDefaultName(entityType: String): String = entityType.toLowerCase + counters(entityType).toString
-    
+  def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString  
     
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {
-    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)          
+    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)        
     scene.initCapsuleAdd(obUI)
     scene.manager.registerCapsuleView(obUI)
     scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
@@ -100,92 +90,3 @@ object MoleScenesManager extends TabManager{
     scene
   }
 }
-
-//MoleScenesManager extends TabManager {
-//
-//    private static MoleScenesManager instance = null;
-//    private Collection<IMoleScene> moleScenes = new ArrayList<IMoleScene>();
-//    private Map<IMoleScene, Collection<Component>> childTabs = new HashMap<IMoleScene, Collection<Component>>();
-//    private int count = 1;
-//    private int nodeCounter = 0;
-//    private boolean detailedView = false;
-//
-//    public void removeMoleScenes() {
-//        moleScenes.clear();
-//        removeAllTabs();
-//    }
-//
-//    public void removeMoleScene(IMoleScene molescene) {
-//        moleScenes.remove(molescene);
-//        removeTab(molescene);
-//    }
-//
-//    public void incrementNodeName() {
-//        nodeCounter++;
-//    }
-//
-//    public String getNodeName() {
-//        return "task" + nodeCounter;
-//    }
-//
-//    public void addMoleScene(IMoleScene ms) {
-//        moleScenes.add(ms);
-//        childTabs.put(ms, new ArrayList<Component>());
-//    }
-//
-//    public IMoleScene addMoleScene(){
-//        IMoleScene sc = new MoleScene();
-//        addMoleScene(sc);
-//        return sc;
-//    }
-//
-//    public void addChild(IMoleScene sc,
-//            Component co) {
-//        childTabs.get(sc).add(co);
-//    }
-//
-//    public Collection<IMoleScene> getMoleScenes() {
-//        return moleScenes;
-//    }
-//
-//    public void removeCurrentSceneAndChilds(IMoleScene curs) {
-//        for (Component co : MoleScenesManager.getInstance().childTabs.get(curs)) {
-//            TaskSettingsManager.getInstance().removeTab(co);
-//        }
-//        removeMoleScene(curs);
-//    }
-//
-//    @Override
-//    public void addTab(Object displayed) {
-//        MoleScene scene = (MoleScene) displayed;
-//
-//        JComponent myView = scene.createView();
-//        JScrollPane moleSceneScrollPane = new JScrollPane();
-//        moleSceneScrollPane.setViewportView(myView);
-//
-//        String name;
-//        if (scene.getManager().getName().equals("")) {
-//            name = "Mole" + count;
-//            count++;
-//        } else {
-//            name = scene.getManager().getName();
-//        }
-//        addMapping(displayed, moleSceneScrollPane, name);
-//        scene.getManager().setName(name);
-//    }
-//
-//     public void setDetailedView(boolean detailedView) {
-//        this.detailedView = detailedView;
-//    }
-//
-//    public boolean isDetailedView() {
-//        return detailedView;
-//    }
-//
-//    public static MoleScenesManager getInstance() {
-//        if (instance == null) {
-//            instance = new MoleScenesManager();
-//        }
-//        return instance;
-//    }
-//}

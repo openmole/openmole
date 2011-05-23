@@ -12,6 +12,7 @@ import org.openmole.ide.core.workflow.action.TaskActions
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
+import org.openmole.ide.core.workflow.implementation.paint.SamplingWidget
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import org.openmole.ide.core.workflow.model.ICapsuleView
 
@@ -29,6 +30,8 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
   // getActions.addAction(ActionFactory.createAcceptAction(dnDAddPrototypeProvider))
+
+
   
   def defineStartingCapsule(on: Boolean){
     capsuleModel.defineStartingCapsule(on)

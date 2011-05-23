@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
 import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.properties.PanelUIData
@@ -42,7 +43,7 @@ class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   
   override def buildPanelUI = new ExplorationTaskPanelUI
   
-  override def buildPanelUIData = new ExplorationTaskPanelUIData
+  override def buildPanelUIData = new ExplorationPanelUIData
 }
 
   

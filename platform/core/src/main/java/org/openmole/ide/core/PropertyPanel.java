@@ -55,28 +55,29 @@ public class PropertyPanel extends javax.swing.JPanel {
         return nameTextField.getText();
     }
 
-    public void save() {
-        if (!initEntity) {
-            if (currentElement != null) {
-                if (currentPanelUI != null) {
-                    PanelUIData pdata = currentPanelUI.saveContent();
-                    pdata.name_$eq(nameTextField.getText());
-                    currentElement.entity().updatePanelUIData(pdata);
-                }
-            }
-        }
-    }
+//    public void save() {
+//        if (!initEntity) {
+//            if (currentElement != null) {
+//                if (currentPanelUI != null) {
+//                    PanelUIData pdata = currentPanelUI.saveContent();
+//                    pdata.name_$eq(nameTextField.getText());
+//                    currentElement.entity().updatePanelUIData(pdata);
+//                }
+//            }
+//        }
+//    }
 
+    public void displayCurrentEntity(){
+        displayCurrentEntity(currentElement);
+    }
+    
     public void displayCurrentEntity(PaletteElementFactory elementFactory) {
-        save();
         currentElement = elementFactory;
         currentPanelUI = elementFactory.entity().factoryUI().buildPanelUI();
 
-        createButton.setVisible(false);
         nameTextField.setText(elementFactory.entity().panelUIData().name());
         typeComboBox.removeAllItems();
-        typeComboBox.setVisible(false);
-        typeLabel.setVisible(false);
+        typeComboBox.setEnabled(false);
 
         currentPanelUI.loadContent(currentElement.entity().panelUIData());
 
@@ -92,24 +93,31 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     }
 
-    private void create() {
-        if (nameTextField.getText().length() != 0) {
-            ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
-            PaletteElementFactory element = currentModelElementFactory.buildPaletteElementFactory(nameTextField.getText());
-            MoleSceneTopComponent.getDefault().refreshPalette();
-            displayCurrentEntity(element);
-            locked.put(currentModelElementFactory.entityType(), false);
+    private void save() {
+        if (initEntity) {
+            if (nameTextField.getText().length() != 0) {
+                ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
+                PaletteElementFactory element = currentModelElementFactory.buildPaletteElementFactory(nameTextField.getText());
+                MoleSceneTopComponent.getDefault().refreshPalette();
+                displayCurrentEntity(element);
+                locked.put(currentModelElementFactory.entityType(), false);
+            }
+        } else {
+            if (currentElement != null) {
+                if (currentPanelUI != null) {
+                    PanelUIData pdata = currentPanelUI.saveContent();
+                    pdata.name_$eq(nameTextField.getText());
+                    currentElement.entity().updatePanelUIData(pdata);
+                }
+            }
         }
+        MoleSceneTopComponent.getDefault().refreshPalette();
         initEntity = false;
     }
 
     private void initNewEntity(String entityType) {
-        save();
 
-        MoleSceneTopComponent.getDefault().refreshPalette();
-        typeComboBox.setVisible(true);
-        typeLabel.setVisible(true);
-        createButton.setVisible(true);
+        typeComboBox.setEnabled(true);
         typeComboBox.removeAllItems();
         for (ModelElementFactory pef : JavaConversions.asJavaIterable(ElementFactories.modelElements().apply(entityType))) {
             typeComboBox.addItem(pef);
@@ -138,12 +146,13 @@ public class PropertyPanel extends javax.swing.JPanel {
         typeLabel = new javax.swing.JLabel();
         typeComboBox = new javax.swing.JComboBox();
         entityPanelScrollPane = new javax.swing.JScrollPane();
-        createButton = new javax.swing.JButton();
+        saveButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         environmentToggleButton = new javax.swing.JToggleButton();
         prototypeToggleButton = new javax.swing.JToggleButton();
         taskToggleButton = new javax.swing.JToggleButton();
         samplingToggleButton = new javax.swing.JToggleButton();
+        cancelButton = new javax.swing.JButton();
 
         jButton1.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.jButton1.text")); // NOI18N
 
@@ -159,10 +168,10 @@ public class PropertyPanel extends javax.swing.JPanel {
             }
         });
 
-        createButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.createButton.text")); // NOI18N
-        createButton.addActionListener(new java.awt.event.ActionListener() {
+        saveButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.saveButton.text")); // NOI18N
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createButtonActionPerformed(evt);
+                saveButtonActionPerformed(evt);
             }
         });
 
@@ -199,7 +208,6 @@ public class PropertyPanel extends javax.swing.JPanel {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(taskToggleButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(prototypeToggleButton)
@@ -224,6 +232,13 @@ public class PropertyPanel extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        cancelButton.setText(org.openide.util.NbBundle.getMessage(PropertyPanel.class, "PropertyPanel.cancelButton.text")); // NOI18N
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -231,23 +246,26 @@ public class PropertyPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 448, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(typeLabel)
-                                    .addComponent(nameLabel))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(typeComboBox, 0, 329, Short.MAX_VALUE)
-                                    .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(createButton)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(14, 14, 14))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(nameLabel)
+                                    .addComponent(typeLabel))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(typeComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(cancelButton, 0, 0, Short.MAX_VALUE)
+                                    .addComponent(saveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(3, 3, 3)))
+                        .addGap(27, 27, 27))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -255,19 +273,24 @@ public class PropertyPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(14, 14, 14)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(createButton, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(nameLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(typeLabel)
-                            .addComponent(typeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(18, 18, 18)
-                .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(saveButton)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(typeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cancelButton))
+                .addGap(20, 20, 20)
+                .addComponent(entityPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.CENTER, layout.createSequentialGroup()
+                .addGap(122, 122, 122)
+                .addComponent(typeLabel)
+                .addGap(292, 292, 292))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(86, 86, 86)
+                .addComponent(nameLabel)
+                .addGap(328, 328, 328))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -296,13 +319,17 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     }//GEN-LAST:event_taskToggleButtonActionPerformed
 
-    private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         // TODO add your handling code here:
+        save();
+    }//GEN-LAST:event_saveButtonActionPerformed
 
-        create();
-    }//GEN-LAST:event_createButtonActionPerformed
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        displayCurrentEntity();
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton createButton;
+    private javax.swing.JButton cancelButton;
     private javax.swing.JScrollPane entityPanelScrollPane;
     private javax.swing.JToggleButton environmentToggleButton;
     private javax.swing.JButton jButton1;
@@ -311,6 +338,7 @@ public class PropertyPanel extends javax.swing.JPanel {
     private javax.swing.JTextField nameTextField;
     private javax.swing.JToggleButton prototypeToggleButton;
     private javax.swing.JToggleButton samplingToggleButton;
+    private javax.swing.JButton saveButton;
     private javax.swing.JToggleButton taskToggleButton;
     private javax.swing.JComboBox typeComboBox;
     private javax.swing.JLabel typeLabel;

@@ -1,13 +1,24 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
-import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 
 class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene){
@@ -15,27 +26,3 @@ class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,va
   else setImage(Images.IMAGE_INPUT_SLOT)     
   setPreferredLocation(new Point(-12, 14 + index * 20))
 }
-
-
-//extends SlotWidget {
-//    private int index;
-//    private boolean startingSlot;
-//
-//    public ISlotWidget(Scene scene,
-//            CapsuleViewUI capsuleView,
-//            int index,
-//            boolean startingSlot) {
-//        super(scene,capsuleView);
-//        this.index = index;
-//        this.startingSlot = startingSlot;
-//        setImage(startingSlot ? Constants.IMAGE_START_SLOT : Constants.IMAGE_INPUT_SLOT);
-//        setPreferredLocation(new Point(-12, 14 + index * 20));
-//    }
-//
-//    public boolean isStartingSlot() {
-//        return startingSlot;
-//    }
-//
-//    public int getIndex() {
-//        return index;
-//    }

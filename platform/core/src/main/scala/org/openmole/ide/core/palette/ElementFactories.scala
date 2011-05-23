@@ -21,6 +21,7 @@ import org.openide.util.Lookup
 import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
@@ -45,6 +46,8 @@ object ElementFactories {
     Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p.displayName,entityType,p)})
     li
   }
+
+  def isExplorationTaskFactory(factory: IFactoryUI) = factory.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
   
   def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   

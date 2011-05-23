@@ -75,13 +75,16 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: IEntityUI=> {println("-- unmarsall " + x.entityType);new PaletteElementFactory(x.panelUIData.name,x)}
+          case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x)
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }
     } catch {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
-    } finally MoleSceneTopComponent.getDefault().refreshPalette();
+    } finally {
+      MoleSceneTopComponent.getDefault().refreshPalette();
+      in.close
+    }
   }
 }

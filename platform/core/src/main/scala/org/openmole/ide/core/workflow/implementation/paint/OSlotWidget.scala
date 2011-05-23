@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.workflow.implementation.paint
@@ -17,13 +29,3 @@ class OSlotWidget(scene: Scene,val capsule: CapsuleViewUI)  extends SlotWidget(s
   def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT))
   
 }
-// OSlotWidget extends SlotWidget {
-//    public OSlotWidget(Scene scene,CapsuleViewUI capsule) {
-//        super(scene,capsule);
-//        setImage(Constants.IMAGE_OUTPUT_SLOT);
-//        setDetailedView(Constants.TASK_CONTAINER_WIDTH);
-//    }
-//
-//    public void setDetailedView(int w){
-//        setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT));
-//    }

@@ -11,10 +11,13 @@ import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.model.ICapsuleView
 import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.implementation.paint.SamplingWidget
 import org.openmole.ide.core.commons.IOType
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
@@ -32,7 +35,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
     else if (transferable.isDataFlavorSupported(Constants.ENTITY_DATA_FLAVOR)){
       transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[EntityUI].entityType match {
         case Constants.PROTOTYPE=> state = ConnectorState.ACCEPT
-        case Constants.SAMPLING=> if (capsuleView.capsuleModel.taskUI.get.factoryUI.coreClass.isAssignableFrom(classOf[ExplorationTask])) state = ConnectorState.ACCEPT
+        case Constants.SAMPLING=> if (ElementFactories.isExplorationTaskFactory(capsuleView.capsuleModel.taskUI.get.factoryUI)) state = ConnectorState.ACCEPT
         case Constants.ENVIRONMENT=> println("envir"); state = ConnectorState.ACCEPT
         case _=> throw new GUIUserBadDataError("Unknown entity type")
       }
@@ -61,7 +64,10 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
               capsuleView.capsuleModel.taskUI.get.addPrototype(entity, IOType.OUTPUT)
             }
           }
-        case Constants.SAMPLING=> println("SAMPLING !!" )
+        case Constants.SAMPLING=> {
+            capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling = Some(entity)
+            capsuleView.connectableWidget.addSampling(new SamplingWidget(molescene,entity.factoryUI)) 
+        }
       }
     }
   }

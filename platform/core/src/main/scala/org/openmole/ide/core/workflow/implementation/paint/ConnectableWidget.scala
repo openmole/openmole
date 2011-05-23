@@ -22,6 +22,7 @@ import java.awt.Container
 import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ActionFactory
@@ -32,13 +33,16 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
 
   var islots= HashSet.empty[ISlotWidget]
   val oslot= new OSlotWidget(scene,capsuleView)
+  var samplingWidget: Option[SamplingWidget] = None
   
   addChild(oslot)
+  
   createActions(scene.MOVE).addAction(ActionFactory.createMoveAction)
   
   def setDetailedView= {
     setWidthHint
     oslot.setDetailedView(taskWidth)
+    if (samplingWidget.isDefined) samplingWidget.get.setDetailedView(taskWidth)
   }
   
   def addInputSlot(iw: ISlotWidget) {
@@ -51,11 +55,18 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     islots.foreach(removeChild(_))
     islots.clear
   }
+  
+  def addSampling (sw: SamplingWidget)= {
+    samplingWidget = Some(sw)
+    addChild(sw) 
+    taskHeight += 45
+    setWidthHint
+  }
  
   override def paintWidget= {
     super.paintWidget
     val graphics = getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(Color.WHITE)
+    graphics.setColor(new Color(204,204,204))
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
     if (capsuleView.capsuleModel.taskUI.isDefined) {
@@ -64,7 +75,6 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
                         taskWidth / 2,
                         widgetArea.height - 3)
 
-      graphics.setColor(new Color(0, 0, 0))
       var x = taskWidth / 2 + 11
       var i= 0
       var otherColumn = true
@@ -78,6 +88,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h = 5 + Constants.TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
           graphics.drawImage(Images.thumb(p.factoryUI.imagePath),x - taskWidth / 2, h ,new Container)
+          graphics.setColor(new Color(102,102,102))
           if (MoleScenesManager.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
           i+= 1
         })
