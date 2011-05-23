@@ -82,7 +82,7 @@ object GliteEnvironment {
 
   Workspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
 
-  Workspace += (CertificateType, "pem")
+  Workspace += (CertificateType, "p12")
   Workspace += (TimeLocation, "PT24H")
   Workspace += (DelegationTimeLocation, "P7D")
 
