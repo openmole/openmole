@@ -20,6 +20,7 @@
         <module>plugins</module>
         <module>plugins-ui</module>
 	<module>openmole-ui-console-package</module>
+	<module>openmole-ui-console-installer</module>
     </modules>
     
     <!-- ************************************************************* -->
