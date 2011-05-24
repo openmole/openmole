@@ -66,7 +66,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
           }
         case Constants.SAMPLING=> {
             capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling = Some(entity)
-            capsuleView.connectableWidget.addSampling(new SamplingWidget(molescene,entity.factoryUI)) 
+          //  capsuleView.connectableWidget.addSampling(new SamplingWidget(molescene,entity.factoryUI)) 
         }
       }
     }

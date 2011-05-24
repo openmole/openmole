@@ -17,20 +17,34 @@
 
 package org.openmole.ide.core.workflow.implementation.paint
 
+import java.awt.Color
 import java.awt.Container
+import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.Point
+import java.awt.Rectangle
 import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.properties.IFactoryUI
+import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 
-class SamplingWidget(scene: MoleScene, factory: IFactoryUI) extends Widget(scene) {
+class SamplingWidget(scene: MoleScene,val capsuleView: CapsuleViewUI ) extends Widget(scene) {
+  val titleArea = new Rectangle
+  titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
   
   override def paintWidget= {
     super.paintWidget
-    getGraphics.asInstanceOf[Graphics2D].drawImage(ImageUtilities.loadImage(factory.imagePath),0,0,new Container)
+    val sampling = capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling
+    if (sampling.isDefined){
+      val g = getGraphics.asInstanceOf[Graphics2D]
+      g.drawImage(ImageUtilities.loadImage(sampling.get.factoryUI.imagePath),0,0,new Container)
+      
+      g.setColor(new Color(102,102,102))
+      g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
+      g.drawString(sampling.get.panelUIData.name,2,46)
+    }
   }
   
   def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-22,Constants.TASK_CONTAINER_HEIGHT+10))

@@ -23,10 +23,12 @@ import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.workflow.implementation.TaskUI
 import scala.collection.mutable.HashSet
 
 class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extends MyWidget(scene, capsuleView.capsuleModel){
@@ -38,7 +40,9 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
   addChild(oslot)
   
   createActions(scene.MOVE).addAction(ActionFactory.createMoveAction)
-  
+
+  implicit def bool2int(b:Boolean) = if (b) 1 else 0
+
   def setDetailedView= {
     setWidthHint
     oslot.setDetailedView(taskWidth)
@@ -56,9 +60,9 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     islots.clear
   }
   
-  def addSampling (sw: SamplingWidget)= {
-    samplingWidget = Some(sw)
-    addChild(sw) 
+  def addSampling (taskUI: TaskUI)= {
+    samplingWidget = Some(new SamplingWidget(scene,capsuleView))
+    addChild(samplingWidget.get) 
     taskHeight += 58
     setWidthHint
     setDetailedView
@@ -71,12 +75,8 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
     if (capsuleView.capsuleModel.taskUI.isDefined) {
-      graphics.drawLine(taskWidth / 2,
-                        Constants.TASK_TITLE_HEIGHT,
-                        taskWidth / 2,
-                        widgetArea.height - 3)
 
-      var x = taskWidth / 2 + 11
+      var x = taskWidth / 2 + 5
       var i= 0
       var otherColumn = true
       (capsuleView.capsuleModel.taskUI.get.prototypesIn.toList:::capsuleView.capsuleModel.taskUI.get.prototypesOut.toList).foreach(p=> {
@@ -100,6 +100,12 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
         bodyArea.setSize(bodyArea.width, newH)
         enlargeWidgetArea(0, -delta)
       }
+      var lineH = 0
+      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling.isDefined * 58
+      graphics.drawLine(taskWidth / 2,
+                        Constants.TASK_TITLE_HEIGHT,
+                        taskWidth / 2,
+                        Constants.TASK_CONTAINER_HEIGHT - 3 + lineH)
     }
     revalidate
   }

@@ -25,6 +25,9 @@ class PaletteElementFactory(defaultName: String, val entity: IEntityUI){
   ElementFactories.addElement(this)
   entity.panelUIData.name = defaultName
   
+  if (ElementFactories.isExplorationTaskFactory(entity.factoryUI))
+    println(" EXPLO :: son sample : " + entity.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling)
+  
   def displayName = entity.panelUIData.name
 }
 

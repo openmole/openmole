@@ -43,16 +43,19 @@
     </folder>
     <folder name="Menu">
         <folder name="File">
+            <file name="Separator2.instance_hidden"/>
+            <file name="Separator3.instance_hidden"/>
+            <file name="org-netbeans-modules-print-action-PageSetupAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-print-action-PrintAction.shadow_hidden"/>
+            <file name="org-openide-actions-SaveAllAction.shadow_hidden"/>
+            <file name="org-openide-actions-SaveAsAction.shadow_hidden"/>
             <file name="org-openmole-ide-core-OpenAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/File/org-openmole-ide-core-OpenXMLAction.instance"/>
                 <attr name="position" intvalue="1300"/>
             </file>
-            <file name="org-openmole-ide-core-SaveXMLAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/File/org-openmole-ide-core-SaveXMLAction.instance"/>
-                <attr name="position" intvalue="1200"/>
-            </file>
         </folder>
         <file name="GoTo_hidden"/>
+        <file name="View_hidden"/>
         <folder name="Window">
             <file name="EntityPropertyAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-EntityPropertyAction.instance"/>
