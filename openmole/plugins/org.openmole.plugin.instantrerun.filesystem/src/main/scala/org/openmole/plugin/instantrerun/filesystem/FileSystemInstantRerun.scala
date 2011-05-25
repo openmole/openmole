@@ -58,15 +58,19 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
   
   import FileSystemInstantRerun._
   
-  @transient lazy val fileDir = new File(dir, FILE)
-  @transient lazy val contextDir = new File(dir, CONTEXT)
- 
+  @transient lazy val fileDir = {
+    val ret = new File(dir, FILE)
+    ret.mkdirs
+    ret
+  }
+  
+  @transient lazy val contextDir = {
+    val ret = new File(dir, CONTEXT)
+    ret.mkdirs
+    ret
+  }
+  
   private var jobsInProgressHash = new TreeMap[MoleJobId, (IHash, IHash)]
-  
-  dir.mkdirs
-  fileDir.mkdir
-  contextDir.mkdir
-  
   
   def rerun(job: IMoleJob, capsule: IGenericCapsule): Boolean = synchronized {
     if(!capsules.contains(capsule)) return false
