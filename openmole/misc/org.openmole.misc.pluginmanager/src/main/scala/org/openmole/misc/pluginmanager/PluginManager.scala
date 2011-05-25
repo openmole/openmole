@@ -90,9 +90,13 @@ object PluginManager {
     allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map{ l => Activator.contextOrException.getBundle(l).file}
   }
 
-  
   def load(files: Iterable[File]) = synchronized {
-    val bundles = files.map{f => installBundle(f)}.toList
+    val bundles = files.map{installBundle}.toList
+    bundles.foreach{_.start}
+  }  
+  
+  def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized { 
+    val bundles = plugins.filterNot(f => files.contains(f)).map(installBundle).toList
     bundles.foreach{_.start}
   }
   

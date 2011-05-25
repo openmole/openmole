@@ -48,8 +48,8 @@ class GroovyTask(name: String, private var _code: ISourceCode) extends CodeTask(
   }
   
   override def process(context: IContext, progress: IProgress) = {
-      if(PluginManagerInfo.enabled) PluginManager.load(plugins) 
-      else Logger.getLogger(classOf[GroovyTask].getName).warning("Plugin haven't been loadded cause application isn't runned in an osgi environment.")
+      if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins) 
+      else if(!plugins.isEmpty) Logger.getLogger(classOf[GroovyTask].getName).warning("Plugin haven't been loadded cause application isn't runned in an osgi environment.")
       super.process(context, progress)
   }
   
