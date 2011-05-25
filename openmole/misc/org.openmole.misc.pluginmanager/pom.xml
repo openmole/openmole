@@ -25,6 +25,11 @@
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.hashservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	<dependency>
 	    <groupId>org.openmole</groupId>
 	    <artifactId>org.apache.commons.collections15</artifactId>

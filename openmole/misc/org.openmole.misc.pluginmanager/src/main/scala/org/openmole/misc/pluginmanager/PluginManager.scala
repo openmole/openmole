@@ -32,12 +32,14 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleException
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
+import org.openmole.misc.hashservice.HashService
+
 
 object PluginManager {
   
   private val defaultPatern = ".*\\.jar";
 
-  private var files = Map.empty[File, Long]
+  private var files = Map.empty[File, (Long, String)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
   private var resolvedPluginDependenciesCache = HashMap.empty[Long, Iterable[Long]]
   private var providedDependencies = Set.empty[Long]
@@ -108,7 +110,7 @@ object PluginManager {
   def loadDir(path: File, fiter: FileFilter): Unit = 
     if (path.exists && path.isDirectory) load(path.listFiles(fiter))
 
-  def bundle(file: File) = files.get(file.getAbsoluteFile).map{id => Activator.contextOrException.getBundle(id)}
+  def bundle(file: File) = files.get(file.getAbsoluteFile).map{id => Activator.contextOrException.getBundle(id._1)}
   
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
     
@@ -135,13 +137,15 @@ object PluginManager {
     files.get(file) match {
       case None =>
         val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-        files += file -> ret.getBundleId
+        files += file -> ((ret.getBundleId, HashService.computeHash(file).toString))
         ret
-      case Some(bundleId) =>
-        val bundle = Activator.contextOrException.getBundle(bundleId)
-        val is = new FileInputStream(f)
-        try bundle.update(is)
-        finally is.close
+      case Some(bundleId) => 
+        val bundle = Activator.contextOrException.getBundle(bundleId._1)
+        if(HashService.computeHash(file) != bundleId._2) {
+          val is = new FileInputStream(f)
+          try bundle.update(is)
+          finally is.close
+        }
         bundle
     }
   }
@@ -160,7 +164,7 @@ object PluginManager {
     
     resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
     providedDependencies = dependencies(bundles.filter(b => b.isProvided).map{_.getBundleId}).toSet
-    files = bundles.map(b => b.file.getAbsoluteFile -> b.getBundleId).toMap
+    files = bundles.map(b => b.file.getAbsoluteFile -> ((b.getBundleId, HashService.computeHash(b.file).toString))).toMap
   }
   
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
