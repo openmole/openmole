@@ -88,7 +88,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
           var st = p.panelUIData.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h = 5 + Constants.TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
-          graphics.drawImage(Images.thumb(p.factoryUI.imagePath),x - taskWidth / 2, h ,new Container)
+          graphics.drawImage(Images.thumb(ElementFactories.factories(p).imagePath),x - taskWidth / 2, h ,new Container)
           graphics.setColor(new Color(102,102,102))
           if (MoleScenesManager.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
           i+= 1

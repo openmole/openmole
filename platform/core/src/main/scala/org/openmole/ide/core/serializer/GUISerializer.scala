@@ -57,6 +57,9 @@ object GUISerializer {
         
     //samplings
     ElementFactories.getAll(Constants.SAMPLING).foreach(pef=> out.writeObject(pef.entity))
+    
+    //factories
+    out.writeObject(ElementFactories.factories.toMap)
 
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
@@ -75,7 +78,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x)
+          case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x,ElementFactories.factories(x))
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

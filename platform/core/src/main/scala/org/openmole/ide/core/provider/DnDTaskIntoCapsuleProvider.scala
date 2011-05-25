@@ -35,7 +35,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
     else if (transferable.isDataFlavorSupported(Constants.ENTITY_DATA_FLAVOR)){
       transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[EntityUI].entityType match {
         case Constants.PROTOTYPE=> state = ConnectorState.ACCEPT
-        case Constants.SAMPLING=> if (ElementFactories.isExplorationTaskFactory(capsuleView.capsuleModel.taskUI.get.factoryUI)) state = ConnectorState.ACCEPT
+        case Constants.SAMPLING=> if (ElementFactories.isExplorationTaskFactory(ElementFactories.factories(capsuleView.capsuleModel.taskUI.get))) state = ConnectorState.ACCEPT
         case Constants.ENVIRONMENT=> println("envir"); state = ConnectorState.ACCEPT
         case _=> throw new GUIUserBadDataError("Unknown entity type")
       }

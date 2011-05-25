@@ -43,7 +43,7 @@ object ElementFactories {
                                Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
                                Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
   
-  
+  var factories = new WeakHashMap[IEntityUI,IFactoryUI]
   
   def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
     val li = new ListBuffer[ModelElementFactory]
@@ -57,7 +57,10 @@ object ElementFactories {
   
   def getAll(entityType: String) = paletteElements(entityType)
   
-  def addElement(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType) += pef
+  def addElement(pef: PaletteElementFactory,factory: IFactoryUI) = {
+    paletteElements(pef.entity.entityType) += pef
+    factories += pef.entity-> factory
+  }
   
   def remove(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType).remove(pef)
   

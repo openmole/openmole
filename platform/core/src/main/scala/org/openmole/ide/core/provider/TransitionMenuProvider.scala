@@ -19,43 +19,14 @@ package org.openmole.ide.core.provider
 
 import javax.swing.JMenuItem
 import org.openmole.ide.core.workflow.action.AddTransitionConditionAction
+import org.openmole.ide.core.workflow.action.AggregationTransitionAction
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
 class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget,edgeID: String) extends GenericMenuProvider {
 
   val itemCondition = new JMenuItem("Edit condition")
-  println("TransitionMenuProvider " + edgeID)
+  val itemAggregation = new JMenuItem("Set as aggregation transition")
   itemCondition.addActionListener(new AddTransitionConditionAction(scene.manager.getTransition(edgeID),connectionWidget))
+  itemAggregation.addActionListener(new AggregationTransitionAction)
 }
-//
-//import javax.swing.JMenuItem;
-//import org.netbeans.api.visual.widget.ConnectionWidget;
-//import org.netbeans.api.visual.widget.LabelWidget;
-//import org.openmole.ide.core.workflow.action.AddTransitionConditionAction;
-//import org.openmole.ide.core.workflow.action.RemoveTransitionAction;
-//import org.openmole.ide.core.workflow.implementation.MoleScene;
-//import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class TransitionMenuProvider extends GenericMenuProvider {
-//
-//    public TransitionMenuProvider(MoleScene scene,
-//            LabeledConnectionWidget connectionWidget,
-//            String edgeID) {
-//        super();
-//
-//        JMenuItem itemCondition = new JMenuItem("Edit condition");
-//        itemCondition.addActionListener(new AddTransitionConditionAction(scene.getManager().getTransition(edgeID),
-//                connectionWidget));
-//
-//        JMenuItem itemRemove = new JMenuItem("Remove transition");
-//        itemRemove.addActionListener(new RemoveTransitionAction(scene, edgeID));
-//
-//        items.add(itemCondition);
-//        items.add(itemRemove);
-//    }
-//}

@@ -45,7 +45,7 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
 
     //capsuleModel.setTaskUI(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType)).asInstanceOf[GenericTaskModelUI])
     capsuleModel.setTaskUI(taskUI)
-    if (ElementFactories.isExplorationTaskFactory(taskUI.factoryUI)) connectableWidget.addSampling(taskUI)
+    if (ElementFactories.isExplorationTaskFactory(ElementFactories.factories(taskUI))) connectableWidget.addSampling(taskUI)
     
     // changeConnectableWidget
     //  dnDAddPrototypeProvider.encapsulated= true

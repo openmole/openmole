@@ -73,7 +73,7 @@ public class PropertyPanel extends javax.swing.JPanel {
     
     public void displayCurrentEntity(PaletteElementFactory elementFactory) {
         currentElement = elementFactory;
-        currentPanelUI = elementFactory.entity().factoryUI().buildPanelUI();
+        currentPanelUI = ElementFactories.factories().get(elementFactory.entity()).get().buildPanelUI();
 
         nameTextField.setText(elementFactory.entity().panelUIData().name());
         typeComboBox.removeAllItems();

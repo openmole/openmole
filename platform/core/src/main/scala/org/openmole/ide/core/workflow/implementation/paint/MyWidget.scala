@@ -24,6 +24,7 @@ import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
@@ -66,9 +67,9 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.asInstanceOf[ITaskFactoryUI].backgroundColor else new Color(204,204,204,128))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) ElementFactories.factories(capsuleModel.taskUI.get).asInstanceOf[ITaskFactoryUI].backgroundColor else new Color(204,204,204,128))
     graphics.fill(bodyArea)
-    graphics.setColor(if(capsuleModel.taskUI.isDefined) capsuleModel.taskUI.get.factoryUI.asInstanceOf[ITaskFactoryUI].borderColor else new Color(204,204,204))
+    graphics.setColor(if(capsuleModel.taskUI.isDefined) ElementFactories.factories(capsuleModel.taskUI.get).asInstanceOf[ITaskFactoryUI].borderColor else new Color(204,204,204))
 
     val stroke = new BasicStroke(1.3f, 1, 1)
     graphics.draw(stroke.createStrokedShape(bodyArea))

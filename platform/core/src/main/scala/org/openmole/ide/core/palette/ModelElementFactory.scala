@@ -32,17 +32,17 @@ import scala.collection.JavaConversions._
 
 class ModelElementFactory(val displayName: String, val entityType: String, val factory: IFactoryUI){
   
-  private def buildEntity: IEntityUI = {
+  private def buildPalette(n: String, en: IEntityUI, f: IFactoryUI) = new PaletteElementFactory(n,en,f)
+  
+  def buildPaletteElementFactory(name: String) = {
     entityType match {
-      case Constants.TASK => new TaskUI(factory.asInstanceOf[IFactoryUI])
-      case Constants.PROTOTYPE => new EntityUI(factory,Constants.PROTOTYPE)
-      case Constants.SAMPLING => new EntityUI(factory,Constants.SAMPLING)
-      case Constants.ENVIRONMENT => new EntityUI(factory,Constants.ENVIRONMENT)                         
+      case Constants.TASK => buildPalette(name,new TaskUI(factory.buildPanelUIData),factory.asInstanceOf[IFactoryUI])
+      case Constants.PROTOTYPE => buildPalette(name,new EntityUI(Constants.PROTOTYPE,factory.buildPanelUIData),factory)
+      case Constants.SAMPLING => buildPalette(name,new EntityUI(Constants.SAMPLING,factory.buildPanelUIData),factory)
+      case Constants.ENVIRONMENT => buildPalette(name,new EntityUI(Constants.ENVIRONMENT,factory.buildPanelUIData),factory)                         
       case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
     }
   }
-  
-  def buildPaletteElementFactory(name: String) = new PaletteElementFactory(name,buildEntity)
 
 }
   

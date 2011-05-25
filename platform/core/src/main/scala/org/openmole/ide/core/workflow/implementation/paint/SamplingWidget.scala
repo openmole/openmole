@@ -25,6 +25,7 @@ import java.awt.Point
 import java.awt.Rectangle
 import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
@@ -39,7 +40,7 @@ class SamplingWidget(scene: MoleScene,val capsuleView: CapsuleViewUI ) extends W
     val sampling = capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling
     if (sampling.isDefined){
       val g = getGraphics.asInstanceOf[Graphics2D]
-      g.drawImage(ImageUtilities.loadImage(sampling.get.factoryUI.imagePath),0,0,new Container)
+      g.drawImage(ImageUtilities.loadImage(ElementFactories.factories(sampling.get).imagePath),0,0,new Container)
       
       g.setColor(new Color(102,102,102))
       g.setFont(new Font("Ubuntu", Font.PLAIN, 10))

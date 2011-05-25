@@ -17,7 +17,19 @@
 
 package org.openmole.ide.core.serializer
 
-class MoleMaker {
+import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.workflow.implementation.MoleSceneManager
+import scala.collection.JavaConversions._
+
+object MoleMaker {
+  
+  def buildMole(manager: MoleSceneManager){
+    manager.capsuleViews.values.foreach(cv =>{
+        val tui = cv.capsuleModel.taskUI.get
+        ElementFactories.factories(tui).coreObject(tui.panelUIData)
+      })
+  }
+
 
 }
 //package org.openmole.ide.core.serializer;

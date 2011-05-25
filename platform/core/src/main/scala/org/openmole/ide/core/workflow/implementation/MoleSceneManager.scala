@@ -15,7 +15,7 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
 
   var capsuleViews= new DualHashBidiMap[String, ICapsuleView]
   var transitions= new DualHashBidiMap[String, TransitionUI]
-  var capsuleConnection= new HashMap[ICapsuleView, HashSet[TransitionUI]]
+  var capsuleConnections= new HashMap[ICapsuleView, HashSet[TransitionUI]]
   var nodeID= 0
   var edgeID= 0
   var name: Option[String]= None
@@ -34,11 +34,11 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
   def registerCapsuleView(cv: ICapsuleView) = {
     nodeID+= 1
     capsuleViews.put(getNodeID,cv)
-    capsuleConnection+= cv-> HashSet.empty[TransitionUI]
+    capsuleConnections+= cv-> HashSet.empty[TransitionUI]
   }
   
   def removeCapsuleView(nodeID: String) = {
-    capsuleConnection(capsuleViews.get(nodeID)).foreach(transitions.removeValue(_))
+    capsuleConnections(capsuleViews.get(nodeID)).foreach(transitions.removeValue(_))
     capsuleViews.remove(nodeID)
   }
   
@@ -57,8 +57,8 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
   
   def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
     transitions.put(edgeID, transition)
-    capsuleConnection(transition.source)+= transition
-    capsuleConnection(transition.target.capsuleView)+= transition
+    capsuleConnections(transition.source)+= transition
+    capsuleConnections(transition.target.capsuleView)+= transition
   }
 }
 

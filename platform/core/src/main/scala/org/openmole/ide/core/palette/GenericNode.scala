@@ -34,7 +34,7 @@ import java.awt.event.MouseListener
 //}
 
 class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
-  setIconBaseWithExtension(elementFactory.entity.factoryUI.imagePath)
+  setIconBaseWithExtension(ElementFactories.factories(elementFactory.entity).imagePath)
   setName(elementFactory.displayName)
   setValue(PaletteController.ATTR_IS_READONLY, false)
   

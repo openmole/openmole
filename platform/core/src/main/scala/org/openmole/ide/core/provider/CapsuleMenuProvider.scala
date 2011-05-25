@@ -69,7 +69,7 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
          menus.remove(taskMenu)
          var colTask = new ListBuffer[JMenuItem]
          ElementFactories.getAll(Constants.TASK).foreach(t=> {
-             val it= new JMenuItem(t.entity.panelUIData.name + " :: " + t.entity.factoryUI.coreClass.getSimpleName)
+             val it= new JMenuItem(t.entity.panelUIData.name + " :: " + ElementFactories.factories(t.entity).coreClass.getSimpleName)
            it.addActionListener(new AddTaskAction(scene,capsuleView, t.entity.asInstanceOf[TaskUI]));
            colTask+= it
           })
@@ -82,7 +82,7 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   def fillPrototypeMenu(t: IOType.Value)= {
     val prototypeCol = HashSet.empty[JMenuItem]
     ElementFactories.getAll(Constants.PROTOTYPE).foreach(p=> {
-        val it= new JMenuItem(p.entity.panelUIData.name + " :: " + p.entity.factoryUI.coreClass.getSimpleName);
+        val it= new JMenuItem(p.entity.panelUIData.name + " :: " + ElementFactories.factories(p.entity).coreClass.getSimpleName);
         it.addActionListener(new AddExistingPrototypeAction(p.entity, capsuleView, t));
         prototypeCol.add(it)})
     prototypeCol.toSet

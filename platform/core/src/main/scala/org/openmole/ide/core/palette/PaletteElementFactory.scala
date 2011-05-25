@@ -17,17 +17,14 @@
 
 package org.openmole.ide.core.palette
 
-import org.openmole.ide.core.properties.ExplorationPanelUIData
+import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 
-class PaletteElementFactory(defaultName: String, val entity: IEntityUI){
-  ElementFactories.addElement(this)
+class PaletteElementFactory(defaultName: String, val entity: IEntityUI,factory: IFactoryUI){
+  ElementFactories.addElement(this,factory)
   entity.panelUIData.name = defaultName
-  
-  if (ElementFactories.isExplorationTaskFactory(entity.factoryUI))
-    println(" EXPLO :: son sample : " + entity.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling)
-  
+    
   def displayName = entity.panelUIData.name
 }
 
