@@ -24,6 +24,7 @@ import java.io.FileInputStream
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.pluginmanager.internal.Activator
+import org.openmole.misc.tools.service.IHash
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -39,7 +40,7 @@ object PluginManager {
   
   private val defaultPatern = ".*\\.jar";
 
-  private var files = Map.empty[File, (Long, String)]
+  private var files = Map.empty[File, (Long, IHash)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
   private var resolvedPluginDependenciesCache = HashMap.empty[Long, Iterable[Long]]
   private var providedDependencies = Set.empty[Long]
@@ -137,7 +138,7 @@ object PluginManager {
     files.get(file) match {
       case None =>
         val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-        files += file -> ((ret.getBundleId, HashService.computeHash(file).toString))
+        files += file -> ((ret.getBundleId, HashService.computeHash(file)))
         ret
       case Some(bundleId) => 
         val bundle = Activator.contextOrException.getBundle(bundleId._1)
@@ -164,7 +165,7 @@ object PluginManager {
     
     resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
     providedDependencies = dependencies(bundles.filter(b => b.isProvided).map{_.getBundleId}).toSet
-    files = bundles.map(b => b.file.getAbsoluteFile -> ((b.getBundleId, HashService.computeHash(b.file).toString))).toMap
+    files = bundles.map(b => b.file.getAbsoluteFile -> ((b.getBundleId, HashService.computeHash(b.file)))).toMap
   }
   
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
