@@ -20,6 +20,7 @@ package org.openmole.core.serializer.converter
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.misc.tools.io.StringInputStream
+import org.openmole.misc.fileservice.internal.FileService
 import org.openmole.misc.hashservice.HashService
 import scala.collection.immutable.TreeMap
 import java.io.OutputStream
@@ -39,7 +40,7 @@ class SerializerWithPathHashInjection extends Serializer {
     var hash = files.getOrElse(file,
       {
         val pathHash = HashService.computeHash(new StringInputStream(file.getAbsolutePath))
-        val fileHash = HashService.computeHash(file)
+        val fileHash = FileService.hash(file)
             
         val hash = new FileInfo(fileHash, pathHash, file.isDirectory)
         files += file -> hash

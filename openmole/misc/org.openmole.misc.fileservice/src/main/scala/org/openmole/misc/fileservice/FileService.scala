@@ -45,7 +45,9 @@ object FileService {
 
   Updater.delay(new FileServiceGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
-  def hash(file: File): IHash = hash(file, file)
+  def hash(file: File): IHash =     
+    if(file.isDirectory) hash(archiveForDir(file).file(false), file)
+  else hash(file, file)
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
     

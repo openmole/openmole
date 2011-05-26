@@ -50,9 +50,7 @@ object PluginManager {
   Activator.contextOrException.addBundleListener(new BundleListener {
       override def bundleChanged(event: BundleEvent) = {
         val b = event.getBundle
-        if(event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) {
-          updateDependencies
-        }
+        if(event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) updateDependencies
       } 
     })
   
