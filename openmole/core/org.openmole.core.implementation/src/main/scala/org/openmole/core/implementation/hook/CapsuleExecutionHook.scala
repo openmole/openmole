@@ -20,14 +20,11 @@ package org.openmole.core.implementation.hook
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import scala.ref.WeakReference
 
-abstract class CapsuleExecutionHook(moleExecution: WeakReference[IMoleExecution], capsule: IGenericCapsule) extends MoleExecutionHook(moleExecution) {
-  def this(moleExecution: IMoleExecution, capsule: IGenericCapsule) = this(new WeakReference(moleExecution), capsule)
+abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGenericCapsule) {
   
-  override def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) =
-    if(capsule == this.capsule) jobFinished(moleJob)
- 
-  def jobFinished(moleJob: IMoleJob)
-    
+  CapsuleExecutionDispatcher += (moleExecution, capsule, this)
+
+  def jobStarting(moleJob: IMoleJob) = {}  
+  def jobFinished(moleJob: IMoleJob) = {}
 }

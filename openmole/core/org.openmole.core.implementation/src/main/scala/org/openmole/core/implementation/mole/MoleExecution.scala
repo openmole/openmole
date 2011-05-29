@@ -132,6 +132,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     
   override def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution): Unit = synchronized {
     val job = capsule.toJob(context, nextJobId)
+    EventDispatcher.objectChanged(this, JobInCapsuleStarting, Array(job, capsule))
     submit(job, capsule, subMole, ticket)
   }
    

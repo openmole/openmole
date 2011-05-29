@@ -27,7 +27,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
-class MoleExecutionHook(private var moleExecution: WeakReference[IMoleExecution]) extends IHook {
+class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]) extends IHook {
   
   def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
   
@@ -38,9 +38,12 @@ class MoleExecutionHook(private var moleExecution: WeakReference[IMoleExecution]
   registerForObjectChangedSynchronous(moleExecution(), HIGH, new MoleExecutionExecutionStartingAdapter, Starting)
   registerForObjectChangedSynchronous(moleExecution(), HIGH, new MoleExecutionJobStateChangedAdapter, OneJobStatusChanged)
   registerForObjectChangedSynchronous(moleExecution(), LOW, new MoleExecutionExecutionFinishedAdapter, Finished)
-  registerForObjectChangedSynchronous(moleExecution(), NORMAL, new CapsuleFinishedAdapter, JobInCapsuleFinished)
+  registerForObjectChangedSynchronous(moleExecution(), NORMAL, new CapsuleChangedAdapter(jobInCapsuleFinished), JobInCapsuleFinished)
+  registerForObjectChangedSynchronous(moleExecution(), NORMAL, new CapsuleChangedAdapter(jobInCapsuleStarting), JobInCapsuleStarting)
   
   def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
+  def jobInCapsuleStarting(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
+  
   def stateChanged(moleJob: IMoleJob) = {}
   def executionStarting = {}
   def executionFinished = {}
@@ -51,15 +54,14 @@ class MoleExecutionHook(private var moleExecution: WeakReference[IMoleExecution]
       stateChanged(moleJob)
     }
   }
-
-  class CapsuleFinishedAdapter extends IObjectListenerWithArgs[IMoleExecution]  {
+  
+  class CapsuleChangedAdapter(listener: (IMoleJob, IGenericCapsule) => Unit) extends IObjectListenerWithArgs[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
       val moleJob = args(0).asInstanceOf[IMoleJob]
       val capsule = args(1).asInstanceOf[IGenericCapsule]
-      jobInCapsuleFinished(moleJob, capsule)
+      listener(moleJob, capsule)
     }
   }
-  
   
   class MoleExecutionExecutionStartingAdapter extends IObjectListener[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution) = executionStarting

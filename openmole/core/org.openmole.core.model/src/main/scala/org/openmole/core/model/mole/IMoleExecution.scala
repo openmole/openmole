@@ -36,6 +36,7 @@ object IMoleExecution {
   final val OneJobStatusChanged = "OneJobStatusChanged"
   final val OneJobSubmitted = "OneJobSubmitted"
   final val JobInCapsuleFinished = "JobInCapsuleFinished"
+  final val JobInCapsuleStarting = "JobInCapsuleStarting"
 }
 
 trait IMoleExecution {

@@ -111,9 +111,9 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   }
 
   override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = { 
-    val ret = new MoleJob(taskOrException, context, jobId)
-    EventDispatcher.registerForObjectChangedSynchronous(ret, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
-    ret
+    val job = new MoleJob(taskOrException, context, jobId)
+    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+    job
   }
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
