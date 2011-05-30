@@ -11,9 +11,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.ImageUtilities
 import scala.collection.immutable.HashMap
-import org.openmole.ide.core.workflow.implementation.EntityUI
 import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.workflow.implementation.TaskUI
 
 object Constants{
   
@@ -45,8 +43,7 @@ object Constants{
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
   
-  val ENTITY_DATA_FLAVOR= new DataFlavor(classOf[EntityUI], PROTOTYPE)
-  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskUI], TASK)
+  val ENTITY_DATA_FLAVOR= new DataFlavor(classOf[PaletteElementFactory], "entity")
 
  // def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }

@@ -10,11 +10,10 @@
  */
 package org.openmole.ide.plugin.task.exploration;
 
-import javax.swing.JPanel;
-import org.openmole.core.implementation.task.ExplorationTask;
-import org.openmole.ide.core.properties.ExplorationPanelUIData;
+import org.openmole.ide.core.properties.IPanelUIData;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.PanelUIData;
+import org.openmole.ide.core.properties.TaskPanelUIData;
 
 /**
  *
@@ -26,14 +25,9 @@ public class ExplorationTaskPanelUI extends PanelUI {
         initComponents();
     }
 
-    public PanelUIData saveContent() {
-        ExplorationPanelUIData panelData = new ExplorationPanelUIData();
-        System.out.println("in saveContent ExplorationTaskPanelUI");
-        return panelData;
-        
-    }
+    public IPanelUIData saveContent(String name) {return new ExplorationTaskPanelUIData(name);}
     
-    public void loadContent(PanelUIData pud) {
+    public void loadContent(IPanelUIData pud) {
         
         System.out.println("in loadContent ExplorationTaskPanelUI");
     }

@@ -17,13 +17,8 @@
 
 package org.openmole.ide.core.properties
 
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.ide.core.commons.Constants
 
-trait IPrototypeFactoryUI  extends IFactoryUI {
-  
-  override def buildPanelUIData = new PanelUIData
-  
-  override def buildPanelUI = new EmptyPanelUI
-  
-  override def coreClass = classOf[Prototype[_]]
+trait IPrototypeFactoryUI  extends IFactoryUI{
+  override def entityType = Constants.PROTOTYPE
 }

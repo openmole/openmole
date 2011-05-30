@@ -17,15 +17,11 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
-import org.openmole.ide.core.properties.PanelUIData
 
 class StringPrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "String"
   
-  override def coreObject(pud: PanelUIData) = new Prototype(pud.name,classOf[String])
-  
-  override def imagePath = "img/thumb/string.png"
+  override def buildPanelUIData(name: String) = new StringPrototypePanelUIData(name)
 }

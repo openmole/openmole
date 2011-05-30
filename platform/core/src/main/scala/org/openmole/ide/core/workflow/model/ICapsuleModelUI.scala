@@ -5,16 +5,16 @@
 
 package org.openmole.ide.core.workflow.model
 
-import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.palette.PaletteElementFactory
 
 trait ICapsuleModelUI {
   def startingCapsule: Boolean
   
   def containsTask: Boolean
 
-  def taskUI: Option[TaskUI]
+  def dataProxy: Option[PaletteElementFactory]
   
-  def setTaskUI(taskUI: TaskUI)
+  def setDataProxy(pef: PaletteElementFactory)
   
   def defineStartingCapsule(on: Boolean)
   
@@ -24,17 +24,3 @@ trait ICapsuleModelUI {
   
   def removeInputSlot
 }
-
-
-//ICapsuleModelUI<T extends IGenericCapsule> extends IObjectModelUI<T>{
-//  boolean containsTask();
-//  IGenericTaskModelUI<IGenericTask> getTaskModel();
-//  void setTaskModel(IGenericTaskModelUI<IGenericTask> taskModel);
-//  void defineAsStartingCapsule();
-//  void defineAsRegularCapsule();
-//  boolean isStartingCapsule();
-//  void addInputSlot();
-//  int getNbInputslots();
-//  boolean isSlotRemovable();
-//  boolean isSlotAddable();
-//  void removeInputSlot();

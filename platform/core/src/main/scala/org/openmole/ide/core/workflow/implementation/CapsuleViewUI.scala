@@ -8,7 +8,7 @@ package org.openmole.ide.core.workflow.implementation
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
-import org.openmole.ide.core.workflow.action.TaskActions
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
@@ -40,18 +40,17 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
     connectableWidget.addInputSlot(new ISlotWidget(scene,this,1,on))
   }
   
-  override def encapsule(taskUI: TaskUI)= {
+  override def encapsule(pef: PaletteElementFactory)= {
     //   capsuleModel.setTaskModel(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType).getClass.asInstanceOf[Class[GenericTaskModelUI]]))
 
     //capsuleModel.setTaskUI(UIFactory.createTaskModelInstance(Preferences.model(MoleConcepts.TASK_INSTANCE,taskUI.entityType)).asInstanceOf[GenericTaskModelUI])
-    capsuleModel.setTaskUI(taskUI)
-    if (ElementFactories.isExplorationTaskFactory(ElementFactories.factories(taskUI))) connectableWidget.addSampling(taskUI)
+    capsuleModel.setDataProxy(pef)
+    if (ElementFactories.isExplorationTaskFactory(pef.panelUIData)) connectableWidget.addSampling
     
     // changeConnectableWidget
     //  dnDAddPrototypeProvider.encapsulated= true
     dndTaskIntoCapsuleProvider.encapsulated= true
     capsuleMenuProvider.addTaskMenus
-    getActions.addAction(new TaskActions(capsuleModel.taskUI.get, this))
   }
   
 //  def changeConnectableWidget= {

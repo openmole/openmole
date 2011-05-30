@@ -34,14 +34,14 @@ import java.awt.event.MouseListener
 //}
 
 class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
-  setIconBaseWithExtension(ElementFactories.factories(elementFactory.entity).imagePath)
-  setName(elementFactory.displayName)
+  setIconBaseWithExtension(elementFactory.panelUIData.imagePath)
+  setName(elementFactory.panelUIData.name)
   setValue(PaletteController.ATTR_IS_READONLY, false)
   
   override def drag: Transferable = {
     println("DRAG")
     val retValue = ExTransferable.create(super.drag)
-    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory.entity})
+    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
     retValue
   }
   

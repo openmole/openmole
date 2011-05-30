@@ -6,7 +6,7 @@
 package org.openmole.ide.core.workflow.model
 
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.TaskUI
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 
@@ -17,7 +17,7 @@ trait ICapsuleView {
   
   def connectableWidget: ConnectableWidget
   
-  def encapsule(taskUI: TaskUI)
+  def encapsule(pef: PaletteElementFactory)
 
   def addInputSlot: ISlotWidget
   

@@ -17,14 +17,10 @@
 
 package org.openmole.ide.core.palette
 
-import org.openmole.ide.core.properties.IFactoryUI
-import org.openmole.ide.core.workflow.model.IEntityUI
+import org.openmole.ide.core.properties.IPanelUIData
 import scala.collection.JavaConversions._
 
-class PaletteElementFactory(defaultName: String, val entity: IEntityUI,factory: IFactoryUI){
-  ElementFactories.addElement(this,factory)
-  entity.panelUIData.name = defaultName
-    
-  def displayName = entity.panelUIData.name
+class PaletteElementFactory(var panelUIData: IPanelUIData){
+  ElementFactories.addElement(this)
 }
 

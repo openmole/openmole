@@ -19,52 +19,15 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
-import org.openmole.ide.core.workflow.implementation.TaskUI
 
-class AddTaskAction(moleScene: MoleScene ,capsuleView: CapsuleViewUI,taskUI: TaskUI) extends ActionListener{
+class AddTaskAction(moleScene: MoleScene ,capsuleView: CapsuleViewUI,pef: PaletteElementFactory) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
-    capsuleView.encapsule(taskUI)
+    capsuleView.encapsule(pef)
     moleScene.validate
     moleScene.refresh
         
   }
 }
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.commons.exception.UserBadDataError;
-//import org.openmole.ide.core.exception.MoleExceptionManagement;
-//import org.openmole.ide.core.workflow.implementation.MoleScene;
-//import org.openmole.ide.core.workflow.implementation.CapsuleViewUI;
-//import org.openmole.ide.core.workflow.implementation.TaskUI;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class AddTaskAction implements ActionListener {
-//
-//    MoleScene moleScene;
-//    TaskUI taskUI;
-//    private CapsuleViewUI capsuleView;
-//
-//    public AddTaskAction(MoleScene moleScene,
-//            CapsuleViewUI capsuleView,
-//            TaskUI taskUI) {
-//        this.moleScene = moleScene;
-//        this.capsuleView = capsuleView;
-//        this.taskUI = taskUI;
-//    }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        try {
-//            capsuleView.encapsule(taskUI);
-//        } catch (UserBadDataError ex) {
-//            MoleExceptionManagement.showException(ex);
-//        }
-//        moleScene.validate();
-//        moleScene.refresh();
-//    }
-//}

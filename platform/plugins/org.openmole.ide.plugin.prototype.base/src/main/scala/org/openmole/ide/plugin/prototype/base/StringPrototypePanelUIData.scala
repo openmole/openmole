@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.workflow.implementation.EntityUI
+import org.openmole.core.implementation.data.Prototype
 
-class ExplorationPanelUIData extends PanelUIData{
-  var sampling: Option[EntityUI] = None
+class StringPrototypePanelUIData(name: String) extends PrototypePanelUIData(name) {
+  
+  override def coreObject = new Prototype(name,classOf[String])
+  
+  override def imagePath = "img/thumb/string.png"
 }

@@ -26,21 +26,21 @@ import java.awt.Rectangle
 import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.properties.ExplorationPanelUIData
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 
-class SamplingWidget(scene: MoleScene,val capsuleView: CapsuleViewUI ) extends Widget(scene) {
+class SamplingWidget(scene: MoleScene,val capsuleModel: ICapsuleModelUI ) extends Widget(scene) {
   val titleArea = new Rectangle
   titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
   
   override def paintWidget= {
     super.paintWidget
-    val sampling = capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling
+    val sampling = capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling
     if (sampling.isDefined){
       val g = getGraphics.asInstanceOf[Graphics2D]
-      g.drawImage(ImageUtilities.loadImage(ElementFactories.factories(sampling.get).imagePath),0,0,new Container)
+      g.drawImage(ImageUtilities.loadImage(sampling.get.panelUIData.imagePath),0,0,new Container)
       
       g.setColor(new Color(102,102,102))
       g.setFont(new Font("Ubuntu", Font.PLAIN, 10))

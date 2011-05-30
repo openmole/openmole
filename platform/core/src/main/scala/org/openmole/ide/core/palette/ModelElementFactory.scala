@@ -25,25 +25,24 @@ import org.openmole.ide.core.properties.IFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
-import org.openmole.ide.core.workflow.implementation.EntityUI
-import org.openmole.ide.core.workflow.implementation.TaskUI
-import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 
-class ModelElementFactory(val displayName: String, val entityType: String, val factory: IFactoryUI){
+class ModelElementFactory(val factory: IFactoryUI){
   
-  private def buildPalette(n: String, en: IEntityUI, f: IFactoryUI) = new PaletteElementFactory(n,en,f)
+ // private def buildPalette(n: String, en: IEntityUI, f: IFactoryUI) = new PaletteElementFactory(n,en,f)
   
-  def buildPaletteElementFactory(name: String) = {
-    entityType match {
-      case Constants.TASK => buildPalette(name,new TaskUI(factory.buildPanelUIData),factory.asInstanceOf[IFactoryUI])
-      case Constants.PROTOTYPE => buildPalette(name,new EntityUI(Constants.PROTOTYPE,factory.buildPanelUIData),factory)
-      case Constants.SAMPLING => buildPalette(name,new EntityUI(Constants.SAMPLING,factory.buildPanelUIData),factory)
-      case Constants.ENVIRONMENT => buildPalette(name,new EntityUI(Constants.ENVIRONMENT,factory.buildPanelUIData),factory)                         
-      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
-    }
-  }
+//  def buildPaletteElementFactory(name: String) = {
+//    entityType match {
+//      case Constants.TASK => buildPalette(name,new TaskUI(factory.buildPanelUIData),factory.asInstanceOf[IFactoryUI])
+//      case Constants.PROTOTYPE => buildPalette(name,new EntityUI(Constants.PROTOTYPE,factory.buildPanelUIData),factory)
+//      case Constants.SAMPLING => buildPalette(name,new EntityUI(Constants.SAMPLING,factory.buildPanelUIData),factory)
+//      case Constants.ENVIRONMENT => buildPalette(name,new EntityUI(Constants.ENVIRONMENT,factory.buildPanelUIData),factory)                         
+//      case _=> throw new GUIUserBadDataError("The entity " + entityType + " does not exist.")
+//    }
+//  }
 
+  def buildPaletteElementFactory(name:String) = new PaletteElementFactory(factory.buildPanelUIData(name))
+  
 }
   
 //   def buildPaletteElementFactory = factoryInstances.find{en:AnyRef => factoryUIClass.isAssignableFrom(en.getClass)}.get

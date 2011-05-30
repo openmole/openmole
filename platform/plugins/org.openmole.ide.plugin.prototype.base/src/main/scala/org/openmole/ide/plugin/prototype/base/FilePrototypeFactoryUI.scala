@@ -17,16 +17,11 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import java.io.File
-import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
-import org.openmole.ide.core.properties.PanelUIData
 
 class FilePrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "File"
   
-  override def coreObject(pud: PanelUIData) = new Prototype(pud.name,classOf[File])
-  
-  override def imagePath = "img/thumb/file.png"
+  override def buildPanelUIData(name: String) = new FilePrototypePanelUIData(name)
 }

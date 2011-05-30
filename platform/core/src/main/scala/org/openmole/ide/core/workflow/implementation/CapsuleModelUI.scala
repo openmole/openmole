@@ -18,21 +18,22 @@
 package org.openmole.ide.core.workflow.implementation
 
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
+import org.openmole.ide.core.palette.PaletteElementFactory
 
-class CapsuleModelUI(var taskUI: Option[TaskUI] = None, var nbInputSlots: Int = 0) extends ICapsuleModelUI{
+class CapsuleModelUI(var dataProxy: Option[PaletteElementFactory] = None, var nbInputSlots: Int = 0) extends ICapsuleModelUI{
 
   val category= "Task Tapsules"
   var startingCapsule = false
   var containsTask = false
   
-  def this(taskUI: TaskUI)= this(Some(taskUI))
+  //def this(pef: PaletteElementFactory)= this(Some(pef))
  
   def addInputSlot= nbInputSlots+= 1
   
   def removeInputSlot= nbInputSlots-= 1
   
-  def setTaskUI(tUI: TaskUI)={
-    taskUI= Some(tUI)
+  def setDataProxy(pef: PaletteElementFactory)={
+    dataProxy= Some(pef)
     containsTask= true
   }
   

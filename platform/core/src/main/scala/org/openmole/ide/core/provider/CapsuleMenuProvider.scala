@@ -25,7 +25,6 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction
-import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.action.AddInputSlotAction
 import org.openmole.ide.core.workflow.action.AddTaskAction
@@ -33,7 +32,6 @@ import org.openmole.ide.core.workflow.action.DefineMoleStartAction
 import org.openmole.ide.core.workflow.action.RemoveCapsuleAction
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import scala.collection.mutable.ListBuffer
 
 class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends GenericMenuProvider {
@@ -69,8 +67,8 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
          menus.remove(taskMenu)
          var colTask = new ListBuffer[JMenuItem]
          ElementFactories.getAll(Constants.TASK).foreach(t=> {
-             val it= new JMenuItem(t.entity.panelUIData.name + " :: " + ElementFactories.factories(t.entity).coreClass.getSimpleName)
-           it.addActionListener(new AddTaskAction(scene,capsuleView, t.entity.asInstanceOf[TaskUI]));
+             val it= new JMenuItem(t.panelUIData.name + " :: " + t.panelUIData.coreClass.getSimpleName)
+           it.addActionListener(new AddTaskAction(scene,capsuleView, t));
            colTask+= it
           })
       }
@@ -82,143 +80,9 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   def fillPrototypeMenu(t: IOType.Value)= {
     val prototypeCol = HashSet.empty[JMenuItem]
     ElementFactories.getAll(Constants.PROTOTYPE).foreach(p=> {
-        val it= new JMenuItem(p.entity.panelUIData.name + " :: " + ElementFactories.factories(p.entity).coreClass.getSimpleName);
-        it.addActionListener(new AddExistingPrototypeAction(p.entity, capsuleView, t));
+        val it= new JMenuItem(p.panelUIData.name + " :: " + p.panelUIData.coreClass.getSimpleName);
+        it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, t));
         prototypeCol.add(it)})
     prototypeCol.toSet
   }
 }
-
-//public JPopupMenu getPopupMenu(Widget widget, Point point) {
-//        //Update prototypes
-//        if (encapsulated) {
-//            Collection<JMenuItem> colI = fillPrototypeMenu(IOType.INPUT);
-//            Collection<JMenuItem> colO = fillPrototypeMenu(IOType.OUTPUT);
-//            if (!colI.isEmpty()) {
-//                menus.remove(inPrototypeMenu);
-//                menus.remove(outPrototypeMenu);
-//                inPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ", colI);
-//                outPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an output prototype ", colO);
-//                menus.add(inPrototypeMenu);
-//                menus.add(outPrototypeMenu);
-//            }
-//        }
-//        //Update tasks
-//        if (!TasksUI.getInstance().getAll().isEmpty()) {
-//            menus.remove(taskMenu);
-//            Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
-//            for (IEntityUI c : TasksUI.getInstance().getAll()) {
-//                JMenuItem it = new JMenuItem(c.getName() + " :: " + c.getType().getSimpleName());
-//                it.addActionListener(new AddTaskAction(scene,
-//                        capsuleView, (TaskUI) c));
-//                colTask.add(it);
-//            }
-//            taskMenu = PopupMenuProviderFactory.addSubMenu("Encapsulate a task ", colTask);
-//            menus.add(taskMenu);
-//        }
-//        itIS.setEnabled(!capsuleView.getCapsuleModel().isStartingCapsule());
-//
-//        retu
-
-
-//
-//import java.awt.Point;
-//import java.util.ArrayList;
-//import java.util.Collection;
-//import javax.swing.JMenu;
-//import javax.swing.JMenuItem;
-//import javax.swing.JPopupMenu;
-//import org.netbeans.api.visual.widget.Widget;
-//import org.openmole.ide.core.commons.IOType;
-//import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction;
-//import org.openmole.ide.core.workflow.action.AddInputSlotAction;
-//import org.openmole.ide.core.workflow.action.AddTaskAction;
-//import org.openmole.ide.core.workflow.action.DefineMoleStartAction;
-//import org.openmole.ide.core.workflow.action.RemoveCapsuleAction;
-//import org.openmole.ide.core.workflow.implementation.MoleScene;
-//import org.openmole.ide.core.workflow.implementation.CapsuleViewUI;
-//import org.openmole.ide.core.workflow.implementation.IEntityUI;
-//import org.openmole.ide.core.workflow.implementation.PrototypesUI;
-//import org.openmole.ide.core.workflow.implementation.TaskUI;
-//import org.openmole.ide.core.workflow.implementation.TasksUI;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class CapsuleMenuProvider extends GenericMenuProvider {
-//
-//    private JMenu inPrototypeMenu;
-//    private JMenu outPrototypeMenu;
-//    private JMenu taskMenu;
-//    private CapsuleViewUI capsuleView = null;
-//    private boolean encapsulated = false;
-//    JMenuItem itIS = new JMenuItem();
-//    MoleScene scene;
-//
-//    @Override
-//    public JPopupMenu getPopupMenu(Widget widget, Point point) {
-//        //Update prototypes
-//        if (encapsulated) {
-//            Collection<JMenuItem> colI = fillPrototypeMenu(IOType.INPUT);
-//            Collection<JMenuItem> colO = fillPrototypeMenu(IOType.OUTPUT);
-//            if (!colI.isEmpty()) {
-//                menus.remove(inPrototypeMenu);
-//                menus.remove(outPrototypeMenu);
-//                inPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ", colI);
-//                outPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an output prototype ", colO);
-//                menus.add(inPrototypeMenu);
-//                menus.add(outPrototypeMenu);
-//            }
-//        }
-//        //Update tasks
-//        if (!TasksUI.getInstance().getAll().isEmpty()) {
-//            menus.remove(taskMenu);
-//            Collection<JMenuItem> colTask = new ArrayList<JMenuItem>();
-//            for (IEntityUI c : TasksUI.getInstance().getAll()) {
-//                JMenuItem it = new JMenuItem(c.getName() + " :: " + c.getType().getSimpleName());
-//                it.addActionListener(new AddTaskAction(scene,
-//                        capsuleView, (TaskUI) c));
-//                colTask.add(it);
-//            }
-//            taskMenu = PopupMenuProviderFactory.addSubMenu("Encapsulate a task ", colTask);
-//            menus.add(taskMenu);
-//        }
-//        itIS.setEnabled(!capsuleView.getCapsuleModel().isStartingCapsule());
-//
-//        return super.getPopupMenu(widget, point);
-//    }
-//
-//    public CapsuleMenuProvider(MoleScene scene,
-//            CapsuleViewUI capsuleView) {
-//        super();
-//        this.capsuleView = capsuleView;
-//        this.scene = scene;
-//
-//        itIS = new JMenuItem("Add an input slot");
-//        itIS.addActionListener(new AddInputSlotAction(capsuleView));
-//        JMenuItem itR = new JMenuItem("Remove capsule");
-//        itR.addActionListener(new RemoveCapsuleAction(scene,capsuleView));
-//        JMenuItem itStart = new JMenuItem("Define as starting capsule");
-//        itStart.addActionListener(new DefineMoleStartAction(scene, capsuleView));
-//
-//        items.add(itIS);
-//        items.add(itR);
-//        items.add(itStart);
-//
-//    }
-//
-//    public void addTaskMenus() {
-//        encapsulated = true;
-//    }
-//
-//    public Collection<JMenuItem> fillPrototypeMenu(IOType type) {
-//        Collection<JMenuItem> prototypeCol = new ArrayList<JMenuItem>();
-//        for (IEntityUI p : PrototypesUI.getInstance().getAll()) {
-//            JMenuItem it = new JMenuItem(p.getName() + " :: " + p.getType().getSimpleName());
-//            it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, type));
-//            prototypeCol.add(it);
-//        }
-//        return prototypeCol;
-//    }
-//}

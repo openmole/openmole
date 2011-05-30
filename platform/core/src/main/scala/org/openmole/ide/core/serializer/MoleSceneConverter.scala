@@ -24,11 +24,11 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions._
 import java.awt.Point
+import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.workflow.implementation.TransitionUI
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.exception.MoleExceptionManagement
@@ -41,7 +41,7 @@ class MoleSceneConverter extends Converter{
     
     var firstSlotID = new HashMap[ICapsuleView, Int]
     var iSlotMapping = new HashMap[ISlotWidget, Int]
-    var taskUIs = new HashSet[TaskUI]
+    var taskUIs = new HashSet[TaskPanelUIData]
     
     val molescene= o.asInstanceOf[MoleScene]
     var slotcount = 0
@@ -71,9 +71,9 @@ class MoleSceneConverter extends Converter{
         
         //Task
         if (view.capsuleModel.containsTask) {
-          taskUIs.add(view.capsuleModel.taskUI.get)
+          taskUIs.add(view.capsuleModel.dataProxy.get.panelUIData)
           writer.startNode("task");
-          writer.addAttribute("name", view.capsuleModel.taskUI.get.panelUIData.name)
+          writer.addAttribute("name", view.capsuleModel.dataProxy.get.panelUIData.name)
           writer.endNode
         }
         writer.endNode
@@ -112,7 +112,7 @@ class MoleSceneConverter extends Converter{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot)
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> {
-                    caps.encapsule(ElementFactories.getPaletteElementFactory(Constants.TASK,reader.getAttribute("name")).entity.asInstanceOf[TaskUI])                   
+                    caps.encapsule(ElementFactories.getPaletteElementFactory(Constants.TASK,reader.getAttribute("name")))                   
                   }
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }

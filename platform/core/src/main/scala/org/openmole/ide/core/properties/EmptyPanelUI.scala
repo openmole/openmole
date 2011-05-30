@@ -19,8 +19,8 @@ package org.openmole.ide.core.properties
 
 class EmptyPanelUI extends PanelUI {
   
-  override def saveContent = new PanelUIData
+  override def saveContent(name: String) = (new Object).asInstanceOf[PanelUIData]
   
-  override def loadContent(pud: PanelUIData) = {} 
+  override def loadContent(pud: IPanelUIData) = {} 
 }
   

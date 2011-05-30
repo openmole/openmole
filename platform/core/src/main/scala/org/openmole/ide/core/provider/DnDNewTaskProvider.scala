@@ -20,12 +20,11 @@ package org.openmole.ide.core.provider
 import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.netbeans.api.visual.action.ConnectorState
 
 
@@ -33,13 +32,13 @@ import org.netbeans.api.visual.action.ConnectorState
 class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    if (transferable.isDataFlavorSupported(Constants.TASK_DATA_FLAVOR)) ConnectorState.ACCEPT
+    if (transferable.isDataFlavorSupported(Constants.ENTITY_DATA_FLAVOR)) ConnectorState.ACCEPT
     else ConnectorState.REJECT
   }
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
     val capsule = MoleScenesManager.createCapsule(molescene,point)
-    capsule.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[TaskUI])
+    capsule.encapsule(transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory])
     capsule.addInputSlot
     
     molescene.repaint

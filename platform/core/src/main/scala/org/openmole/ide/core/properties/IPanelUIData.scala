@@ -18,5 +18,17 @@
 package org.openmole.ide.core.properties
 
 trait IPanelUIData{
+  def name_=(s: String)
+  
   def name: String
+  
+  def entityType: String
+  
+  def coreClass: Class[_]
+  
+  def imagePath: String 
+  
+  def buildPanelUI: IPanelUI
+  
+  def coreObject: Object
 }

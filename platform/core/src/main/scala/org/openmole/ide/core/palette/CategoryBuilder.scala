@@ -18,7 +18,6 @@
 package org.openmole.ide.core.palette
 
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
@@ -39,7 +38,7 @@ class CategoryBuilder extends Children.Keys[ICategory]{
     super.addNotify
     
     setKeys(List(
-        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.TASK_DATA_FLAVOR)),
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.ENTITY_DATA_FLAVOR)),
         new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.ENTITY_DATA_FLAVOR)),
         new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.ENTITY_DATA_FLAVOR)),
         new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENTITY_DATA_FLAVOR))).toIterable)

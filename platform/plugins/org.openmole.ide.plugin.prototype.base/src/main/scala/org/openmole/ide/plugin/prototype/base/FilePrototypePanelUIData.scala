@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.workflow.implementation
+package org.openmole.ide.plugin.prototype.base
+import java.io.File
+import org.openmole.core.implementation.data.Prototype
 
-import org.openmole.ide.core.properties.PanelUIData
-import org.openmole.ide.core.workflow.model.IEntityUI
-
-class EntityUI(val entityType : String,var panelUIData: PanelUIData) extends IEntityUI{
- // lazy var panelUIData = ElementFactories.factories(this).buildPanelUIData
+class FilePrototypePanelUIData(name: String) extends PrototypePanelUIData(name){
   
-  override def updatePanelUIData(pud: PanelUIData) = panelUIData = pud
+  override def coreObject = new Prototype(name,classOf[File])
+  
+  override def imagePath = "img/thumb/file.png"
 }

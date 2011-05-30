@@ -17,13 +17,8 @@
 
 package org.openmole.ide.core.properties
 
-import java.awt.Color
+import org.openmole.ide.core.commons.Constants
 
 abstract class ITaskFactoryUI extends IFactoryUI{ 
-  
-  override def displayName = coreClass.getSimpleName 
-  
-  def borderColor: Color
-  
-  def backgroundColor: Color
+  override def entityType = Constants.TASK
 }

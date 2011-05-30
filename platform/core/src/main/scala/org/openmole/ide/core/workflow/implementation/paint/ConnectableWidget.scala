@@ -23,12 +23,11 @@ import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.properties.ExplorationPanelUIData
+import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import scala.collection.mutable.HashSet
 
 class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extends MyWidget(scene, capsuleView.capsuleModel){
@@ -60,8 +59,8 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     islots.clear
   }
   
-  def addSampling (taskUI: TaskUI)= {
-    samplingWidget = Some(new SamplingWidget(scene,capsuleView))
+  def addSampling= {
+    samplingWidget = Some(new SamplingWidget(scene,capsuleView.capsuleModel))
     addChild(samplingWidget.get) 
     taskHeight += 58
     setWidthHint
@@ -74,13 +73,13 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     graphics.setColor(new Color(204,204,204))
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
-    if (capsuleView.capsuleModel.taskUI.isDefined) {
-
+    if (capsuleView.capsuleModel.dataProxy.isDefined) {
+      val panelUIData = capsuleView.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
       var x = taskWidth / 2 + 5
       var i= 0
       var otherColumn = true
-      (capsuleView.capsuleModel.taskUI.get.prototypesIn.toList:::capsuleView.capsuleModel.taskUI.get.prototypesOut.toList).foreach(p=> {
-          if (i >= capsuleView.capsuleModel.taskUI.get.prototypesIn.size && otherColumn == true) {
+      (panelUIData.prototypesIn.toList:::panelUIData.prototypesOut.toList).foreach(p=> {
+          if (i >= panelUIData.prototypesIn.size && otherColumn == true) {
             i= 0
             x += taskWidth / 2 - 1
             otherColumn = false
@@ -88,20 +87,20 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
           var st = p.panelUIData.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h = 5 + Constants.TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
-          graphics.drawImage(Images.thumb(ElementFactories.factories(p).imagePath),x - taskWidth / 2, h ,new Container)
+          graphics.drawImage(Images.thumb(p.panelUIData.imagePath),x - taskWidth / 2, h ,new Container)
           graphics.setColor(new Color(102,102,102))
           if (MoleScenesManager.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
           i+= 1
         })
 
-      val newH= scala.math.max(capsuleView.capsuleModel.taskUI.get.prototypesIn.size, capsuleView.capsuleModel.taskUI.get.prototypesOut.size) * 22 + 45
+      val newH= scala.math.max(panelUIData.prototypesIn.size, panelUIData.prototypesOut.size) * 22 + 45
       val delta= bodyArea.height - newH
       if (delta < 0) {
         bodyArea.setSize(bodyArea.width, newH)
         enlargeWidgetArea(0, -delta)
       }
       var lineH = 0
-      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsuleView.capsuleModel.taskUI.get.panelUIData.asInstanceOf[ExplorationPanelUIData].sampling.isDefined * 58
+      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling.isDefined * 58
       graphics.drawLine(taskWidth / 2,
                         Constants.TASK_TITLE_HEIGHT,
                         taskWidth / 2,

@@ -19,16 +19,17 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.workflow.model.IEntityUI
+import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
 
-class AddExistingPrototypeAction(entity: IEntityUI,capsuleViewUI: CapsuleViewUI,t: IOType.Value) extends ActionListener{
+class AddExistingPrototypeAction(pef: PaletteElementFactory,capsuleViewUI: CapsuleViewUI,t: IOType.Value) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent) {
-    if (entity.entityType.equals(Constants.PROTOTYPE)) {
-      capsuleViewUI.capsuleModel.taskUI.get.addPrototype(entity, t)
+    if (pef.panelUIData.entityType.equals(Constants.PROTOTYPE)) {
+      capsuleViewUI.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].addPrototype(pef, t)
       capsuleViewUI.repaint
     }
   }

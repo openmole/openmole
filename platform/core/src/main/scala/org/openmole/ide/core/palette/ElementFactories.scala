@@ -19,6 +19,7 @@ package org.openmole.ide.core.palette
 
 import org.openide.util.Lookup
 import org.openmole.ide.core.properties.IFactoryUI
+import org.openmole.ide.core.properties.IPanelUIData
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
@@ -26,7 +27,6 @@ import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.model.IEntityUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.WeakHashMap
@@ -43,26 +43,31 @@ object ElementFactories {
                                Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
                                Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
   
-  var factories = new WeakHashMap[IEntityUI,IFactoryUI]
-  
   def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
     val li = new ListBuffer[ModelElementFactory]
-    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p.displayName,entityType,p)})
+    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p)})
     li
   }
 
-  def isExplorationTaskFactory(factory: IFactoryUI) = factory.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
+  def updateData(pud: IPanelUIData,oldName: String) = {
+//    val oldPud = getPanelUIData(pud.entityType, oldName)
+//    capsuleModels(oldPud).panelUIData = Some(pud)
+//    specificTaskPanelUIData.update(pud, specificTaskPanelUIData(oldPud))
+//    capsuleModels.update(pud,capsuleModels(oldPud))
+//    remove(oldPud)
+//    addElement(pud)
+    getPaletteElementFactory(pud.entityType,oldName).panelUIData = pud
+  }
   
-  def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.displayName).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def isExplorationTaskFactory(pud: IPanelUIData) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
+  
+  def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.panelUIData.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   
   def getAll(entityType: String) = paletteElements(entityType)
   
-  def addElement(pef: PaletteElementFactory,factory: IFactoryUI) = {
-    paletteElements(pef.entity.entityType) += pef
-    factories += pef.entity-> factory
-  }
+  def addElement(pef: PaletteElementFactory) = paletteElements(pef.panelUIData.entityType) += pef
   
-  def remove(pef: PaletteElementFactory) = paletteElements(pef.entity.entityType).remove(pef)
+  def remove(pef: PaletteElementFactory) = paletteElements(pef.panelUIData.entityType).remove(pef)
   
   def clearAll(entityType: String) = paletteElements(entityType).clear
   

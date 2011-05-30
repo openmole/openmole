@@ -10,9 +10,9 @@
  */
 package org.openmole.ide.plugin.task.groovy;
 
+import org.openmole.ide.core.properties.IPanelUIData;
 import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.PanelUIData;
-import org.openmole.plugin.task.groovy.GroovyTask;
 
 /**
  *
@@ -26,11 +26,11 @@ public class GroovyTaskPanelUI extends PanelUI {
         initComponents();
     }
 
-    public PanelUIData saveContent() {
-        return new GroovyTaskPanelUIData(jTextArea1.getText());
+    public IPanelUIData saveContent(String name) {
+        return new GroovyTaskPanelUIData(name,jTextArea1.getText());
     }
 
-    public void loadContent(PanelUIData pud) {
+    public void loadContent(IPanelUIData pud) {
         jTextArea1.setText(((GroovyTaskPanelUIData)pud).code());
     }
     /** This method is called from within the constructor to

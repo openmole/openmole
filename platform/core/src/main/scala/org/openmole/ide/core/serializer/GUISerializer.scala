@@ -25,12 +25,9 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.workflow.model.IEntityUI
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.workflow.implementation.EntityUI
+import org.openmole.ide.core.properties.IPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.TaskUI
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
 
@@ -40,8 +37,8 @@ object GUISerializer {
   xstream.registerConverter(new MoleSceneConverter)
   
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("entity", classOf[EntityUI])
-  xstream.alias("task", classOf[TaskUI])
+//  xstream.alias("entity", classOf[EntityUI])
+  xstream.alias("task", classOf[IPanelUIData])
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -50,16 +47,13 @@ object GUISerializer {
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
     //prototypes
-    ElementFactories.getAll(Constants.PROTOTYPE).foreach(pef=> out.writeObject(pef.entity))
+    ElementFactories.getAll(Constants.PROTOTYPE).foreach(pef=> out.writeObject(pef.panelUIData))
 
     //tasks
-    ElementFactories.getAll(Constants.TASK).foreach(pef=> out.writeObject(pef.entity))
+    ElementFactories.getAll(Constants.TASK).foreach(pef=> out.writeObject(pef.panelUIData))
         
     //samplings
-    ElementFactories.getAll(Constants.SAMPLING).foreach(pef=> out.writeObject(pef.entity))
-    
-    //factories
-    out.writeObject(ElementFactories.factories.toMap)
+    ElementFactories.getAll(Constants.SAMPLING).foreach(pef=> out.writeObject(pef.panelUIData))
 
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
@@ -78,7 +72,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x,ElementFactories.factories(x))
+       //   case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x)
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

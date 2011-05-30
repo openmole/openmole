@@ -17,15 +17,11 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.core.implementation.data.Prototype
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
-import org.openmole.ide.core.properties.PanelUIData
 
 class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "BigDecimal"
   
-  override def coreObject(pud: PanelUIData) = new Prototype(pud.name,BigDecimal.getClass)
-  
-  override def imagePath = "img/thumb/bigdecimal.png"
+  override def buildPanelUIData(name: String) = new BigDecimalPrototypePanelUIData(name)
 }

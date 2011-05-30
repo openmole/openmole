@@ -17,6 +17,8 @@
 
 package org.openmole.ide.core.properties
 
+import org.openmole.ide.core.commons.Constants
+
 trait ISamplingFactoryUI extends IFactoryUI { 
-  override def displayName = coreClass.getSimpleName
+  override def entityType = Constants.SAMPLING
 }
