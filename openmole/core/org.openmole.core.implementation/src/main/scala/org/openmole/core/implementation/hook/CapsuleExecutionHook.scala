@@ -25,6 +25,6 @@ abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGen
   
   CapsuleExecutionDispatcher += (moleExecution, capsule, this)
 
-  def jobStarting(moleJob: IMoleJob) = {}  
-  def jobFinished(moleJob: IMoleJob) = {}
+  def starting(moleJob: IMoleJob) = {}  
+  def finished(moleJob: IMoleJob) = {}
 }
