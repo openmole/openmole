@@ -68,20 +68,15 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    val tpud = capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
-    graphics.setColor(if(capsuleModel.dataProxy.isDefined) tpud.backgroundColor else new Color(204,204,204,128))
-    graphics.fill(bodyArea)
-    graphics.setColor(if(capsuleModel.dataProxy.isDefined) tpud.borderColor else new Color(204,204,204))
-
     if(capsuleModel.dataProxy.isDefined){
-      val stroke = new BasicStroke(1.3f, 1, 1)
-      graphics.draw(stroke.createStrokedShape(bodyArea))
-    
+      val tpud = capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
+      drawBox(graphics,tpud.backgroundColor,tpud.borderColor)
       graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)
       graphics.setFont(new Font("Ubuntu", Font.PLAIN, 15))
       graphics.drawString(tpud.name, 10, 15)
     }
+    else drawBox(graphics,new Color(204,204,204,128),new Color(204,204,204))
 
     /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
      taskImageOffset,
@@ -90,6 +85,13 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
      Constants.TASK_IMAGE_HEIGHT,
      capsuleModel.taskUI.get.factory.backgroundColor,
      new Container)*/
-     }
+  }
   
-     }
+  def drawBox(graphics: Graphics2D,c1: Color, c2: Color) = {
+    graphics.setColor(c1)
+    graphics.fill(bodyArea)
+    graphics.setColor(c2)
+    graphics.draw(new BasicStroke(1.3f, 1, 1).createStrokedShape(bodyArea))
+  }
+  
+}

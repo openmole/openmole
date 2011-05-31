@@ -26,6 +26,7 @@ import java.io.FileWriter
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.properties.IPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.MoleSceneTopComponent
@@ -72,7 +73,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-       //   case x: IEntityUI=> new PaletteElementFactory(x.panelUIData.name,x)
+          case x: IPanelUIData=> new PaletteElementFactory(x)
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

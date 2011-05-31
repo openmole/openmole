@@ -23,26 +23,5 @@ import org.openmole.ide.core.workflow.model.ICapsuleView
 
 class AddInputSlotAction(capsule: ICapsuleView) extends ActionListener{
   override def actionPerformed(ae: ActionEvent )= 
-    if (!capsule.capsuleModel.startingCapsule)  capsule.addInputSlot
+    if (!capsule.capsuleModel.startingCapsule) capsule.addInputSlot
 }
-
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.workflow.model.ICapsuleView;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class AddInputSlotAction implements ActionListener {
-//     private ICapsuleView capsule;
-//
-//     public AddInputSlotAction(ICapsuleView c){
-//        capsule = c;
-//     }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        capsule.addInputSlot();
-//    }
-//}

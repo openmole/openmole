@@ -23,10 +23,11 @@ import org.openmole.ide.core.workflow.action.AggregationTransitionAction
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
-class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget,edgeID: String) extends GenericMenuProvider {
-
-  val itemCondition = new JMenuItem("Edit condition")
-  val itemAggregation = new JMenuItem("Set as aggregation transition")
-  itemCondition.addActionListener(new AddTransitionConditionAction(scene.manager.getTransition(edgeID),connectionWidget))
-  itemAggregation.addActionListener(new AggregationTransitionAction)
-}
+class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget,edgeID: String) extends GenericMenuProvider {  
+  val itCond = new JMenuItem("Edit condition")
+  val itAgreg = new JMenuItem("Set as aggregation transition")
+  itCond.addActionListener(new AddTransitionConditionAction(scene.manager.getTransition(edgeID),connectionWidget))
+  itAgreg.addActionListener(new AggregationTransitionAction(scene.manager.getTransition(edgeID),connectionWidget))
+  items+= (itCond,itAgreg)
+  
+} 

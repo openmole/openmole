@@ -20,4 +20,4 @@ package org.openmole.ide.core.workflow.implementation
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.model.ICapsuleView
 
-class TransitionUI(val source: ICapsuleView,val target: ISlotWidget, var condition: Option[String]= None)
+class TransitionUI(val source: ICapsuleView,val target: ISlotWidget,var isAggregation: Boolean, var condition: Option[String]= None)

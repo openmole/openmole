@@ -28,26 +28,3 @@ class RemoveTransitionAction(scene: MoleScene, edgeID: String) extends ActionLis
     scene.removeEdge(edgeID)
   }
 }
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.workflow.implementation.MoleScene;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class RemoveTransitionAction implements ActionListener{
-//    private MoleScene scene;
-//    private String edgeID;
-//
-//    public RemoveTransitionAction(MoleScene scene, String edgeID) {
-//        this.scene = scene;
-//        this.edgeID = edgeID;
-//    }
-//    
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        scene.getManager().removeTransition(edgeID);
-//        scene.removeEdge(edgeID);
-//    }
-//}

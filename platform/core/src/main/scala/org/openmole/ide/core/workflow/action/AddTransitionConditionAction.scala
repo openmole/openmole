@@ -23,33 +23,5 @@ import org.openmole.ide.core.workflow.implementation.TransitionUI
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
 class AddTransitionConditionAction(transition: TransitionUI,connectionWidget: LabeledConnectionWidget) extends ActionListener{
-
   override def actionPerformed(ae: ActionEvent)= TransitionDialog.displayTransitionDialog(transition,connectionWidget)
 }
-//
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.dialog.TransitionDialog;
-//import org.openmole.ide.core.workflow.implementation.TransitionUI;
-//import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class AddTransitionConditionAction implements ActionListener {
-//
-//    TransitionUI transition;
-//    LabeledConnectionWidget connectionWidget;
-//
-//    public AddTransitionConditionAction(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
-//        this.transition = transition;
-//        this.connectionWidget = connectionWidget;
-//    }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        TransitionDialog.displayTransitionDialog(transition,connectionWidget);
-//    }
-//
-//}

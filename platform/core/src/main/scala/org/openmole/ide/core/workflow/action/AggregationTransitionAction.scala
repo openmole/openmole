@@ -19,9 +19,13 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import org.openmole.ide.core.workflow.implementation.TransitionUI
+import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
-class AggregationTransitionAction extends ActionListener{
-
-  override def actionPerformed(ae: ActionEvent)= println("Aggregation")
+class AggregationTransitionAction(transition: TransitionUI,connectionWidget: LabeledConnectionWidget) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent)= {
+    transition.isAggregation = true
+    connectionWidget.setAsAggregationTransition(true)
+  }
 
 }

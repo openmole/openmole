@@ -45,7 +45,6 @@ import org.openmole.ide.core.workflow.implementation.paint.OSlotWidget
 import org.netbeans.api.visual.action.ReconnectProvider
 import org.openmole.ide.core.workflow.implementation.paint.ISlotAnchor
 import org.openmole.ide.core.workflow.implementation.paint.OSlotAnchor
-import org.openmole.ide.core.workflow.action.TransitionActions
 import org.openmole.ide.core.provider.TransitionMenuProvider
 
 class MoleScene extends GraphScene.StringGraph with IMoleScene{
@@ -99,7 +98,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(reconnectAction)
-    connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
+   // connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
     connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget,e)));
     connectionWidget
   }
@@ -167,7 +166,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     override def resolveTargetWidget(scene: Scene, sceneLocation: Point): Widget= null
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
-      manager.registerTransition(new TransitionUI(sourceWidget.asInstanceOf[CapsuleViewUI], targetWidget.asInstanceOf[ISlotWidget]))
+      manager.registerTransition(new TransitionUI(sourceWidget.asInstanceOf[CapsuleViewUI], targetWidget.asInstanceOf[ISlotWidget],false))
       createEdge(source.get, target.get)
     }
   }
@@ -246,14 +245,14 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
       else if (reconnectingSource) {       
         println("reconnect else if ")
         setEdgeSource(edge.get, replacementNode.get)
-        manager.registerTransition(edge.get,new TransitionUI(replacementWidget.asInstanceOf[OSlotWidget].capsule, t.target))
+        manager.registerTransition(edge.get,new TransitionUI(replacementWidget.asInstanceOf[OSlotWidget].capsule, t.target,false,None))
       }
       else {
         println("reconnect else ")
         val targetView= replacementWidget.asInstanceOf[ISlotWidget]
         connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsuleView, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)
-        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView))
+        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView,false,None))
       }
       repaint
     }

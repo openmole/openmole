@@ -22,6 +22,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.properties.TaskPanelUIData
@@ -71,7 +72,7 @@ class MoleSceneConverter extends Converter{
         
         //Task
         if (view.capsuleModel.containsTask) {
-          taskUIs.add(view.capsuleModel.dataProxy.get.panelUIData)
+          taskUIs.add(view.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData])
           writer.startNode("task");
           writer.addAttribute("name", view.capsuleModel.dataProxy.get.panelUIData.name)
           writer.endNode
@@ -83,6 +84,7 @@ class MoleSceneConverter extends Converter{
         writer.startNode("transition");
         writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.capsuleModel.nbInputSlots).toString)
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
+        writer.addAttribute("aggregation", trans.isAggregation.toString)
         writer.addAttribute("condition", trans.condition.getOrElse(""))
         writer.endNode
       })
@@ -121,9 +123,8 @@ class MoleSceneConverter extends Converter{
           }
         case "transition"=> {
             val source = oslots(reader.getAttribute("source"))
-            val target = islots(reader.getAttribute("target"))
-            val condition = reader.getAttribute("condition")
-            scene.manager.registerTransition(new TransitionUI(source, target, Some(condition)))
+            val target = islots(reader.getAttribute("target"))             
+            scene.manager.registerTransition(new TransitionUI(source, target, reader.getAttribute("aggregation").toBoolean,Some(reader.getAttribute("condition"))))
             scene.createEdge(scene.manager.capsuleViewID(source), scene.manager.capsuleViewID(target.capsuleView))           
           }
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        

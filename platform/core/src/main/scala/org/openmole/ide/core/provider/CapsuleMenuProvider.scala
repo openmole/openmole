@@ -24,7 +24,6 @@ import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.workflow.action.AddExistingPrototypeAction
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.action.AddInputSlotAction
 import org.openmole.ide.core.workflow.action.AddTaskAction
@@ -32,12 +31,11 @@ import org.openmole.ide.core.workflow.action.DefineMoleStartAction
 import org.openmole.ide.core.workflow.action.RemoveCapsuleAction
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.commons.Constants
-import scala.collection.mutable.ListBuffer
 
 class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends GenericMenuProvider {
+  println("TransitionMenuProvider")
+  
   var encapsulated= false
-  var inPrototypeMenu= new JMenu
-  var outPrototypeMenu= new JMenu
   var taskMenu= new JMenu
   
   val itIS= new JMenuItem("Add an input slot")
@@ -53,36 +51,14 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   
   override def getPopupMenu(widget: Widget, point: Point)= {
     if (encapsulated) {
-      val colI= fillPrototypeMenu(IOType.INPUT)
-      val colO= fillPrototypeMenu(IOType.OUTPUT)
-      if (! colI.isEmpty){
-        menus.remove(inPrototypeMenu)  
-        menus.remove(outPrototypeMenu)    
-        inPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an input prototype ", colI)
-        outPrototypeMenu = PopupMenuProviderFactory.addSubMenu("Add an output prototype ", colO)
-        menus.add(inPrototypeMenu);
-        menus.add(outPrototypeMenu)
-      }
       if (! ElementFactories.getAll(Constants.TASK).isEmpty){
          menus.remove(taskMenu)
-         var colTask = new ListBuffer[JMenuItem]
          ElementFactories.getAll(Constants.TASK).foreach(t=> {
              val it= new JMenuItem(t.panelUIData.name + " :: " + t.panelUIData.coreClass.getSimpleName)
-           it.addActionListener(new AddTaskAction(scene,capsuleView, t));
-           colTask+= it
+           it.addActionListener(new AddTaskAction(scene,capsuleView, t))
           })
       }
     }
-    
     super.getPopupMenu(widget, point)
-  }
-  
-  def fillPrototypeMenu(t: IOType.Value)= {
-    val prototypeCol = HashSet.empty[JMenuItem]
-    ElementFactories.getAll(Constants.PROTOTYPE).foreach(p=> {
-        val it= new JMenuItem(p.panelUIData.name + " :: " + p.panelUIData.coreClass.getSimpleName);
-        it.addActionListener(new AddExistingPrototypeAction(p, capsuleView, t));
-        prototypeCol.add(it)})
-    prototypeCol.toSet
   }
 }

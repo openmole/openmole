@@ -32,16 +32,12 @@ import org.netbeans.api.visual.action.ConnectorState
 
 class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
   
-  println("---  DnDNewTaskProvider")
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    println("IS ACCEPTABLE")
-    println("????????' " + transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType)
     transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType match {
       case Constants.TASK=> ConnectorState.ACCEPT
       case _=> ConnectorState.REJECT
     }
-    //   ConnectorState.ACCEPT
   }
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {

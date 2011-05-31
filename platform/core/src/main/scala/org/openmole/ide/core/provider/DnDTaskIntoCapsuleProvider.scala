@@ -27,7 +27,6 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
   var encapsulated= false
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    println("INTO CAPSULE ????????' " + transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType)
     val ent = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType
     var state= ConnectorState.REJECT
     if (!encapsulated){
@@ -41,7 +40,6 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
         case _=> throw new GUIUserBadDataError("Unknown entity type")
       }
     }
-    println("STATE :: " + state)
     state
   }
   

@@ -34,32 +34,3 @@ class GenericMenuProvider extends IGenericMenuProvider{
     PopupMenuProviderFactory.fillPopupMenu(this)
   }
 }
-//
-//public class GenericMenuProvider implements IGenericMenuProvider {
-//
-//    protected Collection<JMenuItem> items = new ArrayList<JMenuItem>();
-//    protected Collection<JMenu> menus = new ArrayList<JMenu>();
-//    private Point currentPoint;
-//
-//    @Override
-//    public Collection<JMenuItem> getItems() {
-//        return items;
-//    }
-//
-//    @Override
-//    public Collection<JMenu> getMenus() {
-//        return menus;
-//    }
-//
-//    @Override
-//    public Point getCurrentPoint() {
-//        return currentPoint;
-//    }
-//
-//    @Override
-//    public JPopupMenu getPopupMenu(Widget widget, Point point) {
-//        currentPoint = point;
-//        return PopupMenuProviderFactory.fillPopupMenu(this);
-//    }
-//
-//}
