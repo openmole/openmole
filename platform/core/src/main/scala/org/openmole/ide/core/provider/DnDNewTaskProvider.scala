@@ -21,8 +21,9 @@ import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.palette.PaletteElementFactory
+import org.openmole.ide.core.properties.IPanelUIData
+import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
 import org.netbeans.api.visual.action.ConnectorState
@@ -30,10 +31,17 @@ import org.netbeans.api.visual.action.ConnectorState
 
 
 class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
+  
+  println("---  DnDNewTaskProvider")
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    if (transferable.isDataFlavorSupported(Constants.ENTITY_DATA_FLAVOR)) ConnectorState.ACCEPT
-    else ConnectorState.REJECT
+    println("IS ACCEPTABLE")
+    println("????????' " + transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType)
+    transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory].panelUIData.entityType match {
+      case Constants.TASK=> ConnectorState.ACCEPT
+      case _=> ConnectorState.REJECT
+    }
+    //   ConnectorState.ACCEPT
   }
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {

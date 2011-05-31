@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.workflow.implementation
@@ -8,36 +20,4 @@ package org.openmole.ide.core.workflow.implementation
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.model.ICapsuleView
 
-class TransitionUI(val source: ICapsuleView,val target: ISlotWidget, var condition: Option[String]= None){}
-
-
-//    private ICapsuleView source;
-//    private ISlotWidget target;
-//    private String condition = "";
-//
-//
-//    public TransitionUI(ICapsuleView source, ISlotWidget target) {
-//        this.source = source;
-//        this.target = target;
-//    }
-//
-//    public TransitionUI(ICapsuleView source, ISlotWidget target,String condition) {
-//        this(source,target);
-//        this.condition = condition;
-//    }
-//
-//    public ICapsuleView getSource() {
-//        return source;
-//    }
-//
-//    public ISlotWidget getTarget() {
-//        return target;
-//    }
-//
-//    public String getCondition() {
-//        return condition;
-//    }
-//
-//    public void setCondition(String condition) {
-//        this.condition = condition;
-//    }
+class TransitionUI(val source: ICapsuleView,val target: ISlotWidget, var condition: Option[String]= None)

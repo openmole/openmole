@@ -27,37 +27,6 @@ class TransitionActions(transition: TransitionUI,connectionWidget: LabeledConnec
 
   override def mouseClicked(widget: Widget, event: WidgetAction.WidgetMouseEvent)= {
     if (event.getClickCount == 2) TransitionDialog.displayTransitionDialog(transition, connectionWidget)
-    WidgetAction.State.REJECTED       
+    WidgetAction.State.REJECTED  
   }
 }
-//import org.netbeans.api.visual.action.WidgetAction;
-//import org.netbeans.api.visual.widget.Widget;
-//import org.openmole.ide.core.dialog.TransitionDialog;
-//import org.openmole.ide.core.workflow.implementation.TransitionUI;
-//import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class TransitionActions extends WidgetAction.Adapter {
-//
-//    TransitionUI transition;
-//    LabeledConnectionWidget connectionWidget;
-//
-//    public TransitionActions(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
-//        System.out.println("TransitionActions constructor   ");
-//        this.transition = transition;
-//        this.connectionWidget = connectionWidget;
-//    }
-//
-//    @Override
-//    public State mouseClicked(Widget widget,
-//            WidgetMouseEvent event) {
-//        System.out.println(" - mouseClicked - " + transition);
-//        if (event.getClickCount() == 2) {
-//            TransitionDialog.displayTransitionDialog(transition, connectionWidget);
-//        }
-//        return State.REJECTED;
-//    }
-//}
