@@ -110,8 +110,17 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
 
-  override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = { 
-    val job = new MoleJob(taskOrException, context, jobId)
+  override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = {
+    val task = taskOrException
+    
+    for (parameter <- task.parameters) {
+      if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) {
+        context += parameter.variable
+      }
+    }
+
+    val job = new MoleJob(task, context, jobId)
+    
     EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
     job
   }

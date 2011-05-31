@@ -15,22 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.hook
+package org.openmole.core.model.hook
 
-import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
-import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
 
-abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value) extends ICapsuleExecutionHook {
-  
-  CapsuleExecutionDispatcher += (moleExecution, capsule, this)
-
-  def process(moleJob: IMoleJob, event: CapsuleEvent.Value) = {
-    if(expectedEvent == All || event == expectedEvent) process(moleJob)
-  }
-  
-  def process(moleJob: IMoleJob)
+trait ICapsuleExecutionHook extends IHook {
+  def process(moleJob: IMoleJob, event: CapsuleEvent.Value)
 }

@@ -109,13 +109,19 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.filemanagement</artifactId>
+            <artifactId>org.openmole.plugin.task.templatefilegenerator</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.task.structuregeneration</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.task.templatefilegenerator</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -193,7 +199,13 @@
         </dependency>
     	<dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.profiler.csv</artifactId>
+            <artifactId>org.openmole.plugin.hook.csvprofiler</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+    	<dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.hook.filemanagement</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

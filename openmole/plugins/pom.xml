@@ -34,9 +34,10 @@
         <module>org.openmole.plugin.task.systemexec</module>
         <module>org.openmole.plugin.task.code</module>
         <module>org.openmole.plugin.task.groovy</module>
-        <module>org.openmole.plugin.task.filemanagement</module>
+        <module>org.openmole.plugin.task.templatefilegenerator</module>
         <module>org.openmole.plugin.task.datasetdistribution</module>
 	<module>org.openmole.plugin.task.structuregeneration</module>
+	<module>org.openmole.plugin.hook.filemanagement</module>
         <module>org.openmole.plugin.domain.range</module>
         <module>org.openmole.plugin.domain.relative</module>
         <module>org.openmole.plugin.domain.distribution</module>
@@ -49,7 +50,7 @@
         <module>org.openmole.plugin.sampling.combine</module>
         <module>org.openmole.plugin.sampling.filter</module>
 	<module>org.openmole.plugin.sampling.loader</module>
-        <module>org.openmole.plugin.profiler.csv</module>
+        <module>org.openmole.plugin.hook.csvprofiler</module>
 	<module>org.openmole.plugin.instantrerun.filesystem</module>
     </modules>
 

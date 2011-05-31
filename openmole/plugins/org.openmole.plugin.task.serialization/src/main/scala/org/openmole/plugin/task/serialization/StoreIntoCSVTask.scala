@@ -21,19 +21,21 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.workspace.Workspace
 
 /**
  * The StoreIntoCSVTask task is dedicated to the storage of data of the workflow
  * into CSV files. It is in particular possible to store data (as prototypes) aggregated in an
  * array. The number of data to store in columns is not limited.
  */
-class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IPrototype[Array[_]], String)],delimiter: Char, quoteChar: Char) extends Task(name) {
+class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], String)], filePrototype: IPrototype[File], delimiter: Char, quoteChar: Char) extends Task(name) {
 
+  addOutput(filePrototype)
+  
   /**
    * Creates an instance of StoreIntoCSVTask with a specific delimiter and
    * quote character
@@ -45,7 +47,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IProto
    * @throws UserBadDataError
    * @throws InternalProcessingError
    */
-  def this(name: String, fileName: String, delimiter: Char, quotechar: Char) = this(name, fileName, List.empty, delimiter, quotechar)
+  def this(name: String, file: IPrototype[File], delimiter: Char, quotechar: Char) = this(name, List.empty, file, delimiter, quotechar)
 
   /**
    * Creates an instance of StoreIntoCSVTask with a specific delimiter and default
@@ -57,7 +59,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IProto
    * @throws UserBadDataError
    * @throws InternalProcessingError
    */
-  def this(name: String, fileName: String, delimiter: Char) = this(name, fileName, delimiter, CSVWriter.NO_QUOTE_CHARACTER)
+  def this(name: String, file: IPrototype[File], delimiter: Char) = this(name, file, delimiter, CSVWriter.NO_QUOTE_CHARACTER)
 
   
   /**
@@ -69,9 +71,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IProto
    * @throws UserBadDataError
    * @throws InternalProcessingError
    */
-  def this(name: String, fileName: String) = this(name, fileName, ',')
-
-
+  def this(name: String, file: IPrototype[File]) = this(name, file, ',')
 
   /**
    * Add a prototype to be stored
@@ -95,8 +95,7 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IProto
   override def process(context: IContext, progress: IProgress) = {
     val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
 
-    val file = new File(VariableExpansion.expandData(context, fileName))
-    file.getParentFile.mkdirs
+    val file = Workspace.newFile("storeIntoCSV", ".csv")
     val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quoteChar)
 
     try {
@@ -107,9 +106,10 @@ class StoreIntoCSVTask(name: String, fileName: String, var columns: List[(IProto
       val listSize = valuesList.map{_.size}.min
             
       //body
-      for (i <- 0 until listSize) {
+      for (i <- 0 until listSize) 
         writer.writeNext(columnIts.map{elt => val s = elt.next; if(s != null) s.toString; else "null"}.toArray)
-      }
+      
     } finally writer.close
+    context += filePrototype -> file
   }
 }

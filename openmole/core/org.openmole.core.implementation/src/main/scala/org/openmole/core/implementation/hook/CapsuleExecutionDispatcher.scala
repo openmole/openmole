@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.hook
 
-
+import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
@@ -36,11 +36,11 @@ object CapsuleExecutionDispatcher {
     private val hub = new WeakHashMap[IGenericCapsule, ListBuffer[CapsuleExecutionHook]]
 
     override def jobInCapsuleStarting(moleJob: IMoleJob, capsule: IGenericCapsule) = hub.synchronized {
-      hub.getOrElse(capsule, Iterable.empty).foreach(_.starting(moleJob))
+      hub.getOrElse(capsule, Iterable.empty).foreach(_.process(moleJob, Starting))
     }
     
     override def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = hub.synchronized {
-      hub.getOrElse(capsule, Iterable.empty).foreach(_.finished(moleJob))
+      hub.getOrElse(capsule, Iterable.empty).foreach(_.process(moleJob, Finished))
     }
     
     def +=(capsule: IGenericCapsule, hook: CapsuleExecutionHook) = hub.synchronized {

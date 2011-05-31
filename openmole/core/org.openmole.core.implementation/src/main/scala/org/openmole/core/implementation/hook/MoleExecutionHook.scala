@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.hook
 
+import org.openmole.core.model.hook.IMoleExecutionHook
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IHook
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.misc.eventdispatcher.IObjectListener
@@ -27,7 +27,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
-class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]) extends IHook {
+class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]) extends IMoleExecutionHook {
   
   def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
   

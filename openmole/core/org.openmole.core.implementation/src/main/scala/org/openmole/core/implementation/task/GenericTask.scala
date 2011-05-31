@@ -78,16 +78,9 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     context ++= vars
   }
 
-  private def init(context: IContext) = {
-    for (parameter <- parameters) {
-      if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) {
-        context += parameter.variable
-      }
-    }
-
-    verifyInput(context)
-  }
-
+  private def init(context: IContext) = verifyInput(context)
+  private def end(context: IContext) = filterOutput(context)
+  
   /**
    * The main operation of the processor.
    * @param context
@@ -109,8 +102,6 @@ abstract class GenericTask(val name: String) extends IGenericTask {
       case e => throw new InternalProcessingError(e, "Error in task " + name)
     }
   }
-
-  private def end(context: IContext) = filterOutput(context)
 
   override def addOutput(prototype: IPrototype[_]): this.type = addOutput(new Data(prototype))
 
