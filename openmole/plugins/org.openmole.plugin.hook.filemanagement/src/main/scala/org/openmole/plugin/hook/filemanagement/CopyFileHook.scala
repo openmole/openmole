@@ -40,7 +40,7 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expe
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String, Boolean)]()
   val listToCopyWithNameInVariable = new ListBuffer[(IPrototype[Array[File]],IPrototype[Array[String]], String, Boolean)]()
 
-  override def process(moleJob: IMoleJob)  {
+  override def process(moleJob: IMoleJob) = {
     import moleJob.context
     
     toCopy.foreach {
