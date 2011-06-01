@@ -72,16 +72,20 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     public void displayCurrentEntity(PaletteElementFactory pef) {
         currentPaletteElementFactory = pef;
-        currentPanelUI = pef.panelUIData().buildPanelUI();
+    //    if (pef.panelUIData().hasPanelUI()) {
+            currentPanelUI = pef.panelUIData().buildPanelUI();
+      //  }
 
         nameTextField.setText(pef.panelUIData().name());
         typeComboBox.removeAllItems();
-        typeComboBox.setEnabled(false);
+        //  typeComboBox.setEnabled(false);
 
-        currentPanelUI.loadContent(currentPaletteElementFactory.panelUIData());
-
-        updateViewport((JPanel) currentPanelUI);
-        entityPanelScrollPane.setVisible(true);
+     //   if (pef.panelUIData().hasPanelUI()) {
+            currentPanelUI.loadContent(currentPaletteElementFactory.panelUIData());
+            updateViewport((JPanel) currentPanelUI);
+            entityPanelScrollPane.setVisible(true);
+      //  }
+        
         locked.put(pef.panelUIData().entityType(), false);
         initEntity = false;
     }
@@ -105,7 +109,7 @@ public class PropertyPanel extends javax.swing.JPanel {
             if (currentPaletteElementFactory != null) {
                 if (currentPanelUI != null) {
                     IPanelUIData pdata = currentPanelUI.saveContent(nameTextField.getText());
-                    ElementFactories.updateData(pdata,currentPaletteElementFactory.panelUIData().name());
+                    ElementFactories.updateData(pdata, currentPaletteElementFactory.panelUIData().name());
                     //currentPanelUIData.updatePanelUIData(pdata);
                 }
             }

@@ -24,4 +24,6 @@ class FilePrototypePanelUIData(name: String) extends PrototypePanelUIData(name){
   override def coreObject = new Prototype(name,classOf[File])
   
   override def imagePath = "img/thumb/file.png"
+  
+  override def buildPanelUI = new FilePrototypePanelUI
 }

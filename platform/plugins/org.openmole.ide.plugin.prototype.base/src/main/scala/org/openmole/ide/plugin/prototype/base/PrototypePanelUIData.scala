@@ -23,7 +23,6 @@ import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.core.implementation.data.Prototype
 
 abstract class PrototypePanelUIData(name: String) extends PanelUIData(name,Constants.PROTOTYPE){
-  override def buildPanelUI = new EmptyPanelUI
   
   override def coreClass = classOf[Prototype[_]]
 }

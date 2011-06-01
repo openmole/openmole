@@ -14,16 +14,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.plugin.prototype.base;
 
-package org.openmole.ide.plugin.prototype.base
+import org.openmole.ide.core.properties.IPanelUIData;
+import org.openmole.ide.core.properties.PanelUI;
+import org.openmole.ide.plugin.prototype.base.FilePrototypePanelUIData;
 
-import org.openmole.core.implementation.data.Prototype
+/**
+ *
+ * @author mathieu
+ */
+public class FilePrototypePanelUI extends PanelUI {
+    
+    public IPanelUIData saveContent(String name) {
+        return new FilePrototypePanelUIData(name);
+    }
 
-class StringPrototypePanelUIData(name: String) extends PrototypePanelUIData(name) {
-  
-  override def coreObject = new Prototype(name,classOf[String])
-  
-  override def imagePath = "img/thumb/string.png"
-  
-  override def buildPanelUI = new StringPrototypePanelUI
+    public void loadContent(IPanelUIData pud) {
+    }
+    
 }

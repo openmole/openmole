@@ -24,4 +24,6 @@ class BigDecimalPrototypePanelUIData(name: String) extends PrototypePanelUIData(
   override def coreObject = new Prototype(name,BigDecimal.getClass)
   
   override def imagePath = "img/thumb/bigdecimal.png"
+  
+  override def buildPanelUI = new BigDecimalPrototypePanelUI
 }
