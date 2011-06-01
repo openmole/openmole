@@ -32,17 +32,15 @@ object ToArrayFinder {
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     var forceArray = new TreeSet[String]
     
-    for(t <- slot.transitions ; output <- t.start.userOutputs){
-      if(!t.filtered.contains(output.prototype.name)) {
-        toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
-        if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
-      }
+    for(t <- slot.transitions ; output <- t.unFiltred) {
+      toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
+      if(classOf[IAggregationTransition].isAssignableFrom(t.getClass)) forceArray += output.prototype.name
     }
        
     for(d <- slot.capsule.inputDataChannels.flatMap(_.data)) {
       toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
     }
     
-    TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection( elt._2: _*)}
+    TreeMap.empty[String, Manifest[_]] ++ toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).map{elt => elt._1 -> intersection(elt._2: _*)}
   }
 }

@@ -209,6 +209,12 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
+    	<dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.hook.display</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.instantrerun.filesystem</artifactId>

@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.execution
 
-import org.openmole.core.implementation.tools.WeakRegistry
+import org.openmole.misc.tools.collection.WeakRegistry
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.mole.IMoleExecution
 

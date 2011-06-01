@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.tools.WeakRegistry
+import org.openmole.misc.tools.collection.WeakRegistry
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution

@@ -74,6 +74,8 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
+  override def unFiltred = start.userOutputs.filterNot(d => filtered.contains(d.prototype.name))
+  
   protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) 
   protected def plugStart
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.misc.tools.collection
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap

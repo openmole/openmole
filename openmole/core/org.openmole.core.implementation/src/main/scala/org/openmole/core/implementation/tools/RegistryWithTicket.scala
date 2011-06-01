@@ -19,6 +19,7 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.tools.IRegistryWithTicket
+import org.openmole.misc.tools.collection.Registry
 import scala.collection.mutable.WeakHashMap
 
 class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
