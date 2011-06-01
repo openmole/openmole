@@ -92,7 +92,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   } 
 
   override def attachEdgeWidget(e: String)= {
-    val connectionWidget = new LabeledConnectionWidget(this,manager.getTransition(e).condition)
+    val connectionWidget = new LabeledConnectionWidget(this,manager.getTransition(e))
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget.getActions.addAction(createObjectHoverAction)

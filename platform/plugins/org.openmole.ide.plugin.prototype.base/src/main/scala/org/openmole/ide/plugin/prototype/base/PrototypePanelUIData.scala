@@ -18,7 +18,6 @@
 package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.properties.EmptyPanelUI
 import org.openmole.ide.core.properties.PanelUIData
 import org.openmole.core.implementation.data.Prototype
 
