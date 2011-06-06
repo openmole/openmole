@@ -23,6 +23,7 @@ import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.provider.CapsuleMenuProvider
+import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
@@ -50,7 +51,7 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
   
   override def encapsule(pef: PaletteElementFactory)= {
     capsuleModel.setDataProxy(pef)
-    if (ElementFactories.isExplorationTaskFactory(pef.panelUIData)) connectableWidget.addSampling
+    if (capsuleModel.capsuleType == EXPLORATION_TASK) connectableWidget.addSampling
     dndTaskIntoCapsuleProvider.encapsulated= true
     capsuleMenuProvider.addTaskMenus
   }

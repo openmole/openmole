@@ -20,8 +20,8 @@ package org.openmole.ide.core.serializer
 import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IExplorationCapsule
 import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.ide.core.control.MoleScenesManager.TransitionType._
-import org.openmole.ide.core.control.MoleScenesManager.CapsuleType._
+import org.openmole.ide.core.commons.TransitionType._
+import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.capsule._
@@ -70,8 +70,8 @@ object MoleMaker {
       case x: IExplorationCapsule=> new ExplorationTransition(x,targetCapsule)
       case z: ICapsule => {
           t.transitionType match {
-            case AGGREGATION=> new AggregationTransition(z,targetCapsule)
-            case BASIC=> new Transition(z,targetCapsule) 
+            case AGGREGATION_TRANSITION=> new AggregationTransition(z,targetCapsule)
+            case BASIC_TRANSITION=> new Transition(z,targetCapsule) 
           }
         }
       case _=> throw new GUIUserBadDataError("No matching type for capsule " + sourceCapsule +". The transition can not be built")

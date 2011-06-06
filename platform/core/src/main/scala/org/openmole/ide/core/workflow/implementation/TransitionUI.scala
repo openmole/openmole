@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.workflow.implementation
 
-import org.openmole.ide.core.control.MoleScenesManager.TransitionType
+import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.model.ICapsuleView
 

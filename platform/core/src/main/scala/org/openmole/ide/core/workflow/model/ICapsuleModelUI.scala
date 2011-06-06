@@ -5,7 +5,7 @@
 
 package org.openmole.ide.core.workflow.model
 
-import org.openmole.ide.core.control.MoleScenesManager.CapsuleType
+import org.openmole.ide.core.commons.CapsuleType
 import org.openmole.ide.core.palette.PaletteElementFactory
 
 trait ICapsuleModelUI {

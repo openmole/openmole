@@ -27,12 +27,13 @@ import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.control.MoleScenesManager.CapsuleType._
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.TransitionUI
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
+import org.openmole.ide.core.commons.CapsuleType._
+import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.exception.MoleExceptionManagement
 import org.openmole.ide.core.workflow.model.ICapsuleView
 import scala.collection.mutable.HashMap
@@ -85,7 +86,9 @@ class MoleSceneConverter extends Converter{
         writer.startNode("transition");
         writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.capsuleModel.nbInputSlots).toString)
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
-        writer.addAttribute("type", trans.transitionType.toString)
+        writer.addAttribute("type", TransitionType.toString(trans.transitionType))
+        
+    println("cond un transisiton serialisation:: " + trans.condition)
         writer.addAttribute("condition", trans.condition.getOrElse(""))
         writer.endNode
       })
@@ -125,7 +128,7 @@ class MoleSceneConverter extends Converter{
         case "transition"=> {
             val source = oslots(reader.getAttribute("source"))
             val target = islots(reader.getAttribute("target"))             
-            scene.manager.registerTransition(new TransitionUI(source, target, MoleScenesManager.stringToTransitionType(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
+            scene.manager.registerTransition(new TransitionUI(source, target, TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
             scene.createEdge(scene.manager.capsuleViewID(source), scene.manager.capsuleViewID(target.capsuleView))           
           }
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        

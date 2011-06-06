@@ -11,6 +11,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.model.ICapsuleView
 import org.openmole.ide.core.palette.PaletteElementFactory
+import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.properties.IPanelUIData
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.TaskPanelUIData
@@ -35,7 +36,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
     else {
       ent match {
         case Constants.PROTOTYPE=> state = ConnectorState.ACCEPT
-        case Constants.SAMPLING=> if (ElementFactories.isExplorationTaskFactory(capsuleView.capsuleModel.dataProxy.get.panelUIData)) state = ConnectorState.ACCEPT
+        case Constants.SAMPLING=> if (capsuleView.capsuleModel.capsuleType == EXPLORATION_TASK) state = ConnectorState.ACCEPT
         case Constants.ENVIRONMENT=> println("envir"); state = ConnectorState.ACCEPT
         case _=> throw new GUIUserBadDataError("Unknown entity type")
       }
@@ -45,21 +46,18 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {  
     val pef = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory]
-    val capsulePanelData = capsuleView.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
     pef.panelUIData.entityType match{
-      case Constants.TASK=>{
-          println("TASK !!" )
-          capsuleView.encapsule(pef)
-          capsuleView.addInputSlot
-        }
+      case Constants.TASK=> capsuleView.encapsule(pef)
       case Constants.PROTOTYPE=> { 
           println("PROTO !!" )
-          if (point.x < capsuleView.connectableWidget.widgetWidth / 2) capsulePanelData.addPrototype(pef, IOType.INPUT)
-          else capsulePanelData.addPrototype(pef, IOType.OUTPUT)
+          if (point.x < capsuleView.connectableWidget.widgetWidth / 2) capsulePanelUIData.addPrototype(pef, IOType.INPUT)
+          else capsulePanelUIData.addPrototype(pef, IOType.OUTPUT)
         }
-      case Constants.SAMPLING=> capsulePanelData.sampling = Some(pef)
+      case Constants.SAMPLING=> capsulePanelUIData.sampling = Some(pef)
     }
     molescene.repaint
     molescene.revalidate
   }
+  
+  def capsulePanelUIData = capsuleView.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
 }

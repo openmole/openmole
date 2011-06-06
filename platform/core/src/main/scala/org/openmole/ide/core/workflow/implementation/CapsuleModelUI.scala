@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.workflow.implementation
 
-import org.openmole.ide.core.control.MoleScenesManager.CapsuleType._
+import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory

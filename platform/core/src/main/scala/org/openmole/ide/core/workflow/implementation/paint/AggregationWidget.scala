@@ -21,9 +21,8 @@ import java.awt.Container
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget.LabelWidget
 import org.netbeans.api.visual.widget.Scene
-import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.control.MoleScenesManager.TransitionType._
+import org.openmole.ide.core.commons.TransitionType._
 import org.openmole.ide.core.workflow.implementation.TransitionUI
 
 //class AggregationWidget (val scene: Scene, transition: TransitionUI) extends Widget(scene) {
@@ -31,7 +30,7 @@ class AggregationWidget (val scene: Scene, transition: TransitionUI) extends Lab
 
   override def paintWidget= {
     super.paintWidget
-    if (transition.transitionType == AGGREGATION){
+    if (transition.transitionType == AGGREGATION_TRANSITION){
       val g = getGraphics.asInstanceOf[Graphics2D]
       g.drawImage(ImageUtilities.loadImage("/home/mathieu/Bureau/cubes.png"),0,0,new Container)
       println("AGGREG")

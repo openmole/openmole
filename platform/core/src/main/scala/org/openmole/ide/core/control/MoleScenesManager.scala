@@ -41,26 +41,7 @@ object MoleScenesManager extends TabManager{
                                            Constants.PROTOTYPE-> new AtomicInteger(0), 
                                            Constants.ENVIRONMENT-> new AtomicInteger(0),
                                            Constants.SAMPLING-> new AtomicInteger(0))
-  
-  object TransitionType extends Enumeration {
-    type TransitionType= Value
-    val BASIC,EXPLORATION,AGGREGATION= Value
-  }
-  
-  object CapsuleType extends Enumeration {
-    type CapsuleType= Value
-    val CAPSULE,EXPLORATION_TASK,BASIC_TASK= Value
-  }
-  
-  def stringToTransitionType(transitionString: String) ={
-    transitionString match {
-      case "BASIC" => TransitionType.BASIC
-      case "EXPLORATION"=> TransitionType.EXPLORATION
-      case "AGGREGATION"=> TransitionType.AGGREGATION
-      case _=> throw new GUIUserBadDataError("Unknown transition type " + transitionString)
-    }
-  }
-  
+   
   def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString  
     
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {

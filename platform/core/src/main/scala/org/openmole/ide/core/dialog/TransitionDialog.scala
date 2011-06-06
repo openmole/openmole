@@ -26,27 +26,8 @@ object TransitionDialog {
     val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", transition.condition)
     if (cond.isEmpty) transition.condition = None
     else transition.condition = Some(cond)
+    println("cond un transisiton :: " + transition.condition)
     connectionWidget.setConditionLabel(transition.condition)
     connectionWidget.scene.validate
   }
 }
-
-//import javax.swing.JOptionPane;
-//import org.openmole.ide.core.workflow.implementation.TransitionUI;
-//import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class TransitionDialog {
-//
-//    public static void displayTransitionDialog(TransitionUI transition, LabeledConnectionWidget connectionWidget) {
-//        String cond = JOptionPane.showInputDialog(null, "Edit transition condition:", transition.getCondition());
-//        if (cond != null) {
-//            connectionWidget.setConditionLabel(cond);
-//            transition.setCondition(cond);
-//            connectionWidget.getScene().validate();
-//        }
-//    }
-//}

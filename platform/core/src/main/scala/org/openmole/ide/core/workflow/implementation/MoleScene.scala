@@ -44,7 +44,8 @@ import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidg
 import org.openmole.ide.core.workflow.implementation.paint.OSlotWidget
 import org.netbeans.api.visual.action.ReconnectProvider
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.control.MoleScenesManager.TransitionType._
+import org.openmole.ide.core.commons.CapsuleType._
+import org.openmole.ide.core.commons.TransitionType._
 import org.openmole.ide.core.workflow.implementation.paint.ISlotAnchor
 import org.openmole.ide.core.workflow.implementation.paint.OSlotAnchor
 import org.openmole.ide.core.provider.TransitionMenuProvider
@@ -100,7 +101,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(reconnectAction)
-   // connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
+    // connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
     connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget,e)));
     connectionWidget
   }
@@ -169,7 +170,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
       val sourceCapsuleView = sourceWidget.asInstanceOf[CapsuleViewUI]
-      manager.registerTransition(new TransitionUI(sourceCapsuleView, targetWidget.asInstanceOf[ISlotWidget],if (ElementFactories.isExplorationTaskFactory(sourceCapsuleView.capsuleModel.dataProxy.get.panelUIData)) EXPLORATION else BASIC))
+      manager.registerTransition(new TransitionUI(sourceCapsuleView, targetWidget.asInstanceOf[ISlotWidget],if (sourceCapsuleView.capsuleModel.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION))
       createEdge(source.get, target.get)
     }
   }
@@ -224,17 +225,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
         case _=> return ConnectorState.REJECT_AND_STOP
       }
     }
-   //            Object object = findObject(replacementWidget);
-//            replacementNode = isNode(object) ? (String) object : null;
-//            if (replacementWidget.getClass().equals(OSlotWidget.class)) {
-//                OSlotWidget ow = (OSlotWidget) replacementWidget;
-//                return ConnectorState.ACCEPT;
-//            } else if (replacementWidget.getClass().equals(ISlotWidget.class)) {
-//                ISlotWidget iw = (ISlotWidget) replacementWidget;
-//                MoleScene.this.currentSlotIndex = iw.getIndex();
-//                return ConnectorState.ACCEPT;
-//            }
-//            return object != null ? ConnectorState.REJECT_AND_STOP : ConnectorState.REJECT;
+    
     override def hasCustomReplacementWidgetResolver(scene: Scene)= false
     
     override def resolveReplacementWidget(scene: Scene,sceneLocation: Point)= null
@@ -249,16 +240,18 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
         println("reconnect else if ")
         setEdgeSource(edge.get, replacementNode.get)
         val sourceW = replacementWidget.asInstanceOf[OSlotWidget].capsule
-        val ttype = if (ElementFactories.isExplorationTaskFactory(sourceW.capsuleModel.dataProxy.get.panelUIData)) EXPLORATION else BASIC
-        manager.registerTransition(edge.get,new TransitionUI(sourceW, t.target,ttype,None))
+        manager.registerTransition(edge.get,new TransitionUI(sourceW, t.target, 
+                                                             if (sourceW.capsuleModel.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
+                                                             None))
       }
       else {
         println("reconnect else ")
         val targetView= replacementWidget.asInstanceOf[ISlotWidget]
         connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsuleView, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)   
-        val ttype = if (ElementFactories.isExplorationTaskFactory(targetView.capsuleView.capsuleModel.dataProxy.get.panelUIData)) EXPLORATION else BASIC
-        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView,ttype,None))
+        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView,
+                                                             if (targetView.capsuleView.capsuleModel.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
+                                                             None))
       }
       repaint
     }
