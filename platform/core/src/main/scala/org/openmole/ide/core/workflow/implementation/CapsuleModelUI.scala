@@ -17,14 +17,17 @@
 
 package org.openmole.ide.core.workflow.implementation
 
+import org.openmole.ide.core.control.MoleScenesManager.CapsuleType._
 import org.openmole.ide.core.workflow.model.ICapsuleModelUI
+import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.PaletteElementFactory
 
 class CapsuleModelUI(var dataProxy: Option[PaletteElementFactory] = None, var nbInputSlots: Int = 0) extends ICapsuleModelUI{
 
   val category= "Task Tapsules"
   var startingCapsule = false
-  var containsTask = false
+ // var containsTask = false
+ var capsuleType = CAPSULE
   
   //def this(pef: PaletteElementFactory)= this(Some(pef))
  
@@ -34,7 +37,8 @@ class CapsuleModelUI(var dataProxy: Option[PaletteElementFactory] = None, var nb
   
   def setDataProxy(pef: PaletteElementFactory)={
     dataProxy= Some(pef)
-    containsTask= true
+    if (ElementFactories.isExplorationTaskFactory(pef.panelUIData)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
+   // containsTask= true
   }
   
   override def defineStartingCapsule(on: Boolean)= {

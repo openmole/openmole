@@ -5,12 +5,13 @@
 
 package org.openmole.ide.core.workflow.model
 
+import org.openmole.ide.core.control.MoleScenesManager.CapsuleType
 import org.openmole.ide.core.palette.PaletteElementFactory
 
 trait ICapsuleModelUI {
   def startingCapsule: Boolean
   
-  def containsTask: Boolean
+  def capsuleType: CapsuleType.Value
 
   def dataProxy: Option[PaletteElementFactory]
   
