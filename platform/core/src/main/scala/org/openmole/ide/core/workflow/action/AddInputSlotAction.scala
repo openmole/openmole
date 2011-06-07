@@ -23,5 +23,5 @@ import org.openmole.ide.core.workflow.model.ICapsuleView
 
 class AddInputSlotAction(capsule: ICapsuleView) extends ActionListener{
   override def actionPerformed(ae: ActionEvent )= 
-    if (!capsule.capsuleModel.startingCapsule) capsule.addInputSlot
+    if (!capsule.startingCapsule) capsule.addInputSlot(false)
 }

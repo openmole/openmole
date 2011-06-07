@@ -49,7 +49,7 @@ object ElementFactories {
     li
   }
 
-  def updateData(pud: IPanelUIData,oldName: String) = {
+  def updateData(pud: IPanelUIData[_],oldName: String) = {
 //    val oldPud = getPanelUIData(pud.entityType, oldName)
 //    capsuleModels(oldPud).panelUIData = Some(pud)
 //    specificTaskPanelUIData.update(pud, specificTaskPanelUIData(oldPud))
@@ -59,7 +59,7 @@ object ElementFactories {
     getPaletteElementFactory(pud.entityType,oldName).panelUIData = pud
   }
   
-  def isExplorationTaskFactory(pud: IPanelUIData) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
+  def isExplorationTaskFactory(pud: IPanelUIData[_]) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
   
   def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.panelUIData.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   

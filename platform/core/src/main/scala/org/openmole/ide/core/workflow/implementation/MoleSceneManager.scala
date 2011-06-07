@@ -20,10 +20,11 @@ package org.openmole.ide.core.workflow.implementation
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.workflow.model.ICapsuleView
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
-class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
+class MoleSceneManager(var startingCapsule: Option[ICapsuleView]= None) {
 
   var capsuleViews= new DualHashBidiMap[String, ICapsuleView]
   var transitions= new DualHashBidiMap[String, TransitionUI]
@@ -32,10 +33,11 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
   var edgeID= 0
   var name: Option[String]= None
   
-  def setStartingCapsule(stCapsule: CapsuleViewUI) = {
-    if (startingCapsule.isDefined) startingCapsule.get.defineStartingCapsule(false)
+  def setStartingCapsule(stCapsule: ICapsuleView) = {
+    if (startingCapsule.isDefined) startingCapsule.get.addInputSlot(false)
     startingCapsule= Some(stCapsule)
-    startingCapsule.get.defineStartingCapsule(true)
+    startingCapsule.get.addInputSlot(true)
+    removeTransitonsBeforeStartingCapsule
   }
   
   def getNodeID: String= "node" + nodeID
@@ -71,4 +73,12 @@ class MoleSceneManager(var startingCapsule: Option[CapsuleViewUI]= None) {
     capsuleConnections(transition.source)+= transition
     capsuleConnections(transition.target.capsuleView)+= transition
   }
+  
+  private def removeTransitonsBeforeStartingCapsule = {
+    val l = new HashSet[String]
+    transitions.foreach{t=> 
+      if (t._2.target.capsuleView.equals(startingCapsule.get)) l += t._1}
+    l.foreach{removeTransition(_)}
+    l
+  } 
 }

@@ -1,33 +1,51 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core;
 
-import java.util.logging.Logger;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-//import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openmole.core.implementation.mole.MoleExecution;
+import org.openmole.ide.core.control.MoleScenesManager;
+import org.openmole.ide.core.control.TabsManager;
+import org.openmole.ide.core.serializer.MoleMaker;
 
 /**
  * Top component which displays something.
  */
 @ConvertAsProperties(dtd = "-//org.openmole.ide.core//Output//EN",
 autostore = false)
+@TopComponent.Description(preferredID = "OutputTopComponent",
+//iconBase="SET/PATH/TO/ICON/HERE", 
+persistenceType = TopComponent.PERSISTENCE_ALWAYS)
+@TopComponent.Registration(mode = "output", openAtStartup = true)
+@ActionID(category = "Window", id = "org.openmole.ide.core.OutputTopComponent")
+@ActionReference(path = "Menu/Window" /*, position = 333 */)
+@TopComponent.OpenActionRegistration(displayName = "#CTL_OutputAction",
+preferredID = "OutputTopComponent")
 public final class OutputTopComponent extends TopComponent {
-
-    private static OutputTopComponent instance;
-    /** path to the icon used by the component and its open action */
-//    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
-    private static final String PREFERRED_ID = "OutputTopComponent";
 
     public OutputTopComponent() {
         initComponents();
         setName(NbBundle.getMessage(OutputTopComponent.class, "CTL_OutputTopComponent"));
         setToolTipText(NbBundle.getMessage(OutputTopComponent.class, "HINT_OutputTopComponent"));
-//        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
     }
 
@@ -39,20 +57,20 @@ public final class OutputTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
-
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+        runButton = new javax.swing.JButton();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
+
+        org.openide.awt.Mnemonics.setLocalizedText(runButton, org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.runButton.text")); // NOI18N
+        runButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                runButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -61,67 +79,30 @@ public final class OutputTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 645, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
+                .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        jTextArea1.append("OUTPUT\n");
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void runButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runButtonActionPerformed
+        (new MoleExecution(MoleMaker.buildMole(TabsManager.getCurrentScene().manager()))).start();
+    }//GEN-LAST:event_runButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JButton runButton;
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * Gets default instance. Do not use directly: reserved for *.settings files only,
-     * i.e. deserialization routines; otherwise you could get a non-deserialized instance.
-     * To obtain the singleton instance, use {@link #findInstance}.
-     */
-    public static synchronized OutputTopComponent getDefault() {
-        if (instance == null) {
-            instance = new OutputTopComponent();
-        }
-        return instance;
-    }
-
-    /**
-     * Obtain the OutputTopComponent instance. Never call {@link #getDefault} directly!
-     */
-    public static synchronized OutputTopComponent findInstance() {
-        TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
-        if (win == null) {
-            Logger.getLogger(OutputTopComponent.class.getName()).warning(
-                    "Cannot find " + PREFERRED_ID + " component. It will not be located properly in the window system.");
-            return getDefault();
-        }
-        if (win instanceof OutputTopComponent) {
-            return (OutputTopComponent) win;
-        }
-        Logger.getLogger(OutputTopComponent.class.getName()).warning(
-                "There seem to be multiple components with the '" + PREFERRED_ID
-                + "' ID. That is a potential source of errors and unexpected behavior.");
-        return getDefault();
-    }
-
-    @Override
-    public int getPersistenceType() {
-        return TopComponent.PERSISTENCE_ALWAYS;
-    }
-
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
@@ -139,21 +120,8 @@ public final class OutputTopComponent extends TopComponent {
         // TODO store your settings
     }
 
-    Object readProperties(java.util.Properties p) {
-        if (instance == null) {
-            instance = this;
-        }
-        instance.readPropertiesImpl(p);
-        return instance;
-    }
-
-    private void readPropertiesImpl(java.util.Properties p) {
+    void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
-    }
-
-    @Override
-    protected String preferredID() {
-        return PREFERRED_ID;
     }
 }

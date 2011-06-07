@@ -30,7 +30,7 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.commons.Constants
 import scala.collection.mutable.HashSet
 
-class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extends MyWidget(scene, capsuleView.capsuleModel){
+class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extends MyWidget(scene, capsuleView){
 
   var islots= HashSet.empty[ISlotWidget]
   val oslot= new OSlotWidget(scene,capsuleView)
@@ -60,7 +60,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
   }
   
   def addSampling= {
-    samplingWidget = Some(new SamplingWidget(scene,capsuleView.capsuleModel))
+    samplingWidget = Some(new SamplingWidget(scene,capsuleView))
     addChild(samplingWidget.get) 
     taskHeight += 58
     setWidthHint
@@ -73,8 +73,8 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
     graphics.setColor(new Color(204,204,204))
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
-    if (capsuleView.capsuleModel.dataProxy.isDefined) {
-      val panelUIData = capsuleView.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
+    if (capsuleView.dataProxy.isDefined) {
+      val panelUIData = capsuleView.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
       var x = taskWidth / 2 + 5
       var i= 0
       var otherColumn = true
@@ -100,7 +100,7 @@ class ConnectableWidget(scene: MoleScene, val capsuleView: CapsuleViewUI) extend
         enlargeWidgetArea(0, -delta)
       }
       var lineH = 0
-      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling.isDefined * 58
+      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling.isDefined * 58
       graphics.drawLine(taskWidth / 2,
                         Constants.TASK_TITLE_HEIGHT,
                         taskWidth / 2,

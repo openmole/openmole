@@ -23,5 +23,5 @@ trait IFactoryUI {
   
   def displayName: String = buildPanelUIData("").coreClass.getSimpleName
   
-  def buildPanelUIData(name: String): IPanelUIData
+  def buildPanelUIData(name: String): IPanelUIData[_]
 }

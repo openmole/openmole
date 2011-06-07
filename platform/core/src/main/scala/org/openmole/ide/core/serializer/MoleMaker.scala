@@ -21,35 +21,33 @@ import org.openmole.core.model.capsule.ICapsule
 import org.openmole.core.model.capsule.IExplorationCapsule
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.ide.core.commons.TransitionType._
+import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.capsule._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.properties.IPanelUIData
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleSceneManager
-import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import org.openmole.ide.core.workflow.implementation.TransitionUI
+import org.openmole.ide.core.workflow.model.ICapsuleView
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
 object MoleMaker {
   
-  var doneCapsules = new HashMap[CapsuleViewUI,IGenericCapsule]
+  var doneCapsules = new HashMap[ICapsuleView,IGenericCapsule]
   
-  def buildMole(manager: MoleSceneManager){
+  def buildMole(manager: MoleSceneManager):IMole = {
     doneCapsules.clear
     if (manager.startingCapsule.isDefined){
-      val mole = new Mole(nextCapsule(manager,manager.startingCapsule.get))
+      new Mole(nextCapsule(manager,manager.startingCapsule.get))
     }
     else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def nextCapsule(manager: MoleSceneManager,capsuleUI: CapsuleViewUI): IGenericCapsule = {
-    val capsule = buildCapsule(capsuleUI.capsuleModel)
+  def nextCapsule(manager: MoleSceneManager,capsuleUI: ICapsuleView): IGenericCapsule = {
+    val capsule = buildCapsule(capsuleUI)
     doneCapsules+= capsuleUI-> capsule
     manager.capsuleConnections(capsuleUI).foreach(t=>{
         buildTransition(capsule,doneCapsules.getOrElseUpdate(t.target.capsuleView,nextCapsule(manager,t.target.capsuleView)),t)
@@ -57,10 +55,10 @@ object MoleMaker {
     capsule
   }
 
-  def buildCapsule(capsuleModel: ICapsuleModelUI) = {
-    capsuleModel.capsuleType match {
-      case EXPLORATION_TASK=> new ExplorationCapsule(capsuleModel.dataProxy.get.panelUIData.coreObject.asInstanceOf[ExplorationTask])
-      case BASIC_TASK=> new Capsule(capsuleModel.dataProxy.get.panelUIData.coreObject.asInstanceOf[Task])
+  def buildCapsule(capsule: ICapsuleView) = {
+    capsule.capsuleType match {
+      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.panelUIData.coreObject.asInstanceOf[ExplorationTask])
+      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.panelUIData.coreObject.asInstanceOf[Task])
       case CAPSULE=> new Capsule
     }
   }

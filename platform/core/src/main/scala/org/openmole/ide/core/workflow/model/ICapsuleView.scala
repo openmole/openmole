@@ -6,12 +6,17 @@
 package org.openmole.ide.core.workflow.model
 
 import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.commons.CapsuleType
 import org.openmole.ide.core.palette.PaletteElementFactory
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 
 trait ICapsuleView {
-  def capsuleModel: ICapsuleModelUI
+  def capsuleType: CapsuleType.Value
+  
+  def dataProxy: Option[PaletteElementFactory]
+  
+  def startingCapsule: Boolean
   
   def scene: MoleScene
   
@@ -19,16 +24,27 @@ trait ICapsuleView {
   
   def encapsule(pef: PaletteElementFactory)
 
-  def addInputSlot: ISlotWidget
+  def addInputSlot(startingCapsule: Boolean): ISlotWidget
   
- // def changeConnectableWidget
+  def nbInputSlots: Int
+  
+  def setDataProxy(pef: PaletteElementFactory)
 }
 
-//interface ICapsuleView {
-//    void encapsule(TaskUI taskUI) throws UserBadDataError;
-//    ICapsuleModelUI<IGenericCapsule> getCapsuleModel();
-//    ISlotWidget addInputSlot();
-//    ConnectableWidget getConnectableWidget();
-//    void changeConnectableWidget();
-//    IMoleScene getMoleScene();
+//trait ICapsuleModelUI {
+//  def startingCapsule: Boolean
+//  
+//  def capsuleType: CapsuleType.Value
+//
+//  def dataProxy: Option[PaletteElementFactory]
+//  
+//  def setDataProxy(pef: PaletteElementFactory)
+//  
+//  def defineStartingCapsule(on: Boolean)
+//  
+//  def addInputSlot
+//  
+//  def nbInputSlots: Int
+//  
+//  def removeInputSlot
 //}

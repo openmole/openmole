@@ -43,7 +43,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
     val capsule = MoleScenesManager.createCapsule(molescene,point)
     capsule.encapsule(transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[PaletteElementFactory])
-    capsule.addInputSlot
+    capsule.addInputSlot(false)
     
     molescene.repaint
     molescene.revalidate

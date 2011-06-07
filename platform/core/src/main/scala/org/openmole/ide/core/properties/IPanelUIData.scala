@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.properties
 
-trait IPanelUIData{
+trait IPanelUIData[T]{
   def name_=(s: String)
   
   def name: String
@@ -30,5 +30,5 @@ trait IPanelUIData{
   
   def buildPanelUI: IPanelUI
   
-  def coreObject: Object
+  def coreObject: T
 }

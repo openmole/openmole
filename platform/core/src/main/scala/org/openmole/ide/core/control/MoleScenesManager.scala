@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JScrollPane
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.workflow.implementation.CapsuleModelUI
 import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.model.ICapsuleView
@@ -45,7 +44,7 @@ object MoleScenesManager extends TabManager{
   def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString  
     
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleView = {
-    val obUI = new CapsuleViewUI(scene,new CapsuleModelUI)        
+    val obUI = new CapsuleViewUI(scene)
     scene.initCapsuleAdd(obUI)
     scene.manager.registerCapsuleView(obUI)
     scene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)

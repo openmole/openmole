@@ -27,7 +27,7 @@ import org.openmole.ide.core.workflow.implementation.MoleScene
 class AddCapsuleAction(moleScene: MoleScene, provider: GenericMenuProvider) extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
-    MoleScenesManager.createCapsule(moleScene,provider.currentPoint).addInputSlot
+    MoleScenesManager.createCapsule(moleScene,provider.currentPoint).addInputSlot(false)
     moleScene.refresh
   }
 }

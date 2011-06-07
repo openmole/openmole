@@ -29,15 +29,15 @@ import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.ICapsuleModelUI
+import org.openmole.ide.core.workflow.model.ICapsuleView
 
-class SamplingWidget(scene: MoleScene,val capsuleModel: ICapsuleModelUI ) extends Widget(scene) {
+class SamplingWidget(scene: MoleScene,val capsule: ICapsuleView ) extends Widget(scene) {
   val titleArea = new Rectangle
   titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
   
   override def paintWidget= {
     super.paintWidget
-    val sampling = capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling
+    val sampling = capsule.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling
     if (sampling.isDefined){
       val g = getGraphics.asInstanceOf[Graphics2D]
       g.drawImage(ImageUtilities.loadImage(sampling.get.panelUIData.imagePath),0,0,new Container)

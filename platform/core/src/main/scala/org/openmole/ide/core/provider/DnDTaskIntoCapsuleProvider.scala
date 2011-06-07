@@ -36,7 +36,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
     else {
       ent match {
         case Constants.PROTOTYPE=> state = ConnectorState.ACCEPT
-        case Constants.SAMPLING=> if (capsuleView.capsuleModel.capsuleType == EXPLORATION_TASK) state = ConnectorState.ACCEPT
+        case Constants.SAMPLING=> if (capsuleView.capsuleType == EXPLORATION_TASK) state = ConnectorState.ACCEPT
         case Constants.ENVIRONMENT=> println("envir"); state = ConnectorState.ACCEPT
         case _=> throw new GUIUserBadDataError("Unknown entity type")
       }
@@ -59,5 +59,5 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsuleView: ICapsuleV
     molescene.revalidate
   }
   
-  def capsulePanelUIData = capsuleView.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
+  def capsulePanelUIData = capsuleView.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
 }

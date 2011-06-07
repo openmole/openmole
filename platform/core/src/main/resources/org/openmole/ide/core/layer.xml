@@ -34,11 +34,6 @@
                 <attr name="displayName" bundlevalue="org.openmole.ide.core.Bundle#CTL_MoleSceneAction"/>
                 <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
             </file>
-            <file name="org-openmole-ide-core-OutputAction.instance">
-                <attr name="component" methodvalue="org.openmole.ide.core.OutputTopComponent.findInstance"/>
-                <attr name="displayName" bundlevalue="org.openmole.ide.core.Bundle#CTL_OutputAction"/>
-                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
-            </file>
         </folder>
     </folder>
     <folder name="Menu">
@@ -49,10 +44,6 @@
             <file name="org-netbeans-modules-print-action-PrintAction.shadow_hidden"/>
             <file name="org-openide-actions-SaveAllAction.shadow_hidden"/>
             <file name="org-openide-actions-SaveAsAction.shadow_hidden"/>
-            <file name="org-openmole-ide-core-OpenAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/File/org-openmole-ide-core-OpenXMLAction.instance"/>
-                <attr name="position" intvalue="1300"/>
-            </file>
         </folder>
         <file name="GoTo_hidden"/>
         <file name="View_hidden"/>
@@ -62,9 +53,6 @@
             </file>
             <file name="MoleSceneAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-MoleSceneAction.instance"/>
-            </file>
-            <file name="OutputAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/Window/org-openmole-ide-core-OutputAction.instance"/>
             </file>
             <file name="ViewFavoritesTabAction.shadow_hidden"/>
             <file name="org-netbeans-core-windows-actions-GlobalPropertiesAction.shadow_hidden"/>
@@ -83,14 +71,10 @@
         <folder name="Components">
             <file name="EntityPropertyTopComponent.settings" url="EntityPropertyTopComponentSettings.xml"/>
             <file name="MoleSceneTopComponent.settings" url="MoleSceneTopComponentSettings.xml"/>
-            <file name="OutputTopComponent.settings" url="OutputTopComponentSettings.xml"/>
         </folder>
         <folder name="Modes">
             <folder name="editor">
                 <file name="MoleSceneTopComponent.wstcref" url="MoleSceneTopComponentWstcref.xml"/>
-            </folder>
-            <folder name="output">
-                <file name="OutputTopComponent.wstcref" url="OutputTopComponentWstcref.xml"/>
             </folder>
             <folder name="properties">
                 <file name="EntityPropertyTopComponent.wstcref" url="EntityPropertyTopComponentWstcref.xml"/>

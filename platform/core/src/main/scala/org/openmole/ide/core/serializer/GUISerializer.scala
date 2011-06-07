@@ -39,7 +39,7 @@ object GUISerializer {
   
   xstream.alias("molescene", classOf[MoleScene])
 //  xstream.alias("entity", classOf[EntityUI])
-  xstream.alias("task", classOf[IPanelUIData])
+  xstream.alias("data", classOf[IPanelUIData[_]])
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -73,7 +73,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: IPanelUIData=> new PaletteElementFactory(x)
+          case x: IPanelUIData[_]=> new PaletteElementFactory(x)
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }
@@ -81,7 +81,7 @@ object GUISerializer {
     } catch {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
     } finally {
-      MoleSceneTopComponent.getDefault().refreshPalette();
+      MoleSceneTopComponent.getDefault.refreshPalette
       in.close
     }
   }

@@ -17,4 +17,4 @@
 
 package org.openmole.ide.core.properties
 
-abstract class PanelUIData(var name: String, val entityType: String) extends IPanelUIData
+abstract class PanelUIData[T](var name: String, val entityType: String) extends IPanelUIData[T]

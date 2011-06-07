@@ -28,10 +28,10 @@ import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.properties.ITaskFactoryUI
 import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import java.awt.BasicStroke
+import org.openmole.ide.core.workflow.model.ICapsuleView
 
-class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(scene) {
+class MyWidget(scene: MoleScene,capsule: ICapsuleView) extends Widget(scene) {
 
   var taskWidth= Constants.TASK_CONTAINER_WIDTH
   var taskHeight= Constants.TASK_CONTAINER_HEIGHT
@@ -68,8 +68,8 @@ class MyWidget(scene: MoleScene,capsuleModel: ICapsuleModelUI) extends Widget(sc
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
-    if(capsuleModel.dataProxy.isDefined){
-      val tpud = capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
+    if(capsule.dataProxy.isDefined){
+      val tpud = capsule.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData]
       drawBox(graphics,tpud.backgroundColor,tpud.borderColor)
       graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)

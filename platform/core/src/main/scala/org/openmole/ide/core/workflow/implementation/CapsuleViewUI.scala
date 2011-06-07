@@ -21,17 +21,20 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.properties.TaskPanelUIData
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
-import org.openmole.ide.core.workflow.model.ICapsuleModelUI
 import org.openmole.ide.core.workflow.model.ICapsuleView
 
-class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) extends Widget(scene) with ICapsuleView{
+class CapsuleViewUI(val scene: MoleScene) extends Widget(scene) with ICapsuleView{
 
+  var dataProxy: Option[PaletteElementFactory] = None
+  var nbInputSlots: Int = 0
+  var capsuleType = CAPSULE
+  var startingCapsule = false
+  
   createActions(scene.MOVE).addAction (ActionFactory.createMoveAction)
   
   val connectableWidget= new ConnectableWidget(scene,this)
@@ -42,27 +45,35 @@ class CapsuleViewUI(val scene: MoleScene,val capsuleModel: ICapsuleModelUI) exte
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
-  
-  def defineStartingCapsule(on: Boolean){
-    capsuleModel.defineStartingCapsule(on)
-    connectableWidget.clearInputSlots
-    connectableWidget.addInputSlot(new ISlotWidget(scene,this,1,on))
-  }
-  
+    
   override def encapsule(pef: PaletteElementFactory)= {
-    capsuleModel.setDataProxy(pef)
-    if (capsuleModel.capsuleType == EXPLORATION_TASK) connectableWidget.addSampling
+    setDataProxy(pef)
+    if (capsuleType == EXPLORATION_TASK) connectableWidget.addSampling
     dndTaskIntoCapsuleProvider.encapsulated= true
     capsuleMenuProvider.addTaskMenus
   }
   
-  def addInputSlot: ISlotWidget =  {
-    capsuleModel.addInputSlot
-    val im = new ISlotWidget(scene, this,capsuleModel.nbInputSlots,capsuleModel.startingCapsule)
+  def addInputSlot(on: Boolean): ISlotWidget =  {
+    if (on || startingCapsule) clearInputSlots(on)
+    
+    nbInputSlots+= 1
+    val im = new ISlotWidget(scene,this,nbInputSlots,startingCapsule)
     connectableWidget.addInputSlot(im)
     scene.validate
     scene.refresh
     im
   }
 
+  private def clearInputSlots(on: Boolean) = {
+      startingCapsule = on
+      nbInputSlots= 0
+      connectableWidget.clearInputSlots
+  }
+  
+  def removeInputSlot= nbInputSlots-= 1
+  
+  def setDataProxy(pef: PaletteElementFactory)={
+    dataProxy= Some(pef)
+    if (ElementFactories.isExplorationTaskFactory(pef.panelUIData)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
+  }
 }

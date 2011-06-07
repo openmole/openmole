@@ -52,7 +52,7 @@ class MoleSceneConverter extends Converter{
     writer.addAttribute("name", molescene.manager.name.get)
     molescene.manager.capsuleViews.values.foreach(view=> {
         writer.startNode("capsule")
-        writer.addAttribute("start", view.capsuleModel.startingCapsule.toString)
+        writer.addAttribute("start", view.startingCapsule.toString)
         writer.addAttribute("x", String.valueOf(view.connectableWidget.convertLocalToScene(view.connectableWidget.getLocation).getX))
         writer.addAttribute("y", String.valueOf(view.connectableWidget.convertLocalToScene(view.connectableWidget.getLocation).getY))
 
@@ -73,10 +73,10 @@ class MoleSceneConverter extends Converter{
         writer.endNode
         
         //Task
-        if (view.capsuleModel.capsuleType != CAPSULE) {
-          taskUIs.add(view.capsuleModel.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData])
+        if (view.capsuleType != CAPSULE) {
+          taskUIs.add(view.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData])
           writer.startNode("task");
-          writer.addAttribute("name", view.capsuleModel.dataProxy.get.panelUIData.name)
+          writer.addAttribute("name", view.dataProxy.get.panelUIData.name)
           writer.endNode
         }
         writer.endNode
@@ -84,11 +84,11 @@ class MoleSceneConverter extends Converter{
     //Transitions
     molescene.manager.getTransitions.foreach(trans=> {
         writer.startNode("transition");
-        writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.capsuleModel.nbInputSlots).toString)
+        writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
         writer.addAttribute("type", TransitionType.toString(trans.transitionType))
         
-    println("cond un transisiton serialisation:: " + trans.condition)
+        println("cond un transisiton serialisation:: " + trans.condition)
         writer.addAttribute("condition", trans.condition.getOrElse(""))
         writer.endNode
       })
@@ -111,11 +111,13 @@ class MoleSceneConverter extends Converter{
             val p= new Point
             p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
             val caps = MoleScenesManager.createCapsule(scene, p)
+            val start = reader.getAttribute("start").toBoolean
+            if (start) scene.manager.startingCapsule = Some(caps)
             while (reader.hasMoreChildren) {
               reader.moveDown
               val n1= reader.getNodeName
               n1 match{
-                case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot)
+                case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> {
                     caps.encapsule(ElementFactories.getPaletteElementFactory(Constants.TASK,reader.getAttribute("name")))                   

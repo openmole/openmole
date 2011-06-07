@@ -20,7 +20,8 @@ package org.openmole.ide.core.palette
 import org.openmole.ide.core.properties.IPanelUIData
 import scala.collection.JavaConversions._
 
-class PaletteElementFactory(var panelUIData: IPanelUIData){
+class PaletteElementFactory(var panelUIData: IPanelUIData[_]){
+  println("PaletteElementFactory constructor ")
   ElementFactories.addElement(this)
 }
 
