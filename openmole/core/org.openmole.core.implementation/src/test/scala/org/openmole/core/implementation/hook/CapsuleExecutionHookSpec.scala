@@ -21,8 +21,9 @@ import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.model.hook.CapsuleEvent._
+import org.openmole.core.implementation.task.Task
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.job.IMoleJob
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -37,20 +38,18 @@ class CapsuleExecutionHookSpec  extends FlatSpec with ShouldMatchers {
     
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new EmptyTask("Test")
-    t1.addInput(p)
+    val t1 = new Task("Test") {
+      override def process(context: IContext, progress: IProgress) = {
+        context += p -> "test"
+      }
+    }
+    
     t1.addOutput(p)
     
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
     
-    new CapsuleExecutionHook(ex, t1c, Starting) {
-      override def process(moleJob: IMoleJob) = {
-        moleJob.context += p -> "test"
-      }  
-    }
-    
-    new CapsuleExecutionHook(ex, t1c, Finished) {
+    new CapsuleExecutionHook(ex, t1c) {
       override def process(moleJob: IMoleJob) = {
         moleJob.context.contains(p) should equal (true)
         moleJob.context.value(p).get should equal ("test")

@@ -19,18 +19,14 @@ package org.openmole.plugin.hook.filemanagement
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.{IContext,IPrototype}
-import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.exception.UserBadDataError
 
-class DeleteFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value, toDelete: Array[IPrototype[File]]) extends CapsuleExecutionHook(moleExecution, capsule, expectedEvent) with Logger {
-
-  def this(moleExecution: IMoleExecution, capsule: IGenericCapsule, toDelete: Array[IPrototype[File]]) = this(moleExecution, capsule, Finished, toDelete)
+class DeleteFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, toDelete: Array[IPrototype[File]]) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob)  = {
     import moleJob.context
@@ -39,7 +35,7 @@ class DeleteFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, ex
       prototype => 
       context.value(prototype) match {
         case Some(file) => file.recursiveDelete
-        case None => logger.warning("No variable " + prototype + " found.")
+        case None => throw new UserBadDataError("No variable " + prototype + " found.")
       }
     }
   }

@@ -28,12 +28,9 @@ import java.io.File
 import org.openmole.misc.tools.io.FileUtil.copy
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.Logger
 
 /**
  * Appends a variable content to an existing file.
@@ -42,9 +39,7 @@ import org.openmole.misc.tools.service.Logger
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule, expectedEvent) with Logger {
- 
-  def this(moleExecution: IMoleExecution, capsule: IGenericCapsule, toBeDumpedPrototype: IPrototype[File], outputFile: String) = this(moleExecution, capsule, Finished, toBeDumpedPrototype, outputFile)
+class AppendFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -72,7 +67,7 @@ class AppendFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, ex
         }
         else if (from.isFile && to.isFile) lockAndAppendFile(from,to)
         else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. ("+from.toString+" and "+to.toString+" found)")
-      case None => logger.warning("Variable not found " + toBeDumpedPrototype)
+      case None => throw new UserBadDataError("Variable not found " + toBeDumpedPrototype)
     }
   }
   

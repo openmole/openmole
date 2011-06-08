@@ -20,5 +20,5 @@ package org.openmole.core.model.hook
 import org.openmole.core.model.job.IMoleJob
 
 trait ICapsuleExecutionHook extends IHook {
-  def process(moleJob: IMoleJob, event: CapsuleEvent.Value)
+  def process(moleJob: IMoleJob)
 }

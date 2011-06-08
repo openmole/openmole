@@ -20,17 +20,13 @@ package org.openmole.plugin.hook.display
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.service.Logger
 
-class ToStringHook(execution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule, expectedEvent) with Logger {
+class ToStringHook(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) with Logger {
   
-  def this(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: IPrototype[_]*) = this(execution, capsule, Finished, prototypes: _*)
-  def this(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, Finished, prototypes: _*)
-  def this(execution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value, prototypes: Array[IPrototype[_]]) = this(execution, capsule, expectedEvent, prototypes: _*)
+  def this(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, prototypes: _*)
   
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

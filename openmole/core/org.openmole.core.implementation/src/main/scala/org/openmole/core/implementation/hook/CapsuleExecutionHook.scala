@@ -17,20 +17,17 @@
 
 package org.openmole.core.implementation.hook
 
+import java.util.logging.Level
 import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.misc.tools.service.Logger
 
-abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value) extends ICapsuleExecutionHook {
+abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGenericCapsule) extends ICapsuleExecutionHook with Logger {
   
   CapsuleExecutionDispatcher += (moleExecution, capsule, this)
-
-  def process(moleJob: IMoleJob, event: CapsuleEvent.Value) = {
-    if(expectedEvent == All || event == expectedEvent) process(moleJob)
-  }
   
+  def trigger(moleJob: IMoleJob) = try process(moleJob) catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
   def process(moleJob: IMoleJob)
 }

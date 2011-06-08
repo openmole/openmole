@@ -25,16 +25,13 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
-import org.openmole.core.model.hook.CapsuleEvent
-import org.openmole.core.model.hook.CapsuleEvent._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.misc.exception.UserBadDataError
 
-class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expectedEvent: CapsuleEvent.Value) extends CapsuleExecutionHook(moleExecution, capsule, expectedEvent) with Logger {
-  
-  def this(moleExecution: IMoleExecution, capsule: IGenericCapsule) = this(moleExecution, capsule, Finished)
+class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   val toCopy = new ListBuffer[(IPrototype[File], String, Boolean)]()
   val toCopyWithNameInVariable = new ListBuffer[(IPrototype[File], IPrototype[String], String, Boolean)]()
@@ -53,7 +50,7 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expe
               from.copy(to)
 
               if(delete) from.recursiveDelete
-            case None => logger.warning("No variable " + prototype + " found.")
+            case None => throw new UserBadDataError("No variable " + prototype + " found.")
           } 
         }
     }
@@ -69,9 +66,9 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expe
               from.copy(to)
 
               if(delete) from.recursiveDelete
-            case(None, None) => logger.warning("No variable " + prototype + " and " + namePrototype + " found.")
-            case(Some(_), None) => logger.warning("No variable " + prototype + " found.")
-            case(None, Some(_)) => logger.warning("No variable " + namePrototype + " found.")
+            case(None, None) => throw new UserBadDataError("No variable " + prototype + " and " + namePrototype + " found.")
+            case(Some(_), None) => throw new UserBadDataError("No variable " + prototype + " found.")
+            case(None, Some(_)) => throw new UserBadDataError("No variable " + namePrototype + " found.")
           }
         }
     }
@@ -90,9 +87,9 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, expe
                   from.copy(to)              
                   if(delete) from.recursiveDelete
               }
-            case(None, None) => logger.warning("No variable " + prototype + " and " + namePrototype + " found.")
-            case(Some(_), None) => logger.warning("No variable " + prototype + " found.")
-            case(None, Some(_)) => logger.warning("No variable " + namePrototype + " found.")
+            case(None, None) => throw new UserBadDataError("No variable " + prototype + " and " + namePrototype + " found.")
+            case(Some(_), None) => throw new UserBadDataError("No variable " + prototype + " found.")
+            case(None, Some(_)) => throw new UserBadDataError("No variable " + namePrototype + " found.")
           }
         }
     }
