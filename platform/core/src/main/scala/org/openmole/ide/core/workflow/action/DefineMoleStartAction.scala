@@ -19,10 +19,10 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 
-class DefineMoleStartAction(moleScene: MoleScene,capsule: CapsuleViewUI) extends ActionListener{
+class DefineMoleStartAction(moleScene: MoleScene,capsule: CapsuleUI) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent)= {
     moleScene.manager.setStartingCapsule(capsule).foreach(moleScene.removeEdge(_))

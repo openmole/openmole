@@ -21,4 +21,9 @@ import org.openmole.ide.core.commons.Constants
 
 trait IPrototypeFactoryUI  extends IFactoryUI{
   override def entityType = Constants.PROTOTYPE
+  
+  override def displayName: String = buildDataUI("").coreClass.getSimpleName
+  
+  def buildDataUI(name: String): IPrototypeDataUI
+  
 }

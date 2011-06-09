@@ -16,10 +16,13 @@
  */
 
 package org.openmole.ide.plugin.prototype.base
+import org.openmole.ide.core.properties.IPrototypeDataUI
 import java.io.File
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data.IPrototype
 
-class FilePrototypePanelUIData(name: String) extends PrototypePanelUIData(name){
+class FilePrototypeDataUI(var name: String) extends IPrototypeDataUI{
+  override def coreClass = classOf[IPrototype[File]]
   
   override def coreObject = new Prototype(name,classOf[File])
   

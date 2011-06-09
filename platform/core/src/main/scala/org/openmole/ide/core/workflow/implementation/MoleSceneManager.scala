@@ -19,21 +19,21 @@ package org.openmole.ide.core.workflow.implementation
 
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class MoleSceneManager(var startingCapsule: Option[ICapsuleView]= None) {
+class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) {
 
-  var capsuleViews= new DualHashBidiMap[String, ICapsuleView]
+  var capsules= new DualHashBidiMap[String, ICapsuleUI]
   var transitions= new DualHashBidiMap[String, TransitionUI]
-  var capsuleConnections= new HashMap[ICapsuleView, HashSet[TransitionUI]]
+  var capsuleConnections= new HashMap[ICapsuleUI, HashSet[TransitionUI]]
   var nodeID= 0
   var edgeID= 0
   var name: Option[String]= None
   
-  def setStartingCapsule(stCapsule: ICapsuleView) = {
+  def setStartingCapsule(stCapsule: ICapsuleUI) = {
     if (startingCapsule.isDefined) startingCapsule.get.addInputSlot(false)
     startingCapsule= Some(stCapsule)
     startingCapsule.get.addInputSlot(true)
@@ -44,18 +44,18 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleView]= None) {
   
   def getEdgeID: String= "edge" + edgeID
   
-  def registerCapsuleView(cv: ICapsuleView) = {
+  def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID+= 1
-    capsuleViews.put(getNodeID,cv)
+    capsules.put(getNodeID,cv)
     capsuleConnections+= cv-> HashSet.empty[TransitionUI]
   }
   
-  def removeCapsuleView(nodeID: String) = {
-    capsuleConnections(capsuleViews.get(nodeID)).foreach(transitions.removeValue(_))
-    capsuleViews.remove(nodeID)
+  def removeCapsuleUI(nodeID: String) = {
+    capsuleConnections(capsules.get(nodeID)).foreach(transitions.removeValue(_))
+    capsules.remove(nodeID)
   }
   
-  def capsuleViewID(cv: ICapsuleView) = capsuleViews.getKey(cv)
+  def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
   
   def getTransitions= transitions.values 
   
@@ -71,13 +71,13 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleView]= None) {
   def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
     transitions.put(edgeID, transition)
     capsuleConnections(transition.source)+= transition
-    capsuleConnections(transition.target.capsuleView)+= transition
+    capsuleConnections(transition.target.capsule)+= transition
   }
   
   private def removeTransitonsBeforeStartingCapsule = {
     val l = new HashSet[String]
     transitions.foreach{t=> 
-      if (t._2.target.capsuleView.equals(startingCapsule.get)) l += t._1}
+      if (t._2.target.capsule.equals(startingCapsule.get)) l += t._1}
     l.foreach{removeTransition(_)}
     l
   } 

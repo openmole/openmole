@@ -18,10 +18,7 @@
 package org.openmole.ide.core.properties
 
 trait IFactoryUI {
+  def displayName: String 
   
   def entityType: String
-  
-  def displayName: String = buildPanelUIData("").coreClass.getSimpleName
-  
-  def buildPanelUIData(name: String): IPanelUIData[_]
 }

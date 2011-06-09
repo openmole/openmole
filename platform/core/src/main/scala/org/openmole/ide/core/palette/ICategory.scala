@@ -24,14 +24,3 @@ trait ICategory {
   
   def children: GenericChildren
 }
-
-//package org.openmole.ide.core.palette;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public interface ICategory {
-//    String getName();
-//    GenericChildren getChildren();
-//}

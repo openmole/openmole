@@ -23,5 +23,5 @@ class StringPrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "String"
   
-  override def buildPanelUIData(name: String) = new StringPrototypePanelUIData(name)
+  override def buildDataUI(name: String) = new StringPrototypeDataUI(name)
 }

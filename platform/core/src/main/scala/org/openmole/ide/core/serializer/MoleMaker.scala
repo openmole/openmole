@@ -30,13 +30,13 @@ import org.openmole.core.implementation.transition._
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.workflow.implementation.MoleSceneManager
 import org.openmole.ide.core.workflow.implementation.TransitionUI
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
 object MoleMaker {
   
-  var doneCapsules = new HashMap[ICapsuleView,IGenericCapsule]
+  var doneCapsules = new HashMap[ICapsuleUI,IGenericCapsule]
   
   def buildMole(manager: MoleSceneManager):IMole = {
     doneCapsules.clear
@@ -46,19 +46,19 @@ object MoleMaker {
     else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def nextCapsule(manager: MoleSceneManager,capsuleUI: ICapsuleView): IGenericCapsule = {
+  def nextCapsule(manager: MoleSceneManager,capsuleUI: ICapsuleUI): IGenericCapsule = {
     val capsule = buildCapsule(capsuleUI)
     doneCapsules+= capsuleUI-> capsule
     manager.capsuleConnections(capsuleUI).foreach(t=>{
-        buildTransition(capsule,doneCapsules.getOrElseUpdate(t.target.capsuleView,nextCapsule(manager,t.target.capsuleView)),t)
+        buildTransition(capsule,doneCapsules.getOrElseUpdate(t.target.capsule,nextCapsule(manager,t.target.capsule)),t)
       })
     capsule
   }
 
-  def buildCapsule(capsule: ICapsuleView) = {
+  def buildCapsule(capsule: ICapsuleUI) = {
     capsule.capsuleType match {
-      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.panelUIData.coreObject.asInstanceOf[ExplorationTask])
-      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.panelUIData.coreObject.asInstanceOf[Task])
+      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
+      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.dataUI.coreObject.asInstanceOf[Task])
       case CAPSULE=> new Capsule
     }
   }

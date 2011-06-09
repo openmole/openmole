@@ -17,11 +17,10 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-import java.awt.Color
 import org.openmole.ide.core.properties.ITaskFactoryUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
-  override def buildPanelUIData(name: String) = new ExplorationTaskPanelUIData(name)
+  override def buildDataUI(name: String) = new ExplorationTaskDataUI(name)
 }
 
   

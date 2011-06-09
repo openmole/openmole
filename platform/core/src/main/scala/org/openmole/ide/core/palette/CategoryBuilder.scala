@@ -18,17 +18,9 @@
 package org.openmole.ide.core.palette
 
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.properties.ITaskFactoryUI
-import org.openmole.ide.core.properties.IPrototypeFactoryUI
-import org.openmole.ide.core.properties.ISamplingFactoryUI
-import scala.collection.mutable.HashMap
 import org.openide.nodes.Node
-import java.beans.PropertyChangeEvent
-import java.beans.PropertyChangeListener
 import org.openide.nodes.Children
 import scala.collection.JavaConversions._
-import org.openide.util.Lookup
-import java.awt.datatransfer.DataFlavor
 
 class CategoryBuilder extends Children.Keys[ICategory]{
   
@@ -38,9 +30,9 @@ class CategoryBuilder extends Children.Keys[ICategory]{
     super.addNotify
     
     setKeys(List(
-        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.paletteElements(Constants.TASK),Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.paletteElements(Constants.PROTOTYPE),Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.paletteElements(Constants.SAMPLING),Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.paletteElements(Constants.ENVIRONMENT),Constants.ENTITY_DATA_FLAVOR))).toIterable)
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.dataTaskProxys,Constants.ENTITY_DATA_FLAVOR)),
+        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.dataPrototypeProxys,Constants.ENTITY_DATA_FLAVOR)),
+        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.dataSamplingProxys,Constants.ENTITY_DATA_FLAVOR)),
+        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.dataEnvironmentProxys,Constants.ENTITY_DATA_FLAVOR))).toIterable)
   }
 }

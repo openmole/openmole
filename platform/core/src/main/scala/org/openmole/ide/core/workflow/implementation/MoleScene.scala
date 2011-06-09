@@ -37,7 +37,7 @@ import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.provider.DnDNewTaskProvider
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
@@ -82,7 +82,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     setEdgeTarget(ed,targetNodeID)
   }
  
-  override def initCapsuleAdd(w: ICapsuleView)= obUI= Some(w.asInstanceOf[Widget])
+  override def initCapsuleAdd(w: ICapsuleUI)= obUI= Some(w.asInstanceOf[Widget])
   
   override def refresh= {validate; repaint}
   
@@ -102,17 +102,16 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(reconnectAction)
     // connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
-    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget,e)));
+    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
     connectionWidget
   }
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
     val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
-    cw.setSourceAnchor(new OSlotAnchor(findWidget(sourceNode).asInstanceOf[CapsuleViewUI]))
-    cw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+    cw.setSourceAnchor(new OSlotAnchor(findWidget(sourceNode).asInstanceOf[CapsuleUI]))
   }
   
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new ISlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleViewUI]), currentSlotIndex))
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new ISlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleUI]), currentSlotIndex))
   
   
   override def setLayout= {
@@ -142,7 +141,7 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
       if (isNode(o)) source= Some(o.asInstanceOf[String])        
       var res= false
       sourceWidget match {
-        case x: CapsuleViewUI=> {res = source.isDefined}
+        case x: CapsuleUI=> {res = source.isDefined}
       }
       res
     }
@@ -169,8 +168,8 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
     override def resolveTargetWidget(scene: Scene, sceneLocation: Point): Widget= null
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
-      val sourceCapsuleView = sourceWidget.asInstanceOf[CapsuleViewUI]
-      manager.registerTransition(new TransitionUI(sourceCapsuleView, targetWidget.asInstanceOf[ISlotWidget],if (sourceCapsuleView.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION))
+      val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
+      manager.registerTransition(new TransitionUI(sourceCapsuleUI, targetWidget.asInstanceOf[ISlotWidget],if (sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION))
       createEdge(source.get, target.get)
     }
   }
@@ -247,10 +246,10 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
       else {
         println("reconnect else ")
         val targetView= replacementWidget.asInstanceOf[ISlotWidget]
-        connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsuleView, currentSlotIndex))
+        connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsule, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)   
         manager.registerTransition(edge.get,new TransitionUI(t.source, targetView,
-                                                             if (targetView.capsuleView.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
+                                                             if (targetView.capsule.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
                                                              None))
       }
       repaint

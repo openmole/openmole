@@ -28,5 +28,5 @@ trait IMoleScene {
   
   def validate
   
-  def initCapsuleAdd(w: ICapsuleView)
+  def initCapsuleAdd(w: ICapsuleUI)
 }

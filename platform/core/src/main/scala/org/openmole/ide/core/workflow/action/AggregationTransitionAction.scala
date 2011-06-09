@@ -23,9 +23,9 @@ import org.openmole.ide.core.commons.TransitionType._
 import org.openmole.ide.core.workflow.implementation.TransitionUI
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
-class AggregationTransitionAction(transition: TransitionUI,connectionWidget: LabeledConnectionWidget) extends ActionListener{
+class AggregationTransitionAction(connectionWidget: LabeledConnectionWidget) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
-    transition.transitionType = AGGREGATION_TRANSITION
-    connectionWidget.setAsAggregationTransition(true)
+    connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
+    connectionWidget.drawTransitionType
   }
 }

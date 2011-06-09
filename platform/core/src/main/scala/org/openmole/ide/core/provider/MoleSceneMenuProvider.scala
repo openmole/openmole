@@ -30,17 +30,3 @@ class MoleSceneMenuProvider(moleScene: MoleScene) extends GenericMenuProvider {
   itemTCapsule.addActionListener(new AddCapsuleAction(moleScene,this))
   items+= itemTCapsule
 }
-
-//public class MoleSceneMenuProvider extends GenericMenuProvider {
-//
-//    Collection<Class<? extends IGenericTask>> tasks = new ArrayList<Class<? extends IGenericTask>>();
-//
-//    public MoleSceneMenuProvider(MoleScene moleScene) {
-//        super();
-//
-//        JMenuItem itemTCapsule = new JMenuItem("Add a Task Capsule");
-//        itemTCapsule.addActionListener(new AddCapsuleAction(moleScene,this));
-//
-//        items.add(itemTCapsule);
-//    }
-//}

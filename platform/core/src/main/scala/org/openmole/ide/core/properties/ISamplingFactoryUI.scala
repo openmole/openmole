@@ -21,4 +21,8 @@ import org.openmole.ide.core.commons.Constants
 
 trait ISamplingFactoryUI extends IFactoryUI { 
   override def entityType = Constants.SAMPLING
+  
+  override def displayName: String = buildDataUI("").coreClass.getSimpleName
+  
+  def buildDataUI(name: String): ISamplingDataUI
 }

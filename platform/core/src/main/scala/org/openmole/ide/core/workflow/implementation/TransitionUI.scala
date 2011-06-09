@@ -19,6 +19,6 @@ package org.openmole.ide.core.workflow.implementation
 
 import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 
-class TransitionUI(val source: ICapsuleView,val target: ISlotWidget,var transitionType: TransitionType.Value, var condition: Option[String]= None)
+class TransitionUI(val source: ICapsuleUI,val target: ISlotWidget,var transitionType: TransitionType.Value, var condition: Option[String]= None)

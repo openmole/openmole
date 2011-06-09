@@ -5,21 +5,19 @@
 
 package org.openmole.ide.core.workflow.implementation.paint
 
-import java.awt.Color
 import java.awt.Dimension
-import java.awt.Graphics2D
-import java.awt.Rectangle
+import org.netbeans.api.visual.anchor.AnchorShape
+import org.netbeans.api.visual.anchor.AnchorShapeFactory
 import org.netbeans.api.visual.border.BorderFactory
 import org.netbeans.api.visual.widget.ConnectionWidget
-import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.LabelWidget
 import org.netbeans.api.visual.widget.Scene
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.commons.Constants
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.openmole.ide.core.workflow.implementation.TransitionUI
+import org.openmole.ide.core.commons.TransitionType._
 
-class LabeledConnectionWidget(val scene: Scene, transition: TransitionUI) extends ConnectionWidget(scene) {
+class LabeledConnectionWidget(val scene: Scene,val transition: TransitionUI) extends ConnectionWidget(scene) {
   val conditionLabel = new LabelWidget(scene, transition.condition.getOrElse(""))
   conditionLabel.setBackground(Constants.CONDITION_LABEL_BACKGROUND_COLOR)
   conditionLabel.setBorder(BorderFactory.createLineBorder(2,Constants.CONDITION_LABEL_BORDER_COLOR))
@@ -28,20 +26,7 @@ class LabeledConnectionWidget(val scene: Scene, transition: TransitionUI) extend
   setConstraint(conditionLabel, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
   setMinimumSize(new Dimension(10, 25))
   setLabelVisible
-  
-//  val aggregWidget = new AggregationWidget(scene,transition)
-//  aggregWidget.setOpaque(true)
-//  addChild(aggregWidget)
-//  setConstraint(aggregWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
-//  setMinimumSize(new Dimension(50, 50))
-  
-  val aggregLabel = new ImageWidget(scene,ImageUtilities.loadImage("/home/mathieu/Bureau/cubes.png"))
- // aggregLabel.setBackground(new Color(222,0,123))
- // aggregLabel.setOpaque(true)
-  addChild(aggregLabel)
-  setConstraint(aggregLabel, LayoutFactory.ConnectionWidgetLayoutAlignment.TOP_CENTER, 0.5f)
- // setMinimumSize(new Dimension(50, 50))
- setAsAggregationTransition(true)
+  drawTransitionType
   
   def setConditionLabel(cond: Option[String])= {
     conditionLabel.setLabel(cond.getOrElse(""))
@@ -50,20 +35,27 @@ class LabeledConnectionWidget(val scene: Scene, transition: TransitionUI) extend
   
   def setLabelVisible= conditionLabel.setVisible(!conditionLabel.getLabel.isEmpty)
   
-  def setAsAggregationTransition(b: Boolean) = {
-    aggregLabel.setVisible(b)
-    println("set Visible " + b)
-//    scene.repaint
-  //  scene.revalidate
+  def drawTransitionType = {
+    println("drawTransitionType " + transition.transitionType)
+    transition.transitionType match {
+      case EXPLORATION_TRANSITION=> setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.EXPLORATION_TRANSITON,false))
+      case AGGREGATION_TRANSITION=> setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.AGGREGATION_TRANSITON,false))
+      case _=> setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+    }
   }
-//  
-//  override def paintWidget = {
-//    super.paintWidget
-//    val graphics = getGraphics.asInstanceOf[Graphics2D]
-//    if (transition.isAggregation){
-//      graphics.setColor(new Color(255,0,0))
-//      graphics.fill(new Rectangle(0,0,40,40))
+  
+//  def toAggregationTransition(b: Boolean) = {
+//    if (b) {
+//      transition.transitionType = AGGREGATION_TRANSITION
+//     // setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.thumb(Images.AGGREGATION_TRANSITON,50),true))
+//      setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.AGGREGATION_TRANSITON,false))
 //    }
+//    else {
+//      transition.transitionType = BASIC_TRANSITION
+//      setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+//    }
+//    scene.repaint
+//    scene.revalidate
 //  }
 }
   

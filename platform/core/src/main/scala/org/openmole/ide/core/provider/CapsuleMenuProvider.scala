@@ -29,10 +29,10 @@ import org.openmole.ide.core.workflow.action.AddInputSlotAction
 import org.openmole.ide.core.workflow.action.AddTaskAction
 import org.openmole.ide.core.workflow.action.DefineMoleStartAction
 import org.openmole.ide.core.workflow.action.RemoveCapsuleAction
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.commons.Constants
 
-class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends GenericMenuProvider {
+class CapsuleMenuProvider(scene: MoleScene, capsule: CapsuleUI) extends GenericMenuProvider {
   println("TransitionMenuProvider")
   
   var encapsulated= false
@@ -41,9 +41,9 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   val itIS= new JMenuItem("Add an input slot")
   val itR = new JMenuItem("Remove capsule")
   val itStart = new JMenuItem("Define as starting capsule")
-  itIS.addActionListener(new AddInputSlotAction(capsuleView))
-  itR.addActionListener(new RemoveCapsuleAction(scene,capsuleView))
-  itStart.addActionListener(new DefineMoleStartAction(scene, capsuleView))
+  itIS.addActionListener(new AddInputSlotAction(capsule))
+  itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
+  itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
   
   items+= (itIS,itR,itStart)
   
@@ -51,11 +51,11 @@ class CapsuleMenuProvider(scene: MoleScene, capsuleView: CapsuleViewUI) extends 
   
   override def getPopupMenu(widget: Widget, point: Point)= {
     if (encapsulated) {
-      if (! ElementFactories.getAll(Constants.TASK).isEmpty){
+      if (! ElementFactories.dataTaskProxys.isEmpty){
          menus.remove(taskMenu)
-         ElementFactories.getAll(Constants.TASK).foreach(t=> {
-             val it= new JMenuItem(t.panelUIData.name + " :: " + t.panelUIData.coreClass.getSimpleName)
-           it.addActionListener(new AddTaskAction(scene,capsuleView, t))
+         ElementFactories.dataTaskProxys.foreach(t=> {
+             val it= new JMenuItem(t.dataUI.name + " :: " + t.dataUI.coreClass.getSimpleName)
+           it.addActionListener(new AddTaskAction(scene,capsule, t))
           })
       }
     }

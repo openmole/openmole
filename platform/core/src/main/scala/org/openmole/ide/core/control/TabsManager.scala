@@ -5,7 +5,7 @@
 
 package org.openmole.ide.core.control
 
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.workflow.model.IMoleScene
 
 object TabsManager {
@@ -15,7 +15,7 @@ object TabsManager {
   def getCurrentScene: IMoleScene= {
     val o= getCurrentObject
     o match{
-      case x: CapsuleViewUI=> x.scene
+      case x: CapsuleUI=> x.scene
       case _=> o.asInstanceOf[IMoleScene]
     }
   }

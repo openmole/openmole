@@ -19,20 +19,20 @@ package org.openmole.ide.core.workflow.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 
-class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleViewUI) extends ActionListener{
+class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleUI) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent)= {
-    val id = scene.manager.capsuleViewID(capsule)
-    scene.manager.removeCapsuleView(id)
+    val id = scene.manager.capsuleID(capsule)
+    scene.manager.removeCapsuleUI(id)
     scene.removeNodeWithEdges(id)
   }
 }
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
-//import org.openmole.ide.core.workflow.implementation.CapsuleViewUI;
+//import org.openmole.ide.core.workflow.implementation.CapsuleUI;
 //import org.openmole.ide.core.workflow.implementation.MoleScene;
 //
 ///**
@@ -41,19 +41,19 @@ class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleViewUI) extends Actio
 // */
 //public class RemoveCapsuleAction implements ActionListener {
 //
-//    CapsuleViewUI capsule;
+//    CapsuleUI capsule;
 //    MoleScene scene;
 //
 //    public RemoveCapsuleAction(MoleScene scene,
-//            CapsuleViewUI capsule) {
+//            CapsuleUI capsule) {
 //        this.capsule = capsule;
 //        this.scene = scene;
 //    }
 //
 //    @Override
 //    public void actionPerformed(ActionEvent ae) {
-//        String id = scene.getManager().getCapsuleViewID(capsule);
-//        scene.getManager().removeCapsuleView(id);
+//        String id = scene.getManager().getCapsuleUIID(capsule);
+//        scene.getManager().removeCapsuleUI(id);
 //        scene.removeNodeWithEdges(id);
 //    }
 //}

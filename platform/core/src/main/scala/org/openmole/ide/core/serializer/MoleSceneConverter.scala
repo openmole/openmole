@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
-import org.openmole.ide.core.properties.TaskPanelUIData
+import org.openmole.ide.core.properties.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.commons.Constants
@@ -35,22 +35,22 @@ import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.exception.MoleExceptionManagement
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 class MoleSceneConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     
-    var firstSlotID = new HashMap[ICapsuleView, Int]
+    var firstSlotID = new HashMap[ICapsuleUI, Int]
     var iSlotMapping = new HashMap[ISlotWidget, Int]
-    var taskUIs = new HashSet[TaskPanelUIData]
+    var taskUIs = new HashSet[TaskDataUI]
     
     val molescene= o.asInstanceOf[MoleScene]
     var slotcount = 0
     
     writer.addAttribute("name", molescene.manager.name.get)
-    molescene.manager.capsuleViews.values.foreach(view=> {
+    molescene.manager.capsules.values.foreach(view=> {
         writer.startNode("capsule")
         writer.addAttribute("start", view.startingCapsule.toString)
         writer.addAttribute("x", String.valueOf(view.connectableWidget.convertLocalToScene(view.connectableWidget.getLocation).getX))
@@ -74,9 +74,9 @@ class MoleSceneConverter extends Converter{
         
         //Task
         if (view.capsuleType != CAPSULE) {
-          taskUIs.add(view.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData])
+          taskUIs.add(view.dataProxy.get.dataUI.asInstanceOf[TaskDataUI])
           writer.startNode("task");
-          writer.addAttribute("name", view.dataProxy.get.panelUIData.name)
+          writer.addAttribute("name", view.dataProxy.get.dataUI.name)
           writer.endNode
         }
         writer.endNode
@@ -95,7 +95,7 @@ class MoleSceneConverter extends Converter{
   }
   
   override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  {
-    var oslots = new HashMap[String, ICapsuleView]
+    var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, ISlotWidget]
     
     val scene = new MoleScene
@@ -120,7 +120,7 @@ class MoleSceneConverter extends Converter{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> {
-                    caps.encapsule(ElementFactories.getPaletteElementFactory(Constants.TASK,reader.getAttribute("name")))                   
+                    caps.encapsule(ElementFactories.getTaskDataProxyUI(reader.getAttribute("name")))                   
                   }
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
@@ -131,7 +131,7 @@ class MoleSceneConverter extends Converter{
             val source = oslots(reader.getAttribute("source"))
             val target = islots(reader.getAttribute("target"))             
             scene.manager.registerTransition(new TransitionUI(source, target, TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
-            scene.createEdge(scene.manager.capsuleViewID(source), scene.manager.capsuleViewID(target.capsuleView))           
+            scene.createEdge(scene.manager.capsuleID(source), scene.manager.capsuleID(target.capsule))           
           }
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        
       }

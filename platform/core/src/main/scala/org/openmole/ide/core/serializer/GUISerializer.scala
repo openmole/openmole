@@ -26,8 +26,8 @@ import java.io.FileWriter
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.PaletteElementFactory
-import org.openmole.ide.core.properties.IPanelUIData
+import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.properties.IDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants
@@ -39,7 +39,7 @@ object GUISerializer {
   
   xstream.alias("molescene", classOf[MoleScene])
 //  xstream.alias("entity", classOf[EntityUI])
-  xstream.alias("data", classOf[IPanelUIData[_]])
+  xstream.alias("data", classOf[IDataUI])
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -48,13 +48,13 @@ object GUISerializer {
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
     //prototypes
-    ElementFactories.getAll(Constants.PROTOTYPE).foreach(pef=> out.writeObject(pef.panelUIData))
+    ElementFactories.dataPrototypeProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
 
     //tasks
-    ElementFactories.getAll(Constants.TASK).foreach(pef=> out.writeObject(pef.panelUIData))
+    ElementFactories.dataTaskProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
         
     //samplings
-    ElementFactories.getAll(Constants.SAMPLING).foreach(pef=> out.writeObject(pef.panelUIData))
+    ElementFactories.dataSamplingProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
 
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
@@ -73,7 +73,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: IPanelUIData[_]=> new PaletteElementFactory(x)
+          case x: IDataUI=> new DataProxyUI(x)
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

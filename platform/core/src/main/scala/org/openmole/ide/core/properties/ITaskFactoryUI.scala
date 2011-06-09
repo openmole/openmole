@@ -19,6 +19,10 @@ package org.openmole.ide.core.properties
 
 import org.openmole.ide.core.commons.Constants
 
-abstract class ITaskFactoryUI extends IFactoryUI{ 
+trait ITaskFactoryUI extends IFactoryUI{ 
   override def entityType = Constants.TASK
+  
+  override def displayName: String = buildDataUI("").coreClass.getSimpleName
+  
+  def buildDataUI(name: String): ITaskDataUI
 }

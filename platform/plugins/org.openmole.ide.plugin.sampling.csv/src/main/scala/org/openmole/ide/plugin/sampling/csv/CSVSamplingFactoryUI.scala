@@ -20,5 +20,5 @@ package org.openmole.ide.plugin.sampling.csv
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
-  override def buildPanelUIData(name: String) = new CSVSamplingPanelUIData(name)
+  override def buildDataUI(name: String) = new CSVSamplingDataUI(name)
 }

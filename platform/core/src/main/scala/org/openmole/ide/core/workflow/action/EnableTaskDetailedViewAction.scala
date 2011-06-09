@@ -27,7 +27,7 @@ class EnableTaskDetailedViewAction extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
     MoleScenesManager.detailedView= ae.getSource.asInstanceOf[AbstractButton].isSelected
-    MoleScenesManager.moleScenes.foreach(s=> {s.manager.capsuleViews.values.foreach(_.connectableWidget.setDetailedView);s.validate;s.refresh})
+    MoleScenesManager.moleScenes.foreach(s=> {s.manager.capsules.values.foreach(_.connectableWidget.setDetailedView);s.validate;s.refresh})
   }
 }
 
@@ -37,7 +37,7 @@ class EnableTaskDetailedViewAction extends ActionListener{
 //import javax.swing.AbstractButton;
 //import org.openmole.ide.core.control.MoleScenesManager;
 //import org.openmole.ide.core.workflow.implementation.MoleScene;
-//import org.openmole.ide.core.workflow.model.ICapsuleView;
+//import org.openmole.ide.core.workflow.model.ICapsuleUI;
 //import org.openmole.ide.core.workflow.model.IMoleScene;
 //
 ///**
@@ -52,7 +52,7 @@ class EnableTaskDetailedViewAction extends ActionListener{
 //        MoleScenesManager.getInstance().setDetailedView(button.isSelected());
 //        for (Iterator<IMoleScene> its = MoleScenesManager.getInstance().getMoleScenes().iterator(); its.hasNext();) {
 //            MoleScene scene = (MoleScene) its.next();
-//            for (ICapsuleView cv : scene.getManager().getCapsuleViews()) {
+//            for (ICapsuleUI cv : scene.getManager().getCapsuleUIs()) {
 //                cv.getConnectableWidget().setDetailedView();
 //            }
 //            scene.validate();

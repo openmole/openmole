@@ -20,9 +20,9 @@ package org.openmole.ide.core.workflow.implementation.paint
 import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 
-class OSlotWidget(scene: Scene,val capsule: CapsuleViewUI)  extends SlotWidget(scene){
+class OSlotWidget(scene: Scene,val capsule: CapsuleUI)  extends SlotWidget(scene){
   setImage(Images.IMAGE_OUTPUT_SLOT)
   setDetailedView(Constants.TASK_CONTAINER_WIDTH)
   

@@ -16,8 +16,6 @@
  */
 package org.openmole.ide.core.properties
 
-import java.awt.event.ContainerListener
 import javax.swing.JPanel
-import java.awt.event.ContainerEvent
 
-abstract class PanelUI extends JPanel with IPanelUI
+abstract class PanelUI[T<:IDataUI] extends JPanel with IPanelUI[T]

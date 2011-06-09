@@ -10,24 +10,24 @@
  */
 package org.openmole.ide.plugin.task.exploration;
 
-import org.openmole.ide.core.properties.IPanelUIData;
+import org.openmole.ide.core.properties.ITaskDataUI;
 import org.openmole.ide.core.properties.PanelUI;
-import org.openmole.ide.core.properties.PanelUIData;
-import org.openmole.ide.core.properties.TaskPanelUIData;
+import org.openmole.ide.core.properties.DataUI;
+import org.openmole.ide.core.properties.TaskDataUI;
 
 /**
  *
  * @author mathieu
  */
-public class ExplorationTaskPanelUI extends PanelUI {
+public class ExplorationTaskPanelUI extends PanelUI<ITaskDataUI> {
     /** Creates new form ExplorationTaskPanelUI */
     public ExplorationTaskPanelUI() {
         initComponents();
     }
 
-    public IPanelUIData saveContent(String name) {return new ExplorationTaskPanelUIData(name);}
+    public ITaskDataUI saveContent(String name) {return new ExplorationTaskDataUI(name);}
     
-    public void loadContent(IPanelUIData pud) {
+    public void loadContent(ITaskDataUI pud) {
         
         System.out.println("in loadContent ExplorationTaskPanelUI");
     }

@@ -21,29 +21,15 @@ import org.openide.nodes.Index
 import org.openide.nodes.Node
 import java.awt.datatransfer.DataFlavor
 import java.util.ArrayList
+import org.openmole.ide.core.properties.IDataUI
 
-class GenericChildren(collection: Iterable[PaletteElementFactory], dataFlavor: DataFlavor) extends Index.ArrayChildren{
+class GenericChildren(collection: Iterable[DataProxyUI[_<:IDataUI]], dataFlavor: DataFlavor) extends Index.ArrayChildren{
 
   def refreshNodes= refresh
   
   override def initCollection: java.util.List[Node] = {
     val childrenNodes = new ArrayList[Node](collection.size)
-    collection.foreach(pef=>{childrenNodes.add(new GenericNode(dataFlavor,pef))})
+    collection.foreach(dpu=>{childrenNodes.add(new GenericNode(dataFlavor,dpu))})
     childrenNodes
   }
 }
-  
-
-//import org.openide.nodes.Index;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public abstract class GenericChildren  extends Index.ArrayChildren  implements IGenericChildren{
-//
-//    @Override
-//    public void refreshNodes() {
-//        refresh();
-//    }
-//}

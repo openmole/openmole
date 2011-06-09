@@ -8,9 +8,9 @@ package org.openmole.ide.core.workflow.implementation.paint
 import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
 import org.netbeans.api.visual.anchor.Anchor.Entry
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 
-class ISlotAnchor(relatedWidget: CapsuleViewUI,index: Int) extends SlotAnchor(relatedWidget) {
+class ISlotAnchor(relatedWidget: CapsuleUI,index: Int) extends SlotAnchor(relatedWidget) {
 
     val x = -4
     
@@ -18,7 +18,7 @@ class ISlotAnchor(relatedWidget: CapsuleViewUI,index: Int) extends SlotAnchor(re
     
   
 }
-//    public ISlotAnchor(CapsuleViewUI relatedWidget,
+//    public ISlotAnchor(CapsuleUI relatedWidget,
 //            int index) {
 //        super(relatedWidget);
 //        this.index = index;

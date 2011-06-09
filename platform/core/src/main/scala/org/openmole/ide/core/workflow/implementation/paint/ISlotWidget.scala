@@ -19,9 +19,9 @@ package org.openmole.ide.core.workflow.implementation.paint
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 
-class ISlotWidget(scene: Scene,val capsuleView: CapsuleViewUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene){
+class ISlotWidget(scene: Scene,val capsule: CapsuleUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene){
   if (startingSlot) setImage(Images.IMAGE_START_SLOT)
   else setImage(Images.IMAGE_INPUT_SLOT)     
   setPreferredLocation(new Point(-12, 14 + index * 20))

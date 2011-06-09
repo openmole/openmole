@@ -23,5 +23,5 @@ class DoublePrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "Double"
   
-  override def buildPanelUIData(name: String) = new DoublePrototypePanelUIData(name)
+  override def buildDataUI(name: String) = new DoublePrototypeDataUI(name)
 }

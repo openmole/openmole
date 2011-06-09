@@ -19,29 +19,21 @@ package org.openmole.ide.core.palette
 
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.beans.PropertyChangeEvent
-import java.beans.PropertyChangeListener
 import org.netbeans.spi.palette.PaletteController
 import org.openide.nodes.AbstractNode
 import org.openide.util.datatransfer.ExTransferable
 import org.openide.util.lookup.Lookups
 import org.openide.nodes.Children
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
-//class GenericNode(dataFlavor: DataFlavor,factory: IFactoryUI,displayName: String) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))){
-//  setIconBaseWithExtension(factory.imagePath)
-//  setName(displayName)
-//}
+import org.openmole.ide.core.properties.IDataUI
 
-class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFactory) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
-  setIconBaseWithExtension(elementFactory.panelUIData.imagePath)
-  setName(elementFactory.panelUIData.name)
+class GenericNode(dataFlavor: DataFlavor,val dataProxy: DataProxyUI[_<:IDataUI]) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
+  setIconBaseWithExtension(dataProxy.dataUI.imagePath)
+  setName(dataProxy.dataUI.name)
   setValue(PaletteController.ATTR_IS_READONLY, false)
   
   override def drag: Transferable = {
-    println("DRAG")
     val retValue = ExTransferable.create(super.drag)
-    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return elementFactory})
+    retValue.put( new ExTransferable.Single(dataFlavor) {override def getData: Object = return dataProxy})
     retValue
   }
   
@@ -52,30 +44,3 @@ class GenericNode(dataFlavor: DataFlavor,val elementFactory: PaletteElementFacto
   }
 
 }
-
-//package org.openmole.ide.core.palette;
-//
-//import java.awt.datatransfer.DataFlavor;
-//import org.openide.nodes.AbstractNode;
-//import org.openide.nodes.Children;
-//import org.openide.util.lookup.Lookups;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class GenericNode extends AbstractNode {
-//
-//    protected  DataFlavor dataFlavor;
-//
-//         public GenericNode(DataFlavor key,
-//                       String iconPath,
-//                       String iconName) {
-//        super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-//            this.dataFlavor = key;
-//            setIconBaseWithExtension(iconPath);
-//            setName(iconName);
-//
-//             System.out.println("*********** "+key + ", " + iconPath +", "+iconName);
-//    }
-//}

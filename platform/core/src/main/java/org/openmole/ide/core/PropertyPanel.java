@@ -23,20 +23,24 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import org.openmole.ide.core.commons.Constants;
+import org.openmole.ide.core.palette.TaskDataProxyFactory;
+import org.openmole.ide.core.palette.SamplingDataProxyFactory;
+import org.openmole.ide.core.palette.PrototypeDataProxyFactory;
+import org.openmole.ide.core.palette.EnvironmentDataProxyFactory;
+import org.openmole.ide.core.palette.IDataProxyFactory;
 import org.openmole.ide.core.palette.ElementFactories;
 import org.openmole.ide.core.control.MoleScenesManager;
-import org.openmole.ide.core.palette.ModelElementFactory;
-import org.openmole.ide.core.palette.PaletteElementFactory;
+import org.openmole.ide.core.palette.DataProxyUI;
 import org.openmole.ide.core.properties.IPanelUI;
-import org.openmole.ide.core.properties.IPanelUIData;
+import org.openmole.ide.core.properties.IDataUI;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConversions.*;
 
 public class PropertyPanel extends javax.swing.JPanel {
 
     private static PropertyPanel instance;
-    private PaletteElementFactory currentPaletteElementFactory;
-    private IPanelUI currentPanelUI;
+    private DataProxyUI<? extends IDataUI> currentDataProxyUI;
+    private IPanelUI<? extends IDataUI> currentPanelUI;
     private Boolean initEntity = false;
     private Map<String, Boolean> locked = new HashMap<String, Boolean>();
 
@@ -57,36 +61,30 @@ public class PropertyPanel extends javax.swing.JPanel {
 
 //    public void save() {
 //        if (!initEntity) {
-//            if (currentPanelUIData != null) {
+//            if (currentDataUI != null) {
 //                if (currentPanelUI != null) {
-//                    PanelUIData pdata = currentPanelUI.saveContent();
+//                    DataUI pdata = currentPanelUI.saveContent();
 //                    pdata.name_$eq(nameTextField.getText());
-//                    currentPanelUIData.entity().updatePanelUIData(pdata);
+//                    currentDataUI.entity().updateDataUI(pdata);
 //                }
 //            }
 //        }
 //    }
     public void displayCurrentEntity() {
-        displayCurrentEntity(currentPaletteElementFactory);
+        displayCurrentEntity(currentDataProxyUI);
     }
 
-    public void displayCurrentEntity(PaletteElementFactory pef) {
-        currentPaletteElementFactory = pef;
-    //    if (pef.panelUIData().hasPanelUI()) {
-            currentPanelUI = pef.panelUIData().buildPanelUI();
-      //  }
+    public void displayCurrentEntity(DataProxyUI<? extends IDataUI> dpu) {
+        currentDataProxyUI = dpu;
+        currentPanelUI = dpu.dataUI().buildPanelUI();
 
-        nameTextField.setText(pef.panelUIData().name());
+        nameTextField.setText(dpu.dataUI().name());
         typeComboBox.removeAllItems();
-        //  typeComboBox.setEnabled(false);
+       // currentPanelUI.loadContent(currentDataProxyUI.dataUI());
+        updateViewport((JPanel) currentPanelUI);
+        entityPanelScrollPane.setVisible(true);
 
-     //   if (pef.panelUIData().hasPanelUI()) {
-            currentPanelUI.loadContent(currentPaletteElementFactory.panelUIData());
-            updateViewport((JPanel) currentPanelUI);
-            entityPanelScrollPane.setVisible(true);
-      //  }
-        
-        locked.put(pef.panelUIData().entityType(), false);
+        locked.put(dpu.dataUI().entityType(), false);
         initEntity = false;
     }
 
@@ -97,34 +95,28 @@ public class PropertyPanel extends javax.swing.JPanel {
     }
 
     private void save() {
-        if (initEntity) {
-            if (nameTextField.getText().length() != 0) {
-                ModelElementFactory currentModelElementFactory = (ModelElementFactory) (typeComboBox.getSelectedItem());
-                PaletteElementFactory element = currentModelElementFactory.buildPaletteElementFactory(nameTextField.getText());
-                MoleSceneTopComponent.getDefault().refreshPalette();
-                displayCurrentEntity(element);
-                locked.put(currentModelElementFactory.factory().entityType(), false);
-            }
-        } else {
-            if (currentPaletteElementFactory != null) {
-                if (currentPanelUI != null) {
-                    IPanelUIData pdata = currentPanelUI.saveContent(nameTextField.getText());
-                    ElementFactories.updateData(pdata, currentPaletteElementFactory.panelUIData().name());
-                    //currentPanelUIData.updatePanelUIData(pdata);
-                }
-            }
-        }
-        MoleSceneTopComponent.getDefault().refreshPalette();
-        initEntity = false;
+//        if (initEntity) {
+//            if (nameTextField.getText().length() != 0) {
+//                IDataProxyFactory currentModelElementFactory = (IDataProxyFactory) (typeComboBox.getSelectedItem());
+//            //    DataProxyUI<? extends IDataUI> element = currentModelElementFactory.buildDataProxyUI(nameTextField.getText());
+//                MoleSceneTopComponent.getDefault().refreshPalette();
+//                displayCurrentEntity(currentModelElementFactory.buildDataProxyUI(nameTextField.getText()));
+//                locked.put(currentModelElementFactory.factory().entityType(), false);
+//            }
+//        } else {
+//            if (currentDataProxyUI != null) {
+//                if (currentPanelUI != null) {
+//                    currentDataProxyUI.updataDataUI(currentPanelUI.saveContent(nameTextField.getText()));
+//                    currentDataProxyUI.dataUI_$eq(currentPanelUI.saveContent(nameTextField.getText()));
+//                }
+//            }
+//        }
+//        MoleSceneTopComponent.getDefault().refreshPalette();
+//        initEntity = false;
     }
 
     private void initNewEntity(String entityType) {
 
-        typeComboBox.setEnabled(true);
-        typeComboBox.removeAllItems();
-        for (ModelElementFactory pef : JavaConversions.asJavaIterable(ElementFactories.modelElements().apply(entityType))) {
-            typeComboBox.addItem(pef);
-        }
         if (entityPanelScrollPane.getViewport() != null) {
             entityPanelScrollPane.getViewport().removeAll();
             //   nameTextField.setText(MoleScenesManager.getName(entityType, locked.get(entityType)));
@@ -132,6 +124,11 @@ public class PropertyPanel extends javax.swing.JPanel {
         }
         initEntity = true;
 
+    }
+
+    private void cleanBox() {
+        typeComboBox.setEnabled(true);
+        typeComboBox.removeAllItems();
     }
 
     /** This method is called from within the constructor to
@@ -299,16 +296,28 @@ public class PropertyPanel extends javax.swing.JPanel {
 
     private void prototypeToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prototypeToggleButtonActionPerformed
         // setButtons(true);
+        cleanBox();
+        for (PrototypeDataProxyFactory dpu : JavaConversions.asJavaIterable(ElementFactories.modelPrototypes())) {
+            typeComboBox.addItem(dpu);
+        }
         initNewEntity(Constants.PROTOTYPE());
     }//GEN-LAST:event_prototypeToggleButtonActionPerformed
 
     private void samplingToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_samplingToggleButtonActionPerformed
         // setButtons(false);
+        cleanBox();
+        for (SamplingDataProxyFactory dpu : JavaConversions.asJavaIterable(ElementFactories.modelSamplings())) {
+            typeComboBox.addItem(dpu);
+        }
         initNewEntity(Constants.SAMPLING());
     }//GEN-LAST:event_samplingToggleButtonActionPerformed
 
     private void environmentToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_environmentToggleButtonActionPerformed
         // setButtons(true);
+        cleanBox();
+        for (EnvironmentDataProxyFactory dpu : JavaConversions.asJavaIterable(ElementFactories.modelEnvironments())) {
+            typeComboBox.addItem(dpu);
+        }
         initNewEntity(Constants.ENVIRONMENT());
     }//GEN-LAST:event_environmentToggleButtonActionPerformed
 
@@ -317,7 +326,11 @@ public class PropertyPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_typeComboBoxActionPerformed
 
     private void taskToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taskToggleButtonActionPerformed
-        // setButtons(false);
+        // setButtons(false);for (IDataProxyFactory dpu : JavaConversions.asJavaIterable(ElementFactories.modelEnvironments)) {
+        cleanBox();
+        for (TaskDataProxyFactory dpu : JavaConversions.asJavaIterable(ElementFactories.modelTasks())) {
+            typeComboBox.addItem(dpu);
+        }
         initNewEntity(Constants.TASK());
 
     }//GEN-LAST:event_taskToggleButtonActionPerformed
@@ -347,15 +360,11 @@ public class PropertyPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     class ItemRenderer extends BasicComboBoxRenderer {
-
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value != null) {
-                if (value.getClass().equals(ModelElementFactory.class)) {
-                    ModelElementFactory mef = (ModelElementFactory) value;
-                    setText(mef.factory().displayName());
-                }
+                    setText(((IDataProxyFactory) value).factory().displayName());
             }
             return this;
         }

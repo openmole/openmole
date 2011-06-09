@@ -10,12 +10,6 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="noIconInMenu" boolvalue="false"/>
             </file>
-            <file name="org-openmole-ide-core-SaveXMLAction.instance">
-                <attr name="delegate" newvalue="org.openmole.ide.core.SaveXMLAction"/>
-                <attr name="displayName" bundlevalue="org.openmole.ide.core.Bundle#CTL_SaveXMLAction"/>
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="noIconInMenu" boolvalue="false"/>
-            </file>
         </folder>
         <folder name="Profile">
             <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.instance_hidden"/>
@@ -37,15 +31,26 @@
         </folder>
     </folder>
     <folder name="Menu">
+        <file name="Edit_hidden"/>
         <folder name="File">
             <file name="Separator2.instance_hidden"/>
             <file name="Separator3.instance_hidden"/>
             <file name="org-netbeans-modules-print-action-PageSetupAction.shadow_hidden"/>
             <file name="org-netbeans-modules-print-action-PrintAction.shadow_hidden"/>
+            <file name="org-openide-actions-SaveAction.shadow_hidden"/>
             <file name="org-openide-actions-SaveAllAction.shadow_hidden"/>
             <file name="org-openide-actions-SaveAsAction.shadow_hidden"/>
         </folder>
         <file name="GoTo_hidden"/>
+        <folder name="Tools">
+            <file name="PaletteManager_hidden"/>
+            <file name="Separator1.instance_hidden"/>
+            <file name="Separator2.instance_hidden"/>
+            <file name="org-netbeans-modules-favorites-templates-TemplatesAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-options-OptionsWindowAction-separatorBefore.instance_hidden"/>
+            <file name="org-netbeans-modules-options-OptionsWindowAction.shadow_hidden"/>
+            <file name="org-openide-actions-ToolsAction.shadow_hidden"/>
+        </folder>
         <file name="View_hidden"/>
         <folder name="Window">
             <file name="EntityPropertyAction.shadow">

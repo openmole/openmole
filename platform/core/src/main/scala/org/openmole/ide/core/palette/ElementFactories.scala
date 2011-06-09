@@ -19,58 +19,103 @@ package org.openmole.ide.core.palette
 
 import org.openide.util.Lookup
 import org.openmole.ide.core.properties.IFactoryUI
-import org.openmole.ide.core.properties.IPanelUIData
+import org.openmole.ide.core.properties.IDataUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.properties.IEnvironmentFactoryUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.properties._
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.WeakHashMap
 
 object ElementFactories {
   
-  lazy val paletteElements = Map(Constants.TASK -> new ListBuffer[PaletteElementFactory],
-                                 Constants.PROTOTYPE -> new ListBuffer[PaletteElementFactory],
-                                 Constants.SAMPLING -> new ListBuffer[PaletteElementFactory],
-                                 Constants.ENVIRONMENT -> new ListBuffer[PaletteElementFactory])
+//  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI[TaskDataUI]],
+//                                 Constants.PROTOTYPE -> new ListBuffer[DataProxyUI[DataUI[Prototype[_]]]],
+//                                 Constants.SAMPLING -> new ListBuffer[DataProxyUI[DataUI[ISampling]]],
+//                                 Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI[DataUI[IEnvironment]]])
   
-  lazy val modelElements = Map(Constants.TASK -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK),
-                               Constants.PROTOTYPE -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE),
-                               Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
-                               Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
+  var dataTaskProxys = new HashSet[DataProxyUI[ITaskDataUI]]
+  var dataPrototypeProxys = new HashSet[DataProxyUI[IPrototypeDataUI]]
+  var dataSamplingProxys = new HashSet[DataProxyUI[ISamplingDataUI]]
+  var dataEnvironmentProxys = new HashSet[DataProxyUI[IEnvironmentDataUI]]
   
-  def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
-    val li = new ListBuffer[ModelElementFactory]
-    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p)})
-    li
-  }
+//  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI[ITaskDataUI]],
+//                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI[IPrototypeDataUI]],
+//                            Constants.SAMPLING -> new ListBuffer[DataProxyUI[ISamplingDataUI]],
+//                            Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI[IEnvironmentDataUI]])
+  
+  val modelTasks = new HashSet[TaskDataProxyFactory]
+  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
+  
+  val modelPrototypes = new HashSet[PrototypeDataProxyFactory]
+  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
+  
+  val modelSamplings = new HashSet[SamplingDataProxyFactory]
+  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{modelSamplings += new SamplingDataProxyFactory(f)})
+  
+  val modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
+  Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
+  
+//  lazy val modelElements = Map(Constants.TASK -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK),
+//                               Constants.PROTOTYPE -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE),
+//                               Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
+//                               Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
+  
+//  def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
+//    val li = new ListBuffer[ModelElementFactory]
+//    Lookup.getDefault.lookupAll(factoryClass).foreach(p=>{li += new ModelElementFactory(p)})
+//    li
+//  }
 
-  def updateData(pud: IPanelUIData[_],oldName: String) = {
-//    val oldPud = getPanelUIData(pud.entityType, oldName)
-//    capsuleModels(oldPud).panelUIData = Some(pud)
-//    specificTaskPanelUIData.update(pud, specificTaskPanelUIData(oldPud))
-//    capsuleModels.update(pud,capsuleModels(oldPud))
-//    remove(oldPud)
-//    addElement(pud)
-    getPaletteElementFactory(pud.entityType,oldName).panelUIData = pud
+ // def updateData(pud: IDataUI,oldName: String) = getDataProxyUI(pud.entityType,oldName).dataUI = pud
+  
+  def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
+
+  // def getDataProxyUI(categoryName: String, name: String) = dataProxys(categoryName).groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//  def getDataProxyUI(categoryName: String, name: String) = {
+//    categoryName match {
+//      case Constants.TASK=> dataTaskProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.PROTOTYPE=> dataPrototypeProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.SAMPLING=> dataSamplingProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.ENVIRONMENT=> dataEnvironmentProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//    }
+//  }
+  
+  def getTaskDataProxyUI(name: String) = dataTaskProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  
+  
+  
+  // def getAll(entityType: String) = dataProxys(entityType)
+  
+  def addTaskElement(dpu: DataProxyUI[ITaskDataUI]) = dataTaskProxys += dpu
+  def addPrototypeElement(dpu: DataProxyUI[IPrototypeDataUI]) = dataPrototypeProxys += dpu
+  def addSamplingElement(dpu: DataProxyUI[ISamplingDataUI]) = dataSamplingProxys += dpu
+  def addEnvironmentElement(dpu: DataProxyUI[IEnvironmentDataUI]) = dataEnvironmentProxys += dpu
+  
+  
+  def removeTaskElement(dpu: DataProxyUI[ITaskDataUI]) = dataTaskProxys.remove(dpu)
+  def removePrototypeElement(dpu: DataProxyUI[IPrototypeDataUI]) = dataPrototypeProxys.remove(dpu)
+  def removeSamplingElement(dpu: DataProxyUI[ISamplingDataUI]) = dataSamplingProxys.remove(dpu)
+  def removeEnvironmentElement(dpu: DataProxyUI[IEnvironmentDataUI]) = dataEnvironmentProxys.remove(dpu)
+  
+  def clearAllTaskElement = dataTaskProxys.clear
+  def clearAllPrototypeElement = dataPrototypeProxys.clear
+  def clearAllSamplingElement = dataSamplingProxys.clear
+  def clearAllEnvironmentElement = dataEnvironmentProxys.clear
+  
+  def clearAll: Unit = {
+    clearAllTaskElement
+    clearAllPrototypeElement
+    clearAllSamplingElement
+    clearAllEnvironmentElement
   }
   
-  def isExplorationTaskFactory(pud: IPanelUIData[_]) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
-  
-  def getPaletteElementFactory(categoryName: String, name: String) = paletteElements(categoryName).groupBy(_.panelUIData.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  
-  def getAll(entityType: String) = paletteElements(entityType)
-  
-  def addElement(pef: PaletteElementFactory) = paletteElements(pef.panelUIData.entityType) += pef
-  
-  def remove(pef: PaletteElementFactory) = paletteElements(pef.panelUIData.entityType).remove(pef)
-  
-  def clearAll(entityType: String) = paletteElements(entityType).clear
-  
-  def clearAll: Unit = paletteElements.foreach(en=> clearAll(en._1))
 } 
   

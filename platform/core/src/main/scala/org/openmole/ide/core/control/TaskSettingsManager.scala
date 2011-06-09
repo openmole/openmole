@@ -10,7 +10,7 @@ import javax.swing.text.Document
 import org.openide.filesystems.FileUtil
 import org.openide.loaders.DataObject
 import org.openide.text.CloneableEditorSupport
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 
 object TaskSettingsManager extends TabManager{
 
@@ -18,7 +18,7 @@ object TaskSettingsManager extends TabManager{
   
   override def addTab(displayed: Object)= {
     
-    val tcv= displayed.asInstanceOf[ICapsuleView]
+    val tcv= displayed.asInstanceOf[ICapsuleUI]
     
     val editorPane= new JEditorPane
     val kit= CloneableEditorSupport.getEditorKit("text/x-groovy")
@@ -28,7 +28,7 @@ object TaskSettingsManager extends TabManager{
     editorPane.getDocument.putProperty(Document.StreamDescriptionProperty, dob)
     editorPane.setText("package dummy;")
     
-    addMapping(tcv, editorPane,tcv.dataProxy.get.panelUIData.name)
+    addMapping(tcv, editorPane,tcv.dataProxy.get.dataUI.name)
     MoleScenesManager.addChild(tcv.scene, editorPane)
     editorPane
   } 

@@ -23,5 +23,5 @@ class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "BigInteger"
   
-  override def buildPanelUIData(name: String) = new BigIntegerPrototypePanelUIData(name)
+  override def buildDataUI(name: String) = new BigIntegerPrototypeDataUI(name)
 }

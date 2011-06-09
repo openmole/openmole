@@ -21,9 +21,9 @@ import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.workflow.implementation.CapsuleViewUI
+import org.openmole.ide.core.workflow.implementation.CapsuleUI
 
-class OSlotAnchor(relatedWidget: CapsuleViewUI) extends SlotAnchor(relatedWidget) {
+class OSlotAnchor(relatedWidget: CapsuleUI) extends SlotAnchor(relatedWidget) {
 
   val x= Constants.TASK_CONTAINER_WIDTH + 10
   val y= Constants.TASK_TITLE_HEIGHT + 22

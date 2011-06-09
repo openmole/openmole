@@ -29,9 +29,12 @@ object Images {
   val IMAGE_START_SLOT= ImageUtilities.loadImage("img/startSlot.png")
   val IMAGE_INPUT_SLOT= ImageUtilities.loadImage("img/inputSlot.png")
   val IMAGE_OUTPUT_SLOT= ImageUtilities.loadImage("img/outputSlot.png")
+  val AGGREGATION_TRANSITON = ImageUtilities.loadImage("img/aggregation.png")
+  val EXPLORATION_TRANSITON = ImageUtilities.loadImage("img/exploration.png")
   val THUMB_SIZE = 24
 
   var thumbPaths = new HashMap[String,Image]
   
-  def thumb(path: String) = thumbPaths.getOrElseUpdate(path, Toolkit.getDefaultToolkit.createImage(new FilteredImageSource(ImageUtilities.loadImage(path).getSource,new ReplicateScaleFilter(THUMB_SIZE,THUMB_SIZE))))
+  def thumb(path: String, size: Int): Image =  thumbPaths.getOrElseUpdate(path, Toolkit.getDefaultToolkit.createImage(new FilteredImageSource(ImageUtilities.loadImage(path).getSource,new ReplicateScaleFilter(size,size))))
+  def thumb(path: String): Image = thumb(path, THUMB_SIZE)
 }

@@ -27,24 +27,24 @@ import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.properties.TaskPanelUIData
+import org.openmole.ide.core.properties.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.ICapsuleView
+import org.openmole.ide.core.workflow.model.ICapsuleUI
 
-class SamplingWidget(scene: MoleScene,val capsule: ICapsuleView ) extends Widget(scene) {
+class SamplingWidget(scene: MoleScene,val capsule: ICapsuleUI ) extends Widget(scene) {
   val titleArea = new Rectangle
   titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
   
   override def paintWidget= {
     super.paintWidget
-    val sampling = capsule.dataProxy.get.panelUIData.asInstanceOf[TaskPanelUIData].sampling
+    val sampling = capsule.dataProxy.get.dataUI.sampling
     if (sampling.isDefined){
       val g = getGraphics.asInstanceOf[Graphics2D]
-      g.drawImage(ImageUtilities.loadImage(sampling.get.panelUIData.imagePath),0,0,new Container)
+      g.drawImage(ImageUtilities.loadImage(sampling.get.dataUI.imagePath),0,0,new Container)
       
       g.setColor(new Color(102,102,102))
       g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
-      g.drawString(sampling.get.panelUIData.name,2,46)
+      g.drawString(sampling.get.dataUI.name,2,46)
     }
   }
   

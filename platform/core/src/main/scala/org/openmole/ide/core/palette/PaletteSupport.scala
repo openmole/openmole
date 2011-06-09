@@ -59,7 +59,8 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
     val selItem = palette.getSelectedItem
     val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
-      PropertyPanel.getDefault.displayCurrentEntity(ElementFactories.getPaletteElementFactory(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
+     // PropertyPanel.getDefault.displayCurrentEntity(ElementFactories.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
+     PropertyPanel.getDefault.displayCurrentEntity(selItem.lookup(classOf[Node]).asInstanceOf[GenericNode].dataProxy) 
       currentSelItem = selItem
     }
   }

@@ -23,5 +23,5 @@ class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
   
   override def displayName = "BigDecimal"
   
-  override def buildPanelUIData(name: String) = new BigDecimalPrototypePanelUIData(name)
+  override def buildDataUI(name: String) = new BigDecimalPrototypeDataUI(name)
 }

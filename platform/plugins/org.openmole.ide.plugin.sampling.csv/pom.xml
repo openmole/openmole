@@ -22,6 +22,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.core.model</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>

@@ -24,20 +24,3 @@ class CategoryNode(category: ICategory) extends AbstractNode(category.children,L
   setName(category.name)
   setDisplayName(category.displayName)
 }
-//package org.openmole.ide.core.palette;
-//
-//import org.openide.nodes.AbstractNode;
-//import org.openide.util.lookup.Lookups;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class CategoryNode  extends AbstractNode {
-//
-//    /** Creates a new instance of CategoryNode */
-//    public CategoryNode( ICategory category ) {
-//        super(category.getChildren(), Lookups.singleton(category) );
-//        setDisplayName(category.getName());
-//    }
-//}

@@ -22,5 +22,5 @@ import org.openmole.ide.core.properties.ITaskFactoryUI
 
 
 class GroovyTaskFactoryUI extends ITaskFactoryUI {
-  override def buildPanelUIData(name: String) = new GroovyTaskPanelUIData(name)
+  override def buildDataUI(name: String) = new GroovyTaskDataUI(name)
 }

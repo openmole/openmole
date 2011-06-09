@@ -17,17 +17,29 @@
 
 package org.openmole.ide.core.provider
 
+import java.awt.Point
 import javax.swing.JMenuItem
+import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.commons.TransitionType
+import org.openmole.ide.core.commons.TransitionType._
 import org.openmole.ide.core.workflow.action.AddTransitionConditionAction
 import org.openmole.ide.core.workflow.action.AggregationTransitionAction
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
-class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget,edgeID: String) extends GenericMenuProvider {  
+class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget) extends GenericMenuProvider {  
   val itCond = new JMenuItem("Edit condition")
-  val itAgreg = new JMenuItem("Set as aggregation transition")
-  itCond.addActionListener(new AddTransitionConditionAction(scene.manager.getTransition(edgeID),connectionWidget))
-  itAgreg.addActionListener(new AggregationTransitionAction(scene.manager.getTransition(edgeID),connectionWidget))
+  itCond.addActionListener(new AddTransitionConditionAction(connectionWidget))
+  
+  var itAgreg = new JMenuItem
   items+= (itCond,itAgreg)
   
+  override def getPopupMenu(widget: Widget, point: Point)= {
+    items.remove(itAgreg)
+    var transitonTypeString = if (connectionWidget.transition.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
+    itAgreg = new JMenuItem("Set as "+ transitonTypeString +" transition")
+    itAgreg.addActionListener(new AggregationTransitionAction(connectionWidget))
+    items+= itAgreg
+    super.getPopupMenu(widget, point)
+  }
 } 
