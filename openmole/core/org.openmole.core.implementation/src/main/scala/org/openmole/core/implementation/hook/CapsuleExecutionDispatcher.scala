@@ -35,7 +35,7 @@ object CapsuleExecutionDispatcher {
     private val hub = new WeakHashMap[IGenericCapsule, ListBuffer[CapsuleExecutionHook]]
     
     override def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = hub.synchronized {
-      hub.getOrElse(capsule, Iterable.empty).foreach(_.process(moleJob))
+      hub.getOrElse(capsule, Iterable.empty).foreach(_.safeProcess(moleJob))
     }
     
     def +=(capsule: IGenericCapsule, hook: CapsuleExecutionHook) = hub.synchronized {
