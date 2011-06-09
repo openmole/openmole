@@ -17,9 +17,7 @@
 
 package org.openmole.misc.eventdispatcher
 
-import scala.collection.immutable.SortedMap
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable.ListBuffer
 
 class SortedListeners[T] extends Iterable[T] {
   
@@ -27,8 +25,14 @@ class SortedListeners[T] extends Iterable[T] {
       def compare(a: Int, b: Int) = (a - b)
     })
  
-  def register(priority: Int, listener: T) = synchronized {
+  def register(priority: Int, listener: T) = {
     listeners += priority -> (listener :: listeners.getOrElse(priority, Nil))
+  }
+  
+  override def isEmpty = listeners.isEmpty
+  
+  def -=(listener: T) = {
+    listeners = listeners.filter{case(k,v) => v != listener}
   }
 
   override def iterator = listeners.values.flatten.iterator

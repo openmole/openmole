@@ -20,6 +20,7 @@ package org.openmole.core.implementation.hook
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.WeakHashMap
 import scala.ref.WeakReference
@@ -32,20 +33,31 @@ object CapsuleExecutionDispatcher {
     
     def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
   
-    private val hub = new WeakHashMap[IGenericCapsule, ListBuffer[CapsuleExecutionHook]]
+    private val hub = new WeakHashMap[IGenericCapsule, HashSet[CapsuleExecutionHook]]
     
     override def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = hub.synchronized {
       hub.getOrElse(capsule, Iterable.empty).foreach(_.safeProcess(moleJob))
     }
     
     def +=(capsule: IGenericCapsule, hook: CapsuleExecutionHook) = hub.synchronized {
-      hub.getOrElseUpdate(capsule, new ListBuffer) += hook
+      hub.getOrElseUpdate(capsule, new HashSet) += hook
+    }
+    
+    def -=(capsule: IGenericCapsule, hook: CapsuleExecutionHook) = hub.synchronized {
+      hub.getOrElse(capsule, HashSet.empty) -= hook
     }
     
   }
   
   def +=(execution: IMoleExecution, capsule: IGenericCapsule, hook: CapsuleExecutionHook) =  dispatchers.synchronized {
     dispatchers.getOrElseUpdate(execution, new DispatcherMoleExecutionHook(execution)) += (capsule, hook)
+  }
+  
+  def -=(execution: IMoleExecution, capsule: IGenericCapsule, hook: CapsuleExecutionHook) =  dispatchers.synchronized {
+    dispatchers.get(execution) match {
+      case Some(dispatcher) => dispatcher -= (capsule, hook)
+      case None =>
+    }
   }
 
 }

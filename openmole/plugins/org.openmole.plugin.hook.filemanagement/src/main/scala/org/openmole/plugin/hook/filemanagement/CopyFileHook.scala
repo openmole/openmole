@@ -22,8 +22,6 @@ import java.io.File
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.service.Logger
-import scala.collection.mutable.ListBuffer
 
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution

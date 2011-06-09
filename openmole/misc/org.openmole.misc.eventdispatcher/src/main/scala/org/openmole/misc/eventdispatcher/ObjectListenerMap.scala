@@ -32,6 +32,19 @@ class ObjectListenerMap[L] {
     listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event, Iterable.empty)
   }
 
+  def unregister(obj: AnyRef, listener: L, event: String) = synchronized {
+    val map = listnerTypeMap.getOrElse(obj, HashMap.empty)
+    
+    map.get(event) match {
+      case Some(listeners) => 
+        listeners -= listener
+        if(listeners.isEmpty) map -= event
+        if(map.isEmpty) listnerTypeMap -= obj
+      case None =>
+    }
+    
+  }
+  
   def register(obj: AnyRef, priority: Int, listener: L, event: String) = synchronized {
     getOrCreateListeners(obj, event).register(priority, listener)
   }

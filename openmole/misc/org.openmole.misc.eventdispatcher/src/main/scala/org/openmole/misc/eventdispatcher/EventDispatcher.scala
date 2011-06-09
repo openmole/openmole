@@ -30,23 +30,29 @@ object EventDispatcher {
   private val asynchronousObjectChangedWithArgsMap = new ObjectListenerMap[IObjectListenerWithArgs[AnyRef]]
   private val synchronousObjectChangedWithArgsMap = new ObjectListenerMap[IObjectListenerWithArgs[AnyRef]]
   
-  def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListener[T] , event: String) = {
+  def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListener[T] , event: String) =
     asynchronousObjectChangedMap.register(obj.asInstanceOf[AnyRef], Priority.NORMAL, listner.asInstanceOf[IObjectListener[AnyRef]], event)
-  }
     
-  def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListener[T], event: String) = {  
+  def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListener[T], event: String) = 
     synchronousObjectChangedMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListener[AnyRef]], event)
-    //Logger.getLogger(classOf[EventDispatcher].getName).fine("All listners " + synchronousObjectChangedMap.toString)  
-  }
   
-  
-  def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListenerWithArgs[T] , event: String) = {
+  def registerForObjectChangedAsynchronous[T](obj: T, listner: IObjectListenerWithArgs[T] , event: String) =
     asynchronousObjectChangedWithArgsMap.register(obj.asInstanceOf[AnyRef], Priority.NORMAL, listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
-  }
   
-  def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListenerWithArgs[T], event: String) = {
+  def registerForObjectChangedSynchronous[T](obj: T, priority: Int, listner: IObjectListenerWithArgs[T], event: String) =
     synchronousObjectChangedWithArgsMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
-  }  
+
+  def unregisterAsynchronousListener[T](obj: T, listner: IObjectListener[T], event: String) =
+    asynchronousObjectChangedMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListener[AnyRef]], event)
+    
+  def unregisterSynchronousListener[T](obj: T, listner: IObjectListener[T], event: String) =
+    synchronousObjectChangedMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListener[AnyRef]], event)
+
+  def unregisterAsynchronousListener[T](obj: T, listner: IObjectListenerWithArgs[T], event: String) =
+    asynchronousObjectChangedWithArgsMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
+    
+  def unregisterSynchronousListener[T](obj: T, listner: IObjectListenerWithArgs[T], event: String) =
+    synchronousObjectChangedWithArgsMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
   
   def objectChanged[T](obj: T, event: String, args: Array[Object]) = {
     //Logger.getLogger(classOf[EventDispatcher].getName).fine("Signal event " + event + " signaled from " + obj.toString)

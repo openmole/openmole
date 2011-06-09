@@ -17,4 +17,6 @@
 
 package org.openmole.core.model.hook
 
-trait IHook
+trait IHook {
+  def release
+}

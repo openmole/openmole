@@ -35,11 +35,19 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   import IMoleExecution._
   import EventDispatcher._
   
-  registerForObjectChangedSynchronous(moleExecution(), HIGH, new MoleExecutionExecutionStartingAdapter, Starting)
-  registerForObjectChangedSynchronous(moleExecution(), HIGH, new MoleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-  registerForObjectChangedSynchronous(moleExecution(), LOW, new MoleExecutionExecutionFinishedAdapter, Finished)
-  registerForObjectChangedSynchronous(moleExecution(), NORMAL, new CapsuleChangedAdapter(jobInCapsuleFinished), JobInCapsuleFinished)
-  registerForObjectChangedSynchronous(moleExecution(), NORMAL, new CapsuleChangedAdapter(jobInCapsuleStarting), JobInCapsuleStarting)
+  registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
+  registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
+  registerForObjectChangedSynchronous(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
+  registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
+  registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
+  
+  override def release = {
+    unregisterSynchronousListener(moleExecution(), moleExecutionExecutionStartingAdapter, Starting)
+    unregisterSynchronousListener(moleExecution(), moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
+    unregisterSynchronousListener(moleExecution(), moleExecutionExecutionFinishedAdapter, Finished)
+    unregisterSynchronousListener(moleExecution(), capsuleFinished, JobInCapsuleFinished)
+    unregisterSynchronousListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
+  }
   
   def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
   def jobInCapsuleStarting(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
@@ -48,11 +56,21 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   def executionStarting = {}
   def executionFinished = {}
   
-  class MoleExecutionJobStateChangedAdapter extends IObjectListenerWithArgs[IMoleExecution]  {
+  @transient lazy val moleExecutionJobStateChangedAdapter = new IObjectListenerWithArgs[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
       val moleJob = args(0).asInstanceOf[IMoleJob]
       stateChanged(moleJob)
     }
+  }
+  
+  @transient lazy val capsuleStarting = new CapsuleChangedAdapter(jobInCapsuleStarting)
+  @transient lazy val capsuleFinished = new CapsuleChangedAdapter(jobInCapsuleFinished)
+  @transient lazy val moleExecutionExecutionStartingAdapter = new IObjectListener[IMoleExecution]  {
+    override def eventOccured(obj: IMoleExecution) = executionStarting
+  }
+
+  @transient lazy val moleExecutionExecutionFinishedAdapter = new IObjectListener[IMoleExecution]  {
+    override def eventOccured(obj: IMoleExecution) =  executionFinished
   }
   
   class CapsuleChangedAdapter(listener: (IMoleJob, IGenericCapsule) => Unit) extends IObjectListenerWithArgs[IMoleExecution]  {
@@ -63,11 +81,4 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     }
   }
   
-  class MoleExecutionExecutionStartingAdapter extends IObjectListener[IMoleExecution]  {
-    override def eventOccured(obj: IMoleExecution) = executionStarting
-  }
-
-  class MoleExecutionExecutionFinishedAdapter extends IObjectListener[IMoleExecution]  {
-    override def eventOccured(obj: IMoleExecution) =  executionFinished
-  }
 }
