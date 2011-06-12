@@ -58,14 +58,14 @@ object PluginManager {
   val OpenMOLEScope = "OpenMOLE-Scope"
   private implicit def bundleDecorator(b: Bundle) = new {
     
-    def isSystem = b.getLocation.toLowerCase.contains("system bundle")
+    def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
     
     def isProvided = b.getHeaders.toMap.exists{case(k,v) => k.toString.toLowerCase.contains("openmole-scope") &&  v.toString.toLowerCase.contains("provided")}
     
     def file = {
       val url = if(b.getLocation.startsWith("reference:")) 
         b.getLocation.substring("reference:".length)
-      else  if(b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
+      else if(b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
       else b.getLocation
 
       val location = {
@@ -154,6 +154,8 @@ object PluginManager {
   }
 
   private def updateDependencies = synchronized {
+    //Activator.contextOrException.getBundles.foreach{b => println(b.getLocation)}
+    
     val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
     
     resolvedDirectDependencies = new HashMap[Long, HashSet[Long]]
