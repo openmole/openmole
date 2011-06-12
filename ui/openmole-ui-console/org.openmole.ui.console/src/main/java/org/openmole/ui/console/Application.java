@@ -49,7 +49,7 @@ public class Application implements IApplication {
             workspaceLocation = new File(cmd.getOptionValue(workspaceDir.getOpt()));
         }
 
-        if(Workspace.isAlreadyRunningAt(workspaceLocation)) {
+        if(Workspace.anotherIsRunningAt(workspaceLocation)) {
             Logger.getLogger(Application.class.getName()).severe("Application is already runnig at " + workspaceLocation.getAbsolutePath()+ ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running()).getAbsolutePath() + "'.");
             return IApplication.EXIT_OK;
         }

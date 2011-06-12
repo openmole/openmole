@@ -24,6 +24,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.nio.channels.FileChannel
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -34,6 +35,7 @@ import com.ice.tar.TarOutputStream
 import TarArchiver._
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import scala.io.Source
 
 object FileUtil {
 
@@ -176,7 +178,19 @@ object FileUtil {
         (for(f <- file.listFiles) yield f.size).sum
       } else file.length
     }
+    
+    def content_=(content: String) = {
+      val os = new OutputStreamWriter(new FileOutputStream(file))
+      try os.write(content)
+      finally os.close
+    }
   
+    def content = {
+      val s = Source.fromFile(file)
+      try s.mkString
+      finally s.close
+    }
+    
     def archiveDirWithRelativePathNoVariableContent(dest: File) = {
       val os = new TarOutputStream(new FileOutputStream(file))
       try os.createDirArchiveWithRelativePathNoVariableContent(dest)

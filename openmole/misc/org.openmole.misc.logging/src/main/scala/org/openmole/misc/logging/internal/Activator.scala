@@ -15,17 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.service
+package org.openmole.misc.logging.internal
 
-import java.util.logging.{Logger => JLogger,Level}
+import org.openmole.misc.logging.LoggerService
+import org.openmole.misc.tools.service.OSGiActivator
+import org.osgi.framework.BundleActivator
+import org.osgi.framework.BundleContext
 
-trait Logger {
-  @transient lazy val logger = JLogger.getLogger(getClass.getName)
+object Activator extends OSGiActivator {
+  var context: Option[BundleContext] = None
+}
+
+class Activator extends BundleActivator {
   
-  def SEVERE = Level.SEVERE
-  def WARNIING = Level.WARNING
-  def INFO = Level.INFO
-  def FINE = Level.FINE
-  def FINER = Level.FINER
-  def FINEST = Level.FINEST
+  override def start(context: BundleContext) = {
+    Activator.context = Some(context)
+    LoggerService.init
+  }
+
+  override def stop(context: BundleContext) = {
+    Activator.context = None
+  }
+ 
 }

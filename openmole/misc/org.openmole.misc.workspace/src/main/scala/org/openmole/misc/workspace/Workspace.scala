@@ -30,12 +30,12 @@ import org.joda.time.format.ISOPeriodFormat
 import scala.collection.mutable.HashMap
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.logging.LoggerService
 
 object Workspace {
   
+  val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
-  val ConfigurationFile = ".preferences"
+  val ConfigurationFile = "preferences"
   val GlobalGroup = "Global"
   val DefaultTmpLocation = ".tmp"
   val running = ".running"
@@ -47,17 +47,17 @@ object Workspace {
   private val fixedDir = "dir"
   
   private val passwordTest = new ConfigurationLocation(group, "passwordTest", true)
-  private val LevelConfiguration = new ConfigurationLocation(group, "LoggingLevel")
-  
   private val passwordTestString = "test"
   
   private val configurations = new HashMap[ConfigurationLocation, () => String]
 
   this += (UniqueID, UUID.randomUUID.toString)
   this += (passwordTest, passwordTestString)
-  this += (LevelConfiguration, Level.INFO.toString)
   
-  def isAlreadyRunningAt(location: File) = new File(location, running).exists
+  def anotherIsRunningAt(location: File) = {
+    val f = new File(location, running)
+    f.exists && UUID.fromString(f.content).compareTo(sessionUUID) != 0
+  }
   
   lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
   
@@ -131,11 +131,15 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, LevelConfiguration}
+  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, sessionUUID}
   
   location.mkdirs
   val run = new File(location, running)
-  run.createNewFile
+  
+  if(!run.exists) {
+    run.createNewFile
+    run.content = sessionUUID.toString
+  }
   
   val tmpDir = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
@@ -154,10 +158,8 @@ class Workspace(val location: File) {
     configuration
   }
 
-  @transient lazy val sessionUUID = UUID.randomUUID
-  
-  LoggerService.setLevel(Level.parse(preference(LevelConfiguration)))
-  
+  //@transient lazy val sessionUUID = UUID.randomUUID
+    
   def clean = {
     run.delete
     tmpDir.recursiveDelete

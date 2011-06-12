@@ -20,8 +20,6 @@ package org.openmole.core.implementation.mole
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.job.Job
@@ -36,6 +34,7 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.apache.commons.collections15.multimap.MultiHashMap
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
@@ -58,9 +57,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-object MoleExecution {
-  val LOGGER = Logger.getLogger(classOf[MoleExecution].getName)
-}
+object MoleExecution extends Logger
 
 class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection, moleJobGrouping: IMoleJobGrouping, instantRerun: IInstantRerun) extends IMoleExecution {
 
@@ -204,7 +201,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
           try {
             p._2.submit(p._1)
           } catch {
-            case (t: Throwable) => LOGGER.log(Level.SEVERE, "Error durring scheduling", t)
+            case (t: Throwable) => logger.log(SEVERE, "Error durring scheduling", t)
           }
         } catch {
           case (e: InterruptedException) =>
@@ -222,7 +219,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       submit(mole.root, context, ticket, SubMoleExecution(this))
       submiter.start
     } else {
-      LOGGER.warning("This MOLE execution has allready been started, this call has no effect.")
+      logger.warning("This MOLE execution has allready been started, this call has no effect.")
     }
     this
   }
