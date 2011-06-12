@@ -21,7 +21,7 @@ import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette._
 import org.openmole.ide.core.properties.IDataUI
 import org.openmole.ide.core.properties.ITaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
@@ -35,7 +35,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
   
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI[_<:IDataUI]].dataUI.entityType match {
+    transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI].dataUI.entityType match {
       case Constants.TASK=> ConnectorState.ACCEPT
       case _=> ConnectorState.REJECT
     }
@@ -43,7 +43,7 @@ class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
     val capsule = MoleScenesManager.createCapsule(molescene,point)
-    capsule.encapsule(transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI[ITaskDataUI]])
+    capsule.encapsule(transferable.getTransferData(Constants.TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
     capsule.addInputSlot(false)
     
     molescene.repaint

@@ -16,21 +16,17 @@
  */
 package org.openmole.ide.plugin.prototype.base;
 
+import org.openmole.ide.core.properties.IPrototypePanelUI;
 import org.openmole.ide.core.properties.IPrototypeDataUI;
-import org.openmole.ide.core.properties.PanelUI;
-import org.openmole.ide.plugin.prototype.base.IntegerPrototypeDataUI;
+import javax.swing.JPanel;
 
 /**
  *
  * @author mathieu
  */
-public class IntegerPrototypePanelUI extends PanelUI<IPrototypeDataUI> {
+public class IntegerPrototypePanelUI extends JPanel  implements IPrototypePanelUI {
     
     public IPrototypeDataUI saveContent(String name) {
         return new IntegerPrototypeDataUI(name);
     }
-
-    public void loadContent(IPrototypeDataUI pud) {
-    }
-    
 }

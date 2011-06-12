@@ -11,18 +11,22 @@
 package org.openmole.ide.plugin.sampling.csv;
 
 import javax.swing.JFileChooser;
+import org.openmole.ide.core.properties.ISamplingPanelUI;
 import org.openmole.ide.core.properties.ISamplingDataUI;
-import org.openmole.ide.core.properties.PanelUI;
+import javax.swing.JPanel;
 
 /**
  *
  * @author mathieu
  */
-public class CSVSamplingPanelUI extends PanelUI<ISamplingDataUI> {
+public class CSVSamplingPanelUI extends JPanel  implements ISamplingPanelUI {
 
     /** Creates new form CSVSamplingPanelUI */
-    public CSVSamplingPanelUI() {
+    public CSVSamplingPanelUI(ISamplingDataUI pud) {
         initComponents();
+        CSVSamplingDataUI panelData = (CSVSamplingDataUI) pud;
+        System.out.println("in loadContent CSVSamplingPanelUI " + csvPathFileTextField);
+        csvPathFileTextField.setText(panelData.csvFilePath());
     }
 
     public ISamplingDataUI saveContent(String name) {
@@ -31,12 +35,6 @@ public class CSVSamplingPanelUI extends PanelUI<ISamplingDataUI> {
         System.out.println("in saveContent CSVSamplingPanelUI " + csvPathFileTextField.getText());
         panelData.csvFilePath_$eq(csvPathFileTextField.getText());
         return panelData;
-    }
-
-    public void loadContent(ISamplingDataUI pud) {
-        CSVSamplingDataUI panelData = (CSVSamplingDataUI) pud;
-        System.out.println("in loadContent CSVSamplingPanelUI " + csvPathFileTextField);
-        csvPathFileTextField.setText(panelData.csvFilePath());
     }
     
     /** This method is called from within the constructor to

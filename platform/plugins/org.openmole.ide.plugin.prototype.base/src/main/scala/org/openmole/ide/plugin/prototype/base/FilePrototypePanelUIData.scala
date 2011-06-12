@@ -21,7 +21,7 @@ import java.io.File
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class FilePrototypeDataUI(var name: String) extends IPrototypeDataUI{
+class FilePrototypeDataUI(val name: String) extends IPrototypeDataUI{
   override def coreClass = classOf[IPrototype[File]]
   
   override def coreObject = new Prototype(name,classOf[File])

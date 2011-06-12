@@ -30,9 +30,9 @@ class CategoryBuilder extends Children.Keys[ICategory]{
     super.addNotify
     
     setKeys(List(
-        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.dataTaskProxys,Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.dataPrototypeProxys,Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.dataSamplingProxys,Constants.ENTITY_DATA_FLAVOR)),
-        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.dataEnvironmentProxys,Constants.ENTITY_DATA_FLAVOR))).toIterable)
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.dataTaskProxys,Constants.TASK_DATA_FLAVOR)),
+        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.dataPrototypeProxys,Constants.PROTOTYPE_DATA_FLAVOR)),
+        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.dataSamplingProxys,Constants.SAMPLING_DATA_FLAVOR)),
+        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.dataEnvironmentProxys,Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
   }
 }

@@ -19,7 +19,7 @@ package org.openmole.ide.core.properties
 
 import java.awt.Color
 import org.openmole.core.implementation.task.GenericTask
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette._
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.Constants
 import scala.collection.mutable.HashSet
@@ -33,13 +33,15 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject: GenericTask
   
-  def prototypesIn: HashSet[DataProxyUI[IPrototypeDataUI]]
+  def prototypesIn: HashSet[PrototypeDataProxyUI]
   
-  def prototypesOut: HashSet[DataProxyUI[IPrototypeDataUI]]
+  def prototypesOut: HashSet[PrototypeDataProxyUI]
+
+  def addPrototype(p: PrototypeDataProxyUI, ioType: IOType.Value)
   
-  def addPrototype(p: DataProxyUI[IPrototypeDataUI], ioType: IOType.Value)
+  def sampling: Option[SamplingDataProxyUI]
   
-  def sampling: Option[DataProxyUI[ISamplingDataUI]]
+  def sampling_=(s: Option[SamplingDataProxyUI])
   
-  def sampling_=(s: Option[DataProxyUI[ISamplingDataUI]])
+  def buildPanelUI: ITaskPanelUI
 }

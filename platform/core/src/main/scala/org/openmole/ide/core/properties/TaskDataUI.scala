@@ -20,16 +20,16 @@ package org.openmole.ide.core.properties
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette._
 import scala.collection.mutable.HashSet
 
 abstract class TaskDataUI extends ITaskDataUI{
   
-  var prototypesIn = HashSet.empty[DataProxyUI[IPrototypeDataUI]]
-  var prototypesOut = HashSet.empty[DataProxyUI[IPrototypeDataUI]]
-  var sampling: Option[DataProxyUI[ISamplingDataUI]] = None
+  var prototypesIn = HashSet.empty[PrototypeDataProxyUI]
+  var prototypesOut = HashSet.empty[PrototypeDataProxyUI]
+  var sampling: Option[SamplingDataProxyUI] = None
   
-  def addPrototype(p: DataProxyUI[IPrototypeDataUI], ioType: IOType.Value)= {
+  def addPrototype(p: PrototypeDataProxyUI, ioType: IOType.Value)= {
     if (p.dataUI.entityType.equals(Constants.PROTOTYPE)){
       if (ioType.equals(IOType.INPUT)) addPrototypeIn(p)
       else addPrototypeOut(p)
@@ -37,7 +37,7 @@ abstract class TaskDataUI extends ITaskDataUI{
     else throw new GUIUserBadDataError("The entity " + p.dataUI.name + " of type " + p.dataUI.entityType + " can not be added as Prototype to the task " + name)
   }
 
-  private def addPrototypeIn(p: DataProxyUI[IPrototypeDataUI])= prototypesIn+= p
+  private def addPrototypeIn(p: PrototypeDataProxyUI)= prototypesIn+= p
   
-  private def addPrototypeOut(p: DataProxyUI[IPrototypeDataUI])= prototypesOut+= p
+  private def addPrototypeOut(p: PrototypeDataProxyUI)= prototypesOut+= p
 }

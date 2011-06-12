@@ -9,7 +9,7 @@ import java.awt.Color
 import org.openmole.ide.core.properties.TaskDataUI
 import org.openmole.plugin.task.groovy.GroovyTask
 
-class GroovyTaskDataUI(var name: String,var code: String) extends TaskDataUI {
+class GroovyTaskDataUI(val name: String,val code: String) extends TaskDataUI {
   def this(n: String) = this(n,"")
   
   override def coreObject = new GroovyTask(name,code)
@@ -18,7 +18,7 @@ class GroovyTaskDataUI(var name: String,var code: String) extends TaskDataUI {
   
   override def imagePath = "img/thumb/groovyTaskSmall.png"
   
-  override def buildPanelUI = new GroovyTaskPanelUI
+  override def buildPanelUI = new GroovyTaskPanelUI(this)
   
   override def borderColor = new Color(61,104,130)
   

@@ -11,7 +11,7 @@ import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.properties.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
 
-class CSVSamplingDataUI(var name: String,var csvFilePath: String) extends ISamplingDataUI {
+class CSVSamplingDataUI(val name: String,var csvFilePath: String) extends ISamplingDataUI {
   def this(n:String) = this(n,"")
   
   override def coreObject = {  
@@ -27,5 +27,5 @@ class CSVSamplingDataUI(var name: String,var csvFilePath: String) extends ISampl
   
   override def imagePath = "img/thumb/csvSampling.png" 
   
-  override def buildPanelUI = new CSVSamplingPanelUI
+  override def buildPanelUI = new CSVSamplingPanelUI(this)
 }

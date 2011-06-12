@@ -24,4 +24,6 @@ trait IEnvironmentDataUI extends IDataUI {
   override def entityType = Constants.ENVIRONMENT
   
   def coreObject: IEnvironment
+  
+  def buildPanelUI: IEnvironmentPanelUI
 }

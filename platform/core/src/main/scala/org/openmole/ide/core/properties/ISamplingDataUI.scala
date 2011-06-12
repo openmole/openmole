@@ -24,4 +24,6 @@ trait ISamplingDataUI extends IDataUI{
   override def entityType = Constants.SAMPLING
   
   def coreObject: ISampling
+  
+  def buildPanelUI: ISamplingPanelUI
 }

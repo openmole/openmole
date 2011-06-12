@@ -21,11 +21,11 @@ import java.awt.Color
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.properties.ISamplingDataUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette.SamplingDataProxyUI
 import org.openmole.ide.core.properties.TaskDataUI
 
 //class ExplorationTaskDataUI(name: String) extends TaskDataUI(name){
-class ExplorationTaskDataUI(var name: String,s: Option[DataProxyUI[ISamplingDataUI]] = None) extends TaskDataUI{
+class ExplorationTaskDataUI(val name: String,s: Option[SamplingDataProxyUI] = None) extends TaskDataUI{
   def this(n:String) = this(n,None)
   sampling = s
    
@@ -38,7 +38,7 @@ class ExplorationTaskDataUI(var name: String,s: Option[DataProxyUI[ISamplingData
   
   override def imagePath = "img/thumb/explorationTaskSmall.png"
   
-  override def buildPanelUI = new ExplorationTaskPanelUI
+  override def buildPanelUI = new ExplorationTaskPanelUI(this)
   
   override def borderColor = new Color(255,102,0)
   

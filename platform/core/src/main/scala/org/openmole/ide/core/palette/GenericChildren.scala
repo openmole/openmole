@@ -21,9 +21,8 @@ import org.openide.nodes.Index
 import org.openide.nodes.Node
 import java.awt.datatransfer.DataFlavor
 import java.util.ArrayList
-import org.openmole.ide.core.properties.IDataUI
 
-class GenericChildren(collection: Iterable[DataProxyUI[_<:IDataUI]], dataFlavor: DataFlavor) extends Index.ArrayChildren{
+class GenericChildren(collection: Iterable[IDataProxyUI], dataFlavor: DataFlavor) extends Index.ArrayChildren{
 
   def refreshNodes= refresh
   

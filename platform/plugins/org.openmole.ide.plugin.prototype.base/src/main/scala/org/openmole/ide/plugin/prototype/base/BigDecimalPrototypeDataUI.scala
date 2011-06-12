@@ -21,7 +21,7 @@ import org.openmole.ide.core.properties.IPrototypeDataUI
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class BigDecimalPrototypeDataUI(var name: String) extends IPrototypeDataUI{
+class BigDecimalPrototypeDataUI(val name: String) extends IPrototypeDataUI{
   override def coreClass = classOf[IPrototype[BigDecimal]]
   
   override def coreObject = new Prototype(name,BigDecimal.getClass)

@@ -20,7 +20,7 @@ import java.awt.Color
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import org.openmole.ide.core.properties._
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette._
 
 object Constants{
   
@@ -52,10 +52,10 @@ object Constants{
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
   
-  val ENTITY_DATA_FLAVOR= new DataFlavor(classOf[DataProxyUI[_]], "task")
-//  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[DataProxyUI[IPrototypeDataUI]], "prototype")
-//  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[DataProxyUI[ISamplingDataUI]], "sampling")
-//  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[DataProxyUI[IEnvironmentDataUI]], "environment")
+  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], "task")
+  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeDataProxyUI], "prototype")
+  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], "sampling")
+  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], "environment")
 
  // def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }

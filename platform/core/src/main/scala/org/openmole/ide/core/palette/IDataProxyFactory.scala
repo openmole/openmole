@@ -20,7 +20,7 @@ package org.openmole.ide.core.palette
 import org.openmole.ide.core.properties.IFactoryUI
 
 trait IDataProxyFactory {
-  def buildDataProxyUI(name:String): DataProxyUI[_]
+  def buildDataProxyUI(name:String): IDataProxyUI
   
   def factory: IFactoryUI
 }

@@ -36,12 +36,6 @@ object MoleScenesManager extends TabManager{
   var count= 0
   var moleScenes= HashSet.empty[IMoleScene]
   var childTabs= new HashMap[IMoleScene, HashSet[Component]]
-  val counters = Map[String,AtomicInteger](Constants.TASK-> new AtomicInteger(0), 
-                                           Constants.PROTOTYPE-> new AtomicInteger(0), 
-                                           Constants.ENVIRONMENT-> new AtomicInteger(0),
-                                           Constants.SAMPLING-> new AtomicInteger(0))
-   
-  def incrementCounter(entityType: String): String = entityType.toLowerCase + counters(entityType).addAndGet(1).toString  
     
   def createCapsule(scene: MoleScene, locationPoint: Point): ICapsuleUI = {
     val obUI = new CapsuleUI(scene)

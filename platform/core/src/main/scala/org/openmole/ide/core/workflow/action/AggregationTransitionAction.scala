@@ -20,12 +20,12 @@ package org.openmole.ide.core.workflow.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.commons.TransitionType._
-import org.openmole.ide.core.workflow.implementation.TransitionUI
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 
 class AggregationTransitionAction(connectionWidget: LabeledConnectionWidget) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
-    connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
+    if (connectionWidget.transition.transitionType == BASIC_TRANSITION) connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
+    else connectionWidget.transition.transitionType = BASIC_TRANSITION
     connectionWidget.drawTransitionType
   }
 }

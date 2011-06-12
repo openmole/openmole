@@ -22,7 +22,7 @@ import org.openmole.ide.core.properties.ITaskFactoryUI
 class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends IDataProxyFactory{
 
   def buildDataProxyUI(name:String) = {
-    val dup = new DataProxyUI(factory.buildDataUI(name))
+    val dup = new TaskDataProxyUI(factory.buildDataUI(name))
     ElementFactories.addTaskElement(dup)
     dup
   }

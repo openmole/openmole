@@ -10,27 +10,21 @@
  */
 package org.openmole.ide.plugin.task.exploration;
 
+import org.openmole.ide.core.properties.ITaskPanelUI;
 import org.openmole.ide.core.properties.ITaskDataUI;
-import org.openmole.ide.core.properties.PanelUI;
-import org.openmole.ide.core.properties.DataUI;
-import org.openmole.ide.core.properties.TaskDataUI;
+import javax.swing.JPanel;
 
 /**
  *
  * @author mathieu
  */
-public class ExplorationTaskPanelUI extends PanelUI<ITaskDataUI> {
+public class ExplorationTaskPanelUI extends JPanel  implements ITaskPanelUI{
     /** Creates new form ExplorationTaskPanelUI */
-    public ExplorationTaskPanelUI() {
+    public ExplorationTaskPanelUI(ExplorationTaskDataUI pud) {
         initComponents();
     }
 
     public ITaskDataUI saveContent(String name) {return new ExplorationTaskDataUI(name);}
-    
-    public void loadContent(ITaskDataUI pud) {
-        
-        System.out.println("in loadContent ExplorationTaskPanelUI");
-    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

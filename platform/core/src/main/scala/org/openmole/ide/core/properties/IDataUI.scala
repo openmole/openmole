@@ -18,7 +18,7 @@
 package org.openmole.ide.core.properties
 
 trait IDataUI{
-  def name_=(s: String)
+ // def name_=(s: String)
   
   def name: String
   
@@ -27,6 +27,4 @@ trait IDataUI{
   def coreClass: Class[_]
   
   def imagePath: String 
-  
-  def buildPanelUI: IPanelUI[_<:IDataUI]
 }

@@ -22,14 +22,14 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.workflow.model.ICapsuleUI
-import org.openmole.ide.core.palette.DataProxyUI
+import scala.collection.JavaConversions
+import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.CapsuleType._
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.ide.core.palette._
 import org.openmole.ide.core.properties._
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.commons.Constants._
 
 class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
   var encapsulated= false
@@ -50,11 +50,23 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
 //    }
 //    state
     
-    transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI[_<:IDataUI]].dataUI.entityType match {
-      case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case Constants.PROTOTYPE=> ConnectorState.ACCEPT
-      case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case Constants.ENVIRONMENT=> println("envir"); ConnectorState.ACCEPT
+    
+    
+//    transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI].dataUI.entityType match {
+//      case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+//      case Constants.PROTOTYPE=> ConnectorState.ACCEPT
+//      case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
+//      case Constants.ENVIRONMENT=> println("envir"); ConnectorState.ACCEPT
+//      case _=> throw new GUIUserBadDataError("Unknown entity type")
+//    }
+    
+   println("HEAD :: " + transferable.getTransferDataFlavors.head)
+    
+    transferable.getTransferDataFlavors.head match {
+      case TASK_DATA_FLAVOR=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case PROTOTYPE_DATA_FLAVOR=> ConnectorState.ACCEPT
+      case SAMPLING_DATA_FLAVOR=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case ENVIRONMENT_DATA_FLAVOR=> println("envir"); ConnectorState.ACCEPT
       case _=> throw new GUIUserBadDataError("Unknown entity type")
     }
   }
@@ -71,16 +83,29 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
 //      case Constants.SAMPLING=> capsuleDataUI.sampling = Some(dpu.asInstanceOf[DataProxyUI[DataUI[ISampling]]])
 //    }
     
-    val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI[_<:IDataUI]]
-    dpu.dataUI.entityType match{
-      case Constants.TASK=> capsule.encapsule(dpu.asInstanceOf[DataProxyUI[ITaskDataUI]])
-      case Constants.PROTOTYPE=> { 
+//    val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI]
+//    dpu.dataUI.entityType match{
+//      case Constants.TASK=> capsule.encapsule(dpu.asInstanceOf[DataProxyUI])
+//      case Constants.PROTOTYPE=> { 
+//          println("PROTO !!" )
+//          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI], IOType.INPUT)
+//          else capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI], IOType.OUTPUT)
+//        }
+//      case Constants.SAMPLING=> capsuleDataUI.sampling = Some(dpu.asInstanceOf[DataProxyUI])
+//    }
+    
+    transferable.getTransferDataFlavors.head match {
+      // val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI]
+      case TASK_DATA_FLAVOR => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
+      case PROTOTYPE_DATA_FLAVOR=> { 
           println("PROTO !!" )
-          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI[IPrototypeDataUI]], IOType.INPUT)
-          else capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI[IPrototypeDataUI]], IOType.OUTPUT)
+          val dpu = transferable.getTransferData(PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeDataProxyUI]
+          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
+          else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
         }
-      case Constants.SAMPLING=> capsuleDataUI.sampling = Some(dpu.asInstanceOf[DataProxyUI[ISamplingDataUI]])
+      case SAMPLING_DATA_FLAVOR=> capsuleDataUI.sampling = Some(transferable.getTransferData(SAMPLING_DATA_FLAVOR).asInstanceOf[SamplingDataProxyUI])
     }
+    
     molescene.repaint
     molescene.revalidate
   }

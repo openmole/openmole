@@ -20,7 +20,7 @@ package org.openmole.ide.core.workflow.implementation
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette.TaskDataProxyUI
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.properties.ITaskDataUI
@@ -31,7 +31,7 @@ import org.openmole.ide.core.workflow.model.ICapsuleUI
 
 class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
 
-  var dataProxy: Option[DataProxyUI[ITaskDataUI]] = None
+  var dataProxy: Option[TaskDataProxyUI] = None
   var nbInputSlots: Int = 0
   var capsuleType = CAPSULE
   var startingCapsule = false
@@ -47,7 +47,7 @@ class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
     
-  override def encapsule(dpu: DataProxyUI[ITaskDataUI])= {
+  override def encapsule(dpu: TaskDataProxyUI)= {
     setDataProxy(dpu)
     if (capsuleType == EXPLORATION_TASK) connectableWidget.addSampling
     dndTaskIntoCapsuleProvider.encapsulated= true
@@ -73,7 +73,7 @@ class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
   
   def removeInputSlot= nbInputSlots-= 1
   
-  def setDataProxy(dpu: DataProxyUI[ITaskDataUI])={
+  def setDataProxy(dpu: TaskDataProxyUI)={
     dataProxy= Some(dpu)
     if (ElementFactories.isExplorationTaskData(dpu.dataUI)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
   }

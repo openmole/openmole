@@ -41,32 +41,16 @@ object ElementFactories {
 //                                 Constants.SAMPLING -> new ListBuffer[DataProxyUI[DataUI[ISampling]]],
 //                                 Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI[DataUI[IEnvironment]]])
   
-  var dataTaskProxys = new HashSet[DataProxyUI[ITaskDataUI]]
-  var dataPrototypeProxys = new HashSet[DataProxyUI[IPrototypeDataUI]]
-  var dataSamplingProxys = new HashSet[DataProxyUI[ISamplingDataUI]]
-  var dataEnvironmentProxys = new HashSet[DataProxyUI[IEnvironmentDataUI]]
+  var dataTaskProxys = new HashSet[TaskDataProxyUI]
+  var dataPrototypeProxys = new HashSet[PrototypeDataProxyUI]
+  var dataSamplingProxys = new HashSet[SamplingDataProxyUI]
+  var dataEnvironmentProxys = new HashSet[EnvironmentDataProxyUI]
   
-//  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI[ITaskDataUI]],
-//                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI[IPrototypeDataUI]],
-//                            Constants.SAMPLING -> new ListBuffer[DataProxyUI[ISamplingDataUI]],
-//                            Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI[IEnvironmentDataUI]])
+//  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI],
+//                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI],
+//                            Constants.SAMPLING -> new ListBuffer[DataProxyUI],
+//                            Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI])
   
-  val modelTasks = new HashSet[TaskDataProxyFactory]
-  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
-  
-  val modelPrototypes = new HashSet[PrototypeDataProxyFactory]
-  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
-  
-  val modelSamplings = new HashSet[SamplingDataProxyFactory]
-  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{modelSamplings += new SamplingDataProxyFactory(f)})
-  
-  val modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
-  Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
-  
-//  lazy val modelElements = Map(Constants.TASK -> updateLookup(classOf[ITaskFactoryUI],Constants.TASK),
-//                               Constants.PROTOTYPE -> updateLookup(classOf[IPrototypeFactoryUI],Constants.PROTOTYPE),
-//                               Constants.SAMPLING -> updateLookup(classOf[ISamplingFactoryUI],Constants.SAMPLING),
-//                               Constants.ENVIRONMENT -> updateLookup(classOf[IEnvironmentFactoryUI],Constants.ENVIRONMENT))
   
 //  def updateLookup(factoryClass: Class[_<:IFactoryUI], entityType: String) = {
 //    val li = new ListBuffer[ModelElementFactory]
@@ -89,21 +73,24 @@ object ElementFactories {
 //  }
   
   def getTaskDataProxyUI(name: String) = dataTaskProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getPrototypeDataProxyUI(name: String) = dataPrototypeProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getSamplingDataProxyUI(name: String) = dataSamplingProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getEnvironmentDataProxyUI(name: String) = dataEnvironmentProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   
   
   
   // def getAll(entityType: String) = dataProxys(entityType)
   
-  def addTaskElement(dpu: DataProxyUI[ITaskDataUI]) = dataTaskProxys += dpu
-  def addPrototypeElement(dpu: DataProxyUI[IPrototypeDataUI]) = dataPrototypeProxys += dpu
-  def addSamplingElement(dpu: DataProxyUI[ISamplingDataUI]) = dataSamplingProxys += dpu
-  def addEnvironmentElement(dpu: DataProxyUI[IEnvironmentDataUI]) = dataEnvironmentProxys += dpu
+  def addTaskElement(dpu: TaskDataProxyUI) = dataTaskProxys += dpu
+  def addPrototypeElement(dpu: PrototypeDataProxyUI) = dataPrototypeProxys += dpu
+  def addSamplingElement(dpu: SamplingDataProxyUI) = dataSamplingProxys += dpu
+  def addEnvironmentElement(dpu: EnvironmentDataProxyUI) = dataEnvironmentProxys += dpu
   
   
-  def removeTaskElement(dpu: DataProxyUI[ITaskDataUI]) = dataTaskProxys.remove(dpu)
-  def removePrototypeElement(dpu: DataProxyUI[IPrototypeDataUI]) = dataPrototypeProxys.remove(dpu)
-  def removeSamplingElement(dpu: DataProxyUI[ISamplingDataUI]) = dataSamplingProxys.remove(dpu)
-  def removeEnvironmentElement(dpu: DataProxyUI[IEnvironmentDataUI]) = dataEnvironmentProxys.remove(dpu)
+  def removeTaskElement(dpu: TaskDataProxyUI) = dataTaskProxys.remove(dpu)
+  def removePrototypeElement(dpu: PrototypeDataProxyUI) = dataPrototypeProxys.remove(dpu)
+  def removeSamplingElement(dpu: SamplingDataProxyUI) = dataSamplingProxys.remove(dpu)
+  def removeEnvironmentElement(dpu: EnvironmentDataProxyUI) = dataEnvironmentProxys.remove(dpu)
   
   def clearAllTaskElement = dataTaskProxys.clear
   def clearAllPrototypeElement = dataPrototypeProxys.clear

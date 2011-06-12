@@ -10,28 +10,24 @@
  */
 package org.openmole.ide.plugin.task.groovy;
 
+import org.openmole.ide.core.properties.ITaskPanelUI;
 import org.openmole.ide.core.properties.ITaskDataUI;
-import org.openmole.ide.core.properties.PanelUI;
 import org.openmole.ide.core.properties.DataUI;
+import javax.swing.JPanel;
 
 /**
  *
  * @author mathieu
  */
-public class GroovyTaskPanelUI extends PanelUI<ITaskDataUI> {
-
-    GroovyTaskDataUI panelData;
+public class GroovyTaskPanelUI extends JPanel implements ITaskPanelUI {
     /** Creates new form GroovyTaskPanelUI */
-    public GroovyTaskPanelUI() {
+    public GroovyTaskPanelUI(GroovyTaskDataUI pud) {
         initComponents();
+        jTextArea1.setText(((GroovyTaskDataUI)pud).code());
     }
 
     public ITaskDataUI saveContent(String name) {
         return new GroovyTaskDataUI(name,jTextArea1.getText());
-    }
-
-    public void loadContent(ITaskDataUI pud) {
-        jTextArea1.setText(((GroovyTaskDataUI)pud).code());
     }
     /** This method is called from within the constructor to
      * initialize the form.

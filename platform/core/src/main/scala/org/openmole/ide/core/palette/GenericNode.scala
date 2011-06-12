@@ -26,7 +26,7 @@ import org.openide.util.lookup.Lookups
 import org.openide.nodes.Children
 import org.openmole.ide.core.properties.IDataUI
 
-class GenericNode(dataFlavor: DataFlavor,val dataProxy: DataProxyUI[_<:IDataUI]) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
+class GenericNode(dataFlavor: DataFlavor,val dataProxy: IDataProxyUI) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
   setIconBaseWithExtension(dataProxy.dataUI.imagePath)
   setName(dataProxy.dataUI.name)
   setValue(PaletteController.ATTR_IS_READONLY, false)

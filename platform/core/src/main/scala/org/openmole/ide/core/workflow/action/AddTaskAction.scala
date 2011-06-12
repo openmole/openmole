@@ -20,11 +20,11 @@ package org.openmole.ide.core.workflow.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.properties.ITaskDataUI
-import org.openmole.ide.core.palette.DataProxyUI
+import org.openmole.ide.core.palette.TaskDataProxyUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.CapsuleUI
 
-class AddTaskAction(moleScene: MoleScene ,capsule: CapsuleUI,dpu: DataProxyUI[ITaskDataUI]) extends ActionListener{
+class AddTaskAction(moleScene: MoleScene ,capsule: CapsuleUI,dpu: TaskDataProxyUI) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
     capsule.encapsule(dpu)
     moleScene.validate

@@ -24,4 +24,6 @@ trait IPrototypeDataUI extends IDataUI{
   def coreObject: IPrototype[_]
   
   override def entityType: String = Constants.PROTOTYPE
+  
+  def buildPanelUI: IPrototypePanelUI
 }

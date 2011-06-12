@@ -22,7 +22,7 @@ import java.math.BigInteger
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class BigIntegerPrototypeDataUI(var name: String) extends IPrototypeDataUI{
+class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI{
   override def coreClass = classOf[IPrototype[BigInteger]]
   
   override def coreObject = new Prototype(name,BigInt.getClass)
