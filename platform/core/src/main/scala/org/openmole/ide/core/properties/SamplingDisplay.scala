@@ -29,7 +29,7 @@ object SamplingDisplay extends IDisplay{
   private var modelSamplings = new HashSet[SamplingDataProxyFactory]
   var name = "sampling0"
   var currentPanel: Option[ISamplingPanelUI] = None
-  
+  println("INIT SAMPLING :: ")
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{modelSamplings += new SamplingDataProxyFactory(f)})
   
   override def implementationClasses = modelSamplings

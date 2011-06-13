@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  *
  * @author mathieu
  */
-public class CSVSamplingPanelUI extends JPanel  implements ISamplingPanelUI {
+public class CSVSamplingPanelUI extends JPanel implements ISamplingPanelUI {
 
     /** Creates new form CSVSamplingPanelUI */
     public CSVSamplingPanelUI(ISamplingDataUI pud) {

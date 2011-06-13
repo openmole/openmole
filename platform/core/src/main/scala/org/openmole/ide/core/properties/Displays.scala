@@ -40,7 +40,10 @@ object Displays {
   
   def buildPanelUI = currentDisplay.buildPanelUI(name)
   
-  def saveContent(oldName: String) = currentDisplay.saveContent(oldName)
+  def saveContent(oldName: String, newName: String) = {
+    setAsName(newName)
+    currentDisplay.saveContent(oldName)
+  }
     
   private def currentDisplay :IDisplay= {
     currentType match{

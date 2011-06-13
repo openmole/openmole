@@ -68,7 +68,7 @@ public class PropertyPanel extends javax.swing.JPanel {
                 //  displayCurrentEntity(((IDataProxyFactory)typeComboBox.getSelectedItem()).buildDataProxyUI(nameTextField.getText()));
             }
         } else if (oldName != "") {
-            Displays.saveContent(oldName);
+            Displays.saveContent(oldName,nameTextField.getText());
 //                if (currentPanelUI != null) {
 //                    currentDataProxyUI.dataUI_$eq(currentPanelUI.saveContent(nameTextField.getText()));
         }
