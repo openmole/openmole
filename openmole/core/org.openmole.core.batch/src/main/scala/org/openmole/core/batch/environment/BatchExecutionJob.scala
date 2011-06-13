@@ -70,15 +70,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     if (batchJob == null) return READY
     
     val oldState = batchJob.state
+    batchJob.updateState
 
-    if (!oldState.isFinal) {
-      val newState = batchJob.updatedState
-
-      /*if (oldState == SUBMITTED && newState == RUNNING) {
-        executionEnvironment.sample(SampleType.WAITING, batchJob.lastStateDurration, job)
-      } */
-    }
-      
     if(oldState != batchJob.state && batchJob.state == KILLED) kill
     state
   }
