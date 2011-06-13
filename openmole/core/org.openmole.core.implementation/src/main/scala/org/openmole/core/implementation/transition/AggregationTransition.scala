@@ -101,24 +101,26 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   
   override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = subMole.synchronized {
-    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
+    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
     
     if(!hasBeenPerformed(subMole, parentTicket)) {
-      val resultContexts = subMole.aggregationTransitionRegistry.consult(this, parentTicket).get
-      
-      //Store the result context
-      resultContexts ++= (context, toClone)
+      subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
+        case Some(resultContexts) =>
+          //Store the result context
+          resultContexts ++= (context, toClone)
     
-      trigger match {
-        case Some(trigger) => {
-            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.userOutputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
-            val context = ContextAggregator.aggregate(start.userOutputs, toArrayManifests, resultContexts.map{_.toVariable})
-            if(trigger.evaluate(context)) {
-              aggregate(subMole, ticket)
-              if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
-            }
+          trigger match {
+            case Some(trigger) => {
+                val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.userOutputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
+                val context = ContextAggregator.aggregate(start.userOutputs, toArrayManifests, resultContexts.map{_.toVariable})
+                if(trigger.evaluate(context)) {
+                  aggregate(subMole, ticket)
+                  if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
+                }
+              }
+            case None =>
           }
-        case None =>
+        case None => throw new InternalProcessingError("No context registred for aggregation.")
       }
     }
   }
@@ -154,22 +156,18 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
       if(!alreadySeen(capsule)) {
         alreadySeen += capsule
         capsule.intputSlots.toList.flatMap{_.transitions}.foreach {
-          _ match {
-            case t: IExplorationTransition => if(level > 0) toProcess += ((t.start, level - 1))
-            case t: IAggregationTransition =>
-              if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
-              toProcess += ((t.start, level + 1))
-            case t => toProcess += ((t.start, level))
-          }
+          case t: IExplorationTransition => if(level > 0) toProcess += ((t.start, level - 1))
+          case t: IAggregationTransition =>
+            if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
+            toProcess += ((t.start, level + 1))
+          case t => toProcess += ((t.start, level))
         }
         capsule.outputTransitions.foreach {
-          _ match {
-            case t: IExplorationTransition => toProcess += ((t.end.capsule, level + 1))
-            case t: IAggregationTransition =>
-              if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
-              if(level > 0) toProcess += ((t.end.capsule, level - 1))
-            case t => toProcess += ((t.end.capsule, level))
-          }
+          case t: IExplorationTransition => toProcess += ((t.end.capsule, level + 1))
+          case t: IAggregationTransition =>
+            if(level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
+            if(level > 0) toProcess += ((t.end.capsule, level - 1))
+          case t => toProcess += ((t.end.capsule, level))
         }
       }
     }
