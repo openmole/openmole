@@ -126,16 +126,14 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
         alreadySeen += capsule
       
         capsule.outputTransitions.foreach {
-          _ match {
-            case t: IExplorationTransition => toProcess += ((t.end.capsule, level + 1))
-            case t: IAggregationTransition => 
-              if(level > 0) toProcess += ((t.end.capsule, level - 1))
-              else if(level == 0) {
-                subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ContextBuffer)
-                EventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), ISubMoleExecution.Finished)
-              }
-            case t => toProcess += ((t.end.capsule, level))
-          }
+          case t: IExplorationTransition => toProcess += t.end.capsule -> (level + 1)
+          case t: IAggregationTransition => 
+            if(level > 0) toProcess += t.end.capsule -> (level - 1)
+            else if(level == 0) {
+              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ContextBuffer)
+              EventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), ISubMoleExecution.Finished)
+            }
+          case t => toProcess += t.end.capsule -> level
         }
       }
     }
