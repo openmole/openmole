@@ -18,11 +18,11 @@
 package org.openmole.core.batch.control
 
 import java.net.URI
-import org.openmole.core.batch.environment.BatchStorage
+import org.openmole.core.batch.environment.Storage
 
-class BatchStorageDescription(description: String) extends BatchServiceDescription(description) {
+class StorageDescription(description: String) extends BatchServiceDescription(description) {
 
   def this(uri: URI) = this(uri.getScheme + "://" + {if(uri.getHost == null) "localhost" else uri.getHost} + ":" + uri.getPort)
-  def this(storage: BatchStorage) = this(storage.URI)
+  def this(storage: Storage) = this(storage.URI)
   
 }

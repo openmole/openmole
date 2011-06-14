@@ -21,14 +21,14 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchJobServiceDescription
-import org.openmole.core.batch.control.BatchJobServiceControl
-import org.openmole.core.batch.control.BatchJobServiceControl._
+import org.openmole.core.batch.control.JobServiceDescription
+import org.openmole.core.batch.control.JobServiceControl
+import org.openmole.core.batch.control.JobServiceControl._
 
 
-abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
+abstract class BatchJob(val jobServiceDescription: JobServiceDescription) {
   
-  def this(jobService: BatchJobService) = this(jobService.description)
+  def this(jobService: JobService) = this(jobService.description)
   
   val timeStemps = new Array[Long](ExecutionState.values.size)
 
@@ -40,14 +40,14 @@ abstract class BatchJob(val jobServiceDescription: BatchJobServiceDescription) {
       timeStemps(state.id) = System.currentTimeMillis
       
       _state match {
-        case SUBMITTED => BatchJobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
-        case RUNNING => BatchJobServiceControl.qualityControl(jobServiceDescription).decrementRunning
+        case SUBMITTED => JobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
+        case RUNNING => JobServiceControl.qualityControl(jobServiceDescription).decrementRunning
         case _ => 
       }
       
       state match {
-        case SUBMITTED => BatchJobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
-        case RUNNING => BatchJobServiceControl.qualityControl(jobServiceDescription).incrementRunning
+        case SUBMITTED => JobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
+        case RUNNING => JobServiceControl.qualityControl(jobServiceDescription).incrementRunning
         case _ => 
       }
       

@@ -19,15 +19,15 @@ package org.openmole.plugin.environment.desktop
 
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.BatchJobService
-import org.openmole.core.batch.environment.VolatileBatchStorage
+import org.openmole.core.batch.environment.JobService
+import org.openmole.core.batch.environment.VolatileStorage
 import org.apache.sshd.SshServer
 import org.apache.sshd.server.PasswordAuthenticator
 import org.apache.sshd.server.auth.UserAuthPassword
 import org.apache.sshd.server.command.ScpCommandFactory
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
-import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
@@ -53,10 +53,10 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
     sshd.start
   }
   
-  @transient lazy val batchStorage = new VolatileBatchStorage(this, path.toURI, Int.MaxValue)
+  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue)
   
   @transient override lazy val allStorages = List(batchStorage)
-  @transient override lazy val allJobServices = List(new DesktopJobService(this, new BatchJobServiceDescription(path.getAbsolutePath)))
+  @transient override lazy val allJobServices = List(new DesktopJobService(this, new JobServiceDescription(path.getAbsolutePath)))
   
   override def authentication = DesktopAuthentication
 }

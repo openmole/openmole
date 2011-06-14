@@ -46,9 +46,9 @@ import org.openmole.misc.tools.obj.Id
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.tools.io.Network._
 
-import org.openmole.core.batch.control.BatchStorageControl._
+import org.openmole.core.batch.control.StorageControl._
 import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.control.QualityControl._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
@@ -148,9 +148,9 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   def this(file: IURIFile) = this(file.location)
     
-  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.BatchStorageControl.withToken(storageDescription,a)
-  private def withFailureControl[A](a: => A, isFailure: Throwable => Boolean): A = org.openmole.core.batch.control.BatchStorageControl.withFailureControl(storageDescription,a,isFailure)
-  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.BatchStorageControl.withFailureControl(storageDescription,a)
+  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.StorageControl.withToken(storageDescription,a)
+  private def withFailureControl[A](a: => A, isFailure: Throwable => Boolean): A = org.openmole.core.batch.control.StorageControl.withFailureControl(storageDescription,a,isFailure)
+  private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.StorageControl.withFailureControl(storageDescription,a)
 
   private def trycatch[A](f: => A): A = {
     try {
@@ -350,7 +350,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)
 
-  override def storageDescription = new BatchStorageDescription(new URI(location))
+  override def storageDescription = new StorageDescription(new URI(location))
   override def URI: URI = new URI(location)
   
   override def toString = location

@@ -20,39 +20,39 @@ package org.openmole.core.batch.control
 import java.util.logging.Logger
 import scala.collection.immutable.HashMap
 
-object BatchStorageControl {
+object StorageControl {
  
-  var ressources = new HashMap[BatchStorageDescription, (UsageControl, QualityControl)]
+  var ressources = new HashMap[StorageDescription, (UsageControl, QualityControl)]
 
-  def registerRessouce(ressource: BatchStorageDescription, usageControl: UsageControl, failureControl: QualityControl) = synchronized {
+  def registerRessouce(ressource: StorageDescription, usageControl: UsageControl, failureControl: QualityControl) = synchronized {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._2.reinit
       case None => ressources += ((ressource -> (usageControl, failureControl)))
     }  
   }
 
-  def qualityControl(ressource: BatchStorageDescription): Option[QualityControl] = {
+  def qualityControl(ressource: StorageDescription): Option[QualityControl] = {
     ressources.get(ressource) match {
       case Some(ctrl) => Some(ctrl._2)
       case None => None
     }
   } 
   
-  def usageControl(ressource: BatchStorageDescription): UsageControl = {
+  def usageControl(ressource: StorageDescription): UsageControl = {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._1
       case None => UsageControl.botomlessUsage
     }    
   }
   
-  def withFailureControl[A](desc: BatchStorageDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => true})
+  def withFailureControl[A](desc: StorageDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => true})
   
-  def withFailureControl[A](desc: BatchStorageDescription, op: => A, isFailure: Throwable => Boolean): A = {
+  def withFailureControl[A](desc: StorageDescription, op: => A, isFailure: Throwable => Boolean): A = {
     val qualityControl = this.qualityControl(desc)
     QualityControl.withQualityControl(qualityControl, op, isFailure)
   }
   
-  def withToken[B]( desc: BatchStorageDescription, f: (AccessToken => B)): B = {
+  def withToken[B]( desc: StorageDescription, f: (AccessToken => B)): B = {
     val usageControl = this.usageControl(desc)
     UsageControl.withUsageControl(usageControl, f)
   }

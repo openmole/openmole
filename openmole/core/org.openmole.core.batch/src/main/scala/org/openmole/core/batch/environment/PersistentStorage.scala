@@ -29,10 +29,10 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
-object PersistentBatchStorage extends Logger {
+object PersistentStorage extends Logger {
 
-  val TmpDirRemoval = new ConfigurationLocation("BatchStorage", "TmpDirRemoval")
-  val TmpDirRegenerate = new ConfigurationLocation("BatchStorage", "TmpDirRegenerate")
+  val TmpDirRemoval = new ConfigurationLocation("Storage", "TmpDirRemoval")
+  val TmpDirRegenerate = new ConfigurationLocation("Storage", "TmpDirRegenerate")
     
   Workspace += (TmpDirRemoval, "P30D")
   Workspace += (TmpDirRegenerate, "P1D")
@@ -41,9 +41,9 @@ object PersistentBatchStorage extends Logger {
   val tmp = "tmp/"
 }
 
-class PersistentBatchStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends BatchStorage(environment, URI, nbAccess) {
+class PersistentStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends Storage(environment, URI, nbAccess) {
 
-  import PersistentBatchStorage._
+  import PersistentStorage._
   
   @transient protected var tmpSpaceVar: IURIFile = null
   @transient protected var persistentSpaceVar: IURIFile = null

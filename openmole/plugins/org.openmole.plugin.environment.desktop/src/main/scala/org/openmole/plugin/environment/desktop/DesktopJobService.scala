@@ -18,13 +18,13 @@
 package org.openmole.plugin.environment.desktop
 
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.BatchJobService
+import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.file.IURIFile
 
-class DesktopJobService(environment: DesktopEnvironment, description: BatchJobServiceDescription) extends BatchJobService(environment, description){
+class DesktopJobService(environment: DesktopEnvironment, description: JobServiceDescription) extends JobService(environment, description){
   override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = new DesktopJob(description)
   override def test = true
 }

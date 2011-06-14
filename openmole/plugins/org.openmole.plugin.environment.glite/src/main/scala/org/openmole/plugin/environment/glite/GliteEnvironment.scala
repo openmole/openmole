@@ -26,8 +26,8 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.core.batch.environment.BatchStorage
-import org.openmole.core.batch.environment.PersistentBatchStorage
+import org.openmole.core.batch.environment.Storage
+import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
@@ -171,7 +171,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   override def allStorages = {
     val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
-    stors.map{new PersistentBatchStorage(this, _, threadsBySE)}
+    stors.map{new PersistentStorage(this, _, threadsBySE)}
   }
 
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)

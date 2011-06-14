@@ -25,7 +25,7 @@ import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.batch.control.BatchJobServiceControl
+import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
@@ -161,7 +161,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     } catch {
       case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)
     } finally {
-      BatchJobServiceControl.usageControl(js._1.description).releaseToken(js._2)
+      JobServiceControl.usageControl(js._1.description).releaseToken(js._2)
     }
   }
 

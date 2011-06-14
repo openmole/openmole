@@ -20,7 +20,7 @@ package org.openmole.core.batch.replication
 import com.db4o.activation.ActivationPurpose
 import com.db4o.ta.Activatable
 import java.io.File
-import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
@@ -49,7 +49,7 @@ class Replica( _source: String, _storageDescription: String, _hash: String, _aut
     _storageDescription
   }
   
-  def storageDescription = new BatchStorageDescription(storageDescriptionString)
+  def storageDescription = new StorageDescription(storageDescriptionString)
 
   def authenticationKey = {
     activate(ActivationPurpose.READ)

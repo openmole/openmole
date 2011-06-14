@@ -22,35 +22,35 @@ import org.openmole.core.batch.environment.TemporaryErrorException
 import scala.collection.immutable.HashMap
 
 
-object BatchJobServiceControl {
-  var ressources = new HashMap[BatchJobServiceDescription, (UsageControl, JobServiceQualityControl)]
+object JobServiceControl {
+  var ressources = new HashMap[JobServiceDescription, (UsageControl, JobServiceQualityControl)]
 
-  def registerRessouce(ressource: BatchJobServiceDescription, usageControl: UsageControl, failureControl: JobServiceQualityControl) = synchronized {
+  def registerRessouce(ressource: JobServiceDescription, usageControl: UsageControl, failureControl: JobServiceQualityControl) = synchronized {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._2.reinit
       case None => ressources += ((ressource -> (usageControl, failureControl)))
     }  
   }
 
-  def qualityControl(ressource: BatchJobServiceDescription): JobServiceQualityControl = {
+  def qualityControl(ressource: JobServiceDescription): JobServiceQualityControl = {
     ressources.getOrElse(ressource, throw new InternalProcessingError("Quality control not found for " + ressource.toString))._2
   } 
   
-  def usageControl(ressource: BatchJobServiceDescription): UsageControl = {
+  def usageControl(ressource: JobServiceDescription): UsageControl = {
     ressources.get(ressource) match {
       case Some(ctrl) => ctrl._1
       case None => UsageControl.botomlessUsage
     }    
   }
   
-  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => !classOf[TemporaryErrorException].isAssignableFrom(e.getClass)})
-  def withFailureControl[A](desc: BatchJobServiceDescription, op: => A, isFailure: Throwable => Boolean): A = {
+  def withFailureControl[A](desc: JobServiceDescription, op: => A): A = withFailureControl[A](desc, op, {e: Throwable => !classOf[TemporaryErrorException].isAssignableFrom(e.getClass)})
+  def withFailureControl[A](desc: JobServiceDescription, op: => A, isFailure: Throwable => Boolean): A = {
     val qualityControl = this.qualityControl(desc)
     QualityControl.withQualityControl(qualityControl, op, isFailure)
   }
   
    
-  def withToken[B]( desc: BatchJobServiceDescription, f: (AccessToken => B)): B = {
+  def withToken[B]( desc: JobServiceDescription, f: (AccessToken => B)): B = {
     val usageControl = this.usageControl(desc)
     UsageControl.withUsageControl(usageControl, f)
   }

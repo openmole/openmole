@@ -25,8 +25,8 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchStorageControl
-import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.control.StorageControl
+import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.URIFile
@@ -40,15 +40,15 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
-object BatchStorage extends Logger
+object Storage extends Logger
 
-abstract class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
+abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
     
-  @transient lazy val description = new BatchStorageDescription(URI)
+  @transient lazy val description = new StorageDescription(URI)
   
-  BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+  StorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
-  import BatchStorage._
+  import Storage._
   
   @transient protected var baseSpaceVar: IURIFile = null
 
@@ -67,7 +67,7 @@ abstract class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAcces
 
   def test: Boolean = {
     try {
-      val token = BatchStorageControl.usageControl(description).waitAToken
+      val token = StorageControl.usageControl(description).waitAToken
 
       try {
         val lenght = 10
@@ -99,7 +99,7 @@ abstract class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAcces
           if (nb == lenght && rdm.deep == resRdm.deep) return true
           
         } finally ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
-      } finally BatchStorageControl.usageControl(description).releaseToken(token)
+      } finally StorageControl.usageControl(description).releaseToken(token)
     } catch {
       case e => logger.log(FINE, URI.toString, e)
     }

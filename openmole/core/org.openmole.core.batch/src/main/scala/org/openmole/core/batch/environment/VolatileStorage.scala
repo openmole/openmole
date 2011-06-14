@@ -23,7 +23,7 @@ import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.JavaConversions._
 
-class VolatileBatchStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends BatchStorage(environment, URI, nbAccess) {
+class VolatileStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends Storage(environment, URI, nbAccess) {
   ReplicaCatalog.getReplica(description, environment.authentication.key).foreach{ReplicaCatalog.clean}
   override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)
   override def tmpSpace(token: AccessToken): IURIFile = baseDir(token)

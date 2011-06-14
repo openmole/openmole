@@ -13,7 +13,7 @@ import org.openmole.core.authenticationregistry.jsaga.model.IJSAGAJobService;
 import org.openmole.core.authenticationregistry.jsaga.model.IJSAGALaunchingScript;
 import org.openmole.core.authenticationregistry.ssh.internal.Activator;
 import org.openmole.core.model.execution.EnvironmentConfiguration;
-import org.openmole.core.model.execution.batch.IBatchStorage;
+import org.openmole.core.model.execution.batch.IStorage;
 
 /**
  *
@@ -51,7 +51,7 @@ public class SSHEnvironment extends JSAGAExecutionEnvironment<SSHEnvironmentDesc
     }
 
     @Override
-    protected Collection<IBatchStorage> allStorages() throws InternalProcessingError, UserBadDataError {
+    protected Collection<IStorage> allStorages() throws InternalProcessingError, UserBadDataError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

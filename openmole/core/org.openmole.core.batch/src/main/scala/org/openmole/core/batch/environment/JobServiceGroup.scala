@@ -26,33 +26,33 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchJobServiceControl
+import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ArrayBuffer
 
-class BatchJobServiceGroup(val environment: BatchEnvironment) {
+class JobServiceGroup(val environment: BatchEnvironment) {
 
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release
   }
   
-  private var resources = List[BatchJobService]()
+  private var resources = List[JobService]()
 
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
-  def selectAService: (BatchJobService, AccessToken) = {
+  def selectAService: (JobService, AccessToken) = {
     selectingRessource.lock
     try {
-      var ret: (BatchJobService, AccessToken) = null
+      var ret: (JobService, AccessToken) = null
 
       do {
         //Select the less failing resources
         //Select the less failing resources
         /*val resourcesCopy = synchronized {
          resources = resources.filter( {r =>
-         BatchJobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
+         JobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
          })
          if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.")
          resources
@@ -60,15 +60,15 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
         val resourcesCopy = resources
 
         //Among them select one not over loaded
-        val notLoaded = new ArrayBuffer[(BatchJobService, AccessToken, Double)]
+        val notLoaded = new ArrayBuffer[(JobService, AccessToken, Double)]
         var totalFitness = 0.
         
         for (cur <- resourcesCopy) {   
           
-          BatchJobServiceControl.usageControl(cur.description).tryGetToken match {
+          JobServiceControl.usageControl(cur.description).tryGetToken match {
             case None =>
             case Some(token) => 
-              val quality = BatchJobServiceControl.qualityControl(cur.description)
+              val quality = JobServiceControl.qualityControl(cur.description)
               val nbSubmitted = quality.submitted
               val fitness = (if(quality.submitted > 0) {
                   val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
@@ -96,7 +96,7 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
           for (service <- notLoaded) { 
             //Logger.getLogger(getClass.getName).info("Not loaded test " + ret + " " + selected + " <= " + service._3)
             if(ret == null && selected <= service._3) ret = (service._1, service._2)
-            else BatchJobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
+            else JobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
             selected -= service._3
           }
         } else waiting.acquire
@@ -108,16 +108,16 @@ class BatchJobServiceGroup(val environment: BatchEnvironment) {
     }
   }
 
-  def +=(service: BatchJobService) = {
+  def +=(service: JobService) = {
     synchronized {
       resources :+= service
-      val usageControl = BatchJobServiceControl.usageControl(service.description)
+      val usageControl = JobServiceControl.usageControl(service.description)
       EventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     }
     waiting.release
   }
   
-  def ++=(services: Iterable[BatchJobService]) = services.foreach{s => this += s}
+  def ++=(services: Iterable[JobService]) = services.foreach{s => this += s}
 
   def isEmpty: Boolean = resources.isEmpty
 

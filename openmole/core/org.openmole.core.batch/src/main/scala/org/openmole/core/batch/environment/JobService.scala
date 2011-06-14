@@ -18,19 +18,19 @@
 package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchJobServiceControl
-import org.openmole.core.batch.control.BatchJobServiceControl._
-import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceControl
+import org.openmole.core.batch.control.JobServiceControl._
+import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.control.JobServiceQualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.misc.workspace.Workspace
 
-abstract class BatchJobService(environment: BatchEnvironment, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(environment) {
+abstract class JobService(environment: BatchEnvironment, val description: JobServiceDescription, nbAccess: Int) extends BatchService(environment) {
   
-  def this(environment: BatchEnvironment, description: BatchJobServiceDescription) = this(environment, description, Int.MaxValue)
+  def this(environment: BatchEnvironment, description: JobServiceDescription) = this(environment, description, Int.MaxValue)
   
-  BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+  JobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
     withFailureControl(description, doSubmit(inputFile, outputFile, runtime, token))

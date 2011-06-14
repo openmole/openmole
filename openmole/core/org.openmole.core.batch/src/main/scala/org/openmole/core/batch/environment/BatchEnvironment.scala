@@ -66,8 +66,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   @transient private lazy val _storagesLock = new ReentrantLock
   @transient private lazy val _jobServicesLock = new ReentrantLock
   
-  @transient private lazy val _jobServices = new BatchJobServiceGroup(this)
-  @transient private lazy val _storages = new BatchStorageGroup(this)
+  @transient private lazy val _jobServices = new JobServiceGroup(this)
+  @transient private lazy val _storages = new StorageGroup(this)
   
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
@@ -84,7 +84,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   @transient lazy val runtime: File = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
   
-  protected def selectStorages(storageGroup: BatchStorageGroup) = {
+  protected def selectStorages(storageGroup: StorageGroup) = {
         
     val stors = allStorages
 
@@ -113,7 +113,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     
   }
 
-  /*protected def selectWorkingJobServices(jobServiceGroup: BatchJobServiceGroup) = {
+  /*protected def selectWorkingJobServices(jobServiceGroup: JobServiceGroup) = {
     val allJobServicesList = allJobServices
     val done = new Semaphore(0)
     val nbStillRunning = new AtomicInteger(allJobServicesList.size)
@@ -142,7 +142,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   }*/
 
 
-  def jobServices: BatchJobServiceGroup = {
+  def jobServices: JobServiceGroup = {
     _jobServicesLock.lock 
     try {
       if (_jobServices.isEmpty) _jobServices ++= allJobServices
@@ -151,7 +151,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     } finally _jobServicesLock.unlock 
   }
 
-  def storages: BatchStorageGroup = {
+  def storages: StorageGroup = {
     _storagesLock.lock
     try {
       if (_storages.isEmpty) selectStorages(_storages)
@@ -159,13 +159,13 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     } finally _storagesLock.unlock
   }
 
-  def allStorages: Iterable[BatchStorage]
-  def allJobServices: Iterable[BatchJobService]
+  def allStorages: Iterable[Storage]
+  def allJobServices: Iterable[JobService]
   
   def authentication: BatchAuthentication
   
-  def selectAJobService: (BatchJobService, AccessToken) = jobServices.selectAService
+  def selectAJobService: (JobService, AccessToken) = jobServices.selectAService
 
-  def selectAStorage(usedFiles: Iterable[File]):  (BatchStorage, AccessToken) = storages.selectAService(usedFiles)
+  def selectAStorage(usedFiles: Iterable[File]):  (Storage, AccessToken) = storages.selectAService(usedFiles)
 
 }

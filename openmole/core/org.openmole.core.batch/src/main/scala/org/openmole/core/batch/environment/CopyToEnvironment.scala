@@ -30,7 +30,7 @@ import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchStorageControl
+import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
@@ -78,7 +78,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         } finally executionMessageFile.delete
             
         new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
-      } finally BatchStorageControl.usageControl(communicationStorage.description).releaseToken(token)
+      } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
     } finally jobFile.delete
   }
 
@@ -108,7 +108,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   
   override def call: CopyToEnvironmentResult = initCommunication
 
-  def toReplicatedFile(file: File, storage: BatchStorage, token: AccessToken): ReplicatedFile = {
+  def toReplicatedFile(file: File, storage: Storage, token: AccessToken): ReplicatedFile = {
     val isDir = file.isDirectory
     var toReplicate = file
     val toReplicatePath = file.getAbsoluteFile
@@ -127,7 +127,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   }
 
 
-  def replicateTheRuntime(token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): Runtime = {
+  def replicateTheRuntime(token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): Runtime = {
     val environmentPluginReplica = new ListBuffer[IURIFile]
 
     val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
@@ -147,7 +147,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     new Runtime(runtimeReplica, environmentPluginReplica.toList, authenticationURIFile)
   }
   
-  def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: BatchStorage, communicationDir: IURIFile): ExecutionMessage = {
+  def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {
     val jobURIFile = new URIFile(jobFile)
     val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 

@@ -29,13 +29,12 @@ import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
-import org.ogf.saga.job.JobService
 import org.ogf.saga.url.URLFactory
-import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchAuthentication
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.Runtime
-import org.openmole.core.batch.environment.BatchJobService
+import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
@@ -51,7 +50,7 @@ object JSAGAJobService {
   Workspace += (TestJobDoneTimeOut, "PT30M")
 }
 
-abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends BatchJobService(environment, new BatchJobServiceDescription(jobServiceURI.toString), nbAccess) {
+abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends JobService(environment, new JobServiceDescription(jobServiceURI.toString), nbAccess) {
 
   override def test: Boolean = {
 
@@ -105,9 +104,8 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
 
   protected def buildJob(id: String): JSAGAJob = new JSAGAJob(id, this)
   
-  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]): JobDescription = {
-    JSAGAJobBuilder.jobDescription(runtime, script, attributes)
-  }
+  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = JSAGAJobBuilder.jobDescription(runtime, script, attributes)
+  
     
   protected def generateScriptString (in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream)
     

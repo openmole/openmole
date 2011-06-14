@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.environment.desktop
 
-import org.openmole.core.batch.control.BatchJobServiceDescription
+import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
 
-class DesktopJob(jobServiceDescription: BatchJobServiceDescription) extends BatchJob(jobServiceDescription) {
+class DesktopJob(jobServiceDescription: JobServiceDescription) extends BatchJob(jobServiceDescription) {
   override def deleteJob = {}
   override def updateState: ExecutionState = SUBMITTED
 }

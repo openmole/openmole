@@ -34,8 +34,8 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
-import org.openmole.core.batch.control.BatchStorageControl
-import org.openmole.core.batch.control.BatchStorageDescription
+import org.openmole.core.batch.control.StorageControl
+import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.implementation.execution.StatisticSample
@@ -55,7 +55,7 @@ object GetResultFromEnvironment {
   private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
 }
 
-class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorageDescription: StorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
 
   private def successFullFinish(running: Long, done: Long) = {
@@ -64,7 +64,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
   }
 
   override def call: Unit = {
-    val token = BatchStorageControl.usageControl(communicationStorageDescription).waitAToken
+    val token = StorageControl.usageControl(communicationStorageDescription).waitAToken
 
     try {
       val result = getRuntimeResult(outputFile, token)
@@ -117,7 +117,7 @@ class GetResultFromEnvironment(communicationStorageDescription: BatchStorageDesc
       if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
     } finally {
-      BatchStorageControl.usageControl(communicationStorageDescription).releaseToken(token)
+      StorageControl.usageControl(communicationStorageDescription).releaseToken(token)
     }
   }
 

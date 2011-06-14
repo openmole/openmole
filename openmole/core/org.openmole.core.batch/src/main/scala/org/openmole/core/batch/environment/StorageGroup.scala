@@ -28,35 +28,35 @@ import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.RNG
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchStorageControl
+import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
 
-class BatchStorageGroup(environment: BatchEnvironment) {
+class StorageGroup(environment: BatchEnvironment) {
   class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
     override def eventOccured(obj: UsageControl) = waiting.release
   }
   
-  private var resources = List[BatchStorage]()
+  private var resources = List[Storage]()
 
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
-  def selectAService(usedFiles: Iterable[File]): (BatchStorage, AccessToken) = {
+  def selectAService(usedFiles: Iterable[File]): (Storage, AccessToken) = {
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum
       val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)
 
-      var ret: (BatchStorage, AccessToken) = null
+      var ret: (Storage, AccessToken) = null
       do {
         val resourcesCopy = resources
         //Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
         
         //Among them select one not over loaded
-        val notLoaded = new ArrayBuffer[(BatchStorage, AccessToken, Double)]
+        val notLoaded = new ArrayBuffer[(Storage, AccessToken, Double)]
         var totalFitness = 0.
         
         //Among them select one not over loaded
@@ -65,10 +65,10 @@ class BatchStorageGroup(environment: BatchEnvironment) {
         while (bestResourcesIt.hasNext) {       
           val cur = bestResourcesIt.next
 
-          BatchStorageControl.usageControl(cur.description).tryGetToken match {
+          StorageControl.usageControl(cur.description).tryGetToken match {
             case None =>
             case Some(token) => 
-              val quality = BatchStorageControl.qualityControl(cur.description)
+              val quality = StorageControl.qualityControl(cur.description)
               
               //Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
@@ -96,7 +96,7 @@ class BatchStorageGroup(environment: BatchEnvironment) {
           
           for (service <- notLoaded) {    
             if(ret == null && selected <= service._3) ret = (service._1, service._2)
-            else BatchStorageControl.usageControl(service._1.description).releaseToken(service._2) 
+            else StorageControl.usageControl(service._1.description).releaseToken(service._2) 
             selected -= service._3
           }
         } else {
@@ -109,17 +109,17 @@ class BatchStorageGroup(environment: BatchEnvironment) {
     }
   }
 
-  def +=(service: BatchStorage) = synchronized {
+  def +=(service: Storage) = synchronized {
 
     resources :+= service
-    val usageControl = BatchStorageControl.usageControl(service.description)
+    val usageControl = StorageControl.usageControl(service.description)
     EventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     
     waiting.release
   }
     
 
-  def get(index: Int): BatchStorage = resources(index)
+  def get(index: Int): Storage = resources(index)
 
   def isEmpty: Boolean = resources.isEmpty
 

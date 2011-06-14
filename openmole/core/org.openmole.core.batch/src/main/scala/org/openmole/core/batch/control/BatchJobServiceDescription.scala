@@ -17,4 +17,4 @@
 
 package org.openmole.core.batch.control
 
-class BatchJobServiceDescription(description: String) extends BatchServiceDescription(description)
+class JobServiceDescription(description: String) extends BatchServiceDescription(description)
