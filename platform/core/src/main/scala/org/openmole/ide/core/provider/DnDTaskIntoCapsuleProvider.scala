@@ -40,7 +40,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
       case TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
       case PROTOTYPE=> ConnectorState.ACCEPT
       case SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case ENVIRONMENT=> println("envir"); ConnectorState.ACCEPT
+      case ENVIRONMENT=> if (encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
       case _=> throw new GUIUserBadDataError("Unknown entity type")
     }
   }
@@ -54,6 +54,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
           else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
         }
       case dpu:SamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
+      case dpu:EnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
     }
     
     molescene.repaint

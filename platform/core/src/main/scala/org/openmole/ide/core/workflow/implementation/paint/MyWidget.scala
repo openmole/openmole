@@ -22,7 +22,7 @@ import java.awt.Rectangle
 import java.awt.Font
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
-import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.commons.Constants._
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import java.awt.BasicStroke
@@ -30,9 +30,9 @@ import org.openmole.ide.core.workflow.model.ICapsuleUI
 
 class MyWidget(scene: MoleScene,capsule: ICapsuleUI) extends Widget(scene) {
 
-  var taskWidth= Constants.TASK_CONTAINER_WIDTH
-  var taskHeight= Constants.TASK_CONTAINER_HEIGHT
-  var taskImageOffset= Constants.TASK_IMAGE_WIDTH_OFFSET
+  var taskWidth= TASK_CONTAINER_WIDTH
+  var taskHeight= TASK_CONTAINER_HEIGHT
+  var taskImageOffset= TASK_IMAGE_WIDTH_OFFSET
   val bodyArea = new Rectangle
   val widgetArea= new Rectangle
   val titleArea = new Rectangle
@@ -43,16 +43,16 @@ class MyWidget(scene: MoleScene,capsule: ICapsuleUI) extends Widget(scene) {
   
   def setWidthHint= {
     if (MoleScenesManager.detailedView) {
-      taskWidth = Constants.EXPANDED_TASK_CONTAINER_WIDTH
-      taskImageOffset = Constants.EXPANDED_TASK_IMAGE_WIDTH_OFFSET
+      taskWidth = EXPANDED_TASK_CONTAINER_WIDTH
+      taskImageOffset = EXPANDED_TASK_IMAGE_WIDTH_OFFSET
     }
     else {
-      taskWidth = Constants.TASK_CONTAINER_WIDTH
-      taskImageOffset = Constants.TASK_IMAGE_WIDTH_OFFSET
+      taskWidth = TASK_CONTAINER_WIDTH
+      taskImageOffset = TASK_IMAGE_WIDTH_OFFSET
     }
-    bodyArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_CONTAINER_HEIGHT))
-    widgetArea.setBounds(new Rectangle(-12, -1,taskWidth + 24,taskHeight+ 2))
-    titleArea.setBounds(new Rectangle(0, 0,taskWidth,Constants.TASK_TITLE_HEIGHT))
+    bodyArea.setBounds(new Rectangle(0, 0,taskWidth,TASK_CONTAINER_HEIGHT))
+    widgetArea.setBounds(new Rectangle(-12, -11,taskWidth + 26,taskHeight+ 16))
+    titleArea.setBounds(new Rectangle(0, 0,taskWidth,TASK_TITLE_HEIGHT))
     setPreferredBounds(widgetArea)
     revalidate
     repaint
@@ -77,9 +77,9 @@ class MyWidget(scene: MoleScene,capsule: ICapsuleUI) extends Widget(scene) {
 
     /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
      taskImageOffset,
-     Constants.TASK_IMAGE_HEIGHT_OFFSET,
-     Constants.TASK_IMAGE_WIDTH,
-     Constants.TASK_IMAGE_HEIGHT,
+     TASK_IMAGE_HEIGHT_OFFSET,
+     TASK_IMAGE_WIDTH,
+     TASK_IMAGE_HEIGHT,
      capsuleModel.taskUI.get.factory.backgroundColor,
      new Container)*/
   }

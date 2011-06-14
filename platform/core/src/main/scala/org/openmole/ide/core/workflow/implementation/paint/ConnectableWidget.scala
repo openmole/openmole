@@ -27,7 +27,7 @@ import org.openmole.ide.core.properties.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.netbeans.api.visual.action.ActionFactory
-import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.commons.Constants._
 import scala.collection.mutable.HashSet
 
 class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule){
@@ -35,6 +35,7 @@ class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidg
   var islots= HashSet.empty[ISlotWidget]
   val oslot= new OSlotWidget(scene,capsule)
   var samplingWidget: Option[SamplingWidget] = None
+  var environmentWidget: Option[EnvironmentWidget] = None
   
   addChild(oslot)
   
@@ -66,7 +67,8 @@ class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidg
     setWidthHint
     setDetailedView
   }
- 
+
+  
   override def paintWidget= {
     super.paintWidget
     val graphics = getGraphics.asInstanceOf[Graphics2D]
@@ -86,7 +88,7 @@ class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidg
           }
           var st = p.dataUI.name
           if (st.length> 10) st = st.substring(0, 8).concat("...")
-          val h = 5 + Constants.TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
+          val h = 5 + TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
           graphics.drawImage(Images.thumb(p.dataUI.imagePath),x - taskWidth / 2, h ,new Container)
           graphics.setColor(new Color(102,102,102))
           if (MoleScenesManager.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
@@ -102,9 +104,11 @@ class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidg
       var lineH = 0
       if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.dataUI.sampling.isDefined * 58
       graphics.drawLine(taskWidth / 2,
-                        Constants.TASK_TITLE_HEIGHT,
+                        TASK_TITLE_HEIGHT,
                         taskWidth / 2,
-                        Constants.TASK_CONTAINER_HEIGHT - 3 + lineH)
+                        TASK_CONTAINER_HEIGHT - 3 + lineH)
+      
+      if (dataUI.environment.isDefined) graphics.drawImage(Images.thumb(dataUI.environment.get.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
     }
     revalidate
   }
