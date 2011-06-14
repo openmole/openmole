@@ -73,10 +73,10 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: ITaskDataUI=> new TaskDataProxyUI(x)
-          case x: IPrototypeDataUI=> new PrototypeDataProxyUI(x)
-          case x: ISamplingDataUI=> new SamplingDataProxyUI(x)
-          case x: IEnvironmentDataUI=> new EnvironmentDataProxyUI(x)
+          case x: ITaskDataUI=> ElementFactories.addTaskElement(new TaskDataProxyUI(x))
+          case x: IPrototypeDataUI=> ElementFactories.addPrototypeElement(new PrototypeDataProxyUI(x))
+          case x: ISamplingDataUI=> ElementFactories.addSamplingElement(new SamplingDataProxyUI(x))
+          case x: IEnvironmentDataUI=> ElementFactories.addEnvironmentElement(new EnvironmentDataProxyUI(x))
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

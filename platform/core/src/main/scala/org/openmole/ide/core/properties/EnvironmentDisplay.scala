@@ -27,7 +27,7 @@ import org.openmole.ide.core.exception.GUIUserBadDataError
 object EnvironmentDisplay extends IDisplay{
   private var count= 0
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
-  var name="environment0"
+  var name="env0"
   var currentPanel: Option[IEnvironmentPanelUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
@@ -36,11 +36,9 @@ object EnvironmentDisplay extends IDisplay{
   
   override def dataProxyUI(n: String) = ElementFactories.getEnvironmentDataProxyUI(n)
   
- // override def name = "environment" + count
-  
   override def increment = {
     count += 1
-    name = "environment" + count
+    name = "env" + count
   }
   
   override def  buildPanelUI(n:String) = {

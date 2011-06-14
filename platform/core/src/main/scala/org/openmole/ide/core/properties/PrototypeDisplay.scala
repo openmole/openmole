@@ -27,7 +27,7 @@ object PrototypeDisplay extends IDisplay{
   private var count= 0
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
   var currentPanel: Option[IPrototypePanelUI] = None
-  var name= "prototype0"
+  var name= "proto0"
   
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
@@ -37,7 +37,7 @@ object PrototypeDisplay extends IDisplay{
 
   override def increment = {
     count += 1
-    name = "prototype" + count
+    name = "proto" + count
   }
   
   def  buildPanelUI(n:String) = {
