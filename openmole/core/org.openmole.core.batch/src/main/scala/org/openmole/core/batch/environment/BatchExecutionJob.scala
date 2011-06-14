@@ -54,11 +54,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   var batchJob: BatchJob = null
   val killed = new AtomicBoolean(false)
-  var copyToEnvironmentResult: CopyToEnvironmentResult = null
+  var copyToEnvironmentResult: SerializedJob = null
   var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
  
   @transient
-  var copyToEnvironmentExecFuture: Future[CopyToEnvironmentResult] = null
+  var copyToEnvironmentExecFuture: Future[SerializedJob] = null
     
   @transient
   var finalizeExecutionFuture: Future[_] = null
@@ -156,7 +156,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     try {
       if(killed.get) throw new InternalProcessingError("Job has been killed")
       //FIXME copyToEnvironmentResult may be null if job killed here
-      val bj = js._1.submit(copyToEnvironmentResult.inputFile, copyToEnvironmentResult.outputFile, copyToEnvironmentResult.runtime, js._2)
+      val bj = js._1.submit(copyToEnvironmentResult, js._2)
       batchJob = bj
     } catch {
       case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)

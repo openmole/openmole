@@ -32,7 +32,7 @@ import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.batch.environment.BatchAuthentication
+import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.executorservice.ExecutorType
@@ -110,7 +110,7 @@ object GliteAuthentication {
 }
 
 
-class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy], fqan: String) extends BatchAuthentication {
+class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyProxy], fqan: String) extends Authentication {
 
   import GliteAuthentication._
     

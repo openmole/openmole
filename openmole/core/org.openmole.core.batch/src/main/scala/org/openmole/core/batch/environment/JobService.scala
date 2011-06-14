@@ -32,11 +32,11 @@ abstract class JobService(environment: BatchEnvironment, val description: JobSer
   
   JobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
-  def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
-    withFailureControl(description, doSubmit(inputFile, outputFile, runtime, token))
+  def submit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
+    withFailureControl(description, doSubmit(serializedJob, token))
   }
  
-  protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob
+  protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob
 
   override def toString: String = description.toString
   

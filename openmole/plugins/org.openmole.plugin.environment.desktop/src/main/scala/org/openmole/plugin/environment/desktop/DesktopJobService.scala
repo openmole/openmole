@@ -21,10 +21,9 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.Runtime
-import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.batch.environment.SerializedJob
 
 class DesktopJobService(environment: DesktopEnvironment, description: JobServiceDescription) extends JobService(environment, description){
-  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = new DesktopJob(description)
+  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = new DesktopJob(description)
   override def test = true
 }

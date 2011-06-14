@@ -124,11 +124,8 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
 
   private def getRuntimeResult(outputFile: IURIFile, token: AccessToken): RuntimeResult = {
     val resultFile = outputFile.cache(token)
-    try {
-      SerializerService.deserialize(resultFile)
-    } finally {
-      resultFile.delete
-    }
+    try SerializerService.deserialize(resultFile)
+    finally resultFile.delete
   }
 
   private def display(message: FileMessage, description: String, token: AccessToken) = {

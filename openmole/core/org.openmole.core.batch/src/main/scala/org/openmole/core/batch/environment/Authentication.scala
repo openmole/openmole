@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-trait BatchAuthentication {
+trait Authentication {
    
   @throws(classOf[Throwable])
   def initialize

@@ -162,7 +162,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   def allStorages: Iterable[Storage]
   def allJobServices: Iterable[JobService]
   
-  def authentication: BatchAuthentication
+  def authentication: Authentication
   
   def selectAJobService: (JobService, AccessToken) = jobServices.selectAService
 

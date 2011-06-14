@@ -19,7 +19,7 @@ package org.openmole.misc.executorservice
 
 import java.util.concurrent.Executors
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.tools.service.DaemonThreadFactory._
+import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 
@@ -31,11 +31,11 @@ object ExecutorService {
   private def nbThreads = Workspace.preferenceAsInt(ExecutorService.NbTread)
 
   def executorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
-    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(threadFactory)
+    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(daemonThreadFactory)
     getOrCreateExecutorService(purpose)
   }
     
   private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
-    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, threadFactory))
+    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, daemonThreadFactory))
   }
 }

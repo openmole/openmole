@@ -18,7 +18,7 @@
 package org.openmole.misc.updater.internal
 
 import java.util.concurrent.Executors
-import org.openmole.misc.tools.service.DaemonThreadFactory._
+import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.IUpdatable
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 object Updater {
   
   private var shutDown = false
-  private lazy val scheduler =  Executors.newScheduledThreadPool(1,threadFactory)
+  private lazy val scheduler =  Executors.newScheduledThreadPool(1, daemonThreadFactory)
 
   def registerForUpdate(updatable: IUpdatableWithVariableDelay, purpose: ExecutorType.Value) = {
     val task = new UpdaterTask(updatable, purpose)

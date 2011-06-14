@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.environment.desktop
 
-import org.openmole.core.batch.environment.BatchAuthentication
+import org.openmole.core.batch.environment.Authentication
 
-object DesktopAuthentication extends BatchAuthentication {
+object DesktopAuthentication extends Authentication {
   override def initialize = {}
   override def key: String = "DesktopAuthentication"
 }

@@ -31,11 +31,12 @@ import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
 import org.ogf.saga.url.URLFactory
 import org.openmole.core.batch.control.JobServiceDescription
-import org.openmole.core.batch.environment.BatchAuthentication
+import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -69,8 +70,10 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     } 
   }
 
-  override protected def doSubmit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {
+  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
 
+    import serializedJob._
+    
     val script = Workspace.newFile("script", ".sh")
     try {
       val os = new BufferedOutputStream(new FileOutputStream(script))

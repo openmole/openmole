@@ -47,9 +47,9 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[CopyToEnvironmentResult] {
+class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
 
-  private def initCommunication: CopyToEnvironmentResult = {
+  private def initCommunication: SerializedJob = {
     val jobFile = Workspace.newFile("job", ".tar")
     
     try {
@@ -77,7 +77,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
           URIFile.copy(new URIFile(executionMessageFile), inputFile, token)
         } finally executionMessageFile.delete
             
-        new CopyToEnvironmentResult(communicationStorage, communicationDir, inputFile, outputFile, runtime)
+        new SerializedJob(communicationStorage, communicationDir, inputFile, outputFile, runtime)
       } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
     } finally jobFile.delete
   }
@@ -106,7 +106,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   }
   
   
-  override def call: CopyToEnvironmentResult = initCommunication
+  override def call: SerializedJob = initCommunication
 
   def toReplicatedFile(file: File, storage: Storage, token: AccessToken): ReplicatedFile = {
     val isDir = file.isDirectory

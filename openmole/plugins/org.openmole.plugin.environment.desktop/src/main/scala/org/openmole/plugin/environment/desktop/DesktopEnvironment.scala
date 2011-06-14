@@ -17,32 +17,38 @@
 
 package org.openmole.plugin.environment.desktop
 
-import org.openmole.core.batch.environment.BatchAuthentication
+import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.VolatileStorage
+import java.util.concurrent.Executors
 import org.apache.sshd.SshServer
 import org.apache.sshd.server.PasswordAuthenticator
 import org.apache.sshd.server.auth.UserAuthPassword
 import org.apache.sshd.server.command.ScpCommandFactory
+import org.apache.sshd.server.filesystem.NativeFileSystemFactory
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
+import org.apache.sshd.server.sftp.SftpSubsystem
 import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import collection.JavaConversions._
+import org.openmole.misc.tools.service.ThreadUtil._
 
 class DesktopEnvironment(port: Int, login: String, password: String, inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
   
   def this(port: Int, login: String, password: String) = this(port, login, password, None)
   
   val path = Workspace.newDir
-
+  val sshd = SshServer.setUpDefaultServer
+  
   {
-    val sshd = SshServer.setUpDefaultServer
     sshd.setPort(port)
+    sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
+    //sshd.setShellFactory(new EchoShellFactory)
     
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
       override def authenticate(username: String, pass: String, session: ServerSession) = {
@@ -50,8 +56,11 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
       }})
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
 
+
     sshd.start
   }
+  
+  override def finalize = background{sshd.stop}
   
   @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue)
   
