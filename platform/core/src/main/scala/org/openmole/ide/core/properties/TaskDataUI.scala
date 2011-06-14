@@ -28,6 +28,7 @@ abstract class TaskDataUI extends ITaskDataUI{
   var prototypesIn = HashSet.empty[PrototypeDataProxyUI]
   var prototypesOut = HashSet.empty[PrototypeDataProxyUI]
   var sampling: Option[SamplingDataProxyUI] = None
+  var environment: Option[EnvironmentDataProxyUI] = None
   
   def addPrototype(p: PrototypeDataProxyUI, ioType: IOType.Value)= {
     if (p.dataUI.entityType.equals(Constants.PROTOTYPE)){

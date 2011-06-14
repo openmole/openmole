@@ -41,12 +41,20 @@ object TaskDisplay extends IDisplay{
     currentPanel.get
   }
   
-  override def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+  override def saveContent(oldName: String) = {
+    val env = dataProxyUI(oldName).dataUI.environment
+    val sample = dataProxyUI(oldName).dataUI.sampling
+    val protoI = dataProxyUI(oldName).dataUI.prototypesIn
+    val protoO = dataProxyUI(oldName).dataUI.prototypesOut
+    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+    dataProxyUI(name).dataUI.prototypesIn_=(protoI)
+    dataProxyUI(name).dataUI.prototypesOut_=(protoO)
+    dataProxyUI(name).dataUI.sampling_=(sample)
+    dataProxyUI(name).dataUI.environment_=(env)
+  }
   
   override def increment = {
-    println("INCREMENT ")
     count += 1
-    println("INCREMENT " + count)
     name = "task" + count
   }
   

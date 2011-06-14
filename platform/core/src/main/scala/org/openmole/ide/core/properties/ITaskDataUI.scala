@@ -33,15 +33,23 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject: GenericTask
   
-  def prototypesIn: HashSet[PrototypeDataProxyUI]
+  def prototypesIn: HashSet[PrototypeDataProxyUI] 
+  
+  def prototypesIn_=(pi: HashSet[PrototypeDataProxyUI])
   
   def prototypesOut: HashSet[PrototypeDataProxyUI]
+  
+  def prototypesOut_=(po: HashSet[PrototypeDataProxyUI])
 
   def addPrototype(p: PrototypeDataProxyUI, ioType: IOType.Value)
   
   def sampling: Option[SamplingDataProxyUI]
   
   def sampling_=(s: Option[SamplingDataProxyUI])
+  
+  def environment: Option[EnvironmentDataProxyUI]
+  
+  def environment_=(s: Option[EnvironmentDataProxyUI])
   
   def buildPanelUI: ITaskPanelUI
 }

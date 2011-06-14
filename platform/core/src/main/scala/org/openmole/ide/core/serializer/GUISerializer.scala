@@ -39,7 +39,7 @@ object GUISerializer {
   
   xstream.alias("molescene", classOf[MoleScene])
 //  xstream.alias("entity", classOf[EntityUI])
-  xstream.alias("data", classOf[IDataUI])
+  xstream.alias("data_proxy", classOf[IDataProxyUI])
   
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
@@ -47,15 +47,10 @@ object GUISerializer {
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    //prototypes
-    ElementFactories.dataPrototypeProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
-
-    //tasks
-    ElementFactories.dataTaskProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
-        
-    //samplings
-    ElementFactories.dataSamplingProxys.foreach(dpu=> out.writeObject(dpu.dataUI))
-
+    out.writeObject(new SerializedProxys(ElementFactories.dataTaskProxys,
+                                         ElementFactories.dataPrototypeProxys,
+                                         ElementFactories.dataSamplingProxys,
+                                         ElementFactories.dataEnvironmentProxys))
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
     
@@ -73,10 +68,7 @@ object GUISerializer {
       while(true) {
         val readObject = in.readObject
         readObject match{
-          case x: ITaskDataUI=> ElementFactories.addTaskElement(new TaskDataProxyUI(x))
-          case x: IPrototypeDataUI=> ElementFactories.addPrototypeElement(new PrototypeDataProxyUI(x))
-          case x: ISamplingDataUI=> ElementFactories.addSamplingElement(new SamplingDataProxyUI(x))
-          case x: IEnvironmentDataUI=> ElementFactories.addEnvironmentElement(new EnvironmentDataProxyUI(x))
+          case x: SerializedProxys=> x.loadProxys
           case x: MoleScene=> MoleScenesManager.addMoleScene(x)
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }

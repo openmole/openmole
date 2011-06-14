@@ -46,6 +46,7 @@ object ElementFactories {
   var dataSamplingProxys = new HashSet[SamplingDataProxyUI]
   var dataEnvironmentProxys = new HashSet[EnvironmentDataProxyUI]
   
+  
 //  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI],
 //                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI],
 //                            Constants.SAMPLING -> new ListBuffer[DataProxyUI],

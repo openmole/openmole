@@ -68,12 +68,9 @@ public class PropertyPanel extends javax.swing.JPanel {
                 //  displayCurrentEntity(((IDataProxyFactory)typeComboBox.getSelectedItem()).buildDataProxyUI(nameTextField.getText()));
             }
         } else if (oldName != "") {
-            Displays.saveContent(oldName,nameTextField.getText());
-//                if (currentPanelUI != null) {
-//                    currentDataProxyUI.dataUI_$eq(currentPanelUI.saveContent(nameTextField.getText()));
+            Displays.saveContent(oldName, nameTextField.getText());
+            oldName = nameTextField.getText();
         }
-//            }
-
         MoleSceneTopComponent.getDefault().refreshPalette();
         initEntity = false;
     }
@@ -291,7 +288,11 @@ public class PropertyPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        displayCurrentEntity();
+        if (initEntity) {
+            nameTextField.setText("");
+        } else {
+            displayCurrentEntity();
+        }
     }//GEN-LAST:event_cancelButtonActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;

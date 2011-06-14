@@ -36,10 +36,12 @@ class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectio
   
   override def getPopupMenu(widget: Widget, point: Point)= {
     items.remove(itAgreg)
-    var transitonTypeString = if (connectionWidget.transition.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
-    itAgreg = new JMenuItem("Set as "+ transitonTypeString +" transition")
-    itAgreg.addActionListener(new AggregationTransitionAction(connectionWidget))
-    items+= itAgreg
+    if(!(connectionWidget.transition.transitionType == EXPLORATION_TRANSITION)){
+      var transitonTypeString = if (connectionWidget.transition.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
+      itAgreg = new JMenuItem("Set as "+ transitonTypeString +" transition")
+      itAgreg.addActionListener(new AggregationTransitionAction(connectionWidget))
+      items+= itAgreg
+    }
     super.getPopupMenu(widget, point)
   }
 } 
