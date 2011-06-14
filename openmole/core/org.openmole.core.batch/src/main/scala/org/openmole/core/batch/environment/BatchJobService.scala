@@ -28,6 +28,8 @@ import org.openmole.misc.workspace.Workspace
 
 abstract class BatchJobService(environment: BatchEnvironment, val description: BatchJobServiceDescription, nbAccess: Int) extends BatchService(environment) {
   
+  def this(environment: BatchEnvironment, description: BatchJobServiceDescription) = this(environment, description, Int.MaxValue)
+  
   BatchJobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   def submit(inputFile: IURIFile, outputFile: IURIFile, runtime: Runtime, token: AccessToken): BatchJob = {

@@ -27,6 +27,7 @@ import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.batch.environment.BatchStorage
+import org.openmole.core.batch.environment.PersistentBatchStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
@@ -97,7 +98,7 @@ object GliteEnvironment {
   Workspace += (OverSubmissionNbSampling, "10")
   Workspace += (OverSubmissionSamplingWindowFactor, "5")
   
- // Workspace += (OverSubmissionGridSizeRatio, "0.25")
+  // Workspace += (OverSubmissionGridSizeRatio, "0.25")
   Workspace += (OverSubmissionInterval, "PT5M")
 
   Workspace += (OverSubmissionMinNumberOfJob, "100")
@@ -153,10 +154,10 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
     val jobServices = new ListBuffer[GliteJobService]
 
-    for (js <- jss) {
+    jss.foreach {
+      js =>
       try {
         val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
-
         val jobService = new GliteJobService(wms, this, threadsByWMS)
         jobServices += jobService
       } catch {
@@ -168,16 +169,9 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
     jobServices.toList
   }
 
-  override def allStorages: Iterable[BatchStorage] = {
-    val allStorages = new ListBuffer[BatchStorage]
+  override def allStorages = {
     val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
-
-    for (stor <- stors) {
-      val storage = new BatchStorage(this, stor, threadsBySE)
-      allStorages += storage
-    }
-
-    allStorages
+    stors.map{new PersistentBatchStorage(this, _, threadsBySE)}
   }
 
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)

@@ -21,8 +21,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
-import java.util.logging.Level
-import java.util.logging.Logger
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
@@ -41,110 +40,37 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
-object BatchStorage {
-  val LOGGER = Logger.getLogger(BatchStorage.getClass.getName)
+object BatchStorage extends Logger
 
-  val TmpDirRemoval = new ConfigurationLocation("BatchStorage", "TmpDirRemoval")
-  val TmpDirRegenerate = new ConfigurationLocation("BatchStorage", "TmpDirRegenerate")
+abstract class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
     
-  Workspace += (TmpDirRemoval, "P30D")
-  Workspace += (TmpDirRegenerate, "P1D")
-    
-  val persistent = "persistent/"
-  val tmp = "tmp/"
-}
-
-class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
-  
   @transient lazy val description = new BatchStorageDescription(URI)
   
   BatchStorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   import BatchStorage._
   
-  @transient
-  var baseSpaceVar: IURIFile = null
-    
-  @transient
-  var tmpSpaceVar: IURIFile = null
-    
-  @transient 
-  var persistentSpaceVar: IURIFile = null
-  
-  @transient 
-  var time = System.currentTimeMillis
- 
-  def persistentSpace(token: AccessToken): IURIFile = synchronized {
-    if (persistentSpaceVar == null) {
-      persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
-      
-      val service = ExecutorService.executorService(ExecutorType.REMOVE)
-      val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
-      for (dir <- persistentSpaceVar.list(token)) {
-        val child = new URIFile(persistentSpaceVar, dir)
-        if(!inCatalog.contains(child.location)) {
-          //LOGGER.log(Level.FINE, "Removing {0} because it is not in catalog anymore.", dir)
-          service.submit(new URIFileCleaner(child, false))
-        } //else LOGGER.log(Level.FINE, "Not removing {0} because it is in catalog.", dir)
-      }
-        
-    }
-    persistentSpaceVar
-  }
+  @transient protected var baseSpaceVar: IURIFile = null
 
-  def tmpSpace(token: AccessToken): IURIFile = synchronized {
-
-    if (tmpSpaceVar == null || time + Workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
-      time = System.currentTimeMillis
-
-      val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
-
-      val service = ExecutorService.executorService(ExecutorType.REMOVE)
-      val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
-
-      for (dir <- tmpNoTime.list(token)) {
-        val child = new URIFile(tmpNoTime, dir)
-        if (child.URLRepresentsADirectory) {
-          try {
-            val timeOfDir = dir.substring(0, dir.length - 1).toLong
-
-            if (timeOfDir < removalDate) {
-              //LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir)
-              service.submit(new URIFileCleaner(child, true, false))
-            }
-          } catch  {
-            case (ex: NumberFormatException) =>
-              //LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir)
-              service.submit(new URIFileCleaner(child, true, false))
-          }
-        } else {
-          service.submit(new URIFileCleaner(child, false, false))
-        }
-      }
-
-      val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
-      tmpSpaceVar = tmpTmpDir
-    }
-    
-    tmpSpaceVar
-  }
+  def persistentSpace(token: AccessToken): IURIFile 
+  def tmpSpace(token: AccessToken): IURIFile
 
   def baseDir(token: AccessToken): IURIFile = synchronized {
     if (baseSpaceVar == null) {
       val storeFile = new URIFile(URI.toString)
-      baseSpaceVar = storeFile.mkdirIfNotExist(Workspace.preference(Workspace.UniqueID) + '/', token)
+      baseSpaceVar = storeFile.mkdirIfNotExist(baseDirName, token)
     }
     baseSpaceVar
   }
+  
+  def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'
 
   def test: Boolean = {
-
     try {
-
       val token = BatchStorageControl.usageControl(description).waitAToken
 
       try {
-        val lenght = 10;
+        val lenght = 10
 
         val rdm = new Array[Byte](lenght)
 
@@ -156,39 +82,26 @@ class BatchStorage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) e
         try {
           //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
           val output = new FileOutputStream(tmpFile)
-          try {
-            output.write(rdm)
-          } finally {
-            output.close
-          }
+          try output.write(rdm)
+          finally output.close
 
           URIFile.copy(tmpFile, testFile, token)
-        } finally {
-          tmpFile.delete
-        }
+        } finally tmpFile.delete
 
         try {
           val local = testFile.cache(token)
           val input = new FileInputStream(local)
           val resRdm = new Array[Byte](lenght)
         
-          val nb = try {
-            input.read(resRdm)
-          } finally {
-            input.close
-          }
+          val nb = try input.read(resRdm) finally input.close
+          
           //String tmp = read.readLine();
-          if (nb == lenght && rdm.deep == resRdm.deep) {
-            return true;
-          }
-        } finally {
-          ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
-        }
-      } finally {
-        BatchStorageControl.usageControl(description).releaseToken(token)
-      }
+          if (nb == lenght && rdm.deep == resRdm.deep) return true
+          
+        } finally ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(testFile, false))
+      } finally BatchStorageControl.usageControl(description).releaseToken(token)
     } catch {
-      case e => LOGGER.log(Level.FINE, URI.toString, e)
+      case e => logger.log(FINE, URI.toString, e)
     }
     return false
   }

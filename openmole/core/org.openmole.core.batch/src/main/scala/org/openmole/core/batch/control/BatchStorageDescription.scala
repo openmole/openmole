@@ -22,7 +22,7 @@ import org.openmole.core.batch.environment.BatchStorage
 
 class BatchStorageDescription(description: String) extends BatchServiceDescription(description) {
 
-  def this(uri: URI) = this(uri.getScheme + "://" + uri.getHost + ":" + uri.getPort)
+  def this(uri: URI) = this(uri.getScheme + "://" + {if(uri.getHost == null) "localhost" else uri.getHost} + ":" + uri.getPort)
   def this(storage: BatchStorage) = this(storage.URI)
   
 }

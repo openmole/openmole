@@ -67,7 +67,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
         val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
 
-        val executionMessage = createExecutionMessage(jobFile,serializationResult, token, communicationStorage, communicationDir)
+        val executionMessage = createExecutionMessage(jobFile, serializationResult, token, communicationStorage, communicationDir)
 
         /* ---- upload the execution message ----*/
 

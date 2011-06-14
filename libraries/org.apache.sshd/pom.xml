@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>libraries</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3-SNAPSHOT</version>
+    </parent>
+
+    <!--Used to build the symbolic name of the bundle-->
+    <artifactId>org.apache.sshd</artifactId>
+    <version>${lib.org.apache.sshd.version}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+            <version>${lib.org.apache.sshd.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${lib.org.slf4j.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId}</name>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>bundle</packaging>
+
+</project>

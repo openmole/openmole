@@ -62,9 +62,9 @@ import scala.collection.mutable.ListBuffer
 object ReplicaCatalog {
   val LOGGER = Logger.getLogger(ReplicaCatalog.getClass.getName)
 
-  
-  val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval");
+  val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval")
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
+  
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   
@@ -78,8 +78,9 @@ object ReplicaCatalog {
     if(objRepo.exists) defrag(objRepo)
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
   }
-  
- 
+
+  Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
+
   def lockRead[A](op: => A): A = {
     readWriteLock.lockRead
     try {
@@ -97,26 +98,7 @@ object ReplicaCatalog {
       readWriteLock.unlockWrite
     }
   }
-  
-  
- /* def transactionalOp[A](op: ObjectContainer => A): A = {
-    val container = obj
-   objectServer.synchronized {
-   op(objectServer)
-  }*/
-  /* 
-   val transaction = objectServer.openSession
-   try {
-   val ret = op(transaction)
-   transaction.commit
-   ret
-   } finally {
-   transaction.close
-   }*/
-  //}
-  
-  Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
- 
+   
   private def getReplica(hash: String, storageDescription: BatchStorageDescription, authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null))
@@ -141,6 +123,9 @@ object ReplicaCatalog {
     lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null)))
   }
   
+  def getReplica(storageDescription: BatchStorageDescription, authenticationKey: String): ObjectSet[Replica] = {
+    lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null)))
+  }
 
   def inCatalog(storageDescription: BatchStorageDescription, authenticationKey: String): Set[String] = {
     lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null)).map{_.destination}.toSet)
@@ -221,7 +206,7 @@ object ReplicaCatalog {
       })
   }
 
-  def allReplicas:  Iterable[Replica] = {
+  def allReplicas: Iterable[Replica] = {
     lockRead({ 
         val q = objectServer.query
         q.constrain(classOf[Replica])
@@ -234,7 +219,7 @@ object ReplicaCatalog {
       { 
         try {
           objectServer.store(replica)
-          //LOGGER.log(Level.INFO,"Insert " + replica.toString)
+          LOGGER.log(Level.INFO,"Insert " + replica.toString)
         } finally {
           objectServer.commit
         }

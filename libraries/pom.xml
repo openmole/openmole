@@ -46,6 +46,7 @@
 	<module>net.java.dev.j3d</module>
 	<module>org.aspectj.runtime</module>
 	<module>org.objenesis</module>
+	<module>org.apache.sshd</module>
     </modules>
 
     <!-- ************************************************************* -->
