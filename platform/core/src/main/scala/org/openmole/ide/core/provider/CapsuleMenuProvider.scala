@@ -25,38 +25,42 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.action.AddInputSlotAction
-import org.openmole.ide.core.workflow.action.AddTaskAction
-import org.openmole.ide.core.workflow.action.DefineMoleStartAction
-import org.openmole.ide.core.workflow.action.RemoveCapsuleAction
+import org.openmole.ide.core.workflow.action._
 import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.commons.Constants
 
 class CapsuleMenuProvider(scene: MoleScene, capsule: CapsuleUI) extends GenericMenuProvider {
-  println("TransitionMenuProvider")
-  
   var encapsulated= false
   var taskMenu= new JMenu
   
-  val itIS= new JMenuItem("Add an input slot")
-  val itR = new JMenuItem("Remove capsule")
-  val itStart = new JMenuItem("Define as starting capsule")
-  itIS.addActionListener(new AddInputSlotAction(capsule))
-  itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
-  itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
   
-  items+= (itIS,itR,itStart)
+  def initMenu = {
+    items.clear
+    val itStart = new JMenuItem("Define as starting capsule")
+    val itIS= new JMenuItem("Add an input slot")
+    val itR = new JMenuItem("Remove capsule")
+    itIS.addActionListener(new AddInputSlotAction(capsule))
+    itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
+    itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
+  
+    items+= (itIS,itR,itStart)
+    
+  }
   
   def addTaskMenus= encapsulated= true
   
   override def getPopupMenu(widget: Widget, point: Point)= {
+    initMenu
     if (encapsulated) {
-      if (! ElementFactories.dataTaskProxys.isEmpty){
-         menus.remove(taskMenu)
-         ElementFactories.dataTaskProxys.foreach(t=> {
-             val it= new JMenuItem(t.dataUI.name + " :: " + t.dataUI.coreClass.getSimpleName)
-           it.addActionListener(new AddTaskAction(scene,capsule, t))
-          })
+      if (capsule.dataProxy.get.dataUI.environment.isDefined) {
+        val itRe= new JMenuItem("Remove environment")
+        itRe.addActionListener(new RemoveEnvironementAction(capsule.dataProxy.get))
+        items+=itRe
+      }
+      if (capsule.dataProxy.get.dataUI.sampling.isDefined) {
+        val itSa= new JMenuItem("Remove sampling")
+        itSa.addActionListener(new RemoveSamplingAction(capsule.dataProxy.get))
+        items+=itSa
       }
     }
     super.getPopupMenu(widget, point)
