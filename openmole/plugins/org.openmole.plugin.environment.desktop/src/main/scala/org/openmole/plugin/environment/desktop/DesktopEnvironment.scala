@@ -23,10 +23,15 @@ import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.VolatileStorage
 import java.util.concurrent.Executors
 import org.apache.sshd.SshServer
+import org.apache.sshd.common.Session
+import org.apache.sshd.server.FileSystemFactory
+import org.apache.sshd.server.FileSystemView
 import org.apache.sshd.server.PasswordAuthenticator
+import org.apache.sshd.server.SshFile
 import org.apache.sshd.server.auth.UserAuthPassword
 import org.apache.sshd.server.command.ScpCommandFactory
 import org.apache.sshd.server.filesystem.NativeFileSystemFactory
+import org.apache.sshd.server.filesystem.NativeFileSystemView
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.server.sftp.SftpSubsystem
@@ -48,14 +53,22 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
     sshd.setPort(port)
     sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
-    //sshd.setShellFactory(new EchoShellFactory)
+    sshd.setFileSystemFactory(new FileSystemFactory {
+        override def createFileSystemView(s: String) = new NativeFileSystemView(login, false) {
+          override def getFile(file: String) = {
+            println(file)
+            val sandboxed = new File(file)
+            if(sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(file)
+            else super.getFile(path.toString)
+          }
+        }
+      })
     
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
-      override def authenticate(username: String, pass: String, session: ServerSession) = {
+        override def authenticate(username: String, pass: String, session: ServerSession) = {
           username == login && pass == password
-      }})
+        }})
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
-
 
     sshd.start
   }

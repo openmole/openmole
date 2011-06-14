@@ -54,16 +54,7 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
 
   def persistentSpace(token: AccessToken): IURIFile 
   def tmpSpace(token: AccessToken): IURIFile
-
-  def baseDir(token: AccessToken): IURIFile = synchronized {
-    if (baseSpaceVar == null) {
-      val storeFile = new URIFile(URI.toString)
-      baseSpaceVar = storeFile.mkdirIfNotExist(baseDirName, token)
-    }
-    baseSpaceVar
-  }
-  
-  def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'
+  def baseDir(token: AccessToken): IURIFile
 
   def test: Boolean = {
     try {

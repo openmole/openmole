@@ -102,5 +102,14 @@ class PersistentStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) 
     
     tmpSpaceVar
   }
-
+  
+  override def baseDir(token: AccessToken): IURIFile = synchronized {
+    if (baseSpaceVar == null) {
+      val storeFile = new URIFile(URI.toString)
+      baseSpaceVar = storeFile.mkdirIfNotExist(baseDirName, token)
+    }
+    baseSpaceVar
+  }
+  
+  def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'
 }

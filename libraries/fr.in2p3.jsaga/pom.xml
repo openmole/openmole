@@ -54,12 +54,12 @@
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
-<!--       	<dependency>
+       	<dependency>
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-ssh</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
         <dependency>
            <groupId>xalan</groupId>
            <artifactId>xalan</artifactId>
