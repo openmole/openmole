@@ -52,10 +52,10 @@ object Constants{
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
   
-  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], "task")
-  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeDataProxyUI], "prototype")
-  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], "sampling")
-  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], "environment")
+  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], TASK)
+  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeDataProxyUI], PROTOTYPE)
+  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], SAMPLING)
+  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
 
  // def simpleEntityName(entityName: String) = entityName.split('_')(0)
 }

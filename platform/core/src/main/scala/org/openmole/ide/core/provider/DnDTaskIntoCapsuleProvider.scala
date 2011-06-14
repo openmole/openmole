@@ -35,80 +35,30 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
   var encapsulated= false
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= { 
-//    val ent = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[IDataProxyUI].dataUI.entityType
-//    var state= ConnectorState.REJECT
-//    if (!encapsulated){
-//      if (ent == Constants.TASK) state = ConnectorState.ACCEPT
-//    }
-//    else {
-//      ent match {
-//        case Constants.PROTOTYPE=> state = ConnectorState.ACCEPT
-//        case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) state = ConnectorState.ACCEPT
-//        case Constants.ENVIRONMENT=> println("envir"); state = ConnectorState.ACCEPT
-//        case _=> throw new GUIUserBadDataError("Unknown entity type")
-//      }
-//    }
-//    state
-    
-    
-    
-//    transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI].dataUI.entityType match {
-//      case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
-//      case Constants.PROTOTYPE=> ConnectorState.ACCEPT
-//      case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-//      case Constants.ENVIRONMENT=> println("envir"); ConnectorState.ACCEPT
-//      case _=> throw new GUIUserBadDataError("Unknown entity type")
-//    }
-    
-   println("HEAD :: " + transferable.getTransferDataFlavors.head)
-    
-    transferable.getTransferDataFlavors.head match {
-      case TASK_DATA_FLAVOR=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case PROTOTYPE_DATA_FLAVOR=> ConnectorState.ACCEPT
-      case SAMPLING_DATA_FLAVOR=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case ENVIRONMENT_DATA_FLAVOR=> println("envir"); ConnectorState.ACCEPT
+
+    Displays.dataProxy.dataUI.entityType match {
+      case TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case PROTOTYPE=> ConnectorState.ACCEPT
+      case SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case ENVIRONMENT=> println("envir"); ConnectorState.ACCEPT
       case _=> throw new GUIUserBadDataError("Unknown entity type")
     }
   }
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
-//     val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[IDataProxyUI]
-//    dpu.dataUI.entityType match{
-//      case Constants.TASK=> capsule.encapsule(dpu)
-//      case Constants.PROTOTYPE=> { 
-//          println("PROTO !!" )
-//          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
-//          else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
-//        }
-//      case Constants.SAMPLING=> capsuleDataUI.sampling = Some(dpu.asInstanceOf[DataProxyUI[DataUI[ISampling]]])
-//    }
-    
-//    val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI]
-//    dpu.dataUI.entityType match{
-//      case Constants.TASK=> capsule.encapsule(dpu.asInstanceOf[DataProxyUI])
-//      case Constants.PROTOTYPE=> { 
-//          println("PROTO !!" )
-//          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI], IOType.INPUT)
-//          else capsuleDataUI.addPrototype(dpu.asInstanceOf[DataProxyUI], IOType.OUTPUT)
-//        }
-//      case Constants.SAMPLING=> capsuleDataUI.sampling = Some(dpu.asInstanceOf[DataProxyUI])
-//    }
-    
-    transferable.getTransferDataFlavors.head match {
-      // val dpu = transferable.getTransferData(Constants.ENTITY_DATA_FLAVOR).asInstanceOf[DataProxyUI]
-      case TASK_DATA_FLAVOR => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
-      case PROTOTYPE_DATA_FLAVOR=> { 
-          println("PROTO !!" )
-          val dpu = transferable.getTransferData(PROTOTYPE_DATA_FLAVOR).asInstanceOf[PrototypeDataProxyUI]
+
+      Displays.dataProxy match {
+      case dpu:TaskDataProxyUI => capsule.encapsule(dpu)
+      case dpu:PrototypeDataProxyUI=> { 
           if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
           else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
         }
-      case SAMPLING_DATA_FLAVOR=> capsuleDataUI.sampling = Some(transferable.getTransferData(SAMPLING_DATA_FLAVOR).asInstanceOf[SamplingDataProxyUI])
+      case dpu:SamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
     }
     
     molescene.repaint
     molescene.revalidate
   }
   
-  def capsuleDataUI = capsule.dataProxy.get.dataUI
+  private def capsuleDataUI = capsule.dataProxy.get.dataUI
 }
