@@ -19,10 +19,13 @@ package org.openmole.ide.core.workflow.implementation
 
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
+import org.openmole.ide.core.commons.TransitionType
+import org.openmole.ide.core.commons.Constants._
 import org.openmole.ide.core.workflow.model.ICapsuleUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 
 class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) {
 
@@ -51,7 +54,12 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) {
   }
   
   def removeCapsuleUI(nodeID: String) = {
+    //remove following transitions
     capsuleConnections(capsules.get(nodeID)).foreach(transitions.removeValue(_))
+    
+    //remove incoming transitions
+    removeIncomingTransitions(capsules.get(nodeID))
+    
     capsules.remove(nodeID)
   }
   
@@ -61,17 +69,31 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) {
   
   def getTransition(edgeID: String) = transitions.get(edgeID)
   
+  private def removeIncomingTransitions(capsule: ICapsuleUI) = transitions.foreach(t => {if (t._2.target.capsule.equals(capsule)) removeTransition(t._1)})
+  
+  
   def removeTransition(edge: String) = transitions.remove(edge)
   
-  def registerTransition(transition: TransitionUI): Unit = {
+  def registerTransition(s: ICapsuleUI, t:ISlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
     edgeID+= 1
-    registerTransition(getEdgeID,transition)
+    registerTransition(getEdgeID,s,t,transitionType,cond)
   }
   
-  def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
-    transitions.put(edgeID, transition)
-    capsuleConnections(transition.source)+= transition
-   // capsuleConnections(transition.target.capsule)+= transition
+  //def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
+  def registerTransition(edgeID: String,s: ICapsuleUI, t:ISlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
+    if (!isTransition(s, t.capsule)) {
+      val transition = new TransitionUI(s,t,transitionType,cond)
+      transitions.put(edgeID, transition)
+      capsuleConnections(transition.source)+= transition
+      return true
+    }
+    false
+    // capsuleConnections(transition.target.capsule)+= transition
+  }
+  
+  private def isTransition(source: ICapsuleUI, target: ICapsuleUI): Boolean = {
+    capsuleConnections(source).foreach(trans=> {if (trans.target.capsule.equals(target)) return true})
+    false
   }
   
   private def removeTransitonsBeforeStartingCapsule = {

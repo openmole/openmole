@@ -88,7 +88,6 @@ class MoleSceneConverter extends Converter{
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
         writer.addAttribute("type", TransitionType.toString(trans.transitionType))
         
-        println("cond un transisiton serialisation:: " + trans.condition)
         writer.addAttribute("condition", trans.condition.getOrElse(""))
         writer.endNode
       })
@@ -128,8 +127,8 @@ class MoleSceneConverter extends Converter{
         case "transition"=> {
             val source = oslots(reader.getAttribute("source"))
             val target = islots(reader.getAttribute("target"))             
-            scene.manager.registerTransition(new TransitionUI(source, target, TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
-            scene.createEdge(scene.manager.capsuleID(source), scene.manager.capsuleID(target.capsule))           
+            if (scene.manager.registerTransition(source, target, TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
+              scene.createEdge(scene.manager.capsuleID(source), scene.manager.capsuleID(target.capsule))           
           }
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        
       }

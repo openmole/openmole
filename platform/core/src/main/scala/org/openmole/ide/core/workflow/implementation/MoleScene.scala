@@ -169,8 +169,8 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      manager.registerTransition(new TransitionUI(sourceCapsuleUI, targetWidget.asInstanceOf[ISlotWidget],if (sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION))
-      createEdge(source.get, target.get)
+      if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[ISlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
+        createEdge(source.get, target.get)
     }
   }
   
@@ -239,18 +239,14 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
         println("reconnect else if ")
         setEdgeSource(edge.get, replacementNode.get)
         val sourceW = replacementWidget.asInstanceOf[OSlotWidget].capsule
-        manager.registerTransition(edge.get,new TransitionUI(sourceW, t.target, 
-                                                             if (sourceW.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
-                                                             None))
+        manager.registerTransition(edge.get,sourceW, t.target, if (sourceW.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
       }
       else {
         println("reconnect else ")
         val targetView= replacementWidget.asInstanceOf[ISlotWidget]
         connectionWidget.setTargetAnchor(new ISlotAnchor(targetView.capsule, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)   
-        manager.registerTransition(edge.get,new TransitionUI(t.source, targetView,
-                                                             if (targetView.capsule.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,
-                                                             None))
+        manager.registerTransition(edge.get,t.source, targetView,if (targetView.capsule.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
       }
       repaint
     }

@@ -70,6 +70,7 @@ object MoleMaker {
           t.transitionType match {
             case AGGREGATION_TRANSITION=> new AggregationTransition(z,targetCapsule)
             case BASIC_TRANSITION=> new Transition(z,targetCapsule) 
+            
           }
         }
       case _=> throw new GUIUserBadDataError("No matching type for capsule " + sourceCapsule +". The transition can not be built")
