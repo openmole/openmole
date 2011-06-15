@@ -71,7 +71,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) {
   def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
     transitions.put(edgeID, transition)
     capsuleConnections(transition.source)+= transition
-    capsuleConnections(transition.target.capsule)+= transition
+   // capsuleConnections(transition.target.capsule)+= transition
   }
   
   private def removeTransitonsBeforeStartingCapsule = {
