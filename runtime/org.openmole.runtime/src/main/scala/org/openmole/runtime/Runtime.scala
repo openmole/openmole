@@ -59,7 +59,7 @@ class Runtime {
 
   import Runtime._
 
-  def apply(baseURI: String, communicationDirPath: String, executionMessagePath: String, resultMessagePath: String, debug: Boolean) = {
+  def apply(baseURI: String, communicationDirPath: String, executionMessageURI: String, resultMessageURI: String, debug: Boolean) = {
     
     val relativePath = new RelativePath(baseURI)
     import relativePath._
@@ -92,7 +92,7 @@ class Runtime {
       /*--- get execution message and job for runtime---*/
       val usedFiles = new HashMap[File, File]
 
-      val executionMesageFileCache = executionMessagePath.cacheUnziped
+      val executionMesageFileCache = new GZURIFile(executionMessageURI).cache
       val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
       executionMesageFileCache.delete
             
@@ -256,7 +256,7 @@ class Runtime {
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
     try {
-      val output = resultMessagePath.toGZURIFile
+      val output = new GZURIFile(resultMessageURI)
       retry(URIFile.copy(outputLocal, output), NbRetry)
     } finally outputLocal.delete
   }

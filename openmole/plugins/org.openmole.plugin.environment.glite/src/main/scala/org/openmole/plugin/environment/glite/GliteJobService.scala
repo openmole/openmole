@@ -75,9 +75,9 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     writter.print(" -a $CUR/authentication.xml ")
     writter.print(" -p $CUR/envplugins/ ")
     writter.print(" -i ")
-    writter.print(inputFilePath)
+    writter.print(inputFilePath.toStringURI)
     writter.print(" -o ")
-    writter.print(outputFilePath)
+    writter.print(outputFilePath.toStringURI)
     writter.print(" -w $CUR ; cd .. ; rm -rf $CUR")
 
   }

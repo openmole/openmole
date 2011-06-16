@@ -47,8 +47,8 @@ public class SimExplorer implements IApplication {
             options.addOption("a", true, "Path to a serialized authentication to initialize.");
             options.addOption("s", true, "Base uri for the storage.");
             options.addOption("w", true, "Path for the workspace.");
-            options.addOption("i", true, "Path for the input message.");
-            options.addOption("o", true, "Path for the output message.");
+            options.addOption("i", true, "URI of the input message.");
+            options.addOption("o", true, "URI of the output message.");
             options.addOption("c", true, "Path for the communication.");
             options.addOption("p", true, "Path for plugin dir to preload.");
             options.addOption("l", true, "Local authentication mode for debug.");
