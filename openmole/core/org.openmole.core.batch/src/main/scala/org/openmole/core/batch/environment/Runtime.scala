@@ -17,6 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.batch.file.IURIFile
-
-class Runtime(val runtime: IURIFile, val environmentPlugins: Iterable[IURIFile], val authentication: IURIFile)
+class Runtime(val runtimePath: String, val environmentPluginsPath: Iterable[String], val authenticationPath: String)

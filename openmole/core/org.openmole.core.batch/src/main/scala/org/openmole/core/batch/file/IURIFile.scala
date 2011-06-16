@@ -74,6 +74,7 @@ trait IURIFile {
     
     def URI: URI
     def location: String
-
+    def path: String
+    
     def storageDescription: StorageDescription
 }

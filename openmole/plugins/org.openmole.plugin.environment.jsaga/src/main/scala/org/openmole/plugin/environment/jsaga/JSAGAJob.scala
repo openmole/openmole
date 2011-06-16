@@ -63,7 +63,7 @@ class JSAGAJob(jobId: String, jobService: JSAGAJobService) extends BatchJob(jobS
     }
   }
 
-  override def updateState: ES = {
+  override def updatedState: ES = {
     val curjob = job
     try {
       translateStatus(curjob, curjob.getState)

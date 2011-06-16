@@ -191,7 +191,6 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   protected def SAGAURL: URL = trycatch(fromLocation(location))
   
-  
   /*-------------------- is a directory ---------------------------*/
   override def isDirectory: Boolean = withToken(isDirectory(_))
 
@@ -352,6 +351,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def storageDescription = new StorageDescription(new URI(location))
   override def URI: URI = new URI(location)
+  override def path = URI.getPath
   
   override def toString = location
   override def id = location

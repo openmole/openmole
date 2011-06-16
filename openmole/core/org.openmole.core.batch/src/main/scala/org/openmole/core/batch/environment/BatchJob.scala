@@ -64,10 +64,10 @@ abstract class BatchJob(val jobServiceDescription: JobServiceDescription) {
     deleteJob
   }
 
-  def updatedState: ExecutionState = withToken(jobServiceDescription,updatedState(_))
+  def updateState: ExecutionState = withToken(jobServiceDescription,updateState(_))
 
-  def updatedState(token: AccessToken): ExecutionState = synchronized {
-    state = withFailureControl(jobServiceDescription, updateState)
+  def updateState(token: AccessToken): ExecutionState = synchronized {
+    state = withFailureControl(jobServiceDescription, updatedState)
     state
   }
 
@@ -85,5 +85,6 @@ abstract class BatchJob(val jobServiceDescription: JobServiceDescription) {
   }
 
   def deleteJob
-  def updateState: ExecutionState
+  
+  protected def updatedState: ExecutionState
 }

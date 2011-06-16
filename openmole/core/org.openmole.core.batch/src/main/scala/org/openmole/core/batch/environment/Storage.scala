@@ -29,8 +29,10 @@ import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
+import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
+import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.misc.executorservice.ExecutorService
@@ -55,7 +57,11 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
   def persistentSpace(token: AccessToken): IURIFile 
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile
-
+  def root = new URI(URI.getScheme + "://" +  URI.getAuthority)
+  def resolve(path: String) = root.resolve(path)
+ 
+  implicit def stringDecorator(path: String) = new RelativePath(root).stringDecorator(path)
+  
   def test: Boolean = {
     try {
       val token = StorageControl.usageControl(description).waitAToken

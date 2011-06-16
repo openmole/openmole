@@ -22,8 +22,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.net.URI
-import java.util.logging.Level
-import java.util.logging.Logger
 import java.util.concurrent.TimeUnit
 import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
@@ -41,9 +39,10 @@ import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Logger
 import scala.io.Source._
 
-object JSAGAJobService {
+object JSAGAJobService extends Logger {
   val CreationTimeout = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "CreationTimout")
   val TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "TestJobDoneTimeOut")
 
@@ -53,6 +52,8 @@ object JSAGAJobService {
 
 abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends JobService(environment, new JobServiceDescription(jobServiceURI.toString), nbAccess) {
 
+  import JSAGAJobService._
+  
   override def test: Boolean = {
 
     try {
@@ -65,7 +66,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       return true
 
     } catch {
-      case e => Logger.getLogger(JSAGAJobService.getClass.getName).log(Level.FINE, jobServiceURI + ": " + e.getMessage, e)
+      case e => logger.log(FINE, jobServiceURI + ": " + e.getMessage, e)
         return false
     } 
   }
@@ -77,13 +78,10 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     val script = Workspace.newFile("script", ".sh")
     try {
       val os = new BufferedOutputStream(new FileOutputStream(script))
-      try {
-        generateScriptString(inputFile.location, outputFile.location, runtime, environment.memorySizeForRuntime.intValue, os)
-      } finally {
-        os.close
-      }
-
-      //println(fromFile(script).getLines.mkString)
+      try generateScriptString(serializedJob, environment.memorySizeForRuntime.intValue, os)
+      finally os.close
+      
+      //logger.fine(fromFile(script).getLines.mkString)
       
       val jobDescription = buildJobDescription(runtime, script, environment.attributes)
       val job = jobServiceCache.createJob(jobDescription)
@@ -110,6 +108,6 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
   protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = JSAGAJobBuilder.jobDescription(runtime, script, attributes)
   
     
-  protected def generateScriptString (in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream)
+  protected def generateScriptString (serializedJob: SerializedJob, memorySizeForRuntime: Int, os: OutputStream)
     
 }

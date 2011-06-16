@@ -15,13 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.desktop
+package org.openmole.core.batch.file
 
-import org.openmole.core.batch.control.JobServiceDescription
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.model.execution.ExecutionState._
+import java.net.URI
+import org.openmole.core.batch.control.AccessToken
 
-class DesktopJob(jobServiceDescription: JobServiceDescription) extends BatchJob(jobServiceDescription) {
-  override def deleteJob = {}
-  override def updatedState: ExecutionState = SUBMITTED
+class RelativePath(root: URI) {
+  
+  def this(root: String) = this(new URI(root))
+  
+  implicit def stringDecorator(path: String) = new {
+    def cacheUnziped = toGZURIFile.cache
+    def cache = toURIFile.cache
+    def cacheUnziped(token: AccessToken) = toGZURIFile.cache(token)
+    def cache(token: AccessToken) = toURIFile.cache(token)
+    def toURIFile = new URIFile(toURI)
+    def toGZURIFile = new GZURIFile(toURI)
+    def toURI = root.resolve(path)
+    def toStringURI = toURI.toString
+  }
 }

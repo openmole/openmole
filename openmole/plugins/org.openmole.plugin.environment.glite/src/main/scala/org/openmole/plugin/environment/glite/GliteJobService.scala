@@ -22,6 +22,7 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.net.URI
 import org.ogf.saga.job.JobDescription
+import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -43,33 +44,40 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
 
   override protected def buildJob(id: String) = new GliteJob(id, this, environment.authentication.expires)
 
-  override protected def generateScriptString(in: String, out: String, runtime: Runtime, memorySizeForRuntime: Int, os: OutputStream) = {
+  override protected def generateScriptString(serializedJob: SerializedJob, memorySizeForRuntime: Int, os: OutputStream) = {
+    import serializedJob.communicationStorage.stringDecorator
+    import serializedJob._
+    
     val writter = new PrintStream(os)
     
-    assert(runtime.runtime.location != null)
+    assert(serializedJob.runtime.runtimePath != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.location, "$PWD/openmole.tar.bz2"))
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtimePath.toStringURI, "$PWD/openmole.tar.bz2"))
     writter.print(" tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; ")
     writter.print("mkdir envplugins; PLUGIN=0;");
 
-    for (plugin <- runtime.environmentPlugins) {
-      assert(plugin.location != null)
-      writter.print(mkLcgCpGunZipCmd(environment, plugin.location, "$CUR/envplugins/plugin$PLUGIN.jar"))
+    for (pluginPath <- runtime.environmentPluginsPath) {
+      assert(pluginPath != null)
+      writter.print(mkLcgCpGunZipCmd(environment, pluginPath.toStringURI, "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
     
-    assert(runtime.authentication.location != null)
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.location, "$CUR/authentication.xml"))
+    assert(runtime.authenticationPath != null)
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.authenticationPath.toStringURI, "$CUR/authentication.xml"))
 
     writter.print("cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))
     writter.print("m ")
-    writter.print("-a $CUR/authentication.xml ")
-    writter.print("-p $CUR/envplugins/ ")
-    writter.print("-i ")
-    writter.print(in)
+    writter.print(" -s ")
+    writter.print(communicationStorage.root.toString)
+    writter.print(" -c ")
+    writter.print(communicationDirPath)
+    writter.print(" -a $CUR/authentication.xml ")
+    writter.print(" -p $CUR/envplugins/ ")
+    writter.print(" -i ")
+    writter.print(inputFilePath)
     writter.print(" -o ")
-    writter.print(out)
+    writter.print(outputFilePath)
     writter.print(" -w $CUR ; cd .. ; rm -rf $CUR")
 
   }

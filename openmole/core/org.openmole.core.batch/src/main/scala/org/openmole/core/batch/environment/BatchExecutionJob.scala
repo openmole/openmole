@@ -54,7 +54,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   var batchJob: BatchJob = null
   val killed = new AtomicBoolean(false)
-  var copyToEnvironmentResult: SerializedJob = null
+  var serializedJob: SerializedJob = null
   var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
  
   @transient
@@ -70,9 +70,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     if (batchJob == null) return READY
     
     val oldState = batchJob.state
-    batchJob.updateState
+    val newState = 
+      if (!oldState.isFinal) batchJob.updateState
+      else oldState
 
-    if(oldState != batchJob.state && batchJob.state == KILLED) kill
+    if(oldState != newState && newState == KILLED) kill
     state
   }
 
@@ -127,7 +129,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = ExecutorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(copyToEnvironmentResult.communicationStorage.description, copyToEnvironmentResult.outputFile, job, executionEnvironment, batchJob))
+      finalizeExecutionFuture = ExecutorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(serializedJob.communicationStorage, serializedJob.outputFilePath, job, executionEnvironment, batchJob))
     }
     if (finalizeExecutionFuture.isDone) {
       finalizeExecutionFuture.get
@@ -137,18 +139,18 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   }
 
   private def asynchonousCopy: Boolean = {
-    if (copyToEnvironmentResult == null) {
+    if (serializedJob == null) {
       if (copyToEnvironmentExecFuture == null) {
         copyToEnvironmentExecFuture = ExecutorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
       }
 
       if (copyToEnvironmentExecFuture.isDone) {
-        copyToEnvironmentResult = copyToEnvironmentExecFuture.get
+        serializedJob = copyToEnvironmentExecFuture.get
         copyToEnvironmentExecFuture = null
       }
     }
 
-    copyToEnvironmentResult != null
+    serializedJob != null
   }
 
   private def trySubmit = {
@@ -156,7 +158,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     try {
       if(killed.get) throw new InternalProcessingError("Job has been killed")
       //FIXME copyToEnvironmentResult may be null if job killed here
-      val bj = js._1.submit(copyToEnvironmentResult, js._2)
+      val bj = js._1.submit(serializedJob, js._2)
       batchJob = bj
     } catch {
       case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)
@@ -166,9 +168,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   }
 
   private def clean = {
-    if (copyToEnvironmentResult != null) {
-      ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(copyToEnvironmentResult.communicationDir, true))
-      copyToEnvironmentResult = null
+    if (serializedJob != null) {
+      val storage = serializedJob.communicationStorage
+      import storage._
+      ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
+      serializedJob = null
     }
   }
 

@@ -20,4 +20,4 @@ package org.openmole.core.batch.message
 import java.io.File
 import org.openmole.core.batch.file.IURIFile
 
-class RuntimeResult(val stdOut: FileMessage, val stdErr: FileMessage, val tarResult: FileMessage, val exception: Throwable, val filesInfo: PartialFunction[String, (File, Boolean)], val contextResultURI: IURIFile)
+class RuntimeResult(val stdOut: FileMessage, val stdErr: FileMessage, val tarResult: FileMessage, val exception: Throwable, val filesInfo: PartialFunction[String, (File, Boolean)], val contextResultPath: String)

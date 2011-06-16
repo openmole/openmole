@@ -45,9 +45,11 @@ public class SimExplorer implements IApplication {
             Options options = new Options();
 
             options.addOption("a", true, "Path to a serialized authentication to initialize.");
+            options.addOption("s", true, "Base uri for the storage.");
             options.addOption("w", true, "Path for the workspace.");
             options.addOption("i", true, "Path for the input message.");
             options.addOption("o", true, "Path for the output message.");
+            options.addOption("c", true, "Path for the communication.");
             options.addOption("p", true, "Path for plugin dir to preload.");
             options.addOption("l", true, "Local authentication mode for debug.");
 
@@ -71,6 +73,8 @@ public class SimExplorer implements IApplication {
 
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
             String executionMessageURI = cmdLine.getOptionValue("i");
+            String baseURI = cmdLine.getOptionValue("s");
+            String communicationPath = cmdLine.getOptionValue("c");
 
             File environmentPluginDir = new File(environmentPluginDirPath);
             PluginManager.loadDir(environmentPluginDir);
@@ -92,7 +96,7 @@ public class SimExplorer implements IApplication {
 
             String outMesseageURI = cmdLine.getOptionValue("o");
 
-            new Runtime().apply(executionMessageURI, outMesseageURI, debug);
+            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);
 
 
         } catch (Throwable t) {

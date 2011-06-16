@@ -22,8 +22,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-//import java.util.TreeMap
-//import java.util.concurrent.Callable
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -36,6 +34,7 @@ import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
 import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.implementation.execution.StatisticSample
@@ -55,19 +54,20 @@ object GetResultFromEnvironment {
   private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
 }
 
-class GetResultFromEnvironment(communicationStorageDescription: StorageDescription, outputFile: IURIFile, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
-
+  import communicationStorage._
+  
   private def successFullFinish(running: Long, done: Long) = {
     import batchJob.timeStemp
     environment.sample(job, new StatisticSample(timeStemp(SUBMITTED), running, done))
   }
 
   override def call: Unit = {
-    val token = StorageControl.usageControl(communicationStorageDescription).waitAToken
+    val token = StorageControl.usageControl(communicationStorage.description).waitAToken
 
     try {
-      val result = getRuntimeResult(outputFile, token)
+      val result = getRuntimeResult(outputFilePath, token)
 
       if (result.exception != null) {
         throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
@@ -78,7 +78,7 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
 
       val fileReplacement = getFiles(result.tarResult, result.filesInfo, token)
 
-      val contextResults = getContextResults(result.contextResultURI, fileReplacement, token)
+      val contextResults = getContextResults(result.contextResultPath, fileReplacement, token)
 
       var successfull = 0
       var firstRunning = Long.MaxValue
@@ -117,13 +117,13 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
       if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
     } finally {
-      StorageControl.usageControl(communicationStorageDescription).releaseToken(token)
+      StorageControl.usageControl(communicationStorage.description).releaseToken(token)
     }
   }
 
 
-  private def getRuntimeResult(outputFile: IURIFile, token: AccessToken): RuntimeResult = {
-    val resultFile = outputFile.cache(token)
+  private def getRuntimeResult(outputFilePath: String, token: AccessToken): RuntimeResult = {
+    val resultFile = outputFilePath.cacheUnziped(token)
     try SerializerService.deserialize(resultFile)
     finally resultFile.delete
   }
@@ -134,7 +134,7 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
     } else {
       try {
         if (!message.isEmpty) {
-          val stdOutFile = message.file.cache(token)
+          val stdOutFile = message.path.cacheUnziped(token)
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
             if (stdOutHash != message.hash) {
@@ -163,8 +163,7 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
     var fileReplacement = new TreeMap[File, File]
 
     if (!tarResult.isEmpty) {
-      val tarResultURIFile = tarResult.file
-      val tarResultFile = tarResultURIFile.cache(token)
+      val tarResultFile = tarResult.path.cacheUnziped(token)
 
       try {
         val tarResulHash = HashService.computeHash(tarResultFile)
@@ -200,9 +199,9 @@ class GetResultFromEnvironment(communicationStorageDescription: StorageDescripti
     fileReplacement
   }
 
-  private def getContextResults(uriFile: IURIFile, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {
-    if (uriFile == null) throw new InternalProcessingError("Context results URI is null")
-    val contextResutsFileCache = uriFile.cache(token)
+  private def getContextResults(resultPath: String, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {
+    if (resultPath == null) throw new InternalProcessingError("Context results path is null")
+    val contextResutsFileCache = resultPath.cacheUnziped(token)
 
     try SerializerService.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
     finally contextResutsFileCache.delete
