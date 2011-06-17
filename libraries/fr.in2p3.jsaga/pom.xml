@@ -55,8 +55,8 @@
             <scope>provided</scope>
         </dependency>
        	<dependency>
-            <groupId>fr.in2p3.jsaga.adaptor</groupId>
-            <artifactId>jsaga-adaptor-ssh</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>fr.in2p3.jsaga.adaptor.sftp</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
