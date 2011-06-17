@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <artifactId>third-parties</artifactId>
+        <groupId>org.openmole</groupId>
+        <version>0.3-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>fr.in2p3.jsaga.adaptor.sftp</artifactId>
+    <version>${lib.fr.in2p3.jsaga.version}</version>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId} ${project.version}</name>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.in2p3.jsaga</groupId>
+            <artifactId>jsaga-adaptoritf</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>ch.ethz.ssh2</artifactId>
+            <version>${lib.ch.ethz.ssh2.version}</version>
+        </dependency>
+        <dependency>
+           <groupId>org.scala-lang</groupId>
+           <artifactId>scala-library</artifactId>
+           <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest</artifactId>
+            <version>${lib.org.scalatest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>${lib.org.junit.version}</version>
+           <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+</project>

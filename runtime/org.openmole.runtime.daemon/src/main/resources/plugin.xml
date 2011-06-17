@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="runtime"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.openmole.runtime.daemon"
+            name="daemon">
+         <property
+               name="appName"
+               value="daemon">
+         </property>
+      </product>
+   </extension>
+   <extension
+         id="daemon"
+         name="daemon"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="org.openmole.runtime.daemon.Daemon">
+         </run>
+      </application>
+   </extension>
+
+</plugin>
