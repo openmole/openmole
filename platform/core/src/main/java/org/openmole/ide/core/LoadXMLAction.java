@@ -37,8 +37,6 @@ public final class LoadXMLAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println("LOAD");
-               
         GUISerializer.unserialize("/tmp/mole.xml");
     }
 }

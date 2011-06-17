@@ -57,8 +57,8 @@ object MoleMaker {
 
   def buildCapsule(capsule: ICapsuleUI) = {
     capsule.capsuleType match {
-      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
-      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.dataUI.coreObject.asInstanceOf[Task])
+      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[ExplorationTask])
+      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[Task])
       case CAPSULE=> new Capsule
     }
   }

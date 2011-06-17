@@ -25,7 +25,7 @@ import org.openmole.core.model.data.IPrototype
 class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI{
   override def coreClass = classOf[IPrototype[BigInteger]]
   
-  override def coreObject = new Prototype(name,BigInt.getClass)
+  override def coreObject = new Prototype(name,classOf[BigInt])
   
   override def imagePath = "img/thumb/biginteger.png"
   

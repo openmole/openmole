@@ -33,6 +33,8 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject: GenericTask
   
+  def buildTask: GenericTask 
+  
   def prototypesIn: HashSet[PrototypeDataProxyUI] 
   
   def prototypesIn_=(pi: HashSet[PrototypeDataProxyUI])

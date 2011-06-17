@@ -25,12 +25,11 @@ import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.TaskDataProxyFactory
 
 object TaskDisplay extends IDisplay{
-  private var count= 0
   private var modelTasks = new HashSet[TaskDataProxyFactory]
-  var name="task0"
   var currentPanel: Option[ITaskPanelUI] = None
-  
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
+  private var count= modelTasks.size
+  var name="task" + count
   
   override def implementationClasses = modelTasks
   

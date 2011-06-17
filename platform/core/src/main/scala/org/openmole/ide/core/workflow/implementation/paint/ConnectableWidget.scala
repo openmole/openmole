@@ -35,7 +35,6 @@ class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidg
   var islots= HashSet.empty[ISlotWidget]
   val oslot= new OSlotWidget(scene,capsule)
   var samplingWidget: Option[SamplingWidget] = None
-  var environmentWidget: Option[EnvironmentWidget] = None
   
   addChild(oslot)
   

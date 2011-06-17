@@ -75,7 +75,6 @@ class MoleScene extends GraphScene.StringGraph with IMoleScene{
   setActiveTool(CONNECT)  
   
   def createEdge(sourceNodeID:String, targetNodeID: String)= {
-    println("createEdge ")
     val ed= manager.getEdgeID
     addEdge(ed)
     setEdgeSource(ed,sourceNodeID)

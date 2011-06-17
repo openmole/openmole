@@ -23,7 +23,7 @@ import org.openmole.core.model.data.IPrototype
 class DoublePrototypeDataUI(val name: String) extends IPrototypeDataUI{
   override def coreClass = classOf[IPrototype[Double]]
 
-  override def coreObject = new Prototype(name,Double.getClass)
+  override def coreObject = new Prototype(name,classOf[Double])
   
   override def imagePath = "img/thumb/double.png"
   

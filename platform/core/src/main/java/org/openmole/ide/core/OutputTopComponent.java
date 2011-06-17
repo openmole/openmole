@@ -16,6 +16,16 @@
  */
 package org.openmole.ide.core;
 
+import java.awt.Rectangle;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -45,7 +55,14 @@ public final class OutputTopComponent extends TopComponent {
         initComponents();
         setName(NbBundle.getMessage(OutputTopComponent.class, "CTL_OutputTopComponent"));
         setToolTipText(NbBundle.getMessage(OutputTopComponent.class, "HINT_OutputTopComponent"));
+        // MyHandler.getInstance().setOutComponent(this);
+        // Logger.getLogger("").addHandler(MyHandler.getInstance());
+        System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
+    }
 
+    public void appendLog(String data) {
+        // jTextArea1.append(data);
+        // this.validate();
     }
 
     /** This method is called from within the constructor to
@@ -57,6 +74,9 @@ public final class OutputTopComponent extends TopComponent {
     private void initComponents() {
 
         runButton = new javax.swing.JButton();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        logTextArea = new javax.swing.JTextArea();
 
         org.openide.awt.Mnemonics.setLocalizedText(runButton, org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.runButton.text")); // NOI18N
         runButton.addActionListener(new java.awt.event.ActionListener() {
@@ -65,21 +85,33 @@ public final class OutputTopComponent extends TopComponent {
             }
         });
 
+        logTextArea.setColumns(20);
+        logTextArea.setRows(5);
+        jScrollPane1.setViewportView(logTextArea);
+
+        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(315, Short.MAX_VALUE))
+                .addGap(14, 14, 14)
+                .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 744, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(29, 29, 29)
-                .addComponent(runButton)
-                .addContainerGap(241, Short.MAX_VALUE))
+                .addGap(54, 54, 54)
+                .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(197, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -87,10 +119,13 @@ public final class OutputTopComponent extends TopComponent {
         // TODO add your handling code here:
         (new MoleExecution(MoleMaker.buildMole(TabsManager.getCurrentScene().manager()))).start();
     }//GEN-LAST:event_runButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTextArea logTextArea;
     private javax.swing.JButton runButton;
     // End of variables declaration//GEN-END:variables
+
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
@@ -111,5 +146,23 @@ public final class OutputTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+
+    class TextAreaOutputStream extends OutputStream {
+
+        JTextArea textArea;
+
+        public TextAreaOutputStream(JTextArea textArea) {
+            this.textArea = textArea;
+        }
+
+        public void flush() {
+            textArea.repaint();
+        }
+
+        public void write(int b) {
+            textArea.append(new String(new byte[]{(byte) b}));
+            textArea.scrollRectToVisible(new Rectangle(0,textArea.getHeight()-2,1,1));
+        }
     }
 }

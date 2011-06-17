@@ -40,6 +40,7 @@ public final class ResetAll implements ActionListener {
         ElementFactories.clearAll();
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
         MoleSceneTopComponent.getDefault().refreshPalette();
+        PropertyPanel.getDefault().hidePanelScrollPane();
         // TODO implement action body
         
     }

@@ -43,13 +43,17 @@ public class PropertyPanel extends javax.swing.JPanel {
         entityPanelScrollPane.setVisible(false);
     }
 
+    public void hidePanelScrollPane(){
+        entityPanelScrollPane.setVisible(false);
+    }
+    
     public void displayCurrentEntity() {
+        entityPanelScrollPane.setVisible(true);
+        initEntity = false;
         oldName = Displays.name();
         nameTextField.setText(Displays.dataProxy().dataUI().name());
         typeComboBox.removeAllItems();
         updateViewport((JPanel) Displays.buildPanelUI());
-        entityPanelScrollPane.setVisible(true);
-        initEntity = false;
     }
 
     public void updateViewport(JPanel panel) {

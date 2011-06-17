@@ -36,7 +36,6 @@ class LabeledConnectionWidget(val scene: Scene,val transition: TransitionUI) ext
   def setLabelVisible= conditionLabel.setVisible(!conditionLabel.getLabel.isEmpty)
   
   def drawTransitionType = {
-    println("drawTransitionType " + transition.transitionType)
     transition.transitionType match {
       case EXPLORATION_TRANSITION=> setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.EXPLORATION_TRANSITON,false))
       case AGGREGATION_TRANSITION=> setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.AGGREGATION_TRANSITON,false))
@@ -44,18 +43,5 @@ class LabeledConnectionWidget(val scene: Scene,val transition: TransitionUI) ext
     }
   }
   
-//  def toAggregationTransition(b: Boolean) = {
-//    if (b) {
-//      transition.transitionType = AGGREGATION_TRANSITION
-//     // setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.thumb(Images.AGGREGATION_TRANSITON,50),true))
-//      setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.AGGREGATION_TRANSITON,false))
-//    }
-//    else {
-//      transition.transitionType = BASIC_TRANSITION
-//      setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
-//    }
-//    scene.repaint
-//    scene.revalidate
-//  }
 }
   
