@@ -173,7 +173,7 @@ class SFTPDataAdaptor extends ClientAdaptor with FileReaderGetter with FileWrite
 
 
   override def listAttributes(absolutePath: String, additionalArgs: String) =
-    mapExceptions(sftpClient.ls(absolutePath).asInstanceOf[java.util.Vector[SFTPv3DirectoryEntry]].filterNot(e => e.filename == "." || e.filename == "..").map{e => new SFTPFileAttributes(e.filename, e.attributes)}).toArray
+    mapExceptions(sftpClient.ls(absolutePath).asInstanceOf[java.util.Vector[SFTPv3DirectoryEntry]].filterNot(e => {e.filename == "." || e.filename == ".."}).map{e => new SFTPFileAttributes(e.filename, e.attributes)}).toArray
  
 
   override def putFromStream(absolutePath: String, append: Boolean, additionalArgs: String, stream: InputStream) = mapExceptions {

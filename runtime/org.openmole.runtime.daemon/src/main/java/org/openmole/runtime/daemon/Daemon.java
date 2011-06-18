@@ -32,31 +32,25 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.core.batch.file.URIFile;
 import org.openmole.core.batch.jsaga.JSAGASessionService;
-import org.openmole.core.batch.jsaga.SSHAuthentication;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.core.serializer.SerializerService;
 
 public class Daemon implements IApplication {
-
+    
     @Override
     public Object start(IApplicationContext context) throws Exception {
         try {
-
+            
             String args[] = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
-
+            
             Options options = new Options();
-
-            options.addOption("h", true, "hostname:port");
-            options.addOption("u", true, "user");
+            
+            options.addOption("h", true, "user@hostname:port");
             options.addOption("p", true, "password");
             
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
-
-            new JobLaucher().launch();
-            
-            /*boolean debug = false;
             
             try {
                 cmdLine = parser.parse(options, args);
@@ -65,45 +59,68 @@ public class Daemon implements IApplication {
                 new HelpFormatter().printHelp(" ", options);
                 return IApplication.EXIT_OK;
             }
+            
+            String userHostnamePort = cmdLine.getOptionValue("h");
+            String password = cmdLine.getOptionValue("p");
+            
+            if (userHostnamePort == null || password == null) {
+                Logger.getLogger(Daemon.class.getName()).severe("Error while parsing command line arguments");
+                new HelpFormatter().printHelp(" ", options);
+                return IApplication.EXIT_OK;                
+            }
+            
+            new JobLauncher().launch(userHostnamePort, password);
 
+
+
+            /*boolean debug = false;
+            
+            try {
+            cmdLine = parser.parse(options, args);
+            } catch (ParseException e) {
+            Logger.getLogger(Daemon.class.getName()).severe("Error while parsing command line arguments");
+            new HelpFormatter().printHelp(" ", options);
+            return IApplication.EXIT_OK;
+            }
+            
             Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
-
+            
             //init jsaga
             JSAGASessionService.session();
-
+            
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
             String executionMessageURI = cmdLine.getOptionValue("i");
             String baseURI = cmdLine.getOptionValue("s");
             String communicationPath = cmdLine.getOptionValue("c");
-
+            
             File environmentPluginDir = new File(environmentPluginDirPath);
             PluginManager.loadDir(environmentPluginDir);
-
+            
             
             if ( cmdLine.hasOption("l") ) {
-                Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
-                debug = true;
+            Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
+            debug = true;
             }
             
             if (cmdLine.hasOption("a")) {
-                File envFile = new File(cmdLine.getOptionValue("a"));
-                Authentication authentication = SerializerService.deserialize(envFile);
-                authentication.initialize();
-                if(!debug) envFile.delete();
+            File envFile = new File(cmdLine.getOptionValue("a"));
+            Authentication authentication = SerializerService.deserialize(envFile);
+            authentication.initialize();
+            if(!debug) envFile.delete();
             }
-
-
+            
+            
             String outMesseageURI = cmdLine.getOptionValue("o");
-
+            
             new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);*/
-
-
+            
+            
         } catch (Throwable t) {
             Logger.getLogger(Daemon.class.getName()).log(Level.SEVERE, "Error durring runtime execution", t);
         }
         return IApplication.EXIT_OK;
     }
-
+    
     @Override
     public void stop() {
     }

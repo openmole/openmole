@@ -20,15 +20,15 @@ package org.openmole.core.batch.jsaga
 import org.ogf.saga.context.Context
 import org.openmole.core.batch.environment.Authentication
 
-class SSHAuthentication(host: String, port:Int, login: String, password: String) extends Authentication{
+class SFTPAuthentication(host: String, port:Int, login: String, password: String) extends Authentication{
   
-  override def key = "ssh:" + (host, port, login).toString
+  override def key = "sftp:" + (host, port, login).toString
   
   override def expires = Long.MaxValue
 
   override def initialize = {
     val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "SSH")
+    ctx.setAttribute(Context.TYPE, "SFTP")
     ctx.setAttribute(Context.REMOTEHOST, host)
     ctx.setAttribute(Context.REMOTEPORT, port.toString)
     ctx.setAttribute(Context.USERID, login)

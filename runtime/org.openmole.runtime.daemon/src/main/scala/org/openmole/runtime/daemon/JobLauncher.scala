@@ -17,13 +17,24 @@
 
 package org.openmole.runtime.daemon
 
+import java.net.URI
+import java.net.URL
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.jsaga.SSHAuthentication
+import org.openmole.core.batch.jsaga.SFTPAuthentication
+import org.openmole.misc.exception.UserBadDataError
 
-class JobLaucher {
-  def launch = {
-    val auth = new SSHAuthentication("localhost", 22, "reuillon", "tete088")
+class JobLauncher {
+  def launch(userHostPort: String, password: String) = {
+    val splitUser = userHostPort.split("@") 
+    if(splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
+    val user = splitUser(0)
+    val splitHost = splitUser(1).split(":")
+    val port = if(splitHost.size == 2) splitHost(1).toInt else 22
+    val host = splitHost(0)
+   
+    val auth = new SFTPAuthentication(host, port, user, password)
     auth.initialize
-    new URIFile("sftp://localhost/iscpif/users/reuillon").list.foreach(println)
+    
+    new URIFile("sftp://" + host + ":" + port + "/").list.foreach(println)
   }
 }

@@ -79,6 +79,11 @@
 
     <packaging>bundle</packaging>
 
+    <properties>
+        <import.packages>scala.*,*;resolution:=optional</import.packages>
+        <libraries.export.packages>org.ogf.saga.*,fr.in2p3.jsaga.*,org.globus.*</libraries.export.packages>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
