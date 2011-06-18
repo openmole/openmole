@@ -17,6 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.batch.file.IURIFile
-
-class SerializedJob(val communicationStorage: Storage,val communicationDirPath: String,val inputFilePath: String,val outputFilePath: String,val runtime: Runtime)
+class SerializedJob(val communicationStorage: Storage,val communicationDirPath: String,val inputFilePath: String, val runtime: Runtime)

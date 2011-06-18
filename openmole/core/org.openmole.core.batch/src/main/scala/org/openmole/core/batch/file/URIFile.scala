@@ -106,11 +106,11 @@ object URIFile {
     val destDescrption = dest.storageDescription
 
     val same = sameRessource(srcDescrption, destDescrption)
-        withToken(srcDescrption,
-          srcToken =>
-          if(!same) withToken(destDescrption, copy(src, dest, srcToken, _))
-          else copy(src, dest, srcToken, srcToken)
-        )
+    withToken(srcDescrption,
+              srcToken =>
+              if(!same) withToken(destDescrption, copy(src, dest, srcToken, _))
+              else copy(src, dest, srcToken, srcToken)
+    )
   }
 
   private def copy(src: IURIFile, dest: IURIFile, srcToken: AccessToken, destToken: AccessToken): Unit = {
@@ -124,8 +124,8 @@ object URIFile {
 
       try {
         withFailureControl(srcDesc,
-          if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
-          else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
+                           if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
+                           else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
         )              
       } finally os.close
     } finally is.close
@@ -271,9 +271,9 @@ class URIFile(val location: String) extends IURIFile with Id {
 
     trycatch(
       withFailureControl ({
-        val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        new JSAGAInputStream(ret)
-      }, {e: Throwable => !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass)}), task)
+          val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+          new JSAGAInputStream(ret)
+        }, {e: Throwable => !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass)}), task)
   }
 
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
@@ -294,7 +294,7 @@ class URIFile(val location: String) extends IURIFile with Id {
       val cacheTmp = Workspace.newFile("file", "cache")
       this.copy(new URIFile(cacheTmp), token)
       cacheTmp
-  })
+    })
 
   private def isLocal: Boolean = {
     val url = SAGAURL
@@ -332,15 +332,32 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def list: Iterable[String] = withToken(list(_))
 
   override def list(token: AccessToken): Iterable[String] = trycatch {
-
     val dir = fetchEntryAsDirectory
     try {
       val task = dir.list(TaskMode.ASYNC)
-
       trycatch (task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS).map{_.toString}, task)
-    } finally {
-      close(dir)
-    }
+    } finally close(dir)
+  }
+  
+  override def modificationTime(name: String): Long  = withToken(modificationTime(name, _))
+  
+  override def modificationTime(name: String, token: AccessToken): Long = trycatch {
+    val dir = fetchEntryAsDirectory
+    try {
+      val dest = URLFactory.createURL(name)
+      val task = dir.getMTime(TaskMode.ASYNC, dest)
+      trycatch (task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    } finally close(dir)
+  }
+    
+  override def modificationTime: Long = withToken(modificationTime(_))
+  
+  override def modificationTime(token: AccessToken): Long = trycatch {
+    val entry = fetchEntry
+    try {
+      val task = entry.getMTime(TaskMode.ASYNC)
+      trycatch (task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+    } finally close(entry)
   }
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)

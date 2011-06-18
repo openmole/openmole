@@ -18,7 +18,6 @@
 package org.openmole.core.batch.message
 
 import java.io.File
-import org.openmole.core.batch.file.IURIFile
 
 class ReplicatedFile(val src: File, val directory: Boolean, val hash: String, val replicaPath: String)
 

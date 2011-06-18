@@ -42,28 +42,28 @@ object GliteJobService {
 
 class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
-  override protected def buildJob(id: String) = new GliteJob(id, this, environment.authentication.expires)
+  override protected def buildJob(id: String, resultPath: String) = new GliteJob(id, resultPath, this, environment.authentication.expires)
 
-  override protected def generateScriptString(serializedJob: SerializedJob, memorySizeForRuntime: Int, os: OutputStream) = {
+  override protected def generateScriptString(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
     import serializedJob.communicationStorage.stringDecorator
     import serializedJob._
     
     val writter = new PrintStream(os)
     
-    assert(serializedJob.runtime.runtimePath != null)
+    assert(runtime.runtime.path != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtimePath.toStringURI, "$PWD/openmole.tar.bz2"))
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.path.toStringURI, "$PWD/openmole.tar.bz2"))
     writter.print(" tar -xjf openmole.tar.bz2 >/dev/null; rm -f openmole.tar.bz2; ")
     writter.print("mkdir envplugins; PLUGIN=0;");
 
-    for (pluginPath <- runtime.environmentPluginsPath) {
-      assert(pluginPath != null)
-      writter.print(mkLcgCpGunZipCmd(environment, pluginPath.toStringURI, "$CUR/envplugins/plugin$PLUGIN.jar"))
+    for (plugin <- runtime.environmentPlugins) {
+      assert(plugin.path != null)
+      writter.print(mkLcgCpGunZipCmd(environment, plugin.path.toStringURI, "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
     
-    assert(runtime.authenticationPath != null)
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.authenticationPath.toStringURI, "$CUR/authentication.xml"))
+    assert(runtime.authentication.path != null)
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.path.toStringURI, "$CUR/authentication.xml"))
 
     writter.print("cd org.openmole.runtime-*; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))
@@ -75,9 +75,9 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     writter.print(" -a $CUR/authentication.xml ")
     writter.print(" -p $CUR/envplugins/ ")
     writter.print(" -i ")
-    writter.print(inputFilePath.toStringURI)
+    writter.print(inputFilePath)
     writter.print(" -o ")
-    writter.print(outputFilePath.toStringURI)
+    writter.print(resultPath)
     writter.print(" -w $CUR ; cd .. ; rm -rf $CUR")
 
   }

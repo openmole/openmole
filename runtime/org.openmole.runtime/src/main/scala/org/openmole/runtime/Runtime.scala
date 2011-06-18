@@ -92,7 +92,7 @@ class Runtime {
       /*--- get execution message and job for runtime---*/
       val usedFiles = new HashMap[File, File]
 
-      val executionMesageFileCache = new GZURIFile(executionMessageURI).cache
+      val executionMesageFileCache = executionMessageURI.cacheUnziped
       val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
       executionMesageFileCache.delete
             
@@ -256,7 +256,7 @@ class Runtime {
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
     try {
-      val output = new GZURIFile(resultMessageURI)
+      val output = resultMessageURI.toGZURIFile
       retry(URIFile.copy(outputLocal, output), NbRetry)
     } finally outputLocal.delete
   }

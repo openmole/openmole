@@ -74,11 +74,14 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
 
     import serializedJob._
+    import communicationStorage.stringDecorator
     
     val script = Workspace.newFile("script", ".sh")
     try {
+      val outputFilePath = communicationDirPath.toURIFile.newFileInDir("job", ".out").path
+   
       val os = new BufferedOutputStream(new FileOutputStream(script))
-      try generateScriptString(serializedJob, environment.memorySizeForRuntime.intValue, os)
+      try generateScriptString(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
       finally os.close
       
       //logger.fine(fromFile(script).getLines.mkString)
@@ -88,10 +91,9 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       job.run
             
       val id = job.getAttribute(Job.JOBID)
-      return buildJob(id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']')))
-    } finally {
-      script.delete
-    }
+      
+      return buildJob(id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']')), outputFilePath)
+    } finally script.delete
   }
  
   @transient lazy val jobServiceCache = {
@@ -103,11 +105,11 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
 
-  protected def buildJob(id: String): JSAGAJob = new JSAGAJob(id, this)
+  protected def buildJob(id: String, resultPath: String): JSAGAJob = new JSAGAJob(id, resultPath, this)
   
   protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = JSAGAJobBuilder.jobDescription(runtime, script, attributes)
   
     
-  protected def generateScriptString (serializedJob: SerializedJob, memorySizeForRuntime: Int, os: OutputStream)
+  protected def generateScriptString (serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream)
     
 }

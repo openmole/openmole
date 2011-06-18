@@ -129,7 +129,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   private def tryFinalise = {
     if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = ExecutorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(serializedJob.communicationStorage, serializedJob.outputFilePath, job, executionEnvironment, batchJob))
+      finalizeExecutionFuture = ExecutorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(serializedJob.communicationStorage, batchJob.resultPath, job, executionEnvironment, batchJob))
     }
     if (finalizeExecutionFuture.isDone) {
       finalizeExecutionFuture.get

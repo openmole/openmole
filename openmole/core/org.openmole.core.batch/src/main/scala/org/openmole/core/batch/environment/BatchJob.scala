@@ -85,6 +85,7 @@ abstract class BatchJob(val jobServiceDescription: JobServiceDescription) {
   }
 
   def deleteJob
+  def resultPath: String
   
   protected def updatedState: ExecutionState
 }

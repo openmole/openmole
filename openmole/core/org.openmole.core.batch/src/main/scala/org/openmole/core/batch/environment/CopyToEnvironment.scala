@@ -46,6 +46,7 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.hashservice.HashService._
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
 
@@ -63,7 +64,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
             
         val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
-        val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
+        //val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
 
         val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
 
@@ -77,7 +78,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
           URIFile.copy(new URIFile(executionMessageFile), inputFile, token)
         } finally executionMessageFile.delete
             
-        new SerializedJob(communicationStorage, communicationDir.path, inputFile.path, outputFile.path, runtime)
+        new SerializedJob(communicationStorage, communicationDir.path, inputFile.path, runtime)
       } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
     } finally jobFile.delete
   }
@@ -131,18 +132,19 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
     val runtimeFile = environment.runtime
 
-    val environmentPluginPath = environmentPlugins.map{toReplicatedFile(_, communicationStorage, token).replicaPath}       
-    val runtimePath = toReplicatedFile(runtimeFile, communicationStorage, token).replicaPath
+    val environmentPluginPath = environmentPlugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
+    val runtimePath = new FileMessage(toReplicatedFile(runtimeFile, communicationStorage, token))
     
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
     
-    try {
+    val authReplication = try {
       SerializerService.serialize(communicationStorage.environment.authentication, authenticationFile)
       URIFile.copy(authenticationFile, authenticationURIFile, token)
+      new FileMessage(authenticationURIFile.URI.getPath, authenticationFile.hash.toString)
     } finally authenticationFile.delete
         
-    new Runtime(runtimePath, environmentPluginPath, authenticationURIFile.URI.getPath)
+    new Runtime(runtimePath, environmentPluginPath, authReplication)
   }
   
   def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {

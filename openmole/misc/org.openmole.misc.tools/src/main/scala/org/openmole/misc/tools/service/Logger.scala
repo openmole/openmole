@@ -23,7 +23,7 @@ trait Logger {
   @transient lazy val logger = JLogger.getLogger(getClass.getName)
   
   def SEVERE = Level.SEVERE
-  def WARNIING = Level.WARNING
+  def WARNING = Level.WARNING
   def INFO = Level.INFO
   def FINE = Level.FINE
   def FINER = Level.FINER

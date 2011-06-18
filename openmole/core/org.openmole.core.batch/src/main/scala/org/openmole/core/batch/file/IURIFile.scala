@@ -28,53 +28,59 @@ import org.openmole.core.batch.control.StorageDescription
 object IURIFile {
   implicit def ordering = new Ordering[IURIFile] {
     def compare(left: IURIFile, right: IURIFile): Int = {
-        left.location.compareTo(right.location)
+      left.location.compareTo(right.location)
     }
   }
 }
 
 trait IURIFile {
-    def isDirectory: Boolean 
-    def isDirectory(token: AccessToken): Boolean
-    def URLRepresentsADirectory: Boolean
+  def isDirectory: Boolean 
+  def isDirectory(token: AccessToken): Boolean
+  def URLRepresentsADirectory: Boolean
     
-    def mkdir(name: String): IURIFile
-    def mkdir(name: String, token: AccessToken): IURIFile
+  def mkdir(name: String): IURIFile
+  def mkdir(name: String, token: AccessToken): IURIFile
     
-    def mkdirIfNotExist(name: String): IURIFile
-    def mkdirIfNotExist(name: String, token: AccessToken): IURIFile
+  def mkdirIfNotExist(name: String): IURIFile
+  def mkdirIfNotExist(name: String, token: AccessToken): IURIFile
     
-    def newFileInDir(prefix: String, sufix: String): IURIFile
+  def newFileInDir(prefix: String, sufix: String): IURIFile
     
-    def openInputStream: InputStream 
-    def openInputStream(token: AccessToken): InputStream 
+  def openInputStream: InputStream 
+  def openInputStream(token: AccessToken): InputStream 
     
-    def openOutputStream: OutputStream
-    def openOutputStream(token: AccessToken): OutputStream
+  def openOutputStream: OutputStream
+  def openOutputStream(token: AccessToken): OutputStream
     
-    def copy(dest: IURIFile)
-    def copy(dest: IURIFile, srcToken: AccessToken)
+  def copy(dest: IURIFile)
+  def copy(dest: IURIFile, srcToken: AccessToken)
     
-    def remove(recusrsive: Boolean) 
-    def remove(recursive: Boolean, token: AccessToken)   
+  def remove(recusrsive: Boolean) 
+  def remove(recursive: Boolean, token: AccessToken)   
   
-    def remove(timeOut: Boolean, recusrsive: Boolean) 
-    def remove(timeOut: Boolean, recusrsive: Boolean, token: AccessToken) 
+  def remove(timeOut: Boolean, recusrsive: Boolean) 
+  def remove(timeOut: Boolean, recusrsive: Boolean, token: AccessToken) 
     
-    def list: Iterable[String]
-    def list(token: AccessToken): Iterable[String]
+  def list: Iterable[String]
+  def list(token: AccessToken): Iterable[String]
     
-    def exist(name: String): Boolean 
-    def exist(name: String, token: AccessToken): Boolean 
+  def exist(name: String): Boolean 
+  def exist(name: String, token: AccessToken): Boolean 
+
+  def modificationTime(name: String): Long 
+  def modificationTime(name: String, token: AccessToken): Long
     
-    def cache: File
-    def cache(token: AccessToken): File
+  def modificationTime: Long 
+  def modificationTime(token: AccessToken): Long
     
-    def child(child: String): IURIFile
+  def cache: File
+  def cache(token: AccessToken): File
     
-    def URI: URI
-    def location: String
-    def path: String
+  def child(child: String): IURIFile
     
-    def storageDescription: StorageDescription
+  def URI: URI
+  def location: String
+  def path: String
+    
+  def storageDescription: StorageDescription
 }

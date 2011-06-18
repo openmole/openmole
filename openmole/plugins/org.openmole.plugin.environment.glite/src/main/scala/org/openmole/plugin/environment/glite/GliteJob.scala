@@ -26,7 +26,7 @@ import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
 
 
-class GliteJob(jobId: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(jobId, jobService){
+class GliteJob(jobId: String, resultPath: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(jobId, resultPath, jobService){
 
   var lastUpdate = System.currentTimeMillis
   

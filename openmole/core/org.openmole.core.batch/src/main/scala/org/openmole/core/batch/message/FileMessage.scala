@@ -22,5 +22,7 @@ object FileMessage {
 }
 
 class FileMessage(val path: String, val hash: String) {
+  def this(replicatedFile: ReplicatedFile) = this(replicatedFile.replicaPath, replicatedFile.hash)
+  
   def isEmpty: Boolean = path == null
 }

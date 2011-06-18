@@ -17,4 +17,6 @@
 
 package org.openmole.core.batch.environment
 
-class Runtime(val runtimePath: String, val environmentPluginsPath: Iterable[String], val authenticationPath: String)
+import org.openmole.core.batch.message.FileMessage
+
+class Runtime(val runtime: FileMessage, val environmentPlugins: Iterable[FileMessage], val authentication: FileMessage)

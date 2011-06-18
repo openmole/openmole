@@ -17,6 +17,7 @@
 
     <modules>
 	<module>org.openmole.runtime</module>
+	<module>org.openmole.runtime.daemon</module>
     </modules>
 
     <dependencies>

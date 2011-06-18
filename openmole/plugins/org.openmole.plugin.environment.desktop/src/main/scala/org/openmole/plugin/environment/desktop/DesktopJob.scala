@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.environment.desktop
 
-import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.serializer.SerializerService
 
 class DesktopJob(jobService: DesktopJobService, jobId: String) extends BatchJob(jobService.description) {
 
   override def deleteJob = {
     jobService.jobSubmissionFile(jobId).delete
     jobService.timeStemps(jobId).foreach{_.delete}
+    jobService.results(jobId).foreach{_.delete}
   }
   
   override def updatedState: ExecutionState = {
@@ -33,4 +34,7 @@ class DesktopJob(jobService: DesktopJobService, jobId: String) extends BatchJob(
     else if(!jobService.resultExists(jobId)) RUNNING
     else DONE
   }
+  
+  override def resultPath = SerializerService.deserialize[DesktopJobResult](jobService.results(jobId).head).result.path
+ 
 }

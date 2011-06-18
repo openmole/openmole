@@ -46,6 +46,7 @@ object DesktopEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
   val resultsDirName = "results"
+  val timeStempSeparator = '#'
 }
 
 class DesktopEnvironment(port: Int, login: String, password: String, inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
