@@ -33,6 +33,8 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object Workspace {
   
+  val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
+  
   val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
   val ConfigurationFile = "preferences"
@@ -131,14 +133,18 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, sessionUUID}
+  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, sessionUUID, noUniqueResourceProperty}
   
   location.mkdirs
   val run = new File(location, running)
   
-  if(!run.exists) {
-    run.createNewFile
-    run.content = sessionUUID.toString
+  {
+    val noURProp = System.getProperty(noUniqueResourceProperty)
+    val noUR = noURProp != null && noURProp.equalsIgnoreCase("true")
+    if(!run.exists && !noUR) {
+      run.createNewFile
+      run.content = sessionUUID.toString
+    }
   }
   
   val tmpDir = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)

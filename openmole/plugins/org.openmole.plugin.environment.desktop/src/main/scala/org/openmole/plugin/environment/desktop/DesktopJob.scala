@@ -21,7 +21,16 @@ import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
 
-class DesktopJob(jobServiceDescription: JobServiceDescription) extends BatchJob(jobServiceDescription) {
-  override def deleteJob = {}
-  override def updatedState: ExecutionState = SUBMITTED
+class DesktopJob(jobService: DesktopJobService, jobId: String) extends BatchJob(jobService.description) {
+
+  override def deleteJob = {
+    jobService.jobSubmissionFile(jobId).delete
+    jobService.timeStemps(jobId).foreach{_.delete}
+  }
+  
+  override def updatedState: ExecutionState = {
+    if(!jobService.timeStempsExists(jobId)) SUBMITTED
+    else if(!jobService.resultExists(jobId)) RUNNING
+    else DONE
+  }
 }

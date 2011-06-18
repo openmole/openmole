@@ -42,6 +42,12 @@ import java.io.File
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.ThreadUtil._
 
+object DesktopEnvironment {
+  val timeStempsDirName = "timeStemps"
+  val jobsDirName = "jobs"
+  val resultsDirName = "results"
+}
+
 class DesktopEnvironment(port: Int, login: String, password: String, inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
   
   def this(port: Int, login: String, password: String) = this(port, login, password, None)
@@ -54,12 +60,15 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
     sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
-        override def createFileSystemView(s: String) = new NativeFileSystemView(login, false) {
+        override def createFileSystemView(s: String) = new NativeFileSystemView(login, false) {        
+          //println("fs view " + s)
           override def getFile(file: String) = {
-            println(file)
-            val sandboxed = new File(file)
-            if(sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(file)
-            else super.getFile(path.toString)
+            val sandboxed = new File(path, file)
+          //println("getFlie " + file)
+            
+            //println("Desktop " + sandboxed.toString)
+            if(sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(sandboxed.getAbsolutePath)
+            else super.getFile(path.getAbsolutePath)
           }
         }
       })

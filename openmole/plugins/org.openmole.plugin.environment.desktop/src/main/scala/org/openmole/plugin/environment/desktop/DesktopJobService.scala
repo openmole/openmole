@@ -17,13 +17,31 @@
 
 package org.openmole.plugin.environment.desktop
 
+import java.io.File
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
+import collection.JavaConversions._
 
 class DesktopJobService(environment: DesktopEnvironment, description: JobServiceDescription) extends JobService(environment, description){
-  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = new DesktopJob(description)
+  import DesktopEnvironment._
+  
+  val timeStempsDir = new File(environment.path, timeStempsDirName){mkdirs}
+  val jobsDir = new File(environment.path, jobsDirName){mkdirs}
+  val resultsDir = new File(environment.path, resultsDirName){mkdirs}
+
+  def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
+  def timeStemps(jobId: String) = timeStempsDir.listFiles.filter{_.getName.startsWith(jobId)}
+  def timeStempsExists(jobId: String) = timeStempsDir.list.exists{_.startsWith(jobId)}
+  def resultExists(jobId: String) = resultsDir.list.exists{_.startsWith(jobId)}
+
+  
+  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
+    val jobId = new File(serializedJob.communicationDirPath).getName
+    jobSubmissionFile(jobId).createNewFile
+    new DesktopJob(this, jobId) 
+  }
   override def test = true
 }

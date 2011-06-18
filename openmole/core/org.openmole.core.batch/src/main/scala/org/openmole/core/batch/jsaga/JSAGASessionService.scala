@@ -42,7 +42,8 @@ object JSAGASessionService {
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
     org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL);
-
+    Logger.getLogger("namespace.AbstractSyncNSEntryImpl").setLevel(Level.OFF)
+    
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
     if (universe != null)  System.setProperty("jsaga.universe", universe.toString)

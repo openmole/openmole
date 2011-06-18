@@ -19,11 +19,23 @@ package org.openmole.runtime.daemon
 
 import java.net.URI
 import java.net.URL
+import java.util.logging.Level
+import java.util.logging.Logger
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.jsaga.SFTPAuthentication
+import org.openmole.plugin.environment.desktop.SFTPAuthentication
+import org.openmole.plugin.environment.desktop.DesktopEnvironment._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.workspace.ConfigurationLocation
+import org.openmole.misc.workspace.Workspace
+
+object JobLauncher {
+  val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval") 
+  Workspace += (jobCheckInterval, "PT1M")
+}
 
 class JobLauncher {
+  import JobLauncher._
+  
   def launch(userHostPort: String, password: String) = {
     val splitUser = userHostPort.split("@") 
     if(splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
@@ -35,6 +47,13 @@ class JobLauncher {
     val auth = new SFTPAuthentication(host, port, user, password)
     auth.initialize
     
-    new URIFile("sftp://" + host + ":" + port + "/").list.foreach(println)
+    while(true) {
+      try{
+        new URIFile("sftp://" + host + ":" + port + "/" + jobsDirName + '/').list.foreach(println)
+      } catch {
+        case e: Exception => Logger.getLogger(this.getClass.getName).log(Level.WARNING, "Error while looking for jobs.",e)
+      }
+      Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
+    }
   }
 }

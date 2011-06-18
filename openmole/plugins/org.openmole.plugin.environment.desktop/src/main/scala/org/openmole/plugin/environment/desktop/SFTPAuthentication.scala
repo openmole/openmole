@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.jsaga
+package org.openmole.plugin.environment.desktop
 
 import org.ogf.saga.context.Context
 import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.jsaga.JSAGASessionService
 
 class SFTPAuthentication(host: String, port:Int, login: String, password: String) extends Authentication{
   
@@ -28,9 +29,11 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
 
   override def initialize = {
     val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "SFTP")
-    ctx.setAttribute(Context.REMOTEHOST, host)
-    ctx.setAttribute(Context.REMOTEPORT, port.toString)
+    ctx.setAttribute(Context.TYPE, "UserPass")
+    //ctx.setAttribute(Context.REMOTEHOST, host)
+    //ctx.setAttribute(Context.REMOTEID, host)
+    //ctx.setAttribute(Context.SERVER, host)
+    //ctx.setAttribute(Context.REMOTEPORT, port.toString)
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, password)
     JSAGASessionService.addContext(ctx)

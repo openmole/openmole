@@ -41,7 +41,7 @@ public class Daemon implements IApplication {
     @Override
     public Object start(IApplicationContext context) throws Exception {
         try {
-            
+            System.setProperty("org.openmole.misc.workspace.noUniqueResource", "true");
             String args[] = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
             
             Options options = new Options();

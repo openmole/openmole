@@ -196,11 +196,9 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def isDirectory(token: AccessToken): Boolean = trycatch {
     val entry = fetchEntry
-    try {
-      isDirectory(entry)
-    } finally {
-      close(entry)
-    }
+    try isDirectory(entry)
+    finally close(entry)
+    
   }
 
   private def isDirectory(entry: NSEntry): Boolean = trycatch {
@@ -227,9 +225,7 @@ class URIFile(val location: String) extends IURIFile with Id {
             
       trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
       new URIFile(this, name)
-    } finally {
-      close(dir)
-    }
+    } finally close(dir)
   }
   
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))
