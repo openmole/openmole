@@ -37,6 +37,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.ProcessUtil._
+import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashMap
@@ -49,12 +50,7 @@ object JobLauncher extends Logger {
 class JobLauncher {
   import JobLauncher._
 
-  
-  def launch(userHostPort: String, password: String) = {
-    val id = UUID.randomUUID
-    val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
-    var runtime: Option[(String, File)] = None
-    
+  def launch(userHostPort: String, password: String, nbWorkers: Int) = {
     val splitUser = userHostPort.split("@") 
     if(splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
     val user = splitUser(0)
@@ -64,12 +60,27 @@ class JobLauncher {
    
     val auth = new SFTPAuthentication(host, port, user, password)
     auth.initialize
-
+    
     val authFile = Workspace.newFile("auth", ".xml")
     SerializerService.serialize(auth, authFile)
     
+    (0 until nbWorkers).foreach{
+      i => 
+        background{runJobs(user, host, port, password, authFile)}
+    }
+    Thread.currentThread.join
+  }
+  
+  def runJobs(user: String, host: String, port: Int, password: String, authFile: File) = {
+    val id = UUID.randomUUID
+    val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
+    var runtime: Option[(String, File)] = None
+    
+ 
+    
     val storage = "sftp://" + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
+    
     import relativePath._
     
     def getFileVerifyHash(fileMessage: FileMessage) = {
@@ -160,14 +171,19 @@ class JobLauncher {
 
             val resultFile = resultsDir.newFileInDir(job, ".res")
             val configurationDir = Workspace.newDir
+            val workspaceDir = Workspace.newDir
             try {
-              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration " + configurationDir.getAbsolutePath +  " -a " + authFile.getAbsolutePath + " -s " + storage + " -w " + Workspace.newDir + " -i " + jobMessage.executionMessagePath + " -o " + resultFile.URI.toString + " -c / -p " + pluginDir.getAbsolutePath
+              
+              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration " + configurationDir.getAbsolutePath +  " -a " + authFile.getAbsolutePath + " -s " + storage + " -w " + workspaceDir.getAbsolutePath  + " -i " + jobMessage.executionMessagePath + " -o " + resultFile.URI.toString + " -c / -p " + pluginDir.getAbsolutePath
             
               logger.info("Executing runtime: " + cmd + ".")
               //val commandLine = CommandLine.parse(cmd)
               val process = Runtime.getRuntime.exec(cmd, null, runtimeLocation) //commandLine.toString, null, runtimeLocation)
               executeProcess(process, System.out, System.err)
-            } finally configurationDir.recursiveDelete
+            } finally {
+              configurationDir.recursiveDelete
+              workspaceDir.recursiveDelete
+            }
            
             logger.info("Process finished.")
             //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)

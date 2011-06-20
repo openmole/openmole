@@ -48,6 +48,7 @@ public class Daemon implements IApplication {
             
             options.addOption("h", true, "user@hostname:port");
             options.addOption("p", true, "password");
+            options.addOption("w", true, "number of workers");
             
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
@@ -63,13 +64,17 @@ public class Daemon implements IApplication {
             String userHostnamePort = cmdLine.getOptionValue("h");
             String password = cmdLine.getOptionValue("p");
             
+            int workers = 1;
+            
+            if(cmdLine.hasOption("w")) workers = new Integer(cmdLine.getOptionValue("w"));
+            
             if (userHostnamePort == null || password == null) {
                 Logger.getLogger(Daemon.class.getName()).severe("Error while parsing command line arguments");
                 new HelpFormatter().printHelp(" ", options);
                 return IApplication.EXIT_OK;                
             }
             
-            new JobLauncher().launch(userHostnamePort, password);
+            new JobLauncher().launch(userHostnamePort, password, workers);
 
 
 
