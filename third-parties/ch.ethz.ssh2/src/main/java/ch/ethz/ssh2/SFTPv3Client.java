@@ -367,7 +367,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_FSTAT, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		if (debug != null)
 		{
@@ -411,7 +411,7 @@ public class SFTPv3Client
 
 		sendMessage(statMethod, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		if (debug != null)
 		{
@@ -492,7 +492,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_READLINK, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		if (debug != null)
 		{
@@ -528,7 +528,7 @@ public class SFTPv3Client
 
 	private void expectStatusOKMessage(int id) throws IOException
 	{
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		if (debug != null)
 		{
@@ -668,7 +668,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_REALPATH, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		if (debug != null)
 		{
@@ -721,7 +721,7 @@ public class SFTPv3Client
 
 			sendMessage(Packet.SSH_FXP_READDIR, req_id, tw.getBytes());
 
-			byte[] resp = receiveMessage(34000);
+			byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 			if (debug != null)
 			{
@@ -788,7 +788,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_OPENDIR, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		TypesReader tr = new TypesReader(resp);
 
@@ -858,7 +858,7 @@ public class SFTPv3Client
 		if (debug != null)
 			debug.println("Waiting for SSH_FXP_VERSION...");
 
-		TypesReader tr = new TypesReader(receiveMessage(34000)); /* Should be enough for any reasonable server */
+		TypesReader tr = new TypesReader(receiveMessage(Integer.MAX_VALUE)); /* Should be enough for any reasonable server */
 
 		int type = tr.readByte();
 
@@ -1167,7 +1167,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_OPEN, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		TypesReader tr = new TypesReader(resp);
 
@@ -1242,7 +1242,7 @@ public class SFTPv3Client
 
 		sendMessage(Packet.SSH_FXP_READ, req_id, tw.getBytes());
 
-		byte[] resp = receiveMessage(34000);
+		byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 		TypesReader tr = new TypesReader(resp);
 
@@ -1335,7 +1335,7 @@ public class SFTPv3Client
 				srcoff += writeRequestLen;
 				len -= writeRequestLen;
 
-				byte[] resp = receiveMessage(34000);
+				byte[] resp = receiveMessage(Integer.MAX_VALUE);
 
 				TypesReader tr = new TypesReader(resp);
 
