@@ -1,7 +1,7 @@
 <assembly>
-  <id>runtime</id>
+  <id>daemon</id>
   <formats>
-    <format>tar.bz2</format>
+    <format>tar.gz</format>
   </formats>
   <fileSets>
     <fileSet>

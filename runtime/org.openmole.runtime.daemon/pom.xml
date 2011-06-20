@@ -185,6 +185,7 @@
                                     <directory>src/main/resources/</directory>
                                     <includes>
                                         <include>run.sh</include>
+                                        <include>run.bat</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -192,7 +193,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
 	        <version>2.2</version>
                 <executions>
@@ -204,12 +205,12 @@
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
-                                <descriptor>src/main/assembly/runtime.xml</descriptor>
+                                <descriptor>src/main/assembly/daemon.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
         </plugins>
     </build>
 </project>
