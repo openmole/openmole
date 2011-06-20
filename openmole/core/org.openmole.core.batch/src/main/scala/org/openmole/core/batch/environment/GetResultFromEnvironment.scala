@@ -81,7 +81,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       var firstRunning = Long.MaxValue
       var lastCompleted = 0L
       
-      logger.fine("Number of mole job " + job.moleJobs.size + ".")
+      //logger.fine("Number of mole job " + job.moleJobs.size + ".")
       
       //Try to download the results for all the jobs of the group
       for (moleJob <- job.moleJobs) {

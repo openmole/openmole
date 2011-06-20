@@ -39,8 +39,10 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
-import scala.collection.immutable.TreeMap
+import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.HashMap
+import actors.Future
+import actors.Futures._
 
 object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval") 
@@ -49,7 +51,9 @@ object JobLauncher extends Logger {
 
 class JobLauncher {
   import JobLauncher._
-
+  
+  val cache = new HashMap[String, Future[File]] with SynchronizedMap[String, Future[File]]
+  
   def launch(userHostPort: String, password: String, nbWorkers: Int) = {
     val splitUser = userHostPort.split("@") 
     if(splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
@@ -75,13 +79,15 @@ class JobLauncher {
     val id = UUID.randomUUID
     val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
     var runtime: Option[(String, File)] = None
-    
- 
-    
+
     val storage = "sftp://" + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
+
     
     import relativePath._
+    
+    def downloadCache(fileMessage: FileMessage) =
+      cache.getOrElseUpdate(fileMessage.hash, future({logger.info("Create task for downloading " + fileMessage.hash); getFileVerifyHash(fileMessage)}))
     
     def getFileVerifyHash(fileMessage: FileMessage) = {
       import fileMessage._
@@ -151,7 +157,7 @@ class JobLauncher {
             case None => 
               val dir = Workspace.newDir
               logger.info("Downloading the runtime.")
-              val runtimeArchive = getFileVerifyHash(jobMessage.runtime) 
+              val runtimeArchive = downloadCache(jobMessage.runtime)()
               logger.info("Extracting runtime.")
               runtimeArchive.extractDirArchiveWithRelativePath(dir)
               runtime = Some(jobMessage.runtime.hash -> dir)
