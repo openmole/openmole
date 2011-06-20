@@ -34,6 +34,7 @@ import org.apache.sshd.server.filesystem.NativeFileSystemFactory
 import org.apache.sshd.server.filesystem.NativeFileSystemView
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
+import org.apache.sshd.common.Session
 import org.apache.sshd.server.sftp.SftpSubsystem
 import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.misc.workspace.Workspace
@@ -61,7 +62,7 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
     sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
-        override def createFileSystemView(s: String) = new NativeFileSystemView(login, false) {        
+        override def createFileSystemView(s: Session) = new NativeFileSystemView(login, false) {        
           //println("fs view " + s)
           override def getFile(file: String) = {
             val sandboxed = 
