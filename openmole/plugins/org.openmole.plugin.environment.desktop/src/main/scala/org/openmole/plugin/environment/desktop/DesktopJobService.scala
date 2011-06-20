@@ -25,6 +25,7 @@ import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
 import collection.JavaConversions._
 import org.openmole.core.serializer.SerializerService
+import org.openmole.misc.tools.io.FileUtil._
 
 class DesktopJobService(environment: DesktopEnvironment, description: JobServiceDescription) extends JobService(environment, description){
   import DesktopEnvironment._
@@ -42,9 +43,12 @@ class DesktopJobService(environment: DesktopEnvironment, description: JobService
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
     val jobId = new File(serializedJob.communicationDirPath).getName
     import serializedJob._
-    val desktopJobMessage = new DesktopJobMessage(runtime.runtime, runtime.environmentPlugins, inputFilePath)
+    val desktopJobMessage = new DesktopJobMessage(runtime.runtime, runtime.environmentPlugins, environment.memorySizeForRuntime, inputFilePath)
     
-    SerializerService.serialize(desktopJobMessage, jobSubmissionFile(jobId)) 
+    val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
+    try SerializerService.serialize(desktopJobMessage, os) 
+    finally os.close
+    
     new DesktopJob(this, jobId) 
   }
   override def test = true

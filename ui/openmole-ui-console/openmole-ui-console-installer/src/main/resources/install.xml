@@ -12,7 +12,8 @@
         <pack name="OpenMOLE Console" required="yes">
             <description>OpenMOLE</description>
             <fileset dir="../dependency/org.openmole.ui.console-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH" />
-            <file src="../dependency/org.openmole.runtime.tar.bz2" targetdir="$USER_HOME/.openmole/runtime/" />
+            <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
+            <file src="../dependency/jvm.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <fileset dir="../dependency/plugins-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
             <fileset dir="../dependency/plugins-ui-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
         </pack>

@@ -40,6 +40,7 @@ import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.tools.io.FileUtil._
 import scala.io.Source._
 
 object JSAGAJobService extends Logger {
@@ -80,7 +81,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     try {
       val outputFilePath = communicationDirPath.toURIFile.newFileInDir("job", ".out").path
    
-      val os = new BufferedOutputStream(new FileOutputStream(script))
+      val os = script.bufferedOutputStream
       try generateScriptString(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
       finally os.close
       
@@ -92,7 +93,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
             
       val id = job.getAttribute(Job.JOBID)
       
-      return buildJob(id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']')), outputFilePath)
+      buildJob(id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']')), outputFilePath)
     } finally script.delete
   }
  

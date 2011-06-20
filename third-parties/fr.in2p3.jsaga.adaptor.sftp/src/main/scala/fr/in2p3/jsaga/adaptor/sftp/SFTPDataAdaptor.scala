@@ -50,7 +50,9 @@ object SFTPDataAdaptor {
   val COMPRESSION_LEVEL = "CompressionLevel"
   val KNOWN_HOSTS = "KnownHosts"
   val IGNORE_KNOWN_HOSTS = "IgnoreKnownHosts"
-  val BUFFER_SIZE = 10240
+  
+  //Other buffer size won't work due to a ssh server bug
+  val BUFFER_SIZE = 32768
 }
 
 class SFTPDataAdaptor extends ClientAdaptor with FileReaderGetter with FileWriterPutter with DataRename {
@@ -136,6 +138,7 @@ class SFTPDataAdaptor extends ClientAdaptor with FileReaderGetter with FileWrite
         var cupPos = 0
         Stream.continually(sftpClient.read(fileHandler, cupPos, buffer, 0, BUFFER_SIZE)).takeWhile(_ != -1).foreach{ 
           count => {
+            //println("Read " + count + " for " + absolutePath)
             stream.write(buffer, 0, count)
             cupPos += count
           }

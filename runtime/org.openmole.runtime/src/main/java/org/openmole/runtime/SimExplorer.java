@@ -76,9 +76,9 @@ public class SimExplorer implements IApplication {
             String baseURI = cmdLine.getOptionValue("s");
             String communicationPath = cmdLine.getOptionValue("c");
 
+            //System.out.println("plugin path " + environmentPluginDirPath);
             File environmentPluginDir = new File(environmentPluginDirPath);
             PluginManager.loadDir(environmentPluginDir);
-
             
             if ( cmdLine.hasOption("l") ) {
                 Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
@@ -90,7 +90,7 @@ public class SimExplorer implements IApplication {
                 File envFile = new File(cmdLine.getOptionValue("a"));
                 Authentication authentication = SerializerService.deserialize(envFile);
                 authentication.initialize();
-                if(!debug) envFile.delete();
+                //if(!debug) envFile.delete();
             }
 
 

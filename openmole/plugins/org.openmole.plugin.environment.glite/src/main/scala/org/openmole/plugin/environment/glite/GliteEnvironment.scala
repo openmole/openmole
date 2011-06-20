@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.glite
 
-
 import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -170,7 +169,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   }
 
   override def allStorages = {
-    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt);
+    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt)
     stors.map{new PersistentStorage(this, _, threadsBySE)}
   }
 

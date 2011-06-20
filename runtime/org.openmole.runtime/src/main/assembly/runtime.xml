@@ -1,7 +1,8 @@
 <assembly>
   <id>runtime</id>
+  <baseDirectory></baseDirectory>
   <formats>
-    <format>tar.bz2</format>
+    <format>tar.gz</format>
   </formats>
   <fileSets>
     <fileSet>

@@ -30,7 +30,7 @@ import java.io.IOException
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
-import org.openmole.plugin.tools.utils.ProcessUtils._
+import org.openmole.misc.tools.service.ProcessUtil._
 import scala.collection.JavaConversions._
 import java.lang.Integer
 

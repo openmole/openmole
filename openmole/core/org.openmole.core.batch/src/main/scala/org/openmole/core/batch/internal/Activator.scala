@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.internal
 
+import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.tools.service.OSGiActivator
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
@@ -30,6 +31,8 @@ class Activator extends BundleActivator {
   
   override def start(context: BundleContext) = {
     Activator.context = Some(context)
+    //Initialize the jsaga session service
+    JSAGASessionService
   }
 
   override def stop(context: BundleContext) = {

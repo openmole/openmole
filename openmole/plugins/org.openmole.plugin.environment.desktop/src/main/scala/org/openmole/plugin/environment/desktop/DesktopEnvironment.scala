@@ -46,7 +46,7 @@ object DesktopEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
   val resultsDirName = "results"
-  val timeStempSeparator = '#'
+  val timeStempSeparator = '@'
 }
 
 class DesktopEnvironment(port: Int, login: String, password: String, inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
@@ -64,7 +64,9 @@ class DesktopEnvironment(port: Int, login: String, password: String, inRequiered
         override def createFileSystemView(s: String) = new NativeFileSystemView(login, false) {        
           //println("fs view " + s)
           override def getFile(file: String) = {
-            val sandboxed = new File(path, file)
+            val sandboxed = 
+              if(file.startsWith(path.getCanonicalPath)) new File(file)
+              else new File(path, file)
           //println("getFlie " + file)
             
             //println("Desktop " + sandboxed.toString)

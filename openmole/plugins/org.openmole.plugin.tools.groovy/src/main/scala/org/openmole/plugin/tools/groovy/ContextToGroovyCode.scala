@@ -43,9 +43,7 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
   override def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object = {
     val binding = context.toBinding
 
-    for(variable <- tmpVariables) {
-      binding.setVariable(variable.prototype.name, variable.value)
-    }
+    for(variable <- tmpVariables) binding.setVariable(variable.prototype.name, variable.value)
 
     binding.setVariable(IContextToCode.progressVar.name, progress)
             
@@ -63,11 +61,8 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
       variables.get(out.name) match {
         case null =>
         case value =>
-          if (out.accepts(value)) {
-            context += (out.asInstanceOf[IPrototype[Any]], value)
-          } else {
-            throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
-          }
+          if (out.accepts(value)) context += (out.asInstanceOf[IPrototype[Any]], value)
+          else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
       }
     }
   }

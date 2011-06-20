@@ -19,4 +19,4 @@ package org.openmole.plugin.environment.desktop
 
 import org.openmole.core.batch.message.FileMessage
 
-class DesktopJobMessage(runtime: FileMessage, runtimePlugins: Iterable[FileMessage], executionMessagePath: String)
+class DesktopJobMessage(val runtime: FileMessage, val runtimePlugins: Iterable[FileMessage], val memory: Int, val executionMessagePath: String)

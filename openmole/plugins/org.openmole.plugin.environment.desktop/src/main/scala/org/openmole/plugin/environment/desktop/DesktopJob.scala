@@ -35,6 +35,6 @@ class DesktopJob(jobService: DesktopJobService, jobId: String) extends BatchJob(
     else DONE
   }
   
-  override def resultPath = SerializerService.deserialize[DesktopJobResult](jobService.results(jobId).head).result.path
+  override def resultPath = jobService.results(jobId).head.getAbsolutePath
  
 }

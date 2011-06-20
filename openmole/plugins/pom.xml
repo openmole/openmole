@@ -22,7 +22,6 @@
     <modules>
         <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>
-	<module>org.openmole.plugin.tools.utils</module>
         <module>org.openmole.plugin.environment.jsaga</module>
         <module>org.openmole.plugin.environment.glite</module>
 	<module>org.openmole.plugin.environment.desktop</module>

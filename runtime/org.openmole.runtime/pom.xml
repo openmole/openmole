@@ -192,6 +192,26 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>copy-jre</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sun.java</groupId>
+                                    <artifactId>java-jre</artifactId>
+                                    <version>6u25</version>
+                                    <type>tgz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm.tar.gz</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+
+                    <execution>
                         <id>copy-dependencies</id>
                         <phase>package</phase>
                         <goals>
@@ -205,7 +225,7 @@
                             <excludeScope>provided</excludeScope>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--<execution>
                         <id>unpack-jre</id>
                         <phase>package</phase>
                         <goals>
@@ -226,7 +246,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

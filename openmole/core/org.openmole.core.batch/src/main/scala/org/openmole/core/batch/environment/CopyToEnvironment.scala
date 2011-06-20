@@ -130,10 +130,10 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
   def replicateTheRuntime(token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): Runtime = {
     val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
-    val runtimeFile = environment.runtime
 
     val environmentPluginPath = environmentPlugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
-    val runtimePath = new FileMessage(toReplicatedFile(runtimeFile, communicationStorage, token))
+    val runtimeFileMessage = new FileMessage(toReplicatedFile(environment.runtime, communicationStorage, token))
+    val jvmFileMessage = new FileMessage(toReplicatedFile(environment.jvm, communicationStorage, token))
     
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
@@ -144,7 +144,8 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
       new FileMessage(authenticationURIFile.URI.getPath, authenticationFile.hash.toString)
     } finally authenticationFile.delete
         
-    new Runtime(runtimePath, environmentPluginPath, authReplication)
+    
+    new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmFileMessage)
   }
   
   def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {

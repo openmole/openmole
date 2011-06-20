@@ -67,8 +67,15 @@
                                     <groupId>org.openmole</groupId>
                                     <artifactId>org.openmole.runtime</artifactId>
                                     <version>${project.version}</version>
-                                    <type>tar.bz2</type>
-                                    <destFileName>org.openmole.runtime.tar.bz2</destFileName>
+                                    <type>tar.gz</type>
+                                    <destFileName>org.openmole.runtime.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.java</groupId>
+                                    <artifactId>java-jre</artifactId>
+                                    <version>6u25</version>
+                                    <type>tgz</type>
+                                    <destFileName>jvm.tar.gz</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

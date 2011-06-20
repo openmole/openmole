@@ -17,6 +17,8 @@
 
 package org.openmole.misc.tools.io
 
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream
@@ -191,6 +193,14 @@ object FileUtil {
       finally s.close
     }
     
+    def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+    
+    def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
+      
+    def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
+    
+    def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+    
     def archiveDirWithRelativePathNoVariableContent(dest: File) = {
       val os = new TarOutputStream(new FileOutputStream(file))
       try os.createDirArchiveWithRelativePathNoVariableContent(dest)
@@ -198,17 +208,17 @@ object FileUtil {
     }
   
     def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
-      val os = new TarOutputStream(new GZIPOutputStream(new FileOutputStream(file)))
+      val os = new TarOutputStream(gzipedBufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(dest)
       finally os.close
     }
     
     def extractDirArchiveWithRelativePath(dest: File) = {
-      new TarInputStream(new FileInputStream(file)).extractDirArchiveWithRelativePathAndClose(dest)
+      new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     }  
     
     def extractUncompressDirArchiveWithRelativePath(dest: File) =
-      new TarInputStream(new GZIPInputStream(new FileInputStream(file))).extractDirArchiveWithRelativePathAndClose(dest)
+      new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     
   }
 

@@ -33,7 +33,7 @@ import org.openmole.core.batch.internal.Activator
 object JSAGASessionService {
   private val JSAGAConfigFile = "jsaga-universe.xml"
   private val JSAGATimeOutFile = "jsaga-timeout.properties"
- 
+
   init
   
   private def init = {
@@ -41,9 +41,7 @@ object JSAGASessionService {
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
-    org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL);
-    Logger.getLogger("namespace.AbstractSyncNSEntryImpl").setLevel(Level.OFF)
-    
+    org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)    
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
     if (universe != null)  System.setProperty("jsaga.universe", universe.toString)

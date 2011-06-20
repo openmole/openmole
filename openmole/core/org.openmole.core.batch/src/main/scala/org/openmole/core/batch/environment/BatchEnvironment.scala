@@ -41,6 +41,10 @@ object BatchEnvironment {
   @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
     
+  @InteractiveConfiguration(label = "JVM location")
+  val JVMLocation = new ConfigurationLocation("BatchEnvironment", "JVMLocation")
+
+  
   val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
 
   val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
@@ -48,7 +52,9 @@ object BatchEnvironment {
   
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
-  Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.bz2").getAbsolutePath)
+  Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)
+  Workspace += (JVMLocation, () => new File(new File(Workspace.location, "runtime"), "jvm.tar.gz").getAbsolutePath)
+
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (QualityHysteresis, "1000")
   Workspace += (CheckInterval, "PT2M")
@@ -82,7 +88,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     jobRegistry.register(bej)
   }
   
-  @transient lazy val runtime: File = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
+  @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
+  @transient lazy val jvm = new File(Workspace.preference(BatchEnvironment.JVMLocation))
   
   protected def selectStorages(storageGroup: StorageGroup) = {
         

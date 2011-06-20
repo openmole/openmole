@@ -26,7 +26,6 @@ import java.net.URI
 import java.util.UUID
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-import java.util.logging.Logger
 import org.ogf.saga.error.DoesNotExistException
 import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.file.FileFactory
@@ -43,6 +42,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.tools.obj.Id
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.tools.io.Network._
 
@@ -53,7 +53,7 @@ import org.openmole.core.batch.control.QualityControl._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
-object URIFile {
+object URIFile extends Logger {
   
   val Timeout = new ConfigurationLocation("URIFile", "Timeout")
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
@@ -109,8 +109,7 @@ object URIFile {
     withToken(srcDescrption,
               srcToken =>
               if(!same) withToken(destDescrption, copy(src, dest, srcToken, _))
-              else copy(src, dest, srcToken, srcToken)
-    )
+              else copy(src, dest, srcToken, srcToken))
   }
 
   private def copy(src: IURIFile, dest: IURIFile, srcToken: AccessToken, destToken: AccessToken): Unit = {
@@ -122,12 +121,10 @@ object URIFile {
     try {
       val os = dest.openOutputStream(destToken)
 
-      try {
-        withFailureControl(srcDesc,
-                           if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
-                           else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
-        )              
-      } finally os.close
+      try withFailureControl(srcDesc,
+                             if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
+                             else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))              
+      finally os.close
     } finally is.close
   }
 
@@ -153,18 +150,16 @@ class URIFile(val location: String) extends IURIFile with Id {
   private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.StorageControl.withFailureControl(storageDescription,a)
 
   private def trycatch[A](f: => A): A = {
-    try {
-      f
-    } catch {
+    try f
+    catch {
       case (e: IOException) => throw e
       case e => throw new IOException(location, e)
     }
   }
   
   private def trycatch[A](f: => A, t: Task[_,_]): A = {
-    try {
-      f
-    } catch { 
+    try f
+    catch { 
       case (e: TimeoutException) =>
         t.cancel(true)
         throw new IOException(location, e)
@@ -214,26 +209,23 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def mkdir(name: String, token: AccessToken): IURIFile = withFailureControl {
     val dir = fetchEntryAsDirectory
     try trycatch {
-      val cname =  if (name.endsWith("/")) {
-        name
-      } else {
-        name + '/'
-      }
+      val cname =  if (name.endsWith("/")) name else name + '/'
 
       val dest = URIFile.child(SAGAURL, cname)
-      val task = dir.makeDir(TaskMode.ASYNC, dest);
+      val task = dir.makeDir(TaskMode.ASYNC, dest)
             
       trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+
       new URIFile(this, name)
-    } finally close(dir)
+    } 
+    finally close(dir)
   }
   
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))
 
   override def mkdirIfNotExist(name: String, token: AccessToken): IURIFile = {
-    try {
-      mkdir(name, token)
-    } catch {
+    try mkdir(name, token)
+    catch {
       case (e: IOException) =>
         withFailureControl {
           val childVal = child(name)
@@ -258,9 +250,7 @@ class URIFile(val location: String) extends IURIFile with Id {
     
       trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task).booleanValue
     
-    } finally {
-      close(dir)
-    }
+    } finally close(dir)
   }
 
   override def openInputStream: InputStream = withToken(openInputStream(_))
@@ -279,7 +269,6 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
 
   override def openOutputStream(token: AccessToken): OutputStream = trycatch {
-
     val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.session, SAGAURL, false)
     trycatch(
       withFailureControl {
@@ -313,7 +302,6 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def remove(timeOut: Boolean, recursive: Boolean, token: AccessToken) = trycatch {
     val entry = fetchEntry
     try {
-
       val task = if (recursive /*&& directory*/) entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue) 
       else entry.remove(TaskMode.ASYNC)
 
@@ -324,9 +312,7 @@ class URIFile(val location: String) extends IURIFile with Id {
           task.get
         }
         , task)
-    } finally {
-      close(entry)
-    }
+    } finally close(entry)
   }
 
   override def list: Iterable[String] = withToken(list(_))
@@ -349,7 +335,12 @@ class URIFile(val location: String) extends IURIFile with Id {
       trycatch (task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
     } finally close(dir)
   }
-    
+  
+  override def touch = withToken(touch(_))
+  
+  override def touch(token: AccessToken) = trycatch {
+    openOutputStream(token).close
+  }
   override def modificationTime: Long = withToken(modificationTime(_))
   
   override def modificationTime(token: AccessToken): Long = trycatch {

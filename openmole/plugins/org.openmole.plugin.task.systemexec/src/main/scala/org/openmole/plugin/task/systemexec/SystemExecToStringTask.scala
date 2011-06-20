@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.model.data.IPrototype
-import org.openmole.plugin.tools.utils.ProcessUtils._
+import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext

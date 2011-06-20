@@ -1263,7 +1263,7 @@ public class SFTPv3Client
 			int readLen = tr.readUINT32();
 
 			if ((readLen < 0) || (readLen > len))
-				throw new IOException("The server sent an invalid length field.");
+				throw new IOException("The server sent an invalid length field " + readLen + ", it was supposed to be between 0 and " + len +".");
 
 			tr.readBytes(dst, dstoff, readLen);
 

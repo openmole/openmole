@@ -64,10 +64,12 @@ object TarArchiver {
       var e = tis.getNextEntry
       while (e != null) {
         val dest = new File(baseDir, e.getName)
-        dest.getParentFile.mkdirs
-        val fos = new FileOutputStream(dest)
-        try tis.copy(fos) finally fos.close
-
+        if(e.isDirectory) dest.mkdirs
+        else {
+          dest.getParentFile.mkdirs
+          val fos = new FileOutputStream(dest)
+          try tis.copy(fos) finally fos.close
+        }
         e = tis.getNextEntry
       }
     } finally tis.close

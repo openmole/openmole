@@ -57,7 +57,9 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
   def persistentSpace(token: AccessToken): IURIFile 
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile
-  def root = new URI(URI.getScheme + "://" +  URI.getAuthority)
+  def root = 
+    if(URI.getScheme != null) new URI(URI.getScheme + "://" +  URI.getAuthority)
+    else new URI(URI.getScheme + ":/")
   def resolve(path: String) = root.resolve(path)
  
   implicit def stringDecorator(path: String) = new RelativePath(root).stringDecorator(path)
