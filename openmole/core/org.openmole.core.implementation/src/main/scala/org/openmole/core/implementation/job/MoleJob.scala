@@ -18,8 +18,6 @@
 package org.openmole.core.implementation.job
 
 import java.util.concurrent.ExecutionException
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.core.implementation.execution.Progress
 import org.openmole.core.implementation.task.GenericTask
 import org.openmole.core.implementation.tools.LocalHostName
@@ -33,12 +31,14 @@ import org.openmole.core.model.task.IGenericTask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Lock
+import org.openmole.misc.tools.service.Logger
 
-object MoleJob {
-  val LOGGER = Logger.getLogger(classOf[MoleJob].getName)
-}
+object MoleJob extends Logger
 
 class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
+  
+  import MoleJob._
+  
   
   val progress = new Progress
     
@@ -99,7 +99,7 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
       case None => state = COMPLETED
       case Some(ex) =>
         state = FAILED
-        MoleJob.LOGGER.log(Level.SEVERE, "Error in user job execution, job state is FAILED.", ex)
+        logger.log(SEVERE, "Error in user job execution, job state is FAILED.", ex)
     }
   }
 

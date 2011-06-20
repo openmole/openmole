@@ -22,18 +22,25 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
+import org.openmole.misc.tools.service.Logger
 import scala.collection.immutable.TreeMap
+
+object ContextSaver extends Logger
 
 class ContextSaver extends IObjectListener[IMoleJob] {
 
+  import ContextSaver._
+  
   var _results = new TreeMap[MoleJobId, IContext]
   def results: TreeMap[MoleJobId, IContext] = _results
 
   override def eventOccured(job: IMoleJob) = synchronized {
     job.state match {
       case COMPLETED | FAILED =>
+        //logger.info("Job finished " + job.id + ".")
         _results += ((job.id, job.context))
       case _ =>
     }
   }
+  
 }

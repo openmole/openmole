@@ -23,8 +23,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.Callable
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
@@ -46,13 +44,12 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.State
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.hashservice.HashService
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import scala.Boolean._
 import scala.collection.immutable.TreeMap
 
-object GetResultFromEnvironment {
-  private val LOGGER = Logger.getLogger(GetResultFromEnvironment.getClass.getName)
-}
+object GetResultFromEnvironment extends Logger
 
 class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
@@ -84,13 +81,18 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       var firstRunning = Long.MaxValue
       var lastCompleted = 0L
       
+      logger.fine("Number of mole job " + job.moleJobs.size + ".")
+      
       //Try to download the results for all the jobs of the group
       for (moleJob <- job.moleJobs) {
         if (contextResults.results.isDefinedAt(moleJob.id)) {
           val context = contextResults.results(moleJob.id)
  
+         // logger.fine("Job finished " + moleJob.id +" for task " + moleJob.task + "")
+          
           moleJob.synchronized {
             if (!moleJob.isFinished) {
+              //logger.fine("Molejob " + moleJob.id + " is not finished.")
               try {
                 moleJob.rethrowException(context)
                 
@@ -100,17 +102,18 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
                     if(completed > lastCompleted) lastCompleted = completed
                     val running = stamps.view.reverse.find( _.state == State.RUNNING ).get.time
                     if(running < firstRunning) firstRunning = running
-                  case None => LOGGER.log(Level.WARNING, "No time stamps found.")
+                  case None => logger.log(WARNING, "No time stamps found.")
                 }
                 
+                //logger.fine("Setting new context for the job " + moleJob.id + ".")
                 moleJob.finished(context)
                 successfull +=1 
               } catch {
-                case e => LOGGER.log(Level.WARNING, "Error durring job execution, it will be resubmitted.", e)
+                case e => logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
               }
-            }
-          }
-        }
+            } //else logger.fine("Molejob " + moleJob.id + " is finished.")
+          } 
+        } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
       }
 
       //If sucessfull for full group update stats
@@ -130,7 +133,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
   private def display(message: FileMessage, description: String, token: AccessToken) = {
     if (message == null) {
-      LOGGER.log(Level.WARNING, "{0} is null.", description)
+      logger.log(WARNING, "{0} is null.", description)
     } else {
       try {
         if (!message.isEmpty) {
@@ -138,7 +141,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
             if (stdOutHash != message.hash) {
-              LOGGER.log(Level.WARNING, "The standard output has been corrupted durring the transfert.")
+              logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
             }
 
             System.out.synchronized {
@@ -152,7 +155,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
           }
         }
       } catch {
-        case(e: IOException) => LOGGER.log(Level.WARNING, description + " transfer has failed.", e);
+        case(e: IOException) => logger.log(WARNING, description + " transfer has failed.", e);
       }
     }
   }

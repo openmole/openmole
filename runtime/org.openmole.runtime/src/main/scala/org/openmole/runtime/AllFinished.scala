@@ -18,14 +18,18 @@
 package org.openmole.runtime
 
 import java.util.concurrent.Semaphore
-import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.tools.service.Priority
+import org.openmole.misc.tools.service.Logger
 import org.openmole.core.model.job.IMoleJob
+
+object AllFinished extends Logger
 
 class AllFinished extends IObjectListener[IMoleJob] {
 
+  import AllFinished._
+  
   val allFinished = new Semaphore(0)
   
   @volatile var nbJobs = 0
@@ -44,10 +48,9 @@ class AllFinished extends IObjectListener[IMoleJob] {
 
   override def eventOccured(job: IMoleJob) = synchronized {
     if (job.isFinished) {
+      //logger.info("Job is finished " + job.id + ".")
       nbFinished += 1
-      if (nbFinished >= nbJobs) {
-        allFinished.release
-      }
+      if (nbFinished >= nbJobs) allFinished.release
     }
   }
 }

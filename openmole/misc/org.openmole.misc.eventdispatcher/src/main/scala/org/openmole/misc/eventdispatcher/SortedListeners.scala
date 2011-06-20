@@ -22,7 +22,7 @@ import scala.collection.immutable.TreeMap
 class SortedListeners[T] extends Iterable[T] {
   
   var listeners = TreeMap.empty[Int, List[T]](new Ordering[Int] {
-      def compare(a: Int, b: Int) = (a - b)
+      def compare(a: Int, b: Int) = (b - a)
     })
  
   def register(priority: Int, listener: T) = {
