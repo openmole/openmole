@@ -25,9 +25,9 @@ import java.util.UUID
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
-import org.openmole.plugin.environment.desktop.DesktopJobMessage
-import org.openmole.plugin.environment.desktop.SFTPAuthentication
-import org.openmole.plugin.environment.desktop.DesktopEnvironment._
+import org.openmole.plugin.environment.desktopgrid.DesktopGridJobMessage
+import org.openmole.plugin.environment.desktopgrid.SFTPAuthentication
+import org.openmole.plugin.environment.desktopgrid.DesktopEnvironment._
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.exception.InternalProcessingError
@@ -139,7 +139,7 @@ class JobLauncher {
           
           val os = jobsDir.child(job).cache.gzipedBufferedInputStream
           val jobMessage = 
-            try SerializerService.deserialize[DesktopJobMessage](os)
+            try SerializerService.deserialize[DesktopGridJobMessage](os)
           finally os.close
           
           logger.info("Job execution message is " + jobMessage.executionMessagePath)

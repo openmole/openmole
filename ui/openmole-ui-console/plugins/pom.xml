@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.environment.desktop</artifactId>
+            <artifactId>org.openmole.plugin.environment.desktopgrid</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
