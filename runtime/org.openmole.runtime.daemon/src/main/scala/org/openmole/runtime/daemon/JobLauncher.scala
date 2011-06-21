@@ -49,7 +49,7 @@ object JobLauncher extends Logger {
   Workspace += (jobCheckInterval, "PT1M")
 }
 
-class JobLauncher {
+class JobLauncher(debug: Boolean = false) {
   import JobLauncher._
   
   val cache = new HashMap[String, Future[File]] with SynchronizedMap[String, Future[File]]
@@ -94,6 +94,12 @@ class JobLauncher {
       val file = path.cacheUnziped
       if(file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
       file
+    }
+    
+    def copyVerifyHash(fileMessage: FileMessage, to: File) = {
+      import fileMessage._
+      path.toGZURIFile.copy(to)
+      if(to.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
     }
     
     while(true) {
@@ -170,25 +176,24 @@ class JobLauncher {
           try {
             jobMessage.runtimePlugins.foreach {
               fileMessage => 
-              val file = getFileVerifyHash(fileMessage)
-              file.renameTo(File.createTempFile("plugin", ".jar", pluginDir))
+                val file = File.createTempFile("plugin", ".jar", pluginDir)
+                copyVerifyHash(fileMessage, file)
             }
-            
 
             val resultFile = resultsDir.newFileInDir(job, ".res")
             val configurationDir = Workspace.newDir
             val workspaceDir = Workspace.newDir
             try {
               
-              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration " + configurationDir.getAbsolutePath +  " -a " + authFile.getAbsolutePath + " -s " + storage + " -w " + workspaceDir.getAbsolutePath  + " -i " + jobMessage.executionMessagePath + " -o " + resultFile.URI.toString + " -c / -p " + pluginDir.getAbsolutePath
+              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\""
             
               logger.info("Executing runtime: " + cmd + ".")
               //val commandLine = CommandLine.parse(cmd)
               val process = Runtime.getRuntime.exec(cmd, null, runtimeLocation) //commandLine.toString, null, runtimeLocation)
               executeProcess(process, System.out, System.err)
             } finally {
-              configurationDir.recursiveDelete
-              workspaceDir.recursiveDelete
+              if(debug) configurationDir.recursiveDelete
+              if(debug) workspaceDir.recursiveDelete
             }
            
             logger.info("Process finished.")

@@ -21,7 +21,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.io.FileInputStream
+import java.io.{FileInputStream, FileOutputStream}
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.ExecutionException
@@ -45,7 +45,6 @@ import org.openmole.misc.tools.obj.Id
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.tools.io.Network._
-
 import org.openmole.core.batch.control.StorageControl._
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.StorageDescription
@@ -89,6 +88,16 @@ object URIFile extends Logger {
 
     if(same) copy(src, dest, destToken, destToken)
     else withToken(srcDescrption, copy(src, dest, _, destToken))
+  }
+  
+  def copy(src: IURIFile, dest: File): Unit = withToken(src.storageDescription, copy(src, _, dest))
+
+  def copy(src: IURIFile, srcToken: AccessToken, dest: File): Unit =  {
+    val os = new FileOutputStream(dest)
+    try {
+      val is = src.openInputStream(srcToken)
+      try is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) finally os.close
+    } finally os.close
   }
 
   def copy(src: File, dest: IURIFile): Unit = withToken(dest.storageDescription, copy(src, dest,_))
@@ -281,7 +290,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def cache(token: AccessToken): File = trycatch(/*synchronized */{
       val cacheTmp = Workspace.newFile("file", "cache")
-      this.copy(new URIFile(cacheTmp), token)
+      this.copy(cacheTmp, token)
       cacheTmp
     })
 
@@ -290,6 +299,9 @@ class URIFile(val location: String) extends IURIFile with Id {
     url.getHost == null || url.getScheme == null || (url.getScheme != null && url.getScheme.compareToIgnoreCase("file") == 0) || isLocalHost(url.getHost)
   }
  
+  override def copy(dest: File) = URIFile.copy(this, dest)
+  override def copy(dest: File, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
+  
   override def copy(dest: IURIFile) = URIFile.copy(this, dest)
   override def copy(dest: IURIFile, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
 

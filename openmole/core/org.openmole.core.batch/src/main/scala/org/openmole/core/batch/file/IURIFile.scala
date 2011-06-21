@@ -55,6 +55,9 @@ trait IURIFile {
   def touch
   def touch(token: AccessToken)
   
+  def copy(dest: File)
+  def copy(dest: File, srcToken: AccessToken)
+  
   def copy(dest: IURIFile)
   def copy(dest: IURIFile, srcToken: AccessToken)
     

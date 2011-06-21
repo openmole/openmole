@@ -49,6 +49,7 @@ public class Daemon implements IApplication {
             options.addOption("h", true, "user@hostname:port");
             options.addOption("p", true, "password");
             options.addOption("w", true, "number of workers");
+            options.addOption("d", false, "debug mode");
             
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
@@ -63,6 +64,7 @@ public class Daemon implements IApplication {
             
             String userHostnamePort = cmdLine.getOptionValue("h");
             String password = cmdLine.getOptionValue("p");
+            boolean debug = cmdLine.hasOption("d");
             
             int workers = 1;
             
@@ -74,7 +76,7 @@ public class Daemon implements IApplication {
                 return IApplication.EXIT_OK;                
             }
             
-            new JobLauncher().launch(userHostnamePort, password, workers);
+            new JobLauncher(debug).launch(userHostnamePort, password, workers);
 
 
 

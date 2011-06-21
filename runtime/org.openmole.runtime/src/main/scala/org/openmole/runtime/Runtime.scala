@@ -99,10 +99,8 @@ class Runtime {
       val pluginDir = Workspace.newDir
 
       for (plugin <- executionMessage.plugins) {
-        val replicaFileCache = plugin.replicaPath.cacheUnziped
-
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
-        replicaFileCache.renameTo(inPluginDirLocalFile)
+        val replicaFileCache = plugin.replicaPath.toGZURIFile.copy(inPluginDirLocalFile)
 
         if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash) {
           throw new InternalProcessingError("Hash of a plugin does't match.")
