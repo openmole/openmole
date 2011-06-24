@@ -100,6 +100,17 @@ public class CSVSampling implements ISampling {
     }
 
     /**
+     * Adds a prototype taken into account in the DoE and mapped to a csv header
+     *
+     * @param proto, the prototyde to be added
+     * @param headerName, the mapped header
+     */
+    public void addColumnAs(IPrototype proto,String headerName) {
+        prototypes.put(headerName, proto);
+    }
+    
+    
+    /**
      * Adds a prototype extended from a File to be takken into account in the DoE
      *
      * @param proto, the prototyde to be added
