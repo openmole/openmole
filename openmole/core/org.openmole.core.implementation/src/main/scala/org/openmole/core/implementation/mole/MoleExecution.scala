@@ -32,8 +32,6 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
-import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.apache.commons.collections15.multimap.MultiHashMap
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -93,10 +91,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job))
     }
   }
-
-  //private val moleExecutionAdapterForSubMoleExecution = new IObjectListener[ISubMoleExecution] {
-  //  override def eventOccured(obj: ISubMoleExecution) = submitGroups(obj)
-  //}
  
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
@@ -104,8 +98,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val executionId = UUID.randomUUID.toString  
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
-
-  //private val categorizer = new DualHashBidiMap[(ISubMoleExecution, IGenericCapsule, IMoleJobGroup), Job]
 
   val rootTicket = Ticket(executionId, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]

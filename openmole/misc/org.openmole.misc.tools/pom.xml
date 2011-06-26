@@ -47,11 +47,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.apache.commons.collections15</artifactId>
-            <version>${lib.org.apache.commons.collections15.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
