@@ -26,6 +26,7 @@ import javax.swing.JPanel;
  */
 public class BigIntegerPrototypePanelUI extends JPanel  implements IPrototypePanelUI {
     
+    public JPanel peer() {return this;}
     public IPrototypeDataUI saveContent(String name) {
         return new BigIntegerPrototypeDataUI(name);
     }

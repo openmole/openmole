@@ -31,6 +31,7 @@ public class NetLogoTaskPanelUI extends JPanel implements ITaskPanelUI {
         launchingCommandTextArea.setText(pud.lauchingCommands());
     }
 
+    public JPanel peer() {return this;}
     public ITaskDataUI saveContent(String name) {
         return new NetLogoTaskDataUI(name,  workspaceTextField.getText(), nlogoTextField.getText(), launchingCommandTextArea.getText());
     }

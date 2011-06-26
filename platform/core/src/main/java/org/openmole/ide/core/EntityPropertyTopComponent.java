@@ -26,7 +26,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
-
+import org.openmole.ide.core.properties.Displays;
 /**
  * Top component which displays something.
  */
@@ -48,8 +48,8 @@ public final class EntityPropertyTopComponent extends TopComponent {
         setLayout(new BorderLayout());
 
       //  propertyPanel.setDropTarget(new DropTarget(propertyPanel, new PanelDropTarget()));
-        add(PropertyPanel.getDefault(), BorderLayout.CENTER);
-
+      //  add(PropertyPanel.getDefault(), BorderLayout.CENTER);
+        add(Displays.propertyPanel().peer(), BorderLayout.CENTER);
 
 //        
 //        DropTarget dt = new DropTarget(this, new PropertyDropTargetListener());

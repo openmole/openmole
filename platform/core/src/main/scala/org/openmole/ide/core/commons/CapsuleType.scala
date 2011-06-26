@@ -20,22 +20,4 @@ package org.openmole.ide.core.commons
  object CapsuleType extends Enumeration {
     type CapsuleType= Value
     val CAPSULE,EXPLORATION_TASK,BASIC_TASK= Value
-    
-//  def toString(transition: Value) = {
-//    transition match {
-//      case CAPSULE => "CAPSULE"
-//      case EXPLORATION_TASK=> "EXPLORATION"
-//      case AGGREGATION_TRANSITION=> "AGGREGATION"
-//      case _=> throw new GUIUserBadDataError("Unknown transition type " + transition)
-//    }
-//  }
-//  
-//  def fromString(transitionString: String) = {
-//    transitionString match {
-//      case "BASIC" => BASIC_TRANSITION
-//      case "EXPLORATION"=> EXPLORATION_TRANSITION
-//      case "AGGREGATION"=> AGGREGATION_TRANSITION
-//      case _=> throw new GUIUserBadDataError("Unknown transition type string " + transitionString)
-//    }
-//  }
   }

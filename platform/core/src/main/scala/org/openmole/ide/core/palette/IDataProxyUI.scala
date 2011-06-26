@@ -21,4 +21,6 @@ import org.openmole.ide.core.properties.IDataUI
 
 trait IDataProxyUI{
   def dataUI: IDataUI
+  
+  override def toString = dataUI.name
 }

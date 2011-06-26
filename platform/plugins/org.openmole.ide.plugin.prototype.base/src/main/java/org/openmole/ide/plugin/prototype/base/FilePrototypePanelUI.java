@@ -27,6 +27,7 @@ import javax.swing.JPanel;
  */
 public class FilePrototypePanelUI extends JPanel  implements IPrototypePanelUI {
     
+    public JPanel peer() {return this;}
     public IPrototypeDataUI saveContent(String name) {
         return new FilePrototypeDataUI(name);
     }

@@ -18,11 +18,13 @@
 package org.openmole.ide.core.properties
  
 import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.widget.PropertyPanel
 import org.openmole.ide.core.commons.Constants._
 
 
 object Displays {
   var currentType = ""
+  val propertyPanel = new PropertyPanel
   
   def name = currentDisplay.name
   

@@ -24,7 +24,6 @@ import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.palette.SamplingDataProxyUI
 import org.openmole.ide.core.properties.TaskDataUI
 
-//class ExplorationTaskDataUI(name: String) extends TaskDataUI(name){
 class ExplorationTaskDataUI(val name: String,s: Option[SamplingDataProxyUI] = None) extends TaskDataUI{
   def this(n:String) = this(n,None)
   sampling = s

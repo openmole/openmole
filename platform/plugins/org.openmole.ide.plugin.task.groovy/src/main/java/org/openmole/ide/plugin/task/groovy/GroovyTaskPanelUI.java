@@ -26,6 +26,7 @@ public class GroovyTaskPanelUI extends JPanel implements ITaskPanelUI {
         jTextArea1.setText(((GroovyTaskDataUI)pud).code());
     }
 
+    public JPanel peer() {return this;}
     public ITaskDataUI saveContent(String name) {
         return new GroovyTaskDataUI(name,jTextArea1.getText());
     }

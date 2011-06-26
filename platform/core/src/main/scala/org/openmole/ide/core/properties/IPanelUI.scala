@@ -17,4 +17,8 @@
 
 package org.openmole.ide.core.properties
 
-trait IPanelUI
+import javax.swing.JPanel
+
+trait IPanelUI {
+  def peer: JPanel
+}

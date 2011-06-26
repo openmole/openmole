@@ -17,6 +17,8 @@
 
 package org.openmole.ide.core.properties
 
-trait IPrototypePanelUI extends IPanelUI{
+import scala.swing.Panel
+
+trait IPrototypePanelUI extends Panel with IPanelUI{
   def saveContent(name:String): IPrototypeDataUI
 }

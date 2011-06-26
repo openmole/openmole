@@ -46,7 +46,6 @@ object ElementFactories {
   var dataSamplingProxys = new HashSet[SamplingDataProxyUI]
   var dataEnvironmentProxys = new HashSet[EnvironmentDataProxyUI]
   
-  
 //  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI],
 //                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI],
 //                            Constants.SAMPLING -> new ListBuffer[DataProxyUI],
@@ -79,7 +78,8 @@ object ElementFactories {
   def getEnvironmentDataProxyUI(name: String) = dataEnvironmentProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   
   
-  
+  def getPrototypesNames = dataTaskProxys.groupBy(_.dataUI.name).keys.toSet
+    
   // def getAll(entityType: String) = dataProxys(entityType)
   
   def addTaskElement(dpu: TaskDataProxyUI) = dataTaskProxys += dpu

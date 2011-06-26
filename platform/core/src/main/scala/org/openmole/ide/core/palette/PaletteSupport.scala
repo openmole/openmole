@@ -33,7 +33,6 @@ import java.beans.BeanInfo
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
 import org.openmole.ide.core.properties.Displays
-import org.openmole.ide.core.PropertyPanel
 
 object PaletteSupport {
   
@@ -62,7 +61,7 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
       Displays.currentType = selCategoryLookup.getName
       Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
       // PropertyPanel.getDefault.displayCurrentEntity(ElementFactories.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
-      PropertyPanel.getDefault.displayCurrentEntity 
+      Displays.propertyPanel.displayCurrentEntity 
       currentSelItem = selItem
     }
   }

@@ -40,6 +40,7 @@ public class GliteEnvironmentPanelUI extends JPanel  implements IEnvironmentPane
         bdiiTextField.setText(pud.bdii());
     }
 
+    public JPanel peer() {return this;}
     public IEnvironmentDataUI saveContent(String name) {
         return new GliteEnvironmentDataUI(name,
                 voTextField.getText(),

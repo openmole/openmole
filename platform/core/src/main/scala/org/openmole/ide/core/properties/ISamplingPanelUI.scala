@@ -17,6 +17,9 @@
 
 package org.openmole.ide.core.properties
 
+import javax.swing.JPanel
+import scala.swing.Panel
+
 trait ISamplingPanelUI extends IPanelUI{
   def saveContent(name:String): ISamplingDataUI
 }

@@ -58,6 +58,7 @@ public final class OutputTopComponent extends TopComponent {
         // MyHandler.getInstance().setOutComponent(this);
         // Logger.getLogger("").addHandler(MyHandler.getInstance());
         System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
+        System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)));
     }
 
     public void appendLog(String data) {
