@@ -73,28 +73,28 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   import IMoleExecution._
   import MoleExecution._
-  
-  class MoleExecutionAdapterForMoleJobOutputTransitionPerformed extends IObjectListenerWithArgs[IMoleJob] {
+
+  private val moleExecutionAdapterForMoleJobOutputTransitionPerformed = new IObjectListenerWithArgs[IMoleJob] {
     override def eventOccured(job: IMoleJob, args: Array[Object]) = {
       val capsule = args(0).asInstanceOf[IGenericCapsule]
       jobOutputTransitionsPerformed(job, capsule)
     }
   }
 
-  class MoleExecutionAdapterForMoleJobFailedOrCanceled extends IObjectListenerWithArgs[IMoleJob] {
+  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new IObjectListenerWithArgs[IMoleJob] {
     override def eventOccured(job: IMoleJob, args: Array[Object]) = {
       val capsule = args(0).asInstanceOf[IGenericCapsule]
       jobFailedOrCanceled(job, capsule)
     }
   }
   
-  class MoleExecutionAdapterForMoleJob extends IObjectListener[IMoleJob] {
+  private val moleExecutionAdapterForMoleJob = new IObjectListener[IMoleJob] {
     override def eventOccured(job: IMoleJob) = {
       EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job))
     }
   }
 
-  class MoleExecutionAdapterForSubMoleExecution extends IObjectListener[ISubMoleExecution] {
+  private val moleExecutionAdapterForSubMoleExecution = new IObjectListener[ISubMoleExecution] {
     override def eventOccured(obj: ISubMoleExecution) = submitGroups(obj)
   }
  
@@ -106,11 +106,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val currentJobId = new AtomicLong
 
   private val categorizer = new DualHashBidiMap[(ISubMoleExecution, IGenericCapsule, IMoleJobGroup), Job]
-
-  private val moleExecutionAdapterForMoleJob = new MoleExecutionAdapterForMoleJob
-  private val moleExecutionAdapterForSubMoleExecution = new MoleExecutionAdapterForSubMoleExecution
-  private val moleJobOutputTransitionPerformed = new MoleExecutionAdapterForMoleJobOutputTransitionPerformed
-  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new MoleExecutionAdapterForMoleJobFailedOrCanceled
 
   val rootTicket = Ticket(executionId, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]
@@ -126,25 +121,19 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def register(subMoleExecution: ISubMoleExecution) = {
     EventDispatcher.registerForObjectChangedSynchronous(subMoleExecution, Priority.NORMAL, moleExecutionAdapterForSubMoleExecution, ISubMoleExecution.AllJobsWaitingInGroup)
   }
-    
-  override def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution): Unit = synchronized {
-    val job = capsule.toJob(context, nextJobId)
-    EventDispatcher.objectChanged(this, JobInCapsuleStarting, Array(job, capsule))
-    submit(job, capsule, subMole, ticket)
-  }
+
    
-  private def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
+  override def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
+    EventDispatcher.objectChanged(this, JobInCapsuleStarting, Array(moleJob, capsule))
+
     EventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
 
     MoleJobRegistry += moleJob -> (this, capsule)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
-    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
+    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
 
-    synchronized {
-      inProgress += moleJob -> (subMole, ticket)
-      subMole += moleJob
-    }
+    inProgress += moleJob -> (subMole, ticket)
 //subMole.incNbJobInProgress(1)
 
     if(!instantRerun.rerun(moleJob, capsule))  {
@@ -213,20 +202,23 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
  
   def start(context: IContext): this.type = {
-    if (submiter.getState.equals(Thread.State.NEW)) {
-      val ticket = nextTicket(rootTicket)
-
-      submit(mole.root, context, ticket, SubMoleExecution(this))
-      submiter.start
-    } else {
-      logger.warning("This MOLE execution has allready been started, this call has no effect.")
-    }
+    val ticket = nextTicket(rootTicket)
+    val moleJob = mole.root.toJob(context, nextJobId)
+      
+    submit(moleJob, mole.root, SubMoleExecution(this), ticket)
+    submiter.start
+  
     this
   }
   
   override def start = {
-    EventDispatcher.objectChanged(this, Starting)
-    start(new Context)      
+    synchronized {
+      if (submiter.getState.equals(Thread.State.NEW)) {
+        EventDispatcher.objectChanged(this, Starting)
+        start(new Context)      
+      } else logger.warning("This MOLE execution has allready been started, this call has no effect.")
+    }
+    this
   }
   
   override def cancel: this.type = {
@@ -237,7 +229,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
         moleJob.cancel
       }
       inProgress = TreeMap.empty
-      
     }
     this
   }
@@ -265,12 +256,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     
     val subMole = jobInfo._1
     val ticket = jobInfo._2
-        
-    subMole -= job
+
     instantRerun.jobFinished(job, capsule)
+    if (subMole.nbJobInProgess == 0)
+      EventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(ticket))
     
-    if (subMole.nbJobInProgess == 0) EventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(ticket))
-   
     if (isFinished) {
       submiter.interrupt
       EventDispatcher.objectChanged(this, IMoleExecution.Finished)
@@ -281,7 +271,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  private def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
+  override def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
     
   override def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution] = {
     inProgress.get(job) match {

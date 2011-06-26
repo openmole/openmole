@@ -57,12 +57,15 @@ trait IMoleExecution {
   
   def isFinished: Boolean
 
-  def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
+  def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket)
 
   def mole: IMole
 
   def rootTicket: ITicket
   def nextTicket(parent: ITicket): ITicket
+  
+  def nextJobId: MoleJobId
+  
   def register(subMoleExecution: ISubMoleExecution)
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContextBuffer]
