@@ -27,6 +27,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
+import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 
@@ -58,6 +59,7 @@ trait IMoleExecution {
   def isFinished: Boolean
 
   def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket)
+  def submitToEnvironment(job: IJob, capsule: IGenericCapsule)
 
   def mole: IMole
 
@@ -66,8 +68,6 @@ trait IMoleExecution {
   
   def nextJobId: MoleJobId
   
-  def register(subMoleExecution: ISubMoleExecution)
-
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContextBuffer]
   def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
       

@@ -24,20 +24,18 @@ import scala.collection.immutable.TreeMap
 
 class Job extends IJob {
 
-    var _moleJobs = new TreeMap[MoleJobId, IMoleJob]
+  var _moleJobs = new TreeMap[MoleJobId, IMoleJob]
 
-    override def moleJobs: Iterable[IMoleJob] = _moleJobs.values
+  override def moleJobs: Iterable[IMoleJob] = _moleJobs.values
        
-    override def apply(id: MoleJobId) = _moleJobs(id)
+  override def apply(id: MoleJobId) = _moleJobs(id)
 
-    def +=(moleJob: IMoleJob) = synchronized { _moleJobs += ((moleJob.id, moleJob)) }
+  def +=(moleJob: IMoleJob) = synchronized { _moleJobs += ((moleJob.id, moleJob)) }
 
-    override def allMoleJobsFinished: Boolean = {
-        for(moleJob <- moleJobs) {
-            if(!moleJob.isFinished) {
-                return false
-            }
-         }
-         true
+  override def allMoleJobsFinished: Boolean = {
+    for(moleJob <- moleJobs) {
+      if(!moleJob.isFinished) return false
     }
+    true
+  }
 }

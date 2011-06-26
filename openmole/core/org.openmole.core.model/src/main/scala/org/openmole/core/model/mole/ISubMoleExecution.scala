@@ -28,7 +28,7 @@ import org.openmole.core.model.transition.IGenericTransition
 
 object ISubMoleExecution {
   val Finished = "Finished"
-  val AllJobsWaitingInGroup = "AllJobsWaitingInGroup"
+  //val AllJobsWaitingInGroup = "AllJobsWaitingInGroup"
 }
 
 trait ISubMoleExecution {
@@ -38,10 +38,7 @@ trait ISubMoleExecution {
   def moleExecution: IMoleExecution
 
   def nbJobInProgess: Int
-  
-  def addWaiting(moleJob: IJob)
-  def removeAllWaiting: Iterable[IJob]
-  
+    
   def addChild(submoleExecution: ISubMoleExecution)
   def removeChild(submoleExecution: ISubMoleExecution)
    
@@ -57,5 +54,6 @@ trait ISubMoleExecution {
   def transitionRegistry: IRegistryWithTicket[IGenericTransition, IContextBuffer]
 
   def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket)
+  def group(moleJob: IMoleJob, capsule: IGenericCapsule, grouping: Option[IGroupingStrategy])
 
 }
