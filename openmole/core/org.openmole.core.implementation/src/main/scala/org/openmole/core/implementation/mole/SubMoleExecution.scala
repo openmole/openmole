@@ -60,7 +60,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
 
   @transient lazy val internalLock = new Object
   
-  parrentApply(p => p.addChild(this))
+  parrentApply(_.addChild(this))
 
   override def isRoot = !parent.isDefined
   
@@ -73,7 +73,6 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def -= (moleJob: IMoleJob) = internalLock.synchronized {
     submittedJobs -= moleJob
-    //println("Remove " + moleJob.state + " from " + this)
     decNbJobInProgress(1)
   }
   
@@ -89,8 +88,8 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def cancel = {
     submittedJobs.foreach{_.cancel}
-    childs.foreach{c => c.cancel}
-    parrentApply(p => p.removeChild(this))
+    childs.foreach{_.cancel}
+    parrentApply(_.removeChild(this))
   }
   
   override def addChild(submoleExecution: ISubMoleExecution) = internalLock.synchronized {
@@ -100,38 +99,35 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   override def removeChild(submoleExecution: ISubMoleExecution) = internalLock.synchronized {
     childs -= submoleExecution
   }
-
   
   override def incNbJobInProgress(nb: Int) =  {
     internalLock.synchronized {_nbJobInProgress += nb}
-    parrentApply(p => p.incNbJobInProgress(nb))
+    parrentApply(_.incNbJobInProgress(nb))
   }
 
   override def decNbJobInProgress(nb: Int) = {
     if(internalLock.synchronized{_nbJobInProgress -= nb; checkAllJobsWaitingInGroup}) allWaitingEvent
-    parrentApply(p => p.decNbJobInProgress(nb))
+    parrentApply(_.decNbJobInProgress(nb))
   }
   
   override def incNbJobWaitingInGroup(nb: Int) = {
     if(internalLock.synchronized {_nbJobWaitingInGroup += nb; checkAllJobsWaitingInGroup}) allWaitingEvent
-    parrentApply(p => p.incNbJobWaitingInGroup(nb))
+    parrentApply(_.incNbJobWaitingInGroup(nb))
   }
 
   override def decNbJobWaitingInGroup(nb: Int) = internalLock.synchronized {
     _nbJobWaitingInGroup -= nb
-    parrentApply(p => p.decNbJobWaitingInGroup(nb))
+    parrentApply(_.decNbJobWaitingInGroup(nb))
   }
   
-  private def parrentApply(f: ISubMoleExecution => Unit) = {
+  private def parrentApply(f: ISubMoleExecution => Unit) =
     parent match {
       case None => 
       case Some(p) => f(p)
     }
-  }
     
   private def checkAllJobsWaitingInGroup = (nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
   
   private def allWaitingEvent = EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
   
-
 }

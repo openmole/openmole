@@ -17,12 +17,15 @@
 
 package org.openmole.core.implementation.transition
 
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.mole.FixedEnvironmentSelection
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IProgress
 
@@ -156,4 +159,62 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     new MoleExecution(new Mole(initc)).start.waitUntilEnded
   }
     
+  "A conjonctive pattern" should "be robust to concurent execution" in {
+    var executed = false
+    val p1 = new Prototype("p1", classOf[String])
+    val p2 = new Prototype("p2", classOf[String])
+    
+    val init = new EmptyTask("Init")
+    
+    val t1 = new Task("Test write 1") {
+      override def process(context: IContext, progress: IProgress) = {
+        context += p1 -> "Test1"
+      }
+    }
+    
+    t1.addOutput(p1)
+    
+    val t2 = new Task("Test write 2") {
+      override def process(context: IContext, progress: IProgress) = {
+        context += p2 -> "Test2"
+      }
+    }
+    
+    t2.addOutput(p2)
+    
+    val t3 = new Task("Test read") {
+      override def process(context: IContext, progress: IProgress) = {
+        context.value(p1).get should equal ("Test1")
+        context.value(toArray(p2)).get.head should equal ("Test2") 
+        context.value(toArray(p2)).get.size should equal (100)
+        executed = true
+      }
+    }
+    
+    t3.addInput(p1)
+    t3.addInput(toArray(p2))
+    
+    val initc = new Capsule(init)
+    val t1c = new Capsule(t1)
+
+    val t3c = new Capsule(t3)
+    
+    val t2CList = (0 until 100).map { i => 
+      val t2c = new Capsule(t2)
+      new Transition(initc, t2c)
+      new Transition(t2c, t3c)   
+      t2c
+    }
+    
+    new Transition(initc, t1c)
+    new Transition(t1c, t3c)
+
+    val env = new LocalExecutionEnvironment(20)
+    val mapping = new FixedEnvironmentSelection
+    t2CList.foreach(c => mapping.select(c, env))
+    
+    new MoleExecution(new Mole(initc), mapping).start.waitUntilEnded
+    executed should equal (true)
+  }
+  
 }

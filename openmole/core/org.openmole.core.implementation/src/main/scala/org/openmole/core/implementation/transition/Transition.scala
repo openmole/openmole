@@ -53,9 +53,8 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
     
 
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = end.synchronized  {
+  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = 
     submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
-  }
   
   override protected def plugStart = start.addOutputTransition(this)
   

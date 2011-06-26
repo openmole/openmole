@@ -31,37 +31,48 @@ import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.core.implementation.tools.ToArrayFinder._
+import org.openmole.misc.tools.service.LockRepository
+
+object GenericTransition {
+  val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
+}
 
 abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends IGenericTransition {
 
+  import GenericTransition._
+  
   plugStart 
   end += this
 
-  def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
+  private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
   
-  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, subMole: ISubMoleExecution) = synchronized {
-    import subMole.moleExecution
-    val registry = subMole.transitionRegistry
-    registry.register(this, ticket, context)
+  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, subMole: ISubMoleExecution) = {
+    val lockKey = (end, subMole, ticket)
+    lockRepository.lock(lockKey)
+    try {
+      import subMole.moleExecution
+      val registry = subMole.transitionRegistry
+      registry.register(this, ticket, context)
 
-    if (nextTaskReady(ticket, subMole)) {
-      val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
-                        end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
+      if (nextTaskReady(ticket, subMole)) {
+        val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
+        end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
                         
-      val newTicket = 
-        if (end.capsule.intputSlots.size <= 1) ticket 
+        val newTicket = 
+          if (end.capsule.intputSlots.size <= 1) ticket 
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-      val toAggregate = combinaison.groupBy(_.prototype.name)
+        val toAggregate = combinaison.groupBy(_.prototype.name)
       
-      val toArray = toArrayManifests(end)      
-      val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
+        val toArray = toArrayManifests(end)      
+        val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
  
-      moleExecution.submit(end.capsule, newContext, newTicket, subMole)
-    }
+        moleExecution.submit(end.capsule, newContext, newTicket, subMole)
+      }
+    } finally lockRepository.unlock(lockKey)
   }
 
   override def perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
