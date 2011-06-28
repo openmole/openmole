@@ -26,6 +26,12 @@
 	    <artifactId>au.com.bytecode.opencsv</artifactId>
 	    <version>${lib.au.com.bytecode.opencsv.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
