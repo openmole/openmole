@@ -79,7 +79,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
     if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
       for(name <- filtered) context -= name
-      performImpl(context, ticket, toClone, subMole)
+      _perform(context, ticket, toClone, subMole)
     }
   }
 
@@ -87,6 +87,6 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
 
   override def unFiltred = start.userOutputs.filterNot(d => filtered.contains(d.prototype.name))
   
-  protected def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) 
+  protected def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) 
   protected def plugStart
 }

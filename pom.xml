@@ -314,56 +314,6 @@
                 <artifactId>maven-scala-plugin</artifactId>
                 <version>2.15.1</version>
             </plugin>
-<!--
-      <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-	<version>2.14.2</version>
-        <configuration>
-	   <aggregateDirectOnly>false</aggregateDirectOnly>
-           <scalaVersion>${maven.scala.version}</scalaVersion>
-        </configuration>
-      </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-	        <version>2.2</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>index</report>
-                            <report>dependencies</report>
-                            <report>dependency-convergence</report>
-                            <report>dependency-management</report>
-                            <report>project-team</report>
-                            <report>mailing-list</report>
-                            <report>issue-tracking</report>
-                            <report>license</report>
-                            <report>scm</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-	        <version>2.6</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-	        <version>2.5</version>
-
-                <configuration>
-                    <aggregate>true</aggregate>
-                    <targetJdk>1.6</targetJdk>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-	        <version>2.4</version>
-            </plugin>-->
         </plugins>
     </reporting>
 
@@ -413,12 +363,6 @@
 
     <repositories>
         <repository>
-            <id>grid.in2p3.fr</id>
-            <name>IN2P3 maven repository</name>
-            <url>http://grid.in2p3.fr/maven2/</url>
-        </repository>
-
-        <repository>
             <id>maven.openmole.org</id>
             <name>OpenMole repository</name>
             <url>http://maven.openmole.org/public/</url>
@@ -427,31 +371,6 @@
             <id>maven.openmole.org.snapshots</id>
             <name>OpenMOLE snapshots repository</name>
             <url>http://maven.openmole.org/snapshots/</url>
-        </repository>
-
-        <repository>
-            <id>SE-nuiton</id>
-            <name>Nuiton Repository</name>
-            <url>http://maven.nuiton.org/release/</url>
-        </repository>
-        <repository>
-            <id>SE-restlet</id>
-            <name>Restlet Repo</name>
-            <url>http://maven.restlet.org</url>
-        </repository>
-        <repository>
-            <id>Scala</id>
-            <name>Scala Repo</name>
-            <url>http://scala-tools.org/repo-releases/</url>
-        </repository>
-        <repository>
-            <id>Scala snapshots</id>
-            <name>Scala Repo Snapshots</name>
-            <url>http://scala-tools.org/repo-snapshots/</url>
-        </repository>
-        <repository>
-            <id>source.db4o</id>
-            <url>http://source.db4o.com/maven</url>
         </repository>
     </repositories>
 

@@ -32,7 +32,7 @@ import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.core.model.transition.ITransition
 
-class Transition(override val start: ICapsule, override val end: ISlot, override val condition: ICondition, filtred: Set[String])  extends GenericTransition(start, end, condition, filtred) with ITransition {
+class Transition(override val start: ICapsule, override val end: ISlot, override val condition: ICondition, filtred: Set[String]) extends GenericTransition(start, end, condition, filtred) with ITransition {
 
   def this(start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
     
@@ -53,8 +53,7 @@ class Transition(override val start: ICapsule, override val end: ISlot, override
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
     
 
-  override def performImpl(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = 
-    submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
+  override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
   
   override protected def plugStart = start.addOutputTransition(this)
   

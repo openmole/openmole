@@ -184,7 +184,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     this
   }
 
-  override def moleJobs: Iterable[IMoleJob] = { inProgress.map{ _._1 }}
+  override def moleJobs: Iterable[IMoleJob] = {inProgress.map{ _._1 }}
 
   override def waitUntilEnded = {
     submiter.join
