@@ -50,7 +50,7 @@ abstract class GenericTask(val name: String) extends IGenericTask {
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
-     if (!d.mode.isOptional) {
+      if (!d.mode.isOptional) {
         val p = d.prototype
         context.variable(p.name) match {
           case None => throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.toString + "\" required by the task \"" + name + "\" has not been found");
@@ -78,7 +78,14 @@ abstract class GenericTask(val name: String) extends IGenericTask {
     context ++= vars
   }
 
-  private def init(context: IContext) = verifyInput(context)
+  private def init(context: IContext) = {
+    for (parameter <- parameters) {
+      if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) {
+        context += parameter.variable
+      }
+    }
+    verifyInput(context)
+  }
   private def end(context: IContext) = filterOutput(context)
   
   /**

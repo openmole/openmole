@@ -82,7 +82,6 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     new AggregationTransition(emptyC, testC)
                         
     val grouping = new MoleJobGrouping
-    //grouping.set(testC, new JobGroupingBy2Test)
     grouping.set(emptyC, new JobGroupingBy2Test)
     
     new MoleExecution(new Mole(exc), new FixedEnvironmentSelection, grouping).start.waitUntilEnded 

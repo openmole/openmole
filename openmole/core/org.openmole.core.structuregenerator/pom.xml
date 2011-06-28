@@ -40,7 +40,7 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
             <version>${lib.org.codehaus.groovy.version}</version>
@@ -70,7 +70,7 @@
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
-
+    
 </project>
 
 
