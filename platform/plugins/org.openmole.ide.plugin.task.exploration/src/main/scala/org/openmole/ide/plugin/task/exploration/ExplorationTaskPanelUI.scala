@@ -16,23 +16,10 @@
  */
 
 package org.openmole.ide.plugin.task.exploration
-import java.awt.Dimension
-import scala.swing.ListView.Renderer
 import scala.swing._
 import swing.Swing._
-import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.properties.ITaskPanelUI
 
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends BoxPanel(Orientation.Horizontal) with ITaskPanelUI {
-
-  val pathFileLabel = new Label("Sampling :") {
-    preferredSize = new Dimension(60,25)
-    border = Swing.EmptyBorder(5,5,5,5)
-  }
-  
-  val samplingCombo = new ComboBox(ElementFactories.dataSamplingProxys.toList) { renderer = Renderer(_.dataUI.name) }
-  
-  contents.append(pathFileLabel,samplingCombo)
-  
-  override def saveContent(name: String) = new ExplorationTaskDataUI(name,Some(samplingCombo.selection.item))
+  override def saveContent(name: String) = new ExplorationTaskDataUI(name)
 }

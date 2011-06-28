@@ -23,6 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
+import org.openmole.ide.core.properties.Displays;
 import org.openmole.ide.core.palette.ElementFactories;
 import org.openmole.ide.core.control.MoleScenesManager;
 
@@ -40,7 +41,7 @@ public final class ResetAll implements ActionListener {
         ElementFactories.clearAll();
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
         MoleSceneTopComponent.getDefault().refreshPalette();
-        PropertyPanel.getDefault().hidePanelScrollPane();
+      //  Displays.propertyPanel.hidePanelScrollPane();
         // TODO implement action body
         
     }

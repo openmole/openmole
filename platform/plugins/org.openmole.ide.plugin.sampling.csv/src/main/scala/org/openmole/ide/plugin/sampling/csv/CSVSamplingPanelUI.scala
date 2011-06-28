@@ -107,7 +107,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   
   override def saveContent(name: String) = {
     var protoMapping = Map[String,PrototypeDataProxyUI]()   
-    for(i<- 0 to model.getRowCount-1) protoMapping += model.getValueAt(i,0).toString -> model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI]
+    for(i<- 0 to model.getRowCount-1) {println("SAVE :: "+model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI].dataUI.getClass);protoMapping += model.getValueAt(i,0).toString -> model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI]}
     new CSVSamplingDataUI(name,filePathTextField.text,protoMapping)
   }
   

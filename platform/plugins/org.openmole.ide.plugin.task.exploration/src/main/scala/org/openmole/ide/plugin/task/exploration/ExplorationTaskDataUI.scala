@@ -19,14 +19,10 @@ package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.properties.ISamplingDataUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.SamplingDataProxyUI
 import org.openmole.ide.core.properties.TaskDataUI
 
-class ExplorationTaskDataUI(val name: String,s: Option[SamplingDataProxyUI] = None) extends TaskDataUI{
-  def this(n:String) = this(n,None)
-  sampling = s
+class ExplorationTaskDataUI(val name: String) extends TaskDataUI{
    
   override def coreObject = {
     if (sampling.isDefined) new ExplorationTask(name,sampling.get.dataUI.coreObject)
