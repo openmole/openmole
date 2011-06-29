@@ -14,20 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.prototype.base;
+package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.properties.IPrototypePanelUI;
-import org.openmole.ide.core.properties.IPrototypeDataUI;
-import javax.swing.JPanel;
+import org.openmole.ide.core.properties.IPrototypePanelUI
+import org.openmole.ide.core.properties.IPrototypeDataUI
+import scala.swing.Panel
 
-/**
- *
- * @author mathieu
- */
-public class IntegerPrototypePanelUI extends JPanel  implements IPrototypePanelUI {
-    
-    public JPanel peer() {return this;}
-    public IPrototypeDataUI saveContent(String name) {
-        return new IntegerPrototypeDataUI(name);
-    }
+class StringPrototypePanelUI extends Panel with IPrototypePanelUI {
+  override def saveContent(name: String): IPrototypeDataUI =new StringPrototypeDataUI(name)
 }

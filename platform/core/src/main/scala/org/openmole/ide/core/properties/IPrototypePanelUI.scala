@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.properties
 
+import java.awt.Dimension
 import scala.swing.Panel
 
 trait IPrototypePanelUI extends Panel with IPanelUI{
