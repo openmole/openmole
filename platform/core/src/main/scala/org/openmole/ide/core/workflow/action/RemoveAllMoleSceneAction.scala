@@ -17,28 +17,9 @@
 
 package org.openmole.ide.core.workflow.action
 
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import org.openmole.ide.core.control.MoleScenesManager
+import scala.swing.Action
 
-class RemoveAllMoleSceneAction extends ActionListener{
-  override def actionPerformed(ae: ActionEvent)= {
-    MoleScenesManager.removeMoleScenes
-  }
+class RemoveAllMoleSceneAction(text: String) extends Action(text){
+  override def apply = MoleScenesManager.removeMoleScenes
 }
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.control.MoleScenesManager;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class RemoveAllMoleSceneAction implements ActionListener{
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        MoleScenesManager.getInstance().removeMoleScenes();
-//    }
-//
-//}

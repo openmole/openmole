@@ -38,6 +38,10 @@ import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.nodes.AbstractNode;
 import org.openmole.ide.core.palette.CategoryBuilder;
+import org.openmole.ide.core.widget.MenuToggleButton2;
+import org.openmole.ide.core.widget.PopupMenu;
+import scala.swing.Menu;
+import scala.swing.MenuItem;
 
 
 /**
@@ -76,26 +80,15 @@ public final class MoleSceneTopComponent extends TopComponent {
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
         JPopupMenu molePopupMenu = new JPopupMenu("Mole");
-
-        JMenuItem itAdd = new JMenuItem("Add");
-        itAdd.addActionListener(new AddMoleSceneAction());
-
-        JMenuItem itRem = new JMenuItem("Remove");
-        itRem.addActionListener(new RemoveMoleSceneAction());
-
-        JMenuItem itRemAll = new JMenuItem("Remove All");
-        itRemAll.addActionListener(new RemoveAllMoleSceneAction());
-
-        molePopupMenu.add(itAdd);
-        molePopupMenu.add(itRem);
-        molePopupMenu.add(itRemAll);
-
-        MenuToogleButton bMole = new MenuToogleButton("Mole");
-        bMole.setPopupMenu(molePopupMenu);
+        
+        MenuToggleButton2 mt = new MenuToggleButton2("Mole");
+        mt.addItem(new MenuItem(new AddMoleSceneAction("Add")));
+        mt.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
+        mt.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(bMole);
+        toolBar.add(mt.peer());
         //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
