@@ -30,7 +30,7 @@ object SamplingDisplay extends IDisplay{
   var name = "sample0"
   var currentPanel: Option[ISamplingPanelUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{modelSamplings += new SamplingDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{println("SANPLI :: " + f.displayName);modelSamplings += new SamplingDataProxyFactory(f)})
   
   override def implementationClasses = modelSamplings
   
