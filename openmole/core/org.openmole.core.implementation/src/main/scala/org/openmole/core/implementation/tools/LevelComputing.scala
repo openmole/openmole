@@ -24,20 +24,15 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.transition.{IExplorationTransition,IAggregationTransition, IGenericTransition}
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.SynchronizedMap
 
 object LevelComputing {
 
-  val levelComputings = new WeakHashMap[IMoleExecution, LevelComputing]
+  val levelComputings = new WeakHashMap[IMoleExecution, LevelComputing] with SynchronizedMap[IMoleExecution, LevelComputing]
 
-  def apply(moleExecution: IMoleExecution): LevelComputing = synchronized {
-    levelComputings.get(moleExecution) match {
-      case None =>  
-        val ret = new LevelComputing(moleExecution.mole)
-        levelComputings.put(moleExecution, ret)
-        ret
-      case Some(ret) => ret
-    }
-  }
+  def apply(moleExecution: IMoleExecution): LevelComputing = 
+    levelComputings.getOrElseUpdate(moleExecution, new LevelComputing(moleExecution.mole))
+    
 }
 
 
