@@ -92,7 +92,7 @@ public class NetLogoTask extends ExternalSystemTask {
                         AbstractCollection netlogoCollection = (AbstractCollection) outputValue;
                         Object array = Array.newInstance(outBinding._2().type().erasure().getComponentType(), netlogoCollection.size());
                         Iterator it = netlogoCollection.iterator();
-                        for(int i = 0; i < netlogoCollection.size(); i++) {
+                        for (int i = 0; i < netlogoCollection.size(); i++) {
                             Array.set(array, i, it.next());
                         }
                         context.add(outBinding._2(), array);
@@ -126,6 +126,11 @@ public class NetLogoTask extends ExternalSystemTask {
     public NetLogoTask addNetLogoOutput(String binding, IPrototype prototype) {
         outputBinding.add(new Tuple2<String, IPrototype>(binding, prototype));
         super.addOutput(prototype);
+        return this;
+    }
+
+    public NetLogoTask addNetLogoOutput(IPrototype prototype) {
+        addOutput(prototype);
         return this;
     }
 
