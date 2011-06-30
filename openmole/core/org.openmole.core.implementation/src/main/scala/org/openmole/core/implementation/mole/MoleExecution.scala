@@ -21,8 +21,6 @@ import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.execution.JobRegistry
-import org.openmole.core.implementation.job.Job
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IEnvironment
@@ -95,11 +93,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
   
-  private val executionId = UUID.randomUUID.toString  
+  override val id = UUID.randomUUID.toString  
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
 
-  val rootTicket = Ticket(executionId, ticketNumber.getAndIncrement)  
+  val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]
 
   val exceptions = new ListBuffer[Throwable]
@@ -126,8 +124,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   override def submitToEnvironment(job: IJob, capsule: IGenericCapsule): Unit = {
-    JobRegistry += job -> this
-    
     environmentSelection.select(capsule) match {
       case Some(environment) => jobs.add((job, environment))
       case None => jobs.add((job, LocalExecutionEnvironment))
@@ -141,9 +137,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       while (continue) {
         try {
           val p = jobs.take
-          try {
-            p._2.submit(p._1)
-          } catch {
+          try p._2.submit(p._1)
+          catch {
             case (t: Throwable) => logger.log(SEVERE, "Error durring scheduling", t)
           }
         } catch {
@@ -220,7 +215,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  override def nextJobId: MoleJobId = new MoleJobId(executionId, currentJobId.getAndIncrement)
+  override def nextJobId: MoleJobId = new MoleJobId(id, currentJobId.getAndIncrement)
     
   override def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution] = {
     inProgress.get(job) match {

@@ -20,6 +20,6 @@ package org.openmole.core.model.execution
 import org.openmole.core.model.mole.IMoleExecution
 
 trait IStatistic {
-  def apply(moleExecution: IMoleExecution, key: IStatisticKey): IStatisticSamples
-  def +=(moleExecution: IMoleExecution, key: IStatisticKey, sample: IStatisticSample)
+  def apply(moleExecutionId: String, key: IStatisticKey): IStatisticSamples
+  def +=(moleExecution: String, key: IStatisticKey, sample: IStatisticSample)
 }

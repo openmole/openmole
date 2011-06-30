@@ -103,17 +103,9 @@ class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
     }
   }
 
-  override def submit(job: IJob) = {
-    val ejob = new LocalExecutionJob(this, job, nextExecutionJobId)
-    //jobRegistry.register(ejob)
-    submit(ejob)
-  }
+  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job, nextExecutionJobId))
 
-  def submit(moleJob: IMoleJob): Unit = {
-    val job = new Job
-    job += moleJob
-    submit(job)
-  }
+  def submit(moleJob: IMoleJob): Unit = submit(new Job(moleJob.id.executionId, List(moleJob)))
 
   private def submit(ejob: LocalExecutionJob) = {
     ejob.state = ExecutionState.SUBMITTED

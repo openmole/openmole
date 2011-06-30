@@ -40,6 +40,7 @@ import org.openmole.misc.tools.service.Priority
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
 object SubMoleExecution {
   
@@ -64,7 +65,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   private var _nbJobInProgress = 0
   private var _nbJobWaitingInGroup = 0
   private var childs = new HashSet[ISubMoleExecution]
-  private val waitingJobs = new HashMap[(IGenericCapsule, IMoleJobGroup), (Job, IGenericCapsule)]
+  private val waitingJobs = new HashMap[(IGenericCapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   
   private var canceled = false
   
@@ -141,20 +142,18 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
         val category = strategy.group(moleJob.context)
 
         val key = (capsule, category)
-        waitingJobs.getOrElseUpdate(key, (new Job, capsule)) match {
-          case (job, capsule) => job += moleJob
-        }
+        waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
         incNbJobWaitingInGroup(1)
       case None =>
-        val job = new Job
-        job += moleJob
+        val job = new Job(moleExecution.id, List(moleJob))
         moleExecution.submitToEnvironment(job, capsule)
     }
   }
     
   private def submitJobs = synchronized {
-    waitingJobs.values.foreach {
-      case(job, capsule) => 
+    waitingJobs.foreach {
+      case((capsule, category), jobs) => 
+        val job = new Job(moleExecution.id, jobs)
         moleExecution.submitToEnvironment(job, capsule)
         decNbJobWaitingInGroup(job.moleJobs.size)
     }

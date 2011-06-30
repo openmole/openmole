@@ -22,21 +22,19 @@ import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.execution.IStatisticSample
 import org.openmole.core.model.execution.IStatisticSamples
 
-import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
 class Statistic(historySize: Int) extends IStatistic {
 
-  val stats = new WeakHashMap[IMoleExecution, HashMap[IStatisticKey, IStatisticSamples]] with SynchronizedMap[IMoleExecution, HashMap[IStatisticKey, IStatisticSamples]]
+  val stats = new WeakHashMap[String, HashMap[IStatisticKey, IStatisticSamples]] with SynchronizedMap[String, HashMap[IStatisticKey, IStatisticSamples]]
 
-  override def apply(moleExecution: IMoleExecution, key: IStatisticKey): IStatisticSamples = {
-    stats.getOrElse(moleExecution, return StatisticSamples.empty).getOrElse(key, StatisticSamples.empty)
-  }
+  override def apply(moleExecutionId: String, key: IStatisticKey): IStatisticSamples =
+    stats.getOrElse(moleExecutionId, return StatisticSamples.empty).getOrElse(key, StatisticSamples.empty)
 
-  override def += (moleExecution: IMoleExecution, key: IStatisticKey, sample: IStatisticSample) = synchronized {
-    stats.getOrElseUpdate(moleExecution, new HashMap[IStatisticKey, IStatisticSamples] with SynchronizedMap[IStatisticKey, IStatisticSamples]).getOrElseUpdate(key, new StatisticSamples(historySize)) += sample
+  override def += (moleExecutionId: String, key: IStatisticKey, sample: IStatisticSample) = synchronized {
+    stats.getOrElseUpdate(moleExecutionId, new HashMap[IStatisticKey, IStatisticSamples] with SynchronizedMap[IStatisticKey, IStatisticSamples]).getOrElseUpdate(key, new StatisticSamples(historySize)) += sample
   }
 
 }

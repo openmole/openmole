@@ -38,18 +38,15 @@ object MoleJob extends Logger
 class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
   
   import MoleJob._
-  
-  
+
   val progress = new Progress
     
   @volatile  private var _state: State = null
   state = READY
-    
-  
+      
   override def state: State = _state
   override def context: IContext = _context
     
-  //@ObjectModified(name = IMoleJob.StateChanged)
   def state_=(state: State) = {
     val changed = synchronized {
       if(_state == null || !_state.isFinal) {
@@ -60,9 +57,7 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
             ret
           case Some(ts) => ts
         }
-        // MoleJob.LOGGER.info("Before " + task.name + " " + timeStamps.map{ _.state.toString } + " " + timeStamps.getClass)
         timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
-        // MoleJob.LOGGER.info("After " + task.name + " " + timeStamps.map{ _.state.toString } + timeStamps.getClass)
         _state = state
         true
       } else false
@@ -79,9 +74,7 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
       case e =>
         context += (GenericTask.Exception.prototype, e)
 
-        if (classOf[InterruptedException].isAssignableFrom(e.getClass)) {
-          throw e
-        }
+        if (classOf[InterruptedException].isAssignableFrom(e.getClass)) throw e
     }
   }
 

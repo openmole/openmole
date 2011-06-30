@@ -144,14 +144,16 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
         caDir
       }
     }
+    
+    
   }
 
   override def initialize = {
-    if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) {
+    if (System.getenv.containsKey("VOMS_USER_PROXY") && new File(System.getenv.get("VOMS_USER_PROXY")).exists)
+      createContextFromVOMSFile(new File(System.getenv.get("VOMS_USER_PROXY")))
+    else if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists)
       createContextFromFile(new File(System.getenv.get("X509_USER_PROXY")))
-    } else {
-      createContextFromPreferences
-    }
+    else createContextFromPreferences
   }
 
   private def createContextFromPreferences = {
@@ -225,13 +227,27 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
   }
 
+  private def createContextFromVOMSFile(proxyFile: File) = {
+    val ctx = JSAGASessionService.createContext
+    ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
+    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+    ctx.setAttribute(VOMSContext.VOMSDIR, "")
+    ctx.setAttribute(Context.TYPE, "VOMS")
+    
+    //if(System.getenv.containsKey("X509_USER_PROXY_TYPE")) ctx.setAttribute(VOMSContext.PROXYTYPE, System.getenv.get("X509_USER_PROXY_TYPE"))
+   // if(!System.getenv.containsKey("X509_USER_PROXY_TYPE")) ctx.setAttribute(Context.TYPE, "GlobusLegacy")
+    //else ctx.setAttribute(Context.TYPE, System.getenv.get("X509_USER_PROXY_TYPE"))
+
+    JSAGASessionService.addContext(ctx)
+  }
+  
+  
   private def createContextFromFile(proxyFile: File) = {
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
     ctx.setAttribute(Context.TYPE, "GlobusLegacy")
-
     JSAGASessionService.addContext(ctx)
   }
 
