@@ -15,30 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.display
 
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.EnvironmentDataProxyFactory
+import org.openmole.ide.core.palette.SamplingDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.properties.ISamplingPanelUI
+import org.openmole.ide.core.properties.ISamplingFactoryUI
 
-object EnvironmentDisplay extends IDisplay{
+object SamplingDisplay extends IDisplay{
   private var count= 0
-  private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
-  var name="env0"
-  var currentPanel: Option[IEnvironmentPanelUI] = None
+  private var modelSamplings = new HashSet[SamplingDataProxyFactory]
+  var name = "sample0"
+  var currentPanel: Option[ISamplingPanelUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{println("SANPLI :: " + f.displayName);modelSamplings += new SamplingDataProxyFactory(f)})
   
-  override def implementationClasses = modelEnvironments
+  override def implementationClasses = modelSamplings
   
-  override def dataProxyUI(n: String) = ElementFactories.getEnvironmentDataProxyUI(n)
+  override def dataProxyUI(n: String) = ElementFactories.getSamplingDataProxyUI(n)
   
   override def increment = {
     count += 1
-    name = "env" + count
+    name = "sample" + count
   }
   
   override def  buildPanelUI(n:String) = {

@@ -26,7 +26,7 @@ import scala.swing.TextField
 import java.io.FileReader
 import javax.swing.DefaultCellEditor
 import scala.swing.Table.ElementMode._
-import org.openmole.ide.core.widget._
+import org.openmole.ide.core.display._
 import org.openmole.ide.core.properties.ISamplingPanelUI
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.table.DefaultTableModel

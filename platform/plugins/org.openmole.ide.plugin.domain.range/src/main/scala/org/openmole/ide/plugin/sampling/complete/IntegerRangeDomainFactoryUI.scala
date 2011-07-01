@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.workflow.action
+package org.openmole.ide.plugin.domain.range
 
-import org.openmole.ide.core.control.MoleScenesManager
-import scala.swing.Action
+import org.openmole.ide.core.properties.IDomainFactoryUI
 
-class RemoveAllMoleSceneAction (text: String) extends Action(text){
-  override def apply = MoleScenesManager.removeMoleScenes
+class IntegerRangeDomainFactoryUI extends IDomainFactoryUI {
+  override def buildDataUI(name: String) = new IntegerRangeDomainamplingDataUI(name)
 }

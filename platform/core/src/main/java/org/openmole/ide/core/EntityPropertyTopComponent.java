@@ -26,7 +26,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openmole.ide.core.properties.Displays;
+import org.openmole.ide.core.display.Displays;
 /**
  * Top component which displays something.
  */

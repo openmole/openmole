@@ -23,7 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
-import org.openmole.ide.core.properties.Displays;
+import org.openmole.ide.core.display.Displays;
 import org.openmole.ide.core.palette.ElementFactories;
 import org.openmole.ide.core.control.MoleScenesManager;
 

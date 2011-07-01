@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.display
 
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
@@ -23,6 +23,8 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.palette.ElementFactories
 import org.openmole.ide.core.palette.TaskDataProxyFactory
+import org.openmole.ide.core.properties.ITaskPanelUI
+import org.openmole.ide.core.properties.ITaskFactoryUI
 
 object TaskDisplay extends IDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]

@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.display
 
 import scala.collection.mutable.HashSet
+import org.openmole.ide.core.properties.IPanelUI
 import org.openmole.ide.core.palette.IDataProxyUI
 import org.openmole.ide.core.palette.IDataProxyFactory
 

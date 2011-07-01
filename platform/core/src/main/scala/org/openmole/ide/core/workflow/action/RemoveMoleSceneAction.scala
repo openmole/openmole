@@ -17,29 +17,10 @@
 
 package org.openmole.ide.core.workflow.action
 
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import org.openmole.ide.core.control.TabsManager
+import scala.swing.Action
 
 
-class RemoveMoleSceneAction extends ActionListener{
-
-  override def actionPerformed(ae: ActionEvent)= TabsManager.removeCurrentSceneAndChild
+class RemoveMoleSceneAction(text: String) extends Action(text){
+  override def apply = TabsManager.removeCurrentSceneAndChild
 }
-
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//import org.openmole.ide.core.control.TabsManager;
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.org>
-// */
-//public class RemoveMoleSceneAction implements ActionListener{
-//
-//    @Override
-//    public void actionPerformed(ActionEvent ae) {
-//        TabsManager.getInstance().removeCurrentSceneAndChild();
-//    }
-//
-//}

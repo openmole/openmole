@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.sampling.complete
+package org.openmole.ide.plugin.domain.range
 
 import scala.swing._
 import scala.swing.Label
@@ -26,8 +26,7 @@ import scala.swing.TextField
 import java.io.FileReader
 import javax.swing.DefaultCellEditor
 import scala.swing.Table.ElementMode._
-import org.openmole.ide.core.display._
-import org.openmole.ide.core.properties.ISamplingPanelUI
+import org.openmole.ide.core.widget._
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.table.DefaultTableModel
 import org.openmole.ide.core.palette.ElementFactories
@@ -35,7 +34,7 @@ import org.openmole.ide.core.palette.PrototypeDataProxyUI
 import org.openmole.ide.core.properties.EmptyDataUIs._
 import scala.swing.BorderPanel.Position._
 
-class CompleteSamplingPanelUI(pud: CompleteSamplingDataUI) extends BoxPanel(Orientation.Vertical) with ISamplingPanelUI {
+class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) extends BoxPanel(Orientation.Vertical) with IDomainPanelUI {
   
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name)
+  override def saveContent(name: String) = new IntegerRangeDomainDataUI(name)
 }

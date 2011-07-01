@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.widget
+package org.openmole.ide.core.display
 
 import scala.swing._
 import swing.Swing._
@@ -23,7 +23,7 @@ import swing.ListView._
 import javax.swing.JPanel
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.palette.IDataProxyFactory
-import org.openmole.ide.core.properties._
+import org.openmole.ide.core.display._
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.commons.Constants._
 

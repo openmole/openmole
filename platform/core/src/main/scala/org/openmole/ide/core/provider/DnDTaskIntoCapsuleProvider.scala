@@ -26,7 +26,7 @@ import scala.collection.JavaConversions
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.palette._
-import org.openmole.ide.core.properties._
+import org.openmole.ide.core.display.Displays
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.commons.Constants._

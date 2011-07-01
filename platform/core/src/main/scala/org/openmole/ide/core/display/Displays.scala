@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.display
  
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.widget.PropertyPanel
 import org.openmole.ide.core.commons.Constants._
+import org.openmole.ide.core.properties.IPanelUI
 
 
 object Displays {

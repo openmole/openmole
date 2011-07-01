@@ -20,10 +20,11 @@ package org.openmole.ide.core.workflow.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.control.MoleScenesManager
+import scala.swing.Action
 
-class AddMoleSceneAction extends ActionListener{
+class AddMoleSceneAction(text: String) extends Action(text){
 
-  override def actionPerformed(ae: ActionEvent)= MoleScenesManager.display(MoleScenesManager.addMoleScene)
+  override def apply = MoleScenesManager.display(MoleScenesManager.addMoleScene)
 }
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;

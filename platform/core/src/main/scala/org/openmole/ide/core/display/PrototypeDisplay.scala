@@ -14,38 +14,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.display
 
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.SamplingDataProxyFactory
+import org.openmole.ide.core.palette.PrototypeDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
+import org.openmole.ide.core.properties.IPrototypePanelUI
+import org.openmole.ide.core.properties.IPrototypeFactoryUI
 
-object SamplingDisplay extends IDisplay{
+object PrototypeDisplay extends IDisplay{
   private var count= 0
-  private var modelSamplings = new HashSet[SamplingDataProxyFactory]
-  var name = "sample0"
-  var currentPanel: Option[ISamplingPanelUI] = None
+  private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
+  var currentPanel: Option[IPrototypePanelUI] = None
+  var name= "proto0"
   
-  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{println("SANPLI :: " + f.displayName);modelSamplings += new SamplingDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
-  override def implementationClasses = modelSamplings
+  override def implementationClasses = modelPrototypes
   
-  override def dataProxyUI(n: String) = ElementFactories.getSamplingDataProxyUI(n)
-  
+  override def dataProxyUI(n: String) = ElementFactories.getPrototypeDataProxyUI(n)
+
   override def increment = {
     count += 1
-    name = "sample" + count
+    name = "proto" + count
   }
   
-  override def  buildPanelUI(n:String) = {
+  def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+  def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
   
 }
