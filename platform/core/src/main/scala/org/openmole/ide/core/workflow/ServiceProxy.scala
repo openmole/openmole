@@ -15,19 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.dialog
+package org.openmole.ide.core.workflow
 
-import javax.swing.JOptionPane
-import javax.swing.JOptionPane._
-import org.openmole.ide.core.workflow.LabeledConnectionWidget
+class ServiceProxy {}
 
-object TransitionDialog {
-  def displayTransitionDialog(connectionWidget: LabeledConnectionWidget) {
-    connectionWidget.transition.condition = None
-    val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", connectionWidget.transition.condition)
-    if (cond == null) CLOSED_OPTION
-    else connectionWidget.transition.condition = Some(cond)
-    connectionWidget.setConditionLabel(connectionWidget.transition.condition)
-    connectionWidget.scene.validate
-  }
-}
+//public class ServiceProxy implements BundleActivator {
+//    static BundleContext bc;
+//    private static IEventDispatcher eventDispatcher;
+//
+//    @Override
+//    public void start(BundleContext c) throws Exception {
+//        bc = c;
+//    }
+//
+//    @Override
+//    public void stop(BundleContext c) throws Exception {
+//    }
+//
+//    public static IEventDispatcher getEventDispatcher() {
+//        return eventDispatcher;
+//    }

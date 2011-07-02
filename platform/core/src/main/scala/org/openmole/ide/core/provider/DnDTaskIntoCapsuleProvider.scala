@@ -21,13 +21,13 @@ import java.awt.Point
 import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
-import org.openmole.ide.core.workflow.model.ICapsuleUI
+import org.openmole.ide.core.workflow.ICapsuleUI
 import scala.collection.JavaConversions
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.display.Displays
-import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.MoleScene
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.commons.Constants._
 

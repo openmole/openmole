@@ -22,10 +22,10 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.commons.TransitionType._
-import org.openmole.ide.core.workflow.action.AddTransitionConditionAction
-import org.openmole.ide.core.workflow.action.AggregationTransitionAction
-import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
+import org.openmole.ide.core.action.AddTransitionConditionAction
+import org.openmole.ide.core.action.AggregationTransitionAction
+import org.openmole.ide.core.workflow.MoleScene
+import org.openmole.ide.core.workflow.LabeledConnectionWidget
 
 class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget) extends GenericMenuProvider {  
   val itCond = new JMenuItem("Edit condition")

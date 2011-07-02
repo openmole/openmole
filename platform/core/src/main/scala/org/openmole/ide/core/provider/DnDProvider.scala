@@ -22,7 +22,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.geom.AffineTransform
 import org.netbeans.api.visual.action.AcceptProvider
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.MoleScene
 import org.netbeans.api.visual.action.ConnectorState
 import java.awt.Graphics
 import java.awt.Graphics2D

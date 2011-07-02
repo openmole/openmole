@@ -19,8 +19,8 @@ package org.openmole.ide.core.provider
 
 
 import javax.swing.JMenuItem
-import org.openmole.ide.core.workflow.action.AddCapsuleAction
-import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.action.AddCapsuleAction
+import org.openmole.ide.core.workflow.MoleScene
 import scala.collection.mutable.HashSet
 
 class MoleSceneMenuProvider(moleScene: MoleScene) extends GenericMenuProvider {

@@ -31,14 +31,14 @@ import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.control.TaskSettingsManager;
 import org.openmole.ide.core.palette.PaletteSupport;
 import org.openmole.ide.core.control.MoleScenesManager;
-import org.openmole.ide.core.workflow.action.AddMoleSceneAction;
-import org.openmole.ide.core.workflow.action.EnableTaskDetailedViewAction;
-import org.openmole.ide.core.workflow.action.RemoveAllMoleSceneAction;
+import org.openmole.ide.core.action.AddMoleSceneAction;
+import org.openmole.ide.core.action.EnableTaskDetailedViewAction;
+import org.openmole.ide.core.action.RemoveAllMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.nodes.AbstractNode;
 import org.openmole.ide.core.palette.CategoryBuilder;
 import org.openmole.ide.core.display.MenuToggleButton2;
-import org.openmole.ide.core.workflow.action.RemoveMoleSceneAction;
+import org.openmole.ide.core.action.RemoveMoleSceneAction;
 import scala.swing.Menu;
 import scala.swing.MenuItem;
 

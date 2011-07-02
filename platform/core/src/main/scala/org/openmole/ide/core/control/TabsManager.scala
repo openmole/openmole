@@ -5,8 +5,8 @@
 
 package org.openmole.ide.core.control
 
-import org.openmole.ide.core.workflow.implementation.CapsuleUI
-import org.openmole.ide.core.workflow.model.IMoleScene
+import org.openmole.ide.core.workflow.CapsuleUI
+import org.openmole.ide.core.workflow.IMoleScene
 
 object TabsManager {
 

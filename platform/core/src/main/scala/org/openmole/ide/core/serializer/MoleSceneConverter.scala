@@ -26,16 +26,16 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.data.TaskDataUI
-import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.MoleScene
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.dataproxy.Proxys
-import org.openmole.ide.core.workflow.implementation.TransitionUI
-import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
+import org.openmole.ide.core.workflow.TransitionUI
+import org.openmole.ide.core.workflow.ISlotWidget
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.commons.TransitionType
 import org.openmole.ide.core.exception.MoleExceptionManagement
-import org.openmole.ide.core.workflow.model.ICapsuleUI
+import org.openmole.ide.core.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 

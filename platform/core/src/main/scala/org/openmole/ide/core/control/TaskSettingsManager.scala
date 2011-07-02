@@ -10,7 +10,7 @@ import javax.swing.text.Document
 import org.openide.filesystems.FileUtil
 import org.openide.loaders.DataObject
 import org.openide.text.CloneableEditorSupport
-import org.openmole.ide.core.workflow.model.ICapsuleUI
+import org.openmole.ide.core.workflow.ICapsuleUI
 
 object TaskSettingsManager extends TabManager{
 

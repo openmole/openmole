@@ -23,10 +23,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JScrollPane
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.workflow.implementation.CapsuleUI
-import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.model.ICapsuleUI
-import org.openmole.ide.core.workflow.model.IMoleScene
+import org.openmole.ide.core.workflow.CapsuleUI
+import org.openmole.ide.core.workflow.MoleScene
+import org.openmole.ide.core.workflow.ICapsuleUI
+import org.openmole.ide.core.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 

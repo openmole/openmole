@@ -15,19 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.dialog
-
-import javax.swing.JOptionPane
-import javax.swing.JOptionPane._
+package org.openmole.ide.core.action
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.dialog.TransitionDialog
 import org.openmole.ide.core.workflow.LabeledConnectionWidget
 
-object TransitionDialog {
-  def displayTransitionDialog(connectionWidget: LabeledConnectionWidget) {
-    connectionWidget.transition.condition = None
-    val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", connectionWidget.transition.condition)
-    if (cond == null) CLOSED_OPTION
-    else connectionWidget.transition.condition = Some(cond)
-    connectionWidget.setConditionLabel(connectionWidget.transition.condition)
-    connectionWidget.scene.validate
-  }
+class AddTransitionConditionAction(connectionWidget: LabeledConnectionWidget) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent)= TransitionDialog.displayTransitionDialog(connectionWidget)
 }

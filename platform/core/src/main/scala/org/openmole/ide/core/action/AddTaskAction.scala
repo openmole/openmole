@@ -15,19 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.dialog
+package org.openmole.ide.core.action
 
-import javax.swing.JOptionPane
-import javax.swing.JOptionPane._
-import org.openmole.ide.core.workflow.LabeledConnectionWidget
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.data.ITaskDataUI
+import org.openmole.ide.core.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.workflow.MoleScene
+import org.openmole.ide.core.workflow.CapsuleUI
 
-object TransitionDialog {
-  def displayTransitionDialog(connectionWidget: LabeledConnectionWidget) {
-    connectionWidget.transition.condition = None
-    val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", connectionWidget.transition.condition)
-    if (cond == null) CLOSED_OPTION
-    else connectionWidget.transition.condition = Some(cond)
-    connectionWidget.setConditionLabel(connectionWidget.transition.condition)
-    connectionWidget.scene.validate
+class AddTaskAction(moleScene: MoleScene ,capsule: CapsuleUI,dpu: TaskDataProxyUI) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent)= {
+    capsule.encapsule(dpu)
+    moleScene.validate
+    moleScene.refresh
+        
   }
 }

@@ -24,7 +24,7 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.data.IDataUI
 import org.openmole.ide.core.data.ITaskDataUI
-import org.openmole.ide.core.workflow.implementation.MoleScene
+import org.openmole.ide.core.workflow.MoleScene
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager
 import org.netbeans.api.visual.action.ConnectorState

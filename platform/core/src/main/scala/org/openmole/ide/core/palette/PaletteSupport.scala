@@ -107,7 +107,7 @@ class MyDnDHandler extends DragAndDropHandler {
 //import org.openide.nodes.Node;
 //import org.openide.util.Lookup;
 //import org.openide.util.datatransfer.ExTransferable;
-//import org.openmole.ide.core.workflow.implementation.Preferences;
+//import org.openmole.ide.core.workflow.Preferences;
 //
 //
 ///**

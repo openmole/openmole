@@ -24,9 +24,9 @@ import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.dataproxy.Proxys
-import org.openmole.ide.core.workflow.implementation.MoleScene
-import org.openmole.ide.core.workflow.action._
-import org.openmole.ide.core.workflow.implementation.CapsuleUI
+import org.openmole.ide.core.workflow.MoleScene
+import org.openmole.ide.core.action._
+import org.openmole.ide.core.workflow.CapsuleUI
 import org.openmole.ide.core.commons.Constants
 
 class CapsuleMenuProvider(scene: MoleScene, capsule: CapsuleUI) extends GenericMenuProvider {

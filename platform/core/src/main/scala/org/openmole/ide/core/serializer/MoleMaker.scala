@@ -28,9 +28,9 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.capsule._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.workflow.implementation.MoleSceneManager
-import org.openmole.ide.core.workflow.implementation.TransitionUI
-import org.openmole.ide.core.workflow.model.ICapsuleUI
+import org.openmole.ide.core.workflow.MoleSceneManager
+import org.openmole.ide.core.workflow.TransitionUI
+import org.openmole.ide.core.workflow.ICapsuleUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
