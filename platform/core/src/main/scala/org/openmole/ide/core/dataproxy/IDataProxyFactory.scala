@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IFactoryUI
+import org.openmole.ide.core.factory.IFactoryUI
 
 trait IDataProxyFactory {
   def buildDataProxyUI(name:String): IDataProxyUI

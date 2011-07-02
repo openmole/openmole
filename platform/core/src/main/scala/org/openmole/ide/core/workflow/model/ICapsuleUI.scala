@@ -7,7 +7,7 @@ package org.openmole.ide.core.workflow.model
 
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.commons.CapsuleType
-import org.openmole.ide.core.properties.ITaskDataUI
+import org.openmole.ide.core.data.ITaskDataUI
 import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget

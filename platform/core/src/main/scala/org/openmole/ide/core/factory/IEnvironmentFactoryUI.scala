@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.factory
 
-import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.data.IEnvironmentDataUI
 
 trait IEnvironmentFactoryUI extends IFactoryUI{ 
-  override def entityType = Constants.ENVIRONMENT
-  
   override def displayName: String = buildDataUI("").coreClass.getSimpleName
   
   def buildDataUI(name: String): IEnvironmentDataUI

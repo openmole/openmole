@@ -22,8 +22,8 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.properties.IPrototypePanelUI
-import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.panel.IPrototypePanelUI
+import org.openmole.ide.core.factory.IPrototypeFactoryUI
 
 object PrototypeDisplay extends IDisplay{
   private var count= 0

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,21 +9,14 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.panel
+import org.openmole.ide.core.data.ITaskDataUI
 
-package org.openmole.ide.core.properties
-
-import org.openmole.ide.core.commons.Constants
-import org.openmole.core.model.sampling.ISampling
-
-trait ISamplingDataUI extends IDataUI{
-  override def entityType = Constants.SAMPLING
-  
-  def coreObject: ISampling
-  
-  def buildPanelUI: ISamplingPanelUI
+trait ITaskPanelUI extends IPanelUI{
+  def saveContent(name:String): ITaskDataUI
 }

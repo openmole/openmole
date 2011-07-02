@@ -23,8 +23,8 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.properties.ISamplingPanelUI
-import org.openmole.ide.core.properties.ISamplingFactoryUI
+import org.openmole.ide.core.panel.ISamplingPanelUI
+import org.openmole.ide.core.factory.ISamplingFactoryUI
 
 object SamplingDisplay extends IDisplay{
   private var count= 0

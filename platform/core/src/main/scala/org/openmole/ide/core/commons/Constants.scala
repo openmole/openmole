@@ -19,7 +19,7 @@ package org.openmole.ide.core.commons
 import java.awt.Color
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
-import org.openmole.ide.core.properties._
+import org.openmole.ide.core.data._
 import org.openmole.ide.core.dataproxy._
 
 object Constants{

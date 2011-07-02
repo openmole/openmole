@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.core.properties
 
-trait ITaskPanelUI extends IPanelUI{
-  def saveContent(name:String): ITaskDataUI
-}
+package org.openmole.ide.core.data
+
+abstract class DataUI(var name: String, val entityType: String) extends IDataUI

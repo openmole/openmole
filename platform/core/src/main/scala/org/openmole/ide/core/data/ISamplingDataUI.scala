@@ -15,15 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.data
 
 import org.openmole.ide.core.commons.Constants
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.sampling.ISampling
+import org.openmole.ide.core.panel.ISamplingPanelUI
 
-trait IPrototypeDataUI extends IDataUI{
-  def coreObject: IPrototype[_]
+trait ISamplingDataUI extends IDataUI{
+  override def entityType = Constants.SAMPLING
   
-  override def entityType: String = Constants.PROTOTYPE
+  def coreObject: ISampling
   
-  def buildPanelUI: IPrototypePanelUI
+  def buildPanelUI: ISamplingPanelUI
 }

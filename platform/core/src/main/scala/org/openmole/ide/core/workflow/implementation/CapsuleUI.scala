@@ -23,7 +23,7 @@ import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.commons.CapsuleType._
-import org.openmole.ide.core.properties.ITaskDataUI
+import org.openmole.ide.core.data.ITaskDataUI
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget

@@ -15,11 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.data
 
-import javax.swing.JPanel
-import scala.swing.Panel
+import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.panel.IPrototypePanelUI
+import org.openmole.core.model.data.IPrototype
 
-trait ISamplingPanelUI extends IPanelUI{
-  def saveContent(name:String): ISamplingDataUI
+trait IPrototypeDataUI extends IDataUI{
+  def coreObject: IPrototype[_]
+  
+  override def entityType: String = Constants.PROTOTYPE
+  
+  def buildPanelUI: IPrototypePanelUI
 }

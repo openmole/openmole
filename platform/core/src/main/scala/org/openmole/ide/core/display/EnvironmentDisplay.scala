@@ -23,8 +23,8 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.properties.IEnvironmentPanelUI
-import org.openmole.ide.core.properties.IEnvironmentFactoryUI
+import org.openmole.ide.core.panel.IEnvironmentPanelUI
+import org.openmole.ide.core.factory.IEnvironmentFactoryUI
 
 object EnvironmentDisplay extends IDisplay{
   private var count= 0

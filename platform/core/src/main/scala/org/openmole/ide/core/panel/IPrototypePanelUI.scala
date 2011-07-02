@@ -15,8 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.panel
 
-trait IEnvironmentPanelUI extends IPanelUI{
-  def saveContent(name:String): IEnvironmentDataUI
+import scala.swing.Panel
+import org.openmole.ide.core.data.IPrototypeDataUI
+
+trait IPrototypePanelUI extends Panel with IPanelUI{
+  def saveContent(name:String): IPrototypeDataUI
 }

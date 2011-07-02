@@ -15,10 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.data
 
-import javax.swing.JPanel
+import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.panel.IEnvironmentPanelUI
+import org.openmole.core.model.execution.IEnvironment
 
-trait IPanelUI {
-  def peer: JPanel
+trait IEnvironmentDataUI extends IDataUI {
+  override def entityType = Constants.ENVIRONMENT
+  
+  def coreObject: IEnvironment
+  
+  def buildPanelUI: IEnvironmentPanelUI
 }

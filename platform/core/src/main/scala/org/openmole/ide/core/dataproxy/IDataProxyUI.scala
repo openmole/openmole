@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IDataUI
+import org.openmole.ide.core.data.IDataUI
 
 trait IDataProxyUI{
   def dataUI: IDataUI

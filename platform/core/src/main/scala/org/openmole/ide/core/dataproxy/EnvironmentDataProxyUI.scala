@@ -17,6 +17,6 @@
 
 package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IEnvironmentDataUI
+import org.openmole.ide.core.data.IEnvironmentDataUI
 
 class EnvironmentDataProxyUI (var dataUI: IEnvironmentDataUI) extends IDataProxyUI 

@@ -15,21 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.panel
 
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.data.ISamplingDataUI
 
-object EmptyDataUIs {
-  //def prototype = new 
-  
-  
-  class  EmptyPrototypeDataUI(val name: String) extends IPrototypeDataUI  {
-    override def coreClass = classOf[IPrototype[Any]]
-    override def coreObject = new Prototype(name,classOf[Any])
-    override def imagePath = ""
-    override def buildPanelUI = new EmptyPrototypePanelUI
-    
-    class EmptyPrototypePanelUI extends IPrototypePanelUI {override def saveContent(name:String) = new EmptyPrototypeDataUI("")}
-  }
+trait ISamplingPanelUI extends IPanelUI{
+  def saveContent(name:String): ISamplingDataUI
 }

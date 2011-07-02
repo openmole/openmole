@@ -19,7 +19,7 @@ package org.openmole.ide.core.display
  
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.commons.Constants._
-import org.openmole.ide.core.properties.IPanelUI
+import org.openmole.ide.core.panel.IPanelUI
 
 
 object Displays {

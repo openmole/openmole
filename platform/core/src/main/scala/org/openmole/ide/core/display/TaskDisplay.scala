@@ -23,8 +23,8 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.dataproxy.TaskDataProxyFactory
-import org.openmole.ide.core.properties.ITaskPanelUI
-import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.panel.ITaskPanelUI
+import org.openmole.ide.core.factory.ITaskFactoryUI
 
 object TaskDisplay extends IDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]

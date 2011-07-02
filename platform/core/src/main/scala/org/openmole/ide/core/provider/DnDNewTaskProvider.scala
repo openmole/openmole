@@ -22,8 +22,8 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.dataproxy._
-import org.openmole.ide.core.properties.IDataUI
-import org.openmole.ide.core.properties.ITaskDataUI
+import org.openmole.ide.core.data.IDataUI
+import org.openmole.ide.core.data.ITaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.control.MoleScenesManager

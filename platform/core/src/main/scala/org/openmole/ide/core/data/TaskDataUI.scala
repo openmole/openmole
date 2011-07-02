@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.data
 
 import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType

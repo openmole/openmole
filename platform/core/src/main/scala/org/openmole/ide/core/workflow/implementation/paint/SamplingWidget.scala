@@ -27,7 +27,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.properties.TaskDataUI
+import org.openmole.ide.core.data.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.model.ICapsuleUI
 

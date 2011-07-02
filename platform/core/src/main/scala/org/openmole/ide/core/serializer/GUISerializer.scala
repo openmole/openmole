@@ -27,7 +27,7 @@ import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.dataproxy._
-import org.openmole.ide.core.properties._
+import org.openmole.ide.core.data._
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.MoleSceneTopComponent
 import org.openmole.ide.core.commons.Constants

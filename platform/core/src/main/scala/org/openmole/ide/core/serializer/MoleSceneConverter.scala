@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
-import org.openmole.ide.core.properties.TaskDataUI
+import org.openmole.ide.core.data.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.control.MoleScenesManager
 import org.openmole.ide.core.commons.Constants

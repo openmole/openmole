@@ -18,17 +18,17 @@
 package org.openmole.ide.core.dataproxy
 
 import org.openide.util.Lookup
-import org.openmole.ide.core.properties.IFactoryUI
-import org.openmole.ide.core.properties.IDataUI
-import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.factory.IFactoryUI
+import org.openmole.ide.core.data.IDataUI
+import org.openmole.ide.core.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.properties.IEnvironmentFactoryUI
-import org.openmole.ide.core.properties.ISamplingFactoryUI
-import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.factory.ISamplingFactoryUI
+import org.openmole.ide.core.factory.ITaskFactoryUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.commons.Constants
-import org.openmole.ide.core.properties._
+import org.openmole.ide.core.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer

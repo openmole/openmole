@@ -15,13 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.data
 
 import java.awt.Color
 import org.openmole.core.implementation.task.GenericTask
 import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.panel.ITaskPanelUI
 import scala.collection.mutable.HashSet
 
 trait ITaskDataUI extends IDataUI{

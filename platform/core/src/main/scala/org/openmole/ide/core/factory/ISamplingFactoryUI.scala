@@ -15,15 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.factory
 
-import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.data.ISamplingDataUI
 
-trait IPrototypeFactoryUI  extends IFactoryUI{
-  override def entityType = Constants.PROTOTYPE
-  
+trait ISamplingFactoryUI extends IFactoryUI { 
   override def displayName: String = buildDataUI("").coreClass.getSimpleName
   
-  def buildDataUI(name: String): IPrototypeDataUI
-  
+  def buildDataUI(name: String): ISamplingDataUI
 }

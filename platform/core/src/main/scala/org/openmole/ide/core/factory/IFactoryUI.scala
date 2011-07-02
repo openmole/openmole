@@ -15,16 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.properties
+package org.openmole.ide.core.factory
 
-trait IDataUI{
- // def name_=(s: String)
-  
-  def name: String
-  
-  def entityType: String
-  
-  def coreClass: Class[_]
-  
-  def imagePath: String 
+trait IFactoryUI {
+  def displayName: String 
 }
