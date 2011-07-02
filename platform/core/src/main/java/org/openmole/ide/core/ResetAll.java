@@ -24,7 +24,7 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openmole.ide.core.display.Displays;
-import org.openmole.ide.core.palette.ElementFactories;
+import org.openmole.ide.core.dataproxy.Proxys;
 import org.openmole.ide.core.control.MoleScenesManager;
 
 @ActionID(category = "File",
@@ -38,7 +38,7 @@ public final class ResetAll implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         MoleScenesManager.removeMoleScenes();
-        ElementFactories.clearAll();
+        Proxys.clearAll();
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
         MoleSceneTopComponent.getDefault().refreshPalette();
       //  Displays.propertyPanel.hidePanelScrollPane();

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
 import org.openide.util.Lookup
 import org.openmole.ide.core.properties.IFactoryUI
@@ -34,17 +34,17 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.WeakHashMap
 
-object ElementFactories {
+object Proxys {
   
 //  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI[TaskDataUI]],
 //                                 Constants.PROTOTYPE -> new ListBuffer[DataProxyUI[DataUI[Prototype[_]]]],
 //                                 Constants.SAMPLING -> new ListBuffer[DataProxyUI[DataUI[ISampling]]],
 //                                 Constants.ENVIRONMENT -> new ListBuffer[DataProxyUI[DataUI[IEnvironment]]])
   
-  var dataTaskProxys = new HashSet[TaskDataProxyUI]
-  var dataPrototypeProxys = new HashSet[PrototypeDataProxyUI]
-  var dataSamplingProxys = new HashSet[SamplingDataProxyUI]
-  var dataEnvironmentProxys = new HashSet[EnvironmentDataProxyUI]
+  var task = new HashSet[TaskDataProxyUI]
+  var prototype = new HashSet[PrototypeDataProxyUI]
+  var sampling = new HashSet[SamplingDataProxyUI]
+  var environment = new HashSet[EnvironmentDataProxyUI]
   
 //  lazy val dataProxys = Map(Constants.TASK -> new ListBuffer[DataProxyUI],
 //                            Constants.PROTOTYPE -> new ListBuffer[DataProxyUI],
@@ -65,38 +65,38 @@ object ElementFactories {
   // def getDataProxyUI(categoryName: String, name: String) = dataProxys(categoryName).groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
 //  def getDataProxyUI(categoryName: String, name: String) = {
 //    categoryName match {
-//      case Constants.TASK=> dataTaskProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-//      case Constants.PROTOTYPE=> dataPrototypeProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-//      case Constants.SAMPLING=> dataSamplingProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-//      case Constants.ENVIRONMENT=> dataEnvironmentProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.TASK=> task.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.PROTOTYPE=> prototype.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.SAMPLING=> sampling.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+//      case Constants.ENVIRONMENT=> environment.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
 //    }
 //  }
   
-  def getTaskDataProxyUI(name: String) = dataTaskProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getPrototypeDataProxyUI(name: String) = dataPrototypeProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getSamplingDataProxyUI(name: String) = dataSamplingProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getEnvironmentDataProxyUI(name: String) = dataEnvironmentProxys.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getTaskDataProxyUI(name: String) = task.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getPrototypeDataProxyUI(name: String) = prototype.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getSamplingDataProxyUI(name: String) = sampling.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
+  def getEnvironmentDataProxyUI(name: String) = environment.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
   
   
-  def getPrototypesNames = dataTaskProxys.groupBy(_.dataUI.name).keys.toSet
+  def getPrototypesNames = task.groupBy(_.dataUI.name).keys.toSet
     
   // def getAll(entityType: String) = dataProxys(entityType)
   
-  def addTaskElement(dpu: TaskDataProxyUI) = dataTaskProxys += dpu
-  def addPrototypeElement(dpu: PrototypeDataProxyUI) = dataPrototypeProxys += dpu
-  def addSamplingElement(dpu: SamplingDataProxyUI) = dataSamplingProxys += dpu
-  def addEnvironmentElement(dpu: EnvironmentDataProxyUI) = dataEnvironmentProxys += dpu
+  def addTaskElement(dpu: TaskDataProxyUI) = task += dpu
+  def addPrototypeElement(dpu: PrototypeDataProxyUI) = prototype += dpu
+  def addSamplingElement(dpu: SamplingDataProxyUI) = sampling += dpu
+  def addEnvironmentElement(dpu: EnvironmentDataProxyUI) = environment += dpu
   
   
-  def removeTaskElement(dpu: TaskDataProxyUI) = dataTaskProxys.remove(dpu)
-  def removePrototypeElement(dpu: PrototypeDataProxyUI) = dataPrototypeProxys.remove(dpu)
-  def removeSamplingElement(dpu: SamplingDataProxyUI) = dataSamplingProxys.remove(dpu)
-  def removeEnvironmentElement(dpu: EnvironmentDataProxyUI) = dataEnvironmentProxys.remove(dpu)
+  def removeTaskElement(dpu: TaskDataProxyUI) = task.remove(dpu)
+  def removePrototypeElement(dpu: PrototypeDataProxyUI) = prototype.remove(dpu)
+  def removeSamplingElement(dpu: SamplingDataProxyUI) = sampling.remove(dpu)
+  def removeEnvironmentElement(dpu: EnvironmentDataProxyUI) = environment.remove(dpu)
   
-  def clearAllTaskElement = dataTaskProxys.clear
-  def clearAllPrototypeElement = dataPrototypeProxys.clear
-  def clearAllSamplingElement = dataSamplingProxys.clear
-  def clearAllEnvironmentElement = dataEnvironmentProxys.clear
+  def clearAllTaskElement = task.clear
+  def clearAllPrototypeElement = prototype.clear
+  def clearAllSamplingElement = sampling.clear
+  def clearAllEnvironmentElement = environment.clear
   
   def clearAll: Unit = {
     clearAllTaskElement

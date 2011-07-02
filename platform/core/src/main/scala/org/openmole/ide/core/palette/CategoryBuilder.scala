@@ -18,6 +18,7 @@
 package org.openmole.ide.core.palette
 
 import org.openmole.ide.core.commons.Constants
+import org.openmole.ide.core.dataproxy.Proxys
 import org.openide.nodes.Node
 import org.openide.nodes.Children
 import scala.collection.JavaConversions._
@@ -30,9 +31,9 @@ class CategoryBuilder extends Children.Keys[ICategory]{
     super.addNotify
     
     setKeys(List(
-        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(ElementFactories.dataTaskProxys,Constants.TASK_DATA_FLAVOR)),
-        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(ElementFactories.dataPrototypeProxys,Constants.PROTOTYPE_DATA_FLAVOR)),
-        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(ElementFactories.dataSamplingProxys,Constants.SAMPLING_DATA_FLAVOR)),
-        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(ElementFactories.dataEnvironmentProxys,Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
+        new GenericCategory(Constants.TASK,"Tasks" ,new GenericChildren(Proxys.task,Constants.TASK_DATA_FLAVOR)),
+        new GenericCategory(Constants.PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,Constants.PROTOTYPE_DATA_FLAVOR)),
+        new GenericCategory(Constants.SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,Constants.SAMPLING_DATA_FLAVOR)),
+        new GenericCategory(Constants.ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,Constants.ENVIRONMENT_DATA_FLAVOR))).toIterable)
   }
 }

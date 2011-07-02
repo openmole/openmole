@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,16 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IEnvironmentFactoryUI
-import scala.collection.JavaConversions._
+import org.openmole.ide.core.properties.ITaskFactoryUI
 
-class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends IDataProxyFactory{
-  
-  override def buildDataProxyUI(name:String) = {
-    val dup = new EnvironmentDataProxyUI(factory.buildDataUI(name))
-    ElementFactories.addEnvironmentElement(dup)
+class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends IDataProxyFactory{
+
+  def buildDataProxyUI(name:String) = {
+    val dup = new TaskDataProxyUI(factory.buildDataUI(name))
+    Proxys.addTaskElement(dup)
     dup
   }
 }

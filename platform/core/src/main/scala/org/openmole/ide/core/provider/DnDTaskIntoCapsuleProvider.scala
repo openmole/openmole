@@ -25,7 +25,7 @@ import org.openmole.ide.core.workflow.model.ICapsuleUI
 import scala.collection.JavaConversions
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.CapsuleType._
-import org.openmole.ide.core.palette._
+import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.display.Displays
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.exception.GUIUserBadDataError

@@ -20,8 +20,8 @@ package org.openmole.ide.core.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.SamplingDataProxyFactory
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.properties.ISamplingPanelUI
 import org.openmole.ide.core.properties.ISamplingFactoryUI
@@ -36,7 +36,7 @@ object SamplingDisplay extends IDisplay{
   
   override def implementationClasses = modelSamplings
   
-  override def dataProxyUI(n: String) = ElementFactories.getSamplingDataProxyUI(n)
+  override def dataProxyUI(n: String) = Proxys.getSamplingDataProxyUI(n)
   
   override def increment = {
     count += 1

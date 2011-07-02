@@ -19,6 +19,7 @@ package org.openmole.ide.core.palette
 
 import org.openide.nodes.Index
 import org.openide.nodes.Node
+import org.openmole.ide.core.dataproxy.IDataProxyUI
 import java.awt.datatransfer.DataFlavor
 import java.util.ArrayList
 

@@ -20,11 +20,11 @@ package org.openmole.ide.core.workflow.implementation
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.provider.DnDTaskIntoCapsuleProvider
-import org.openmole.ide.core.palette.TaskDataProxyUI
+import org.openmole.ide.core.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.provider.CapsuleMenuProvider
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.properties.ITaskDataUI
-import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.workflow.implementation.paint.ConnectableWidget
 import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.model.ICapsuleUI
@@ -75,6 +75,6 @@ class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
   
   def setDataProxy(dpu: TaskDataProxyUI)={
     dataProxy= Some(dpu)
-    if (ElementFactories.isExplorationTaskData(dpu.dataUI)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
+    if (Proxys.isExplorationTaskData(dpu.dataUI)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
   }
 }

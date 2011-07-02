@@ -22,7 +22,7 @@ import java.awt.Container
 import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.properties.TaskDataUI
 import org.openmole.ide.core.workflow.implementation.CapsuleUI
 import org.openmole.ide.core.workflow.implementation.MoleScene

@@ -21,8 +21,8 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.TaskDataProxyFactory
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.properties.ITaskPanelUI
 import org.openmole.ide.core.properties.ITaskFactoryUI
 
@@ -35,7 +35,7 @@ object TaskDisplay extends IDisplay{
   
   override def implementationClasses = modelTasks
   
-  override def dataProxyUI(n: String) = ElementFactories.getTaskDataProxyUI(n)
+  override def dataProxyUI(n: String) = Proxys.getTaskDataProxyUI(n)
   
   override def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)

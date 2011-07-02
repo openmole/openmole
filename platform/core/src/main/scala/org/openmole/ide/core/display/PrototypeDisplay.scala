@@ -19,8 +19,8 @@ package org.openmole.ide.core.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.PrototypeDataProxyFactory
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.properties.IPrototypePanelUI
 import org.openmole.ide.core.properties.IPrototypeFactoryUI
@@ -35,7 +35,7 @@ object PrototypeDisplay extends IDisplay{
   
   override def implementationClasses = modelPrototypes
   
-  override def dataProxyUI(n: String) = ElementFactories.getPrototypeDataProxyUI(n)
+  override def dataProxyUI(n: String) = Proxys.getPrototypeDataProxyUI(n)
 
   override def increment = {
     count += 1

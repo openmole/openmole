@@ -15,12 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IFactoryUI
+import org.openmole.ide.core.properties.IPrototypeDataUI
 
-trait IDataProxyFactory {
-  def buildDataProxyUI(name:String): IDataProxyUI
-  
-  def factory: IFactoryUI
-}
+class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI) extends IDataProxyUI

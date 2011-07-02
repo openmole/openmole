@@ -19,7 +19,7 @@ package org.openmole.ide.core.properties
 
 import java.awt.Color
 import org.openmole.core.implementation.task.GenericTask
-import org.openmole.ide.core.palette._
+import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.commons.Constants
 import scala.collection.mutable.HashSet

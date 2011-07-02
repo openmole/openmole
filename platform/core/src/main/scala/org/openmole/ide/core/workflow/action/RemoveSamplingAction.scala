@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.workflow.action
 
-import org.openmole.ide.core.palette.TaskDataProxyUI
+import org.openmole.ide.core.dataproxy.TaskDataProxyUI
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 

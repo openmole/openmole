@@ -21,7 +21,7 @@ import org.openmole.ide.core.commons.Constants
 import org.openmole.ide.core.commons.IOType
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.GenericTask
-import org.openmole.ide.core.palette._
+import org.openmole.ide.core.dataproxy._
 import scala.collection.mutable.HashSet
 
 abstract class TaskDataUI extends ITaskDataUI{

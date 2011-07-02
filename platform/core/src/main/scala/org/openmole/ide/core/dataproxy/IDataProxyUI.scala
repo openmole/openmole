@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
 import org.openmole.ide.core.properties.IDataUI
 

@@ -17,19 +17,19 @@
 
 package org.openmole.ide.core.serializer
 
-import org.openmole.ide.core.palette._
+import org.openmole.ide.core.dataproxy._
 import scala.collection.mutable.HashSet
 
-class SerializedProxys(var dataTaskProxys: HashSet[TaskDataProxyUI],
-                       var dataPrototypeProxys: HashSet[PrototypeDataProxyUI],
-                       var dataSamplingProxys: HashSet[SamplingDataProxyUI],
-                       var dataEnvironmentProxys: HashSet[EnvironmentDataProxyUI]) {
+class SerializedProxys(var task: HashSet[TaskDataProxyUI],
+                       var prototype: HashSet[PrototypeDataProxyUI],
+                       var sampling: HashSet[SamplingDataProxyUI],
+                       var environment: HashSet[EnvironmentDataProxyUI]) {
   
   def loadProxys = {
-    ElementFactories.dataTaskProxys = dataTaskProxys
-    ElementFactories.dataPrototypeProxys = dataPrototypeProxys
-    ElementFactories.dataSamplingProxys = dataSamplingProxys
-    ElementFactories.dataEnvironmentProxys = dataEnvironmentProxys
+    Proxys.task = task
+    Proxys.prototype = prototype
+    Proxys.sampling = sampling
+    Proxys.environment = environment
   }
   
 }

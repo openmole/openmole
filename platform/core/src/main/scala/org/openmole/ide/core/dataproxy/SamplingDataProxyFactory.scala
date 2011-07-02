@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 import org.openmole.ide.core.properties.ISamplingFactoryUI
 
 class SamplingDataProxyFactory (val factory: ISamplingFactoryUI) extends IDataProxyFactory{
   def buildDataProxyUI(name:String) = {
     val dup = new SamplingDataProxyUI(factory.buildDataUI(name))
-    ElementFactories.addSamplingElement(dup)
+    Proxys.addSamplingElement(dup)
     dup
   }
 }

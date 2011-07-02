@@ -25,8 +25,8 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.control.MoleScenesManager
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette._
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy._
 import org.openmole.ide.core.properties._
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.MoleSceneTopComponent
@@ -47,10 +47,10 @@ object GUISerializer {
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    out.writeObject(new SerializedProxys(ElementFactories.dataTaskProxys,
-                                         ElementFactories.dataPrototypeProxys,
-                                         ElementFactories.dataSamplingProxys,
-                                         ElementFactories.dataEnvironmentProxys))
+    out.writeObject(new SerializedProxys(Proxys.task,
+                                         Proxys.prototype,
+                                         Proxys.sampling,
+                                         Proxys.environment))
     //molescenes
     MoleScenesManager.moleScenes.foreach(out.writeObject(_))
     
@@ -61,7 +61,7 @@ object GUISerializer {
     val reader = new FileReader(new File(fromFile))
     val in = xstream.createObjectInputStream(reader)
    
-    ElementFactories.clearAll
+    Proxys.clearAll
     MoleScenesManager.removeMoleScenes
     
     try {

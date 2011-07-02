@@ -23,7 +23,7 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.commons.IOType
-import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.action._
 import org.openmole.ide.core.workflow.implementation.CapsuleUI

@@ -19,8 +19,8 @@ package org.openmole.ide.core.display
 
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.properties.IPanelUI
-import org.openmole.ide.core.palette.IDataProxyUI
-import org.openmole.ide.core.palette.IDataProxyFactory
+import org.openmole.ide.core.dataproxy.IDataProxyUI
+import org.openmole.ide.core.dataproxy.IDataProxyFactory
 
 trait IDisplay{
   def implementationClasses: HashSet[_<:IDataProxyFactory]

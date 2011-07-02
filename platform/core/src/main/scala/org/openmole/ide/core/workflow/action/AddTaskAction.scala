@@ -20,7 +20,7 @@ package org.openmole.ide.core.workflow.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.properties.ITaskDataUI
-import org.openmole.ide.core.palette.TaskDataProxyUI
+import org.openmole.ide.core.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.workflow.implementation.MoleScene
 import org.openmole.ide.core.workflow.implementation.CapsuleUI
 

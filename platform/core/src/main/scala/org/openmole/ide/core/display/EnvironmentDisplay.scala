@@ -20,8 +20,8 @@ package org.openmole.ide.core.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.EnvironmentDataProxyFactory
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.exception.GUIUserBadDataError
 import org.openmole.ide.core.properties.IEnvironmentPanelUI
 import org.openmole.ide.core.properties.IEnvironmentFactoryUI
@@ -36,7 +36,7 @@ object EnvironmentDisplay extends IDisplay{
   
   override def implementationClasses = modelEnvironments
   
-  override def dataProxyUI(n: String) = ElementFactories.getEnvironmentDataProxyUI(n)
+  override def dataProxyUI(n: String) = Proxys.getEnvironmentDataProxyUI(n)
   
   override def increment = {
     count += 1

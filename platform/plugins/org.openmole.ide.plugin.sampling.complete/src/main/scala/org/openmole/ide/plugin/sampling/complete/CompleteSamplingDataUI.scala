@@ -8,7 +8,7 @@ package org.openmole.ide.plugin.sampling.complete
 
 import java.io.File
 import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.palette.PrototypeDataProxyUI
+import org.openmole.ide.core.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.properties.ISamplingDataUI
 import org.openmole.plugin.sampling.complete.CompleteSampling
 import org.openmole.ide.core.properties.EmptyDataUIs._

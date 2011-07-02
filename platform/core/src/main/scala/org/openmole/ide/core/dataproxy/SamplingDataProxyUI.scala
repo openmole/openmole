@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,16 +9,14 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
-import scala.collection.JavaConversions._
-import org.openmole.ide.core.properties.ITaskDataUI
+import org.openmole.ide.core.properties.ISamplingDataUI
 
-//class DataProxyUI(var dataUI: IDataUI[_]){
-class TaskDataProxyUI(var dataUI: ITaskDataUI) extends IDataProxyUI
+class SamplingDataProxyUI (var dataUI: ISamplingDataUI) extends IDataProxyUI

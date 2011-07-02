@@ -30,8 +30,8 @@ import org.openmole.ide.core.display._
 import org.openmole.ide.core.properties.ISamplingPanelUI
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.table.DefaultTableModel
-import org.openmole.ide.core.palette.ElementFactories
-import org.openmole.ide.core.palette.PrototypeDataProxyUI
+import org.openmole.ide.core.dataproxy.Proxys
+import org.openmole.ide.core.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.properties.EmptyDataUIs._
 import scala.swing.BorderPanel.Position._
 

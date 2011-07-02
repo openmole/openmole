@@ -43,7 +43,7 @@ import org.openmole.ide.core.workflow.implementation.paint.ISlotWidget
 import org.openmole.ide.core.workflow.implementation.paint.LabeledConnectionWidget
 import org.openmole.ide.core.workflow.implementation.paint.OSlotWidget
 import org.netbeans.api.visual.action.ReconnectProvider
-import org.openmole.ide.core.palette.ElementFactories
+import org.openmole.ide.core.dataproxy.Proxys
 import org.openmole.ide.core.commons.CapsuleType._
 import org.openmole.ide.core.commons.TransitionType._
 import org.openmole.ide.core.workflow.implementation.paint.ISlotAnchor

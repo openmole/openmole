@@ -25,6 +25,7 @@ import org.openide.util.datatransfer.ExTransferable
 import org.openide.util.lookup.Lookups
 import org.openide.nodes.Children
 import org.openmole.ide.core.properties.IDataUI
+import org.openmole.ide.core.dataproxy.IDataProxyUI
 
 class GenericNode(dataFlavor: DataFlavor,val dataProxy: IDataProxyUI) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
   setIconBaseWithExtension(dataProxy.dataUI.imagePath)

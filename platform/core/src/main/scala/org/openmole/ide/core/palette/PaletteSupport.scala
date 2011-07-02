@@ -60,7 +60,7 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
       Displays.currentType = selCategoryLookup.getName
       Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
-      // PropertyPanel.getDefault.displayCurrentEntity(ElementFactories.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
+      // PropertyPanel.getDefault.displayCurrentEntity(Proxys.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
       Displays.propertyPanel.displayCurrentEntity 
       currentSelItem = selItem
     }

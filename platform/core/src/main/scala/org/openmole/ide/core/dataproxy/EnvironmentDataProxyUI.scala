@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.palette
+package org.openmole.ide.core.dataproxy
 
-import org.openmole.ide.core.properties.IPrototypeDataUI
+import org.openmole.ide.core.properties.IEnvironmentDataUI
 
-class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI) extends IDataProxyUI
+class EnvironmentDataProxyUI (var dataUI: IEnvironmentDataUI) extends IDataProxyUI 
