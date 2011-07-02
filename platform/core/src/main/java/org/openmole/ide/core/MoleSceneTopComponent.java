@@ -77,7 +77,6 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
-
         
         MenuToggleButton2 mt = new MenuToggleButton2("Mole");
         mt.addItem(new MenuItem(new AddMoleSceneAction("Add")));
