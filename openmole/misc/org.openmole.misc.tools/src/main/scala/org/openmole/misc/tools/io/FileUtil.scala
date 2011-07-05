@@ -50,7 +50,10 @@ object FileUtil {
   val DefaultBufferSize = 8 * 1024
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
-  implicit def inputStreamDecorator(is: InputStream) = new {
+  
+  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
+  
+  class InputStreamDecorator(is: InputStream) {
     def copy(to: OutputStream): Unit = {
       val buffer = new Array[Byte](DefaultBufferSize)
       Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach{ 

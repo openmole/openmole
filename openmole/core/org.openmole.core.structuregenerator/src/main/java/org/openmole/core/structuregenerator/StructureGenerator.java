@@ -94,14 +94,6 @@ public class StructureGenerator {
         return gp;
     }
 
-    /*  public void mkjar(GroovyProject gp, JarOutputStream jar) throws InternalProcessingError {
-    try {
-    mkJar(gp.getBinDir(), gp.getManifest(), jar);
-    } catch (IOException e) {
-    throw new InternalProcessingError(e);
-    }
-    }
-     */
     private void packStructures(Collection<ComplexNode> structures, File packDir, String nameSpace) throws IOException {
 
         Set<NodePath<ComplexNode>> builded = new TreeSet<NodePath<ComplexNode>>();
@@ -110,85 +102,8 @@ public class StructureGenerator {
             buildJavaCode(struct, packDir, nameSpace, builded);
         }
     }
-/*
-    private void loadClassesInProcessorList(IMole workflow, final GroovyProject gp, final Bundle b) throws InternalProcessingError {
 
-        workflow.visit(new IVisitor<IGenericTaskCapsule>() {
-
-            @Override
-            public void action(IGenericTaskCapsule visited) throws InternalProcessingError {
-                try {
-                    if (IStructureGenerationTask.class.isAssignableFrom(visited.getAssignedTask().getClass())) {
-                        IStructureGenerationTask loop = (IStructureGenerationTask) visited.getAssignedTask();
-
-
-                        if (loop.getInputClassName() != null) {
-                            Class<?> in = b.loadClass(gp.getNameSpace() + '.' + loop.getInputClassName());
-                            loop.setInputDataStructureClass(in);
-                        }
-
-                        if (loop.getOutputClassName() != null) {
-                            Class<?> out = b.loadClass(gp.getNameSpace() + '.' + loop.getOutputClassName());
-                            loop.setOutputDataStructureClass(out);
-                        }
-
-
-                    }
-                } catch (ClassNotFoundException e) {
-                    throw new InternalProcessingError(e);
-                }
-            }
-        });
-    }*/
-
-    /*private List<ComplexNode> packProcessorList(final IMole application, final File pack, final String nameSpace) throws InternalProcessingError {
-
-        final List<ComplexNode> structures = new LinkedList<ComplexNode>();
-
-        application.visit(new IVisitor<IGenericTaskCapsule>() {
-
-            @Override
-            public void action(IGenericTaskCapsule visited) throws InternalProcessingError {
-                try {
-                    if (IStructureGenerationTask.class.isAssignableFrom(visited.getAssignedTask().getClass())) {
-                        IStructureGenerationTask loop = (IStructureGenerationTask) visited.getAssignedTask();
-                        Set<NodePath<ComplexNode>> builded = new TreeSet<NodePath<ComplexNode>>();
-
-                        if (loop.getInputDataStructureClass() == null) {
-                            ComplexNode in = loop.getInputDataStructure();
-                            if (in != null) {
-                                structures.add(in);
-                                String inClassName = buildJavaCode(in, pack, nameSpace, builded);
-                                loop.setInputClassName(inClassName);
-                            }
-                        }
-
-                        if (loop.getOutputDataStructureClass() == null) {
-                            ComplexNode out = loop.getOutputDataStructure();
-                            if (out != null) {
-                                structures.add(out);
-                                String outClassName = buildJavaCode(out, pack, nameSpace, builded);
-                                loop.setOutputClassName(outClassName);
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new InternalProcessingError(e);
-                }
-            }
-        });
-
-        return structures;
-    }*/
-
-    /*  void mkJar(File binDir, Manifest man, JarOutputStream zos, String entry) throws FileNotFoundException, IOException, InternalProcessingError {
-    zipDir(binDir, zos);
-
-    JarEntry anEntry = new JarEntry(entry);
-    zos.putNextEntry(anEntry);
-
-    }*/
-   void mkJar(File binDir, File jar, Manifest man) throws FileNotFoundException, IOException, InternalProcessingError {
+    void mkJar(File binDir, File jar, Manifest man) throws FileNotFoundException, IOException, InternalProcessingError {
         JarOutputStream zos = new JarOutputStream(new FileOutputStream(jar), man);
         try {
             zipDir(binDir, zos);
