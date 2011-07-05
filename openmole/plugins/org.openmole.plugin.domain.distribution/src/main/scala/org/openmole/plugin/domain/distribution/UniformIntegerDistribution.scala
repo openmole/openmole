@@ -19,17 +19,21 @@ package org.openmole.plugin.domain.distribution
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import scala.util.Random
+import java.util.Random
 import java.lang.Integer
 
-class UniformIntegerDistribution(generator: Random) extends IDomain[Integer] {
+class UniformIntegerDistribution(generator: Random,topBound: Option[Int]= None) extends IDomain[Integer] {
  
-  def this(seed: Long) = this(new Random(seed))
+  def this(seed: Long) = this(new Random(seed),None)
+  def this(seed: Long, b: Int) = this(new Random(seed),Some(b))
     
   override def iterator(context: IContext): Iterator[Integer] = {
     new Iterator[Integer] {
       override def hasNext: Boolean = true
-      override def next: Integer =  generator.nextInt
+      override def next: Integer = topBound match {
+        case Some(i)=> generator.nextInt(i)
+        case None=> generator.nextInt
+      }
     }
   }
 }
