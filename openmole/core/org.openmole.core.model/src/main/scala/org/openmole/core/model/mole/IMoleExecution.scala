@@ -74,4 +74,5 @@ trait IMoleExecution {
   def ticket(job: IMoleJob): Option[ITicket]
     
   def moleJobs: Iterable[IMoleJob]
+  def id: String
 }

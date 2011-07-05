@@ -367,11 +367,6 @@
             <name>OpenMole repository</name>
             <url>http://maven.openmole.org/public/</url>
         </repository>
-        <repository>
-            <id>maven.openmole.org.snapshots</id>
-            <name>OpenMOLE snapshots repository</name>
-            <url>http://maven.openmole.org/snapshots/</url>
-        </repository>
     </repositories>
 
 </project>

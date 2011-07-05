@@ -25,7 +25,6 @@ import java.util.UUID
 import java.util.concurrent.Callable
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.ReplicatedFile
@@ -113,16 +112,15 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     val isDir = file.isDirectory
     var toReplicate = file
     val toReplicatePath = file.getAbsoluteFile
-    val moleExecution = JobRegistry(job)
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      val cache = FileService.archiveForDir(file, moleExecution)
+      val cache = FileService.archiveForDir(file, job.executionId)
       toReplicate = cache.file(false)
       cache
     } else null
 
-    val hash = FileService.hash(toReplicate, moleExecution).toString
+    val hash = FileService.hash(toReplicate, job.executionId).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.destinationURIFile.path)
   }

@@ -54,6 +54,7 @@ import scala.collection.JavaConversions._
 
 object URIFile extends Logger {
   
+  
   val Timeout = new ConfigurationLocation("URIFile", "Timeout")
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
@@ -96,8 +97,8 @@ object URIFile extends Logger {
     val os = new FileOutputStream(dest)
     try {
       val is = src.openInputStream(srcToken)
-      try is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) finally os.close
-    } finally os.close
+      try is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) finally is.close
+    } finally os.flushClose
   }
 
   def copy(src: File, dest: IURIFile): Unit = withToken(dest.storageDescription, copy(src, dest,_))
@@ -106,7 +107,7 @@ object URIFile extends Logger {
     val is = new FileInputStream(src)
     try {
       val os = dest.openOutputStream(token)
-      try withFailureControl(dest.storageDescription, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout))) finally os.close
+      try withFailureControl(dest.storageDescription, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout))) finally os.flushClose
     } finally is.close
   }
 
@@ -133,7 +134,7 @@ object URIFile extends Logger {
       try withFailureControl(srcDesc,
                              if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
                              else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))              
-      finally os.close
+      finally os.flushClose
     } finally is.close
   }
 

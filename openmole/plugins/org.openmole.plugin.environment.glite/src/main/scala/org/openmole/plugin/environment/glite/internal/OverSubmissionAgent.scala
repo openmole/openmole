@@ -22,7 +22,6 @@ import java.util.logging.Logger
 
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.implementation.execution.JobRegistry
 import org.openmole.core.implementation.execution.StatisticKey
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
@@ -58,7 +57,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
     val registry = env.jobRegistry
     registry.synchronized {
 
-      val toProceed = registry.allExecutionJobs.groupBy( ejob => (JobRegistry(ejob.job).orNull, new StatisticKey(ejob.job))).filter( elt => {elt._1 != null && elt._2.size > 0})
+      val toProceed = registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).filter( elt => {elt._1 != null && elt._2.size > 0})
       //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
     
       toProceed.foreach {

@@ -40,7 +40,7 @@ import scala.collection.mutable.ListBuffer
 
 object GliteEnvironment {
 
-  @field @InteractiveConfiguration(label = "CertificateType type", choices = Array("pem", "p12"))
+  @field @InteractiveConfiguration(label = "Credential type", choices = Array("pem", "p12", "proxy"))
   val CertificateType = new ConfigurationLocation("GliteEnvironment", "CertificateType")
 
   @field @InteractiveConfiguration(label = "PEM Certificate location", dependOn = "CertificateType", value = "pem")
@@ -52,9 +52,15 @@ object GliteEnvironment {
   @field @InteractiveConfiguration(label = "P12 Certificate Location", dependOn = "CertificateType", value = "p12")
   val P12CertificateLocation = new ConfigurationLocation("GliteEnvironment", "P12CertificateLocation")
 
-  @field @InteractiveConfiguration(label = "Key password")
+  @field @InteractiveConfiguration(label = "Key password", dependOn = "CertificateType", value = "(p12|pem)")
   val PasswordLocation = new ConfigurationLocation("GliteEnvironment", "Password", true)
        
+  @field @InteractiveConfiguration(label = "Proxy Location", dependOn = "CertificateType", value = "proxy")
+  val ProxyLocation = new ConfigurationLocation("GliteEnvironment", "ProxyLocation")
+  
+  //@field @InteractiveConfiguration(label = "Proxy type", dependOn = "CertificateType", value = "proxy")
+  //val ProxyType = new ConfigurationLocation("GliteEnvironment", "ProxyType")
+  
   val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
   val DelegationTimeLocation = new ConfigurationLocation("GliteEnvironment", "DelegationTime")
 
@@ -81,6 +87,9 @@ object GliteEnvironment {
   Workspace += (KeyPathLocation, () => System.getProperty("user.home") + "/.globus/userkey.pem")
 
   Workspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
+
+  //Workspace += (ProxyLocation, () => System.getProperty("user.home") + "/.globus/x509u")
+  //Workspace += (ProxyType, "old")
 
   Workspace += (CertificateType, "p12")
   Workspace += (TimeLocation, "PT24H")

@@ -45,13 +45,10 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         val job = executionJob.job
         executionJob.state = ExecutionState.RUNNING
         val running = System.currentTimeMillis
-        //executionJob.environment.sample(SampleType.WAITING, running - executionJob.creationTime, job)
 
         for (moleJob <- job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
-            if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) {
-              jobGoneIdle
-            }
+            if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
               
             moleJob.perform
             moleJob.finished(moleJob.context)

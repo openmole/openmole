@@ -26,8 +26,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
-import java.util.logging.Level
-import java.util.logging.Logger
+import org.openmole.misc.tools.service.Logger
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.UserBadDataError
@@ -43,7 +42,7 @@ import org.openmole.plugin.environment.glite.internal.ProxyChecker
 
 import scala.collection.JavaConversions._
 
-object GliteAuthentication {
+object GliteAuthentication extends Logger {
   def getCertType: String = Workspace.preference(GliteEnvironment.CertificateType)
   
   def getP12CertPath: String = Workspace.preference(GliteEnvironment.P12CertificateLocation)
@@ -88,8 +87,6 @@ object GliteAuthentication {
             val dest = new File(dir, destForName.getName)
 
             if (dest.exists) dest.delete
-            //Logger.getLogger(classOf[GliteAuthentication].getName).fine(tarEntry.getName + " -> " + tarEntry.getLinkName)
-
             if(!tarEntry.getLinkName.isEmpty) links ::= dest -> tarEntry.getLinkName
             else tis.copy(dest)
             
@@ -98,12 +95,12 @@ object GliteAuthentication {
           
           links.foreach{e => new File(dir, e._2).copy(e._1)}
         } catch {
-          case (e: IOException) => Logger.getLogger(classOf[GliteAuthentication].getName()).log(Level.WARNING, "Unable to untar " + child.toString(), e);
+          case (e: IOException) => logger.log(WARNING, "Unable to untar " + child.toString(), e)
         } finally {
           tis.close
         }
       } catch {
-        case (e: IOException) => throw new IOException(tarUrl, e);
+        case (e: IOException) => throw new IOException(tarUrl, e)
       }
     }
   }
@@ -144,14 +141,21 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
         caDir
       }
     }
+    
+    
   }
 
   override def initialize = {
     if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) {
+      //logger.fine(System.getenv.get("X509_USER_PROXY"))
       createContextFromFile(new File(System.getenv.get("X509_USER_PROXY")))
-    } else {
-      createContextFromPreferences
-    }
+    } else if(getCertType.equalsIgnoreCase("proxy")) {
+      //logger.fine(Workspace.preference(GliteEnvironment.ProxyLocation))
+      val proxyFile = new File(Workspace.preference(GliteEnvironment.ProxyLocation))
+     // val proxyType = Workspace.preference(GliteEnvironment.ProxyType)
+      createContextFromVOMSFile(proxyFile)
+      //createContextFromFile(proxyFile)
+    } else createContextFromPreferences
   }
 
   private def createContextFromPreferences = {
@@ -225,12 +229,29 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
 
   }
 
-  private def createContextFromFile(proxyFile: File) = {
+  private def createContextFromVOMSFile(proxyFile: File) = {
     val ctx = JSAGASessionService.createContext
+    
+    //logger.fine(proxyFile.getCanonicalPath + " " + proxyFile.exists + " " + ctx.getClass.getName)
+    
+    ctx.setAttribute(Context.TYPE, "VOMS")
     ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
+    ctx.setAttribute(VOMSContext.PROXYTYPE, "RFC820")
+   
+    JSAGASessionService.addContext(ctx)
+  }
+  
+  
+  private def createContextFromFile(proxyFile: File) = {
+    val ctx = JSAGASessionService.createContext
+    
+    //logger.fine(proxyFile.getCanonicalPath + " " + proxyFile.exists)
     ctx.setAttribute(Context.TYPE, "GlobusLegacy")
+    ctx.setAttribute(Context.USERPROXY, proxyFile.getCanonicalPath)
+    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+    ctx.setAttribute(VOMSContext.VOMSDIR, "")
 
     JSAGASessionService.addContext(ctx)
   }

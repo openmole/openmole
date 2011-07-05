@@ -38,13 +38,7 @@ abstract class Environment extends IEnvironment {
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
-  def sample(job: IJob, sample: IStatisticSample) = {
-    JobRegistry(job) match {
-      case None =>
-      case Some(moleExecution) =>
-        statistic += (moleExecution, new StatisticKey(job), sample)
-    }
-  }
+  def sample(job: IJob, sample: IStatisticSample) = statistic += (job.executionId, new StatisticKey(job), sample)
 
   def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
   

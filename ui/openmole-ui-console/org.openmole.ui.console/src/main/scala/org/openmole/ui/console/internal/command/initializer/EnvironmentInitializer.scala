@@ -51,11 +51,10 @@ class EnvironmentInitializer(shell: Shell) extends IInitializer {
 
               val enabled = if (!interactiveConfiguration.dependOn().isEmpty()) {
                 val value = Workspace.preference(new ConfigurationLocation(location.group, interactiveConfiguration.dependOn))
-                value.equals(interactiveConfiguration.value());
+                value.matches(interactiveConfiguration.value)
               } else true
 
               if (enabled) {
-
                 var line = ""
                 var defaultVal = ""
                 do {
