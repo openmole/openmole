@@ -25,6 +25,7 @@ import java.lang.Integer
 class UniformIntegerDistribution(generator: Random,topBound: Option[Int]= None) extends IDomain[Integer] {
  
   def this(seed: Long) = this(new Random(seed),None)
+  def this(seed: Long, b: Int) = this(new Random(seed),Some(b))
     
   override def iterator(context: IContext): Iterator[Integer] = {
     new Iterator[Integer] {
