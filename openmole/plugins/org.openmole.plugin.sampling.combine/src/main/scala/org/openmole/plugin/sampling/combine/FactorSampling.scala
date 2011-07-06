@@ -24,7 +24,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 
-class FactorSamplingAdapter(factor: IFactor[T,IDomain[T]] forSome{type T}) extends ISampling {
+class FactorSampling(factor: IFactor[T,IDomain[T]] forSome{type T}) extends ISampling {
  
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
     typedBuild(context, factor)

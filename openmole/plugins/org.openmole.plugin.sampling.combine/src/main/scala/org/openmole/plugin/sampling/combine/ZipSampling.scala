@@ -26,13 +26,13 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
 
-class ZipSamplingCombination(reference: ISampling, samplings: Iterable[ISampling]) extends ISampling {
+class ZipSampling(reference: ISampling, samplings: Iterable[ISampling]) extends ISampling {
 
   def this(reference: ISampling) = this(reference, Iterable.empty) 
     
-  def this(reference: ISampling, head: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(reference, (List(head) ++ factors).map{new FactorSamplingAdapter(_)})
+  def this(reference: ISampling, head: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(reference, (List(head) ++ factors).map{new FactorSampling(_)})
 
-  def this(reference: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(new FactorSamplingAdapter(reference), factors.map{new FactorSamplingAdapter(_)})
+  def this(reference: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(new FactorSampling(reference), factors.map{new FactorSampling(_)})
 
   def this(reference: ISampling, head: ISampling, samplings: Array[ISampling]) = this(reference, List(head) ++ samplings) 
 
