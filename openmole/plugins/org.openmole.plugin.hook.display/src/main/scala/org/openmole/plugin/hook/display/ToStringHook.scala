@@ -23,9 +23,8 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.Logger
 
-class ToStringHook(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) with Logger {
+class ToStringHook(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
   
   def this(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, prototypes: _*)
   
