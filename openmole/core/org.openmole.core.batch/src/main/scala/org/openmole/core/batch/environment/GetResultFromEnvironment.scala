@@ -36,10 +36,8 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
 import org.openmole.core.implementation.execution.StatisticSample
-import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
-
-//import scala.collection.JavaConversions._
 
 import org.openmole.core.model.job.State
 import org.openmole.core.serializer.SerializerService
@@ -86,31 +84,23 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       //Try to download the results for all the jobs of the group
       for (moleJob <- job.moleJobs) {
         if (contextResults.results.isDefinedAt(moleJob.id)) {
-          val context = contextResults.results(moleJob.id)
- 
-         // logger.fine("Job finished " + moleJob.id +" for task " + moleJob.task + "")
-          
+         val executionResult = contextResults.results(moleJob.id)
+         
           moleJob.synchronized {
             if (!moleJob.isFinished) {
-              //logger.fine("Molejob " + moleJob.id + " is not finished.")
-              try {
-                moleJob.rethrowException(context)
-                
-                context.value(GenericTask.Timestamps.prototype) match {
-                  case Some(stamps) => 
-                    val completed = stamps.view.reverse.find( _.state == State.COMPLETED ).get.time
+
+                executionResult._1 match {
+                  case context: IContext =>
+                    val timeStamps = executionResult._2
+                    val completed = timeStamps.view.reverse.find( _.state == State.COMPLETED ).get.time
                     if(completed > lastCompleted) lastCompleted = completed
-                    val running = stamps.view.reverse.find( _.state == State.RUNNING ).get.time
+                    val running = timeStamps.view.reverse.find( _.state == State.RUNNING ).get.time
                     if(running < firstRunning) firstRunning = running
-                  case None => logger.log(WARNING, "No time stamps found.")
+                    moleJob.finished(context, executionResult._2)
+                    successfull +=1 
+                  case e: Throwable => 
+                    logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
                 }
-                
-                //logger.fine("Setting new context for the job " + moleJob.id + ".")
-                moleJob.finished(context)
-                successfull +=1 
-              } catch {
-                case e => logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
-              }
             } //else logger.fine("Molejob " + moleJob.id + " is finished.")
           } 
         } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
@@ -119,9 +109,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       //If sucessfull for full group update stats
       if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
-    } finally {
-      StorageControl.usageControl(communicationStorage.description).releaseToken(token)
-    }
+    } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
   }
 
 

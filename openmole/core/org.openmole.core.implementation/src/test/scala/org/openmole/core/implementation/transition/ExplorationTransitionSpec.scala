@@ -27,7 +27,6 @@ import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.sampling.ISampling
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -50,9 +49,10 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     val res = new ListBuffer[String]
     
     val t = new Task("Test") {
-      override def process(context: IContext, progress: IProgress) = synchronized {
+      override def process(context: IContext) = synchronized {
         context.contains(i) should equal (true)
         res += context.value(i).get
+        context
       }
     }
     

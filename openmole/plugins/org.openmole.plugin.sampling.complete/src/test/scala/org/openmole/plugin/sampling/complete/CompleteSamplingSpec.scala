@@ -48,7 +48,7 @@ class CompleteSamplingSpec extends FlatSpec with ShouldMatchers {
         override def iterator(context: IContext) = r3.iterator
       })    
     
-    val sampling = new CompleteSampling(f1, f2, f3).build(new Context).map{ _.map{_.value}.toList }.toSet
+    val sampling = new CompleteSampling(f1, f2, f3).build(Context.empty).map{ _.map{_.value}.toList }.toSet
 
     sampling.size should equal (r1.size * r2.size * r3.size)
     for(i <- r1 ; j <- r2 ; k <- r3) sampling.contains(List(i, j, k)) should equal (true)
@@ -68,7 +68,7 @@ class CompleteSamplingSpec extends FlatSpec with ShouldMatchers {
       })
   
     
-    val sampling = new CompleteSampling(f1, f2).build(new Context).map{ _.map{_.value}.toList }.toSet
+    val sampling = new CompleteSampling(f1, f2).build(Context.empty).map{ _.map{_.value}.toList }.toSet
 
     sampling.isEmpty should equal (true)
   }

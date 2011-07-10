@@ -16,7 +16,6 @@
  */
 
 package org.openmole.plugin.task.serialization
-import org.openmole.core.implementation.execution.Progress
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
@@ -38,11 +37,9 @@ class SerializeTaskSpec extends FlatSpec with ShouldMatchers {
     val pfile = new Prototype("pfile", classOf[File])
     
     val pVal = new Variable(p, 5)
-    val context = new Context
-    context += pVal
-    
+  
     val t = new SerializeXMLTask("Test", List(p -> pfile))
-    t.process(context, new Progress)
+    val context = t.process(Context.empty + pVal)
       
     context.contains(pfile) should equal (true)
     

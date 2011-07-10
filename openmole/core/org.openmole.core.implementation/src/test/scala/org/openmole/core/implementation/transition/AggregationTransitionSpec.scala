@@ -30,7 +30,6 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.sampling.ISampling
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -58,10 +57,11 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     val emptyC = new Capsule(emptyT)
     
     val testT = new Task("Test") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
         context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
         endCapsExecuted += 1
+        context
       }
     }
     
@@ -93,12 +93,13 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     val emptyC = new Capsule(emptyT)
     
     val testT = new Task("Test") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
         
         context.value(toArray(i)).get.getClass should equal (classOf[Array[Int]])
         context.value(toArray(i)).get.sorted.deep should equal (data.sorted.toArray.deep)
         endCapsExecuted += 1
+        context
       }
     }
     

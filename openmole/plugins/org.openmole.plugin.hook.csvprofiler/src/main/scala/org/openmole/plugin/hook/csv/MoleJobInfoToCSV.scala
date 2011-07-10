@@ -23,24 +23,17 @@ import org.openmole.core.model.job.IMoleJob
 object MoleJobInfoToCSV {
 
   def toColumns(moleJob: IMoleJob): Array[String] = {
-    moleJob.context.value(GenericTask.Timestamps.prototype) match {
-      case None => Array.empty
-      case Some(ts) => 
-        val timeStamps = ts.toList
-        val toWrite = new Array[String]((timeStamps.size) + 2)
+    val timeStamps = moleJob.timeStamps
+    val toWrite = new Array[String]((timeStamps.size) + 2)
         
-        toWrite(0) = moleJob.task.name
+    toWrite(0) = moleJob.task.name
 
-        val created = timeStamps.head.time
-        toWrite(1) = created.toString
+    val created = timeStamps.head.time
+    toWrite(1) = created.toString
 
-        var cur = 2
-        for(timeStamp <- timeStamps) {
-          toWrite(cur) = timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
-          cur += 1
-        }
-        toWrite
+    timeStamps.zipWithIndex.foreach {
+      case(timeStamp, i) => toWrite(i + 2) = timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
     }
-        
+    toWrite
   }
 }

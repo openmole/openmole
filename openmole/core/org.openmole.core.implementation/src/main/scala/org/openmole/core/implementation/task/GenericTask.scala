@@ -19,34 +19,21 @@ package org.openmole.core.implementation.task
 
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
-import java.io.File
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.{IContext,IData,IParameter,IVariable,IPrototype,DataModeMask, IDataSet}
-import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.task.IGenericTask
-import org.openmole.core.model.execution.IProgress
+import org.openmole.core.implementation.data.Context._
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
-
-object GenericTask {
-  val Timestamps = new Data[ArrayBuffer[ITimeStamp]]("Timestamps#", classOf[ArrayBuffer[ITimeStamp]], Array(SYSTEM))
-  val Exception = new Data[Throwable]("Exception#", classOf[Throwable], Array(OPTIONAL, SYSTEM))
-}
-
 
 abstract class GenericTask(val name: String) extends IGenericTask {
   
   private var _inputs = TreeMap.empty[String, IData[_]]
   private var _outputs = TreeMap.empty[String, IData[_]]
   private var _parameters = TreeMap.empty[String, IParameter[_]]
-  
-  addOutput(GenericTask.Timestamps)
-  addOutput(GenericTask.Exception)
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
@@ -58,34 +45,34 @@ abstract class GenericTask(val name: String) extends IGenericTask {
         }
       }
     }
+    context
   }
 
-  protected def filterOutput(context: IContext): Unit = {
-    val vars = new ListBuffer[IVariable[_]]
-   
-    for (d <- outputs) {
-      val p = d.prototype
+  protected def filterOutput(context: IContext): IContext = {
+    outputs.flatMap {
+      d => val p = d.prototype
       context.variable(p) match {
         case None => 
           if (!d.mode.isOptional) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString +" in not optional and has not found in output of task" + name +".")
+          else Option.empty[IVariable[_]]
         case Some(v) =>
-          if (p.accepts(v.value)) vars += v
+          if (p.accepts(v.value)) Some(v)
           else throw new UserBadDataError("Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.toString +") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.toString + "' in task" + name + ".")
       }
-    }
+    }.toContext
 
-    context.clean
-    context ++= vars
   }
 
-  private def init(context: IContext) = {
-    for (parameter <- parameters) {
-      if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) {
-        context += parameter.variable
-      }
-    }
-    verifyInput(context)
-  }
+  private def init(context: IContext): IContext =
+    verifyInput(
+      context ++ 
+        parameters.flatMap {
+          parameter =>
+            if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) Some(parameter.variable)
+            else Option.empty[IVariable[_]]
+        }
+    )
+
   private def end(context: IContext) = filterOutput(context)
   
   /**
@@ -94,18 +81,15 @@ abstract class GenericTask(val name: String) extends IGenericTask {
    * @param progress
    */
   @throws(classOf[Throwable])
-  protected def process(context: IContext, progress: IProgress): Unit
+  protected def process(context: IContext): IContext
    
 
   /* (non-Javadoc)
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
-  override def perform(context: IContext, progress: IProgress) = {
-    try {
-      init(context)
-      process(context, progress)
-      end(context)
-    } catch {
+  override def perform(context: IContext) = {
+    try end(process(init(context)))
+    catch {
       case e => throw new InternalProcessingError(e, "Error in task " + name)
     }
   }

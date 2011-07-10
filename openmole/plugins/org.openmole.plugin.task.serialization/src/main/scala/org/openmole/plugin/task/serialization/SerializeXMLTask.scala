@@ -18,9 +18,9 @@
 package org.openmole.plugin.task.serialization
 
 import java.io.File
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.workspace.Workspace
@@ -35,13 +35,12 @@ class SerializeXMLTask(name: String, var convert: List[(IPrototype[_], IPrototyp
     convert :+= input -> output
   }
   
-  override def process(context: IContext, progress: IProgress) = {
-    convert.foreach {
+  override def process(context: IContext) =
+    context ++ convert.map {
       case(input, output) =>
         val file = Workspace.newFile
         SerializerService.serialize(context.value(input).get, file)
-        context += output -> file
+        new Variable(output, file)
     } 
-  }
 
 }

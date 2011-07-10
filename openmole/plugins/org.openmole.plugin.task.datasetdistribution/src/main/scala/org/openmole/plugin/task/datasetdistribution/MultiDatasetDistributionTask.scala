@@ -30,7 +30,6 @@ import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
 import org.jfree.data.statistics.HistogramDataset
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
@@ -75,7 +74,7 @@ class  MultiDatasetDistributionTask(name: String,
     chart
   }
 
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext) = {
     try {
       val dataset = new DefaultCategoryDataset();
       charts foreach ( chart => {
@@ -109,7 +108,7 @@ class  MultiDatasetDistributionTask(name: String,
           } finally {
             os.close()
           }
-
+          context
     } catch {
       case ex: FileNotFoundException => throw new UserBadDataError(ex)
       case ex: IOException => throw new InternalProcessingError(ex)

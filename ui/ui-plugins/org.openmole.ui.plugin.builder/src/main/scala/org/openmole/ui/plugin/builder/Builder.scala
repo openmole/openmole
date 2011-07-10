@@ -49,7 +49,6 @@ import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -326,14 +325,14 @@ class Builder {
     moleTask
   }
     
-  def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], nb: Int) = {
+  /*def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], nb: Int) = {
     val prototype = new Prototype(iterationName, classOf[Int])
     
     val loopOnCapsule = new Capsule(new Task(iterationName + "_loopOn") {
       addParameter(prototype, 0)
       
       override protected def filterOutput(context: IContext) = {}
-      override def process(context: IContext, progress: IProgress) = {}
+      override def process(context: IContext) = context
     })
     
     val decrementCapsule = new Capsule(new Task(iterationName + "_decrement") {
@@ -341,8 +340,8 @@ class Builder {
       addOutput(prototype)
       
       override protected def filterOutput(context: IContext) = {}
-      override def process(context: IContext, progress: IProgress) = {
-        context += (prototype, context.value(prototype).get + 1)
+      override def process(context: IContext) = {
+        context + (prototype, context.value(prototype).get + 1)
       }
     })
      
@@ -351,7 +350,7 @@ class Builder {
     new Transition(decrementCapsule, loopOnCapsule, prototype.name + "<=" + nb)
     new DataChannel(loopOnCapsule, decrementCapsule, prototype)
     new PuzzleFirstAndLast(loopOnCapsule, decrementCapsule)
-  }
+  }*/
       
   /**
    * Builds a prototype node.

@@ -46,37 +46,6 @@ class ContextBuffer extends IContextBuffer {
   val variableBuffers = new ListBuffer[IVariableBuffer]
   
   override def iterator = variableBuffers.iterator
- /* override def toContext = {
-    var variableByName = new TreeMap[String, ListBuffer[IVariable[_]]] 
-    
-    for(buff <- variableBuffers) {
-      val variable = buff.toVariable
-      variableByName.get(variable.prototype.name) match {
-        case None => 
-          val listBuff = ListBuffer[IVariable[_]](variable)
-          variableByName += ((variable.prototype.name, listBuff))
-        case Some(listBuff) => 
-          listBuff += variable
-      } 
-    }
-    
-    val ret = new Context
-    for(listBuff <- variableByName.values) {
-      if(listBuff.size == 1 && !forceArray) {
-        ret += listBuff.head
-      } else {
-        val m = intersect(listBuff.map{_.prototype.`type`}: _*)
-        val array = m.newArray(listBuff.size).asInstanceOf[Array[Any]]
-        var i = 0
-        for(v <- listBuff.map{_.value}) {
-          array(i) = v
-          i += 1
-        }
-        ret += new Variable(toArray(listBuff.head.prototype).asInstanceOf[IPrototype[Array[Any]]], array)
-      }
-    }
-    ret
-  }*/
   
   override def += (v: IVariableBuffer): this.type = {
     variableBuffers += v

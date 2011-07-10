@@ -26,8 +26,6 @@ package org.openmole.core.model.task
  */
 import org.openmole.core.model.data.{IParameter,IPrototype,IDataSet, IData, DataModeMask}
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
-
 
 trait IGenericTask {
 
@@ -35,9 +33,9 @@ trait IGenericTask {
    *
    * Perform this task.
    *
-   * @param progress the progress reporting structure of the task
+   * @param context the context in which the task will be executed
    */
-  def perform(context: IContext, progress: IProgress)
+  def perform(context: IContext): IContext
 
   /**
    *

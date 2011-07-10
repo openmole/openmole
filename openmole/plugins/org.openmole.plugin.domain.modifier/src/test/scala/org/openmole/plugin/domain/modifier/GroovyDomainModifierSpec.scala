@@ -38,7 +38,7 @@ class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
       override def iterator(context: IContext) = r1.iterator
     }
     
-    val md = new GroovyDomainModifier(p1, d1, "p1 * 2").iterator(new Context)
+    val md = new GroovyDomainModifier(p1, d1, "p1 * 2").iterator(Context.empty)
     
     md.toList == r1.map{_*2} should equal (true)
   }

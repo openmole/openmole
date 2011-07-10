@@ -20,20 +20,15 @@ package org.openmole.core.implementation.execution.local
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.State
-import java.util.logging.Level
-import java.util.logging.Logger
-
 import org.openmole.core.model.task.IMoleTask
+import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
-object LocalExecuter {
-  val LOGGER = Logger.getLogger(LocalExecuter.getClass.getName) 
-}
-
+object LocalExecuter extends Logger
 
 class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
 
-  import LocalExecuter. _
+  import LocalExecuter._
   
   var stop: Boolean = false;
 
@@ -49,16 +44,19 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         for (moleJob <- job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
-              
             moleJob.perform
-            moleJob.finished(moleJob.context)
+            
+            moleJob.exception match {
+              case None =>
+              case Some(e) => logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
+            }
           }
         }
         executionJob.state = ExecutionState.DONE
         LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
       } catch {
-        case (e: InterruptedException) => if (!stop) LOGGER.log(Level.WARNING, "Interrupted despite stop is false.", e)  
-        case e => LOGGER.log(Level.SEVERE, null, e)
+        case (e: InterruptedException) => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
+        case e => logger.log(SEVERE, null, e)
       }
     }
   }

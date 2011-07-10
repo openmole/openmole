@@ -22,7 +22,6 @@ import java.io.File
 import java.io.FileWriter
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
@@ -92,7 +91,7 @@ class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], St
     this
   }
 
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext) = {
     val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
 
     val file = Workspace.newFile("storeIntoCSV", ".csv")
@@ -110,6 +109,6 @@ class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], St
         writer.writeNext(columnIts.map{elt => val s = elt.next; if(s != null) s.toString; else "null"}.toArray)
       
     } finally writer.close
-    context += filePrototype -> file
+    context + (filePrototype -> file)
   }
 }

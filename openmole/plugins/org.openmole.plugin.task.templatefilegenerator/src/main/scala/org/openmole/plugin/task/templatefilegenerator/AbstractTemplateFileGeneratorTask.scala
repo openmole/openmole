@@ -25,7 +25,6 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.tools.VariableExpansion._
 
@@ -34,10 +33,10 @@ abstract class AbstractTemplateFileGeneratorTask(name: String, output: IData[Fil
   def this(name: String, outputPrototype: IPrototype[File]) = this(name,new Data(outputPrototype))
   addOutput(output)
   
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext) = {
     val outputFile = Workspace.newFile("output", "template")
     expandBufferData(context,new FileInputStream(file(context)),new FileOutputStream(outputFile))
-    context.add(output.prototype,outputFile) 
+    context + (output.prototype,outputFile) 
   }
    
   def file(context: IContext): File

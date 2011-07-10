@@ -63,13 +63,13 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
                         
         val newTicket = 
           if (end.capsule.intputSlots.size <= 1) ticket 
-        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+          else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
         val toAggregate = combinaison.groupBy(_.prototype.name)
       
         val toArray = toArrayManifests(end)      
         val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
- 
+        
         subMole.submit(end.capsule, newContext, newTicket)
       }
     } finally lockRepository.unlock(lockKey)
@@ -78,8 +78,7 @@ abstract class GenericTransition(val start: IGenericCapsule, val end: ISlot, val
   override def perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
     if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
-      for(name <- filtered) context -= name
-      _perform(context, ticket, toClone, subMole)
+      _perform(context -- filtered, ticket, toClone, subMole)
     }
   }
 

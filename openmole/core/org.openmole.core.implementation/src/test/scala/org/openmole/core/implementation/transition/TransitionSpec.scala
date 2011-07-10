@@ -27,7 +27,6 @@ import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -41,16 +40,15 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype("p", classOf[String])
     
     val t1 = new Task("Test write") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p -> "Test"
-      }
+      override def process(context: IContext) = context + (p -> "Test")
     }
     
     t1.addOutput(p)
     
     val t2 = new Task("Test read") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
+        context
       }
     }
     
@@ -72,25 +70,22 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val init = new EmptyTask("Init")
     
     val t1 = new Task("Test write 1") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p1 -> "Test1"
-      }
+      override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
     t1.addOutput(p1)
     
     val t2 = new Task("Test write 2") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p2 -> "Test2"
-      }
+      override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
     t2.addOutput(p2)
     
     val t3 = new Task("Test read") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(p2).get should equal ("Test2") 
+        context
       }
     }
     
@@ -119,30 +114,28 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val init = new EmptyTask("Init")
     
     val t1 = new Task("Test write 1") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p1 -> new java.lang.Long(1L)
-      }
+      override def process(context: IContext) = context + (p1 -> new java.lang.Long(1L))
     }
     
     t1.addOutput(p1)
     
     val t2 = new Task("Test write 2") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p2 -> new java.lang.Integer(2)
-      }
+      override def process(context: IContext) = context + (p2 -> new java.lang.Integer(2))
     }
     
     t2.addOutput(p2)
     
     val t3 = new Task("Test read") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         //println(context.value(pArtoStringray).map(_.intL))
         context.value(pArray).get.map(_.intValue).contains(1) should equal (true)
         context.value(pArray).get.map(_.intValue).contains(2) should equal (true)
   
         context.value(pArray).get.getClass should equal (classOf[Array[java.lang.Number]])
+        context
       }
     }
+    
     
     t3.addInput(pArray)
     
@@ -167,27 +160,24 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val init = new EmptyTask("Init")
     
     val t1 = new Task("Test write 1") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p1 -> "Test1"
-      }
+      override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
     t1.addOutput(p1)
     
     val t2 = new Task("Test write 2") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p2 -> "Test2"
-      }
+      override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
     t2.addOutput(p2)
     
     val t3 = new Task("Test read") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(toArray(p2)).get.head should equal ("Test2") 
         context.value(toArray(p2)).get.size should equal (100)
         executed = true
+        context
       }
     }
     

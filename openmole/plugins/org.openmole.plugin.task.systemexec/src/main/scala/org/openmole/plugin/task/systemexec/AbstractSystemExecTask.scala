@@ -18,10 +18,10 @@
 package org.openmole.plugin.task.systemexec
 
 import java.io.File
+import org.openmole.core.model.data.IVariable
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
@@ -32,11 +32,9 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
 import org.openmole.misc.tools.service.ProcessUtil._
 import scala.collection.JavaConversions._
-import java.lang.Integer
-
 abstract class AbstractSystemExecTask (name: String, 
                                        val cmd: String, 
-                                       val returnValue: Option[IPrototype[Integer]] = null, 
+                                       val returnValue: Option[IPrototype[Int]] = null, 
                                        exceptionIfReturnValueNotZero: Boolean = true,
                                        relativeDir: String = "") extends ExternalSystemTask(name) {
  
@@ -45,35 +43,31 @@ abstract class AbstractSystemExecTask (name: String,
     case Some(returnValue) => addOutput(returnValue)
   }
   
-  override protected def process(context: IContext, progress: IProgress) = {
+  override protected def process(context: IContext) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
-    prepareInputFiles(context, progress, tmpDir)
+    prepareInputFiles(context, tmpDir)
     val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
     val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
       
-    try {                    
-      // val executor = new DefaultExecutor
-      // executor.setWorkingDirectory(workDir)
-      // val ret = executor.execute(commandLine);
-     
+    try {    
       val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
-      val ret = execute(process,context)
-
-      if(exceptionIfReturnValueNotZero && ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
+      
+      execute(process,context) match {
+        case(retCode, variables) =>
+          if(exceptionIfReturnValueNotZero && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + retCode)
         
-      returnValue match {
-        case None =>
-        case Some(returnValue) => context += (returnValue, ret)
+          val retContext = fetchOutputFiles(context, workDir) ++ variables
+      
+          returnValue match {
+            case None => retContext
+            case Some(returnValue) => retContext + (returnValue, retCode)
+          }
       }
-
-      // if(returnValue != null) context.setValue[Integer](returnValue, ret)
     } catch {
       case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
     }
-
-    fetchOutputFiles(context, progress, workDir)
   }
   
-  protected def execute(process: Process, context: IContext): Integer
+  protected def execute(process: Process, context: IContext): (Int, Iterable[IVariable[_]])
 }

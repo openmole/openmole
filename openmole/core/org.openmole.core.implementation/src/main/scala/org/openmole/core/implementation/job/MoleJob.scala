@@ -17,9 +17,6 @@
 
 package org.openmole.core.implementation.job
 
-import java.util.concurrent.ExecutionException
-import org.openmole.core.implementation.execution.Progress
-import org.openmole.core.implementation.task.GenericTask
 import org.openmole.core.implementation.tools.LocalHostName
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
@@ -29,9 +26,8 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.Lock
 import org.openmole.misc.tools.service.Logger
+import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger
 
@@ -39,8 +35,9 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
   
   import MoleJob._
 
-  val progress = new Progress
-    
+  val timeStamps: ListBuffer[ITimeStamp] = new ListBuffer
+  var exception: Option[Throwable] = None
+  
   @volatile  private var _state: State = null
   state = READY
       
@@ -50,13 +47,6 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
   def state_=(state: State) = {
     val changed = synchronized {
       if(_state == null || !_state.isFinal) {
-        val timeStamps = context.value(GenericTask.Timestamps.prototype) match {
-          case None => 
-            val ret = new ArrayBuffer[ITimeStamp](5)
-            context += (GenericTask.Timestamps.prototype, ret)
-            ret
-          case Some(ts) => ts
-        }
         timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
         _state = state
         true
@@ -66,40 +56,27 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
   }
 
 
-  override def perform = {
+  override def perform =
     try {
       state = RUNNING
-      task.perform(context, progress)
+      _context = task.perform(context)
+      state = COMPLETED
     } catch {
-      case e =>
-        context += (GenericTask.Exception.prototype, e)
-
-        if (classOf[InterruptedException].isAssignableFrom(e.getClass)) throw e
+      case t => 
+        state = FAILED     
+        exception = Some(t)
+        if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
     }
-  }
-
-  override def rethrowException(context: IContext) = {
-    context.value(GenericTask.Exception.prototype) match {
-      case None =>
-      case Some(e) => throw new ExecutionException("Error durring job execution for task " + task.name, e)
-    }
-  }
-
-  override def finished(context: IContext) = {
+  
+  override def finished(context: IContext, timeStamps: Seq[ITimeStamp]) = {
     _context = context
-
-    context.value(GenericTask.Exception.prototype) match {
-      case None => state = COMPLETED
-      case Some(ex) =>
-        state = FAILED
-        logger.log(SEVERE, "Error in user job execution, job state is FAILED.", ex)
-    }
+    this.timeStamps ++= timeStamps
+    state = COMPLETED
   }
-
+  
   override def isFinished: Boolean = state.isFinal
     
-  override def cancel = {
-    state = CANCELED
-  }
+  override def cancel = state = CANCELED
+  
 
 }

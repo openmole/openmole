@@ -17,35 +17,35 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.core.implementation.data.{DataSet,Variable,Prototype, Context}
+import org.openmole.core.implementation.data.{DataSet,Variable,Prototype}
 import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
 import org.openmole.misc.exception.InternalProcessingError
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.core.implementation.data.Context._
 
 object ContextAggregator {
  
   def aggregate(aggregate: IDataSet, toArrayFonc: PartialFunction[String, Manifest[_]] , toAggregateList: Iterable[IVariable[_]]): IContext = {
-    val inContext = new Context   
     val toAggregate = toAggregateList.groupBy(_.prototype.name)
     
-    for(d <- aggregate) {
-      val merging = if(toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
+    aggregate.foldLeft(List.empty[IVariable[_]]) {
+      case(acc,d) =>
+        val merging = if(toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
   
-      if(toArrayFonc.isDefinedAt(d.prototype.name)) {
-        val manifest = toArrayFonc(d.prototype.name)
+        if(toArrayFonc.isDefinedAt(d.prototype.name)) {
+          val manifest = toArrayFonc(d.prototype.name)
 
-        val array = manifest.newArray(merging.size)
-        merging.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2, e._1.value)}
+          val array = manifest.newArray(merging.size)
+          merging.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2, e._1.value)}
 
-        inContext += new Variable(new Prototype(d.prototype.name, manifest.arrayManifest).asInstanceOf[IPrototype[Any]], array) 
-      } else if(!merging.isEmpty) { 
-        if(merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        
-        inContext += new Variable(d.prototype.asInstanceOf[IPrototype[Any]], merging.head.value)
-      }
-    }
-    inContext
+          new Variable(new Prototype(d.prototype.name, manifest.arrayManifest).asInstanceOf[IPrototype[Any]], array) :: acc
+        } else if(!merging.isEmpty) { 
+          if(merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype.name + " has been found multiple times before and it does'nt match data flow specification.")        
+          new Variable(d.prototype.asInstanceOf[IPrototype[Any]], merging.head.value) :: acc
+        } else acc
+    }.toContext
   }
 
 }

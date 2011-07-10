@@ -22,7 +22,6 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.execution.IProgress
 
 object ExplorationTask {
   val Sample = new Data[Iterable[Iterable[IVariable[_]]]]("Sample#", classOf[Iterable[Iterable[IVariable[_]]]])
@@ -34,9 +33,9 @@ class ExplorationTask(name: String, val sampling: ISampling) extends GenericTask
   addOutput(ExplorationTask.Sample)
 
   //If input prototype as the same name as the output it is erased
-  override protected def process(context: IContext, progress: IProgress) ={
+  override protected def process(context: IContext) ={
     val sampled = sampling.build(context)
-    context += (ExplorationTask.Sample.prototype, sampled)
+    context + (ExplorationTask.Sample.prototype, sampled)
   }
  
 }

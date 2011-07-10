@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.task
 
-import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.InternalProcessingError
@@ -25,7 +24,7 @@ import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
@@ -43,7 +42,6 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
@@ -64,12 +62,8 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
           val e = MoleJobRegistry(moleJob).getOrElse(throw new InternalProcessingError("Capsule for " + moleJob.task.name + " not found in registry."))
           outputCapsules.get(e._2) match {
             case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
-            case Some(prototypes) => 
-              val ctx = new Context
-              for(p <- prototypes) {
-                moleJob.context.variable(p).foreach{v: IVariable[_] => ctx += v}
-              }
-              variables ++= ctx
+            case Some(prototypes) =>
+              variables ++= prototypes.flatMap(p => moleJob.context.variable(p).toList)
           }
           
         case _ =>
@@ -80,14 +74,13 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
   private val outputCapsules = new HashMap[IGenericCapsule, ListBuffer[String]]
 
-  override protected def process(context: IContext, progress: IProgress) = {
-    val firstTaskContext = new Context
-
-    for (input <- inputs) {
-      if (!input.mode.isOptional || (input.mode.isOptional && context.contains(input.prototype))) {
-        firstTaskContext += context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found."))        
-      }
-    }
+  override protected def process(context: IContext) = {
+    val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
+      (acc, input) =>
+        if (!input.mode.isOptional || (input.mode.isOptional && context.contains(input.prototype)))
+          context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
+        else acc
+    }.toContext
 
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
@@ -97,11 +90,9 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forcedArray.map( e => e.name -> e.`type`)
+    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forcedArray.map(e => e.name -> e.`type`)
     
-    aggregate(userOutputs, toArrayMap, resultGathering.variables).foreach {
-      context += _
-    }
+    context ++ aggregate(userOutputs, toArrayMap, resultGathering.variables)
   }
 
   def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)

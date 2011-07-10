@@ -20,7 +20,6 @@ package org.openmole.plugin.task.templatefilegenerator
 import java.io.File
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.execution.Progress
 import org.openmole.misc.hashservice.HashService._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -34,10 +33,8 @@ class TemplateFileGeneratorTaskSpec extends FlatSpec with ShouldMatchers {
   "A template file generator task" should "parse a template file and evalutate the ${} expressions" in {  
     val outputP = new Prototype("file1", classOf[File])
     val t1 = new TemplateFileGeneratorTask("Test TemplateFileGeneratorTask", templateFile, outputP)    
-    val context= new Context
-    t1.process(context, new Progress)
-    
-    context.value(outputP).get.hash.equals(targetFile.hash) should equal (true)
+   
+    t1.process(Context.empty).value(outputP).get.hash.equals(targetFile.hash) should equal (true)
   }
 
 }

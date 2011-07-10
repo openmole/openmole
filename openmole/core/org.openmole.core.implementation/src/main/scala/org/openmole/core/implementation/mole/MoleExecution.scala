@@ -164,7 +164,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     synchronized {
       if (submiter.getState.equals(Thread.State.NEW)) {
         EventDispatcher.objectChanged(this, Starting)
-        start(new Context)      
+        start(Context.empty)      
       } else logger.warning("This MOLE execution has allready been started, this call has no effect.")
     }
     this
@@ -188,7 +188,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
     
   private def jobFailedOrCanceled(moleJob: IMoleJob, capsule: IGenericCapsule) = {
-    if(moleJob.state == State.FAILED) exceptions += moleJob.context.value(GenericTask.Exception.prototype).getOrElse(new InternalProcessingError("BUG: Job has failed but no exception can be found"))
+    moleJob.exception match {
+      case None =>
+      case Some(e) => exceptions += e
+    }
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 

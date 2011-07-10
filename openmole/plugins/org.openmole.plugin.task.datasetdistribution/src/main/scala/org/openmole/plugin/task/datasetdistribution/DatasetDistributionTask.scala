@@ -28,7 +28,6 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.data.statistics.HistogramDataset
 import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
@@ -86,7 +85,7 @@ class DatasetDistributionTask (name: String,
    * 2- builds a HistogramDataset object
    * 3- saves it as a PNG file
    */
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext) = {
     try {
       charts foreach ( chart => {
           val data = context.value(chart._1).get
@@ -102,13 +101,11 @@ class DatasetDistributionTask (name: String,
 
           val jfchart = createChart(dataset, context)
           val os = new BufferedOutputStream(new FileOutputStream(expandData(context, outputDirectoryPath + "/" + chart._2)));
-          try {
-            writeChartAsPNG(os, jfchart, imageWidth, imageHeight)
-          } finally {
-            os.close
-          }
+          try writeChartAsPNG(os, jfchart, imageWidth, imageHeight)
+          finally os.close
+          
         } )
-
+      context
     } catch {
       case ex: FileNotFoundException => throw new UserBadDataError(ex)
       case ex: IOException => throw new InternalProcessingError(ex)

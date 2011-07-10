@@ -25,7 +25,6 @@ import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 
 
 import org.scalatest.FlatSpec

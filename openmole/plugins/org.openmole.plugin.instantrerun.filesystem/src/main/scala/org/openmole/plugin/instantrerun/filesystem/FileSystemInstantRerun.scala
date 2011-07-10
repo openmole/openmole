@@ -25,10 +25,12 @@ import java.util.zip.GZIPOutputStream
 import java.io.File
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IInstantRerun
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.data.Context
@@ -38,7 +40,6 @@ import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.tools.service.IHash
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.task.GenericTask.Timestamps
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashMap
@@ -82,9 +83,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
     try {
       val contextHash = computeHash(serializedContext._1)
       val contextDir = new File(taskDir, contextHash.toString)
-      
-      //println("Test " + contextDir.getAbsolutePath)
-      
+         
       if(!contextDir.exists) {
         jobsInProgressHash += job.id -> ((taskHash, contextHash))
         false
@@ -113,14 +112,8 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
             override def isDefinedAt(fileInfo: FileInfo) = new File(fileDir, fileInfo.fileHash.toString).exists
           })
         finally is.close
-        job.task.outputs.toList.filter(_.mode.isSystem).map{d => job.context.variable(d.prototype)}.foreach {
-          variable => variable match {
-            case Some(v) => context += v
-            case None =>
-          }
-        }
-
-        job.finished(context)
+        
+        job.finished(context, Seq.empty)
         true
       }
       
@@ -128,7 +121,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
   }
   
   def jobFinished(job: IMoleJob, capsule: IGenericCapsule) = synchronized {
-    if(capsules.contains(capsule)) {
+    if(job.state == State.COMPLETED && capsules.contains(capsule)) {
       jobsInProgressHash.get(job.id) match {
         case Some((taskH, contextH)) =>
           val contextFile = saveContext(job)

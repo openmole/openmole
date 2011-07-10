@@ -25,7 +25,6 @@ import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 import org.openmole.misc.hashservice.HashService._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -48,9 +47,7 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype("p", classOf[File])
     
     val t1 = new Task("Test") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p -> f
-      }
+      override def process(context: IContext) = context + (p -> f)
     }
 
     t1.addOutput(p)

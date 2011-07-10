@@ -28,7 +28,6 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.sampling.ISampling
@@ -53,7 +52,6 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
   }
   
   "Grouping jobs" should "not impact a normal mole execution" in {
-     
     val data = List("A","A","B","C")
     val i = new Prototype("i", classOf[String])
      
@@ -68,9 +66,10 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     val emptyC = new Capsule(emptyT)
     
     val testT = new Task("Test") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
         context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
+        context
       }
     }
     

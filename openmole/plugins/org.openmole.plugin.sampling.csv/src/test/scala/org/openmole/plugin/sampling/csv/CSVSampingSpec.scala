@@ -37,15 +37,15 @@ class CSVSamplingSpec extends FlatSpec with ShouldMatchers {
     val p1 = new Prototype("col1", classOf[String])
     val p2 = new Prototype("col2", classOf[Int])
     
-    val tmpCsvFile = new File("/tmp/tmp.csv")
+    val tmpCsvFile = File.createTempFile("tmp", ".csv")
     getClass.getClassLoader.getResourceAsStream("csvTest.csv").copy(tmpCsvFile)
     val reader = new CSVReader(new FileReader(tmpCsvFile))
     val sampling = new CSVSampling(tmpCsvFile)
     sampling.addColumn(p1)
     
-    sampling.build(new Context).head.head.value should equal ("myTest")
+    sampling.build(Context.empty).head.head.value should equal ("myTest")
     
     sampling.addColumnAs("badName",p2)
-    val exception = evaluating { sampling.build(new Context)} should produce [UserBadDataError]
+    val exception = evaluating { sampling.build(Context.empty)} should produce [UserBadDataError]
   }
 }

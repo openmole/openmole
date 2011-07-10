@@ -27,8 +27,8 @@ class GroovyDomainModifier[-I,+O](prototype: IPrototype[I], domain: IDomain[I], 
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
-  override def iterator(context: IContext): Iterator[O] = {
-    domain.iterator(context).map(e => contextToGroovyCode.execute(context, List(new Variable[I](prototype, e))).asInstanceOf[O])
-  }
+  override def iterator(context: IContext): Iterator[O] =
+    domain.iterator(context).map(e => contextToGroovyCode.execute(context + (prototype, e)).asInstanceOf[O])
+  
 
 }

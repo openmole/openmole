@@ -75,7 +75,7 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param variable the variable to add
    * @return the context itself
    */
-  def +=(variable: IVariable[_]): this.type
+  def +(variable: IVariable[_]): IContext
 
   /**
    * Construct ant add a variable to this context.
@@ -84,7 +84,7 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param value the value of the variable
    * @return the context itself
    */
-  def +=(name: String, value: Object): this.type
+  def +(name: String, value: Object): IContext
 
   /**
    * Construct and add a variable to this context.
@@ -94,7 +94,7 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param value the value of the variable
    * @return the context itself
    */
-  def +=[T] (name: String, t: Class[T], value: T): this.type
+  def +[T] (name: String, t: Class[T], value: T): IContext
     
   /**
    * Construct and add a variable to this context.
@@ -103,8 +103,8 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param value the value of the variable
    * @return the context itself
    */
-  def +=[T] (proto: IPrototype[T], value: T): this.type
-  def +=[T] (tuple: (IPrototype[T],T)): this.type = this.+=(tuple._1, tuple._2)
+  def +[T] (proto: IPrototype[T], value: T): IContext
+  def +[T] (tuple: (IPrototype[T],T)): IContext = this.+(tuple._1, tuple._2)
 
   /**
    * Add a collection of variables to this context
@@ -112,7 +112,7 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param variables the variables to add
    * @return the context itself
    */
-  def ++=(variables: Iterable[IVariable[_]] ): this.type
+  def ++(variables: Traversable[IVariable[_]] ): IContext
   
   /**
    * Remove a variable from this context given its name.
@@ -120,7 +120,15 @@ trait IContext extends Iterable[IVariable[_]] {
    * @param name the name of the variable
    * @return the context itself
    */
-  def -=(name: String): this.type
+  def -(name: String): IContext
+  
+  /**
+   * Remove variables from this context given theire names.
+   * 
+   * @param names the names of the variables
+   * @return the context itself
+   */
+  def --(name: Traversable[String]): IContext
 
   /**
    * Check if the context contains a variable with a given prototype's name.
@@ -150,41 +158,5 @@ trait IContext extends Iterable[IVariable[_]] {
    * otherwise
    */
   def contains(proto: IPrototype[_]): Boolean
-
-  /**
-   * Reset the content of the context. After this operation, the context doesn't
-   * contain any variable.
-   */
-  def clean
-  
-  /**
-   * Alias for +=
-   */
-  def add(variable: IVariable[_]): this.type = { += (variable)}
-
-  /**
-   * Alias for +=
-   */
-  def add(name: String, value: Object): this.type = { += (name, value)}
-
-  /**
-   * Alias for +=
-   */
-  def add[T] (name: String, t: Class[T], value: T): this.type = { += (name, t, value)}
-  
-  /**
-   * Alias for +=
-   */
-  def add[T] (proto: IPrototype[T], value: T): this.type = { += (proto, value)}
- 
-  /**
-   * Alias for ++=
-   */
-  def addAll(variables: Iterable[IVariable[_]] ): this.type = { ++= (variables)}
-
-  /**
-   * Alias for -=
-   */
-  def remove(name: String): this.type = { -= (name) }
 
 }

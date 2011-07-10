@@ -19,7 +19,7 @@ package org.openmole.core.implementation.transition
 
 import java.util.logging.Logger
 import org.openmole.misc.exception.{InternalProcessingError,UserBadDataError}
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.SubMoleExecution
 import org.openmole.core.implementation.task.ExplorationTask
@@ -35,7 +35,6 @@ import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.IExplorationTransition
-import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
@@ -72,20 +71,20 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
     var size = 0
         
     val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("Capsule is empty"))
-    
+ 
     for(value <- values) {
       size += 1
       subSubMole.incNbJobInProgress(1)
 
       val newTicket = moleExecution.nextTicket(ticket)
-      val destContext = new Context
-
+      
+      val variables = new ListBuffer[IVariable[_]]
       val notFound = new ListBuffer[IData[_]]
       
       for (in <- endTask.inputs) {
         context.variable(in.prototype) match {
           case None => notFound += in
-          case Some(v) => destContext += v      
+          case Some(v) => variables += v      
         }
       }
       
@@ -98,13 +97,12 @@ class ExplorationTransition(override val start: IExplorationCapsule, override va
             if(variable.size > 1) Logger.getLogger(classOf[ExplorationTransition].getName).warning("Misformed sampling prototype " + prototype + " has been found " + variable.size + " times in a single row.") 
             val value = variable.head.value
  
-            if(prototype.accepts(value)) destContext += (prototype.asInstanceOf[IPrototype[Any]], value)
+            if(prototype.accepts(value)) variables += new Variable(prototype.asInstanceOf[IPrototype[Any]], value)
             else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype) 
           case None =>
         }
       }
-
-      submitNextJobsIfReady(ContextBuffer(destContext, toClone), newTicket, subSubMole)
+      submitNextJobsIfReady(ContextBuffer(variables.toContext, toClone), newTicket, subSubMole)
     }
 
     subSubMole.decNbJobInProgress(size)

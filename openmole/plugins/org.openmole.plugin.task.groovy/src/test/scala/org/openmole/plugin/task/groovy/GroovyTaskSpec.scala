@@ -20,7 +20,6 @@ package org.openmole.plugin.task.groovy
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.execution.Progress
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -32,16 +31,14 @@ import org.junit.runner.RunWith
 class GroovyTaskSpec extends FlatSpec with ShouldMatchers {
   
   "GroovyTask" should "run a groovy code" in {
-    val p1 = new Prototype("p1", classOf[Integer])
+    val p1 = new Prototype("p1", classOf[Int])
 
     val groovyTask = new GroovyTask("GroovyTask", "p1 *= 2")
     groovyTask.addOutput(p1)
     
-    val ctx = new Context
-    ctx += p1 -> new Integer(2)
+    val ctx = Context.empty + (p1 -> 2)
     
-    groovyTask.process(ctx, new Progress)
-    ctx.value(p1).get should equal (4)
+    groovyTask.process(ctx).value(p1).get should equal (4)
   }
   
   "GroovyTask" should "allow importing namespace" in {
@@ -51,8 +48,7 @@ class GroovyTaskSpec extends FlatSpec with ShouldMatchers {
     groovyTask.addImport("java.util.concurrent.atomic.*")
     groovyTask.addOutput(p1)
     
-    val ctx = new Context
-    groovyTask.process(ctx, new Progress)
+    val ctx = groovyTask.process(Context.empty)
     ctx.contains(p1) should equal (true)
   }
 }

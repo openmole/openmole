@@ -25,7 +25,6 @@ import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.capsule.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -45,14 +44,13 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
    val res = new ListBuffer[Long]
     
     val t1 = new Task("Test instant rerun") {
-      override def process(context: IContext, progress: IProgress) = {
-        context += p -> new java.lang.Long(System.currentTimeMillis)
-      }
+      override def process(context: IContext) = context + (p -> new java.lang.Long(System.currentTimeMillis))
     }
     
     val t2 = new Task("Add result") {
-      override def process(context: IContext, progress: IProgress) = {
+      override def process(context: IContext) = {
         res += context.value(p).get
+        context
       }
     }
     

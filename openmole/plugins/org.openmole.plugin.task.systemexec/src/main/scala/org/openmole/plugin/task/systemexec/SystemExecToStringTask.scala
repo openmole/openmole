@@ -21,13 +21,13 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import java.io.PrintStream
-import java.lang.Integer
 
 class SystemExecToStringTask(name: String, 
                              cmd: String, 
-                             returnValue: Option[Prototype[Integer]], 
+                             returnValue: Option[Prototype[Int]], 
                              exceptionIfReturnValueNotZero: Boolean,
                              relativeDir: String,
                              val outString: IPrototype[String],
@@ -50,24 +50,22 @@ class SystemExecToStringTask(name: String,
     this(name, cmd, None, exceptionIfReturnValueNotZero, relativeDir, outString, errString)
   }
   
-  def this(name: String, cmd: String, returnValue: Prototype[Integer], outString: IPrototype[String], errString: IPrototype[String]) = {
+  def this(name: String, cmd: String, returnValue: Prototype[Int], outString: IPrototype[String], errString: IPrototype[String]) = {
     this(name, cmd, Some(returnValue), false, "", outString, errString)
   }
   
-  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer], outString: IPrototype[String], errString: IPrototype[String]) = {
+  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Int], outString: IPrototype[String], errString: IPrototype[String]) = {
     this(name, cmd, Some(returnValue), false, relativeDir, outString, errString)
   }
 
   addOutput(outString)
   addOutput(errString)
   
-  override protected def execute(process: Process, context: IContext):Integer = {    
+  override protected def execute(process: Process, context: IContext) = {    
     val outStringBuilder = new StringBuilder
     val errStringBuilder = new StringBuilder
     
     val ret = executeProcess(process,new PrintStream(new StringBuilderOutputStream(outStringBuilder)),new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
-    context += (outString,outStringBuilder.toString)
-    context += (errString,errStringBuilder.toString)
-    ret
+    (ret, List(new Variable(outString, outStringBuilder.toString), new Variable(errString,errStringBuilder.toString) ))
   }
 }

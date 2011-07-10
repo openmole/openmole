@@ -35,7 +35,7 @@ class VariableExpansionSpec  extends FlatSpec with ShouldMatchers {
   "A expandData" should "expand all the ${} sequence from an inputStream and return a parsed OuputStream" in {
     
     val of = File.createTempFile("expand", ".test")
-    expandBufferData(new Context(),new FileInputStream(TemplateData.templateFile),new FileOutputStream(of))
+    expandBufferData(Context.empty,new FileInputStream(TemplateData.templateFile),new FileOutputStream(of))
     HashService.computeHash(of).equals(HashService.computeHash(TemplateData.targetFile)) should equal (true) 
   }
 }

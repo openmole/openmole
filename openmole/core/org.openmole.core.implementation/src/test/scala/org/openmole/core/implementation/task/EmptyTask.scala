@@ -18,8 +18,7 @@
 package org.openmole.core.implementation.task
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
 
 class EmptyTask(name: String) extends Task(name) {
-  override def process(context: IContext, progress: IProgress) = {}
+  override def process(context: IContext) = context
 }

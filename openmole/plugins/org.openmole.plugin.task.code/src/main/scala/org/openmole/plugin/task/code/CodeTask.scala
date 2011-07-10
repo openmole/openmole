@@ -17,21 +17,18 @@
 
 package org.openmole.plugin.task.code
 
-import java.io.File
-import java.util.logging.Logger
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.execution.IProgress
+import org.openmole.core.implementation.data.Context._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import org.openmole.plugin.tools.code.{IContextToCode,ISourceCode}
 
 abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
 
-  override def process(context: IContext, progress: IProgress) = {
+  override def process(context: IContext) = {
     val pwd = Workspace.newDir
-    prepareInputFiles(context, progress, pwd.getCanonicalFile)
-    contextToCode.execute(context, Iterable.empty, progress, userOutputs)
-    fetchOutputFiles(context, progress, pwd.getCanonicalFile)
+    prepareInputFiles(context, pwd.getCanonicalFile)
+    fetchOutputFiles(contextToCode.execute(context, userOutputs).toContext, pwd.getCanonicalFile)
   }
 
   def contextToCode: IContextToCode

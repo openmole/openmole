@@ -17,18 +17,18 @@
 
 package org.openmole.plugin.task.systemexec
 
+import org.openmole.core.model.data.IVariable
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.tools.VariableExpansion._
-import java.lang.Integer
 import scala.collection.JavaConversions._
 
 
 class SystemExecTask(name: String, 
                      cmd: String, 
-                     returnValue: Option[IPrototype[Integer]], 
+                     returnValue: Option[IPrototype[Int]], 
                      exceptionIfReturnValueNotZero: Boolean,
                      relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,exceptionIfReturnValueNotZero,relativeDir) {
   
@@ -40,10 +40,10 @@ class SystemExecTask(name: String,
   
   def this(name: String, cmd: String, relativeDir: String,  exceptionIfReturnValueNotZero: Boolean) = this(name, cmd, None, exceptionIfReturnValueNotZero, relativeDir)
   
-  def this(name: String, cmd: String, returnValue: Prototype[Integer]) = this(name, cmd, Some(returnValue), false, "")
+  def this(name: String, cmd: String, returnValue: Prototype[Int]) = this(name, cmd, Some(returnValue), false, "")
   
-  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Integer]) = this(name, cmd, Some(returnValue), false, relativeDir)
+  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Int]) = this(name, cmd, Some(returnValue), false, relativeDir)
   
-  override protected def execute(process: Process, context: IContext): Integer = executeProcess(process,System.out,System.err)
+  override protected def execute(process: Process, context: IContext) = executeProcess(process,System.out,System.err) -> List.empty[IVariable[_]]
   
 }

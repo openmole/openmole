@@ -21,7 +21,6 @@ import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import java.io.File

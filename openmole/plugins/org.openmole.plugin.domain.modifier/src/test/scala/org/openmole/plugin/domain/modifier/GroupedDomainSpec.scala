@@ -37,7 +37,7 @@ class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
       override def iterator(context: IContext) = r1.iterator
     }
     
-    val md = new GroupedDomain(d1, 3).iterator(new Context)
+    val md = new GroupedDomain(d1, 3).iterator(Context.empty)
     
     md.toList.size should equal (4)
   }

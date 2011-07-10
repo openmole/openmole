@@ -17,8 +17,6 @@
 
 package org.openmole.core.model.job
 
-
-import org.openmole.core.model.execution.IProgress
 import org.openmole.core.model.task.IGenericTask
 import org.openmole.core.model.data.IContext
 
@@ -41,10 +39,10 @@ trait IMoleJob {
   def state: State.State
   def isFinished: Boolean
   def context: IContext
-  def perform   
-  def finished(context: IContext)
-  def rethrowException(context: IContext)
-  def progress: IProgress
+  def exception: Option[Throwable]
+  def timeStamps: Seq[ITimeStamp]
+  def finished(context: IContext, timeStamps: Seq[ITimeStamp])
+  def perform
   def id: MoleJobId
   def cancel 
 }

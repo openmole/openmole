@@ -26,15 +26,18 @@ import java.util.List;
 import org.nlogo.api.CompilerException;
 import org.nlogo.api.LogoException;
 import org.nlogo.headless.HeadlessWorkspace;
+import org.openmole.core.implementation.data.Context$;
+import org.openmole.core.implementation.data.Variable;
 import org.openmole.core.implementation.tools.VariableExpansion;
 import org.openmole.core.model.data.IPrototype;
-import org.openmole.core.model.execution.IProgress;
 import org.openmole.core.model.data.IContext;
+import org.openmole.core.model.data.IVariable;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.plugin.task.external.system.ExternalSystemTask;
 import scala.Tuple2;
+import scala.collection.JavaConversions;
 
 /**
  *
@@ -65,10 +68,10 @@ public class NetLogoTask extends ExternalSystemTask {
     }
 
     @Override
-    public void process(IContext context, IProgress progress) throws UserBadDataError, InternalProcessingError, InterruptedException {
+    public IContext process(IContext context) throws UserBadDataError, InternalProcessingError, InterruptedException {
         try {
             File tmpDir = Workspace.instance().newDir("netLogoTask");
-            prepareInputFiles(context, progress, tmpDir);
+            prepareInputFiles(context, tmpDir);
             File script = new File(tmpDir, relativeScriptPath);
             HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
             try {
@@ -84,10 +87,12 @@ public class NetLogoTask extends ExternalSystemTask {
                     workspace.command(VariableExpansion.expandData(context, cmd));
                 }
 
+                List<IVariable<?>> variables = new LinkedList<IVariable<?>>();
+                
                 for (Tuple2<String, IPrototype> outBinding : getOutputBinding()) {
                     Object outputValue = workspace.report(outBinding._1());
                     if (!outBinding._2().type().erasure().isArray()) {
-                        context.add(outBinding._2(), outputValue);
+                        variables.add(new Variable(outBinding._2(), outputValue));
                     } else {
                         AbstractCollection netlogoCollection = (AbstractCollection) outputValue;
                         Object array = Array.newInstance(outBinding._2().type().erasure().getComponentType(), netlogoCollection.size());
@@ -95,11 +100,11 @@ public class NetLogoTask extends ExternalSystemTask {
                         for (int i = 0; i < netlogoCollection.size(); i++) {
                             Array.set(array, i, it.next());
                         }
-                        context.add(outBinding._2(), array);
+                        variables.add(new Variable(outBinding._2(), array));
                     }
                 }
 
-                fetchOutputFiles(context, progress, tmpDir);
+                return fetchOutputFiles(context, tmpDir).$plus$plus(JavaConversions.iterableAsScalaIterable(variables));
             } catch (CompilerException ex) {
                 throw new UserBadDataError(ex);
             } catch (LogoException ex) {

@@ -60,9 +60,7 @@ object VariableExpansion {
 
   private def expandDataInernal(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
     var ret = s
-    val allVariables = new Context
-    allVariables ++= context
-    allVariables ++= tmpVariable
+    val allVariables = context ++ tmpVariable
     var cur = 0
     
     breakable { do {

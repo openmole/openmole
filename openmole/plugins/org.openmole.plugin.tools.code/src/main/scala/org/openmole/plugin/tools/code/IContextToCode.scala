@@ -17,16 +17,10 @@
 
 package org.openmole.plugin.tools.code
 
-import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.execution.IProgress
-
-object IContextToCode {
-   val progressVar = new Prototype[IProgress]("progress", classOf[IProgress])
-}
 
 trait IContextToCode {
-  def execute(context: IContext, tmpVariables: Iterable[IVariable[_]], progress: IProgress, output: Iterable[IData[_]]): Object
+  def execute(context: IContext, output: Iterable[IData[_]]): Iterable[IVariable[_]]
 }
