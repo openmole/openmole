@@ -1,2 +1,4 @@
-FOR /F "tokens=*" %G IN ('DIR /B /AD /S org.*') DO RMDIR /S /Q "%G"
+rmdir /s /q "configuration\org.eclipse.core.runtime"
+rmdir /s /q "configuration\org.eclipse.equinox.app"
+rmdir /s /q "configuration\org.eclipse.osgi"
 java -ea -Dosgi.classloader.singleThreadLoads=true -Xmx512m -jar plugins\org.eclipse.equinox.launcher.jar -p openmole-plugins,openmole-plugins-ui %*
