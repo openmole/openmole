@@ -90,7 +90,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
             if (!moleJob.isFinished) {
 
                 executionResult._1 match {
-                  case context: IContext =>
+                  case Left(context) =>
                     val timeStamps = executionResult._2
                     val completed = timeStamps.view.reverse.find( _.state == State.COMPLETED ).get.time
                     if(completed > lastCompleted) lastCompleted = completed
@@ -98,7 +98,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
                     if(running < firstRunning) firstRunning = running
                     moleJob.finished(context, executionResult._2)
                     successfull +=1 
-                  case e: Throwable => 
+                  case Right(e) => 
                     logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
                 }
             } //else logger.fine("Molejob " + moleJob.id + " is finished.")
