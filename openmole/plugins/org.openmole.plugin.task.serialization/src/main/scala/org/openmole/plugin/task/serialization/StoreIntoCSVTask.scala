@@ -25,6 +25,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
+import collection.JavaConversions._
 
 /**
  * The StoreIntoCSVTask task is dedicated to the storage of data of the workflow
@@ -106,9 +107,19 @@ class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], St
             
       //body
       for (i <- 0 until listSize) 
-        writer.writeNext(columnIts.map{elt => val s = elt.next; if(s != null) s.toString; else "null"}.toArray)
+        writer.writeNext(columnIts.map{e => prettify(e.next)}.toArray)
       
     } finally writer.close
     context + (filePrototype -> file)
   }
+  
+  def prettify(o: Any): String =
+    o match {
+      case null => "null"
+      case o: Array[_] => "[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
+      case o: Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
+      case o: java.lang.Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]" 
+      case o => o.toString
+    }
+  
 }
