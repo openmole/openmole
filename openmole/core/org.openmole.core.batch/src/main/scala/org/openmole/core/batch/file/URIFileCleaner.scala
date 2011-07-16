@@ -17,12 +17,11 @@
 
 package org.openmole.core.batch.file
 
-import java.util.logging.Level
-import java.util.logging.Logger
 
-object URIFileCleaner {
-  val LOGGER = Logger.getLogger(classOf[URIFileCleaner].getName)
-}
+
+import org.openmole.misc.tools.service.Logger
+
+object URIFileCleaner extends Logger 
 
 class URIFileCleaner(toClean: IURIFile, recursive: Boolean = false, timeOut: Boolean = true) extends Runnable {
 
@@ -34,7 +33,7 @@ class URIFileCleaner(toClean: IURIFile, recursive: Boolean = false, timeOut: Boo
         toClean.remove(timeOut, recursive)
       }
     } catch {
-      case e => LOGGER.log(Level.FINE, "Cannot delete file " + toClean.location, e)
+      case e => logger.log(FINE, "Cannot delete file " + toClean.location, e)
     }
   }
 }

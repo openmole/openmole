@@ -62,9 +62,9 @@ class MoleJob(val task: IGenericTask, private var _context: IContext, val id: Mo
       _context = task.perform(context)
       state = COMPLETED
     } catch {
-      case t => 
-        state = FAILED     
+      case t =>    
         exception = Some(t)
+        state = FAILED  
         if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
     }
   
