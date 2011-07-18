@@ -16,8 +16,8 @@
  */
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.properties.IPrototypePanelUI
-import org.openmole.ide.core.properties.IPrototypeDataUI
+import org.openmole.ide.core.model.panel.IPrototypePanelUI
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 
 class FilePrototypePanelUI extends IPrototypePanelUI {
     override def saveContent(name:String) = new FilePrototypeDataUI(name)

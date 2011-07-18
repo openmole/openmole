@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.task.groovy
 
 import java.awt.Color
-import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
 class GroovyTaskFactoryUI extends ITaskFactoryUI {

@@ -6,7 +6,7 @@
 package org.openmole.ide.plugin.task.groovy
 
 import java.awt.Color
-import org.openmole.ide.core.properties.TaskDataUI
+import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.groovy.GroovyTask
 
 class GroovyTaskDataUI(val name: String,val code: String) extends TaskDataUI {

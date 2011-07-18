@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.properties.IPrototypeFactoryUI
+import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
   

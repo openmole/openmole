@@ -16,7 +16,7 @@
  */
 
 package org.openmole.ide.plugin.prototype.base
-import org.openmole.ide.core.properties.IPrototypeDataUI
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import java.io.File
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype

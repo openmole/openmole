@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.sampling.complete
 
-import org.openmole.ide.core.properties.ISamplingFactoryUI
+import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class CompleteSamplingFactoryUI extends ISamplingFactoryUI {
   override def buildDataUI(name: String) = new CompleteSamplingDataUI(name)

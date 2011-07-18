@@ -22,8 +22,8 @@
  */
 package org.openmole.ide.plugin.environment.glite;
 
-import org.openmole.ide.core.properties.IEnvironmentPanelUI;
-import org.openmole.ide.core.properties.IEnvironmentDataUI;
+import org.openmole.ide.core.model.panel.IEnvironmentPanelUI;
+import org.openmole.ide.core.model.data.IEnvironmentDataUI;
 import javax.swing.JPanel;
 
 /**

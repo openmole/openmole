@@ -3,12 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openmole.ide</groupId>
-    <artifactId>org.openmole.ide.platform</artifactId>
+    <artifactId>platform</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>platform</name>
-    
     <repositories> 
         <repository>
             <id>scala-tools.org</id>
@@ -144,6 +142,7 @@
         <module>branding</module>
         <module>application</module>
         <module>core</module>
+	<module>misc</module>
         <module>plugins</module>
     </modules>
 

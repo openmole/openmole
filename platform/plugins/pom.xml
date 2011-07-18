@@ -3,12 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.openmole.ide</groupId>
-        <artifactId>org.openmole.ide.platform</artifactId>
+        <artifactId>platform</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.ide.plugins</artifactId>
-    <name>plugins</name>
+    <artifactId>plugins</artifactId>
     <packaging>pom</packaging>
     
     
@@ -84,6 +83,7 @@
         <module>org.openmole.ide.plugin.task.exploration</module>
         <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.sampling.complete</module>
+        <module>org.openmole.ide.plugin.domain.range</module>
         <module>org.openmole.ide.plugin.prototype.base</module>
         <module>org.openmole.ide.plugin.environment.glite</module>
     </modules>

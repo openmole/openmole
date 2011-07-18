@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.properties.IPrototypePanelUI
+import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import java.awt.Dimension
 
 class BigDecimalPrototypePanelUI extends IPrototypePanelUI {

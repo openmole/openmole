@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.properties.ITaskFactoryUI
+import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
 class NetLogoTaskFactoryUI extends ITaskFactoryUI {

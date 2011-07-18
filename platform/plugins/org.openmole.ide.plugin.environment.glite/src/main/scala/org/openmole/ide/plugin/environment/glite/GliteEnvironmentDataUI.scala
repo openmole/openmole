@@ -8,8 +8,8 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.io.File
 import org.openmole.plugin.environment.glite.GliteEnvironment
-import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.properties.IEnvironmentDataUI
+import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
 class GliteEnvironmentDataUI(val name: String,val vo: String,val voms: String,val bdii: String) extends IEnvironmentDataUI {
   def this(n:String) = this(n,"","","")

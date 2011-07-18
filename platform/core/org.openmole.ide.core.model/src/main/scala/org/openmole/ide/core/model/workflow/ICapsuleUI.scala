@@ -1,0 +1,34 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package org.openmole.ide.core.model.workflow
+
+import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.commons.CapsuleType
+import org.openmole.ide.core.model.data.ITaskDataUI
+import org.openmole.ide.core.model.dataproxy._
+
+trait ICapsuleUI {
+  def capsuleType: CapsuleType.Value
+  
+  def dataProxy: Option[ITaskDataProxyUI]
+  
+  def startingCapsule: Boolean
+  
+  def scene: IMoleScene
+  
+  def connectableWidget: IConnectableWidget
+  
+  def encapsule(dpu: ITaskDataProxyUI)
+
+ // def addInputSlot(startingCapsule: Boolean): ISlotWidget
+  def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
+  
+  def nbInputSlots: Int
+  
+  def setDataProxy(dpu: ITaskDataProxyUI)
+  
+  def widget: Widget
+}

@@ -6,7 +6,7 @@
 package org.openmole.ide.plugin.task.netlogo
 
 import java.awt.Color
-import org.openmole.ide.core.properties.TaskDataUI
+import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.netlogo.NetLogoTask
 import scala.collection.JavaConversions._
 

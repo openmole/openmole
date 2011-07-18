@@ -7,11 +7,11 @@ package org.openmole.ide.plugin.sampling.csv
 
 
 import java.io.File
-import org.openmole.ide.core.exception.GUIUserBadDataError
-import org.openmole.ide.core.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.properties.ISamplingDataUI
+import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
-import org.openmole.ide.core.properties.EmptyDataUIs._
+import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 
 class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeMapping: Map[String,PrototypeDataProxyUI]) extends ISamplingDataUI {
   def this(n:String) = this(n,"",Map())

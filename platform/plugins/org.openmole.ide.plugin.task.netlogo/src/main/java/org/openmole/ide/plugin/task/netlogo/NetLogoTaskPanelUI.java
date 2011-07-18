@@ -11,9 +11,8 @@
 package org.openmole.ide.plugin.task.netlogo;
 
 import javax.swing.JFileChooser;
-import org.openmole.ide.core.properties.ITaskPanelUI;
-import org.openmole.ide.core.properties.ITaskDataUI;
-import org.openmole.ide.core.properties.DataUI;
+import org.openmole.ide.core.model.panel.ITaskPanelUI;
+import org.openmole.ide.core.model.data.ITaskDataUI;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 

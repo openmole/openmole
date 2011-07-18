@@ -1,0 +1,197 @@
+/*
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.ide.core.implementation.palette
+
+import java.awt.Image
+import java.beans.PropertyChangeEvent
+import java.beans.PropertyChangeListener
+import javax.swing.Action
+import org.netbeans.spi.palette.DragAndDropHandler
+import org.netbeans.spi.palette.PaletteActions
+import org.netbeans.spi.palette.PaletteController
+import org.netbeans.spi.palette.PaletteFactory
+import org.netbeans.spi.palette.PaletteFilter
+import org.openide.nodes.AbstractNode
+import org.openide.util.Lookup
+import org.openide.nodes.Node
+import java.beans.BeanInfo
+import java.awt.datatransfer.DataFlavor
+import org.openide.util.datatransfer.ExTransferable
+import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.implementation.display.Displays
+import org.openmole.ide.core.implementation.dataproxy._
+
+object PaletteSupport {
+  val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], TASK)
+  val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeDataProxyUI], PROTOTYPE)
+  val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], SAMPLING)
+  val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
+
+  var palette: Option[PaletteController] = None
+  private var paletteRoot: Option[AbstractNode] = None
+  
+  def createPalette(paletteR: AbstractNode) = {
+    paletteRoot = Some(paletteR)
+    palette = Some(PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler))
+    palette.get.addPropertyChangeListener( new MyAddPropertyChangeListener(palette.get))
+    palette.get
+  }
+  
+}
+  
+
+class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
+  var currentSelItem = Lookup.EMPTY
+  
+  override def  propertyChange(pce: PropertyChangeEvent)= {
+        
+    // PropertyPanel.getDefault.save
+    val selItem = palette.getSelectedItem
+    val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
+    if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
+      Displays.currentType = selCategoryLookup.getName
+      Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
+      // PropertyPanel.getDefault.displayCurrentEntity(Proxys.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
+    
+      Displays.propertyPanel.displayCurrentEntity 
+      currentSelItem = selItem
+    }
+  }
+}                                
+                                      
+                                      
+class MyActions extends PaletteActions{
+  override def getImportActions = null
+  override def getCustomPaletteActions = null
+  override def getCustomCategoryActions(lkp: Lookup) = null
+  override def getCustomItemActions(lkp: Lookup) = null
+  override def getPreferredAction(lkp: Lookup) = null
+}
+  
+class MyPaletteFilter extends PaletteFilter {
+  override def isValidCategory(lkp: Lookup)= true
+  override def isValidItem(lkp: Lookup)= true
+}
+  
+class MyDnDHandler extends DragAndDropHandler {
+  override def customize(exTransferable: ExTransferable, lookup: Lookup)= {
+    val node = lookup.lookup(classOf[Node])
+    val image = node.getIcon(BeanInfo.ICON_COLOR_16x16).asInstanceOf[Image]
+    exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
+        override def getData: Image= return image
+      })
+  }
+}
+
+//
+//import java.awt.Image;
+//import java.awt.datatransfer.DataFlavor;
+//import java.awt.datatransfer.UnsupportedFlavorException;
+//import java.beans.BeanInfo;
+//import java.io.IOException;
+//import javax.swing.Action;
+//import org.netbeans.spi.palette.DragAndDropHandler;
+//import org.netbeans.spi.palette.PaletteActions;
+//import org.netbeans.spi.palette.PaletteController;
+//import org.netbeans.spi.palette.PaletteFactory;
+//import org.netbeans.spi.palette.PaletteFilter;
+//import org.openide.nodes.AbstractNode;
+//import org.openide.nodes.Node;
+//import org.openide.util.Lookup;
+//import org.openide.util.datatransfer.ExTransferable;
+//import org.openmole.ide.core.implementation.workflow.Preferences;
+//
+//
+///**
+// *
+// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
+// */
+//public class PaletteSupport {
+//    private static PaletteController controller;
+//    
+//    public static PaletteController createPalette(){
+//        AbstractNode paletteRoot = new AbstractNode(new CategoryBuilder());
+//        paletteRoot.setName("Palette Root");
+//        Preferences.getInstance().clearProperties();
+//        Preferences.getInstance().clearModels();
+//        controller = PaletteFactory.createPalette(paletteRoot, new MyActions(), new MyPaletteFilter(), new MyDnDHandler());
+//        return controller;
+//    }
+//
+//    private static class MyActions extends PaletteActions {
+//
+//        @Override
+//        public Action[] getImportActions() {
+//            return null;
+//        }
+//
+//        @Override
+//        public Action[] getCustomPaletteActions() {
+//            return null;
+//        }
+//
+//        @Override
+//        public Action[] getCustomCategoryActions(Lookup lookup) {
+//            return null;
+//        }
+//
+//        @Override
+//        public Action[] getCustomItemActions(Lookup lookup) {
+//            return null;
+//        }
+//
+//        @Override
+//        public Action getPreferredAction(Lookup lookup) {
+//            return null;
+//        }
+//    }
+//
+//    public static class MyPaletteFilter extends PaletteFilter {
+//
+//        public static void refresh(){
+//            controller.refresh();
+//        }
+//        
+//        @Override
+//        public boolean isValidCategory(Lookup lkp) {
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean isValidItem(Lookup lkp) {
+//            return true;
+//        }
+//        
+//    }
+//    
+//    private static class MyDnDHandler extends DragAndDropHandler {
+//
+//        @Override
+//        public void customize(ExTransferable exTransferable, Lookup lookup) {
+//            Node node = lookup.lookup(Node.class);
+//            final Image image = (Image) node.getIcon(BeanInfo.ICON_COLOR_16x16);
+//            exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
+//
+//                @Override
+//                protected Object getData() throws IOException, UnsupportedFlavorException {
+//                    return image;
+//                }
+//            });
+//        }
+//    }
+//}
