@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.panel.IPanelUI
 
 
 object Displays {
-  var currentType = ""
+  var currentType = TASK
   val propertyPanel = new PropertyPanel
   
   def name = currentDisplay.name

@@ -33,25 +33,25 @@ import org.openmole.ide.core.implementation.serializer.MoleMaker;
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//org.openmole.ide.core.implementation//Output//EN",
+@ConvertAsProperties(dtd = "-//org.openmole.ide.core.implementation//Execution//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "OutputTopComponent",
+@TopComponent.Description(preferredID = "ExecutionTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "output", openAtStartup = true)
-@ActionID(category = "Window", id = "org.openmole.ide.core.implementation.OutputTopComponent")
+@ActionID(category = "Window", id = "org.openmole.ide.core.implementation.ExecutionTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_OutputAction",
-preferredID = "OutputTopComponent")
-public final class OutputTopComponent extends TopComponent {
+@TopComponent.OpenActionRegistration(displayName = "Execution",
+preferredID = "ExecutionTopComponent")
+public final class ExecutionTopComponent extends TopComponent {
 
-    public OutputTopComponent() {
+    public ExecutionTopComponent() {
         initComponents();
-        setName(NbBundle.getMessage(OutputTopComponent.class, "CTL_OutputTopComponent"));
-        setToolTipText(NbBundle.getMessage(OutputTopComponent.class, "HINT_OutputTopComponent"));
+        setName(NbBundle.getMessage(ExecutionTopComponent.class, "CTL_ExecutionTopComponent"));
+        setToolTipText(NbBundle.getMessage(ExecutionTopComponent.class, "HINT_ExecutionTopComponent"));
 
         System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
-        System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)));
+       // System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)));
     }
 
     /** This method is called from within the constructor to
@@ -71,9 +71,9 @@ public final class OutputTopComponent extends TopComponent {
         logTextArea.setRows(5);
         jScrollPane1.setViewportView(logTextArea);
 
-        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
+        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ExecutionTopComponent.class, "ExecutionTopComponent.jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(OutputTopComponent.class, "OutputTopComponent.jButton1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ExecutionTopComponent.class, "ExecutionTopComponent.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -84,23 +84,24 @@ public final class OutputTopComponent extends TopComponent {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE))
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 845, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE))
+                        .addGap(54, 54, 54)
+                        .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jButton1)))
-                .addContainerGap())
+                        .addContainerGap()
+                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

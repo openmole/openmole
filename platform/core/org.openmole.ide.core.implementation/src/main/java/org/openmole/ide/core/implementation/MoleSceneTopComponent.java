@@ -55,7 +55,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @ActionID(category = "Window", id = "org.openmole.ide.core.implementation.MoleSceneTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_MoleSceneAction",
+@TopComponent.OpenActionRegistration(displayName = "MoleScene",
 preferredID = "MoleSceneTopComponent")
 public final class MoleSceneTopComponent extends TopComponent {
 

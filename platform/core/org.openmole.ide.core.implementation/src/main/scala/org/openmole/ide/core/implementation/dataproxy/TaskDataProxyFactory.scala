@@ -17,10 +17,10 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyFactory
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends IDataProxyFactory{
+class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends ITaskDataProxyFactory{
 
   def buildDataProxyUI(name:String) = {
     val dup = new TaskDataProxyUI(factory.buildDataUI(name))

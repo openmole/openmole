@@ -29,24 +29,25 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.commons.Constants
 
 class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
   var encapsulated= false
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= { 
 
+    println("ENTITY TYPE :: :: " + Displays.dataProxy.dataUI.entityType)
     Displays.dataProxy.dataUI.entityType match {
-      case TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case PROTOTYPE=> ConnectorState.ACCEPT
-      case SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case ENVIRONMENT=> if (encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case Constants.PROTOTYPE=> ConnectorState.ACCEPT
+      case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case Constants.ENVIRONMENT=> if (encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
       case _=> throw new GUIUserBadDataError("Unknown entity type")
     }
   }
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
-
+    println("DISPLAY :: " + Displays.dataProxy)
       Displays.dataProxy match {
       case dpu:ITaskDataProxyUI => capsule.encapsule(dpu)
       case dpu:IPrototypeDataProxyUI=> { 

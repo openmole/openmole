@@ -20,5 +20,7 @@ package org.openmole.ide.core.model.dataproxy
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
 trait IEnvironmentDataProxyUI extends IDataProxyUI{
+  def dataUI_=(d: IEnvironmentDataUI)
+  
   override def dataUI: IEnvironmentDataUI 
 }

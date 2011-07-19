@@ -20,5 +20,7 @@ package org.openmole.ide.core.model.dataproxy
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 
 trait IPrototypeDataProxyUI extends IDataProxyUI{
+  def dataUI_=(d: IPrototypeDataUI)
+  
   override def dataUI: IPrototypeDataUI 
 }

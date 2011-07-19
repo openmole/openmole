@@ -15,9 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.dataproxy
+package org.openmole.ide.core.model.dataproxy
 
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-
-class EnvironmentDataProxyUI (var dataUI: IEnvironmentDataUI) extends IEnvironmentDataProxyUI 
+trait IEnvironmentDataProxyFactory extends IDataProxyFactory

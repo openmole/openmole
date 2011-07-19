@@ -17,11 +17,11 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyFactory
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import scala.collection.JavaConversions._
 
-class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends IDataProxyFactory{
+class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends IEnvironmentDataProxyFactory{
   
   override def buildDataProxyUI(name:String) = {
     val dup = new EnvironmentDataProxyUI(factory.buildDataUI(name))

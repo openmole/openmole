@@ -19,8 +19,8 @@ package org.openmole.ide.core.implementation.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI

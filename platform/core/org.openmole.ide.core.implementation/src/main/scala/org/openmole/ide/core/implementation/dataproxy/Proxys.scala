@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openide.util.Lookup
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.commons.Constants
@@ -31,10 +32,10 @@ import scala.collection.mutable.WeakHashMap
 
 object Proxys {
     
-  var task = new HashSet[TaskDataProxyUI]
-  var prototype = new HashSet[PrototypeDataProxyUI]
-  var sampling = new HashSet[SamplingDataProxyUI]
-  var environment = new HashSet[EnvironmentDataProxyUI]
+  var task = new HashSet[ITaskDataProxyUI]
+  var prototype = new HashSet[IPrototypeDataProxyUI]
+  var sampling = new HashSet[ISamplingDataProxyUI]
+  var environment = new HashSet[IEnvironmentDataProxyUI]
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
 
@@ -47,16 +48,16 @@ object Proxys {
   
   def getPrototypesNames = task.groupBy(_.dataUI.name).keys.toSet
   
-  def addTaskElement(dpu: TaskDataProxyUI) = task += dpu
-  def addPrototypeElement(dpu: PrototypeDataProxyUI) = prototype += dpu
-  def addSamplingElement(dpu: SamplingDataProxyUI) = sampling += dpu
-  def addEnvironmentElement(dpu: EnvironmentDataProxyUI) = environment += dpu
+  def addTaskElement(dpu: ITaskDataProxyUI) = task += dpu
+  def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototype += dpu
+  def addSamplingElement(dpu: ISamplingDataProxyUI) = sampling += dpu
+  def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment += dpu
   
   
-  def removeTaskElement(dpu: TaskDataProxyUI) = task.remove(dpu)
-  def removePrototypeElement(dpu: PrototypeDataProxyUI) = prototype.remove(dpu)
-  def removeSamplingElement(dpu: SamplingDataProxyUI) = sampling.remove(dpu)
-  def removeEnvironmentElement(dpu: EnvironmentDataProxyUI) = environment.remove(dpu)
+  def removeTaskElement(dpu: ITaskDataProxyUI) = task.remove(dpu)
+  def removePrototypeElement(dpu: IPrototypeDataProxyUI) = prototype.remove(dpu)
+  def removeSamplingElement(dpu: ISamplingDataProxyUI) = sampling.remove(dpu)
+  def removeEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment.remove(dpu)
   
   def clearAllTaskElement = task.clear
   def clearAllPrototypeElement = prototype.clear

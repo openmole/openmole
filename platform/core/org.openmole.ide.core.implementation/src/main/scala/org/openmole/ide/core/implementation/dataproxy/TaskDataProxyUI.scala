@@ -21,5 +21,4 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.data.ITaskDataUI
 
-//class DataProxyUI(var dataUI: IDataUI[_]){
 class TaskDataProxyUI(var dataUI: ITaskDataUI) extends ITaskDataProxyUI

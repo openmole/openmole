@@ -23,6 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.WindowManager;
 import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.dataproxy.Proxys;
 
@@ -38,7 +39,7 @@ public final class ResetAll implements ActionListener {
         MoleScenesManager.removeMoleScenes();
         Proxys.clearAll();
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
-        MoleSceneTopComponent.getDefault().refreshPalette();
-      //  Displays.propertyPanel.hidePanelScrollPane();
+        ((MoleSceneTopComponent) WindowManager.getDefault().findTopComponent("MoleSceneTopComponent")).refreshPalette();
+        //  Displays.propertyPanel.hidePanelScrollPane();
     }
 }

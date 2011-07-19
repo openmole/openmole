@@ -18,6 +18,6 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI) extends IDataProxyUI
+class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI) extends IPrototypeDataProxyUI

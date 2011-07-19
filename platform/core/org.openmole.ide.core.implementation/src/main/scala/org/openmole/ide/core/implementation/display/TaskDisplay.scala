@@ -22,8 +22,8 @@ import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 

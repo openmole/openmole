@@ -16,10 +16,10 @@
  */
 
 package org.openmole.ide.core.implementation.dataproxy
-import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyFactory
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
-class SamplingDataProxyFactory (val factory: ISamplingFactoryUI) extends IDataProxyFactory{
+class SamplingDataProxyFactory (val factory: ISamplingFactoryUI) extends ISamplingDataProxyFactory{
   def buildDataProxyUI(name:String) = {
     val dup = new SamplingDataProxyUI(factory.buildDataUI(name))
     Proxys.addSamplingElement(dup)
