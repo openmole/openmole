@@ -96,7 +96,7 @@ class MoleSceneConverter extends Converter{
   
   override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  {
     var oslots = new HashMap[String, ICapsuleUI]
-    var islots = new HashMap[String, InputSlotWidget]
+    var islots = new HashMap[String, IInputSlotWidget]
     
     val scene = new MoleScene
     scene.manager.name = Some(reader.getAttribute("name"))
