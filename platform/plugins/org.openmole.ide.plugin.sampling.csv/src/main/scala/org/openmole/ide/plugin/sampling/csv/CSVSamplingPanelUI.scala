@@ -32,6 +32,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.table.DefaultTableModel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import scala.swing.BorderPanel.Position._
 import au.com.bytecode.opencsv.CSVReader
@@ -111,5 +112,5 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
     new CSVSamplingDataUI(name,filePathTextField.text,protoMapping)
   }
   
-  def comboContent: List[PrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.toList
+  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.toList
 }
