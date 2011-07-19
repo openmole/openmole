@@ -52,16 +52,16 @@ object JSAGASessionService {
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
     else  Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.");
         
-    initializeURLProtocol(Activator.context.getOrElse(throw new InternalProcessingError("Context hasn't been initialized")))
+//    initializeURLProtocol(Activator.context.getOrElse(throw new InternalProcessingError("Context hasn't been initialized")))
   }
   
-  private def initializeURLProtocol(context: BundleContext) = {
+ /* private def initializeURLProtocol(context: BundleContext) = {
     val protocol = "httpg"; //$NON-NLS-1$
     //    URLStreamHandlerService svc = new HttpgURLStreamHandlerService();
     val properties = new Hashtable[String, Array[String]]
     properties.put(URLConstants.URL_HANDLER_PROTOCOL, Array[String](protocol))
     context.registerService(classOf[URLStreamHandlerService].getName,new HttpgURLStreamHandlerService,properties)
-  }
+  }*/
   
   lazy val session = SessionFactory.createSession(false)
   
