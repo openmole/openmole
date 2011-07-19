@@ -34,10 +34,10 @@ object ProcessUtil {
     try {
       pump.start
       try process.waitFor
-      catch  {
+      catch {
         case e: InterruptedException =>
           process.destroy
-          throw e;
+          throw e
       } finally pump.stop
     } finally processDestroyer.remove(process)
     process.exitValue

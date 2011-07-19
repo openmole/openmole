@@ -120,15 +120,14 @@ class Runtime {
           val cache = repliURI.replicaPath.cacheUnziped
           val cacheHash = HashService.computeHash(cache).toString
 
-          if (cacheHash != repliURI.hash) {
+          if (cacheHash != repliURI.hash)
             throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.replicaPath.toStringURI)
-          }
 
           val local = if (repliURI.directory) {
             val local = Workspace.newDir("dirReplica")
             new TarInputStream(new FileInputStream(cache)).extractDirArchiveWithRelativePathAndClose(local) 
             local
-          } else  cache
+          } else cache
 
           usedFiles.put(repliURI.src, local)
         }
@@ -136,9 +135,9 @@ class Runtime {
       
       val jobsFileCache = executionMessage.jobs.path.cacheUnziped
 
-      if (HashService.computeHash(jobsFileCache) != executionMessage.jobs.hash) {
+      if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash)
         throw new InternalProcessingError("Hash of the execution job does't match.");
-      }
+
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))     
       val allMoleJobs =  tis.applyAndClose( e => {SerializerService.deserializeReplaceFiles[IMoleJob](tis, usedFiles)})

@@ -53,8 +53,7 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
 object URIFile extends Logger {
-  
-  
+    
   val Timeout = new ConfigurationLocation("URIFile", "Timeout")
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")

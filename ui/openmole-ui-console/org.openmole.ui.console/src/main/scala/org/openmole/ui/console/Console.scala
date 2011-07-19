@@ -25,6 +25,7 @@ import org.codehaus.groovy.tools.shell.Command
 import org.codehaus.groovy.tools.shell.Groovysh
 import org.codehaus.groovy.tools.shell.IO
 import org.openmole.core.structuregenerator.StructureGenerator
+import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 
@@ -35,6 +36,7 @@ object Console {
   val structureGenerator = "structure"
   val workspace = "workspace"
   val registry = "registry"
+  val logger = "logger"
   
   val binding = new Binding
   val groovysh = new Groovysh(classOf[Groovy].getClassLoader, binding, new IO())
@@ -50,6 +52,7 @@ object Console {
   setVariable(pluginManager, PluginManager)
   setVariable(structureGenerator, StructureGenerator.instance)
   setVariable(workspace, Workspace)
+  setVariable(logger, LoggerService)
 
   def setVariable(name: String, value: Object) = binding.setVariable(name, value)
 

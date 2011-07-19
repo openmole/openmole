@@ -20,8 +20,6 @@ package org.openmole.core.batch.environment
 import java.util.concurrent.CancellationException
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.exception.InternalProcessingError
@@ -32,16 +30,16 @@ import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
-object BatchExecutionJob {
+object BatchExecutionJob extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
-  val LOGGER = Logger.getLogger(classOf[BatchExecutionJob].getName)
-
+ 
   Workspace += (MinUpdateInterval, "PT2M")
   Workspace += (MaxUpdateInterval, "PT30M")
   Workspace += (IncrementUpdateInterval, "PT2M")
@@ -110,13 +108,14 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         _delay = if (newDelay <= maxDelay) newDelay else maxDelay
       }
     } catch {
-      case (e: TemporaryErrorException) => LOGGER.log(Level.FINE, "Temporary error durring job update.", e)
-      case (e: CancellationException) => LOGGER.log(Level.FINE, "Operation interrupted cause job was killed.", e)
+      case (e: TemporaryErrorException) => logger.log(FINE, "Temporary error durring job update.", e)
+      case (e: CancellationException) => logger.log(FINE, "Operation interrupted cause job was killed.", e)
       case (e: ShouldBeKilledException) => 
-        LOGGER.log(Level.FINE, e.getMessage)
+        logger.log(FINE, "Job should be killed", e)
         kill
       case e =>
-        LOGGER.log(Level.WARNING, "Error in job update", e)
+        logger.log(WARNING, "Error in job update: " + e.getMessage)
+        logger.log(FINE, "Error in job update.", e)
         kill
     }
 
@@ -161,7 +160,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       val bj = js._1.submit(serializedJob, js._2)
       batchJob = bj
     } catch {
-      case e => LOGGER.log(Level.FINE, "Error durring job submission.", e)
+      case e => logger.log(FINE, "Error durring job submission.", e)
     } finally {
       JobServiceControl.usageControl(js._1.description).releaseToken(js._2)
     }
