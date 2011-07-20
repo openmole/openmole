@@ -17,6 +17,6 @@
 
 package org.openmole.ui.plugin.transitionfactory
 
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 
-class PuzzleFirst[+T <: IGenericCapsule](val firstCapsule: T) extends IPuzzleFirst[T]
+class PuzzleFirst(val firstCapsule: ICapsule) extends IPuzzleFirst

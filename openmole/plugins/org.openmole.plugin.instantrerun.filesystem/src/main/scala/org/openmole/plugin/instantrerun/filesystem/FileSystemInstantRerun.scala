@@ -24,12 +24,12 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import java.io.File
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IInstantRerun
 import org.openmole.core.model.data.IContext
@@ -50,12 +50,12 @@ object FileSystemInstantRerun {
   val CONTEXT = "context"
 }
 
-class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends IInstantRerun {
+class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstantRerun {
 
-  def this(dir: File, capsules: Array[IGenericCapsule]) = this(dir, capsules.toSet)
-  def this(dir: String, capsules: Array[IGenericCapsule]) = this(new File(dir), capsules)
-  def this(dir: File, capsules: IGenericCapsule*) = this(dir, capsules.toSet)
-  def this(dir: String, capsules: IGenericCapsule*) = this(new File(dir), capsules.toSet)
+  def this(dir: File, capsules: Array[ICapsule]) = this(dir, capsules.toSet)
+  def this(dir: String, capsules: Array[ICapsule]) = this(new File(dir), capsules)
+  def this(dir: File, capsules: ICapsule*) = this(dir, capsules.toSet)
+  def this(dir: String, capsules: ICapsule*) = this(new File(dir), capsules.toSet)
   
   import FileSystemInstantRerun._
   
@@ -73,7 +73,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
   
   private var jobsInProgressHash = new TreeMap[MoleJobId, (IHash, IHash)]
   
-  def rerun(job: IMoleJob, capsule: IGenericCapsule): Boolean = synchronized {
+  def rerun(job: IMoleJob, capsule: ICapsule): Boolean = synchronized {
     if(!capsules.contains(capsule)) return false
     
     val taskHash = hashTask(capsule.taskOrException)
@@ -120,7 +120,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
     } finally serializedContext._1.delete
   }
   
-  def jobFinished(job: IMoleJob, capsule: IGenericCapsule) = synchronized {
+  def jobFinished(job: IMoleJob, capsule: ICapsule) = synchronized {
     if(job.state == State.COMPLETED && capsules.contains(capsule)) {
       jobsInProgressHash.get(job.id) match {
         case Some((taskH, contextH)) =>
@@ -166,7 +166,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[IGenericCapsule]) extends 
     (file, try SerializerService.serializeFilePathAsHashGetFiles(context, os) finally os.close)
   }
   
-  private def hashTask(task: IGenericTask) = {
+  private def hashTask(task: ITask) = {
     val file = Workspace.newFile("context", ".xml")
     try {
       SerializerService.serializeFilePathAsHashGetFiles(task, file)

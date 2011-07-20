@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook.filemanagement
 
 import java.io.File
-import org.openmole.core.implementation.capsule.Capsule
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution

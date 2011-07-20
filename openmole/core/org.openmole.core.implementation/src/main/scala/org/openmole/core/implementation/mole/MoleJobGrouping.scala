@@ -18,20 +18,20 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.IMoleJobGrouping
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
 import scala.collection.mutable.HashMap
 
 object MoleJobGrouping {
-  val Empty = new MoleJobGrouping(new HashMap[IGenericCapsule, IGroupingStrategy])
+  val Empty = new MoleJobGrouping(new HashMap[ICapsule, IGroupingStrategy])
 }
 
-class MoleJobGrouping(groupers: HashMap[IGenericCapsule, IGroupingStrategy]) extends IMoleJobGrouping {
+class MoleJobGrouping(groupers: HashMap[ICapsule, IGroupingStrategy]) extends IMoleJobGrouping {
 
-    def this() = this(new HashMap[IGenericCapsule, IGroupingStrategy])
+    def this() = this(new HashMap[ICapsule, IGroupingStrategy])
     
-    override def apply(capsule: IGenericCapsule): Option[IGroupingStrategy] = groupers.get(capsule);
+    override def apply(capsule: ICapsule): Option[IGroupingStrategy] = groupers.get(capsule);
    
-    def set(capsule: IGenericCapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy);
+    def set(capsule: ICapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy);
    
 }

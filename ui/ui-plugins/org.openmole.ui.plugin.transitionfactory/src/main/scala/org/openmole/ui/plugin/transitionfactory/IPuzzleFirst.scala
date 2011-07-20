@@ -17,9 +17,8 @@
 
 package org.openmole.ui.plugin.transitionfactory
 
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 
-trait IPuzzleFirst[+T <: IGenericCapsule] extends IPuzzle {
-    def firstCapsule: T
-//    public void setFirstCapsule(T firstTCapsule);
+trait IPuzzleFirst extends IPuzzle {
+  def firstCapsule: ICapsule
 }

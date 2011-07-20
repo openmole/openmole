@@ -20,15 +20,16 @@ package org.openmole.core.implementation.task
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
-import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.task.IExplorationTask
 
 object ExplorationTask {
-  val Sample = new Data[Iterable[Iterable[IVariable[_]]]]("Sample#", classOf[Iterable[Iterable[IVariable[_]]]])
+  type SampledValues = Iterable[Iterable[IVariable[_]]]
+  
+  val Sample = new Data[SampledValues]("Sample#", classOf[Iterable[Iterable[IVariable[_]]]])
 }
 
-
-class ExplorationTask(name: String, val sampling: ISampling) extends GenericTask(name) with IExplorationTask {
+class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) with IExplorationTask {
 
   addOutput(ExplorationTask.Sample)
 

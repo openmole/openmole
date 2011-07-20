@@ -17,17 +17,17 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class Mole(val root: IGenericCapsule) extends IMole {
+class Mole(val root: ICapsule) extends IMole {
 
   @throws(classOf[Throwable])
-  override def tasks: Iterable[IGenericTask] = {
-    val tasks = new HashSet[IGenericTask]
+  override def tasks: Iterable[ITask] = {
+    val tasks = new HashSet[ITask]
 
     capsules.foreach(visited => { 
         visited.task match {
@@ -41,9 +41,9 @@ class Mole(val root: IGenericCapsule) extends IMole {
   }
 
   @throws(classOf[Throwable])
-  override def capsules: Iterable[IGenericCapsule] = {
-    val caps = new HashSet[IGenericCapsule]
-    val toExplore = new ListBuffer[IGenericCapsule]
+  override def capsules: Iterable[ICapsule] = {
+    val caps = new HashSet[ICapsule]
+    val toExplore = new ListBuffer[ICapsule]
     toExplore += root
 
     while (!(toExplore.isEmpty)) {

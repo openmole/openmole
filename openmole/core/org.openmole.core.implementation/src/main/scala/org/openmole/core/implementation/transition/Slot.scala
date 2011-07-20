@@ -17,29 +17,29 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 
-class Slot(val capsule: IGenericCapsule) extends ISlot {
+class Slot(val capsule: ICapsule) extends ISlot {
   capsule.addInputSlot(this)
   
-  private val _transitions = new HashSet[IGenericTransition]
+  private val _transitions = new HashSet[ITransition]
 
-  override def +=(transition: IGenericTransition) = {
+  override def +=(transition: ITransition) = {
     _transitions += transition
     this
   }
 
-  override def -=(transition: IGenericTransition) = {
+  override def -=(transition: ITransition) = {
     _transitions -= transition
     this
   }
 
-  override def transitions: Iterable[IGenericTransition] =  _transitions
+  override def transitions: Iterable[ITransition] =  _transitions
     
-  override def contains(transition: IGenericTransition): Boolean = {
+  override def contains(transition: ITransition): Boolean = {
     _transitions.contains(transition)
   }
 }

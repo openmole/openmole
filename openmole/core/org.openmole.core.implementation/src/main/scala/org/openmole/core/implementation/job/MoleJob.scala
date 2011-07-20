@@ -24,14 +24,14 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.job.State
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger
 
-class MoleJob(val task: IGenericTask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
+class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
   
   import MoleJob._
 

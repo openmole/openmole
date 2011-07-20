@@ -18,16 +18,15 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.capsule.IGenericCapsule
 
 object IInstantRerun {
   def empty = new IInstantRerun {
-    override def rerun(job: IMoleJob, capsule: IGenericCapsule) = false
-    override def jobFinished(job: IMoleJob, capsule: IGenericCapsule) = {}
+    override def rerun(job: IMoleJob, capsule: ICapsule) = false
+    override def jobFinished(job: IMoleJob, capsule: ICapsule) = {}
   }
 }
 
 trait IInstantRerun {
-  def rerun(job: IMoleJob, capsule: IGenericCapsule): Boolean
-  def jobFinished(job: IMoleJob, capsule: IGenericCapsule)
+  def rerun(job: IMoleJob, capsule: ICapsule): Boolean
+  def jobFinished(job: IMoleJob, capsule: ICapsule)
 }

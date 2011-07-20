@@ -17,6 +17,6 @@
 
 package org.openmole.ui.plugin.transitionfactory
 
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 
-class PuzzleFirstAndLast[+T1 <: IGenericCapsule, +T2 <: IGenericCapsule](val firstCapsule: T1, val lastCapsule: T2) extends IPuzzleFirstAndLast[T1,T2]
+class PuzzleFirstAndLast(val firstCapsule: ICapsule, val lastCapsule: ICapsule) extends IPuzzleFirstAndLast

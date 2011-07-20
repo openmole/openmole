@@ -17,7 +17,7 @@
 
 package org.openmole.core.model.transition
 
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 
 trait ISlot {
 
@@ -27,7 +27,7 @@ trait ISlot {
    *
    * @return all the transitions plugged into this slot
    */
-  def transitions: Iterable[IGenericTransition]
+  def transitions: Iterable[ITransition]
 
   /**
    *
@@ -35,8 +35,8 @@ trait ISlot {
    *
    * @param transition the transition to plug
    */
-  def +=(transition: IGenericTransition): this.type
-  def add(transition: IGenericTransition): this.type = { +=(transition) }
+  def +=(transition: ITransition): this.type
+  def add(transition: ITransition): this.type = { +=(transition) }
   
   /**
    *
@@ -44,8 +44,8 @@ trait ISlot {
    *
    * @param transition the transition to unplug
    */
-  def -=(transition: IGenericTransition): this.type
-  def remove(transition: IGenericTransition): this.type = { -=(transition)}
+  def -=(transition: ITransition): this.type
+  def remove(transition: ITransition): this.type = { -=(transition)}
   
   /**
    *
@@ -54,7 +54,7 @@ trait ISlot {
    * @param transition the transition to test
    * @return true if the transition is plugged to this slot
    */
-  def contains(transition: IGenericTransition): Boolean
+  def contains(transition: ITransition): Boolean
 
   /**
    *
@@ -63,5 +63,5 @@ trait ISlot {
    * 
    * @return the capsule this slot belongs to
    */
-  def capsule: IGenericCapsule
+  def capsule: ICapsule
 }

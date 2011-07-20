@@ -17,44 +17,110 @@
 
 package org.openmole.core.implementation.transition
 
+import java.util.logging.Logger
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.tools.ContextBuffer
-import org.openmole.core.implementation.tools.LevelComputing
-import org.openmole.core.model.capsule.ICapsule
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.mole.SubMoleExecution
+import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.core.implementation.tools.ContextAggregator._
+import org.openmole.core.implementation.data.Context._
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IData
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.transition.ISlot
 import org.openmole.core.model.transition.ITransition
+import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.task.IExplorationTask
+import org.openmole.core.implementation.tools.ToArrayFinder._
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.LockRepository
+import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.misc.tools.service.Priority
+import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
-class Transition(override val start: ICapsule, override val end: ISlot, override val condition: ICondition, filtred: Set[String]) extends GenericTransition(start, end, condition, filtred) with ITransition {
 
-  def this(start: ICapsule, end: IGenericCapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
+object Transition {
+  val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
+  
+  def isExploration(t: Transition) = classOf[IExplorationTask].isAssignableFrom(t.start.taskOrException.getClass)
+}
+
+class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends ITransition {
+
+  def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
     
-  def this(start: ICapsule, end: IGenericCapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
+  def this(start: ICapsule, end: ICapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
 
-  def this(start: ICapsule, end: IGenericCapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
-    
+  def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
+
   def this(start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
-    
+
   def this(start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
-   
-  def this(start: ICapsule, end: IGenericCapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
-    
-  def this(start: ICapsule, end: IGenericCapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet)
 
-  def this(start: ICapsule, end: IGenericCapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
-    
+  def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
+
+  def this(start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet)
+
+  def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
+
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-    
 
-  override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
+  import Transition._
   
-  override protected def plugStart = start.addOutputTransition(this)
+  start.addOutputTransition(this)
+  end += this
+
+  private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
+    val registry = subMole.transitionRegistry
+    !end.transitions.exists(!registry.isRegistred(_, ticket))
+  }
   
+  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, subMole: ISubMoleExecution) = {
+    val lockKey = (end, subMole, ticket)
+    lockRepository.lock(lockKey)
+    try {
+      import subMole.moleExecution
+      val registry = subMole.transitionRegistry
+      registry.register(this, ticket, context)
+
+      if (nextTaskReady(ticket, subMole)) {
+        val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
+        end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
+                        
+        val newTicket = 
+          if (end.capsule.intputSlots.size <= 1) ticket 
+          else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+
+        val toAggregate = combinaison.groupBy(_.prototype.name)
+      
+        val toArray = toArrayManifests(end)      
+        val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
+        
+        subMole.submit(end.capsule, newContext, newTicket)
+      }
+    } finally lockRepository.unlock(lockKey)
+  }
+
+  override def perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
+    if (isConditionTrue(context)) {
+      /*-- Remove filtred --*/
+      _perform(context -- filtered, ticket, toClone, subMole)
+    }
+  }
+
+  override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
+
+  override def unFiltred = start.userOutputs.filterNot(d => filtered.contains(d.prototype.name))
+  
+  protected def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
+
 }

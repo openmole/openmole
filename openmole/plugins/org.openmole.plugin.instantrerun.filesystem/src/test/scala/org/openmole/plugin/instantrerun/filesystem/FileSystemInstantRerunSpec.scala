@@ -22,7 +22,7 @@ import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.implementation.capsule.Capsule
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 

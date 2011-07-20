@@ -25,8 +25,7 @@ package org.openmole.ui.plugin.builder
  */
 
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.capsule.Capsule
-import org.openmole.core.implementation.capsule.ExplorationCapsule
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.DataSet
@@ -39,11 +38,9 @@ import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.model.capsule.ICapsule
-import org.openmole.core.model.capsule.IExplorationCapsule
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
@@ -55,10 +52,10 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.IExplorationTransition
+import org.openmole.core.model.transition.ITransition
 import org.openmole.core.structuregenerator.ComplexNode
 import org.openmole.core.structuregenerator.PrototypeNode
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast
@@ -124,7 +121,7 @@ class Builder {
    * @throws UserBadDataError
    * @throws InterruptedException
    */
-  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): MoleTask = {  
+  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast): MoleTask = {  
     val task = puzzle.lastCapsule.task.getOrElse(throw new UserBadDataError("Task unasigned for last capsule of the puzzle"))
                   
 //        val inputToGlobalTask = new InputToGlobalTask(taskName + "InputToGlobalTask", task.userOutputs);
@@ -160,7 +157,7 @@ class Builder {
    * @throws InterruptedException
    */
   def mole(head: ICapsule, capsules: Array[ICapsule]): IMole = new Mole(chain(head, capsules).firstCapsule)
-  def mole(capsule: IGenericCapsule): IMole = new Mole(capsule)
+  def mole(capsule: ICapsule): IMole = new Mole(capsule)
 
   /**
    * Builds a Mole.
@@ -171,7 +168,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def mole(puzzle: IPuzzleFirstAndLast[IGenericCapsule,_]): IMole = new Mole(puzzle.firstCapsule)
+  def mole(puzzle: IPuzzleFirstAndLast): IMole = new Mole(puzzle.firstCapsule)
   /**
    * Builds a Mole execution, that is to say a Mole ready to be run.
    *
@@ -193,7 +190,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def moleExecution(capsule: IGenericCapsule): IMoleExecution = new MoleExecution(new Mole(capsule))
+  def moleExecution(capsule: ICapsule): IMoleExecution = new MoleExecution(new Mole(capsule))
 
   /**
    * Builds a Mole execution, that is to say a Mole ready to be run.
@@ -204,7 +201,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws InterruptedException
    */
-  def moleExecution(puzzle: IPuzzleFirstAndLast[IGenericCapsule,_]): IMoleExecution = new MoleExecution(mole(puzzle))
+  def moleExecution(puzzle: IPuzzleFirstAndLast): IMoleExecution = new MoleExecution(mole(puzzle))
 
   /**
    * Builds a Mole execution, that is to say a Mole ready to be run.
@@ -225,7 +222,7 @@ class Builder {
    * @throws InternalProcessingError
    * @throws UserBadDataError
    */
-  def moleExecution(puzzle: IPuzzleFirstAndLast[IGenericCapsule,_], strategy: IEnvironmentSelection): IMoleExecution = new MoleExecution(mole(puzzle), strategy)
+  def moleExecution(puzzle: IPuzzleFirstAndLast, strategy: IEnvironmentSelection): IMoleExecution = new MoleExecution(mole(puzzle), strategy)
 
   /**
    * Builds an environment selection object.
@@ -273,14 +270,6 @@ class Builder {
     explo
   }
 
-  /**
-   * Builds an ExplorationCapsule
-   *
-   * @param exporationTask, the exploration task to be encapsulated.
-   * @return an instace of ExplorationCapsule
-   */
-  def explorationCapsule(exporationTask: IExplorationTask): IExplorationCapsule = new ExplorationCapsule(exporationTask);
-        
 
   /**
    * Builds an transitin exploration from a exploration task capsule and a
@@ -290,9 +279,9 @@ class Builder {
    * @param exploredTask, the task to be explored.
    * @return an instance of Capsule
    */
-  def explorationTransition(explorationCapsule: IExplorationCapsule, exploredTask: ITask): IExplorationTransition = {
+  def explorationTransition(explorationCapsule: ICapsule, exploredTask: ITask): ITransition = {
     val exploredCapsule = new Capsule(exploredTask)
-    new ExplorationTransition(explorationCapsule, exploredCapsule)
+    new Transition(explorationCapsule, exploredCapsule)
   }
     
   /**
@@ -307,7 +296,7 @@ class Builder {
    * @throws UserBadDataError
    * @throws InterruptedException
    */ 
-  def explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule]): IMoleTask = {
+  def explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast): IMoleTask = {
         
     val ft = puzzle.lastCapsule.task.getOrElse(throw new UserBadDataError("Task unasigned for first capsule of the puzzle"))
     
@@ -325,7 +314,7 @@ class Builder {
     moleTask
   }
     
-  /*def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], nb: Int) = {
+  /*def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[ICapsule,ICapsule], nb: Int) = {
     val prototype = new Prototype(iterationName, classOf[Int])
     
     val loopOnCapsule = new Capsule(new Task(iterationName + "_loopOn") {

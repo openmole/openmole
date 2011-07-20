@@ -18,13 +18,13 @@
 package org.openmole.core.implementation.hook
 
 import java.util.logging.Level
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.service.Logger
 
-abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: IGenericCapsule) extends ICapsuleExecutionHook with Logger {
+abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: ICapsule) extends ICapsuleExecutionHook with Logger {
   
   CapsuleExecutionDispatcher += (moleExecution, capsule, this)
   

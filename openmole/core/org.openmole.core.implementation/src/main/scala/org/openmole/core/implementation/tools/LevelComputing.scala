@@ -18,10 +18,10 @@
 package org.openmole.core.implementation.tools
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.transition.{IExplorationTransition,IAggregationTransition, IGenericTransition}
+import org.openmole.core.model.transition.{ITransition,IAggregationTransition, IExplorationTransition}
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import scala.collection.mutable.SynchronizedMap
@@ -38,17 +38,17 @@ object LevelComputing {
 
 class LevelComputing(mole: IMole) {
   
-  @transient private val levelCache = new WeakHashMap[IGenericCapsule, Int]
+  @transient private val levelCache = new WeakHashMap[ICapsule, Int]
 
-  def level(capsule: IGenericCapsule): Int = synchronized {
+  def level(capsule: ICapsule): Int = synchronized {
     levelCache.getOrElse (capsule, {
-        val l = level(capsule, new HashSet[IGenericCapsule], Int.MaxValue)
+        val l = level(capsule, new HashSet[ICapsule], Int.MaxValue)
         if(l == Int.MaxValue) throw new InternalProcessingError("Error in level computing level could not be equal to MAXVALUE." + capsule.taskOrException.name)
         l
     })
   }
   
-  private def level (capsule : IGenericCapsule, alreadySeen: HashSet[IGenericCapsule], lvl : Int): Int = {
+  private def level (capsule : ICapsule, alreadySeen: HashSet[ICapsule], lvl : Int): Int = {
     if (capsule.equals (mole.root)) return 1
     if (alreadySeen.contains(capsule)) return lvl
     capsule.intputSlots map (slot => {
@@ -58,7 +58,7 @@ class LevelComputing(mole: IMole) {
             t match {
               case _ : IExplorationTransition => inLevel + 1
               case _ : IAggregationTransition => inLevel - 1
-              case _ => inLevel
+              case t => inLevel
             }
           }) min
         else Int.MaxValue

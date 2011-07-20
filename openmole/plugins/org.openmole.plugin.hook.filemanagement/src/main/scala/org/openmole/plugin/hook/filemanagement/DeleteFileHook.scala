@@ -22,11 +22,11 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{IContext,IPrototype}
 import org.openmole.misc.exception.UserBadDataError
 
-class DeleteFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, toDelete: Array[IPrototype[File]]) extends CapsuleExecutionHook(moleExecution, capsule) {
+class DeleteFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toDelete: Array[IPrototype[File]]) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob)  = {
     import moleJob.context

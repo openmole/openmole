@@ -27,7 +27,7 @@ import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 
 trait IMoleTask extends ITask {
@@ -40,15 +40,15 @@ trait IMoleTask extends ITask {
    */
   def mole: IMole
     
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): this.type
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_]): this.type
 
-  def addOutput(capsule: IGenericCapsule, data: IData[_]): this.type
+  def addOutput(capsule: ICapsule, data: IData[_]): this.type
   
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type
  
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_], forceArray: Boolean): this.type
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_], forceArray: Boolean): this.type
 
-  def addOutput(capsule: IGenericCapsule, data: IData[_], forceArray: Boolean): this.type
+  def addOutput(capsule: ICapsule, data: IData[_], forceArray: Boolean): this.type
   
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type
 }

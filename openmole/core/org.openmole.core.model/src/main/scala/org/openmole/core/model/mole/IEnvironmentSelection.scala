@@ -17,9 +17,8 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.execution.IEnvironment
 
 trait IEnvironmentSelection {
-   def select(capsule: IGenericCapsule): Option[IEnvironment]
+   def select(capsule: ICapsule): Option[IEnvironment]
 }

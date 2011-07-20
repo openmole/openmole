@@ -23,11 +23,11 @@ import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
@@ -55,7 +55,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
 
   val subMoleExecutionAdapterForMoleJobFinished = new IObjectListenerWithArgs[IMoleJob] {
     override def eventOccured(job: IMoleJob, args: Array[Object]) = {
-      val capsule = args(0).asInstanceOf[IGenericCapsule]
+      val capsule = args(0).asInstanceOf[ICapsule]
       jobFinished(job, capsule)
     }
   }
@@ -65,12 +65,12 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   private var _nbJobInProgress = 0
   private var _nbJobWaitingInGroup = 0
   private var childs = new HashSet[ISubMoleExecution]
-  private val waitingJobs = new HashMap[(IGenericCapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
+  private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   
   private var canceled = false
   
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContextBuffer]
-  val transitionRegistry = new RegistryWithTicket[IGenericTransition, IContextBuffer]
+  val transitionRegistry = new RegistryWithTicket[ITransition, IContextBuffer]
 
   parrentApply(_.addChild(this))
 
@@ -123,7 +123,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     parrentApply(_.decNbJobWaitingInGroup(nb))
   }
   
-  override def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket) = synchronized {
+  override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
       val moleJob = capsule.toJob(context, moleExecution.nextJobId)
 
@@ -136,7 +136,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     }
   }
 
-  override def group(moleJob: IMoleJob, capsule: IGenericCapsule, grouping: Option[IGroupingStrategy]) = synchronized {
+  override def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy]) = synchronized {
     grouping match {
       case Some(strategy) =>
         val category = strategy.group(moleJob.context)
@@ -166,7 +166,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       case Some(p) => f(p)
     }
     
-  private def jobFinished(job: IMoleJob, capsule: IGenericCapsule): Unit = synchronized {       
+  private def jobFinished(job: IMoleJob, capsule: ICapsule): Unit = synchronized {       
     this -= job
   }
   

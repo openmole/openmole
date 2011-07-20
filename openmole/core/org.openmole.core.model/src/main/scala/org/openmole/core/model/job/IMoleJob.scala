@@ -17,7 +17,7 @@
 
 package org.openmole.core.model.job
 
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.IContext
 
 object IMoleJob {
@@ -35,7 +35,7 @@ object IMoleJob {
 }
 
 trait IMoleJob {
-  def task: IGenericTask
+  def task: ITask
   def state: State.State
   def isFinished: Boolean
   def context: IContext

@@ -20,7 +20,7 @@ package org.openmole.core.implementation.hook
 import org.openmole.core.model.hook.IMoleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -49,8 +49,8 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     unregisterSynchronousListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
   }
   
-  def jobInCapsuleFinished(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
-  def jobInCapsuleStarting(moleJob: IMoleJob, capsule: IGenericCapsule) = {}
+  def jobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
+  def jobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) = {}
   
   def stateChanged(moleJob: IMoleJob) = {}
   def executionStarting = {}
@@ -73,10 +73,10 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     override def eventOccured(obj: IMoleExecution) =  executionFinished
   }
   
-  class CapsuleChangedAdapter(listener: (IMoleJob, IGenericCapsule) => Unit) extends IObjectListenerWithArgs[IMoleExecution]  {
+  class CapsuleChangedAdapter(listener: (IMoleJob, ICapsule) => Unit) extends IObjectListenerWithArgs[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
       val moleJob = args(0).asInstanceOf[IMoleJob]
-      val capsule = args(1).asInstanceOf[IGenericCapsule]
+      val capsule = args(1).asInstanceOf[ICapsule]
       listener(moleJob, capsule)
     }
   }

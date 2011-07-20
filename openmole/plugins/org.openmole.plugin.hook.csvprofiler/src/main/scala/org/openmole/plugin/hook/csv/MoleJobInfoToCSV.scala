@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.hook.csvprofiler
 
-import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.job.IMoleJob
 
 object MoleJobInfoToCSV {

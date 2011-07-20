@@ -15,23 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.capsule
+package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.{IDataChannel,IContext, IDataSet}
-import org.openmole.core.model.job.{IMoleJob,MoleJobId}
-import org.openmole.core.model.task.IGenericTask
-import org.openmole.core.model.transition.{IGenericTransition,ISlot}
+import org.openmole.core.model.data.{IDataSet, IContext, IDataChannel}
+import org.openmole.core.model.job.{MoleJobId, IMoleJob}
+import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.{ISlot, ITransition}
 import org.openmole.misc.exception.UserBadDataError
 
-
 /**
- * Super class for all capsules. Capsules are entities linked together by
- * transition to build a workflow. Even if it may be not true fo technical
- * reasons, conceptually they are this is the only mutable class element of
- * the workflow representation.
+ * A capsule containing ordinry task (as oposed from exploration ones). This
+ * type of capsule must be followed by a Transition (as oposed to exploration
+ * ones).
  * 
  */
-trait IGenericCapsule {
+trait ICapsule {
 
   /**
    * Get the Some(task) assigned to this capsule or None if not the task has not
@@ -39,7 +37,7 @@ trait IGenericCapsule {
    *
    * @return Some(task) inside this capsule or None if not the task has not been assigned
    */
-  def task: Option[IGenericTask]
+  def task: Option[ITask]
   
   def taskOrException = task.getOrElse(throw new UserBadDataError("Capsule task is unassigned.")) 
   
@@ -111,12 +109,6 @@ trait IGenericCapsule {
    */
   def addInputSlot(group: ISlot): this.type
 
-  /**
-   * Get all the output transitions plugged to this capsule.
-   *
-   * @return all the output transitions plugged to this capsule
-   */
-  def outputTransitions: Iterable[IGenericTransition]
 
   /**
    * Instanciate a MoleJob from this capsule for running the task contained
@@ -143,4 +135,34 @@ trait IGenericCapsule {
    * @return the output data of the task
    */
   def userOutputs: IDataSet
+  
+  /**
+   * Assing a task to this capsule.
+   * 
+   * @param task the task to assign to this capsule.
+   */
+  def task_=(task: ITask)
+  
+  /**
+   * Assing an option of task to this capsule.
+   * 
+   * @param task the option of task to assign to this capsule.
+   */
+  def task_=(task: Option[ITask])
+    
+  /**
+   * Add an output transition to this capsule.
+   * 
+   * @param transition the transition to add
+   * @return the capsule itself
+   */
+  def addOutputTransition(transition: ITransition): this.type
+  
+  /**
+   * Get all the output transitions plugged to this capsule.
+   *
+   * @return all the output transitions plugged to this capsule
+   */
+  def outputTransitions: Iterable[ITransition]
+  
 }

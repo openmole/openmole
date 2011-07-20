@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.tools
 
 import java.util.logging.Logger
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.HashSet
@@ -50,20 +50,20 @@ class MutableComputing {
   
   import MutableComputing.Mutable._
   
-  @transient private val mutableCache = new WeakHashMap[(IGenericCapsule, IPrototype[_]), Mutable]
+  @transient private val mutableCache = new WeakHashMap[(ICapsule, IPrototype[_]), Mutable]
   
-  def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], levelComputing: LevelComputing): Mutable = synchronized {
+  def mutable(capsule: ICapsule, prototype: IPrototype[_], levelComputing: LevelComputing): Mutable = synchronized {
     mutableCache.get(capsule, prototype) match {
       case Some(cachedMutable) => cachedMutable
       case None => 
-        val l = mutableOfNextCapsules(capsule, prototype, 0, new HashSet[IGenericCapsule], levelComputing)
+        val l = mutableOfNextCapsules(capsule, prototype, 0, new HashSet[ICapsule], levelComputing)
         mutableCache.put((capsule, prototype), l)
         l
     }
   }
   
   
-  private def mutable(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
+  private def mutable(capsule: ICapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[ICapsule], levelComputing: LevelComputing): Mutable = {
   //  Logger.getLogger(classOf[MutableComputing].getName).info(capsule.toString)
     
     if(allreadySeen.contains(capsule)) return No
@@ -87,7 +87,7 @@ class MutableComputing {
   }
   
   
-  private def mutableOfNextCapsules(capsule: IGenericCapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[IGenericCapsule], levelComputing: LevelComputing): Mutable = {
+  private def mutableOfNextCapsules(capsule: ICapsule, prototype: IPrototype[_], relativeLevel: Int, allreadySeen: HashSet[ICapsule], levelComputing: LevelComputing): Mutable = {
     val startCapsuleLevel = levelComputing.level(capsule)
 
     var res = No

@@ -30,7 +30,7 @@ import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.tools.ContextAggregator._
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
@@ -72,7 +72,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
   }
    
 
-  private val outputCapsules = new HashMap[IGenericCapsule, ListBuffer[String]]
+  private val outputCapsules = new HashMap[ICapsule, ListBuffer[String]]
 
   override protected def process(context: IContext) = {
     val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
@@ -95,22 +95,22 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     context ++ aggregate(userOutputs, toArrayMap, resultGathering.variables)
   }
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)
 
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype, masks), forceArray)
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype, masks), forceArray)
  
-  def addOutput(capsule: IGenericCapsule, data: IData[_], forceArray: Boolean): this.type = {
+  def addOutput(capsule: ICapsule, data: IData[_], forceArray: Boolean): this.type = {
     addOutput(data)
     outputCapsules.getOrElseUpdate(capsule, new ListBuffer[String]) += data.prototype.name
     if(forceArray) this.forceArray(data.prototype)
     this
   }
  
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_]): this.type = addOutput(capsule, prototype, false)
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_]): this.type = addOutput(capsule, prototype, false)
 
-  def addOutput(capsule: IGenericCapsule, data: IData[_]): this.type = addOutput(capsule, data, false)
+  def addOutput(capsule: ICapsule, data: IData[_]): this.type = addOutput(capsule, data, false)
   
-  def addOutput(capsule: IGenericCapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type = addOutput(capsule, prototype, masks, false)
+  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type = addOutput(capsule, prototype, masks, false)
  
   override def inputs: IDataSet = {
     val firstTask = mole.root.task.getOrElse(throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name))

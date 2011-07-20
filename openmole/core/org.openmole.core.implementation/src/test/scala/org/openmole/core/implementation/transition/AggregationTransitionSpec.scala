@@ -18,8 +18,7 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.capsule.Capsule
-import org.openmole.core.implementation.capsule.ExplorationCapsule
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
@@ -48,7 +47,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
      
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
      
     val emptyT = new EmptyTask("Empty")
     emptyT.addInput(i)
@@ -84,7 +83,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
      
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new ExplorationCapsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
      
     val emptyT = new EmptyTask("Empty")
     emptyT.addInput(i)

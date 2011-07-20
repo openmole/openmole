@@ -21,7 +21,7 @@ import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil.copy
@@ -38,7 +38,7 @@ import org.openmole.misc.exception.UserBadDataError
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(moleExecution: IMoleExecution, capsule: IGenericCapsule, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
+class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

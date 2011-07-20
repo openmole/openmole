@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.capsule
+package org.openmole.core.implementation.mole
 
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
@@ -23,10 +23,10 @@ import org.openmole.misc.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.transition.Slot
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.{IMoleExecution,ISubMoleExecution}
-import org.openmole.core.model.task.IGenericTask
-import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.data.{IContext,IDataChannel}
 import org.openmole.core.model.job.{IMoleJob,MoleJobId}
@@ -35,14 +35,16 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 
-import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.tools.ToCloneFinder._
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
 
-abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](private var _task: Option[TASK]) extends IGenericCapsule {
 
-  class GenericCapsuleAdapter extends IObjectListener[IMoleJob] {
+class Capsule(override var task: Option[ITask] = None) extends ICapsule {
+
+  def this(t: ITask) = this(Some(t))
+  
+  class CapsuleAdapter extends IObjectListener[IMoleJob] {
 
     override def eventOccured(obj: IMoleJob) = {
       obj.state match {
@@ -52,13 +54,15 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
       }
     }
   }
+  
   private val _inputSlots = new HashSet[ISlot]
   private val _defaultInputSlot = new Slot(this)
-  private val _outputTransitions = new HashSet[TOUT]
+  private val _outputTransitions = new HashSet[ITransition]
     
   private val _inputDataChannels = new HashSet[IDataChannel]
   private val _outputDataChannels = new HashSet[IDataChannel]
- 
+
+  
   override def defaultInputSlot: ISlot = _defaultInputSlot
 
   override def addInputSlot(slot: ISlot): this.type = {
@@ -88,7 +92,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
   def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
   def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels
     
-  override def outputTransitions: Iterable[TOUT] = _outputTransitions
+  override def outputTransitions: Iterable[ITransition] = _outputTransitions
       
   override def addOutputDataChannel(dataChannel: IDataChannel): this.type = {
     _outputDataChannels += dataChannel
@@ -105,7 +109,7 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     this
   }
 
-  def addOutputTransition(transition: TOUT): this.type = {
+  def addOutputTransition(transition: ITransition): this.type = {
     _outputTransitions += transition
     this
   }
@@ -114,21 +118,13 @@ abstract class GenericCapsule[TOUT <: IGenericTransition, TASK <: IGenericTask](
     val task = taskOrException
     val job = new MoleJob(task, context, jobId)
     
-    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOWEST, new GenericCapsuleAdapter, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOWEST, new CapsuleAdapter, IMoleJob.StateChanged)
     job
   }
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
-  override def task: Option[TASK] = _task
-  
-  def task_=(task: TASK) = {
-    _task = Some(task)
-  }
-
-  def task_=(task: Option[TASK]) = {
-    _task = task
-  }
+  def task_=(task: ITask) = this.task = Some(task) 
   
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1

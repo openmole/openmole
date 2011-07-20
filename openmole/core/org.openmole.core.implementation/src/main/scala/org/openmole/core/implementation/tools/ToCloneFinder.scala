@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.mole.IMoleExecution
 import java.util.logging.Logger
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet
@@ -37,7 +37,7 @@ object ToCloneFinder {
   }
 
   //TODO Improvement condition are evaluated several times
-  def variablesToClone(caps: IGenericCapsule, context: IContext, moleExecution: IMoleExecution): Set[String] = {
+  def variablesToClone(caps: ICapsule, context: IContext, moleExecution: IMoleExecution): Set[String] = {
 
     var counters = new TreeMap[String, DataInfo]
     val levelComputing = LevelComputing(moleExecution)
@@ -91,7 +91,7 @@ object ToCloneFinder {
   }
   
   
-  private def updateInfo(caps: IGenericCapsule, info: DataInfo, data: IData[_], mutableComputing: MutableComputing, levelComputing: LevelComputing) = {
+  private def updateInfo(caps: ICapsule, info: DataInfo, data: IData[_], mutableComputing: MutableComputing, levelComputing: LevelComputing) = {
     info.nbUsage += 1
     mutableComputing.mutable(caps, data.prototype, levelComputing) match {
       case No =>

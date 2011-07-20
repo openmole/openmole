@@ -20,12 +20,9 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
-import org.openmole.core.model.transition.IGenericTransition
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
@@ -58,8 +55,8 @@ trait IMoleExecution {
   
   def isFinished: Boolean
 
-  def submit(moleJob: IMoleJob, capsule: IGenericCapsule, subMole: ISubMoleExecution, ticket: ITicket)
-  def submitToEnvironment(job: IJob, capsule: IGenericCapsule)
+  def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket)
+  def submitToEnvironment(job: IJob, capsule: ICapsule)
 
   def mole: IMole
 

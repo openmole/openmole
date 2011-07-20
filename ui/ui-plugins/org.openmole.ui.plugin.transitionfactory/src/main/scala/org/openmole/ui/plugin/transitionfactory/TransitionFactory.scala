@@ -17,15 +17,11 @@
 
 package org.openmole.ui.plugin.transitionfactory
 
-import org.openmole.core.implementation.capsule.Capsule
-import org.openmole.core.implementation.capsule.ExplorationCapsule
-import org.openmole.core.implementation.capsule.ExplorationCapsule
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.transition.AggregationTransition
-import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.model.capsule.ICapsule
-import org.openmole.core.model.capsule.IExplorationCapsule
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.task.ITask
 
@@ -38,9 +34,9 @@ object TransitionFactory {
    * @param singleCapsule, the ICapsule to be encapsuled in a IPuzzleFirstAndLast
    * @return
    */
-  def puzzle[T <: IGenericCapsule](singleCapsule: T): IPuzzleFirstAndLast[T,T] = new PuzzleFirstAndLast(singleCapsule, singleCapsule)
+  def puzzle[T <: ICapsule](singleCapsule: T): IPuzzleFirstAndLast = new PuzzleFirstAndLast(singleCapsule, singleCapsule)
  
-  def puzzle(singleTask: ITask): IPuzzleFirstAndLast[ICapsule,ICapsule] = puzzle(new Capsule(singleTask))
+  def puzzle(singleTask: ITask): IPuzzleFirstAndLast = puzzle(new Capsule(singleTask))
 
   
   
@@ -55,7 +51,7 @@ object TransitionFactory {
    * @param capsules, the array of all the capsules to be chained.
    * @return an IPuzzleFirstAndLast instance
    */
-  def chain(head: ICapsule, capsules: Array[ICapsule]): IPuzzleFirstAndLast[ICapsule, ICapsule] = {
+  def chain(head: ICapsule, capsules: Array[ICapsule]): IPuzzleFirstAndLast = {
     if(!capsules.isEmpty) {
       new Transition(head, capsules(0))
       for (i <- 1 until capsules.length) {
@@ -66,9 +62,9 @@ object TransitionFactory {
   }
   
  
-  def chain(head: ITask, capsules: Array[ITask]): IPuzzleFirstAndLast[ICapsule, ICapsule] = chain(new Capsule(head), capsules.map{new Capsule(_)}.toArray[ICapsule])
+  def chain(head: ITask, capsules: Array[ITask]): IPuzzleFirstAndLast = chain(new Capsule(head), capsules.map{new Capsule(_)}.toArray[ICapsule])
    
-  def chain(task: ITask, firstPuzzle: IPuzzleFirst[IGenericCapsule]): IPuzzleFirst[ICapsule] = {
+  def chain(task: ITask, firstPuzzle: IPuzzleFirst): IPuzzleFirst = {
     val firstCapsule = new Capsule(task)
     new Transition(firstCapsule, firstPuzzle.firstCapsule)
     new PuzzleFirst(firstCapsule)
@@ -83,7 +79,7 @@ object TransitionFactory {
    * @param workflowPuzzles, an array of IPuzzleFirstAndLast
    * @return an instance of IPuzzleFirstAndLast
    */
-  /*def chain[F <: IGenericCapsule](head: IPuzzleFirstAndLast[F, ICapsule], puzzles: IPuzzleFirstAndLast[IGenericCapsule, ICapsule]*): IPuzzleFirstAndLast[F,ICapsule] = {
+  /*def chain[F <: ICapsule](head: IPuzzleFirstAndLast[F, ICapsule], puzzles: IPuzzleFirstAndLast[ICapsule, ICapsule]*): IPuzzleFirstAndLast[F,ICapsule] = {
     if(!puzzles.isEmpty) {
       new Transition(head.lastCapsule, puzzles(0).firstCapsule)
       for (i <- 1 until puzzles.length) new Transition(puzzles(i - 1).lastCapsule, puzzles(i).firstCapsule)
@@ -91,7 +87,7 @@ object TransitionFactory {
     } else head
   }*/
 
-  def chain[F <: IGenericCapsule, L <: IGenericCapsule](head: IPuzzleFirstAndLast[F, ICapsule], last: IPuzzleFirstAndLast[ICapsule, L]): IPuzzleFirstAndLast[F,L] = {
+  def chain(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
     new Transition(head.lastCapsule, last.firstCapsule)
     new PuzzleFirstAndLast(head.firstCapsule, last.lastCapsule)
   }
@@ -111,9 +107,9 @@ object TransitionFactory {
    * @return an instance of IPuzzleFirstAndLast
    * @throws InstantiationException
    */
-  def diamond(head: ICapsule, last: ICapsule, capsules: Array[ICapsule]): IPuzzleFirstAndLast[ICapsule,ICapsule] = {
+  def diamond(head: ICapsule, last: ICapsule, capsules: Array[ICapsule]): IPuzzleFirstAndLast = 
     new PuzzleFirstAndLast(fork(head, capsules).firstCapsule, join(last, capsules).lastCapsule)
-  }
+  
 
   /**
    * Creates a Diamond structure from puzzles. Building a  diamond structure of n IPuzzleFirstAndLast consists in
@@ -129,7 +125,7 @@ object TransitionFactory {
    * @return an instance of IPuzzleFirstAndLast
    * @throws InstantiationException
    */
-  def diamond(head: IPuzzleFirstAndLast[ICapsule,ICapsule], last: IPuzzleFirstAndLast[ICapsule,ICapsule], puzzles: Array[IPuzzleFirstAndLast[ICapsule,ICapsule]]): IPuzzleFirstAndLast[ICapsule,ICapsule] = {
+  def diamond(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleFirstAndLast = {
     new PuzzleFirstAndLast(fork(head, puzzles).firstCapsule,join(last, puzzles).lastCapsule)
   }
 
@@ -146,7 +142,7 @@ object TransitionFactory {
    * @param a list of capsule to be connected.
    * @return an instance of IPuzzleFirst
    */
-  private def fork(head: ICapsule, capsules: Array[ICapsule]): PuzzleFirst[ICapsule] = {
+  private def fork(head: ICapsule, capsules: Array[ICapsule]): PuzzleFirst = {
     for (capsule <- capsules) new Transition(head, capsule)
     return new PuzzleFirst(head)
   }
@@ -164,7 +160,8 @@ object TransitionFactory {
    * @param a list of puzzle to be connected. 
    * @return an instance of IPuzzleFirst
    */
-  private def fork(head: IPuzzleFirstAndLast[ICapsule,ICapsule], puzzles: Array[IPuzzleFirstAndLast[ICapsule,ICapsule]]): IPuzzleFirst[ICapsule] = fork(head.lastCapsule, puzzles.map{ _.firstCapsule })
+  private def fork(head: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleFirst = 
+    fork(head.lastCapsule, puzzles.map{ _.firstCapsule })
     
 
   /**
@@ -178,7 +175,7 @@ object TransitionFactory {
    *
    * @param a list of capsule to be connected. 
    */
-  private def join(last: ICapsule, capsules: Array[ICapsule]): IPuzzleLast[ICapsule] = {
+  private def join(last: ICapsule, capsules: Array[ICapsule]): IPuzzleLast = {
     for (capsule <- capsules) new Transition(capsule, last)
     return new PuzzleLast(last)
   }
@@ -195,7 +192,7 @@ object TransitionFactory {
    * @param a list of puzzle to be connected.
    * @return an instance of IPuzzleLast
    */
-  private def join(last: IPuzzleFirstAndLast[ICapsule,ICapsule], puzzles: Array[IPuzzleFirstAndLast[ICapsule,ICapsule]]): IPuzzleLast[ICapsule] = {
+  private def join(last: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleLast = {
     return join(last.firstCapsule, puzzles.map{ _.lastCapsule })
   }
 
@@ -207,7 +204,7 @@ object TransitionFactory {
    * @param capsules to be chain in a branch
    * @return an instance of IPuzzlefirstAndLast
    */
-  def branch(head: ICapsule, capsules: ICapsule): IPuzzleFirstAndLast[ICapsule,ICapsule] = {
+  def branch(head: ICapsule, capsules: ICapsule): IPuzzleFirstAndLast = {
     chain(head, Array(capsules))
     return new PuzzleFirstAndLast(head, head)
   }
@@ -220,27 +217,28 @@ object TransitionFactory {
    * @param puzzles to be chain in a branch
    * @return an instance of IPuzzlefirstAndLast
    */
-  def branch(head: IPuzzleFirstAndLast[ICapsule,ICapsule], puzzles: IPuzzleFirstAndLast[ICapsule,ICapsule]): IPuzzleFirstAndLast[ICapsule,ICapsule] = {
+  def branch(head: IPuzzleFirstAndLast, puzzles: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
     chain(head, puzzles)
     return new PuzzleFirstAndLast(head.firstCapsule, head.firstCapsule)
   }
 
-  def exploration(exploreCapsule: IExplorationCapsule, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], aggregationCapsule: ICapsule): IPuzzleFirstAndLast[IExplorationCapsule,ICapsule] = {
-    new ExplorationTransition(exploreCapsule, puzzle.firstCapsule)
+  def exploration(exploreCapsule: ICapsule, puzzle: IPuzzleFirstAndLast, aggregationCapsule: ICapsule): IPuzzleFirstAndLast = {
+    new Transition(exploreCapsule, puzzle.firstCapsule)
     new AggregationTransition(puzzle.lastCapsule, aggregationCapsule)
     return new PuzzleFirstAndLast(exploreCapsule, aggregationCapsule)
   }
   
-  def exploration(exploreTask: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,ICapsule], aggregationTask: ITask): IPuzzleFirstAndLast[IExplorationCapsule,ICapsule] = exploration(new ExplorationCapsule(exploreTask), puzzle, new Capsule(aggregationTask))
+  def exploration(exploreTask: IExplorationTask, puzzle: IPuzzleFirstAndLast, aggregationTask: ITask): IPuzzleFirstAndLast = 
+    exploration(new Capsule(exploreTask), puzzle, new Capsule(aggregationTask))
  
-  def exploration[L <: IGenericCapsule](exploreCapsule: IExplorationCapsule, puzzle: IPuzzleFirstAndLast[IGenericCapsule, L]): IPuzzleFirstAndLast[IExplorationCapsule, L] = {
-    new ExplorationTransition(exploreCapsule, puzzle.firstCapsule)
+  def exploration(exploreCapsule: ICapsule, puzzle: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
+    new Transition(exploreCapsule, puzzle.firstCapsule)
     new PuzzleFirstAndLast(exploreCapsule, puzzle.lastCapsule)
   }
 
-  def exploration[L <: IGenericCapsule](exploreTask: IExplorationTask, puzzle: IPuzzleFirstAndLast[IGenericCapsule,L]): IPuzzleFirstAndLast[IExplorationCapsule,L] = {
-    val etc = new ExplorationCapsule(exploreTask)
-    new ExplorationTransition(etc, puzzle.firstCapsule)
+  def exploration(exploreTask: IExplorationTask, puzzle: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
+    val etc = new Capsule(exploreTask)
+    new Transition(etc, puzzle.firstCapsule)
     return new PuzzleFirstAndLast(etc, puzzle.lastCapsule)
   }
 }

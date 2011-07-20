@@ -18,15 +18,15 @@
 package org.openmole.plugin.hook.display
 
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
 
-class ToStringHook(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
+class ToStringHook(execution: IMoleExecution, capsule: ICapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
   
-  def this(execution: IMoleExecution, capsule: IGenericCapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, prototypes: _*)
+  def this(execution: IMoleExecution, capsule: ICapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, prototypes: _*)
   
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

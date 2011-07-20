@@ -19,7 +19,7 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.IAggregationTransition
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet

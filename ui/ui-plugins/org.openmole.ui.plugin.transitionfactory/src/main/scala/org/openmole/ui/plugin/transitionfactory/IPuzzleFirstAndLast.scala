@@ -17,6 +17,4 @@
 
 package org.openmole.ui.plugin.transitionfactory
 
-import org.openmole.core.model.capsule.IGenericCapsule
-
-trait IPuzzleFirstAndLast[+T1 <: IGenericCapsule, +T2 <: IGenericCapsule] extends IPuzzleFirst[T1] with IPuzzleLast[T2]
+trait IPuzzleFirstAndLast extends IPuzzleFirst with IPuzzleLast

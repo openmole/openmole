@@ -27,7 +27,7 @@ package org.openmole.core.model.data
  *        the two capsules.
  *        
  */
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 
@@ -39,7 +39,7 @@ trait IDataChannel {
    *
    * @return the capsule from whitch the data channel starts
    */
-  def start: IGenericCapsule
+  def start: ICapsule
 
 
   /**
@@ -48,7 +48,7 @@ trait IDataChannel {
    *
    * @return the capsule to which the data channel ends.
    */
-  def end:  IGenericCapsule
+  def end:  ICapsule
 
 
   /**

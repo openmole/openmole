@@ -21,28 +21,28 @@ package org.openmole.core.implementation.data
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext, IVariable}
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.ListBuffer
 
-class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val variableNames: Set[String]) extends IDataChannel {
+class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Set[String]) extends IDataChannel {
 
   start.addOutputDataChannel(this)
   end.addInputDataChannel(this)
   
-  def this(start: IGenericCapsule, end: IGenericCapsule, head: String, variables: Array[String]) = {
+  def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = {
     this(start, end, (ListBuffer(head) ++ variables).toSet[String])
   }
   
-  def this(start: IGenericCapsule, end: IGenericCapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) = {
+  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) = {
     this(start, end, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
   }
 
-  def this(start: IGenericCapsule, end: IGenericCapsule, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
+  def this(start: ICapsule, end: ICapsule, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
 
-  def this(start: IGenericCapsule, end: IGenericCapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
+  def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
    
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = {
     val levelComputing = LevelComputing(moleExecution)
@@ -106,37 +106,6 @@ class DataChannel(val start: IGenericCapsule, val end:  IGenericCapsule, val var
       }  
     }
   }
-
-  
-  /*private def flatProvide(fromContext: IContext, data: Iterable[IData[_]], toContext: IContext) = {
-   for (d <- data) {
-   fromContext.variable(d.prototype) match {
-   case Some(variable) => toContext += variable
-   case None => 
-   }
-   }
-   }
-  
-   private def arrayProvide(fromContext: IContext, data: Iterable[IData[_]], toContext: IContext) = {
-   for(d <- data) {
-   fromContext.value(d.prototype) match {
-   case Some(curVal) =>
-   toContext += {
-   //FIXME downcasting and inefficient use of arrays
-   val itProt = toArray(d.prototype).asInstanceOf[IPrototype[Array[Any]]]
-   toContext.value(itProt) match {
-   case None => 
-   val collec = Array[Any](curVal)
-   new Variable(itProt, collec)
-   case Some(collec) =>
-   new Variable(itProt, Array.concat(collec, Array[Any](curVal)))
-   }
-   } 
-   case None =>
-   }
-   }
-  
-   }*/
   
   def data: Iterable[IData[_]] = {
     end.task match {

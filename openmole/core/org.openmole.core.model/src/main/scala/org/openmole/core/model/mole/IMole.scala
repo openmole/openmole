@@ -17,16 +17,15 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.capsule.IGenericCapsule
-import org.openmole.core.model.task.IGenericTask
+import org.openmole.core.model.task.ITask
 
 trait IMole {
 
-  def root: IGenericCapsule
+  def root: ICapsule
     
   @throws(classOf[Throwable])
-  def capsules: Iterable[IGenericCapsule]
+  def capsules: Iterable[ICapsule]
    
   @throws(classOf[Throwable])
-  def tasks: Iterable[IGenericTask]
+  def tasks: Iterable[ITask]
 }

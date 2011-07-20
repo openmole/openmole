@@ -17,14 +17,13 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.capsule.IGenericCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.IGenericTransition
+import org.openmole.core.model.transition.ITransition
 
 object ISubMoleExecution {
   val Finished = "Finished"
@@ -51,9 +50,9 @@ trait ISubMoleExecution {
   def cancel
   
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, IContextBuffer]
-  def transitionRegistry: IRegistryWithTicket[IGenericTransition, IContextBuffer]
+  def transitionRegistry: IRegistryWithTicket[ITransition, IContextBuffer]
 
-  def submit(capsule: IGenericCapsule, context: IContext, ticket: ITicket)
-  def group(moleJob: IMoleJob, capsule: IGenericCapsule, grouping: Option[IGroupingStrategy])
+  def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
+  def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy])
 
 }
