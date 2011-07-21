@@ -33,10 +33,9 @@ trait IDisplay{
   
   def dataProxyUI(name: String): IDataProxyUI
   
+  def dataProxy: Option[IDataProxyUI]
+  
   def buildPanelUI(name: String): IPanelUI
   
   def saveContent(oldName: String)
-//  def lock: Unit
-  
-//  def unlock: Unit
 }

@@ -25,6 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 object SamplingDisplay extends IDisplay{
@@ -32,12 +33,13 @@ object SamplingDisplay extends IDisplay{
   private var modelSamplings = new HashSet[SamplingDataProxyFactory]
   var name = "sample0"
   var currentPanel: Option[ISamplingPanelUI] = None
+  var dataProxy: Option[ISamplingDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{println("SANPLI :: " + f.displayName);modelSamplings += new SamplingDataProxyFactory(f)})
   
   override def implementationClasses = modelSamplings
   
-  override def dataProxyUI(n: String) = Proxys.getSamplingDataProxyUI(n)
+  override def dataProxyUI(n: String):ISamplingDataProxyUI = Proxys.getSamplingDataProxyUI(n).getOrElse(dataProxy.get)
   
   override def increment = {
     count += 1

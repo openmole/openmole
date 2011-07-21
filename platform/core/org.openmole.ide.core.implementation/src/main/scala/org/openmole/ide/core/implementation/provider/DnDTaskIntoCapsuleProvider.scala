@@ -36,8 +36,8 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= { 
 
-    println("ENTITY TYPE :: :: " + Displays.dataProxy.dataUI.entityType)
-    Displays.dataProxy.dataUI.entityType match {
+    println("ENTITY TYPE :: :: " + Displays.dataProxy.get.dataUI.entityType)
+    Displays.dataProxy.get.dataUI.entityType match {
       case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
       case Constants.PROTOTYPE=> ConnectorState.ACCEPT
       case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
@@ -48,7 +48,7 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
     println("DISPLAY :: " + Displays.dataProxy)
-      Displays.dataProxy match {
+      Displays.dataProxy.get match {
       case dpu:ITaskDataProxyUI => capsule.encapsule(dpu)
       case dpu:IPrototypeDataProxyUI=> { 
           if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)

@@ -17,73 +17,63 @@
 
 package org.openmole.ide.core.implementation.display
 
+import scala.collection.mutable.HashSet
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import javax.swing.JPanel
+import scala.swing.MenuItem
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
+import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.model.commons.Constants._
 
-class PropertyPanel extends FlowPanel{
+class PropertyPanel extends BoxPanel(Orientation.Vertical){
   border = Swing.EmptyBorder(10, 10, 10, 10)
   var initEntity = false
   var oldName = ""
-  Displays.setAsTask
+  Displays.currentType = TASK
   
   
-  val prototype = buildButton("Prototype")
-  val task = buildButton("Task")
-  val sampling = buildButton("Sampling")
-  val environment = buildButton("Environment")
+  val environmentToggleButton = new MenuToggleButton2("Environment")
+  EnvironmentDisplay.implementationClasses.foreach(d=>environmentToggleButton.addItem(new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT))))
+  val taskToggleButton = new MenuToggleButton2("Task")
+  TaskDisplay.implementationClasses.foreach(d=>taskToggleButton.addItem(new MenuItem(new TaskDisplayAction(d,TASK))))
+  val prototypeToggleButton = new MenuToggleButton2("Prototype")
+  PrototypeDisplay.implementationClasses.foreach(d=>prototypeToggleButton.addItem(new MenuItem(new PrototypeDisplayAction(d,PROTOTYPE))))
+  val samplingToggleButton = new MenuToggleButton2("Sampling")
+  SamplingDisplay.implementationClasses.foreach(d=>samplingToggleButton.addItem(new MenuItem(new SamplingDisplayAction(d,SAMPLING))))
+    
   val saveButton = buildButton("Save")
   val cancelButton = buildButton("Cancel")
   val nameTextField = new TextField {
-    border = Swing.EmptyBorder(5, 5, 5, 5)
-    //preferredSize = new Dimension(150,25)
+    maximumSize = new Dimension(150,30)
   }
-  val taskComboBox = buildCombo(TaskDisplay.implementationClasses.toList)
-  val prototypeComboBox = buildCombo(PrototypeDisplay.implementationClasses.toList) 
-  val samplingComboBox = buildCombo(SamplingDisplay.implementationClasses.toList) 
-  val environmentComboBox = buildCombo(EnvironmentDisplay.implementationClasses.toList) 
   
-  listenTo(`prototype`,`task`,`sampling`,`environment`,`saveButton`,`cancelButton`)
+  listenTo(`saveButton`,`cancelButton`)
   
   val categoryButtonPanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(task,prototype,sampling,environment)
+    contents.append(prototypeToggleButton,taskToggleButton,samplingToggleButton,environmentToggleButton)
     border = Swing.EmptyBorder(15, 5, 15, 5)
   }
   
   reactions += {
-    case ButtonClicked(`prototype`) =>  {Displays.setAsPrototype; initNewEntity}
-    case ButtonClicked(`task`) =>  {Displays.setAsTask; initNewEntity}
-    case ButtonClicked(`sampling`) =>  {Displays.setAsSampling; initNewEntity}
-    case ButtonClicked(`environment`) =>  {Displays.setAsEnvironment; initNewEntity}
     case ButtonClicked(`saveButton`) =>  save
     case ButtonClicked(`cancelButton`) =>  cancel
   }
 
   val namePanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(buildLabel("Name :"),nameTextField,saveButton)
+    contents.append(buildLabel("Name :"),nameTextField,saveButton,cancelButton)
     border = Swing.EmptyBorder(10, 5, 10, 5)
   }
-  
-  val typePanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(buildLabel("Type :"),taskComboBox,cancelButton)
-    border = Swing.EmptyBorder(10, 5, 10, 5)
-  }
-  
-  val fixedPanel = new BoxPanel(Orientation.Vertical) {contents.append(categoryButtonPanel,namePanel,typePanel)}
     
   val propertyScrollPane = new ScrollPane{minimumSize = new Dimension(150,200)}
   
-  contents.append(fixedPanel,propertyScrollPane)
+  contents.append(categoryButtonPanel,namePanel,propertyScrollPane)
   border = Swing.EmptyBorder(10, 10, 10, 10)
-  
-  def buildCombo(l: List[IDataProxyFactory]) = new ComboBox(l) { renderer = Renderer(_.factory.displayName) }
   
   def buildButton(name: String) = 
     new Button(name){
@@ -91,66 +81,37 @@ class PropertyPanel extends FlowPanel{
       border = Swing.EmptyBorder(5,15,5,15)
     }
 
-  
   def buildLabel(name: String) = 
     new Label(name) {
       preferredSize = new Dimension(60,25)
       border = Swing.EmptyBorder(5,5,5,5)
     }
   
-  def hidePanelScrollPane = propertyScrollPane.visible = false
-  
   def displayCurrentEntity = {
-    typePanel.visible = false
-    propertyScrollPane.visible = true
-    initEntity = false
     oldName = Displays.name
-    nameTextField.text = Displays.dataProxy.dataUI.name
+    nameTextField.text = Displays.name
     updateViewport(Displays.buildPanelUI.peer)
     repaint
   }
   
+  def cleanViewport = propertyScrollPane.peer.getViewport.removeAll
+  
   def updateViewport(panel: JPanel)= {
-    propertyScrollPane.peer.getViewport.removeAll
+    cleanViewport
     propertyScrollPane.peer.setViewportView(panel)
   }
   
   def save = {
-    if (initEntity) {
-      if (nameTextField.text.length != 0) {
-        Displays.setAsName(nameTextField.text)
-        combo.selection.item.buildDataProxyUI(nameTextField.text)
-        displayCurrentEntity
-      }
-    } else if (oldName != "") {
-      Displays.saveContent(oldName, nameTextField.text)
-      oldName = nameTextField.text
-    }
+    Displays.saveContent(oldName, nameTextField.text)
     WindowManager.getDefault().findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].refreshPalette
-    initEntity = false
   }
   
-  def cancel = {
-    if (initEntity) nameTextField.text = ""
-    else displayCurrentEntity
-  }
+  def cancel = displayCurrentEntity
   
   def initNewEntity = {
-    typePanel.visible = true
-    typePanel.contents.update(1,combo) 
-    typePanel.repaint
     Displays.increment
     nameTextField.text = Displays.name
-    propertyScrollPane.visible = false
-    initEntity = true
-  }
-  
-  def combo = {
-    Displays.currentType match {
-      case TASK=> taskComboBox
-      case PROTOTYPE=> prototypeComboBox
-      case SAMPLING=> samplingComboBox
-      case ENVIRONMENT=> environmentComboBox
-    }
+    oldName = Displays.name
+    updateViewport(Displays.buildPanelUI.peer)
   }
 }

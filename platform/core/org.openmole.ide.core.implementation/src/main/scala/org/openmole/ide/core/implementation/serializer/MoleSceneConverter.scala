@@ -119,7 +119,7 @@ class MoleSceneConverter extends Converter{
               n1 match{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
-                case "task"=> caps.encapsule(Proxys.getTaskDataProxyUI(reader.getAttribute("name")))  
+                case "task"=> caps.encapsule(Proxys.getTaskDataProxyUI(reader.getAttribute("name")).get)  
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
               reader.moveUp

@@ -25,6 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 
 object EnvironmentDisplay extends IDisplay{
@@ -32,12 +33,13 @@ object EnvironmentDisplay extends IDisplay{
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
   var name="env0"
   var currentPanel: Option[IEnvironmentPanelUI] = None
+  var dataProxy : Option[IEnvironmentDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
   
   override def implementationClasses = modelEnvironments
   
-  override def dataProxyUI(n: String) = Proxys.getEnvironmentDataProxyUI(n)
+  override def dataProxyUI(n: String):IEnvironmentDataProxyUI = Proxys.getEnvironmentDataProxyUI(n).getOrElse(dataProxy.get)
   
   override def increment = {
     count += 1
@@ -50,5 +52,5 @@ object EnvironmentDisplay extends IDisplay{
   }
   
   override def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-  
+   
 }

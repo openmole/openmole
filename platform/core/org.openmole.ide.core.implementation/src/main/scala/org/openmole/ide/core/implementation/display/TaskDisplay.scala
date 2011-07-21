@@ -21,9 +21,9 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
@@ -33,12 +33,13 @@ object TaskDisplay extends IDisplay{
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
   private var count= modelTasks.size
   var name="task" + count
+  var dataProxy: Option[ITaskDataProxyUI] = None
   
   override def implementationClasses = modelTasks
   
-  override def dataProxyUI(n: String) = Proxys.getTaskDataProxyUI(n)
-  
-  override def  buildPanelUI(n:String) = {
+  override def dataProxyUI(n: String):ITaskDataProxyUI = Proxys.getTaskDataProxyUI(n).getOrElse(dataProxy.get)
+
+  override def buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
     currentPanel.get
   }

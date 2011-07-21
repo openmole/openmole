@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.display
 
 import javax.swing.JPopupMenu
 import javax.swing.event.PopupMenuEvent
-import javax.swing.event.PopupMenuListener
 import scala.swing._
 
 class PopupMenu extends Component with SequentialContainer.Wrapper {

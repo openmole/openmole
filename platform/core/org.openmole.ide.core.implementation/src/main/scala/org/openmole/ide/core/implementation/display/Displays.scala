@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.display
  
 import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -29,19 +30,17 @@ object Displays {
   
   def name = currentDisplay.name
   
-  def setAsTask = currentType = TASK
-  def setAsPrototype = currentType = PROTOTYPE
-  def setAsSampling = currentType = SAMPLING
-  def setAsEnvironment = currentType = ENVIRONMENT
   def setAsName(n: String) = currentDisplay.name = n
   
   def increment = currentDisplay.increment
   
   def implementationClasses = currentDisplay.implementationClasses
   
-  def dataProxy = currentDisplay.dataProxyUI(name)
+  def dataProxy = currentDisplay.dataProxy
   
   def buildPanelUI = currentDisplay.buildPanelUI(name)
+  
+  def saveContent(name: String) = currentDisplay.saveContent(name)
   
   def saveContent(oldName: String, newName: String) = {
     setAsName(newName)

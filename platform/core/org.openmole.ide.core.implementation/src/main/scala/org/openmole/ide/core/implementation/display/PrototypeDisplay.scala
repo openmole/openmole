@@ -19,24 +19,25 @@ package org.openmole.ide.core.implementation.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.model.dataproxy._
 
 object PrototypeDisplay extends IDisplay{
   private var count= 0
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
   var currentPanel: Option[IPrototypePanelUI] = None
   var name= "proto0"
+  var dataProxy: Option[IPrototypeDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
   override def implementationClasses = modelPrototypes
   
-  override def dataProxyUI(n: String) = Proxys.getPrototypeDataProxyUI(n)
+  override def dataProxyUI(n: String):IPrototypeDataProxyUI = Proxys.getPrototypeDataProxyUI(n).getOrElse(dataProxy.get)
 
   override def increment = {
     count += 1
@@ -49,5 +50,5 @@ object PrototypeDisplay extends IDisplay{
   }
   
   def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-  
+ 
 }

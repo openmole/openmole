@@ -39,12 +39,10 @@ object Proxys {
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
 
-  
-  def getTaskDataProxyUI(name: String) = task.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getPrototypeDataProxyUI(name: String) = prototype.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getSamplingDataProxyUI(name: String) = sampling.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  def getEnvironmentDataProxyUI(name: String) = environment.groupBy(_.dataUI.name).filterKeys(k => k.equals(name)).getOrElse(name,throw new GUIUserBadDataError("Not found entity " + name)).head
-  
+  def getTaskDataProxyUI(name: String) = task.filter(_.dataUI.name==name).headOption
+  def getPrototypeDataProxyUI(name: String) = prototype.filter(_.dataUI.name==name).headOption
+  def getSamplingDataProxyUI(name: String) = sampling.filter(_.dataUI.name==name).headOption
+  def getEnvironmentDataProxyUI(name: String) = environment.filter(_.dataUI.name==name).headOption
   
   def getPrototypesNames = task.groupBy(_.dataUI.name).keys.toSet
   

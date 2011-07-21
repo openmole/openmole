@@ -25,12 +25,14 @@ import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 import org.openmole.ide.core.implementation.control.MoleScenesManager;
+import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.dataproxy.Proxys;
 
 @ActionID(category = "File",
 id = "org.openmole.ide.core.implementation.ResetAll")
 @ActionRegistration(displayName = "#CTL_ResetAll")
-@ActionReferences({})
+@ActionReferences({
+    @ActionReference(path = "Menu/File", position = 2000)})
 @Messages("CTL_ResetAll=Reset all")
 public final class ResetAll implements ActionListener {
 
@@ -40,6 +42,6 @@ public final class ResetAll implements ActionListener {
         Proxys.clearAll();
         MoleScenesManager.display(MoleScenesManager.addMoleScene());
         ((MoleSceneTopComponent) WindowManager.getDefault().findTopComponent("MoleSceneTopComponent")).refreshPalette();
-        //  Displays.propertyPanel.hidePanelScrollPane();
+        Displays.propertyPanel().cleanViewport();
     }
 }

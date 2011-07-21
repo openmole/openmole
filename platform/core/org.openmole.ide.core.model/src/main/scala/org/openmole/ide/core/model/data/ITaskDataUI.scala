@@ -18,7 +18,7 @@
 package org.openmole.ide.core.model.data
 
 import java.awt.Color
-import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy._
@@ -33,9 +33,9 @@ trait ITaskDataUI extends IDataUI{
   
   def backgroundColor: Color
   
-  def coreObject: GenericTask
+  def coreObject: Task
   
-  def buildTask: GenericTask 
+  def buildTask: Task 
   
   def prototypesIn: HashSet[IPrototypeDataProxyUI] 
   

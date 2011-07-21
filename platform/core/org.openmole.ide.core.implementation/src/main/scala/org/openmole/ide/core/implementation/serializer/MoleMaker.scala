@@ -17,16 +17,13 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.core.model.capsule.ICapsule
-import org.openmole.core.model.capsule.IExplorationCapsule
-import org.openmole.core.model.capsule.IGenericCapsule
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
-import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.capsule._
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
@@ -39,7 +36,7 @@ import scala.collection.mutable.HashMap
 
 object MoleMaker {
   
-  var doneCapsules = new HashMap[ICapsuleUI,IGenericCapsule]
+  var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
   
   def buildMole(manager: IMoleSceneManager):IMole = {
     doneCapsules.clear
@@ -49,7 +46,7 @@ object MoleMaker {
     else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def nextCapsule(manager: IMoleSceneManager,capsuleUI: ICapsuleUI): IGenericCapsule = {
+  def nextCapsule(manager: IMoleSceneManager,capsuleUI: ICapsuleUI): ICapsule = {
     val capsule = buildCapsule(capsuleUI)
     doneCapsules+= capsuleUI-> capsule
     manager.capsuleConnections(capsuleUI).foreach(t=>{
@@ -61,23 +58,18 @@ object MoleMaker {
   def buildCapsule(capsule: ICapsuleUI) = {
     println("buildCapsule:: " + capsule.capsuleType)
     capsule.capsuleType match {
-      case EXPLORATION_TASK=> new ExplorationCapsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[ExplorationTask])
+      case EXPLORATION_TASK=> new Capsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[ExplorationTask])
       case BASIC_TASK=> new Capsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[Task])
       case CAPSULE=> new Capsule
     }
   }
   
-  def buildTransition(sourceCapsule: IGenericCapsule, targetCapsule: IGenericCapsule,t: ITransitionUI){
-    sourceCapsule match {
-      case x: IExplorationCapsule=> new ExplorationTransition(x,targetCapsule)
-      case z: ICapsule => {
-          t.transitionType match {
-            case AGGREGATION_TRANSITION=> new AggregationTransition(z,targetCapsule)
-            case BASIC_TRANSITION=> new Transition(z,targetCapsule) 
-            
-          }
-        }
-      case _=> throw new GUIUserBadDataError("No matching type for capsule " + sourceCapsule +". The transition can not be built")
+  def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule,t: ITransitionUI){
+    t.transitionType match {
+      case BASIC_TRANSITION=> new Transition(sourceCapsule,targetCapsule) 
+      case AGGREGATION_TRANSITION=> new AggregationTransition(sourceCapsule,targetCapsule)
+      case EXPLORATION_TRANSITION=> new ExplorationTransition(sourceCapsule,targetCapsule)
+      case _=> throw new GUIUserBadDataError("No matching type between capsule " + sourceCapsule +" and " + targetCapsule +". The transition can not be built")
     }
   }
 }

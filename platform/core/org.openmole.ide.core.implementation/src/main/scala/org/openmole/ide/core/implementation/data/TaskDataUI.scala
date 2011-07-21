@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.core.implementation.task.GenericTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
@@ -45,7 +45,7 @@ abstract class TaskDataUI extends ITaskDataUI{
   
   private def addPrototypeOut(p: IPrototypeDataProxyUI)= prototypesOut+= p
   
-  override def buildTask: GenericTask = {
+  override def buildTask: Task = {
     val task = coreObject
     prototypesIn.foreach{pp=> task.addInput(pp.dataUI.coreObject)}
     prototypesOut.foreach{pp=> task.addOutput(pp.dataUI.coreObject)}
