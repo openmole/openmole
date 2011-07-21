@@ -29,14 +29,16 @@ object Prototype {
 }
 
 class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] with Id {
+ 
+  import Prototype._
+  
+  def this(name: String, clazz: Class[T]) = this(name, clazz.equivalence.toManifest)
+  
+  override def isAssignableFrom(p: IPrototype[_]): Boolean = 
+    `type`.unArrayifyIsAssignableFrom(p.`type`)
 
-  def this(name: String, `type`: Class[T]) = this(name, `type`.equivalence.toManifest)
-  
-  override def isAssignableFrom(p: IPrototype[_]): Boolean = `type` <:< p.`type`
-  
-  override def accepts(obj: Any): Boolean = {
-    obj == null || `type`.isAssignableFrom(manifest(clazzOf(obj)))
-  }
+  override def accepts(obj: Any): Boolean =
+    obj == null || `type`.unArrayifyIsAssignableFrom(manifest(clazzOf(obj)))
   
   override def id = (name, `type`)
   override def toString: String = '(' + `type`.toString + ')' + name

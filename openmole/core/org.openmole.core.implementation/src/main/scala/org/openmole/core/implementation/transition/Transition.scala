@@ -17,36 +17,21 @@
 
 package org.openmole.core.implementation.transition
 
-import java.util.logging.Logger
-import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.mole.SubMoleExecution
-import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.tools.IContextBuffer
-import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.implementation.tools.ToArrayFinder._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.LockRepository
 import org.openmole.core.implementation.tools.ContextBuffer
-import org.openmole.misc.tools.service.Priority
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
-
 
 object Transition {
   val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]

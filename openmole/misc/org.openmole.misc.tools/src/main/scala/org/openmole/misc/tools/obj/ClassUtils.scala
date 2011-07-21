@@ -17,6 +17,7 @@
 
 package org.openmole.misc.tools.obj
 
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type => JType, Array => _, _ }
 import scala.reflect.Manifest.{classType, intersectionType, arrayType, wildcardType }
@@ -80,23 +81,56 @@ object ClassUtils {
       ret
     }
     
+    def isAssignableFromPrimitive(c2: Class[_]) = {
+      if(primitiveWrapperMap.contains(c) || primitiveWrapperMap.contains(c2))
+        primitiveWrapperMap.getOrElse(c, c) == primitiveWrapperMap.getOrElse(c2, c2)
+      else c.isAssignableFrom(c2)
+    }
+    
+    def unArrayifyIsAssignableFrom(from: Class[_]) =
+      unArrayify(c, from) match {
+        case(c1, c2, level) => c1.isAssignableFromPrimitive(c2)
+      }
+    
     def toManifest = classType[T](c)
   }
   
-  def intersection(t: Manifest[_]*) = {
+  @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {
+    if(!m1.isArray || !m2.isArray) (m1, m2, level)
+    else unArrayify(m1.getComponentType, m2.getComponentType, level + 1)
+  }
+  
+  def unArrayify(c: Iterable[Class[_]]): (Iterable[Class[_]], Int) = {
+    @tailrec def rec(c: Iterable[Class[_]], level: Int = 0): (Iterable[Class[_]], Int)= {
+      if(c.exists(!_.isArray)) (c, level)
+      else rec(c.map{_.getComponentType}, level + 1)
+    }
+    rec(c)
+  }
+  
+  def intersectionArray(t: Iterable[Class[_]]) =
+    unArrayify(t) match {
+      case(cls, level) =>
+        val c = intersection(cls)
+        def arrayManifest(m: Manifest[_], l: Int): Manifest[_] = if(l == 0) m else arrayManifest(m.arrayManifest, l - 1)
+        arrayManifest(c, level)
+    }
+  
+  
+  def intersection(t: Iterable[Class[_]]) = {
     def intesectionClass(t1: Class[_], t2: Class[_]) = {
       val classes = (t1.listSuperClasses.toSet & t2.listSuperClasses.toSet)
       if(classes.isEmpty) classOf[Any]
       else classes.head
     }
  
-    val c = t.map(_.erasure).reduceLeft((t1, t2) => intesectionClass(t1,t2))
-    val interfaces = t.map(_.erasure.listImplementedInterfaces.toSet).reduceLeft((t1, t2) => t1 & t2)
+    val c = t.reduceLeft((t1, t2) => intesectionClass(t1,t2))
+    val interfaces = t.map(_.listImplementedInterfaces.toSet).reduceLeft((t1, t2) => t1 & t2)
     
-    intersect((List(c) ++ interfaces): _*)
+    intersect((List(c) ++ interfaces))
   }
 
-  def intersect(tps: JType*): Manifest[_] = intersectionType(tps map manifest: _*)
+  def intersect(tps: Iterable[JType]): Manifest[_] = intersectionType(tps.toSeq map manifest: _*)
   
   def nanifest[T](cls: Class[T]): Manifest[T] = classType(cls)
   
@@ -113,8 +147,8 @@ object ClassUtils {
         case (false, _)     => classType(manifest(owner), raw, targs: _*)
       }
     case x: GenericArrayType    => arrayType(manifest(x.getGenericComponentType))
-    case x: WildcardType        => wildcardType(intersect(x.getLowerBounds: _*), intersect(x.getUpperBounds: _*))
-    case x: TypeVariable[_]     => intersect(x.getBounds(): _*)
+    case x: WildcardType        => wildcardType(intersect(x.getLowerBounds), intersect(x.getUpperBounds))
+    case x: TypeVariable[_]     => intersect(x.getBounds())
   }
  
   
@@ -140,21 +174,17 @@ object ClassUtils {
   }
   
   private val primitiveWrapperMap = Map[Class[_], Class[_]](java.lang.Boolean.TYPE -> classOf[java.lang.Boolean],
-                                        java.lang.Byte.TYPE -> classOf[java.lang.Byte],
-                                        java.lang.Character.TYPE -> classOf[java.lang.Character],
-                                        java.lang.Short.TYPE -> classOf[java.lang.Short],
-                                        java.lang.Integer.TYPE -> classOf[java.lang.Integer],
-                                        java.lang.Long.TYPE -> classOf[java.lang.Long],
-                                        java.lang.Double.TYPE -> classOf[java.lang.Double],
-                                        java.lang.Float.TYPE -> classOf[java.lang.Float])
-     
+                                                            java.lang.Byte.TYPE -> classOf[java.lang.Byte],
+                                                            java.lang.Character.TYPE -> classOf[java.lang.Character],
+                                                            java.lang.Short.TYPE -> classOf[java.lang.Short],
+                                                            java.lang.Integer.TYPE -> classOf[java.lang.Integer],
+                                                            java.lang.Long.TYPE -> classOf[java.lang.Long],
+                                                            java.lang.Double.TYPE -> classOf[java.lang.Double],
+                                                            java.lang.Float.TYPE -> classOf[java.lang.Float])
   
-  implicit def manifest2ManifestDecorator[T](m: Manifest[T]) = new {
-    def isAssignableFrom(m2: Manifest[_]) = {
-      if(primitiveWrapperMap.contains(m.erasure) || primitiveWrapperMap.contains(m2.erasure))
-        primitiveWrapperMap.getOrElse(m.erasure, m.erasure) == primitiveWrapperMap.getOrElse(m2.erasure, m2.erasure)
-      else m.erasure.isAssignableFrom(m2.erasure)
-    }
+  implicit def manifestDecoration(m: Manifest[_]) = new {
+    def isAssignableFromPrimitive(m2: Manifest[_]) = m.erasure.isAssignableFromPrimitive(m2.erasure)
+    def unArrayifyIsAssignableFrom(from: Manifest[_]) = m.erasure.unArrayifyIsAssignableFrom(from.erasure)
   }
    
 }

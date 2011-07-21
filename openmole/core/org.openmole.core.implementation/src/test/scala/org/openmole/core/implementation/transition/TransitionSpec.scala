@@ -207,4 +207,55 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     executed should equal (true)
   }
   
+  "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {
+    
+    val p1 = new Prototype("p", classOf[Array[java.lang.Long]])
+    val p2 = new Prototype("p", classOf[Array[java.lang.Integer]])
+    val pArray = new Prototype("p", classOf[Array[Array[java.lang.Number]]])
+    
+    val init = new EmptyTask("Init")
+    
+    val t1 = new Task("Test write 1") {
+      override def process(context: IContext) = context + (p1 -> Array(new java.lang.Long(1L)))
+    }
+    
+    t1.addOutput(p1)
+    
+    val t2 = new Task("Test write 2") {
+      override def process(context: IContext) = context + (p2 -> Array(new java.lang.Integer(2)))
+    }
+    
+    t2.addOutput(p2)
+    
+    val t3 = new Task("Test read") {
+      override def process(context: IContext) = {
+        val res = IndexedSeq(context.value(pArray).get(0).deep, context.value(pArray).get(1).deep)
+        
+        res.contains(Array(new java.lang.Integer(1)).deep) should equal (true)
+        res.contains(Array(new java.lang.Long(2L)).deep) should equal (true)
+  
+        context.value(pArray).get.getClass should equal (classOf[Array[Array[java.lang.Number]]])
+        context
+      }
+    }
+    
+    
+    t3.addInput(pArray)
+    
+    val initc = new Capsule(init)
+    val t1c = new Capsule(t1)
+    val t2c = new Capsule(t2)
+    val t3c = new Capsule(t3)
+    
+    new Transition(initc, t1c)
+    new Transition(initc, t2c)
+    new Transition(t1c, t3c)
+    new Transition(t2c, t3c)
+    
+    new MoleExecution(new Mole(initc)).start.waitUntilEnded
+  }
+  
+  
+  
+  
 }

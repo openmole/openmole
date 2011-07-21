@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
