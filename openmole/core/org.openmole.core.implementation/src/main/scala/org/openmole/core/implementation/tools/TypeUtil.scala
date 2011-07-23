@@ -19,15 +19,29 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.core.implementation.data.Data
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.transition.IAggregationTransition
-import scala.collection.immutable.TreeMap
-import scala.collection.immutable.TreeSet
+import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
+import scala.collection.immutable.{TreeSet, TreeMap}
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-object ToArrayFinder {
+
+object TypeUtil {
  
-  def toArrayManifests(slot : ISlot) = {
+  def receivedTypes(slot : ISlot): IDataSet = {
+    val arrayManifest = spanArrayManifests(slot)
+    new DataSet(
+      arrayManifest._1.map{case(name, manifest) => toArray(new Prototype(name, manifest))}.map{new Data(_)} ++ 
+      arrayManifest._2.map{case(name, manifest) => new Prototype(name, manifest)}.map{new Data(_)}
+    )
+  }
+  
+  
+  def spanArrayManifests(slot : ISlot): (Map[String, Manifest[_]], Map[String, Manifest[_]]) = {
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     
     val forceArray = new TreeSet[String] ++
@@ -41,8 +55,11 @@ object ToArrayFinder {
       toArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
     }
     
-    TreeMap.empty[String, Manifest[_]] ++ 
-      toArray.filter(elt => elt._2.size > 1 || forceArray.contains(elt._1)).
-      map{elt => elt._1 -> intersectionArray(elt._2 map (_.erasure))}
+    val arrayAndOthers = toArray.span(elt => elt._2.size > 1 || forceArray.contains(elt._1))
+    
+    val toArrayManifest = TreeMap.empty[String, Manifest[_]] ++ 
+      arrayAndOthers._1.map{case(name, manifests) => name -> intersectionArray(manifests map (_.erasure))} 
+    val otherManifest = TreeMap.empty[String, Manifest[_]] ++ arrayAndOthers._2.map{case(name, manifests) => name -> manifests.head}
+    (toArrayManifest, otherManifest)
   }
 }

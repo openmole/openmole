@@ -29,7 +29,7 @@ import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.implementation.tools.ToArrayFinder._
+import org.openmole.core.implementation.tools.TypeUtil._
 import org.openmole.misc.tools.service.LockRepository
 import org.openmole.core.implementation.tools.ContextBuffer
 
@@ -87,7 +87,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
         val toAggregate = combinaison.groupBy(_.prototype.name)
       
-        val toArray = toArrayManifests(end)      
+        val toArray = spanArrayManifests(end)._1   
         val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
         
         subMole.submit(end.capsule, newContext, newTicket)

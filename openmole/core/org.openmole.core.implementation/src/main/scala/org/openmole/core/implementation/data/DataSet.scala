@@ -20,30 +20,21 @@ package org.openmole.core.implementation.data
 import org.openmole.core.model.data.{IData,IDataSet,IPrototype}
 import scala.collection.Iterator
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable.ListBuffer
-
 
 object DataSet {
+  lazy val empty = new DataSet(Iterable.empty)
   
-  implicit private def toMap(lst: Iterable[(String, IData[_])]): Map[String, IData[_]]  = {
-    var map = TreeMap[String, IData[_]]()
-    lst.foreach {map += _}
-    map
+  implicit def dataIterableDecorator(data: Iterable[IData[_]]) = new {
+    def toDataSet = new DataSet(data)
   }
-  
-  implicit  def fromIterable2Map(lst: Iterable[IData[_]]): Map[String, IData[_]] = toMap(lst.map{ d => (d.prototype.name,d)})
-  
-  lazy val empty = new DataSet(Map.empty)
 }
 
 
-class DataSet(_data: Map[String, IData[_]]) extends IDataSet {
-
-  def this(data: Iterable[IData[_]]) = this(DataSet.fromIterable2Map(data))  
+class DataSet(data: Iterable[IData[_]]) extends IDataSet {
   
   def this(head: IData[_], data: Array[IData[_]]) =  this(List(head) ++ data)
   
-  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(DataSet.fromIterable2Map((ListBuffer(head) ++ dataSets).flatten))
+  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(head ++ dataSets.toList.flatten)
   
   def this(head: IPrototype[_], prototypes: Iterable[IPrototype[_]]) = this((List(head) ++ prototypes).map{new Data(_)})
    
@@ -54,11 +45,15 @@ class DataSet(_data: Map[String, IData[_]]) extends IDataSet {
   def this(dataMod: DataMode, head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(dataMod, head, prototypes.toIterable)
   
 
-  def this(data: Iterable[IData[_]], head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(DataSet.fromIterable2Map(data ++ (List(head) ++ prototypes).map{new Data(_)}))
+  def this(data: Iterable[IData[_]], head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(data ++ (List(head) ++ prototypes).map{new Data(_)})
   
-  def this(data: Iterable[IData[_]], dataMode: DataMode, prototypes: Array[IPrototype[_]]) = this(DataSet.fromIterable2Map(data ++ prototypes.map{new Data(_, dataMode)})) 
+  def this(data: Iterable[IData[_]], dataMode: DataMode, prototypes: Array[IPrototype[_]]) = this(data ++ prototypes.map{new Data(_, dataMode)})
    
-  def this(data: Iterable[IData[_]], head: IData[_], inData: Array[IData[_]]) = this(DataSet.fromIterable2Map(data ++ List(head) ++ inData))
+  def this(data: Iterable[IData[_]], head: IData[_], inData: Array[IData[_]]) = this(data ++ List(head) ++ inData)
+  
+  
+  @transient private lazy val _data =
+    TreeMap.empty[String, IData[_]] ++ data.map{d => (d.prototype.name,d)}
   
   override def iterator: Iterator[IData[_]] = _data.values.iterator
   override def apply(name: String) = _data.get(name)

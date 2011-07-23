@@ -22,6 +22,11 @@ import org.openmole.core.model.data.{IData,IPrototype,DataModeMask, IDataMode}
 object Data {
   import org.openmole.core.implementation.data.Prototype
   def toArray[T](data: IData[T]): IData[Array[T]] = new Data[Array[T]](Prototype.toArray(data.prototype), data.mode)  
+
+  implicit lazy val dataOrderingOnName = new Ordering[IData[_]] {
+    override def compare(left: IData[_], right: IData[_]) = 
+      Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
+  }
 }
 
 class Data[T](val prototype: IPrototype[T], val mode: IDataMode) extends IData[T] {

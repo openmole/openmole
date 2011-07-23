@@ -26,10 +26,9 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.model.data.IContext
 
-
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
@@ -49,8 +48,10 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(t1c, t2c)
     
-    //TODO change this spec
-    ToArrayFinder.toArrayManifests(t2c.intputSlots.head).isEmpty should equal (true)
+    val spannedToArray = TypeUtil.spanArrayManifests(t2c.intputSlots.head)
+    
+    spannedToArray._1.isEmpty should equal (true)
+    spannedToArray._2.contains(p.name) should equal (true)
   }
   
   "To array finder" should "detect a toArray case" in {
@@ -72,7 +73,7 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
 
-    val manifests = ToArrayFinder.toArrayManifests(t3c.intputSlots.head)
+    val manifests = TypeUtil.spanArrayManifests(t3c.intputSlots.head)._1
     manifests.contains(p.name) should equal (true)
     manifests.get(p.name).get.erasure should equal (classOf[Int])
   }

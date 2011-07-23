@@ -91,8 +91,8 @@ trait ITask {
    */
   def addInput(prototype: IPrototype[_]): this.type
 
-  def containsInput(name: String): Boolean
-  def containsInput(name: IPrototype[_]): Boolean
+  //def containsInput(name: String): Boolean
+  //def containsInput(name: IPrototype[_]): Boolean
 
 
   /**
@@ -114,8 +114,8 @@ trait ITask {
    */
   def addOutput(prototype: IPrototype[_]): this.type
 
-  def containsOutput(name: String): Boolean
-  def containsOutput(name: IPrototype[_]): Boolean
+  //def containsOutput(name: String): Boolean
+  //def containsOutput(name: IPrototype[_]): Boolean
    
 
 

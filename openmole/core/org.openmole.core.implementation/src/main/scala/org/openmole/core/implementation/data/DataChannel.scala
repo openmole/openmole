@@ -107,10 +107,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
     }
   }
   
-  def data: Iterable[IData[_]] = {
-    end.task match {
-      case None => List.empty
-      case Some(task) => (for (d <- task.inputs ; if (variableNames.contains(d.prototype.name))) yield d)
-    }
-  }
+  def data: Iterable[IData[_]] =
+    (for (d <- end.userInputs ; if (variableNames.contains(d.prototype.name))) yield d)
+    
 }

@@ -26,13 +26,16 @@ import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.{IContext,IData,IParameter,IVariable,IPrototype,DataModeMask, IDataSet}
 import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.data.Context._
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.TreeSet
 
 abstract class Task(val name: String) extends ITask {
   
-  private var _inputs = TreeMap.empty[String, IData[_]]
-  private var _outputs = TreeMap.empty[String, IData[_]]
-  private var _parameters = TreeMap.empty[String, IParameter[_]]
+  import Data._
+  import Parameter._
+  
+  private var _inputs = TreeSet.empty[IData[_]]
+  private var _outputs = TreeSet.empty[IData[_]]
+  private var _parameters = TreeSet.empty[IParameter[_]]
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
@@ -47,7 +50,7 @@ abstract class Task(val name: String) extends ITask {
     context
   }
 
-  protected def filterOutput(context: IContext): IContext = {
+  protected def filterOutput(context: IContext): IContext =
     outputs.flatMap {
       d => val p = d.prototype
       context.variable(p) match {
@@ -59,8 +62,6 @@ abstract class Task(val name: String) extends ITask {
           else throw new UserBadDataError("Output value of variable " + p.name + " (prototype: "+ v.prototype.`type`.toString +") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.toString + "' in task" + name + ".")
       }
     }.toContext
-
-  }
 
   private def init(context: IContext): IContext =
     verifyInput(
@@ -98,7 +99,7 @@ abstract class Task(val name: String) extends ITask {
   override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
  
   override def addOutput(data: IData[_]): this.type =  {
-    _outputs += data.prototype.name -> data
+    _outputs += data
     this
   }
   
@@ -107,7 +108,7 @@ abstract class Task(val name: String) extends ITask {
   override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
 
   override def addInput(data: IData[_]): this.type = {
-    _inputs += data.prototype.name -> data
+    _inputs += data
     this
   }
 
@@ -121,13 +122,13 @@ abstract class Task(val name: String) extends ITask {
     this
   }
 
-  override def containsInput(name: String): Boolean =  _inputs.contains(name)
+  //override def containsInput(name: String): Boolean =  _inputs.contains(name)
 
-  override def containsInput(prototype: IPrototype[_]): Boolean = containsInput(prototype.name)
+  //override def containsInput(prototype: IPrototype[_]): Boolean = containsInput(prototype.name)
 
-  override def containsOutput(name: String): Boolean =  _outputs.contains(name)
+  //override def containsOutput(name: String): Boolean =  _outputs.contains(name)
 
-  override def containsOutput(prototype: IPrototype[_]): Boolean = _outputs.contains(prototype.name)
+  //override def containsOutput(prototype: IPrototype[_]): Boolean = _outputs.contains(prototype.name)
 
   override def inputs: IDataSet = new DataSet(_inputs)
     
@@ -138,7 +139,7 @@ abstract class Task(val name: String) extends ITask {
   @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filter(!_.mode.isSystem))
     
   override def addParameter(parameter: IParameter[_]): this.type = {
-    _parameters += ((parameter.variable.prototype.name,parameter))
+    _parameters += parameter
     this
   }
     
@@ -146,7 +147,7 @@ abstract class Task(val name: String) extends ITask {
     
   override def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type = addParameter(new Parameter[T](prototype, value, `override`))
     
-  override def parameters: Iterable[IParameter[_]]= _parameters.values
+  override def parameters: Iterable[IParameter[_]]= _parameters
    
   override def toString: String = name       
     
