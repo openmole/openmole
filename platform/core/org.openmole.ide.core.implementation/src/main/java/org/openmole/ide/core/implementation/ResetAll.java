@@ -40,7 +40,7 @@ public final class ResetAll implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         MoleScenesManager.removeMoleScenes();
         Proxys.clearAll();
-        MoleScenesManager.display(MoleScenesManager.addMoleScene());
+        MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
         ((MoleSceneTopComponent) WindowManager.getDefault().findTopComponent("MoleSceneTopComponent")).refreshPalette();
         Displays.propertyPanel().cleanViewport();
     }

@@ -21,10 +21,10 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
-import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 
 
-class AddCapsuleAction(moleScene: MoleScene, provider: GenericMenuProvider) extends ActionListener{
+class AddCapsuleAction(moleScene: BuildMoleScene, provider: GenericMenuProvider) extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
     MoleScenesManager.createCapsule(moleScene,provider.currentPoint).addInputSlot(false)

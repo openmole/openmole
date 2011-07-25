@@ -17,6 +17,8 @@
 
 package org.openmole.ide.core.model.workflow
 
+import javax.swing.JComponent
+
 trait IMoleScene {
   def manager: IMoleSceneManager
   

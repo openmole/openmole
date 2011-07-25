@@ -25,14 +25,14 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data.IDataUI
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
-import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.netbeans.api.visual.action.ConnectorState
 
 
 
-class DnDNewTaskProvider(molescene: MoleScene) extends DnDProvider(molescene) {
+class DnDNewTaskProvider(molescene: BuildMoleScene) extends DnDProvider(molescene) {
   
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {

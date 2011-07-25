@@ -15,20 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.workflow
+package org.openmole.ide.core.implementation.workflow
 
-import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-trait IMoleSceneManager {
-  def name: Option[String]
-  
-  def name_=(n:Option[String])
-  
-  def capsules:DualHashBidiMap[String, ICapsuleUI]
-  
-  def startingCapsule: Option[ICapsuleUI]
-  
-  def capsuleConnections:  HashMap[ICapsuleUI, HashSet[ITransitionUI]]
+class ExecutionMoleScene extends MoleScene{
+  override def initCapsuleAdd(w: ICapsuleUI) = null
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = null
+  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String) = null
+  override def attachEdgeWidget(e: String) = null
+  override def attachNodeWidget(n: String) = null
 }

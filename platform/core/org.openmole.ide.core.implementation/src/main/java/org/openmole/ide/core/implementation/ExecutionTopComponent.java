@@ -27,7 +27,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openmole.core.implementation.mole.MoleExecution;
-import org.openmole.ide.core.implementation.control.TabsManager;
+import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.serializer.MoleMaker;
 
 /**
@@ -38,7 +38,7 @@ autostore = false)
 @TopComponent.Description(preferredID = "ExecutionTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "output", openAtStartup = true)
+@TopComponent.Registration(mode = "output", openAtStartup = false)
 @ActionID(category = "Window", id = "org.openmole.ide.core.implementation.ExecutionTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(displayName = "Execution",
@@ -107,7 +107,7 @@ public final class ExecutionTopComponent extends TopComponent {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        (new MoleExecution(MoleMaker.buildMole(TabsManager.getCurrentScene().manager()))).start();
+        (new MoleExecution(MoleMaker.buildMole(MoleScenesManager.sceneTabs().getKey(MoleScenesManager.tabbedPane().get().getSelectedComponent()).manager()))).start();
     }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

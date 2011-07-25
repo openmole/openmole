@@ -26,7 +26,7 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -47,7 +47,7 @@ class MoleSceneConverter extends Converter{
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
     var taskUIs = new HashSet[TaskDataUI]
     
-    val molescene= o.asInstanceOf[MoleScene]
+    val molescene= o.asInstanceOf[BuildMoleScene]
     var slotcount = 0
     
     writer.addAttribute("name", molescene.manager.name.get)
@@ -98,7 +98,7 @@ class MoleSceneConverter extends Converter{
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
     
-    val scene = new MoleScene
+    val scene = new BuildMoleScene
     scene.manager.name = Some(reader.getAttribute("name"))
         
     
@@ -135,10 +135,8 @@ class MoleSceneConverter extends Converter{
       }
       reader.moveUp
     }
-        
-    MoleScenesManager.display(scene)
     scene
   }
   
-  override def canConvert(t: Class[_]) = t.equals(classOf[MoleScene])
+  override def canConvert(t: Class[_]) = t.equals(classOf[BuildMoleScene])
 }

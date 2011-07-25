@@ -28,7 +28,6 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openmole.ide.core.implementation.control.TaskSettingsManager;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
 import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.action.AddMoleSceneAction;
@@ -69,8 +68,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
         MoleScenesManager.setTabbedPane(tabbedPane);
-        TaskSettingsManager.setTabbedPane(tabbedPane);
-        MoleScenesManager.display(MoleScenesManager.addMoleScene());
+        MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
 
         createPalette();
         associateLookup(new AbstractLookup(ic));
@@ -130,7 +128,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-            .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+            .addComponent(tabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

@@ -17,10 +17,10 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.control.TabsManager
+import org.openmole.ide.core.implementation.control.MoleScenesManager
 import scala.swing.Action
 
 
 class RemoveMoleSceneAction(text: String) extends Action(text){
-  override def apply = TabsManager.removeCurrentSceneAndChild
+  override def apply = MoleScenesManager.removeCurrentSceneAndChilds
 }
