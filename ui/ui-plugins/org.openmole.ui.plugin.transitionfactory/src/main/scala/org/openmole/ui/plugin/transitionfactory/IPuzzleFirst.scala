@@ -20,5 +20,5 @@ package org.openmole.ui.plugin.transitionfactory
 import org.openmole.core.model.mole.ICapsule
 
 trait IPuzzleFirst extends IPuzzle {
-  def firstCapsule: ICapsule
+  def first: ICapsule
 }

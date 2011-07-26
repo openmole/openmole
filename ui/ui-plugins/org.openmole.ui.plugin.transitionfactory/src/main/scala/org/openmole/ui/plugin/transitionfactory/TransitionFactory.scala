@@ -65,9 +65,9 @@ object TransitionFactory {
   def chain(head: ITask, capsules: Array[ITask]): IPuzzleFirstAndLast = chain(new Capsule(head), capsules.map{new Capsule(_)}.toArray[ICapsule])
    
   def chain(task: ITask, firstPuzzle: IPuzzleFirst): IPuzzleFirst = {
-    val firstCapsule = new Capsule(task)
-    new Transition(firstCapsule, firstPuzzle.firstCapsule)
-    new PuzzleFirst(firstCapsule)
+    val first = new Capsule(task)
+    new Transition(first, firstPuzzle.first)
+    new PuzzleFirst(first)
   }
     
   
@@ -88,8 +88,8 @@ object TransitionFactory {
   }*/
 
   def chain(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
-    new Transition(head.lastCapsule, last.firstCapsule)
-    new PuzzleFirstAndLast(head.firstCapsule, last.lastCapsule)
+    new Transition(head.last, last.first)
+    new PuzzleFirstAndLast(head.first, last.last)
   }
   
   
@@ -108,7 +108,7 @@ object TransitionFactory {
    * @throws InstantiationException
    */
   def diamond(head: ICapsule, last: ICapsule, capsules: Array[ICapsule]): IPuzzleFirstAndLast = 
-    new PuzzleFirstAndLast(fork(head, capsules).firstCapsule, join(last, capsules).lastCapsule)
+    new PuzzleFirstAndLast(fork(head, capsules).first, join(last, capsules).last)
   
 
   /**
@@ -125,9 +125,9 @@ object TransitionFactory {
    * @return an instance of IPuzzleFirstAndLast
    * @throws InstantiationException
    */
-  def diamond(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleFirstAndLast = {
-    new PuzzleFirstAndLast(fork(head, puzzles).firstCapsule,join(last, puzzles).lastCapsule)
-  }
+  def diamond(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleFirstAndLast =
+    new PuzzleFirstAndLast(fork(head, puzzles).first,join(last, puzzles).last)
+  
 
   /**
    * Creates single transitions between a start capsule and n-1 end capsules.
@@ -161,7 +161,7 @@ object TransitionFactory {
    * @return an instance of IPuzzleFirst
    */
   private def fork(head: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleFirst = 
-    fork(head.lastCapsule, puzzles.map{ _.firstCapsule })
+    fork(head.last, puzzles.map{ _.first })
     
 
   /**
@@ -193,7 +193,7 @@ object TransitionFactory {
    * @return an instance of IPuzzleLast
    */
   private def join(last: IPuzzleFirstAndLast, puzzles: Array[IPuzzleFirstAndLast]): IPuzzleLast = {
-    return join(last.firstCapsule, puzzles.map{ _.lastCapsule })
+    return join(last.first, puzzles.map{ _.last })
   }
 
   /**
@@ -219,12 +219,12 @@ object TransitionFactory {
    */
   def branch(head: IPuzzleFirstAndLast, puzzles: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
     chain(head, puzzles)
-    return new PuzzleFirstAndLast(head.firstCapsule, head.firstCapsule)
+    return new PuzzleFirstAndLast(head.first, head.first)
   }
 
   def exploration(exploreCapsule: ICapsule, puzzle: IPuzzleFirstAndLast, aggregationCapsule: ICapsule): IPuzzleFirstAndLast = {
-    new Transition(exploreCapsule, puzzle.firstCapsule)
-    new AggregationTransition(puzzle.lastCapsule, aggregationCapsule)
+    new Transition(exploreCapsule, puzzle.first)
+    new AggregationTransition(puzzle.last, aggregationCapsule)
     return new PuzzleFirstAndLast(exploreCapsule, aggregationCapsule)
   }
   
@@ -232,13 +232,13 @@ object TransitionFactory {
     exploration(new Capsule(exploreTask), puzzle, new Capsule(aggregationTask))
  
   def exploration(exploreCapsule: ICapsule, puzzle: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
-    new Transition(exploreCapsule, puzzle.firstCapsule)
-    new PuzzleFirstAndLast(exploreCapsule, puzzle.lastCapsule)
+    new Transition(exploreCapsule, puzzle.first)
+    new PuzzleFirstAndLast(exploreCapsule, puzzle.last)
   }
 
   def exploration(exploreTask: IExplorationTask, puzzle: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
     val etc = new Capsule(exploreTask)
-    new Transition(etc, puzzle.firstCapsule)
-    return new PuzzleFirstAndLast(etc, puzzle.lastCapsule)
+    new Transition(etc, puzzle.first)
+    return new PuzzleFirstAndLast(etc, puzzle.last)
   }
 }

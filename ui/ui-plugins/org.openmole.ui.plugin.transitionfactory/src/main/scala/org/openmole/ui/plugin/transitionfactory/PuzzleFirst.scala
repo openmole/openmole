@@ -19,4 +19,4 @@ package org.openmole.ui.plugin.transitionfactory
 
 import org.openmole.core.model.mole.ICapsule
 
-class PuzzleFirst(val firstCapsule: ICapsule) extends IPuzzleFirst
+class PuzzleFirst(val first: ICapsule) extends IPuzzleFirst
