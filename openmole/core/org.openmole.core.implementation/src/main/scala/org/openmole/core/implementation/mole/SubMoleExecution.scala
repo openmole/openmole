@@ -21,6 +21,7 @@ import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition

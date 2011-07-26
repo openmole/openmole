@@ -23,6 +23,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import java.util.logging.Logger
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.task.ITask
 import scala.collection.immutable.TreeMap
 import scala.collection.immutable.TreeSet
 import MutableComputing.Mutable._

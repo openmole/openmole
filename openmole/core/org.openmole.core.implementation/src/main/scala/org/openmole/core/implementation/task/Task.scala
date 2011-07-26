@@ -39,7 +39,7 @@ abstract class Task(val name: String) extends ITask {
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
-      if (!d.mode.isOptional) {
+      if (!(d.mode is optional)) {
         val p = d.prototype
         context.variable(p.name) match {
           case None => throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.toString + "\" required by the task \"" + name + "\" has not been found");
@@ -55,7 +55,7 @@ abstract class Task(val name: String) extends ITask {
       d => val p = d.prototype
       context.variable(p) match {
         case None => 
-          if (!d.mode.isOptional) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString +" in not optional and has not found in output of task" + name +".")
+          if (!(d.mode is optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString +" in not optional and has not found in output of task" + name +".")
           else Option.empty[IVariable[_]]
         case Some(v) =>
           if (p.accepts(v.value)) Some(v)
@@ -121,22 +121,14 @@ abstract class Task(val name: String) extends ITask {
     for(data <- dataSet) addOutput(data)
     this
   }
-
-  //override def containsInput(name: String): Boolean =  _inputs.contains(name)
-
-  //override def containsInput(prototype: IPrototype[_]): Boolean = containsInput(prototype.name)
-
-  //override def containsOutput(name: String): Boolean =  _outputs.contains(name)
-
-  //override def containsOutput(prototype: IPrototype[_]): Boolean = _outputs.contains(prototype.name)
-
+  
   override def inputs: IDataSet = new DataSet(_inputs)
     
   override def outputs: IDataSet = new DataSet(_outputs)
  
-  @transient override lazy val userInputs: IDataSet =  new DataSet(inputs.filter(!_.mode.isSystem))
+  @transient override lazy val userInputs: IDataSet =  new DataSet(inputs.filterNot(_.mode is system))
    
-  @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filter(!_.mode.isSystem))
+  @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filterNot(_.mode is system))
     
   override def addParameter(parameter: IParameter[_]): this.type = {
     _parameters += parameter

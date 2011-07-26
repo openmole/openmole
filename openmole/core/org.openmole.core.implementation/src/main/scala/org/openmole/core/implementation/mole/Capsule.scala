@@ -40,7 +40,7 @@ import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
 
 
-class Capsule(override var task: Option[ITask] = None) extends ICapsule {
+class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
   
@@ -75,19 +75,17 @@ class Capsule(override var task: Option[ITask] = None) extends ICapsule {
     this
   }
     
-  override def userInputs: IDataSet  = {
+  override def userInputs: IDataSet  = 
     task match {
       case None => DataSet.empty
       case Some(t) => t.userInputs
     }
-  }
   
-  override def userOutputs: IDataSet  = {
+  override def userOutputs: IDataSet =
     task match {
       case None => DataSet.empty
       case Some(t) => t.userOutputs
     }
-  }
   
   def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
   def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels
@@ -124,7 +122,9 @@ class Capsule(override var task: Option[ITask] = None) extends ICapsule {
 
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
-  def task_=(task: ITask) = this.task = Some(task) 
+  override def task_=(task: ITask) = this.task = Some(task) 
+  override def task_=(task: Option[ITask]) = _task = task
+  override def task = _task
   
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
@@ -141,9 +141,7 @@ class Capsule(override var task: Option[ITask] = None) extends ICapsule {
       performTransition(job.context, ticket, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
-    } finally {
-      EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed, Array(this))
-    }
+    } finally  EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed, Array(this))
   }
 
   protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    

@@ -40,6 +40,7 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.data.IDataChannel
@@ -112,7 +113,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     EventDispatcher.objectChanged(this, JobInCapsuleStarting, Array(moleJob, capsule))
     EventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
 
-    MoleJobRegistry += moleJob -> (this, capsule)
+    MoleJobRegistry += (moleJob, this, capsule)
     
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
     EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
@@ -142,9 +143,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
             case (t: Throwable) => logger.log(SEVERE, "Error durring scheduling", t)
           }
         } catch {
-          case (e: InterruptedException) =>
-            //LOGGER.log(Level.FINE, "Scheduling interrupted", e)
-            continue = false
+          case (e: InterruptedException) => continue = false
         }
       }
     }
@@ -227,11 +226,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
     
-  override def ticket(job: IMoleJob): Option[ITicket] = {
+  override def ticket(job: IMoleJob): Option[ITicket] = 
     inProgress.get(job) match {
       case None => None
       case Some(j) => Some(j._2)
     }
-  }
     
 }

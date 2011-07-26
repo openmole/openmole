@@ -23,10 +23,12 @@ import org.openmole.misc.tools.obj.Id
 import scala.reflect.Manifest
 
 object Prototype {
-  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] = {
+  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] =
     new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
-  }
   
+  def fromArray[T](prototype: IPrototype[Array[T]]): IPrototype[T] =
+    new Prototype(prototype.name, prototype.`type`.fromArray).asInstanceOf[IPrototype[T]]
+
   implicit lazy val prototypeOrderingOnName = new Ordering[IPrototype[_]] {
     override def compare(left: IPrototype[_], right: IPrototype[_]) = 
       left.name compare right.name
@@ -41,10 +43,10 @@ class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype
   def this(name: String, clazz: Class[T]) = this(name, clazz.equivalence.toManifest)
   
   override def isAssignableFrom(p: IPrototype[_]): Boolean = 
-    `type`.unArrayifyIsAssignableFrom(p.`type`)
+    `type`.isAssignableFromHighOrder(p.`type`)
 
   override def accepts(obj: Any): Boolean =
-    obj == null || `type`.unArrayifyIsAssignableFrom(manifest(clazzOf(obj)))
+    obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
   
   override def id = (name, `type`)
   override def toString: String = '(' + `type`.toString + ')' + name

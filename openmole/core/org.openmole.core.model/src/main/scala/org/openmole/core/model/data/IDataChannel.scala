@@ -30,6 +30,7 @@ package org.openmole.core.model.data
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.task.ITask
 
 trait IDataChannel {
 

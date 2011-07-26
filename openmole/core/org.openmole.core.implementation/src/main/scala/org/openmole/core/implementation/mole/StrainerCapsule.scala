@@ -20,6 +20,7 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.task.ITask
+import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.TypeUtil._
@@ -34,19 +35,21 @@ object StrainerCapsule {
   }
 }
 
-class StrainerCapsule(task: Option[ITask] = None) extends Capsule(task.map(new StrainerCapsule.StrainerTaskDecorator(_))) {
+class StrainerCapsule(t: Option[ITask] = None) extends Capsule(t.map(new StrainerCapsule.StrainerTaskDecorator(_))) {
   
   def this(t: ITask) = this(Some(t))
 
+  override def task_=(task: Option[ITask]) = super.task = t.map(new StrainerCapsule.StrainerTaskDecorator(_))
+  
   override def userInputs = 
-    (receivedTypes(defaultInputSlot) ++ 
+    (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
       (task match {
         case Some(t) => t.inputs
         case None => Iterable.empty
       })).toDataSet
   
   override def userOutputs = 
-    (receivedTypes(defaultInputSlot) ++ 
+    (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
       (task match {
         case Some(t) => t.outputs
         case None => Iterable.empty

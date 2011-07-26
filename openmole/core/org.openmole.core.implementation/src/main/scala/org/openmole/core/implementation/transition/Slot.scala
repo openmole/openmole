@@ -39,7 +39,6 @@ class Slot(val capsule: ICapsule) extends ISlot {
 
   override def transitions: Iterable[ITransition] =  _transitions
     
-  override def contains(transition: ITransition): Boolean = {
-    _transitions.contains(transition)
-  }
+  override def contains(transition: ITransition) = _transitions.contains(transition)
+
 }

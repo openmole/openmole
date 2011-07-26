@@ -23,7 +23,4 @@ import org.openmole.core.model.data.IPrototype
 trait IFactor[T, +D <: IDomain[T]] {
   def domain: D
   def prototype: IPrototype[T]
-  
-  override def equals(obj: Any): Boolean = (domain, prototype).equals(obj)
-  override def hashCode: Int = (domain, prototype).hashCode
 }

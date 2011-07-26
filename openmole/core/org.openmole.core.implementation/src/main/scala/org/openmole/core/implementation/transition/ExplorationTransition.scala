@@ -20,7 +20,11 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.implementation.task.ExplorationTask._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.data.Context._
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.mole.SubMoleExecution
+import org.openmole.core.model.task.IExplorationTask
+import org.openmole.core.model.task.ITask
+import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.transition.{IExplorationTransition, ISlot, ICondition, IAggregationTransition}
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.model.data.{IPrototype, IContext, IVariable, IData}
@@ -28,6 +32,7 @@ import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Priority
 import scala.collection.mutable.HashSet
@@ -35,7 +40,7 @@ import scala.collection.mutable.ListBuffer
 
 object ExplorationTransition extends Logger
 
-class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String], sampling: IPrototype[SampledValues] = Sample.prototype) extends Transition(start, end, condition, filtered) with IExplorationTransition {
+class ExplorationTransition(override val start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String]) extends Transition(start, end, condition, filtered) with IExplorationTransition {
   import ExplorationTransition._
   
   def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
@@ -44,9 +49,9 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
 
   def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
 
-  def this(start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
 
-  def this(start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
 
   def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
 
@@ -56,36 +61,20 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
 
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
-  
-  def this(start: ICapsule, end: ICapsule, sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String], sampling)
-    
-  def this(start: ICapsule, end: ICapsule, condition: ICondition, sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, condition, Set.empty[String], sampling)
-
-  def this(start: ICapsule, end: ICapsule, condition: String, sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String], sampling)
-
-  def this(start: ICapsule , slot: ISlot, condition: String, sampling: IPrototype[SampledValues]) = this(start, slot, new Condition(condition), Set.empty[String], sampling)
-
-  def this(start: ICapsule , slot: ISlot, condition: ICondition, sampling: IPrototype[SampledValues]) = this(start, slot, condition, Set.empty[String], sampling)
-
-  def this(start: ICapsule, end: ICapsule, filtred: Array[String], sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet, sampling)
-
-  def this(start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String], sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, condition, filtred.toSet, sampling)
-
-  def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String], sampling: IPrototype[SampledValues]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet, sampling)
-
-  def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String], sampling: IPrototype[SampledValues]) = this(start, slot, new Condition(condition), filtred.toSet, sampling)
-
 
   override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
     import subMole.moleExecution
-    val values = context.value(sampling).getOrElse(throw new UserBadDataError("Sample not found in the prototype " + sampling +" for the exploration transition."))
+    
+    val (factors, outputs) = start.userOutputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
+    val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
+    val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
+   
     val subSubMole = SubMoleExecution(moleExecution, subMole)
     
     registerAggregationTransitions(ticket, subSubMole)
     var size = 0
         
-    val endTask = end.capsule.task.getOrElse(throw new InternalProcessingError("Capsule is empty"))
- 
+    val endTask = end.capsule.taskOrException
     for(value <- values) {
       size += 1
       subSubMole.incNbJobInProgress(1)
@@ -93,28 +82,18 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition, 
       val newTicket = moleExecution.nextTicket(ticket)
       
       val variables = new ListBuffer[IVariable[_]]
-      val notFound = new ListBuffer[IData[_]]
       
-      for (in <- endTask.inputs) {
+      for (in <- outputs) 
         context.variable(in.prototype) match {
-          case None => notFound += in
           case Some(v) => variables += v      
-        }
-      }
-      
-      val valueMap = value.groupBy{_.prototype.name}
-
-      for(data <- notFound) {
-        val prototype = data.prototype
-        valueMap.get(prototype.name) match {
-          case Some(variable) =>
-            if(variable.size > 1) logger.warning("Misformed sampling prototype " + prototype + " has been found " + variable.size + " times in a single row.") 
-            val value = variable.head.value
- 
-            if(prototype.accepts(value)) variables += new Variable(prototype.asInstanceOf[IPrototype[Any]], value)
-            else throw new UserBadDataError("Found value of type " + value.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + prototype) 
           case None =>
         }
+      
+      for((p, v) <- typedFactors zip value) {
+        val fp = fromArray(p)
+        if(fp.accepts(v)) variables += new Variable(fp, v)
+        else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
+
       }
       submitNextJobsIfReady(ContextBuffer(variables.toContext, toClone), newTicket, subSubMole)
     }

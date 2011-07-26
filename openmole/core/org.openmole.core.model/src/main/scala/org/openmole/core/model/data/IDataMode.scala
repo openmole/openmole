@@ -23,19 +23,8 @@ package org.openmole.core.model.data
  */
 trait IDataMode {
   
-  /**
-   * This data chunk is modified durring the task execution.
+  /** 
+   * Test a data mode mask against this mode
    */
-  def isMutable: Boolean
-
-  /**
-   * This data chunk is optional for the task execution.
-   */
-  def isOptional: Boolean
-
-  /**
-   * This data chunk is for system use and has not been generated for the
-   * bussiness logic but rather for the workflow system use. 
-   */
-  def isSystem: Boolean
+  def is(mode: DataModeMask): Boolean
 }

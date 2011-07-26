@@ -32,13 +32,11 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   start.addOutputDataChannel(this)
   end.addInputDataChannel(this)
   
-  def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = {
+  def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = 
     this(start, end, (ListBuffer(head) ++ variables).toSet[String])
-  }
-  
-  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) = {
+
+  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) =
     this(start, end, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
-  }
 
   def this(start: ICapsule, end: ICapsule, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
 
@@ -56,15 +54,13 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
    
     var currentTicket = ticket
 
-    for (i <- 0 until levelDif)  {
+    for (i <- 0 until levelDif) {
       currentTicket = currentTicket.parent match {
         case None => throw new InternalProcessingError("Bug no supposed to reach root ticket")
         case Some(p) => p
       }
     }
-    
-    //def error = throw new InternalProcessingError("No context registered for data channel found in input of task " + end.toString)
-
+  
     {
       if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket) getOrElse(new ContextBuffer)
       else dataChannelRegistry.consult(this, currentTicket) getOrElse(new ContextBuffer)
@@ -108,6 +104,6 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   }
   
   def data: Iterable[IData[_]] =
-    (for (d <- end.userInputs ; if (variableNames.contains(d.prototype.name))) yield d)
+    (for (d <- start.userOutputs ; if (variableNames.contains(d.prototype.name))) yield d)
     
 }

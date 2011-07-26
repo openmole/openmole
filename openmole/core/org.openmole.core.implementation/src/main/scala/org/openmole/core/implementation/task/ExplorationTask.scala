@@ -20,23 +20,35 @@ package org.openmole.core.implementation.task
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.task.IExplorationTask
+import org.openmole.core.implementation.data.Prototype._
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.model.data.DataModeMask._
+import scala.collection.immutable.TreeMap
+import scala.collection.mutable.ArrayBuffer
 
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[IVariable[_]]]
-  
-  val Sample = new Data[SampledValues]("Sample#", classOf[Iterable[Iterable[IVariable[_]]]])
 }
 
 class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) with IExplorationTask {
 
-  addOutput(ExplorationTask.Sample)
-
+  sampling.prototypes.foreach{f => addOutput(new Data(toArray(f), explore))}
+  
   //If input prototype as the same name as the output it is erased
-  override protected def process(context: IContext) ={
+  override protected def process(context: IContext) = {
     val sampled = sampling.build(context)
-    context + (ExplorationTask.Sample.prototype, sampled)
+
+    val variablesValues = TreeMap.empty[IPrototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map{p => p -> new ArrayBuffer[Any](sampled.size)}
+ 
+    for(sample <- sampled; v <- sample) variablesValues.get(v.prototype) match {
+      case Some(b) => b += v.value
+      case None =>
+    }
+   
+    context ++ variablesValues.map{case(k,v) => new Variable(toArray(k).asInstanceOf[IPrototype[Array[_]]], v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))}
   }
  
 }

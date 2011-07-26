@@ -30,7 +30,7 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class CapsuleExecutionHookSpec  extends FlatSpec with ShouldMatchers {
+class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   
   "A capsule execution hook" should "intersept the execution of a capsule" in {
     var executed = false

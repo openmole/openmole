@@ -32,7 +32,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
+class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
   "To array finder" should "not detect a toArray case" in {
     val p = new Prototype("p", classOf[java.lang.Integer])
@@ -48,10 +48,11 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(t1c, t2c)
     
-    val spannedToArray = TypeUtil.spanArrayManifests(t2c.intputSlots.head)
+    val manifests = TypeUtil.computeManifests(t2c.defaultInputSlot)
     
-    spannedToArray._1.isEmpty should equal (true)
-    spannedToArray._2.contains(p.name) should equal (true)
+    manifests.filter(_.toArray).isEmpty should equal (true)
+    val tc = manifests.filter(_.name == p.name).head
+    tc.toArray should equal (false)
   }
   
   "To array finder" should "detect a toArray case" in {
@@ -73,8 +74,9 @@ class ToArrayFinderSpec extends FlatSpec with ShouldMatchers {
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
 
-    val manifests = TypeUtil.spanArrayManifests(t3c.intputSlots.head)._1
-    manifests.contains(p.name) should equal (true)
-    manifests.get(p.name).get.erasure should equal (classOf[Int])
+    val manifests = TypeUtil.computeManifests(t3c.defaultInputSlot)
+    val m = manifests.filter(_.name == p.name).head
+    m.toArray should equal (true)
+    m.manifest.erasure should equal (classOf[Int])
   }
 }

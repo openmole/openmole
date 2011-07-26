@@ -18,7 +18,6 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket

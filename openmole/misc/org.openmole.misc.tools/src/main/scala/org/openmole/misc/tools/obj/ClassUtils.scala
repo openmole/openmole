@@ -87,7 +87,9 @@ object ClassUtils {
       else c.isAssignableFrom(c2)
     }
     
-    def unArrayifyIsAssignableFrom(from: Class[_]) =
+    def fromArray = c.getComponentType
+    
+    def isAssignableFromHighOrder(from: Class[_]) =
       unArrayify(c, from) match {
         case(c1, c2, level) => c1.isAssignableFromPrimitive(c2)
       }
@@ -184,7 +186,9 @@ object ClassUtils {
   
   implicit def manifestDecoration(m: Manifest[_]) = new {
     def isAssignableFromPrimitive(m2: Manifest[_]) = m.erasure.isAssignableFromPrimitive(m2.erasure)
-    def unArrayifyIsAssignableFrom(from: Manifest[_]) = m.erasure.unArrayifyIsAssignableFrom(from.erasure)
+    def isAssignableFromHighOrder(from: Manifest[_]) = m.erasure.isAssignableFromHighOrder(from.erasure)
+    def isArray = m.erasure.isArray
+    def fromArray = m.erasure.fromArray
   }
    
 }

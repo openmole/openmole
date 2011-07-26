@@ -31,6 +31,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ICondition._
@@ -50,9 +51,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
     
-  def this(start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
     
-  def this(start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
    
   def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
     
@@ -60,7 +61,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
     
-  def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
+  def this(start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
   
   def this(trigger: ICondition, start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
@@ -69,9 +70,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
     
-  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String], Some(trigger))
+  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String], Some(trigger))
     
-  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String], Some(trigger))
+  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String], Some(trigger))
    
   def this(trigger: ICondition, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
     
@@ -79,7 +80,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
     
-  def this(trigger: ICondition, start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet, Some(trigger))
+  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet, Some(trigger))
   
 
   def this(trigger: String, start: ICapsule, end: ICapsule) = this(new Condition(trigger), start, end)  
@@ -88,9 +89,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(trigger: String, start: ICapsule, end: ICapsule, condition: String) = this(new Condition(trigger), start, end, condition)
   
-  def this(trigger: String, start: ICapsule , slot: ISlot, condition: String) = this(new Condition(trigger), start, slot, condition)
+  def this(trigger: String, start: ICapsule, slot: ISlot, condition: String) = this(new Condition(trigger), start, slot, condition)
     
-  def this(trigger: String, start: ICapsule , slot: ISlot, condition: ICondition) = this(new Condition(trigger), start, slot, condition)
+  def this(trigger: String, start: ICapsule, slot: ISlot, condition: ICondition) = this(new Condition(trigger), start, slot, condition)
    
   def this(trigger: String, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(new Condition(trigger), start, end, filtred)
     
@@ -98,7 +99,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   def this(trigger: String, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, end, condition, filtred)
     
-  def this(trigger: String, start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
+  def this(trigger: String, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
 
   
   override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = subMole.synchronized {

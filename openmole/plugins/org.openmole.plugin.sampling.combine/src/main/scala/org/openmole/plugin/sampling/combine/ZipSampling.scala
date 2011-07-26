@@ -36,6 +36,8 @@ class ZipSampling(reference: ISampling, samplings: Iterable[ISampling]) extends 
 
   def this(reference: ISampling, head: ISampling, samplings: Array[ISampling]) = this(reference, List(head) ++ samplings) 
 
+  override def prototypes = reference.prototypes ++ samplings.flatMap(_.prototypes)
+  
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
 
     /* Compute plans */

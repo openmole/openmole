@@ -26,9 +26,10 @@ import org.openmole.core.model.sampling.ISampling
 
 class FactorSampling(factor: IFactor[T,IDomain[T]] forSome{type T}) extends ISampling {
  
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def prototypes = List(factor.prototype)
+  
+  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] =
     typedBuild(context, factor)
-  }
   
   private def typedBuild[T](context: IContext, factor: IFactor[T,IDomain[T]]): Iterable[Iterable[IVariable[T]]] = {
     return new Iterable[Iterable[IVariable[T]]] {

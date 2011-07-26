@@ -21,7 +21,6 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.WeakHashMap
 import scala.ref.WeakReference
 

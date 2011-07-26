@@ -26,6 +26,7 @@ package org.openmole.ui.plugin.builder
 
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.mole.Capsule
+import org.openmole.core.implementation.mole.StrainerCapsule
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.DataSet
@@ -39,7 +40,7 @@ import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
@@ -63,7 +64,7 @@ import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast
 import org.openmole.ui.plugin.transitionfactory.TransitionFactory
 import org.openmole.ui.plugin.transitionfactory.TransitionFactory._
 
-class Builder {
+object Builder {
 
   /**
    * Builds an OpenMOLE prototype. A prototype is composed of a name and a type.
@@ -313,33 +314,38 @@ class Builder {
     }
     moleTask
   }
+  
+  
+  def iterative(iterationName: String, nb: Int, head: ICapsule, capsules: Array[ICapsule] = Array.empty): IPuzzleFirstAndLast =
+    iterative(iterationName, nb, chain(head, capsules))
+  
     
-  /*def iterative(iterationName: String, puzzle: IPuzzleFirstAndLast[ICapsule,ICapsule], nb: Int) = {
+  def iterative(iterationName: String, nb: Int, puzzle: IPuzzleFirstAndLast) = {
     val prototype = new Prototype(iterationName, classOf[Int])
     
-    val loopOnCapsule = new Capsule(new Task(iterationName + "_loopOn") {
+    val loopOnCapsule = new StrainerCapsule(new Task(iterationName + "_loopOn") {
       addParameter(prototype, 0)
-      
-      override protected def filterOutput(context: IContext) = {}
+      addInput(prototype)
+      addOutput(prototype)
+        
       override def process(context: IContext) = context
     })
     
-    val decrementCapsule = new Capsule(new Task(iterationName + "_decrement") {
+    val decrementCapsule = new StrainerCapsule(new Task(iterationName + "_decrement") {
       addInput(prototype)
       addOutput(prototype)
       
-      override protected def filterOutput(context: IContext) = {}
-      override def process(context: IContext) = {
+      override def process(context: IContext) =
         context + (prototype, context.value(prototype).get + 1)
-      }
+      
     })
      
     new Transition(loopOnCapsule, puzzle.firstCapsule)
     new Transition(puzzle.lastCapsule, decrementCapsule)
-    new Transition(decrementCapsule, loopOnCapsule, prototype.name + "<=" + nb)
+    new Transition(decrementCapsule, new Slot(loopOnCapsule), prototype.name + "<=" + nb)
     new DataChannel(loopOnCapsule, decrementCapsule, prototype)
     new PuzzleFirstAndLast(loopOnCapsule, decrementCapsule)
-  }*/
+  }
       
   /**
    * Builds a prototype node.

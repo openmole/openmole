@@ -26,6 +26,8 @@ import org.openmole.core.model.sampling.ISampling
 
 class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IInfiniteDomain[T]], nbReplication: Int) extends ISampling {
 
+  override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
+  
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
     val factorIts = seederFactor.domain.iterator(context).sliding(nbReplication, nbReplication)
 

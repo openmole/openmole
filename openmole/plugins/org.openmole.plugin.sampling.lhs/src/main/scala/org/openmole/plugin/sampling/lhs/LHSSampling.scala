@@ -17,11 +17,9 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import java.util.Arrays
-import java.util.Collections
+import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.RNG
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
@@ -31,8 +29,10 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) extends Sampling[IFactor[Double, IDomain[Double] with IWithRange[Double]]](factors) {
+class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) extends ISampling {
 
+  override def prototypes = factors.map{_.prototype}
+  
   override def build(context: IContext): Iterable[Iterable[IVariable[Double]]] = {
      
     //System.out.println("LHSPlan::computeValues");

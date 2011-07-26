@@ -32,9 +32,5 @@ object DataMode {
 }
 
 class DataMode(mask: Int) extends IDataMode {
-  override def isOptional: Boolean = (mask & OPTIONAL.value) != 0
-   
-  override def isMutable: Boolean = (mask & MUTABLE.value) != 0
-
-  override def isSystem: Boolean = (mask & SYSTEM.value) != 0
+  override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
 }

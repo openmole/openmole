@@ -24,9 +24,7 @@ import org.openmole.core.model.transition.{ISlot, ITransition}
 import org.openmole.misc.exception.UserBadDataError
 
 /**
- * A capsule containing ordinry task (as oposed from exploration ones). This
- * type of capsule must be followed by a Transition (as oposed to exploration
- * ones).
+ * A capsule containing a task.
  * 
  */
 trait ICapsule {

@@ -17,24 +17,23 @@
 
 package org.openmole.plugin.sampling.complete
 
-import java.util.logging.Logger
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.ArraySeq
+import org.openmole.core.model.sampling.ISampling
 import scala.util.control.Breaks._ 
 
-class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}]) extends Sampling(factors) {
+class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}]) extends ISampling {
 
   def this(factors: Array[(IFactor[T,IDomain[T]]) forSome{type T}]) = this(factors.toIterable)
 
   def this(factors: IFactor[T,IDomain[T]] forSome{type T}*) = this(factors.toIterable)
 
+  override def prototypes = factors.map{_.prototype}
+  
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
     val values = factors.map{f => f.domain.iterator(context).toIterable}
     val composed = values.view.map{_.map(e => List(e))}.reduceRight((v1, v2) => v1.flatMap(e1 => v2.map{e2 =>  e1 ::: e2}))

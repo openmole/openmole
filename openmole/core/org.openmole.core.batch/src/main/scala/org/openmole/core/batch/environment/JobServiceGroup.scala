@@ -48,15 +48,6 @@ class JobServiceGroup(val environment: BatchEnvironment) {
       var ret: (JobService, AccessToken) = null
 
       do {
-        //Select the less failing resources
-        //Select the less failing resources
-        /*val resourcesCopy = synchronized {
-         resources = resources.filter( {r =>
-         JobServiceControl.qualityControl(r.description).failureRate <= expulseThreshold
-         })
-         if(resources.isEmpty) throw new InternalProcessingError("No more reliable resource available.")
-         resources
-         }*/
         val resourcesCopy = resources
 
         //Among them select one not over loaded
@@ -103,9 +94,7 @@ class JobServiceGroup(val environment: BatchEnvironment) {
         
       } while (ret == null)
       return ret
-    } finally {
-      selectingRessource.unlock
-    }
+    } finally selectingRessource.unlock
   }
 
   def +=(service: JobService) = {

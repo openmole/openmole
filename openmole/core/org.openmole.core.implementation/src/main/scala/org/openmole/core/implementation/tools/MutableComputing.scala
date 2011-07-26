@@ -21,6 +21,8 @@ import java.util.logging.Logger
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.data.DataModeMask
+import org.openmole.core.model.task.ITask
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
 
@@ -74,7 +76,7 @@ class MutableComputing {
       case Some(task) => task.inputs(prototype.name) match {
           case None => return No
           case Some(i) => 
-            if(i.mode.isMutable) {
+            if(i.mode is DataModeMask.mutable) {
               if(relativeLevel > 0) return YesForHigherLevel
               else Yes
             } else task.outputs(prototype.name) match {

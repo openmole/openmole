@@ -28,7 +28,7 @@ object DataModeMask {
    * execution no error will be raised and the task should accomodate of it.
    *
    */
-  val OPTIONAL = new DataModeMask(0x0001)
+  val optional = new DataModeMask(0x0001)
 
   /**
    * The value corresponding to the IData is mutable. The task will modify the
@@ -36,7 +36,7 @@ object DataModeMask {
    * to ensure consistency. This data mode only applies for task inputs.
    *
    */
-  val MUTABLE = new DataModeMask(0x0002)
+  val mutable = new DataModeMask(0x0002)
 
   /**
    * The value corresponding to the IData is used for system level information
@@ -44,7 +44,15 @@ object DataModeMask {
    * workflow system.
    *
    */
-  val SYSTEM = new DataModeMask(0x0004)
+  val system = new DataModeMask(0x0004)
+  
+  
+  /**
+   * The value corresponding to the IData can be used by an exploration 
+   * transition as a exploration set. This should be set only on array.
+   *
+   */
+  val explore = new DataModeMask(0x0008)
 }
 
 class DataModeMask(val value: Int)

@@ -24,6 +24,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.task.ITask
 import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ITransition
@@ -35,8 +36,6 @@ import org.openmole.core.implementation.tools.ContextBuffer
 
 object Transition {
   val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
-  
-  def isExploration(t: Transition) = classOf[IExplorationTask].isAssignableFrom(t.start.taskOrException.getClass)
 }
 
 class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends ITransition {
@@ -47,9 +46,9 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
 
-  def this(start: ICapsule , slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
 
-  def this(start: ICapsule , slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
+  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
 
   def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
 
@@ -57,7 +56,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
 
-  def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
+  def this(start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
   import Transition._
   
@@ -87,8 +86,8 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
         val toAggregate = combinaison.groupBy(_.prototype.name)
       
-        val toArray = spanArrayManifests(end)._1   
-        val newContext = aggregate(end.capsule.userInputs, toArray, combinaison)
+        val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
+        val newContext = aggregate(end.capsule.userInputs, toArrayManifests, combinaison)
         
         subMole.submit(end.capsule, newContext, newTicket)
       }

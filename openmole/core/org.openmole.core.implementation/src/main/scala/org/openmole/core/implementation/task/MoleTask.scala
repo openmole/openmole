@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.task
 
+import org.openmole.core.model.task.ITask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.InternalProcessingError
@@ -32,12 +33,12 @@ import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
+import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
@@ -56,17 +57,12 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     
     override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
       val moleJob = os(0).asInstanceOf[IMoleJob]
+      val capsule = os(1).asInstanceOf[ICapsule]
 
-      moleJob.state match {
-        case State.COMPLETED =>
-          val e = MoleJobRegistry(moleJob).getOrElse(throw new InternalProcessingError("Capsule for " + moleJob.task.name + " not found in registry."))
-          outputCapsules.get(e._2) match {
-            case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
-            case Some(prototypes) =>
-              variables ++= prototypes.flatMap(p => moleJob.context.variable(p).toList)
-          }
-          
-        case _ =>
+      outputCapsules.get(capsule) match {
+        case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
+        case Some(prototypes) =>
+          variables ++= prototypes.flatMap(p => moleJob.context.variable(p).toList)
       }
     }
   }
@@ -77,16 +73,16 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
   override protected def process(context: IContext) = {
     val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
       (acc, input) =>
-        if (!input.mode.isOptional || (input.mode.isOptional && context.contains(input.prototype)))
-          context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
-        else acc
+      if (!(input.mode is optional) || ((input.mode is optional) && context.contains(input.prototype)))
+        context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
+      else acc
     }.toContext
 
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
     
-    EventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.OneJobStatusChanged)
-
+    EventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.JobInCapsuleFinished)
+    
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 

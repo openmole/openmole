@@ -27,15 +27,15 @@ import org.openmole.core.implementation.data.Context._
 
 object ContextAggregator {
  
-  def aggregate(aggregate: IDataSet, toArrayFonc: PartialFunction[String, Manifest[_]] , toAggregateList: Iterable[IVariable[_]]): IContext = {
+  def aggregate(aggregate: IDataSet, toArray: PartialFunction[String, Manifest[_]] , toAggregateList: Iterable[IVariable[_]]): IContext = {
     val toAggregate = toAggregateList.groupBy(_.prototype.name)
     
     aggregate.foldLeft(List.empty[IVariable[_]]) {
       case(acc,d) =>
         val merging = if(toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
   
-        if(toArrayFonc.isDefinedAt(d.prototype.name)) {
-          val manifest = toArrayFonc(d.prototype.name)
+        if(toArray.isDefinedAt(d.prototype.name)) {
+          val manifest = toArray(d.prototype.name)
 
           val array = manifest.newArray(merging.size)
           merging.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2, e._1.value)}

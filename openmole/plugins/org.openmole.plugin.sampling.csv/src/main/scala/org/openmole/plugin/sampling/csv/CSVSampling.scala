@@ -36,23 +36,23 @@ class CSVSampling(val csvFile: File) extends ISampling{
    */
   def this(csvFilePath: String) = this(new File(csvFilePath))
   
-  // var prototypes = new TreeMap[String,IPrototype[_]]
-  // var protoFiles = new HashMap[IPrototype[_<:File], File]
-  var prototypes = List[PrototypeColumn]()
-  var protoFiles = List[FileProtoypeColumn]()
+  override def prototypes = columns.map{_.proto} ::: fileColumns.map{_.proto}
+  
+  private var columns = List[PrototypeColumn]()
+  private var fileColumns = List[FileProtoypeColumn]()
   
   /**
    * Adds a prototype to be takken into account in the DoE
    *
    * @param proto, the prototyde to be added
    */
-  def addColumn(proto: IPrototype[_]): Unit = prototypes = new PrototypeColumn(proto.name,proto) :: prototypes
+  def addColumn(proto: IPrototype[_]): Unit = columns = new PrototypeColumn(proto.name,proto) :: columns
   
   /**
    * 
    * @param dataset
    */
-  def addColumn(dataSet: DataSet): Unit = dataSet.foreach{d=> prototypes= new PrototypeColumn(d.prototype.name,d.prototype)::prototypes}
+  def addColumn(dataSet: DataSet): Unit = dataSet.foreach{d=> columns= new PrototypeColumn(d.prototype.name,d.prototype)::columns}
   
   /**
    * Adds a prototype taken into account in the DoE and mapped to a csv header
@@ -60,7 +60,7 @@ class CSVSampling(val csvFile: File) extends ISampling{
    * @param proto, the prototyde to be added
    * @param headerName, the mapped header
    */
-  def addColumnAs(headerName: String, proto: IPrototype[_]): Unit = prototypes= new PrototypeColumn(headerName, proto):: prototypes
+  def addColumnAs(headerName: String, proto: IPrototype[_]): Unit = columns= new PrototypeColumn(headerName, proto):: columns
   
   /**
    * Adds a prototype extended from a File to be takken into account in the DoE
@@ -76,7 +76,7 @@ class CSVSampling(val csvFile: File) extends ISampling{
    * @param proto, the prototyde to be added
    * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a File
    */
-  def addColumn(proto: IPrototype[File],baseFile: File): Unit = protoFiles= new FileProtoypeColumn(proto.name,proto,baseFile)::protoFiles
+  def addColumn(proto: IPrototype[File],baseFile: File): Unit = fileColumns= new FileProtoypeColumn(proto.name,proto,baseFile)::fileColumns
   
 
   /**
@@ -95,7 +95,7 @@ class CSVSampling(val csvFile: File) extends ISampling{
    * @param proto, the prototyde to be added
    * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a File
    */
-  def addColumnAs(headerName: String, proto: IPrototype[File],baseFile: File): Unit = protoFiles= new FileProtoypeColumn(headerName,proto,baseFile):: protoFiles
+  def addColumnAs(headerName: String, proto: IPrototype[File],baseFile: File): Unit = fileColumns= new FileProtoypeColumn(headerName,proto,baseFile):: fileColumns
   
   
   /**
@@ -108,19 +108,19 @@ class CSVSampling(val csvFile: File) extends ISampling{
     val headers = reader.readNext.toArray
     
     //test wether prototype names belong to header names
-    prototypes.foreach(x=> {val i= headers.indexOf(x.name);
+    columns.foreach(x=> {val i= headers.indexOf(x.name);
                             if(i == -1) throw new UserBadDataError("Unknown column name : " + x.name)
                             else {x.index = i;}})
     
-    protoFiles.foreach(x=> {val i= headers.indexOf(x.name)
+    fileColumns.foreach(x=> {val i= headers.indexOf(x.name)
                             if(i == -1) throw new UserBadDataError("Unknown column name : " + x.name)
                             else {x.index = i}})
     
     var nextLine = reader.readNext
     while(nextLine != null) {
       var values = List[IVariable[_]]()
-      prototypes.filter(_.index != -1).foreach{p=> values = new Variable(p.proto.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.proto.`type`.erasure).convert(nextLine(p.index)))::values}
-      protoFiles.foreach{p=> values = new Variable(p.proto, new FileMapping(p.filePath).convert(nextLine(p.index)))::values}
+      columns.filter(_.index != -1).foreach{p=> values = new Variable(p.proto.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.proto.`type`.erasure).convert(nextLine(p.index)))::values}
+      fileColumns.foreach{p=> values = new Variable(p.proto, new FileMapping(p.filePath).convert(nextLine(p.index)))::values}
       listOfListOfValues= values::listOfListOfValues
       nextLine = reader.readNext
     }
