@@ -51,6 +51,9 @@ object SamplingDisplay extends IDisplay{
     currentPanel.get
   }
   
-  override def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+  override def saveContent(oldName: String) = {
+    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+    Proxys.addSamplingElement(dataProxyUI(oldName))
+  }
   
 }

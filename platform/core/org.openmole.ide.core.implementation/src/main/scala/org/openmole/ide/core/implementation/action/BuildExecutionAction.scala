@@ -17,9 +17,9 @@
 
 package org.openmole.ide.core.implementation.action
 
+import org.openmole.ide.core.implementation.control.MoleScenesManager
 import scala.swing.Action
 
 class BuildExecutionAction(text: String) extends Action(text){
-  override def apply = println("build exe")
-
+  override def apply = MoleScenesManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(MoleScenesManager.currentScene))
 }

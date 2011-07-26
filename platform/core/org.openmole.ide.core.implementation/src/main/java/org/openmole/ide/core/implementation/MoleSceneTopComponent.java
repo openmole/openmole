@@ -37,6 +37,7 @@ import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.nodes.AbstractNode;
+import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.palette.CategoryBuilder;
 import org.openmole.ide.core.implementation.display.MenuToggleButton2;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
@@ -67,7 +68,6 @@ public final class MoleSceneTopComponent extends TopComponent {
         setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        MoleScenesManager.setTabbedPane(tabbedPane);
         MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
 
         createPalette();
@@ -79,18 +79,24 @@ public final class MoleSceneTopComponent extends TopComponent {
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        MenuToggleButton2 mt = new MenuToggleButton2("Mole");
-        mt.addItem(new MenuItem(new AddMoleSceneAction("Add")));
-        mt.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
-        mt.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
+        MenuToggleButton2 moleButton = new MenuToggleButton2("Mole");
+        moleButton.addItem(new MenuItem(new AddMoleSceneAction("Add")));
+        moleButton.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
+        moleButton.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
 
+        
+        MenuToggleButton2 executionButton = new MenuToggleButton2("Execution");
+        executionButton.addItem(new MenuItem(new BuildExecutionAction("Build")));
+        executionButton.addItem(new MenuItem(new BuildExecutionAction("Clean and Build")));
+        
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(mt.peer());
+        toolBar.add(moleButton.peer());
+        toolBar.add(executionButton.peer());
         //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
-        add(tabbedPane, BorderLayout.CENTER);
+        add(MoleScenesManager.tabbedPane().peer(), BorderLayout.CENTER);
 
     }
 
@@ -115,11 +121,7 @@ public final class MoleSceneTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        tabbedPane = new javax.swing.JTabbedPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
         toolBar = new javax.swing.JToolBar();
-
-        tabbedPane.addTab(org.openide.util.NbBundle.getMessage(MoleSceneTopComponent.class, "MoleSceneTopComponent.jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
 
         toolBar.setRollover(true);
 
@@ -128,19 +130,15 @@ public final class MoleSceneTopComponent extends TopComponent {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-            .addComponent(tabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(264, 264, 264))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTabbedPane tabbedPane;
     private javax.swing.JToolBar toolBar;
     // End of variables declaration//GEN-END:variables
 

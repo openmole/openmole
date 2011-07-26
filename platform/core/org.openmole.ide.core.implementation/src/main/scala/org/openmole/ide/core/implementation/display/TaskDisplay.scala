@@ -54,6 +54,7 @@ object TaskDisplay extends IDisplay{
     dataProxyUI(name).dataUI.prototypesOut_=(protoO)
     dataProxyUI(name).dataUI.sampling_=(sample)
     dataProxyUI(name).dataUI.environment_=(env)
+    Proxys.addTaskElement(dataProxyUI(oldName))
   }
   
   override def increment = {

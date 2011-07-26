@@ -32,21 +32,26 @@ import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.WeakHashMap
 import scala.swing.ScrollPane
 import scala.collection.JavaConversions._
+import scala.swing.TabbedPane
 
 object MoleScenesManager{
 
   var detailedView= false
-  var count= 0
+  var countMole= 0
+  var countExec= 0
   var moleScenes= new HashMap[BuildMoleScene, ListBuffer[ExecutionMoleScene]] 
-  var sceneTabs = new DualHashBidiMap[IMoleScene,ScrollPane]
-  var tabbedPane: Option[JTabbedPane]= None
+  var sceneTabs = new DualHashBidiMap[IMoleScene,TabbedPane.Page]
+  var tabbedPane= new TabbedPane
   
-  def setTabbedPane(tp: JTabbedPane) = tabbedPane = Some(tp)
+  def currentScene : BuildMoleScene = {
+    sceneTabs.getKey(tabbedPane.selection.page) match {
+      case m: BuildMoleScene => m
+      case _=> throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
+    }
+  }
   
   def createCapsule(scene: BuildMoleScene, locationPoint: Point): ICapsuleUI = {
     val obUI = new CapsuleUI(scene)
@@ -58,51 +63,52 @@ object MoleScenesManager{
 
   def removeMoleScenes= {
     moleScenes.clear
-    tabbedPane.get.removeAll
+    tabbedPane.peer.removeAll
   }
   
   def removeMoleScene(ms: BuildMoleScene)= {
     moleScenes.remove(ms)
-    tabbedPane.get.remove(sceneTabs.get(ms).peer)
+    tabbedPane.pages-=sceneTabs.get(ms)
   }
+    
   def addBuildMoleScene(ms: BuildMoleScene): BuildMoleScene = {
     moleScenes.getOrElseUpdate(ms, new ListBuffer[ExecutionMoleScene])
-    addTab(ms)
+    addTab(ms,{countMole+= 1; "Mole"+countMole},new ScrollPane {peer.setViewportView(ms.createView)})
     ms
   }
     
   def addBuildMoleScene: BuildMoleScene = addBuildMoleScene(new BuildMoleScene)
     
-  def addExecutionMoleScene(bms : BuildMoleScene): IMoleScene = {
+  def addExecutionMoleScene(bms : BuildMoleScene): ExecutionMoleScene = {
     val ms = new ExecutionMoleScene
     moleScenes.getOrElseUpdate(bms, new ListBuffer[ExecutionMoleScene]) += ms
+    addTab(ms,{countExec+= 1; "Exec"+countExec},new ScrollPane {peer.setViewportView(ms.createView)})
     ms
   }
   
   def removeCurrentSceneAndChilds= {
-    tabbedPane.get.getSelectedComponent match {
-      case bms: BuildMoleScene => {moleScenes(bms).foreach(ems=>tabbedPane.get.remove(sceneTabs.get(ems).peer))
+    sceneTabs.getKey(tabbedPane.selection.page) match {
+      case bms: BuildMoleScene => {moleScenes(bms).foreach(ems=>tabbedPane.pages-= sceneTabs.get(ems))
                                    removeMoleScene(bms)}
-      case ems: ExecutionMoleScene=> tabbedPane.get.remove(sceneTabs.get(ems).peer)
+      case ems: ExecutionMoleScene=> tabbedPane.pages-=sceneTabs.get(ems)
     }
   }
   
-  def addTab(scene: MoleScene): IMoleScene = {
-    val name= scene.manager.name.getOrElse({count+= 1; "Mole"+count})
-    sceneTabs.put(scene, {var sp = new ScrollPane
-                          sp.peer.setViewportView(scene.createView)
-                          tabbedPane.get.add(name,sp.peer)
-                          sp})
+  def addTab(scene: MoleScene,n: String,sp: ScrollPane): IMoleScene = {
+    val name= scene.manager.name.getOrElse(n)
+    val p = new TabbedPane.Page(name,sp)
+    tabbedPane.pages += p
+    sceneTabs.put(scene,p)
     scene.manager.name= Some(name)
     scene
   }
   
   def displayBuildMoleScene: Unit = displayBuildMoleScene(addBuildMoleScene)
 
-  def displayBuildMoleScene(displayed: BuildMoleScene): Unit ={
+  def displayBuildMoleScene(displayed: BuildMoleScene): Unit = {
     if (!sceneTabs.containsKey(displayed)) addBuildMoleScene
-    sceneTabs.foreach(t=>println("::: "+t))
-    tabbedPane.get.setSelectedComponent(sceneTabs.get(displayed).peer)
+    tabbedPane.selection.page= sceneTabs.get(displayed)
   }
 
+  def displayExecutionMoleScene(displayed: ExecutionMoleScene) = tabbedPane.selection.page= sceneTabs.get(displayed)
 }

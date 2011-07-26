@@ -49,6 +49,9 @@ object PrototypeDisplay extends IDisplay{
     currentPanel.get
   }
   
-  def saveContent(oldName: String) = dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+  def saveContent(oldName: String) = {
+    currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+    Proxys.addPrototypeElement(dataProxyUI(oldName))
+  }
  
 }

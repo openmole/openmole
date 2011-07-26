@@ -107,7 +107,7 @@ public final class ExecutionTopComponent extends TopComponent {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        (new MoleExecution(MoleMaker.buildMole(MoleScenesManager.sceneTabs().getKey(MoleScenesManager.tabbedPane().get().getSelectedComponent()).manager()))).start();
+        (new MoleExecution(MoleMaker.buildMole(MoleScenesManager.currentScene().manager()))).start();
     }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
