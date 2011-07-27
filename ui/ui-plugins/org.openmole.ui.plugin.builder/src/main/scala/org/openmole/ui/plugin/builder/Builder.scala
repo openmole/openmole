@@ -127,7 +127,7 @@ object Builder {
 
     val moleTask = new MoleTask(taskName, new Mole(puzzle.first))
 
-    for (data <- task.userOutputs) moleTask.addOutput(puzzle.last, data)
+    for (data <- task.outputs) moleTask.addOutput(puzzle.last, data)
     
     moleTask
   }
@@ -305,7 +305,7 @@ object Builder {
     val moleTask = new MoleTask(taskName, new Mole(exploPuz.first))
 
     // sets output available as an array
-    for (data <- ft.userOutputs) {
+    for (data <- ft.outputs) {
       moleTask.addOutput(puzzle.last, Data.toArray(data), true)
     }
     moleTask
