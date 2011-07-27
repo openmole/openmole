@@ -37,22 +37,13 @@ object DataModeMask {
    *
    */
   val mutable = new DataModeMask(0x0002)
-
-  /**
-   * The value corresponding to the IData is used for system level information
-   * (as oposed to buisiness or user level information). This mask is use by the
-   * workflow system.
-   *
-   */
-  val system = new DataModeMask(0x0004)
-  
   
   /**
    * The value corresponding to the IData can be used by an exploration 
    * transition as a exploration set. This should be set only on array.
    *
    */
-  val explore = new DataModeMask(0x0008)
+  val explore = new DataModeMask(0x0004)
 }
 
 class DataModeMask(val value: Int)

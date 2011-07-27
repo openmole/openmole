@@ -39,6 +39,24 @@ trait ICapsule {
   
   def taskOrException = task.getOrElse(throw new UserBadDataError("Capsule task is unassigned.")) 
   
+  /*
+   * Get the inputs data taken by this capsule, generally it is empty if the capsule
+   * is empty or the input of the task inside the capsule. It can be different
+   * in some cases.
+   * 
+   * @return the input of the capsule
+   */
+  def inputs: IDataSet
+  
+  /*
+   * Get the outputs data taken by this capsule, generally it is empty if the capsule
+   * is empty or the output of the task inside the capsule. It can be different
+   * in some cases.
+   * 
+   * @return the output of the capsule
+   */
+  def outputs: IDataSet
+  
   /**
    * Get all data channels ending at this capsule.
    *
@@ -118,22 +136,6 @@ trait ICapsule {
    */
   def toJob(context: IContext, jobId: MoleJobId): IMoleJob
 
-  /**
-   *
-   * Get the user input data of the task contained in this capsule.
-   *
-   * @return the input of the task
-   */
-  def userInputs: IDataSet  
-   
-  /**
-   *
-   * Get the user output data of the task contained in this capsule.
-   *
-   * @return the output data of the task
-   */
-  def userOutputs: IDataSet
-  
   /**
    * Assing a task to this capsule.
    * 

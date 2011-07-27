@@ -24,6 +24,7 @@ import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
@@ -113,8 +114,8 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     
           trigger match {
             case Some(trigger) => {
-                val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.userOutputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
-                val context = ContextAggregator.aggregate(start.userOutputs, toArrayManifests, resultContexts.map{_.toVariable})
+                val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
+                val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, resultContexts.map{_.toVariable})
                 if(trigger.evaluate(context)) {
                   aggregate(subMole, ticket)
                   if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel

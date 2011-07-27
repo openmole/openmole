@@ -55,24 +55,6 @@ trait ITask {
   
   /**
    *
-   * Get the input data of the task exepts the one used for the internal usage 
-   * of the workflow system.
-   *
-   * @return the input of the task
-   */
-  def userInputs: IDataSet  
-   
-  /**
-   *
-   * Get the output data of the task exepts the one used for the internal usage 
-   * of the workflow system.
-   *
-   * @return the output data of the task
-   */
-  def userOutputs: IDataSet
-
-  /**
-   *
    * Add <code>data</code> as an input for this task.
    *
    * @param data the data added in input

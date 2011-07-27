@@ -30,6 +30,7 @@ import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.MoleJobRegistry
+import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
@@ -88,7 +89,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
     val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forcedArray.map(e => e.name -> e.`type`)
     
-    context ++ aggregate(userOutputs, toArrayMap, resultGathering.variables)
+    context ++ aggregate(outputs, toArrayMap, resultGathering.variables)
   }
 
   def addOutput(capsule: ICapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)

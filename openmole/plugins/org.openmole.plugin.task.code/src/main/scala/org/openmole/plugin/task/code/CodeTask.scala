@@ -28,7 +28,7 @@ abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
   override def process(context: IContext) = {
     val pwd = Workspace.newDir
     prepareInputFiles(context, pwd.getCanonicalFile)
-    fetchOutputFiles(contextToCode.execute(context, userOutputs).toContext, pwd.getCanonicalFile)
+    fetchOutputFiles(contextToCode.execute(context, outputs).toContext, pwd.getCanonicalFile)
   }
 
   def contextToCode: IContextToCode

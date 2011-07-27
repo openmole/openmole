@@ -125,10 +125,6 @@ abstract class Task(val name: String) extends ITask {
   override def inputs: IDataSet = new DataSet(_inputs)
     
   override def outputs: IDataSet = new DataSet(_outputs)
- 
-  @transient override lazy val userInputs: IDataSet =  new DataSet(inputs.filterNot(_.mode is system))
-   
-  @transient override lazy val userOutputs: IDataSet = new DataSet(outputs.filterNot(_.mode is system))
     
   override def addParameter(parameter: IParameter[_]): this.type = {
     _parameters += parameter

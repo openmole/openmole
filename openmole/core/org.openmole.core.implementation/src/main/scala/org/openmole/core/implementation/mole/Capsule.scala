@@ -39,7 +39,6 @@ import org.openmole.core.implementation.tools.ToCloneFinder._
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
 
-
 class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
@@ -63,6 +62,18 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   private val _outputDataChannels = new HashSet[IDataChannel]
 
   
+  override def inputs: IDataSet  = 
+    task match {
+      case None => DataSet.empty
+      case Some(t) => t.inputs
+    }
+  
+  override def outputs: IDataSet =
+    task match {
+      case None => DataSet.empty
+      case Some(t) => t.outputs
+    }
+  
   override def defaultInputSlot: ISlot = _defaultInputSlot
 
   override def addInputSlot(slot: ISlot): this.type = {
@@ -74,18 +85,6 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     _inputDataChannels.add(dataChannel)
     this
   }
-    
-  override def userInputs: IDataSet  = 
-    task match {
-      case None => DataSet.empty
-      case Some(t) => t.userInputs
-    }
-  
-  override def userOutputs: IDataSet =
-    task match {
-      case None => DataSet.empty
-      case Some(t) => t.userOutputs
-    }
   
   def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
   def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels

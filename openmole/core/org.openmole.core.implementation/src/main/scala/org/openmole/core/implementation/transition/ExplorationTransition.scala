@@ -22,6 +22,7 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.mole.SubMoleExecution
+import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.DataModeMask._
@@ -65,7 +66,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
   override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
     import subMole.moleExecution
     
-    val (factors, outputs) = start.userOutputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
+    val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
    

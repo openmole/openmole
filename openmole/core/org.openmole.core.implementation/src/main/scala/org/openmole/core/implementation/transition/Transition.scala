@@ -18,21 +18,17 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.ContextAggregator._
-import org.openmole.core.implementation.data.Context._
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.tools.IContextBuffer
-import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.transition.ITransition
-import org.openmole.core.model.transition.ISlot
-import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.implementation.tools.TypeUtil._
-import org.openmole.misc.tools.service.LockRepository
 import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.ContextAggregator._
+import org.openmole.core.implementation.tools.TypeUtil._
+import org.openmole.core.implementation.data.Context._
+import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.task.{ITask, IExplorationTask}
+import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.transition.{ICondition, ITransition, ISlot}
+import org.openmole.core.implementation.mole.Capsule._
+import org.openmole.misc.tools.service.LockRepository
 
 object Transition {
   val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
@@ -87,7 +83,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
         val toAggregate = combinaison.groupBy(_.prototype.name)
       
         val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
-        val newContext = aggregate(end.capsule.userInputs, toArrayManifests, combinaison)
+        val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
         
         subMole.submit(end.capsule, newContext, newTicket)
       }
@@ -103,7 +99,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
-  override def unFiltred = start.userOutputs.filterNot(d => filtered.contains(d.prototype.name))
+  override def unFiltred = start.outputs.filterNot(d => filtered.contains(d.prototype.name))
   
   protected def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
 

@@ -41,14 +41,14 @@ class StrainerCapsule(t: Option[ITask] = None) extends Capsule(t.map(new Straine
 
   override def task_=(task: Option[ITask]) = super.task = t.map(new StrainerCapsule.StrainerTaskDecorator(_))
   
-  override def userInputs = 
+  override def inputs = 
     (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
       (task match {
         case Some(t) => t.inputs
         case None => Iterable.empty
       })).toDataSet
   
-  override def userOutputs = 
+  override def outputs = 
     (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
       (task match {
         case Some(t) => t.outputs

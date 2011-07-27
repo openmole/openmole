@@ -21,6 +21,7 @@ package org.openmole.core.implementation.data
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.ContextBuffer
 import org.openmole.core.implementation.tools.LevelComputing
+import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext, IVariable}
 import org.openmole.core.model.mole.ITicket
@@ -104,6 +105,6 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   }
   
   def data: Iterable[IData[_]] =
-    (for (d <- start.userOutputs ; if (variableNames.contains(d.prototype.name))) yield d)
+    (for (d <- start.outputs ; if (variableNames.contains(d.prototype.name))) yield d)
     
 }
