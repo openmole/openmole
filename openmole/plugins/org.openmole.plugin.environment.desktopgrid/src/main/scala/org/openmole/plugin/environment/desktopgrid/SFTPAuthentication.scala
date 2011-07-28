@@ -36,7 +36,8 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
     //ctx.setAttribute(Context.REMOTEPORT, port.toString)
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, password)
-    JSAGASessionService.addContext(ctx)
+    JSAGASessionService.addContext("sftp://"+ login + "@host:port/.*", ctx)
+    if(port == 22) JSAGASessionService.addContext("sftp://host"+ login + "/.*", ctx)
   }
   
 }

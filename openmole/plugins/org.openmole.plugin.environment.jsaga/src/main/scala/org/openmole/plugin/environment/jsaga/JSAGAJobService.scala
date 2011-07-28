@@ -99,8 +99,8 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
  
   @transient lazy val jobServiceCache = {
     val task = {
-      val url = URLFactory.createURL(jobServiceURI.toString());
-      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session, url);
+      val url = URLFactory.createURL(jobServiceURI.toString)
+      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(jobServiceURI.toString), url)
     } 
 
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);

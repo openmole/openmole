@@ -23,16 +23,10 @@ import org.openmole.core.model.job.MoleJobId
 import scala.collection.immutable.TreeMap
 
 class Job(override val executionId: String, override val moleJobs: Iterable[IMoleJob]) extends IJob {
-
-  //var _moleJobs = new TreeMap[MoleJobId, IMoleJob]
-
-  //override def moleJobs: Iterable[IMoleJob] = _moleJobs.values
   
   @transient lazy val moleJobsMap = new TreeMap[MoleJobId, IMoleJob]() ++ moleJobs.map{mj => mj.id -> mj}  
   
   override def apply(id: MoleJobId) = moleJobsMap(id)
-
-  //def +=(moleJob: IMoleJob) = synchronized { _moleJobs += ((moleJob.id, moleJob)) }
 
   override def allMoleJobsFinished: Boolean = {
     for(moleJob <- moleJobs; if(!moleJob.isFinished)) return false

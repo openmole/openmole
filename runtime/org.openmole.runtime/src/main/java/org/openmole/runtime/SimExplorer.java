@@ -66,10 +66,10 @@ public class SimExplorer implements IApplication {
                 return IApplication.EXIT_OK;
             }
 
-            Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
-
             //init jsaga
-            JSAGASessionService.session();
+            //JSAGASessionService.init();
+            
+            Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
 
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
             String executionMessageURI = cmdLine.getOptionValue("i");

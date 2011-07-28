@@ -74,7 +74,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         val executionMessageFile = Workspace.newFile("job", ".xml")
         try {
           SerializerService.serialize(executionMessage, executionMessageFile)
-          URIFile.copy(new URIFile(executionMessageFile), inputFile, token)
+          URIFile.copy(executionMessageFile, inputFile, token)
         } finally executionMessageFile.delete
             
         new SerializedJob(communicationStorage, communicationDir.path, inputFile.path, runtime)
@@ -147,10 +147,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
   }
   
   def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {
-    val jobURIFile = new URIFile(jobFile)
     val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 
-    URIFile.copy(jobURIFile, jobForRuntimeFile, token)
+    URIFile.copy(jobFile, jobForRuntimeFile, token)
     val jobHash = HashService.computeHash(jobFile).toString
 
     val plugins = new TreeSet[File]

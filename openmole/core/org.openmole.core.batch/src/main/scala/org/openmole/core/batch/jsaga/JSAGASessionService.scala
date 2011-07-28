@@ -23,6 +23,7 @@ import java.util.logging.Logger
 import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
+import org.ogf.saga.session.Session
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.workspace.Workspace
 import org.osgi.framework.BundleContext
@@ -31,12 +32,13 @@ import org.osgi.service.url.URLStreamHandlerService
 import org.openmole.core.batch.internal.Activator
 
 object JSAGASessionService {
+  
+  private var sessions = List[(String, Session)]()
   private val JSAGAConfigFile = "jsaga-universe.xml"
   private val JSAGATimeOutFile = "jsaga-timeout.properties"
-
-  init
   
-  private def init = {
+  init
+  @transient lazy val init = {
     System.setProperty("JSAGA_VAR", Workspace.newDir.getAbsolutePath)
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
@@ -50,22 +52,27 @@ object JSAGASessionService {
     val timeout = this.getClass.getClassLoader.getResource(JSAGATimeOutFile)
 
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
-    else  Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.");
-        
-//    initializeURLProtocol(Activator.context.getOrElse(throw new InternalProcessingError("Context hasn't been initialized")))
+    else  Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
+    
+    sessions = ("file://.*" -> SessionFactory.createSession(false)) :: sessions
+    Unit
+  }
+    
+  def addContext(expr: String, context: Context) = synchronized {
+    sessions.filter(_ == expr).headOption match {
+      case None => 
+        val session = SessionFactory.createSession(false)
+        session.addContext(context)
+        sessions = (expr -> session) :: sessions
+      case Some((pattern,session)) =>
+        session.addContext(context)
+    }
   }
   
- /* private def initializeURLProtocol(context: BundleContext) = {
-    val protocol = "httpg"; //$NON-NLS-1$
-    //    URLStreamHandlerService svc = new HttpgURLStreamHandlerService();
-    val properties = new Hashtable[String, Array[String]]
-    properties.put(URLConstants.URL_HANDLER_PROTOCOL, Array[String](protocol))
-    context.registerService(classOf[URLStreamHandlerService].getName,new HttpgURLStreamHandlerService,properties)
-  }*/
-  
-  lazy val session = SessionFactory.createSession(false)
-  
-  def addContext(context: Context) = session.addContext(context)
+  def session(url: String) = sessions.filter{case(p, s) => url.matches(p)}.headOption match {
+    case Some((p, s)) => s
+    case None => throw new InternalProcessingError("No session available for url " + url)
+  }
   
   def createContext: Context = ContextFactory.createContext
 }

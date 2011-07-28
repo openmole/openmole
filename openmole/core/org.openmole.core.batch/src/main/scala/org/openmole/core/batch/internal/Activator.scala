@@ -29,13 +29,14 @@ object Activator extends OSGiActivator {
 
 class Activator extends BundleActivator {
   
-  override def start(context: BundleContext) = {
+  override def start(context: BundleContext) {
     Activator.context = Some(context)
+    
     //Initialize the jsaga session service
-    JSAGASessionService
+    JSAGASessionService.init
   }
 
-  override def stop(context: BundleContext) = {
+  override def stop(context: BundleContext) {
     Activator.context = None
   }
  

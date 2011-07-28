@@ -53,13 +53,11 @@ object GliteAuthentication extends Logger {
 
   def getTimeString: String = Workspace.preference(GliteEnvironment.TimeLocation)
   
-  def getTime: Long = {
-    try {
-      return UDuration.toInt(getTimeString) * 1000L
-    } catch {
+  def getTime: Long =
+    try  UDuration.toInt(getTimeString) * 1000L
+    catch {
       case (ex: ParseException) => throw new UserBadDataError(ex)
     }
-  }
 
   def getDelegationTimeString: String = Workspace.preference(GliteEnvironment.DelegationTimeLocation)
   
@@ -96,9 +94,7 @@ object GliteAuthentication extends Logger {
           links.foreach{e => new File(dir, e._2).copy(e._1)}
         } catch {
           case (e: IOException) => logger.log(WARNING, "Unable to untar " + child.toString(), e)
-        } finally {
-          tis.close
-        }
+        } finally tis.close
       } catch {
         case (e: IOException) => throw new IOException(tarUrl, e)
       }
@@ -128,9 +124,8 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
       new File(X509_CERT_DIR)
     } else {
       val caDir = new File("/etc/grid-security/certificates/")
-      if (caDir.exists) {
-        caDir
-      } else {
+      if (caDir.exists) caDir
+      else {
         val caDir = Workspace.file("CACertificates")
 
         if (!caDir.exists || !new File(caDir, ".complete").exists) {
@@ -165,7 +160,6 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     val interval = (proxyDuration * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
 
     Updater.delay(new ProxyChecker(this, ctx), ExecutorType.OWN, interval)
-
   }
 
   def initContext(ctx: Context): Long = {
@@ -200,9 +194,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
         ctx.setAttribute(Context.USERCERT, getCertPath)
         //Logger.getLogger(classOf[GliteAuthentication].getName).info(getKeyPath)
         ctx.setAttribute(Context.USERKEY, getKeyPath)
-      } else {
-        throw new UserBadDataError("Unknown certificate type " + getCertType)
-      }
+      } else throw new UserBadDataError("Unknown certificate type " + getCertType)
 
       val keyPassword = {
         val pass = Workspace.preference(GliteEnvironment.PasswordLocation)
@@ -223,7 +215,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     //Logger.getLogger(classOf[GliteAuthentication].getName).info(voName)
     ctx.setAttribute(Context.USERVO, voName)
 
-    JSAGASessionService.addContext(ctx)
+    addContext(ctx)
     
     proxyDuration
 
@@ -240,7 +232,7 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
     ctx.setAttribute(VOMSContext.PROXYTYPE, "RFC820")
    
-    JSAGASessionService.addContext(ctx)
+    addContext(ctx)
   }
   
   
@@ -253,7 +245,12 @@ class GliteAuthentication(voName: String, vomsURL: String, myProxy: Option[MyPro
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
 
-    JSAGASessionService.addContext(ctx)
+    addContext(ctx)
   }
 
+  private def addContext(ctx: Context) {
+    JSAGASessionService.addContext("wms://.*", ctx)
+    JSAGASessionService.addContext("srm://.*", ctx)
+  }
+  
 }

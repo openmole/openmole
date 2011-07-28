@@ -178,13 +178,13 @@ class URIFile(val location: String) extends IURIFile with Id {
   }
   
   private def fetchEntry: NSEntry = trycatch {
-    val task = NSFactory.createNSEntry(TaskMode.ASYNC, JSAGASessionService.session, SAGAURL)
-    trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS) , task)
+    val task = NSFactory.createNSEntry(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL)
+    trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
     
 
   private def fetchEntryAsDirectory: NSDirectory = trycatch {
-    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, JSAGASessionService.session, SAGAURL)
+    val task = NSFactory.createNSDirectory(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL)
     trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
 
@@ -266,7 +266,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def openInputStream(token: AccessToken): InputStream = trycatch {
 
-    val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.session, SAGAURL);
+    val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL);
 
     trycatch(
       withFailureControl ({
@@ -278,7 +278,7 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
 
   override def openOutputStream(token: AccessToken): OutputStream = trycatch {
-    val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.session, SAGAURL, false)
+    val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL, false)
     trycatch(
       withFailureControl {
         val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)

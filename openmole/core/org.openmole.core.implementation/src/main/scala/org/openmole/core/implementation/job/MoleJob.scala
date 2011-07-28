@@ -55,7 +55,6 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
     if(changed) EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
   }
 
-
   override def perform =
     try {
       state = RUNNING
