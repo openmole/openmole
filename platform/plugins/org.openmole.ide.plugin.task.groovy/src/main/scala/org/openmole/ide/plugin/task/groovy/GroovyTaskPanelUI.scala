@@ -29,16 +29,18 @@ import scala.swing.TextArea
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends BoxPanel(Orientation.Vertical) with ITaskPanelUI {
   
-  contents += new Label("code: ")
+  contents += new Label("Code: ")
   
-val codeTextArea = new TextArea {
-    preferredSize = new Dimension(60,25)
-    border = Swing.EmptyBorder(5,5,5,5)
+  val codeTextArea = new TextArea {
+    minimumSize = new Dimension(50,50)
+    border = Swing.EmptyBorder(5,15,5,15)
+    text = pud.code
   }
   
   contents += new ScrollPane(codeTextArea)
   
-  def saveContent(name: String): ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text)
+  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text)
+  
 }
 
 //  val editorPane= new JEditorPane
