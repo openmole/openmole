@@ -25,12 +25,11 @@ import java.awt.Point
 import java.awt.Rectangle
 import org.netbeans.api.visual.widget.Widget
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants
-import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class SamplingWidget(scene: MoleScene,val capsule: ICapsuleUI ) extends Widget(scene) {
+class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(scene.graphScene) {
   val titleArea = new Rectangle
   titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
   

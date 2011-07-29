@@ -27,7 +27,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openmole.core.implementation.mole.MoleExecution;
-import org.openmole.ide.core.implementation.control.MoleScenesManager;
+import org.openmole.ide.core.implementation.control.TabManager;
 import org.openmole.ide.core.implementation.serializer.MoleMaker;
 
 /**
@@ -107,7 +107,7 @@ public final class ExecutionTopComponent extends TopComponent {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        (new MoleExecution(MoleMaker.buildMole(MoleScenesManager.currentScene().manager()))).start();
+        (new MoleExecution(MoleMaker.buildMole(TabManager.currentScene().manager()))).start();
     }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

@@ -28,10 +28,11 @@ import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.commons.Constants
 
-class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
+class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
   var encapsulated= false
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= { 
@@ -58,8 +59,8 @@ class DnDTaskIntoCapsuleProvider(molescene: MoleScene,val capsule: ICapsuleUI) e
       case dpu:IEnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
     }
     
-    molescene.repaint
-    molescene.revalidate
+    molescene.graphScene.repaint
+    molescene.graphScene.revalidate
   }
   
   private def capsuleDataUI = capsule.dataProxy.get.dataUI

@@ -15,14 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow
+package org.openmole.ide.core.model.commons
 
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-
-class ExecutionMoleScene extends MoleScene{
-  override def initCapsuleAdd(w: ICapsuleUI) = null
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = null
-  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String) = null
-  override def attachEdgeWidget(e: String) = null
-  override def attachNodeWidget(n: String) = null
-}
+object MoleSceneType extends Enumeration {
+    type MoleSceneType= Value
+    val BUILD,EXECUTION= Value
+  }

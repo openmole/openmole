@@ -23,22 +23,23 @@ import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.model.commons.Constants
+import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object GUISerializer {
     
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
   
-  xstream.alias("molescene", classOf[BuildMoleScene])
+  xstream.alias("molescene", classOf[IMoleScene])
 //  xstream.alias("entity", classOf[EntityUI])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
   
@@ -70,7 +71,7 @@ object GUISerializer {
         val readObject = in.readObject
         readObject match{
           case x: SerializedProxys=> x.loadProxys
-          case x: BuildMoleScene=> {MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene(x))}
+          case x: MoleScene=> {TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene(x))}
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }

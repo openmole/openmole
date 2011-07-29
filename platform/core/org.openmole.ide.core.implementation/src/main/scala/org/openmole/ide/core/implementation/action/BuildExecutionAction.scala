@@ -18,8 +18,9 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.control.TabManager
 import scala.swing.Action
 
 class BuildExecutionAction(text: String) extends Action(text){
-  override def apply = MoleScenesManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(MoleScenesManager.currentScene))
+  override def apply = TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene))
 }

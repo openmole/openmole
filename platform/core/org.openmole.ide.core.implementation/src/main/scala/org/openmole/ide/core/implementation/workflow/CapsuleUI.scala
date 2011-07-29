@@ -20,24 +20,23 @@ package org.openmole.ide.core.implementation.workflow
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.provider.DnDTaskIntoCapsuleProvider
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
+import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.collection.mutable.HashMap
 
-class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
-
-  var dataProxy: Option[ITaskDataProxyUI] = None
-  var nbInputSlots: Int = 0
-  var capsuleType = CAPSULE
-  var startingCapsule = false
+class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],var capsuleType:CapsuleType,var startingCapsule: Boolean) extends Widget(scene.graphScene) with ICapsuleUI{
+  def this(sc: IMoleScene) = this (sc,None,CAPSULE,false)
+    
   
-  createActions(scene.MOVE).addAction (ActionFactory.createMoveAction)
+  createActions(MOVE).addAction (ActionFactory.createMoveAction)
   
+  var nbInputSlots = 0
   val connectableWidget= new ConnectableWidget(scene,this)
   val dndTaskIntoCapsuleProvider = new DnDTaskIntoCapsuleProvider(scene, this)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
@@ -48,6 +47,13 @@ class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
     
   override def widget = this
+  
+  override def copy(sc: IMoleScene) = {
+    var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
+    val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule)
+    connectableWidget.islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
+    (c,slotMapping)
+  }
   
   override def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
@@ -60,7 +66,7 @@ class CapsuleUI(val scene: MoleScene) extends Widget(scene) with ICapsuleUI{
     if (on || startingCapsule) clearInputSlots(on)
     
     nbInputSlots+= 1
-    val im = new InputSlotWidget(scene,this,nbInputSlots,startingCapsule)
+    val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,startingCapsule)
     connectableWidget.addInputSlot(im)
     scene.validate
     scene.refresh

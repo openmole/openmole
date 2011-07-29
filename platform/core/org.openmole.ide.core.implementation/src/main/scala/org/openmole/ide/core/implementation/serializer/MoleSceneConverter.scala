@@ -26,16 +26,15 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.control.MoleScenesManager
-import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.implementation.workflow.InputSlotWidget
+import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.CapsuleType._
-import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.MoleExceptionManagement
+import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -47,7 +46,7 @@ class MoleSceneConverter extends Converter{
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
     var taskUIs = new HashSet[TaskDataUI]
     
-    val molescene= o.asInstanceOf[BuildMoleScene]
+    val molescene= o.asInstanceOf[IMoleScene]
     var slotcount = 0
     
     writer.addAttribute("name", molescene.manager.name.get)
@@ -83,7 +82,7 @@ class MoleSceneConverter extends Converter{
         writer.endNode
       })
     //Transitions
-    molescene.manager.getTransitions.foreach(trans=> {
+    molescene.manager.transitions.foreach(trans=> {
         writer.startNode("transition");
         writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
@@ -98,7 +97,7 @@ class MoleSceneConverter extends Converter{
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
     
-    val scene = new BuildMoleScene
+    val scene = new MoleScene(BUILD)
     scene.manager.name = Some(reader.getAttribute("name"))
         
     
@@ -107,8 +106,7 @@ class MoleSceneConverter extends Converter{
       reader.moveDown
       val n0 = reader.getNodeName
       n0 match {
-        case "capsule"=> {
-            val p= new Point
+        case "capsule"=> {val p= new Point
             p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
             val caps = MoleScenesManager.createCapsule(scene, p)
             val start = reader.getAttribute("start").toBoolean
@@ -125,12 +123,10 @@ class MoleSceneConverter extends Converter{
               reader.moveUp
             }     
           }
-        case "transition"=> {
-            val source = oslots(reader.getAttribute("source"))
-            val target = islots(reader.getAttribute("target"))             
-            if (scene.manager.registerTransition(source, target, TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition"))))
-              scene.createEdge(scene.manager.capsuleID(source), scene.manager.capsuleID(target.capsule))           
-          }
+        case "transition"=> {MoleScenesManager.createEdge(scene, 
+                                                          oslots(reader.getAttribute("source")), 
+                                                          islots(reader.getAttribute("target")), 
+                                                          TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))}
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        
       }
       reader.moveUp
@@ -138,5 +134,5 @@ class MoleSceneConverter extends Converter{
     scene
   }
   
-  override def canConvert(t: Class[_]) = t.equals(classOf[BuildMoleScene])
+  override def canConvert(t: Class[_]) = t.equals(classOf[MoleScene])
 }

@@ -21,6 +21,9 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 
 object Constants{
+  val MOVE= "move"
+  val CONNECT = "connect"
+  val RECONNECT = "connect"
   
   val TASK_HEADER_BACKGROUND_COLOR= new Color(68, 120, 33)
   val TASK_SELECTION_COLOR= new Color(255, 100, 0)

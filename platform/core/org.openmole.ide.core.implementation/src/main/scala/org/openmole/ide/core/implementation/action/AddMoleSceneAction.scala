@@ -18,8 +18,9 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.control.TabManager
 import scala.swing.Action
 
 class AddMoleSceneAction(text: String) extends Action(text){
-  override def apply = MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene)
+  override def apply = TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene)
 }

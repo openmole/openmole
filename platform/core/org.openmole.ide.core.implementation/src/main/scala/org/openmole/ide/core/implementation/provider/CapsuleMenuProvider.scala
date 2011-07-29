@@ -21,15 +21,11 @@ import java.awt.Point
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
-import scala.collection.mutable.HashSet
-import org.openmole.ide.core.model.commons.IOType
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.workflow.CapsuleUI
-import org.openmole.ide.core.model.commons.Constants
 
-class CapsuleMenuProvider(scene: MoleScene, capsule: CapsuleUI) extends GenericMenuProvider {
+class CapsuleMenuProvider(scene: IMoleScene, capsule: CapsuleUI) extends GenericMenuProvider {
   var encapsulated= false
   var taskMenu= new JMenu
   

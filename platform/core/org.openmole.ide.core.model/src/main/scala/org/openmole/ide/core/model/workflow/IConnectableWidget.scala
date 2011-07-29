@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.model.workflow
 
+import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 
 trait IConnectableWidget {

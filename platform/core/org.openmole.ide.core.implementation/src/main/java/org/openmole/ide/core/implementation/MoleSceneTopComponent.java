@@ -29,6 +29,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
+import org.openmole.ide.core.implementation.control.TabManager;
 import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.action.AddMoleSceneAction;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
@@ -68,7 +69,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        MoleScenesManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
+        TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
 
         createPalette();
         associateLookup(new AbstractLookup(ic));
@@ -96,7 +97,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
-        add(MoleScenesManager.tabbedPane().peer(), BorderLayout.CENTER);
+        add(TabManager.tabbedPane().peer(), BorderLayout.CENTER);
 
     }
 

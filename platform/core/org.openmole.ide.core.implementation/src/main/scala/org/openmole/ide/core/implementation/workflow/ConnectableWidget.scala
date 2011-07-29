@@ -28,20 +28,21 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.workflow.IConnectableWidget
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashSet
 
-class ConnectableWidget(scene: MoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
+class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
 
   var islots= HashSet.empty[IInputSlotWidget]
-  val oslot= new OutputSlotWidget(scene,capsule)
+  val oslot= new OutputSlotWidget(scene.graphScene,capsule)
   var samplingWidget: Option[SamplingWidget] = None
   
   addChild(oslot)
   
-  createActions(scene.MOVE).addAction(ActionFactory.createMoveAction)
+  createActions(MOVE).addAction(ActionFactory.createMoveAction)
 
   implicit def bool2int(b:Boolean) = if (b) 1 else 0
-
+  
   override def x = convertLocalToScene(getLocation).getX
   
   override def y = convertLocalToScene(getLocation).getY

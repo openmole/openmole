@@ -20,13 +20,13 @@ package org.openmole.ide.core.implementation.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.implementation.workflow.CapsuleUI
-import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class RemoveCapsuleAction(scene: MoleScene,capsule: CapsuleUI) extends ActionListener{
+class RemoveCapsuleAction(scene: IMoleScene,capsule: CapsuleUI) extends ActionListener{
 
   override def actionPerformed(ae: ActionEvent)= {
     val id = scene.manager.capsuleID(capsule)
     scene.manager.removeCapsuleUI(id)
-    scene.removeNodeWithEdges(id)
+    scene.graphScene.removeNodeWithEdges(id)
   }
 }

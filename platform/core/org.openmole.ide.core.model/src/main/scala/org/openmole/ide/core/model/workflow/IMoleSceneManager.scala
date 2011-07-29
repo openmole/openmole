@@ -18,6 +18,7 @@
 package org.openmole.ide.core.model.workflow
 
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
+import org.openmole.ide.core.model.commons.TransitionType
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
@@ -26,9 +27,33 @@ trait IMoleSceneManager {
   
   def name_=(n:Option[String])
   
+  def startingCapsule_=(n:Option[ICapsuleUI])
+  
+  def getNodeID: String
+  
+  def getEdgeID: String
+  
+  def capsuleID(cv: ICapsuleUI): String
+  
   def capsules:DualHashBidiMap[String, ICapsuleUI]
   
   def startingCapsule: Option[ICapsuleUI]
   
   def capsuleConnections:  HashMap[ICapsuleUI, HashSet[ITransitionUI]]
-}
+  
+  def removeCapsuleUI(nodeID: String):Unit
+  
+  def registerCapsuleUI(cv: ICapsuleUI):Unit
+  
+  def setStartingCapsule(capsule: ICapsuleUI): Iterable[String]
+  
+  def transitions: Iterable[ITransitionUI] 
+  
+  def transition(edgeID: String): ITransitionUI
+  
+  def removeTransition(edgeID: String)
+  
+  def registerTransition(s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
+  
+  def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
+ }

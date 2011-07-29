@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Image
 import java.awt.Toolkit
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
 import java.awt.image.FilteredImageSource
 import java.awt.image.ReplicateScaleFilter
 import org.openide.util.ImageUtilities
@@ -37,4 +39,12 @@ object Images {
   
   def thumb(path: String, size: Int): Image =  thumbPaths.getOrElseUpdate(path, Toolkit.getDefaultToolkit.createImage(new FilteredImageSource(ImageUtilities.loadImage(path).getSource,new ReplicateScaleFilter(size,size))))
   def thumb(path: String): Image = thumb(path, THUMB_SIZE)
+  
+  
+  def getImageFromTransferable(transferable: Transferable): Image= {
+    transferable.getTransferData(DataFlavor.imageFlavor) match {
+      case o: Image  => o
+      case _ => ImageUtilities.loadImage("ressources/shape1.png")}
+  }
+  
 }

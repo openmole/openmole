@@ -22,18 +22,15 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.model.data.IDataUI
-import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.netbeans.api.visual.action.ConnectorState
 
 
 
-class DnDNewTaskProvider(molescene: BuildMoleScene) extends DnDProvider(molescene) {
-  
+class DnDNewTaskProvider(molescene: IMoleScene) extends DnDProvider(molescene) {
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
     transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI].dataUI.entityType match {
@@ -47,7 +44,7 @@ class DnDNewTaskProvider(molescene: BuildMoleScene) extends DnDProvider(molescen
     capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
     capsule.addInputSlot(false)
     
-    molescene.repaint
-    molescene.revalidate
+    molescene.graphScene.repaint
+    molescene.graphScene.revalidate
   }
 }

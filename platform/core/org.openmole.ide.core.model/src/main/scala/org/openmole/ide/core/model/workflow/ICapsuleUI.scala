@@ -7,8 +7,8 @@ package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.commons.CapsuleType
-import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
+import scala.collection.mutable.HashMap
 
 trait ICapsuleUI {
   def capsuleType: CapsuleType.Value
@@ -31,4 +31,6 @@ trait ICapsuleUI {
   def setDataProxy(dpu: ITaskDataProxyUI)
   
   def widget: Widget
+  
+  def copy(sc: IMoleScene): (ICapsuleUI,HashMap[IInputSlotWidget,IInputSlotWidget])
 }

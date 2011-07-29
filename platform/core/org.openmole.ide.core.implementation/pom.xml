@@ -140,5 +140,10 @@
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
         </dependency> -->
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>uk.com.robustit.cloning</artifactId>
+            <version>1.7</version>
+        </dependency>
     </dependencies>
 </project>

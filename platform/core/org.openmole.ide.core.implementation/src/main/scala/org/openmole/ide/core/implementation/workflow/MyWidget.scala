@@ -26,8 +26,9 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import java.awt.BasicStroke
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class MyWidget(scene: MoleScene,capsule: ICapsuleUI) extends Widget(scene) {
+class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graphScene) {
 
   var taskWidth= TASK_CONTAINER_WIDTH
   var taskHeight= TASK_CONTAINER_HEIGHT
