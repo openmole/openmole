@@ -65,6 +65,8 @@ public final class MoleSceneTopComponent extends TopComponent {
     private static MoleSceneTopComponent instance;
     private MenuToggleButton2 moleButton;
     private MenuToggleButton2 executionButton;
+    private JToggleButton detailedViewButton;
+    private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
 
     public MoleSceneTopComponent() {
         initComponents();
@@ -74,7 +76,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         PaletteSupport.createPalette();
         associateLookup(new AbstractLookup(PaletteSupport.ic()));
 
-        JToggleButton detailedViewButton = new JToggleButton("Detailed view");
+        detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
         moleButton = new MenuToggleButton2("Mole");
@@ -95,12 +97,13 @@ public final class MoleSceneTopComponent extends TopComponent {
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
         add(TabManager.tabbedPane().peer(), BorderLayout.CENTER);
-        ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent")).close();
+        etc.close();
+        repaint();
     }
 
     public void updateMode(Boolean b) {
         executionButton.enabled_$eq(b);
-        ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
+        detailedViewButton.setEnabled(b);
         if (b) etc.close();
         else etc.open();
         repaint();
