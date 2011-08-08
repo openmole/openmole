@@ -32,8 +32,8 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>ccl.northwestern.edu.netlogo</artifactId>
-            <version>${lib.ccl.northwestern.edu.netlogo.version}</version>
+            <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
+            <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
