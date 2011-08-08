@@ -61,6 +61,9 @@ object MoleScenesManager{
     moleScenes.remove(ms)
     TabManager.removeSceneTab(ms)
   }
+  
+  def removeAllExecutionMoleScene(bms: IMoleScene) = moleScenes(bms).foreach(removeMoleScene(_))
+    
     
   def addBuildMoleScene(ms: IMoleScene): IMoleScene = {
     moleScenes.getOrElseUpdate(ms, new ListBuffer[IMoleScene])

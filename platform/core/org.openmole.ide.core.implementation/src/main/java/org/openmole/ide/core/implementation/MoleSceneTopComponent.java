@@ -39,6 +39,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.nodes.AbstractNode;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
+import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.palette.CategoryBuilder;
 import org.openmole.ide.core.implementation.display.MenuToggleButton2;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
@@ -84,7 +85,7 @@ public final class MoleSceneTopComponent extends TopComponent {
 
         executionButton = new MenuToggleButton2("Execution");
         executionButton.addItem(new MenuItem(new BuildExecutionAction("Build")));
-        executionButton.addItem(new MenuItem(new BuildExecutionAction("Clean and Build")));
+        executionButton.addItem(new MenuItem(new CleanAndBuildExecutionAction("Clean and Build")));
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
