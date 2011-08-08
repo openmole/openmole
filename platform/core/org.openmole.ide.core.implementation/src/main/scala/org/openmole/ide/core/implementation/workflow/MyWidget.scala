@@ -22,6 +22,7 @@ import java.awt.Rectangle
 import java.awt.Font
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
+import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -75,6 +76,7 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
     }
     else drawBox(graphics,new Color(204,204,204,128),new Color(204,204,204))
 
+    
     /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
      taskImageOffset,
      TASK_IMAGE_HEIGHT_OFFSET,
@@ -85,9 +87,9 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
   }
   
   def drawBox(graphics: Graphics2D,c1: Color, c2: Color) = {
-    graphics.setColor(c1)
+    graphics.setColor(if(scene.moleSceneType == BUILD) c1 else new Color(215,238,244,64))
     graphics.fill(bodyArea)
-    graphics.setColor(c2)
+    graphics.setColor(if(scene.moleSceneType == BUILD) c2 else new Color(44,137,160,64))
     graphics.draw(new BasicStroke(1.3f, 1, 1).createStrokedShape(bodyArea))
   }
   

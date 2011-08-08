@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.control.TabManager;
 import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.dataproxy.Proxys;
+import org.openmole.ide.core.implementation.palette.PaletteSupport;
 
 @ActionID(category = "File",
 id = "org.openmole.ide.core.implementation.ResetAll")
@@ -42,7 +43,7 @@ public final class ResetAll implements ActionListener {
         MoleScenesManager.removeMoleScenes();
         Proxys.clearAll();
         TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
-        ((MoleSceneTopComponent) WindowManager.getDefault().findTopComponent("MoleSceneTopComponent")).refreshPalette();
+        PaletteSupport.refreshPalette();
         Displays.propertyPanel().cleanViewport();
     }
 }

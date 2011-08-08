@@ -32,6 +32,7 @@ import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.data._
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object GUISerializer {
@@ -78,7 +79,7 @@ object GUISerializer {
     } catch {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
     } finally {
-      WindowManager.getDefault().findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].refreshPalette
+      PaletteSupport.refreshPalette
       in.close
     }
   }

@@ -36,7 +36,7 @@
         <netbeans.version>RELEASE70</netbeans.version>
         <brandingToken>openmole_gui</brandingToken>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <lib.org.scala-lang.scala.version>2.9.0</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.9.1.RC1</lib.org.scala-lang.scala.version>
         <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>

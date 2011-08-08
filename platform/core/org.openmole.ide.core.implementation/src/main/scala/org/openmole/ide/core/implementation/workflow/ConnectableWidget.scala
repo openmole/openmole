@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.workflow.IConnectableWidget
+import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashSet
@@ -34,7 +35,7 @@ import scala.collection.mutable.HashSet
 class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
 
   var islots= HashSet.empty[IInputSlotWidget]
-  val oslot= new OutputSlotWidget(scene.graphScene,capsule)
+  val oslot= new OutputSlotWidget(scene.graphScene,capsule,scene.moleSceneType == EXECUTION)
   var samplingWidget: Option[SamplingWidget] = None
   
   addChild(oslot)

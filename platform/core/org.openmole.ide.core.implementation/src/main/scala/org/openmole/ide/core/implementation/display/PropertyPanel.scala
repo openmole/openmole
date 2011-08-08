@@ -29,6 +29,7 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.commons.Constants._
 
 class PropertyPanel extends BoxPanel(Orientation.Vertical){
@@ -103,7 +104,7 @@ class PropertyPanel extends BoxPanel(Orientation.Vertical){
   
   def save = {
     Displays.saveContent(oldName, nameTextField.text)
-    WindowManager.getDefault().findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].refreshPalette
+    PaletteSupport.refreshPalette
   }
   
   def cancel = displayCurrentEntity

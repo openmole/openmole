@@ -19,22 +19,32 @@ package org.openmole.ide.core.implementation.control
 
 import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
+import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import scala.collection.JavaConversions._
 import scala.swing.ScrollPane
 import scala.swing.TabbedPane
+import scala.swing.event.SelectionChanged
 
 object TabManager {
-  var tabbedPane= new TabbedPane
   var sceneTabs = new DualHashBidiMap[IMoleScene,TabbedPane.Page]
   
+  var tabbedPane= new TabbedPane {
+    listenTo(selection)
+    reactions += {case SelectionChanged(tabbedPane) =>  
+        if (selection.index != -1) PaletteSupport.refreshPalette(sceneTabs.getKey(selection.page).moleSceneType)}
+  }
+    
   def currentScene: IMoleScene = {
-    sceneTabs.getKey(tabbedPane.selection.page) match {
-      case m: MoleScene => m
-      case _=> throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
-    }
+    if (tabbedPane.selection.index != -1) {
+      sceneTabs.getKey(tabbedPane.selection.page) match {
+        case m: MoleScene => m
+        case _=> throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
+      }
+    } else throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
   }
   
   def removeSceneTab(ms: IMoleScene) = tabbedPane.pages-=sceneTabs.get(ms)
@@ -42,17 +52,19 @@ object TabManager {
   def removeAllSceneTabs = tabbedPane.peer.removeAll
   
   def addTab(scene: IMoleScene,n: String,sp: ScrollPane): IMoleScene = {
+    println("ADD SAB :: " + n)
     val name= scene.manager.name.getOrElse(n)
     val p = new TabbedPane.Page(name,sp)
-    tabbedPane.pages += p
     sceneTabs.put(scene,p)
+    tabbedPane.pages += p
+    
     scene.manager.name= Some(name)
     scene
   }
   
-  def displayBuildMoleScene(displayed: IMoleScene): Unit = {
- //   if (!sceneTabs.containsKey(displayed)) addBuildMoleScene
+  def displayBuildMoleScene(displayed: IMoleScene) = {
     tabbedPane.selection.page= sceneTabs.get(displayed)
+    tabbedPane.selection.page
   }
 
   def displayExecutionMoleScene(displayed: IMoleScene) = tabbedPane.selection.page= sceneTabs.get(displayed)

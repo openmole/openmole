@@ -45,11 +45,11 @@
             <artifactId>org.openmole.ide.plugin.task.groovy</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
-        <dependency>
+        <!-- <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> 
+        </dependency> -->
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
@@ -60,30 +60,31 @@
             <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
+        <!--
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.complete</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> 
+        </dependency>--> 
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.prototype.base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--<dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> 
+        </dependency> -->
         <dependency>
             <groupId>org.apidesign</groupId>
             <artifactId>netbinox</artifactId>
             <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.plugin.prototype.base</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

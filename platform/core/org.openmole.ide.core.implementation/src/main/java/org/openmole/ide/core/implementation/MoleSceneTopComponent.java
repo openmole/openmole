@@ -42,6 +42,7 @@ import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.palette.CategoryBuilder;
 import org.openmole.ide.core.implementation.display.MenuToggleButton2;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
+import org.openmole.ide.core.model.commons.MoleSceneType;
 import scala.swing.Menu;
 import scala.swing.MenuItem;
 
@@ -61,35 +62,30 @@ preferredID = "MoleSceneTopComponent")
 public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
-    private PaletteController palette;
-    private final InstanceContent ic = new InstanceContent();
+    private MenuToggleButton2 moleButton;
+    private MenuToggleButton2 executionButton;
 
     public MoleSceneTopComponent() {
         initComponents();
         setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
-
-        createPalette();
-        associateLookup(new AbstractLookup(ic));
-        ic.add(palette);
-
-        //  palette.addPropertyChangeListener(this);
+        PaletteSupport.createPalette();
+        associateLookup(new AbstractLookup(PaletteSupport.ic()));
 
         JToggleButton detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        MenuToggleButton2 moleButton = new MenuToggleButton2("Mole");
+        moleButton = new MenuToggleButton2("Mole");
         moleButton.addItem(new MenuItem(new AddMoleSceneAction("Add")));
         moleButton.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
         moleButton.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
 
-        
-        MenuToggleButton2 executionButton = new MenuToggleButton2("Execution");
+
+        executionButton = new MenuToggleButton2("Execution");
         executionButton.addItem(new MenuItem(new BuildExecutionAction("Build")));
         executionButton.addItem(new MenuItem(new BuildExecutionAction("Clean and Build")));
-        
+
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(moleButton.peer());
@@ -98,20 +94,15 @@ public final class MoleSceneTopComponent extends TopComponent {
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
         add(TabManager.tabbedPane().peer(), BorderLayout.CENTER);
-
+        ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent")).close();
     }
 
-    public void refreshPalette() {
-        ic.remove(palette);
-        createPalette();
-        ic.add(palette);
+    public void updateMode(Boolean b) {
+        executionButton.enabled_$eq(b);
+        ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
+        if (b) etc.close();
+        else etc.open();
         repaint();
-    }
-
-    public void createPalette() {
-        AbstractNode paletteRoot = new AbstractNode(new CategoryBuilder());
-        paletteRoot.setName("Entities");
-        palette = PaletteSupport.createPalette(paletteRoot);
     }
 
     /** This method is called from within the constructor to

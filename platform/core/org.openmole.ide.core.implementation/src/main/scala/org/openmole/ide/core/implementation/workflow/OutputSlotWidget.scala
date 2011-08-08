@@ -21,8 +21,10 @@ import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.core.model.commons.Constants
 
-class OutputSlotWidget(scene: Scene,val capsule: CapsuleUI)  extends SlotWidget(scene){
-  setImage(Images.IMAGE_OUTPUT_SLOT)
+class OutputSlotWidget(scene: Scene,val capsule: CapsuleUI,val isExecutableMode: Boolean)   extends SlotWidget(scene){
+  if(isExecutableMode) setImage(Images.IMAGE_OUTPUT_EXE_SLOT)
+  else setImage(Images.IMAGE_OUTPUT_SLOT)
+  
   setDetailedView(Constants.TASK_CONTAINER_WIDTH)
   
   def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT))

@@ -34,7 +34,11 @@ import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.display.Displays
+import org.openide.util.lookup.InstanceContent
+import org.openide.windows.WindowManager
+import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.model.commons.MoleSceneType._
 
 object PaletteSupport {
   val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], TASK)
@@ -43,18 +47,29 @@ object PaletteSupport {
   val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
 
   var palette: Option[PaletteController] = None
-  private var paletteRoot: Option[AbstractNode] = None
+  val ic = new InstanceContent
+  // private var paletteRoot: Option[AbstractNode] = None
   
-  def createPalette(paletteR: AbstractNode) = {
-    paletteRoot = Some(paletteR)
-    palette = Some(PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler))
-    palette.get.addPropertyChangeListener( new MyAddPropertyChangeListener(palette.get))
-    palette.get
+  def createPalette(mst: MoleSceneType) = {
+    val paletteRoot = new AbstractNode(new CategoryBuilder(mst))
+    paletteRoot.setName("Entities")
+    palette = Some(PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler))
+    palette.get.addPropertyChangeListener( new MyAddPropertyChangeListener(palette.get)) 
+    ic.add(palette);
   }
   
+  def createPalette: Unit = createPalette(BUILD)
+  
+  def refreshPalette(mst: MoleSceneType) = {
+    ic.remove(palette);
+    createPalette(mst);
+    ic.add(palette);
+    WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].updateMode( if (mst.equals(BUILD)) true else false)
+  }
+  
+  def refreshPalette: Unit = refreshPalette(BUILD)
 }
   
-
 class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
   var currentSelItem = Lookup.EMPTY
   
@@ -97,101 +112,3 @@ class MyDnDHandler extends DragAndDropHandler {
       })
   }
 }
-
-//
-//import java.awt.Image;
-//import java.awt.datatransfer.DataFlavor;
-//import java.awt.datatransfer.UnsupportedFlavorException;
-//import java.beans.BeanInfo;
-//import java.io.IOException;
-//import javax.swing.Action;
-//import org.netbeans.spi.palette.DragAndDropHandler;
-//import org.netbeans.spi.palette.PaletteActions;
-//import org.netbeans.spi.palette.PaletteController;
-//import org.netbeans.spi.palette.PaletteFactory;
-//import org.netbeans.spi.palette.PaletteFilter;
-//import org.openide.nodes.AbstractNode;
-//import org.openide.nodes.Node;
-//import org.openide.util.Lookup;
-//import org.openide.util.datatransfer.ExTransferable;
-//import org.openmole.ide.core.implementation.workflow.Preferences;
-//
-//
-///**
-// *
-// * @author Mathieu Leclaire <mathieu.leclaire@openmole.fr>
-// */
-//public class PaletteSupport {
-//    private static PaletteController controller;
-//    
-//    public static PaletteController createPalette(){
-//        AbstractNode paletteRoot = new AbstractNode(new CategoryBuilder());
-//        paletteRoot.setName("Palette Root");
-//        Preferences.getInstance().clearProperties();
-//        Preferences.getInstance().clearModels();
-//        controller = PaletteFactory.createPalette(paletteRoot, new MyActions(), new MyPaletteFilter(), new MyDnDHandler());
-//        return controller;
-//    }
-//
-//    private static class MyActions extends PaletteActions {
-//
-//        @Override
-//        public Action[] getImportActions() {
-//            return null;
-//        }
-//
-//        @Override
-//        public Action[] getCustomPaletteActions() {
-//            return null;
-//        }
-//
-//        @Override
-//        public Action[] getCustomCategoryActions(Lookup lookup) {
-//            return null;
-//        }
-//
-//        @Override
-//        public Action[] getCustomItemActions(Lookup lookup) {
-//            return null;
-//        }
-//
-//        @Override
-//        public Action getPreferredAction(Lookup lookup) {
-//            return null;
-//        }
-//    }
-//
-//    public static class MyPaletteFilter extends PaletteFilter {
-//
-//        public static void refresh(){
-//            controller.refresh();
-//        }
-//        
-//        @Override
-//        public boolean isValidCategory(Lookup lkp) {
-//            return true;
-//        }
-//
-//        @Override
-//        public boolean isValidItem(Lookup lkp) {
-//            return true;
-//        }
-//        
-//    }
-//    
-//    private static class MyDnDHandler extends DragAndDropHandler {
-//
-//        @Override
-//        public void customize(ExTransferable exTransferable, Lookup lookup) {
-//            Node node = lookup.lookup(Node.class);
-//            final Image image = (Image) node.getIcon(BeanInfo.ICON_COLOR_16x16);
-//            exTransferable.put(new ExTransferable.Single(DataFlavor.imageFlavor) {
-//
-//                @Override
-//                protected Object getData() throws IOException, UnsupportedFlavorException {
-//                    return image;
-//                }
-//            });
-//        }
-//    }
-//}

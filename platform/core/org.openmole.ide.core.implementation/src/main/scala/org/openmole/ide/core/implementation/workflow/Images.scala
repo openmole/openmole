@@ -29,8 +29,11 @@ import scala.collection.mutable.HashMap
 object Images {
   
   val IMAGE_START_SLOT= ImageUtilities.loadImage("img/startSlot.png")
+  val IMAGE_START_EXE_SLOT= ImageUtilities.loadImage("img/startSlotExe.png")
   val IMAGE_INPUT_SLOT= ImageUtilities.loadImage("img/inputSlot.png")
+  val IMAGE_INPUT_EXE_SLOT= ImageUtilities.loadImage("img/inputSlotExe.png")
   val IMAGE_OUTPUT_SLOT= ImageUtilities.loadImage("img/outputSlot.png")
+  val IMAGE_OUTPUT_EXE_SLOT= ImageUtilities.loadImage("img/outputSlotExe.png")
   val AGGREGATION_TRANSITON = ImageUtilities.loadImage("img/aggregation.png")
   val EXPLORATION_TRANSITON = ImageUtilities.loadImage("img/exploration.png")
   val THUMB_SIZE = 24

@@ -110,13 +110,17 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleUI]), currentSlotIndex))
     
-  override def initCapsuleAdd(w: ICapsuleUI)= obUI= Some(w.asInstanceOf[Widget])
+  override def initCapsuleAdd(w: ICapsuleUI)= {
+    obUI= Some(w.asInstanceOf[Widget])
+    if (moleSceneType == BUILD) {
+      obUI.get.createActions(CONNECT).addAction(connectAction)
+      obUI.get.createActions(CONNECT).addAction(moveAction)
+      // obUI.get.getActions.addAction(createObjectHoverAction)
+    }
+  }
   
   override def attachNodeWidget(n: String)= {
     capsuleLayer.addChild(obUI.get)
-    obUI.get.createActions(CONNECT).addAction(connectAction)
-    obUI.get.createActions(CONNECT).addAction(moveAction)
-    obUI.get.getActions.addAction(createObjectHoverAction)
     obUI.get
   } 
 
@@ -124,11 +128,12 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     val connectionWidget = new LabeledConnectionWidget(graphScene,manager.transition(e))
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
-    connectionWidget.getActions.addAction(createObjectHoverAction)
-    connectionWidget.getActions.addAction(createSelectAction)
-    connectionWidget.getActions.addAction(reconnectAction)
-    // connectionWidget.getActions.addAction(new TransitionActions(manager.getTransition(e),connectionWidget))
-    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
+    if (moleSceneType == BUILD) {
+      connectionWidget.getActions.addAction(createObjectHoverAction)
+      connectionWidget.getActions.addAction(createSelectAction)
+      connectionWidget.getActions.addAction(reconnectAction)
+      connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
+    }
     connectionWidget
   }
   

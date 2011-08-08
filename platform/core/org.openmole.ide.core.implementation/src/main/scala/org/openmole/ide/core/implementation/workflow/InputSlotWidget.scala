@@ -21,9 +21,13 @@ import java.awt.Point
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.core.model.workflow._
 
-class InputSlotWidget(scene: Scene,val capsule: ICapsuleUI, val index: Int,val startingSlot: Boolean) extends SlotWidget(scene) with IInputSlotWidget{
-  if (startingSlot) setImage(Images.IMAGE_START_SLOT)
-  else setImage(Images.IMAGE_INPUT_SLOT)     
+class InputSlotWidget(scene: Scene,val capsule: ICapsuleUI, val index: Int,val startingSlot: Boolean, val isExecutableMode: Boolean) extends SlotWidget(scene) with IInputSlotWidget{
+  if (startingSlot) {
+    if(isExecutableMode) setImage(Images.IMAGE_START_EXE_SLOT)
+    else setImage(Images.IMAGE_START_SLOT)}
+  else {
+    if(isExecutableMode) setImage(Images.IMAGE_INPUT_EXE_SLOT) 
+    else setImage(Images.IMAGE_INPUT_SLOT)}
   setPreferredLocation(new Point(-12, 14 + index * 20))
   
   override def widget = this

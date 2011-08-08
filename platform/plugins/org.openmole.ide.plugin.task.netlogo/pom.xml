@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.plugin.task.netlogo</artifactId>
+            <artifactId>org.openmole.plugin.task.netlogo4</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
         <dependency>

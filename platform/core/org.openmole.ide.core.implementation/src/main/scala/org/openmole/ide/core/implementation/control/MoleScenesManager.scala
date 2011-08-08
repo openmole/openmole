@@ -46,7 +46,7 @@ object MoleScenesManager{
   }
   
   def createCapsule(scene: IMoleScene, locationPoint: Point): ICapsuleUI = createCapsule(new CapsuleUI(scene),scene, locationPoint)
-  
+    
   def createEdge(scene: IMoleScene,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]) = {
     if (scene.manager.registerTransition(s, t, transitionType,cond))
       scene.createEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))  
@@ -80,14 +80,11 @@ object MoleScenesManager{
   def removeCurrentSceneAndChilds= {
     val ms = TabManager.currentScene
     ms.moleSceneType match {
-      //case BUILD => {moleScenes(ms).foreach(ems=>tabbedPane.pages-= TabManager.tab(ems))
       case BUILD => {moleScenes(ms).foreach(TabManager.removeSceneTab(_))
                      removeMoleScene(ms)}
       case EXECUTION=> { TabManager.removeSceneTab(ms)
         }
     }
   }
-  
-  
 
 }
