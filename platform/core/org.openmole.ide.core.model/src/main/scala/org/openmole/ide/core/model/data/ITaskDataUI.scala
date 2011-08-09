@@ -55,5 +55,9 @@ trait ITaskDataUI extends IDataUI{
   
   def environment_=(s: Option[IEnvironmentDataProxyUI])
   
+  def hook: Option[IHookDataProxyUI]
+  
+  def hook_=(s: Option[IHookDataProxyUI])
+  
   def buildPanelUI: ITaskPanelUI
 }
