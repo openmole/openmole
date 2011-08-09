@@ -34,7 +34,6 @@ import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.display.Displays
-import org.openide.util.lookup.InstanceContent
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.dataproxy._
@@ -46,28 +45,25 @@ object PaletteSupport {
   val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], SAMPLING)
   val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
 
-  var palette: Option[PaletteController] = None
-  val ic = new InstanceContent
-  // private var paletteRoot: Option[AbstractNode] = None
+  var currentType = BUILD
   
-  def createPalette(mst: MoleSceneType) = {
+  def createPalette(mst: MoleSceneType): PaletteController = {
+    currentType = mst
     val paletteRoot = new AbstractNode(new CategoryBuilder(mst))
     paletteRoot.setName("Entities")
-    palette = Some(PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler))
-    palette.get.addPropertyChangeListener( new MyAddPropertyChangeListener(palette.get)) 
-    ic.add(palette);
+    var palette = PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
+    palette.addPropertyChangeListener( new MyAddPropertyChangeListener(palette)) 
+    palette
   }
   
-  def createPalette: Unit = createPalette(BUILD)
+  def createPalette: PaletteController = createPalette(currentType)
   
   def refreshPalette(mst: MoleSceneType) = {
-    ic.remove(palette);
-    createPalette(mst);
-    ic.add(palette);
-    WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].updateMode( if (mst.equals(BUILD)) true else false)
+    currentType = mst
+    WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].refresh(if(mst.equals(BUILD)) true else false)
   }
-  
-  def refreshPalette: Unit = refreshPalette(BUILD)
+    
+  def refreshPalette: Unit = refreshPalette(currentType)
 }
   
 class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
@@ -75,14 +71,11 @@ class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyCh
   
   override def  propertyChange(pce: PropertyChangeEvent)= {
         
-    // PropertyPanel.getDefault.save
     val selItem = palette.getSelectedItem
     val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
       Displays.currentType = selCategoryLookup.getName
       Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
-      // PropertyPanel.getDefault.displayCurrentEntity(Proxys.getDataProxyUI(selCategoryLookup.getName,selItem.lookup(classOf[Node]).getName)) 
-    
       Displays.propertyPanel.displayCurrentEntity 
       currentSelItem = selItem
     }

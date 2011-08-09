@@ -66,6 +66,8 @@ public final class MoleSceneTopComponent extends TopComponent {
     private MenuToggleButton2 moleButton;
     private MenuToggleButton2 executionButton;
     private JToggleButton detailedViewButton;
+    private PaletteController palette;
+    private final InstanceContent ic = new InstanceContent();
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
 
     public MoleSceneTopComponent() {
@@ -73,8 +75,8 @@ public final class MoleSceneTopComponent extends TopComponent {
         setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        PaletteSupport.createPalette();
-        associateLookup(new AbstractLookup(PaletteSupport.ic()));
+        associateLookup(new AbstractLookup(ic));
+        addPalette();
 
         detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
@@ -101,11 +103,26 @@ public final class MoleSceneTopComponent extends TopComponent {
         repaint();
     }
 
+    public void addPalette() {
+        palette = PaletteSupport.createPalette();
+        ic.add(palette);
+    }
+
+    public void refresh(Boolean b) {
+        ic.remove(palette);
+        addPalette();
+        repaint();
+        updateMode(b);
+    }
+
     public void updateMode(Boolean b) {
         executionButton.enabled_$eq(b);
         detailedViewButton.setEnabled(b);
-        if (b) etc.close();
-        else etc.open();
+        if (b) {
+            etc.close();
+        } else {
+            etc.open();
+        }
         repaint();
     }
 

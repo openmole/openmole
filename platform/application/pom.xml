@@ -45,11 +45,11 @@
             <artifactId>org.openmole.ide.plugin.task.groovy</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
-        <!-- <dependency>
+         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
@@ -76,11 +76,11 @@
             <artifactId>org.openmole.ide.plugin.prototype.base</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>org.apidesign</groupId>
             <artifactId>netbinox</artifactId>
