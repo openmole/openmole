@@ -27,7 +27,6 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 
 object PrototypeDisplay extends IDisplay{
-  private var count= 0
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
   var currentPanel: Option[IPrototypePanelUI] = None
   var name= "proto0"
@@ -39,10 +38,7 @@ object PrototypeDisplay extends IDisplay{
   
   override def dataProxyUI(n: String):IPrototypeDataProxyUI = Proxys.getPrototypeDataProxyUI(n).getOrElse(dataProxy.get)
 
-  override def increment = {
-    count += 1
-    name = "proto" + count
-  }
+  override def increment = name = "proto" + Displays.nextInt
   
   def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
@@ -50,8 +46,8 @@ object PrototypeDisplay extends IDisplay{
   }
   
   def saveContent(oldName: String) = {
-    currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    Proxys.addPrototypeElement(dataProxyUI(oldName))
+    dataProxy = Some(dataProxyUI(oldName))
+    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
+    Proxys.addPrototypeElement(dataProxyUI(oldName))  
   }
- 
 }

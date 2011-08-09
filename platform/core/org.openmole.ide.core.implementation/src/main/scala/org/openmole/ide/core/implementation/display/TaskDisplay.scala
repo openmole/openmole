@@ -31,8 +31,7 @@ object TaskDisplay extends IDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]
   var currentPanel: Option[ITaskPanelUI] = None
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
-  private var count= modelTasks.size
-  var name="task" + count
+  var name="task0"
   var dataProxy: Option[ITaskDataProxyUI] = None
   
   override def implementationClasses = modelTasks
@@ -45,6 +44,7 @@ object TaskDisplay extends IDisplay{
   }
   
   override def saveContent(oldName: String) = {
+    dataProxy = Some(dataProxyUI(oldName))
     val env = dataProxyUI(oldName).dataUI.environment
     val sample = dataProxyUI(oldName).dataUI.sampling
     val protoI = dataProxyUI(oldName).dataUI.prototypesIn
@@ -57,9 +57,7 @@ object TaskDisplay extends IDisplay{
     Proxys.addTaskElement(dataProxyUI(oldName))
   }
   
-  override def increment = {
-    count += 1
-    name = "task" + count
-  }
+  override def increment = name = "task" + Displays.nextInt
+  
   
 }

@@ -58,8 +58,6 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   
   override def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
-    if (capsuleType == EXPLORATION_TASK) connectableWidget.addSampling
-    dndTaskIntoCapsuleProvider.encapsulated= true
     capsuleMenuProvider.addTaskMenus
   }
   
@@ -84,6 +82,9 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   
   def setDataProxy(dpu: ITaskDataProxyUI)={
     dataProxy= Some(dpu)
-    if (Proxys.isExplorationTaskData(dpu.dataUI)) capsuleType = EXPLORATION_TASK else capsuleType = BASIC_TASK
+    if (Proxys.isExplorationTaskData(dpu.dataUI)) {
+      capsuleType = EXPLORATION_TASK 
+      connectableWidget.addSampling
+    } else capsuleType = BASIC_TASK
   }
 }

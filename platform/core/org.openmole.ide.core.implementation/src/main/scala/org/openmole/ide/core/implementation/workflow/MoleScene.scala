@@ -129,8 +129,8 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     if (moleSceneType == BUILD) {
-      connectionWidget.getActions.addAction(createObjectHoverAction)
       connectionWidget.getActions.addAction(createSelectAction)
+      connectionWidget.getActions.addAction(createObjectHoverAction)
       connectionWidget.getActions.addAction(reconnectAction)
       connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
     }

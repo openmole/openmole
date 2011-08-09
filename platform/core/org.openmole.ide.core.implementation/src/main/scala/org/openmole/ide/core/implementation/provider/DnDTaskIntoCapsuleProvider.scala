@@ -24,7 +24,9 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.JavaConversions
 import org.openmole.ide.core.model.commons.IOType
+import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.commons.CapsuleType._
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.workflow.MoleScene
@@ -33,24 +35,21 @@ import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.commons.Constants
 
 class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
-  var encapsulated= false
   
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= { 
-
-    println("ENTITY TYPE :: :: " + Displays.dataProxy.get.dataUI.entityType)
     Displays.dataProxy.get.dataUI.entityType match {
-      case Constants.TASK=> if (!encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case Constants.TASK=> if (capsule.capsuleType == CAPSULE) ConnectorState.ACCEPT else ConnectorState.REJECT
       case Constants.PROTOTYPE=> ConnectorState.ACCEPT
       case Constants.SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case Constants.ENVIRONMENT=> if (encapsulated) ConnectorState.ACCEPT else ConnectorState.REJECT
+      case Constants.ENVIRONMENT=> if (capsule.capsuleType != CAPSULE) ConnectorState.ACCEPT else ConnectorState.REJECT
       case _=> throw new GUIUserBadDataError("Unknown entity type")
     }
   }
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
-    println("DISPLAY :: " + Displays.dataProxy)
       Displays.dataProxy.get match {
-      case dpu:ITaskDataProxyUI => capsule.encapsule(dpu)
+     // case dpu:ITaskDataProxyUI => capsule.encapsule(dpu)
+     case dpu:ITaskDataProxyUI => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
       case dpu:IPrototypeDataProxyUI=> { 
           if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
           else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)

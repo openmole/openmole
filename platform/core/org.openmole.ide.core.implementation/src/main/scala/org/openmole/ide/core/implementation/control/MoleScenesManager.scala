@@ -85,8 +85,7 @@ object MoleScenesManager{
     ms.moleSceneType match {
       case BUILD => {moleScenes(ms).foreach(TabManager.removeSceneTab(_))
                      removeMoleScene(ms)}
-      case EXECUTION=> { TabManager.removeSceneTab(ms)
-        }
+      case EXECUTION=>  TabManager.removeSceneTab(ms)
     }
   }
 

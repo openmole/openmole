@@ -108,6 +108,8 @@ public final class MoleSceneTopComponent extends TopComponent {
         ic.add(palette);
     }
 
+    public PaletteController getPalette(){return palette;}
+    
     public void refresh(Boolean b) {
         ic.remove(palette);
         addPalette();

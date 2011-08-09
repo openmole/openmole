@@ -29,22 +29,18 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 object SamplingDisplay extends IDisplay{
-  private var count= 0
   private var modelSamplings = new HashSet[SamplingDataProxyFactory]
   var name = "sample0"
   var currentPanel: Option[ISamplingPanelUI] = None
   var dataProxy: Option[ISamplingDataProxyUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>{println("SANPLI :: " + f.displayName);modelSamplings += new SamplingDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>modelSamplings += new SamplingDataProxyFactory(f))
   
   override def implementationClasses = modelSamplings
   
   override def dataProxyUI(n: String):ISamplingDataProxyUI = Proxys.getSamplingDataProxyUI(n).getOrElse(dataProxy.get)
   
-  override def increment = {
-    count += 1
-    name = "sample" + count
-  }
+  override def increment = name = "sample" +  + Displays.nextInt
   
   override def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
@@ -52,6 +48,7 @@ object SamplingDisplay extends IDisplay{
   }
   
   override def saveContent(oldName: String) = {
+    dataProxy = Some(dataProxyUI(oldName))
     dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
     Proxys.addSamplingElement(dataProxyUI(oldName))
   }

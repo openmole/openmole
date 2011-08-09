@@ -52,7 +52,7 @@ object PaletteSupport {
     val paletteRoot = new AbstractNode(new CategoryBuilder(mst))
     paletteRoot.setName("Entities")
     var palette = PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
-    palette.addPropertyChangeListener( new MyAddPropertyChangeListener(palette)) 
+    palette.addPropertyChangeListener( new MyAddPropertyChangeListener) 
     palette
   }
   
@@ -66,13 +66,13 @@ object PaletteSupport {
   def refreshPalette: Unit = refreshPalette(currentType)
 }
   
-class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
+class MyAddPropertyChangeListener extends PropertyChangeListener  {
   var currentSelItem = Lookup.EMPTY
   
   override def  propertyChange(pce: PropertyChangeEvent)= {
-        
-    val selItem = palette.getSelectedItem
-    val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
+    val mstc = WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent]
+    val selItem = mstc.getPalette.getSelectedItem
+    val selCategoryLookup = mstc.getPalette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
       Displays.currentType = selCategoryLookup.getName
       Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)

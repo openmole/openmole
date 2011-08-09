@@ -29,7 +29,6 @@ import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 
 object EnvironmentDisplay extends IDisplay{
-  private var count= 0
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
   var name="env0"
   var currentPanel: Option[IEnvironmentPanelUI] = None
@@ -41,10 +40,7 @@ object EnvironmentDisplay extends IDisplay{
   
   override def dataProxyUI(n: String):IEnvironmentDataProxyUI = Proxys.getEnvironmentDataProxyUI(n).getOrElse(dataProxy.get)
   
-  override def increment = {
-    count += 1
-    name = "env" + count
-  }
+  override def increment = name = "env" + Displays.nextInt
   
   override def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
@@ -52,6 +48,7 @@ object EnvironmentDisplay extends IDisplay{
   }
   
   override def saveContent(oldName: String) = {
+    dataProxy = Some(dataProxyUI(oldName))
     dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
     Proxys.addEnvironmentElement(dataProxyUI(oldName))
   }

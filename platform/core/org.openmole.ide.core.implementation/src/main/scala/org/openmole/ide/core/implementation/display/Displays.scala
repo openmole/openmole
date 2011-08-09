@@ -22,11 +22,13 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPanelUI
+import scala.util.Random
 
 
 object Displays {
   var currentType = TASK
   val propertyPanel = new PropertyPanel
+  private val randomGenerator = new Random 
   
   def name = currentDisplay.name
   
@@ -47,6 +49,8 @@ object Displays {
     currentDisplay.saveContent(oldName)
   }
     
+  def nextInt = randomGenerator.nextInt(1000)
+  
   private def currentDisplay :IDisplay= {
     currentType match{
       case TASK=> TaskDisplay

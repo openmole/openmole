@@ -50,7 +50,7 @@ public final class ExecutionTopComponent extends TopComponent {
         setName(NbBundle.getMessage(ExecutionTopComponent.class, "CTL_ExecutionTopComponent"));
         setToolTipText(NbBundle.getMessage(ExecutionTopComponent.class, "HINT_ExecutionTopComponent"));
 
-        System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
+       // System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
        // System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)));
     }
 
