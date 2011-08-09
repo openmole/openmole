@@ -32,7 +32,7 @@ class CompleteSampling(factors: Iterable[(IFactor[T,IDomain[T]]) forSome{type T}
 
   def this(factors: IFactor[T,IDomain[T]] forSome{type T}*) = this(factors.toIterable)
 
-  override def prototypes = factors.map{_.prototype}
+  override def prototypes: Iterable[IPrototype[_]] = factors.map{_.prototype}
   
   override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
     val values = factors.map{f => f.domain.iterator(context).toIterable}
