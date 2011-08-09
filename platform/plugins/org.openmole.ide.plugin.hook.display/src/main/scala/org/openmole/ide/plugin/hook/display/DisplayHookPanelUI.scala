@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,24 +9,20 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.data
+package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.core.model.panel.IPanelUI
+import org.openmole.ide.core.model.data.IHookDataUI
+import org.openmole.ide.core.model.panel.IHookPanelUI
+import scala.swing.Panel
 
-trait IDataUI{
-  def name: String
+class DisplayHookPanelUI(pud: DisplayHookDataUI) extends Panel with IHookPanelUI {
+  override def saveContent(name: String):IHookDataUI = new DisplayHookDataUI(name)
   
-  def entityType: String
-  
-  def coreClass: Class[_]
-  
-  def imagePath: String 
-  
-  def buildPanelUI: IPanelUI
 }
+

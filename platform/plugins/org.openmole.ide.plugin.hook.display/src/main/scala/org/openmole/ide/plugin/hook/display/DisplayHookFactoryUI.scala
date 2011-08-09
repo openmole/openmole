@@ -15,18 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.data
+package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.core.model.panel.IPanelUI
+import org.openmole.ide.core.model.factory.IHookFactoryUI
 
-trait IDataUI{
-  def name: String
-  
-  def entityType: String
-  
-  def coreClass: Class[_]
-  
-  def imagePath: String 
-  
-  def buildPanelUI: IPanelUI
+
+class DisplayHookFactoryUI extends IHookFactoryUI {
+  override def buildDataUI(name: String) = new DisplayHookDataUI(name)
 }

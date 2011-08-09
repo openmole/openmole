@@ -16,7 +16,7 @@ import org.openmole.ide.core.model.display.IDisplay
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 
-class HookDisplay extends IDisplay{
+object HookDisplay extends IDisplay{
   private var modelHooks = new HashSet[HookDataProxyFactory]
   var currentPanel: Option[IHookPanelUI] = None
   var name= "hook0"
@@ -28,7 +28,7 @@ class HookDisplay extends IDisplay{
   
   override def dataProxyUI(n: String):IHookDataProxyUI = Proxys.getHookDataProxyUI(n).getOrElse(dataProxy.get)
 
-  override def increment = name = "proto" + Displays.nextInt
+  override def increment = name = "hook" + Displays.nextInt
   
   def  buildPanelUI(n:String) = {
     currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
