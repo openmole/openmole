@@ -43,8 +43,10 @@ object TaskDisplay extends IDisplay{
     currentPanel.get
   }
   
+  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
+  
   override def saveContent(oldName: String) = {
-    dataProxy = Some(dataProxyUI(oldName))
+    select(oldName)
     val env = dataProxyUI(oldName).dataUI.environment
     val sample = dataProxyUI(oldName).dataUI.sampling
     val protoI = dataProxyUI(oldName).dataUI.prototypesIn

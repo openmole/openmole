@@ -38,4 +38,6 @@ trait IDisplay{
   def buildPanelUI(name: String): IPanelUI
   
   def saveContent(oldName: String)
+  
+  def select(name: String)
 }

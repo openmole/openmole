@@ -49,7 +49,6 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
       Displays.dataProxy.get match {
-     // case dpu:ITaskDataProxyUI => capsule.encapsule(dpu)
      case dpu:ITaskDataProxyUI => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
       case dpu:IPrototypeDataProxyUI=> { 
           if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)

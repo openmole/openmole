@@ -32,7 +32,9 @@ object Displays {
   
   def name = currentDisplay.name
   
-  def setAsName(n: String) = currentDisplay.name = n
+  def setAsName(n: String) = {
+    currentDisplay.name = n
+    currentDisplay.select(n)}
   
   def increment = currentDisplay.increment
   
