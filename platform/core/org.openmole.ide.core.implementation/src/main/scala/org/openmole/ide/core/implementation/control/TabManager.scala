@@ -25,17 +25,23 @@ import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
 import scala.swing.ScrollPane
 import scala.swing.TabbedPane
 import scala.swing.event.SelectionChanged
 
 object TabManager {
   var sceneTabs = new DualHashBidiMap[IMoleScene,TabbedPane.Page]
+  var executionTabs = new HashMap[IMoleScene,ExecutionTabbedPane]
   
   var tabbedPane= new TabbedPane {
     listenTo(selection)
     reactions += {case SelectionChanged(tabbedPane) =>  
-        if (selection.index != -1) PaletteSupport.refreshPalette(sceneTabs.getKey(selection.page).moleSceneType)}
+        if (selection.index != -1) {
+          val ms = sceneTabs.getKey(selection.page)
+          if ((ms.moleSceneType == EXECUTION)) ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionTabbedPane(ms.manager)))
+          PaletteSupport.refreshPalette(ms.moleSceneType)
+        }}
   }
     
   def currentScene: IMoleScene = {
@@ -52,7 +58,6 @@ object TabManager {
   def removeAllSceneTabs = tabbedPane.peer.removeAll
   
   def addTab(scene: IMoleScene,n: String,sp: ScrollPane): IMoleScene = {
-    println("ADD SAB :: " + n)
     val name= scene.manager.name.getOrElse(n)
     val p = new TabbedPane.Page(name,sp)
     sceneTabs.put(scene,p)
@@ -68,4 +73,4 @@ object TabManager {
   }
 
   def displayExecutionMoleScene(displayed: IMoleScene) = tabbedPane.selection.page= sceneTabs.get(displayed)
-}
+  }

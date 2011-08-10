@@ -16,6 +16,7 @@
  */
 package org.openmole.ide.core.implementation;
 
+import java.awt.BorderLayout;
 import java.awt.Rectangle;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -27,6 +28,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openmole.core.implementation.mole.MoleExecution;
+import org.openmole.ide.core.implementation.control.ExecutionSupport;
 import org.openmole.ide.core.implementation.control.TabManager;
 import org.openmole.ide.core.implementation.serializer.MoleMaker;
 
@@ -50,6 +52,8 @@ public final class ExecutionTopComponent extends TopComponent {
         setName(NbBundle.getMessage(ExecutionTopComponent.class, "CTL_ExecutionTopComponent"));
         setToolTipText(NbBundle.getMessage(ExecutionTopComponent.class, "HINT_ExecutionTopComponent"));
 
+        setLayout(new BorderLayout());
+        add(ExecutionSupport.peer(), BorderLayout.CENTER);
        // System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)));
        // System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)));
     }
@@ -62,62 +66,28 @@ public final class ExecutionTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        logTextArea = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
-
-        logTextArea.setColumns(20);
-        logTextArea.setRows(5);
-        jScrollPane1.setViewportView(logTextArea);
-
-        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ExecutionTopComponent.class, "ExecutionTopComponent.jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ExecutionTopComponent.class, "ExecutionTopComponent.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 845, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 932, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(54, 54, 54)
-                        .addComponent(jButton1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGap(0, 275, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        (new MoleExecution(MoleMaker.buildMole(TabManager.currentScene().manager()))).start();
-    }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextArea logTextArea;
     // End of variables declaration//GEN-END:variables
 
+    public void refresh(){
+        
+    }
+    
     @Override
     public void componentOpened() {
+        
         // TODO add custom code on component opening
     }
 
