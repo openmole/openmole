@@ -38,6 +38,7 @@ import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.nodes.AbstractNode;
+import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.palette.CategoryBuilder;
@@ -95,6 +96,7 @@ public final class MoleSceneTopComponent extends TopComponent {
         toolBar.add(new JToolBar.Separator());
         toolBar.add(moleButton.peer());
         toolBar.add(executionButton.peer());
+        toolBar.add(ExecutionBoard.peer());
         //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
@@ -118,7 +120,9 @@ public final class MoleSceneTopComponent extends TopComponent {
     }
 
     public void updateMode(Boolean b) {
+        System.out.println("updateMode " + b + " " + !b);
         executionButton.enabled_$eq(b);
+        ExecutionBoard.activate(!b);
         detailedViewButton.setEnabled(b);
         if (b) {
             etc.close();
