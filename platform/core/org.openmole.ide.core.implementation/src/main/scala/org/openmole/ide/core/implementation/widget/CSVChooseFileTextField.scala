@@ -7,4 +7,4 @@ package org.openmole.ide.core.implementation.widget
 
 import javax.swing.filechooser.FileNameExtensionFilter
 
-class CSVChooseFileTextField extends ChooseFileTextField(new FileNameExtensionFilter("CSV files","csv","CSV"),"Select a csv file")
+class CSVChooseFileTextField(initialText: String) extends ChooseFileTextField(new FileNameExtensionFilter("CSV files","csv","CSV"),"Select a csv file",initialText)

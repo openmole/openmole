@@ -32,6 +32,8 @@ object EmptyDataUIs {
     override def imagePath = ""
     override def buildPanelUI = new EmptyPrototypePanelUI
     
-    class EmptyPrototypePanelUI extends IPrototypePanelUI {override def saveContent(name:String) = new EmptyPrototypeDataUI("")}
+    class EmptyPrototypePanelUI extends IPrototypePanelUI {
+      override def peer = this.peer
+      override def saveContent(name:String) = new EmptyPrototypeDataUI("")}
   }
 }

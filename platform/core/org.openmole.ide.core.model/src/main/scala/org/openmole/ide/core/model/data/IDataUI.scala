@@ -17,8 +17,6 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.panel.IPanelUI
-
 trait IDataUI{
   def name: String
   
@@ -28,5 +26,5 @@ trait IDataUI{
   
   def imagePath: String 
   
-  def buildPanelUI: IPanelUI
+ // def buildPanelUI: IPanelUI
 }

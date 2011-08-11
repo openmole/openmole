@@ -9,6 +9,7 @@ import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.widget.CSVChooseFileTextField
+import org.openmole.ide.core.implementation.widget.ChooseFileTextField
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.swing.BoxPanel
@@ -23,6 +24,6 @@ class ExecutionPanel(capsule: ICapsuleUI) extends BoxPanel(Orientation.Vertical)
   
   def buildSaveFilePanel(pdp: IPrototypeDataProxyUI) =  new BoxPanel(Orientation.Horizontal) {
     contents.append(new CheckBox("Save " + pdp.dataUI.name +" prototype in "),
-                    new CSVChooseFileTextField)
+                    new CSVChooseFileTextField(""))
   }
 }
