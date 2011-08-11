@@ -17,10 +17,8 @@
 package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
-import java.awt.Dimension
+import scala.swing.Panel
 
-class BigDecimalPrototypePanelUI extends IPrototypePanelUI {
-  minimumSize = new Dimension(200,150)
-  visible = true
+class BigDecimalPrototypePanelUI extends Panel with IPrototypePanelUI {
   override def saveContent(name: String) = new BigDecimalPrototypeDataUI(name)
 }

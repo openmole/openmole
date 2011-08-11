@@ -17,8 +17,8 @@
 package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
-import org.openmole.ide.core.model.data.IPrototypeDataUI
+import scala.swing.Panel
 
-class IntegerPrototypePanelUI extends IPrototypePanelUI {
+class IntegerPrototypePanelUI extends Panel with IPrototypePanelUI {
    override def saveContent(name: String) =  new IntegerPrototypeDataUI(name)
 }
