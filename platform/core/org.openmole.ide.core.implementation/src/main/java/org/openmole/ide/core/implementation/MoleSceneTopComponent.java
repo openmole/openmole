@@ -120,7 +120,6 @@ public final class MoleSceneTopComponent extends TopComponent {
     }
 
     public void updateMode(Boolean b) {
-        System.out.println("updateMode " + b + " " + !b);
         executionButton.enabled_$eq(b);
         ExecutionBoard.activate(!b);
         detailedViewButton.setEnabled(b);

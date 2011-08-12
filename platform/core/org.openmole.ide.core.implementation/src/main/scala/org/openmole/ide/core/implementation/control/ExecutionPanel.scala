@@ -30,13 +30,12 @@ class ExecutionPanel(capsule: ICapsuleUI) extends BoxPanel(Orientation.Horizonta
   contents += new Separator
   
   private def buildExecutionOptionPanel = new  BoxPanel(Orientation.Vertical){
-  contents.append(new BoxPanel(Orientation.Horizontal) {contents.append(groupByJobOption,groupByJobValue)})
-    }
+    contents.append(new BoxPanel(Orientation.Horizontal) {contents.append(groupByJobOption,groupByJobValue)})
+  }
     
   private def buildHookPanel = new BoxPanel(Orientation.Vertical){
-  contents.append(displayHookOption)
-  capsule.dataProxy.get.dataUI.prototypes.foreach( p=>p.dataUI.coreObject match{case c:IPrototype[File]=> { println("OBL :: " + p.dataUI.coreObject);contents.append(buildSaveFilePanel(p))}
-      case _ => println("other :: " + p.dataUI.coreObject)})
+    contents.append(displayHookOption)
+    capsule.dataProxy.get.dataUI.prototypes.foreach( p=> {if(p.dataUI.coreObject.`type`.erasure == classOf[File]) contents.append(buildSaveFilePanel(p))})
   }
     
   private def buildSaveFilePanel(pdp: IPrototypeDataProxyUI) =  new BoxPanel(Orientation.Horizontal) {

@@ -26,7 +26,7 @@ class ExecutionTabbedPane(manager: IMoleSceneManager) extends TabbedPane {
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint
     override def write(b:Int) = {
-      textArea.append(b.asInstanceOf[Byte].toString)
+      textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
       textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
     }
   }
