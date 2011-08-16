@@ -35,11 +35,15 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   import IMoleExecution._
   import EventDispatcher._
   
-  registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
-  registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-  registerForObjectChangedSynchronous(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
-  registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
-  registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
+  resume
+  
+  override def resume = {
+    registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
+    registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
+    registerForObjectChangedSynchronous(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
+    registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
+    registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
+  }
   
   override def release = {
     unregisterSynchronousListener(moleExecution(), moleExecutionExecutionStartingAdapter, Starting)

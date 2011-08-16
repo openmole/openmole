@@ -26,9 +26,11 @@ import org.openmole.misc.tools.service.Logger
 
 abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: ICapsule) extends ICapsuleExecutionHook with Logger {
   
-  CapsuleExecutionDispatcher += (moleExecution, capsule, this)
+  resume
   
+  override def resume = CapsuleExecutionDispatcher += (moleExecution, capsule, this)
   override def release = CapsuleExecutionDispatcher -= (moleExecution, capsule, this)
+  
   def safeProcess(moleJob: IMoleJob) = try process(moleJob) catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
   def process(moleJob: IMoleJob)
 }

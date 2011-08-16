@@ -19,4 +19,5 @@ package org.openmole.core.model.hook
 
 trait IHook {
   def release
+  def resume
 }
