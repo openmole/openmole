@@ -24,14 +24,15 @@ import scala.swing.FileChooser.Result.Approve
 import scala.swing.Orientation
 import scala.swing.TextField
 import scala.swing.event.FocusGained
+import scala.swing.FileChooser.SelectionMode.Value
 
 class FakeTextField(fc: FileChooser, initialText: String) extends TextField {
   def this(filter: FileNameExtensionFilter, chooserTitle: String,t: String) = this(new FileChooser {
       fileFilter = filter
       title = chooserTitle},t)
-  def this(chooserTitle: String,t: String) = this(new FileChooser{
+  def this(chooserTitle: String,t: String,sm: Value) = this(new FileChooser{
       title = chooserTitle
-      fileSelectionMode = FileChooser.SelectionMode.DirectoriesOnly},t)
+      fileSelectionMode = sm},t)
   
   maximumSize = new Dimension(150,30)
     reactions += {

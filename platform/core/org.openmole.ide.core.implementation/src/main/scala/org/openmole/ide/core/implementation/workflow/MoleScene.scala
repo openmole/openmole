@@ -105,10 +105,10 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
     val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
-    cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[CapsuleUI]))
+    cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
   }
   
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[CapsuleUI]), currentSlotIndex))
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
     
   override def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])

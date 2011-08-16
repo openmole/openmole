@@ -18,10 +18,10 @@
 package org.openmole.ide.core.model.data
 
 import java.awt.Color
-import org.openmole.core.implementation.task.Task
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.core.implementation.task.Task
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import scala.collection.mutable.HashSet
@@ -34,8 +34,6 @@ trait ITaskDataUI extends IDataUI{
   def backgroundColor: Color
   
   def coreObject: Task
-  
-  def buildTask: Task 
   
   def prototypesIn: HashSet[IPrototypeDataProxyUI] 
   
@@ -56,10 +54,6 @@ trait ITaskDataUI extends IDataUI{
   def environment: Option[IEnvironmentDataProxyUI]
   
   def environment_=(s: Option[IEnvironmentDataProxyUI])
-  
-  def hook: Option[IHookDataProxyUI]
-  
-  def hook_=(s: Option[IHookDataProxyUI])
   
   def buildPanelUI: ITaskPanelUI
 }

@@ -5,11 +5,17 @@
 
 package org.openmole.ide.core.model.factory
 
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import scala.collection.mutable.HashMap
 
-import org.openmole.ide.core.model.data.IHookDataUI
-
-trait IHookFactoryUI  extends IFactoryUI{
-  override def displayName: String = buildDataUI("").coreClass.getSimpleName
-  
-  def buildDataUI(name: String): IHookDataUI
+trait IHookFactoryUI{
+  def buildPanelUI(execution: IMoleExecution, 
+                   prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
+                   capsuleUI: ICapsuleUI, 
+                   capsule: ICapsule): IHookPanelUI
 }

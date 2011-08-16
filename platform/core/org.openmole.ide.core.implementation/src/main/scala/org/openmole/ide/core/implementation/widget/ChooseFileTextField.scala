@@ -7,10 +7,9 @@ package org.openmole.ide.core.implementation.widget
 
 import java.awt.Dimension
 import javax.swing.filechooser.FileNameExtensionFilter
-import scala.swing.BoxPanel
+import scala.swing.FileChooser.SelectionMode.Value
 import scala.swing.FileChooser
 import scala.swing.FileChooser.Result.Approve
-import scala.swing.Orientation
 import scala.swing.TextField
 import scala.swing.event.FocusGained
 
@@ -18,9 +17,9 @@ class ChooseFileTextField(fc: FileChooser, initialText: String) extends TextFiel
   def this(filter: FileNameExtensionFilter, chooserTitle: String,t: String) = this(new FileChooser {
       fileFilter = filter
       title = chooserTitle},t)
-  def this(chooserTitle: String,t: String) = this(new FileChooser{
+  def this(chooserTitle: String,t: String, sm: Value) = this(new FileChooser{
       title = chooserTitle
-      fileSelectionMode = FileChooser.SelectionMode.DirectoriesOnly},t)
+      fileSelectionMode = sm},t)
   
   maximumSize = new Dimension(150,30)
     reactions += {

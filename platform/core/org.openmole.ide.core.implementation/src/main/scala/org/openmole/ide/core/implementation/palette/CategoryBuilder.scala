@@ -39,9 +39,7 @@ class CategoryBuilder(val sceneType: MoleSceneType) extends Children.Keys[ICateg
             new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
             new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR))).toIterable
         case EXECUTION => List (
-            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR)),
-            new GenericCategory(HOOK,"Hooks" ,new GenericChildren(Proxys.hook,HOOK_DATA_FLAVOR))).toIterable
+            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR))).toIterable
       })
-  }
-            
+  }     
 }

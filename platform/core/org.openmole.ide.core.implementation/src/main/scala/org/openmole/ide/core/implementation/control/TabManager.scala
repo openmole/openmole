@@ -44,6 +44,8 @@ object TabManager {
         }}
   }
     
+  def currentExecutionTabbedPane = executionTabs(currentScene)
+  
   def currentScene: IMoleScene = {
     if (tabbedPane.selection.index != -1) {
       sceneTabs.getKey(tabbedPane.selection.page) match {

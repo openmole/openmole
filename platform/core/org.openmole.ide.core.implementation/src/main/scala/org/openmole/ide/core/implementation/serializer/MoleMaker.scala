@@ -17,9 +17,11 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IMole
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
@@ -27,6 +29,7 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -37,9 +40,13 @@ import scala.collection.mutable.HashMap
 object MoleMaker {
   
   var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
+  var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_<:Any]]
+  
+  def buildMoleExecution(manager: IMoleSceneManager) = (new MoleExecution(buildMole(manager)),corePrototypes,doneCapsules)
   
   def buildMole(manager: IMoleSceneManager):IMole = {
     doneCapsules.clear
+    corePrototypes.clear
     if (manager.startingCapsule.isDefined){
       new Mole(nextCapsule(manager,manager.startingCapsule.get))
     }
@@ -55,13 +62,20 @@ object MoleMaker {
     capsule
   }
 
-  def buildCapsule(capsule: ICapsuleUI) = {
-    println("buildCapsule:: " + capsule.capsuleType)
-    capsule.capsuleType match {
-      case EXPLORATION_TASK=> new Capsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[ExplorationTask])
-      case BASIC_TASK=> new Capsule(capsule.dataProxy.get.dataUI.buildTask.asInstanceOf[Task])
-      case CAPSULE=> new Capsule
+  def buildCapsule(capsuleUI: ICapsuleUI) = new Capsule(buildTask(capsuleUI))
+  
+  def buildTask(capsuleUI: ICapsuleUI) = {
+    capsuleUI.capsuleType match {
+      case EXPLORATION_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
+      case BASIC_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject)
+      case CAPSULE=> throw new GUIUserBadDataError("A capsule without any task can not be run")  
     }
+  }
+  
+  def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
+    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach(pui=> {task.addInput(corePrototypes.getOrElseUpdate(pui, pui.dataUI.coreObject ))})
+    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pui=> {task.addOutput(corePrototypes.getOrElseUpdate(pui, pui.dataUI.coreObject ))})
+    task
   }
   
   def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule,t: ITransitionUI){

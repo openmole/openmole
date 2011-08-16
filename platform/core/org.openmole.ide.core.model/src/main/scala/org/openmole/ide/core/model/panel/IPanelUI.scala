@@ -19,6 +19,6 @@ package org.openmole.ide.core.model.panel
 
 import javax.swing.JPanel
 
-trait IPanelUI {
+trait IPanelUI{
   def peer: JPanel
 }

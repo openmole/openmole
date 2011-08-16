@@ -40,6 +40,8 @@
         <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
+        <lib.fr.in2p3.jsaga.version>0.9.15-SNAPSHOT</lib.fr.in2p3.jsaga.version>
+
     </properties>
 
     <dependencies>

@@ -17,9 +17,17 @@
 
 package org.openmole.ide.plugin.hook.display
 
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
-
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import scala.collection.mutable.HashMap
 
 class DisplayHookFactoryUI extends IHookFactoryUI {
-  override def buildDataUI(name: String) = new DisplayHookDataUI(name)
-}
+  override def buildPanelUI(execution: IMoleExecution, 
+                            prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
+                            capsuleUI: ICapsuleUI, 
+                            capsule: ICapsule) = new DisplayHookPanelUI(execution,prototypes,capsuleUI,capsule)
+}            

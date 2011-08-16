@@ -17,12 +17,39 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.core.model.data.IHookDataUI
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import scala.swing.Panel
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import scala.collection.mutable.HashMap
+import scala.swing.Alignment
+import java.awt.Font
+import java.awt.Font._
+import scala.swing.BoxPanel
+import scala.swing.CheckBox
+import scala.swing.Label
+import scala.swing.Orientation
+import scala.swing.event.ButtonClicked
+import org.openmole.plugin.hook.display.ToStringHook
 
-class DisplayHookPanelUI(pud: DisplayHookDataUI) extends Panel with IHookPanelUI {
-  override def saveContent(name: String):IHookDataUI = new DisplayHookDataUI(name)
-  
+class DisplayHookPanelUI(execution: IMoleExecution, 
+                         prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
+                         capsuleUI: ICapsuleUI, 
+                         capsule: ICapsule) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
+  xLayoutAlignment = 0.0F
+  yLayoutAlignment = 0.0F
+                         
+  private var currentDisplayHook= new HashMap[IPrototypeDataProxyUI,Option[ToStringHook]]
+  contents += new Label("Display: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)}
+  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pdu=> contents += displayHookCheckBox(pdu))
+    
+  private def displayHookCheckBox(dpu: IPrototypeDataProxyUI): CheckBox = {
+    val cb = new CheckBox(dpu.dataUI.name){reactions+= {case ButtonClicked(cb) =>{
+            if (cb.selected) currentDisplayHook+= dpu-> Some(new ToStringHook(execution, capsule, prototypes(dpu)))
+            else currentDisplayHook(dpu).get.release}}}
+    listenTo(cb)
+    cb
+  }
 }
-

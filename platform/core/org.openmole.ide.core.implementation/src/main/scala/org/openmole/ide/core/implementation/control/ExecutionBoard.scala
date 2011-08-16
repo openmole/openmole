@@ -31,7 +31,7 @@ object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
   
   listenTo(`startButton`)
   reactions += {
-    case ButtonClicked(`startButton`) =>new MoleExecution(MoleMaker.buildMole(TabManager.currentScene.manager)).start
+    case ButtonClicked(`startButton`) =>TabManager.currentExecutionTabbedPane.start
   }
   def activate(b:Boolean) = {
     startButton.enabled = b

@@ -44,7 +44,6 @@ object PaletteSupport {
   val PROTOTYPE_DATA_FLAVOR= new DataFlavor(classOf[PrototypeDataProxyUI], PROTOTYPE)
   val SAMPLING_DATA_FLAVOR= new DataFlavor(classOf[SamplingDataProxyUI], SAMPLING)
   val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
-  val HOOK_DATA_FLAVOR= new DataFlavor(classOf[HookDataProxyUI], HOOK)
 
   var currentType = BUILD
   

@@ -17,18 +17,12 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openide.util.Lookup
-import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.commons.Constants
-import org.openmole.ide.core.implementation.data.TaskDataUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.WeakHashMap
 
 object Proxys {
     
@@ -36,7 +30,6 @@ object Proxys {
   var prototype = new HashSet[IPrototypeDataProxyUI]
   var sampling = new HashSet[ISamplingDataProxyUI]
   var environment = new HashSet[IEnvironmentDataProxyUI]
-  var hook = new HashSet[IHookDataProxyUI]
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
 
@@ -44,7 +37,6 @@ object Proxys {
   def getPrototypeDataProxyUI(name: String) = prototype.filter(_.dataUI.name==name).headOption
   def getSamplingDataProxyUI(name: String) = sampling.filter(_.dataUI.name==name).headOption
   def getEnvironmentDataProxyUI(name: String) = environment.filter(_.dataUI.name==name).headOption
-  def getHookDataProxyUI(name: String) = hook.filter(_.dataUI.name==name).headOption
   
   def getPrototypesNames = task.groupBy(_.dataUI.name).keys.toSet
   
@@ -52,27 +44,23 @@ object Proxys {
   def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototype += dpu
   def addSamplingElement(dpu: ISamplingDataProxyUI) = sampling += dpu
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment += dpu
-  def addHookElement(dpu: IHookDataProxyUI) = hook += dpu
   
   
   def removeTaskElement(dpu: ITaskDataProxyUI) = task.remove(dpu)
   def removePrototypeElement(dpu: IPrototypeDataProxyUI) = prototype.remove(dpu)
   def removeSamplingElement(dpu: ISamplingDataProxyUI) = sampling.remove(dpu)
   def removeEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment.remove(dpu)
-  def removeHookElement(dpu: IHookDataProxyUI) = hook.remove(dpu)
   
   def clearAllTaskElement = task.clear
   def clearAllPrototypeElement = prototype.clear
   def clearAllSamplingElement = sampling.clear
   def clearAllEnvironmentElement = environment.clear
-  def clearAllHookElement = hook.clear
   
   def clearAll: Unit = {
     clearAllTaskElement
     clearAllPrototypeElement
     clearAllSamplingElement
     clearAllEnvironmentElement
-    clearAllHookElement
   }
   
 } 

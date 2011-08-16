@@ -21,8 +21,9 @@ import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
 import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-class OutputSlotAnchor(relatedWidget: CapsuleUI) extends SlotAnchor(relatedWidget) {
+class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidget) {
 
   val x= Constants.TASK_CONTAINER_WIDTH + 10
   val y= Constants.TASK_TITLE_HEIGHT + 22
@@ -31,6 +32,6 @@ class OutputSlotAnchor(relatedWidget: CapsuleUI) extends SlotAnchor(relatedWidge
     var detailedEffect= 0
     if (MoleScenesManager.detailedView)
       detailedEffect= Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH
-    new Result(relatedWidget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
+    new Result(relatedWidget.widget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
   }
 }

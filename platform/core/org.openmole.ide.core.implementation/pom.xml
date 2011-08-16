@@ -145,5 +145,10 @@
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>1.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.plugin.hook.display</artifactId>
+            <version>0.3-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
