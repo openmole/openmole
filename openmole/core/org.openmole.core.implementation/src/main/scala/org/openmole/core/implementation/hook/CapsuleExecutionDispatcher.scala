@@ -20,11 +20,12 @@ package org.openmole.core.implementation.hook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import scala.ref.WeakReference
 
-object CapsuleExecutionDispatcher {
+object CapsuleExecutionDispatcher extends Logger {
   
   private val dispatchers = new WeakHashMap[IMoleExecution, DispatcherMoleExecutionHook]
   
@@ -55,7 +56,7 @@ object CapsuleExecutionDispatcher {
   def -=(execution: IMoleExecution, capsule: ICapsule, hook: CapsuleExecutionHook) =  dispatchers.synchronized {
     dispatchers.get(execution) match {
       case Some(dispatcher) => dispatcher -= (capsule, hook)
-      case None =>
+      case None => 
     }
   }
 

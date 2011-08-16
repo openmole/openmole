@@ -21,6 +21,7 @@ import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
@@ -58,6 +59,26 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     ex.start.waitUntilEnded
     
     executed should equal (true)
+  }
+  
+  "After release a capsule execution hook" should "not be executed" in {
+    var executed = false
+    
+    val t1 = new EmptyTask("Test") 
+    
+    val t1c = new Capsule(t1)
+    val ex = new MoleExecution(new Mole(t1c))
+    
+    val hook = new CapsuleExecutionHook(ex, t1c) {
+      override def process(moleJob: IMoleJob) = {
+        executed = true
+      }
+    }
+    
+    hook.release
+    ex.start.waitUntilEnded
+    
+    executed should equal (false)
   }
   
 }
