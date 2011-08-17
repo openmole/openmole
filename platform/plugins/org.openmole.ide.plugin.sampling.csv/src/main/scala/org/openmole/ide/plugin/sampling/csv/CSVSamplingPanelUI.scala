@@ -57,11 +57,11 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   reactions += {
     case DialogClosedEvent(csvTextField)=> { 
         if (isFile(csvTextField.text)){
-        val reader = new CSVReader(new FileReader(csvTextField.text))
-        val headers = reader.readNext
-        model.setRowCount(headers.length)
-        headers.zipWithIndex.foreach{case (h,i)=> table.update(i,0,h); table.update(i,1,new PrototypeDataProxyUI(new EmptyPrototypeDataUI("")))}
-        reader.close}}}
+          val reader = new CSVReader(new FileReader(csvTextField.text))
+          val headers = reader.readNext
+          model.setRowCount(headers.length)
+          headers.zipWithIndex.foreach{case (h,i)=> table.update(i,0,h); table.update(i,1,new PrototypeDataProxyUI(new EmptyPrototypeDataUI("")))}
+          reader.close}}}
   
   val model = new DefaultTableModel(Array[Object]("CSV headers","Prototypes"),0)
   val table = buildTable(model)
@@ -83,7 +83,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   def buildTable(m: DefaultTableModel) = 
     new Table{
       model = m
-      preferredSize = new Dimension(100,100)
+      preferredViewportSize = new Dimension(150,200)
       selection.elementMode = Cell
       rowHeight= 30
       
