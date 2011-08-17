@@ -17,9 +17,6 @@
 package org.openmole.ide.core.implementation;
 
 import java.awt.BorderLayout;
-import java.util.logging.Logger;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.util.NbBundle;
@@ -30,22 +27,17 @@ import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
 import org.openmole.ide.core.implementation.control.TabManager;
-import org.openmole.ide.core.implementation.control.MoleScenesManager;
 import org.openmole.ide.core.implementation.action.AddMoleSceneAction;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.openmole.ide.core.implementation.action.RemoveAllMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.nodes.AbstractNode;
 import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
-import org.openmole.ide.core.implementation.palette.CategoryBuilder;
-import org.openmole.ide.core.implementation.display.MenuToggleButton2;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
-import org.openmole.ide.core.model.commons.MoleSceneType;
-import scala.swing.Menu;
+import org.openmole.ide.core.misc.widget.MenuToggleButton;
 import scala.swing.MenuItem;
 
 /**
@@ -64,8 +56,8 @@ preferredID = "MoleSceneTopComponent")
 public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
-    private MenuToggleButton2 moleButton;
-    private MenuToggleButton2 executionButton;
+    private MenuToggleButton moleButton;
+    private MenuToggleButton executionButton;
     private JToggleButton detailedViewButton;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
@@ -82,13 +74,13 @@ public final class MoleSceneTopComponent extends TopComponent {
         detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        moleButton = new MenuToggleButton2("Mole");
+        moleButton = new MenuToggleButton("Mole");
         moleButton.addItem(new MenuItem(new AddMoleSceneAction("Add")));
         moleButton.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
         moleButton.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
 
 
-        executionButton = new MenuToggleButton2("Execution");
+        executionButton = new MenuToggleButton("Execution");
         executionButton.addItem(new MenuItem(new BuildExecutionAction("Build")));
         executionButton.addItem(new MenuItem(new CleanAndBuildExecutionAction("Clean and Build")));
 

@@ -32,19 +32,19 @@ import scala.swing.event.SelectionChanged
 
 object TabManager {
   var sceneTabs = new DualHashBidiMap[IMoleScene,TabbedPane.Page]
-  var executionTabs = new HashMap[IMoleScene,ExecutionTabbedPane]
+  var executionTabs = new HashMap[IMoleScene,ExecutionManager]
   
   var tabbedPane= new TabbedPane {
     listenTo(selection)
     reactions += {case SelectionChanged(tabbedPane) =>  
         if (selection.index != -1) {
           val ms = sceneTabs.getKey(selection.page)
-          if ((ms.moleSceneType == EXECUTION)) ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionTabbedPane(ms.manager)))
+          if ((ms.moleSceneType == EXECUTION)) ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionManager(ms.manager)))
           PaletteSupport.refreshPalette(ms.moleSceneType)
         }}
   }
     
-  def currentExecutionTabbedPane = executionTabs(currentScene)
+  def currentExecutionManager = executionTabs(currentScene)
   
   def currentScene: IMoleScene = {
     if (tabbedPane.selection.index != -1) {

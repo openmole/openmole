@@ -14,34 +14,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.task.netlogo
+package org.openmole.ide.misc.widget
 
 import java.awt.Dimension
+import scala.swing.FileChooser.SelectionMode._
 import javax.swing.filechooser.FileNameExtensionFilter
-import scala.swing.BoxPanel
 import scala.swing.FileChooser
 import scala.swing.FileChooser.Result.Approve
-import scala.swing.Orientation
 import scala.swing.TextField
-import scala.swing.event.FocusGained
-import scala.swing.FileChooser.SelectionMode.Value
+import scala.swing.event.MousePressed
+import scala.collection.JavaConversions._
 
-class FakeTextField(fc: FileChooser, initialText: String) extends TextField {
-  def this(filter: FileNameExtensionFilter, chooserTitle: String,t: String) = this(new FileChooser {
-      fileFilter = filter
-      title = chooserTitle},t)
-  def this(chooserTitle: String,t: String,sm: Value) = this(new FileChooser{
-      title = chooserTitle
-      fileSelectionMode = sm},t)
+class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDescription: Option[String], selectionMode: Value,extensions: Option[String] ) extends TextField {
+  def this(iT:String,cT:String,cD:String,ex:String) = this(iT,cT,Some(cD),FilesOnly,Some(ex))
+  def this(iT:String,cT:String) = this(iT,cT,None,FilesOnly,None)
+  def this(iT:String) = this(iT,"Select a directory",None,DirectoriesOnly,None)
   
+  text = initialText
+  val fc = new FileChooser {
+    if (chooserDescription.isDefined) fileFilter = new FileNameExtensionFilter(chooserDescription.get,extensions.get)
+    fileSelectionMode = selectionMode
+    title = chooserTitle
+  }
   maximumSize = new Dimension(150,30)
-    reactions += {
-      case FocusGained(peer,_,false) =>
-        focusable = false
+  
+  reactions += {
+    case e: MousePressed => 
         if (fc.showDialog(this,"OK") == Approve) text = fc.selectedFile.getPath
-        focusable = true
-    }
-    text = initialText
-    columns = 15
-  listenTo(this)
+        publish(new DialogClosedEvent(this))
+  }
+  columns = 15
+  listenTo(this.mouse.clicks)
 }

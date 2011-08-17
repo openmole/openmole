@@ -8,7 +8,6 @@ package org.openmole.ide.core.implementation.control
 import java.awt.Rectangle
 import java.io.OutputStream
 import java.io.PrintStream
-import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.swing.ScrollPane
@@ -16,14 +15,16 @@ import scala.swing.TabbedPane
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 
-class ExecutionTabbedPane(manager: IMoleSceneManager) extends TabbedPane {
+class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane {
   val logTextArea = new TextArea{columns = 20;rows = 10}
   val (execution, prototypes,capsules) = MoleMaker.buildMoleExecution(manager)
   
   System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)))
   System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)))
   
-  capsules.keys.foreach{c=>pages+= new TabbedPane.Page(c.dataProxy.get.dataUI.name,new ExecutionPanel(execution,prototypes,c,capsules(c)))}
+  capsules.keys.foreach{c=>pages+= new TabbedPane.Page(c.dataProxy.get.dataUI.name,
+                                                       new ExecutionPanel(execution,prototypes,c,capsules(c),
+                                                                          new PrintStream(new TextAreaOutputStream(logTextArea))))}
   pages+= new TabbedPane.Page("Log",new ScrollPane(logTextArea))
   
   def start = execution.start

@@ -31,7 +31,7 @@ object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
   
   listenTo(`startButton`)
   reactions += {
-    case ButtonClicked(`startButton`) =>TabManager.currentExecutionTabbedPane.start
+    case ButtonClicked(`startButton`) =>TabManager.currentExecutionManager.start
   }
   def activate(b:Boolean) = {
     startButton.enabled = b

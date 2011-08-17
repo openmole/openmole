@@ -17,19 +17,16 @@
 
 package org.openmole.ide.core.implementation.display
 
-import scala.collection.mutable.HashSet
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import javax.swing.JPanel
 import scala.swing.MenuItem
-import org.openide.windows.WindowManager
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
+import org.openmole.ide.core.misc.widget.MenuToggleButton
 import org.openmole.ide.core.model.commons.Constants._
 
 class PropertyPanel extends BoxPanel(Orientation.Vertical){
@@ -38,13 +35,13 @@ class PropertyPanel extends BoxPanel(Orientation.Vertical){
   var oldName = ""
   Displays.currentType = TASK
   
-  val environmentToggleButton = new MenuToggleButton2("Environment")
+  val environmentToggleButton = new MenuToggleButton("Environment")
   EnvironmentDisplay.implementationClasses.foreach(d=>environmentToggleButton.addItem(new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT))))
-  val taskToggleButton = new MenuToggleButton2("Task")
+  val taskToggleButton = new MenuToggleButton("Task")
   TaskDisplay.implementationClasses.foreach(d=>taskToggleButton.addItem(new MenuItem(new TaskDisplayAction(d,TASK))))
-  val prototypeToggleButton = new MenuToggleButton2("Prototype")
+  val prototypeToggleButton = new MenuToggleButton("Prototype")
   PrototypeDisplay.implementationClasses.foreach(d=>prototypeToggleButton.addItem(new MenuItem(new PrototypeDisplayAction(d,PROTOTYPE))))
-  val samplingToggleButton = new MenuToggleButton2("Sampling")
+  val samplingToggleButton = new MenuToggleButton("Sampling")
   SamplingDisplay.implementationClasses.foreach(d=>samplingToggleButton.addItem(new MenuItem(new SamplingDisplayAction(d,SAMPLING))))
     
   val saveButton = buildButton("Save")

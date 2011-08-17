@@ -42,16 +42,6 @@
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.apache.commons.collections15</artifactId>
-            <version>4.01</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.joda.time</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
             <version>${netbeans.version}</version>
@@ -59,6 +49,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.core.implementation</artifactId>
+            <version>${openmole.gui.version}</version>
+        </dependency>  
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.widget</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>  
         <dependency>

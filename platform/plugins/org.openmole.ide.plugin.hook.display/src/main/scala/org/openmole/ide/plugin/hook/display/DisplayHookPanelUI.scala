@@ -17,6 +17,8 @@
 
 package org.openmole.ide.plugin.hook.display
 
+import java.io.OutputStream
+import java.io.PrintStream
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
@@ -37,18 +39,20 @@ import org.openmole.plugin.hook.display.ToStringHook
 class DisplayHookPanelUI(execution: IMoleExecution, 
                          prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
                          capsuleUI: ICapsuleUI, 
-                         capsule: ICapsule) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
+                         capsule: ICapsule,
+                         printStream: PrintStream) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
   xLayoutAlignment = 0.0F
   yLayoutAlignment = 0.0F
                          
-  private var currentDisplayHook= new HashMap[IPrototypeDataProxyUI,Option[ToStringHook]]
   contents += new Label("Display: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)}
   capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pdu=> contents += displayHookCheckBox(pdu))
     
   private def displayHookCheckBox(dpu: IPrototypeDataProxyUI): CheckBox = {
+    val tsh = new ToStringHook(execution, capsule, printStream, prototypes(dpu))
     val cb = new CheckBox(dpu.dataUI.name){reactions+= {case ButtonClicked(cb) =>{
-            if (cb.selected) currentDisplayHook+= dpu-> Some(new ToStringHook(execution, capsule, prototypes(dpu)))
-            else currentDisplayHook(dpu).get.release}}}
+            if (cb.selected) tsh.resume
+            else tsh.release}}}
+    tsh.release
     listenTo(cb)
     cb
   }

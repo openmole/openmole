@@ -15,11 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.widget
+package org.openmole.ide.core.misc.widget
 
 import javax.swing.JPopupMenu
-import javax.swing.event.PopupMenuEvent
-import javax.swing.event.PopupMenuListener
 import scala.swing._
 
 class PopupMenu extends Component with SequentialContainer.Wrapper {

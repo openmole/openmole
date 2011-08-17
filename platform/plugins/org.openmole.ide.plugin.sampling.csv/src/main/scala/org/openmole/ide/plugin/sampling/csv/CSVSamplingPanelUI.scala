@@ -21,58 +21,47 @@ import scala.swing._
 import scala.swing.Label
 import swing.Swing._
 import scala.swing.event.ButtonClicked
+import scala.swing.event.EditDone
 import swing.ListView._
 import scala.swing.TextField
+import au.com.bytecode.opencsv.CSVReader
+import java.io.File
 import java.io.FileReader
 import javax.swing.DefaultCellEditor
 import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.model.display._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.table.DefaultTableModel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import org.openmole.ide.misc.widget.CSVChooseFileTextField
+import org.openmole.ide.misc.widget.DialogClosedEvent
 import scala.swing.BorderPanel.Position._
-import au.com.bytecode.opencsv.CSVReader
 
 class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Vertical) with ISamplingPanelUI {
   
+  val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   val pathFileLabel = new Label("CSV file :") {
-    preferredSize = new Dimension(60,25)
+    preferredSize = new Dimension(80,25)
     border = Swing.EmptyBorder(5,5,5,5)
   }
   
-  val browseFileButton = new Button("Browse") {
-    minimumSize = new Dimension(100,25)
-    border = Swing.EmptyBorder(5,15,5,15)
-  }
-  
-  val filePathTextField = new TextField {
-    border = Swing.EmptyBorder(5, 5, 5, 5)
-  }
-  
   val filePanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(pathFileLabel,filePathTextField,browseFileButton)
+    contents.append(pathFileLabel,csvTextField)
     border = Swing.EmptyBorder(5,15,5,15)
   }
   
-  listenTo(`browseFileButton`)
+  listenTo(csvTextField)
   reactions += {
-    case ButtonClicked(`browseFileButton`) =>  { val fc = new FileChooser {
-          fileFilter = new FileNameExtensionFilter("CSV files","csv","CSV")
-          title = "Select a csv file"
-        }
-        fc.showDialog(this,"OK")
-        filePathTextField.text = fc.selectedFile.getPath
-        val reader = new CSVReader(new FileReader(fc.selectedFile.getPath))
+    case DialogClosedEvent(csvTextField)=> { 
+        if (isFile(csvTextField.text)){
+        val reader = new CSVReader(new FileReader(csvTextField.text))
         val headers = reader.readNext
         model.setRowCount(headers.length)
         headers.zipWithIndex.foreach{case (h,i)=> table.update(i,0,h); table.update(i,1,new PrototypeDataProxyUI(new EmptyPrototypeDataUI("")))}
-        reader.close
-      }
-  }
+        reader.close}}}
   
   val model = new DefaultTableModel(Array[Object]("CSV headers","Prototypes"),0)
   val table = buildTable(model)
@@ -81,7 +70,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   border = Swing.EmptyBorder(10, 10, 10, 10)
   
   // Load data
-  filePathTextField.text =  pud.csvFilePath
+  if (isFile(pud.csvFilePath)) csvTextField.text = pud.csvFilePath
   model.setRowCount(pud.prototypeMapping.size)
   
   var i = 0
@@ -89,14 +78,16 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
                                table.update(i,1,comboContent.zipWithIndex.filter(_._1.dataUI.name.equals(d._2.dataUI.name))(0)._1);
                                i+=1}
   
- 
+  def isFile(s: String) = new File(s).isFile
+  
   def buildTable(m: DefaultTableModel) = 
     new Table{
       model = m
-      preferredSize = new Dimension(150,100)
+      preferredSize = new Dimension(100,100)
       selection.elementMode = Cell
       rowHeight= 30
-
+      
+      
       override protected def editor(row: Int, column: Int) = {
         column match {
           case 1=> new DefaultCellEditor(new ComboBox(comboContent).peer)
@@ -109,7 +100,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   override def saveContent(name: String) = {
     var protoMapping = Map[String,PrototypeDataProxyUI]()   
     for(i<- 0 to model.getRowCount-1) {println("SAVE :: "+model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI].dataUI.getClass);protoMapping += model.getValueAt(i,0).toString -> model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI]}
-    new CSVSamplingDataUI(name,filePathTextField.text,protoMapping)
+    new CSVSamplingDataUI(name,csvTextField.text,protoMapping)
   }
   
   def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.toList

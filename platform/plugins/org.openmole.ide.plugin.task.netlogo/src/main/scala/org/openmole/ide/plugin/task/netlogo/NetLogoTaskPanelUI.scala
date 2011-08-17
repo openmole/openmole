@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.netlogo
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.misc.widget.ChooseFileTextField
 import java.awt.Dimension
 import scala.swing._
 import swing.Swing._
@@ -26,13 +27,14 @@ import swing.Swing._
 class NetLogoTaskPanelUI(ndu: NetLogoTaskDataUI) extends BoxPanel(Orientation.Vertical) with ITaskPanelUI{
  
   border = Swing.EmptyBorder(10, 10, 10, 10)
-  val nlogoTextField = new FakeTextField(new FileNameExtensionFilter("Netlogo files", "nlogo"),"Select a nlogo file",ndu.nlogoPath){preferredSize = new Dimension(100,25)}
-  val workspaceTextField = new FakeTextField("Select a the workspace directory",ndu.workspacePath,FileChooser.SelectionMode.DirectoriesOnly)
+  val nlogoTextField = new ChooseFileTextField(ndu.nlogoPath,"Select a nlogo file","Netlogo files","nlogo"){preferredSize = new Dimension(100,25)}
+  val workspaceTextField = new ChooseFileTextField(ndu.workspacePath)
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   
   contents+= new BoxPanel(Orientation.Horizontal){contents.append(buildLabel("Nlogo file: "),nlogoTextField)}
+  contents+= new BoxPanel(Orientation.Horizontal){contents.append(buildLabel("Workspace directory: "),workspaceTextField)}
   contents+= new BoxPanel(Orientation.Vertical){contents.append(buildLabel("Commands: "),new ScrollPane(launchingCommandTextArea)); border = Swing.EmptyBorder(10,10,10,10);preferredSize = new Dimension(130,25)}
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(buildLabel("Workspace directory: "))}
+  
   
   override def saveContent(name: String): ITaskDataUI = new NetLogoTaskDataUI(name, workspaceTextField.text, nlogoTextField.text, launchingCommandTextArea.text)
   

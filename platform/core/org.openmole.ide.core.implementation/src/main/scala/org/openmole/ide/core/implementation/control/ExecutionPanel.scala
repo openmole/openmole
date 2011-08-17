@@ -5,41 +5,32 @@
 
 package org.openmole.ide.core.implementation.control
 
-import java.awt.Color
 import java.awt.Dimension
 import java.awt.Font
-import java.io.File
-import javax.swing.JPanel
-import javax.swing.border.Border
-import javax.swing.border.LineBorder
-import org.openmole.plugin.hook.display.ToStringHook
+import java.io.OutputStream
+import java.io.PrintStream
 import org.openide.util.Lookup
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ide.core.implementation.widget.ChooseFileTextField
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import scala.swing.BoxPanel
 import scala.swing.CheckBox
-import scala.swing.Component
-import scala.swing.FileChooser
 import scala.swing.FlowPanel
 import scala.swing.Label
 import scala.swing.Orientation
-import scala.swing.Panel
-import scala.swing.ScrollPane
 import scala.swing.Separator
 import scala.swing.TextField
 import scala.swing.Alignment
 import java.awt.Font._
-import scala.swing.event.ButtonClicked
 import scala.collection.JavaConversions._
 
-class ExecutionPanel(execution: IMoleExecution,prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_<:Any]],capsuleUI: ICapsuleUI,capsule: ICapsule) extends FlowPanel{
+class ExecutionPanel(execution: IMoleExecution,prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_<:Any]],capsuleUI: ICapsuleUI,capsule: ICapsule,printStream: PrintStream) extends FlowPanel{
+ 
+//class ExecutionPanel(exeTP: ExecutionManager) extends FlowPanel{
  
   yLayoutAlignment = 0.0F
   xLayoutAlignment = 0.0F
@@ -58,6 +49,6 @@ class ExecutionPanel(execution: IMoleExecution,prototypes: HashMap[IPrototypeDat
   }
   
   private def buildHookPanel = new FlowPanel {
-    Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach(f=>{peer.add(f.buildPanelUI(execution,prototypes,capsuleUI,capsule).peer)})}
+    Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach(f=>{peer.add(f.buildPanelUI(execution,prototypes,capsuleUI,capsule,printStream).peer)})}
   
 }

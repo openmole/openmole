@@ -30,10 +30,10 @@ import java.awt.Font
 import java.awt.Font._
 import scala.swing.BoxPanel
 import scala.swing.CheckBox
-import scala.swing.FileChooser
 import scala.swing.Label
 import scala.swing.Orientation
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.plugin.hook.filemanagement.CopyFileHook
 
 class CopyFileHookPanelUI(execution: IMoleExecution, 
@@ -51,9 +51,9 @@ class CopyFileHookPanelUI(execution: IMoleExecution,
       }})               
 
   private def copyHookPanel(dpu: IPrototypeDataProxyUI): BoxPanel = {
-    val cftf = new FakeTextField("Choose the file path","",FileChooser.SelectionMode.FilesOnly)
+    val cftf = new ChooseFileTextField("","Select a file path")
     val cb = new CheckBox("Save " + dpu.dataUI.name +" in "){reactions+= {case ButtonClicked(cb) =>
-          if (selected) {println("SEL COPY H ");currentCopyFileHook+= dpu-> Some(new CopyFileHook(execution,capsule,prototypes(dpu).asInstanceOf[IPrototype[File]],cftf.text))}
+          if (selected) {currentCopyFileHook+= dpu-> Some(new CopyFileHook(execution,capsule,prototypes(dpu).asInstanceOf[IPrototype[File]],cftf.text))}
           else currentCopyFileHook(dpu).get.release}}
     listenTo(cb)
     new BoxPanel(Orientation.Horizontal){xLayoutAlignment = 0; contents.append(cb,cftf)}

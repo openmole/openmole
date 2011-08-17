@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.hook.display
 
+import java.io.PrintStream
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
@@ -29,5 +30,6 @@ class DisplayHookFactoryUI extends IHookFactoryUI {
   override def buildPanelUI(execution: IMoleExecution, 
                             prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
                             capsuleUI: ICapsuleUI, 
-                            capsule: ICapsule) = new DisplayHookPanelUI(execution,prototypes,capsuleUI,capsule)
+                            capsule: ICapsule,
+                            printStream: PrintStream) = new DisplayHookPanelUI(execution,prototypes,capsuleUI,capsule,printStream)
 }            

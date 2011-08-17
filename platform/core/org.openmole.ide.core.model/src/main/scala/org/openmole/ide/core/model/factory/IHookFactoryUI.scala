@@ -5,6 +5,7 @@
 
 package org.openmole.ide.core.model.factory
 
+import java.io.PrintStream
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
@@ -17,5 +18,6 @@ trait IHookFactoryUI{
   def buildPanelUI(execution: IMoleExecution, 
                    prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
                    capsuleUI: ICapsuleUI, 
-                   capsule: ICapsule): IHookPanelUI
+                   capsule: ICapsule,
+                   printStream: PrintStream): IHookPanelUI
 }

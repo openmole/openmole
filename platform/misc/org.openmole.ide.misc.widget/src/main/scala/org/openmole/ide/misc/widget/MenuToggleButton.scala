@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.widget
+package org.openmole.ide.core.misc.widget
 
 import java.awt.Color
 import java.awt.Graphics
@@ -26,7 +26,7 @@ import javax.swing.Icon
 import scala.swing._
 import swing.Swing._
 
-class MenuToggleButton2(text: String) extends ToggleButton(text){
+class MenuToggleButton(text: String) extends ToggleButton(text){
   val popup = new PopupMenu
   icon = new MenuArrowIcon
   peer.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4 + icon.getIconWidth))
@@ -34,7 +34,7 @@ class MenuToggleButton2(text: String) extends ToggleButton(text){
   popup.peer.addPropertyChangeListener( "visible", new PropertyChangeListener {
       def propertyChange(e: PropertyChangeEvent) = peer.setSelected( popup.peer.isVisible )})
   
-  action = new Action( text ) { override def apply = popup.show(MenuToggleButton2.this, 0,MenuToggleButton2.this.peer.getHeight-1 ) }
+  action = new Action( text ) { override def apply = popup.show(MenuToggleButton.this, 0,MenuToggleButton.this.peer.getHeight-1 ) }
   
   def addItem(item : MenuItem) = popup.contents += item
   
