@@ -17,13 +17,16 @@
 
 package org.openmole.plugin.hook.display
 
+import java.io.PrintStream
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 
-class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) extends CapsuleExecutionHook(execution, capsule) {
+class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: String, out: PrintStream) extends CapsuleExecutionHook(execution, capsule) {
   
-  override def process(moleJob: IMoleJob) = println(VariableExpansion.expandData(moleJob.context, toDisplay))
+  def this(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) = this(execution, capsule, toDisplay, System.out)
+  
+  override def process(moleJob: IMoleJob) = out.println(VariableExpansion.expandData(moleJob.context, toDisplay))
 }

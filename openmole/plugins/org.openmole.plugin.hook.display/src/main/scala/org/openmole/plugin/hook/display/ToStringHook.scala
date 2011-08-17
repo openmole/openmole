@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.hook.display
 
+import java.io.PrintStream
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IPrototype
@@ -24,16 +25,20 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
 
-class ToStringHook(execution: IMoleExecution, capsule: ICapsule, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
+class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
+
+  def this(execution: IMoleExecution, capsule: ICapsule, prototypes: IPrototype[_]*) = this(execution, capsule, System.out, prototypes: _*)
   
-  def this(execution: IMoleExecution, capsule: ICapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, prototypes: _*)
-  
+  def this(execution: IMoleExecution, capsule: ICapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, System.out, prototypes: _*)
+
+  def this(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: Array[IPrototype[_]]) = this(execution, capsule, out, prototypes: _*)
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
     
     prototypes.map(p => p -> context.variable(p)) foreach {
       case(prototype, option) => option match {
-          case Some(v) => println(v.toString)
+          case Some(v) => out.println(v.toString)
           case None => throw new UserBadDataError("No variable " + prototype + " found.")
         }
     }
