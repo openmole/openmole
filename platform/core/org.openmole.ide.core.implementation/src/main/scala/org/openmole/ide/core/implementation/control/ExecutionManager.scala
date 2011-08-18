@@ -10,23 +10,26 @@ import java.io.OutputStream
 import java.io.PrintStream
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import scala.swing.Orientation
 import scala.swing.ScrollPane
+import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 
-class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane {
+class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientation.Vertical) {
+  val tabbedPane = new TabbedPane
   val logTextArea = new TextArea{columns = 20;rows = 10}
   val (execution, prototypes,capsules) = MoleMaker.buildMoleExecution(manager)
   
   System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)))
   System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)))
   
-  capsules.keys.foreach{c=>pages+= new TabbedPane.Page(c.dataProxy.get.dataUI.name,
+  capsules.keys.foreach{c=>tabbedPane.pages+= new TabbedPane.Page(c.dataProxy.get.dataUI.name,
                                                        new ExecutionPanel(execution,prototypes,c,capsules(c),
                                                                           new PrintStream(new TextAreaOutputStream(logTextArea))))}
-  pages+= new TabbedPane.Page("Log",new ScrollPane(logTextArea))
-  
+  leftComponent = new ScrollPane(tabbedPane)
+  rightComponent = new ScrollPane(logTextArea)
   def start = execution.start
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
