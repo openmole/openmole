@@ -19,13 +19,26 @@ package org.openmole.ide.plugin.sampling.complete
 
 import scala.swing._
 import swing.Swing._
+import scala.swing.event.ButtonClicked
 import swing.ListView._
+import scala.swing.BoxPanel
 import scala.swing.Table.ElementMode._
+import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import scala.swing.BorderPanel.Position._
 
 class CompleteSamplingPanelUI(pud: CompleteSamplingDataUI) extends BoxPanel(Orientation.Vertical) with ISamplingPanelUI {
+  
+  Proxys.prototype.foreach(pud=>contents+= buildFactorPanel(pud))
+  
+  def buildFactorPanel(pud: IPrototypeDataProxyUI) = {
+    val cbb = new ComboBox(List.empty)
+    new BoxPanel(Orientation.Horizontal){
+    contents+= new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}}
+    contents+= cbb}
+  }
   
   override def saveContent(name: String) = new CompleteSamplingDataUI(name)
 }
