@@ -43,9 +43,10 @@ class DisplayHookPanelUI(execution: IMoleExecution,
                          printStream: PrintStream) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
   xLayoutAlignment = 0.0F
   yLayoutAlignment = 0.0F
-                         
+       
+  if (capsuleUI.dataProxy.get.dataUI.prototypesOut.size > 0) {
   contents += new Label("Display: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)}
-  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pdu=> contents += displayHookCheckBox(pdu))
+  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pdu=> contents += displayHookCheckBox(pdu))}
     
   private def displayHookCheckBox(dpu: IPrototypeDataProxyUI): CheckBox = {
     val tsh = new ToStringHook(execution, capsule, printStream, prototypes(dpu))

@@ -40,16 +40,16 @@ class CopyFileHookPanelUI(execution: IMoleExecution,
                           prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
                           capsuleUI: ICapsuleUI, 
                           capsule: ICapsule) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
- xLayoutAlignment = 0.0F
- yLayoutAlignment = 0.0F
+  xLayoutAlignment = 0.0F
+  yLayoutAlignment = 0.0F
   var currentCopyFileHook= new HashMap[IPrototypeDataProxyUI,Option[CopyFileHook]]
   
-  contents += new Label("Save in File: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)}
   capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach( 
     p=> {if(p.dataUI.coreObject.`type`.erasure == classOf[File]) {
         contents.append(copyHookPanel(p))
       }})               
 
+  if (contents.size > 0) contents.insert(0,new Label("Save in File: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)})
   private def copyHookPanel(dpu: IPrototypeDataProxyUI): BoxPanel = {
     val cftf = new ChooseFileTextField("","Select a file path")
     val cb = new CheckBox("Save " + dpu.dataUI.name +" in "){reactions+= {case ButtonClicked(cb) =>
