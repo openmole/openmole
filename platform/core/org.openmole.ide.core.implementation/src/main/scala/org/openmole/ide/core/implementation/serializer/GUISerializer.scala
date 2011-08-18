@@ -30,8 +30,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.data._
-import org.openide.windows.WindowManager
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
@@ -41,7 +39,6 @@ object GUISerializer {
   xstream.registerConverter(new MoleSceneConverter)
   
   xstream.alias("molescene", classOf[IMoleScene])
-//  xstream.alias("entity", classOf[EntityUI])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
   
   def serialize(toFile: String) = {
@@ -53,7 +50,8 @@ object GUISerializer {
     out.writeObject(new SerializedProxys(Proxys.task,
                                          Proxys.prototype,
                                          Proxys.sampling,
-                                         Proxys.environment))
+                                         Proxys.environment,
+                                         Proxys.domain))
     //molescenes
     MoleScenesManager.moleScenes.keys.foreach(out.writeObject(_))
     

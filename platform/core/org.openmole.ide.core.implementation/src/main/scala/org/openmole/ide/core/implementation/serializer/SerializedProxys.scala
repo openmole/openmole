@@ -24,13 +24,15 @@ import scala.collection.mutable.HashSet
 class SerializedProxys(var task: HashSet[ITaskDataProxyUI],
                        var prototype: HashSet[IPrototypeDataProxyUI],
                        var sampling: HashSet[ISamplingDataProxyUI],
-                       var environment: HashSet[IEnvironmentDataProxyUI]) {
+                       var environment: HashSet[IEnvironmentDataProxyUI],
+                       var domain: HashSet[IDomainDataProxyUI]) {
   
   def loadProxys = {
     Proxys.task = task
     Proxys.prototype = prototype
     Proxys.sampling = sampling
     Proxys.environment = environment
+    Proxys.domain = domain
   }
   
 }

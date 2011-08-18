@@ -30,6 +30,7 @@ object Proxys {
   var prototype = new HashSet[IPrototypeDataProxyUI]
   var sampling = new HashSet[ISamplingDataProxyUI]
   var environment = new HashSet[IEnvironmentDataProxyUI]
+  var domain = new HashSet[IDomainDataProxyUI]
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
 
@@ -37,6 +38,7 @@ object Proxys {
   def getPrototypeDataProxyUI(name: String) = prototype.filter(_.dataUI.name==name).headOption
   def getSamplingDataProxyUI(name: String) = sampling.filter(_.dataUI.name==name).headOption
   def getEnvironmentDataProxyUI(name: String) = environment.filter(_.dataUI.name==name).headOption
+  def getDomainDataProxyUI(name: String) = domain.filter(_.dataUI.name==name).headOption
   
   def getPrototypesNames = task.groupBy(_.dataUI.name).keys.toSet
   
@@ -44,23 +46,27 @@ object Proxys {
   def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototype += dpu
   def addSamplingElement(dpu: ISamplingDataProxyUI) = sampling += dpu
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment += dpu
+  def addDomainElement(dpu: IDomainDataProxyUI) = domain += dpu
   
   
   def removeTaskElement(dpu: ITaskDataProxyUI) = task.remove(dpu)
   def removePrototypeElement(dpu: IPrototypeDataProxyUI) = prototype.remove(dpu)
   def removeSamplingElement(dpu: ISamplingDataProxyUI) = sampling.remove(dpu)
   def removeEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment.remove(dpu)
+  def removeDomainElement(dpu: IDomainDataProxyUI) = domain.remove(dpu)
   
   def clearAllTaskElement = task.clear
   def clearAllPrototypeElement = prototype.clear
   def clearAllSamplingElement = sampling.clear
   def clearAllEnvironmentElement = environment.clear
+  def clearAllDomainElement = domain.clear
   
   def clearAll: Unit = {
     clearAllTaskElement
     clearAllPrototypeElement
     clearAllSamplingElement
     clearAllEnvironmentElement
+    clearAllDomainElement
   }
   
 } 

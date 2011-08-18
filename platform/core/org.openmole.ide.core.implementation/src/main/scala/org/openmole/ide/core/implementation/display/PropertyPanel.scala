@@ -35,6 +35,8 @@ class PropertyPanel extends BoxPanel(Orientation.Vertical){
   var oldName = ""
   Displays.currentType = TASK
   
+  val domainToggleButton = new MenuToggleButton("Domain")
+  DomainDisplay.implementationClasses.foreach(d=>domainToggleButton.addItem(new MenuItem(new DomainDisplayAction(d,DOMAIN))))
   val environmentToggleButton = new MenuToggleButton("Environment")
   EnvironmentDisplay.implementationClasses.foreach(d=>environmentToggleButton.addItem(new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT))))
   val taskToggleButton = new MenuToggleButton("Task")
@@ -53,7 +55,7 @@ class PropertyPanel extends BoxPanel(Orientation.Vertical){
   listenTo(`saveButton`,`cancelButton`)
   
   val categoryButtonPanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(prototypeToggleButton,taskToggleButton,samplingToggleButton,environmentToggleButton)
+    contents.append(prototypeToggleButton,taskToggleButton,domainToggleButton,samplingToggleButton,environmentToggleButton)
     border = Swing.EmptyBorder(15, 5, 15, 5)
   }
   

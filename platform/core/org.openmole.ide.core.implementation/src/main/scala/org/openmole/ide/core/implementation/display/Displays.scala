@@ -59,6 +59,7 @@ object Displays {
       case PROTOTYPE=> PrototypeDisplay
       case SAMPLING=> SamplingDisplay
       case ENVIRONMENT=> EnvironmentDisplay
+      case DOMAIN => DomainDisplay
       case _=> throw new GUIUserBadDataError("Unknown type " + currentType + " No display is available.")
     }
   }

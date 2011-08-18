@@ -21,10 +21,22 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import scala.swing.Table.ElementMode._
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.Locale
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.swing.BorderPanel.Position._
 
-class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) extends BoxPanel(Orientation.Vertical) with IDomainPanelUI {
+class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) extends RangeDomainPanelUI(NumberFormat.getIntegerInstance) 
+                                                                  with IDomainPanelUI {
   
-  override def saveContent(name: String) = new IntegerRangeDomainDataUI(name)
+  minField.text = pud.min
+  maxField.text = pud.max
+  stepField.text = pud.step
+  
+  override def saveContent(name: String) = {
+    new IntegerRangeDomainDataUI(name,minField.text.filterNot(_==' '),
+                                 maxField.text.filterNot(_==' '),
+                                 stepField.text.filterNot(_==' '))
+  }
 }
