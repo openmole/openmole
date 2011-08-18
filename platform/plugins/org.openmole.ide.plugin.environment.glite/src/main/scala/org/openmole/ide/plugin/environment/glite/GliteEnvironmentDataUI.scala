@@ -21,7 +21,7 @@ class GliteEnvironmentDataUI(val name: String,val vo: String,val voms: String,va
 
   override def coreClass = classOf[GliteEnvironment] 
   
-  override def imagePath = "img/thumb/glite.png" 
+  override def imagePath = "img/glite.png" 
   
   override def buildPanelUI = new GliteEnvironmentPanelUI(this)
 }

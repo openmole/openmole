@@ -26,7 +26,7 @@ class StringPrototypeDataUI(val name: String) extends IPrototypeDataUI {
   
   override def coreObject = new Prototype(name,classOf[String])
   
-  override def imagePath = "img/thumb/string.png"
+  override def imagePath = "img/string.png"
   
   override def buildPanelUI = new StringPrototypePanelUI
 }

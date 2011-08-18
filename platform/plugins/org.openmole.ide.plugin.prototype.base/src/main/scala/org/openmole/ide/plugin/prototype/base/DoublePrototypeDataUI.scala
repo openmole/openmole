@@ -25,7 +25,7 @@ class DoublePrototypeDataUI(val name: String) extends IPrototypeDataUI{
 
   override def coreObject = new Prototype(name,classOf[Double])
   
-  override def imagePath = "img/thumb/double.png"
+  override def imagePath = "img/double.png"
   
   override def buildPanelUI = new DoublePrototypePanelUI
 }

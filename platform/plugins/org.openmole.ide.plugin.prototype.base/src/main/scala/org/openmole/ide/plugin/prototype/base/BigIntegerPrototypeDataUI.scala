@@ -27,7 +27,7 @@ class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI{
   
   override def coreObject = new Prototype(name,classOf[BigInt])
   
-  override def imagePath = "img/thumb/biginteger.png"
+  override def imagePath = "img/biginteger.png"
   
   override def buildPanelUI = new BigIntegerPrototypePanelUI
 }

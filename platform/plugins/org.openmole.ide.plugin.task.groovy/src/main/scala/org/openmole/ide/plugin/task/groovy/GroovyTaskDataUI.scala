@@ -16,7 +16,7 @@ class GroovyTaskDataUI(val name: String,val code: String) extends TaskDataUI {
   
   override def coreClass= classOf[GroovyTask]
   
-  override def imagePath = "img/thumb/groovyTask.png"
+  override def imagePath = "img/groovyTask.png"
   
   override def buildPanelUI = new GroovyTaskPanelUI(this)
   

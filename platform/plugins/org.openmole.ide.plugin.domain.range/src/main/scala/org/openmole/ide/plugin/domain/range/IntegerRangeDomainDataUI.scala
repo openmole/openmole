@@ -16,7 +16,7 @@ class IntegerRangeDomainDataUI(val name: String,val min: String,val max: String,
 
   override def coreClass = classOf[IntegerRange] 
   
-  override def imagePath = "img/thumb/completeSampling.png"
+  override def imagePath = "img/domain_range.png"
   
   override def buildPanelUI = new IntegerRangeDomainPanelUI(this)
 }

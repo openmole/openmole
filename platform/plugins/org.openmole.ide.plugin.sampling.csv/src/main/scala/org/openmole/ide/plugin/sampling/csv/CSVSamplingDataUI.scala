@@ -35,7 +35,7 @@ class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeM
 
   override def coreClass = classOf[CSVSampling] 
   
-  override def imagePath = "img/thumb/csvSampling.png" 
+  override def imagePath = "img/csvSampling.png" 
   
 //  override def buildPanelUI = new CSVSamplingPanelUI(this)
   override def buildPanelUI = new CSVSamplingPanelUI(this)

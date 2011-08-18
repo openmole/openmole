@@ -16,7 +16,7 @@ class DoubleRangeDomainDataUI(val name: String,val min: String,val max: String,v
 
   override def coreClass = classOf[DoubleRange] 
   
-  override def imagePath = "img/thumb/completeSampling.png"
+  override def imagePath = "img/domain_range.png"
   
   override def buildPanelUI = new DoubleRangeDomainPanelUI(this)
 }
