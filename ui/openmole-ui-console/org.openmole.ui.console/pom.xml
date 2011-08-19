@@ -101,12 +101,6 @@
         <!-- dependencies for the runtime -->
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.nuiton.j2r</artifactId>
-            <version>${lib.org.nuiton.j2r.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>net.sourceforge.jline</artifactId>
             <version>${lib.net.sourceforge.jline.version}</version>
         </dependency>
