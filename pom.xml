@@ -11,11 +11,11 @@
     <version>0.3-SNAPSHOT</version>
 
     <modules>
-        <!--<module>libraries</module>
+        <module>libraries</module>
         <module>third-parties</module>
         <module>openmole</module>
         <module>runtime</module>
-        <module>ui</module>-->
+        <module>ui</module>
     </modules>
 
     <dependencyManagement>
