@@ -34,6 +34,7 @@ import org.openmole.core.batch.internal.Activator
 object JSAGASessionService {
   
   private var sessions = List[(String, Session)]()
+  private lazy val defaultSession = SessionFactory.createSession(false)
   private val JSAGAConfigFile = "jsaga-universe.xml"
   private val JSAGATimeOutFile = "jsaga-timeout.properties"
   
@@ -54,7 +55,7 @@ object JSAGASessionService {
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
     else  Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
     
-    sessions = ("file://.*" -> SessionFactory.createSession(false)) :: sessions
+    //sessions = ("(file://.*)|(http://.*)" -> SessionFactory.createSession(false)) :: sessions
     Unit
   }
     
@@ -71,7 +72,7 @@ object JSAGASessionService {
   
   def session(url: String) = sessions.filter{case(p, s) => url.matches(p)}.headOption match {
     case Some((p, s)) => s
-    case None => throw new InternalProcessingError("No session available for url " + url)
+    case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
   }
   
   def createContext: Context = ContextFactory.createContext
