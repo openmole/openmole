@@ -55,7 +55,8 @@
             <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
-        <dependency>org.openmole.ide</groupId>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.task.systemexec</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>

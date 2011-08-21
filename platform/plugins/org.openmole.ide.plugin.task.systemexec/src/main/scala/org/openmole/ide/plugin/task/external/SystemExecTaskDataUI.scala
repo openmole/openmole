@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 class SystemExecTaskDataUI(val name: String,val workspace: String,val lauchingCommands: String) extends TaskDataUI {
   def this(n: String) = this(n,"","")
   
-  override def coreObject = new SystemExecTask(name,asJavaIterable(lauchingCommands.split('\n')),None,true,workspace)
+  override def coreObject = new SystemExecTask(name,lauchingCommands.split('\n').toString,None,true,workspace)
   
   override def coreClass= classOf[SystemExecTask]
   
