@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyFactory
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import scala.collection.JavaConversions._
 
-class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI) extends IPrototypeDataProxyFactory{
+class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory{
   
   override def buildDataProxyUI(name:String) = new PrototypeDataProxyUI(factory.buildDataUI(name))
 }

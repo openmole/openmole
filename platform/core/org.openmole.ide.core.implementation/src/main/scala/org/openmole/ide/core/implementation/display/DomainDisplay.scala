@@ -31,10 +31,10 @@ import scala.collection.JavaConversions._
 object DomainDisplay extends IDisplay{
   private var modelDomains = new HashSet[DomainDataProxyFactory]
   var name = "domain0"
-  var currentPanel: Option[IDomainPanelUI] = None
+  var currentPanel: Option[IDomainPanelUI[_]] = None
   var dataProxy: Option[IDomainDataProxyUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))
+  Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))
   
   override def implementationClasses = modelDomains
   

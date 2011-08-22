@@ -20,6 +20,6 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.dataproxy.IDomainDataProxyFactory
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-class DomainDataProxyFactory(val factory: IDomainFactoryUI) extends IDomainDataProxyFactory {
+class DomainDataProxyFactory(val factory: IDomainFactoryUI[_]) extends IDomainDataProxyFactory {
  override def buildDataProxyUI(name:String) = new DomainDataProxyUI(factory.buildDataUI(name))
 }

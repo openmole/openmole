@@ -28,11 +28,11 @@ import org.openmole.ide.core.model.dataproxy._
 
 object PrototypeDisplay extends IDisplay{
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
-  var currentPanel: Option[IPrototypePanelUI] = None
+  var currentPanel: Option[IPrototypePanelUI[_]] = None
   var name= "proto0"
   var dataProxy: Option[IPrototypeDataProxyUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
   override def implementationClasses = modelPrototypes
   

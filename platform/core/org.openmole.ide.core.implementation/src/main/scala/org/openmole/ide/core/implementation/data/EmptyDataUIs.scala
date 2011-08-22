@@ -26,13 +26,13 @@ object EmptyDataUIs {
   //def prototype = new 
   
   
-  class  EmptyPrototypeDataUI(val name: String) extends IPrototypeDataUI  {
-    override def coreClass = classOf[IPrototype[Any]]
+  class  EmptyPrototypeDataUI(val name: String) extends IPrototypeDataUI[Any]  {
+    override def coreClass = classOf[IPrototype[_]]
     override def coreObject = new Prototype(name,classOf[Any])
     override def imagePath = ""
     override def buildPanelUI = new EmptyPrototypePanelUI
     
-    class EmptyPrototypePanelUI extends IPrototypePanelUI {
+    class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
       override def peer = this.peer
       override def saveContent(name:String) = new EmptyPrototypeDataUI("")}
   }
