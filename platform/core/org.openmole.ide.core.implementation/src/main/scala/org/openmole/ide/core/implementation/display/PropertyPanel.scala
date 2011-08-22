@@ -21,70 +21,46 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import javax.swing.JPanel
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
-import org.openmole.ide.core.misc.widget.MenuToggleButton
 import org.openmole.ide.core.model.commons.Constants._
 
-class PropertyPanel extends BoxPanel(Orientation.Vertical){
-  border = Swing.EmptyBorder(10, 10, 10, 10)
-  var initEntity = false
+class PropertyPanel extends MigPanel("fillx,wrap 4","[right]rel[grow,fill]", "[]10[]"){
   var oldName = ""
   Displays.currentType = TASK
   
-  val domainToggleButton = new MenuToggleButton("Domain")
-  DomainDisplay.implementationClasses.foreach(d=>domainToggleButton.addItem(new MenuItem(new DomainDisplayAction(d,DOMAIN))))
-  val environmentToggleButton = new MenuToggleButton("Environment")
-  EnvironmentDisplay.implementationClasses.foreach(d=>environmentToggleButton.addItem(new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT))))
-  val taskToggleButton = new MenuToggleButton("Task")
-  TaskDisplay.implementationClasses.foreach(d=>taskToggleButton.addItem(new MenuItem(new TaskDisplayAction(d,TASK))))
-  val prototypeToggleButton = new MenuToggleButton("Prototype")
-  PrototypeDisplay.implementationClasses.foreach(d=>prototypeToggleButton.addItem(new MenuItem(new PrototypeDisplayAction(d,PROTOTYPE))))
-  val samplingToggleButton = new MenuToggleButton("Sampling")
-  SamplingDisplay.implementationClasses.foreach(d=>samplingToggleButton.addItem(new MenuItem(new SamplingDisplayAction(d,SAMPLING))))
+  val domainMenu = new Menu("Domain")
+  DomainDisplay.implementationClasses.foreach(d=>domainMenu.contents+=new MenuItem(new DomainDisplayAction(d,DOMAIN)))
+  val environmentMenu = new Menu("Environment")
+  EnvironmentDisplay.implementationClasses.foreach(d=>environmentMenu.contents+=new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT)))
+  val taskMenu = new Menu("Task")
+  TaskDisplay.implementationClasses.foreach(d=>taskMenu.contents+=new MenuItem(new TaskDisplayAction(d,TASK)))
+  val prototypeMenu = new Menu("Prototype")
+  PrototypeDisplay.implementationClasses.foreach(d=>prototypeMenu.contents+= new MenuItem(new PrototypeDisplayAction(d,PROTOTYPE)))
+  val samplingMenu = new Menu("Sampling")
+  SamplingDisplay.implementationClasses.foreach(d=>samplingMenu.contents+= new MenuItem(new SamplingDisplayAction(d,SAMPLING)))
     
-  val saveButton = buildButton("Save")
-  val cancelButton = buildButton("Cancel")
-  val nameTextField = new TextField {
-    maximumSize = new Dimension(150,30)
-  }
+  val saveButton = new Button("Save")
+  val cancelButton = new Button("Cancel")
+  val nameTextField = new TextField(12) 
   
   listenTo(`saveButton`,`cancelButton`)
-  
-  val categoryButtonPanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(prototypeToggleButton,taskToggleButton,domainToggleButton,samplingToggleButton,environmentToggleButton)
-    border = Swing.EmptyBorder(15, 5, 15, 5)
-  }
-  
   reactions += {
     case ButtonClicked(`saveButton`) =>  save
-    case ButtonClicked(`cancelButton`) =>  cancel
-  }
+    case ButtonClicked(`cancelButton`) =>  cancel}
 
-  val namePanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(buildLabel("Name :"),nameTextField,saveButton,cancelButton)
-    border = Swing.EmptyBorder(10, 5, 10, 5)
-  }
-    
   val propertyScrollPane = new ScrollPane{minimumSize = new Dimension(150,200)}
   
-  contents.append(categoryButtonPanel,namePanel,propertyScrollPane)
-  border = Swing.EmptyBorder(10, 10, 10, 10)
-  
-  def buildButton(name: String) = 
-    new Button(name){
-      minimumSize = new Dimension(100,25)
-      border = Swing.EmptyBorder(5,15,5,15)
-    }
-
-  def buildLabel(name: String) = 
-    new Label(name) {
-      preferredSize = new Dimension(60,25)
-      border = Swing.EmptyBorder(5,5,5,5)
-    }
+  contents+= (new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu);preferredSize.height= 30 },"span 4,growx")
+  contents+= new Label("Name: ")
+  contents+= nameTextField
+  contents+= saveButton
+  contents+= cancelButton
+  contents+= (propertyScrollPane,"span 4,growx")
   
   def displayCurrentEntity = {
     oldName = Displays.name
