@@ -80,7 +80,7 @@ class JobLauncher(debug: Boolean = false) {
     val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
     var runtime: Option[(String, File)] = None
 
-    val storage = "sftp://" + host + ":" + port + "/"
+    val storage = "sftp://" + user + '@' + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
 
     

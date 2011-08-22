@@ -19,17 +19,14 @@ package org.openmole.core.batch.jsaga
 
 import java.util.Hashtable
 import java.util.logging.Level
-import java.util.logging.Logger
+import java.util.logging.{Logger => JLogger}
 import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
 import org.ogf.saga.session.Session
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.osgi.framework.BundleContext
-import org.osgi.service.url.URLConstants
-import org.osgi.service.url.URLStreamHandlerService
-import org.openmole.core.batch.internal.Activator
 
 object JSAGASessionService {
   
@@ -40,7 +37,9 @@ object JSAGASessionService {
   
   init
   @transient lazy val init = {
-    System.setProperty("JSAGA_VAR", Workspace.newDir.getAbsolutePath)
+    val varDir = Workspace.newDir
+    System.setProperty("JSAGA_VAR", varDir.getAbsolutePath)
+
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
@@ -48,12 +47,12 @@ object JSAGASessionService {
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
     if (universe != null)  System.setProperty("jsaga.universe", universe.toString)
-    else Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
+    else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
       
     val timeout = this.getClass.getClassLoader.getResource(JSAGATimeOutFile)
 
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
-    else  Logger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
+    else  JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
     
     //sessions = ("(file://.*)|(http://.*)" -> SessionFactory.createSession(false)) :: sessions
     Unit

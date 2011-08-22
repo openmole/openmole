@@ -177,7 +177,7 @@ class Workspace(val location: File) {
     if (!tempFile.delete) throw new IOException    
     if (!tempFile.mkdir) throw new IOException
 
-    tempFile.deleteOnExit
+    //tempFile.deleteOnExit
     tempFile
   }
   
