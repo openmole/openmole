@@ -31,7 +31,7 @@ class ExplorationTaskDataUI(val name: String) extends TaskDataUI{
   
   override def coreClass= classOf[ExplorationTask]
   
-  override def imagePath = "img/explorationTaskSmall.png"
+  override def imagePath = "img/explorationTask.png"
   
   override def buildPanelUI = new ExplorationTaskPanelUI(this)
   
