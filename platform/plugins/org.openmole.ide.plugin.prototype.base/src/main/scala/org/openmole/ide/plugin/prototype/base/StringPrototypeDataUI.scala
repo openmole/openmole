@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.data.Prototype
 
-class StringPrototypeDataUI(val name: String) extends IPrototypeDataUI {
+class StringPrototypeDataUI(val name: String) extends IPrototypeDataUI[String] {
   override def coreClass = classOf[IPrototype[String]]
   
   override def coreObject = new Prototype(name,classOf[String])

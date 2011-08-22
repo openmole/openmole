@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
+class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
   
   override def displayName = "BigDecimal"
   

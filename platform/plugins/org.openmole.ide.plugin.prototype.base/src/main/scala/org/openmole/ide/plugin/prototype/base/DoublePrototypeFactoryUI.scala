@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class DoublePrototypeFactoryUI extends IPrototypeFactoryUI {
+class DoublePrototypeFactoryUI extends IPrototypeFactoryUI[Double] {
   
   override def displayName = "Double"
   

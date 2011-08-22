@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI {
+class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI[Int] {
   
   override def displayName = "Integer"
   

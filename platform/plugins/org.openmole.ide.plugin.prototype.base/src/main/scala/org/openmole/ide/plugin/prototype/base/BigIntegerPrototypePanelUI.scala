@@ -21,6 +21,6 @@ import org.openmole.ide.core.model.data.IPrototypeDataUI
 import scala.swing.Panel
 
 
-class BigIntegerPrototypePanelUI extends Panel with IPrototypePanelUI {
-    override def saveContent(name: String): IPrototypeDataUI = new BigIntegerPrototypeDataUI(name)
+class BigIntegerPrototypePanelUI extends Panel with IPrototypePanelUI[scala.BigInt] {
+    override def saveContent(name: String) = new BigIntegerPrototypeDataUI(name)
 }

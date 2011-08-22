@@ -22,8 +22,8 @@ import java.math.BigInteger
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI{
-  override def coreClass = classOf[IPrototype[BigInteger]]
+class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI[scala.BigInt]{
+  override def coreClass = classOf[IPrototype[BigInt]]
   
   override def coreObject = new Prototype(name,classOf[BigInt])
   

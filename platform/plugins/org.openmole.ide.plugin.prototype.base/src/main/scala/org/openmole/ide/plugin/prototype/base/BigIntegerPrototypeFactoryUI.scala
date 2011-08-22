@@ -17,9 +17,10 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import java.math.BigInteger
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI {
+class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[scala.BigInt] {
   
   override def displayName = "BigInteger"
   

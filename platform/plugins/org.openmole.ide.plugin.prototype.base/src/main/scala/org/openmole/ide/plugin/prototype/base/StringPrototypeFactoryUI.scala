@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class StringPrototypeFactoryUI extends IPrototypeFactoryUI {
+class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
   
   override def displayName = "String"
   
