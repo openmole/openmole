@@ -26,19 +26,26 @@ import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.openmole.core.implementation.sampling.Factor
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import scala.None
+import scala.collection.mutable.ListBuffer
 import scala.swing.BorderPanel.Position._
 
 class CompleteSamplingPanelUI(pud: CompleteSamplingDataUI) extends BoxPanel(Orientation.Vertical) with ISamplingPanelUI {
   
-  Proxys.prototype.foreach(pud=>contents+= buildFactorPanel(pud))
+  Proxys.prototype.foreach(pud=>contents+= new FactorPanel(pud))
   
-  def buildFactorPanel(pud: IPrototypeDataProxyUI) = {
-    val cbb = new ComboBox(List.empty)
-    new BoxPanel(Orientation.Horizontal){
+  override def saveContent(name: String) = new CompleteSamplingDataUI(name,contents.flatMap{
+        case fp: FactorPanel=> if (fp.selected) List(fp.factor) else None
+        case _=> None})
+  
+  class FactorPanel(pud: IPrototypeDataProxyUI) extends BoxPanel(Orientation.Horizontal){
+    val cbb = new ComboBox(Proxys.domain.toList) {enabled = false}
     contents+= new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}}
-    contents+= cbb}
+    contents+= cbb
+    def selected = cbb.enabled
+    def factor= new Factor(pud.dataUI.coreObject.asInstanceOf[IPrototype[Any]],cbb.selection.item.dataUI.coreObject)
   }
-  
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name)
 }
