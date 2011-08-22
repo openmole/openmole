@@ -55,7 +55,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[right]rel[grow,fill]", "[]
 
   val propertyScrollPane = new ScrollPane{minimumSize = new Dimension(150,200)}
   
-  contents+= (new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu);preferredSize.height= 30 },"span 4,growx")
+  contents+= (new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu)},"span 4,growx")
   contents+= new Label("Name: ")
   contents+= nameTextField
   contents+= saveButton
