@@ -28,7 +28,7 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.swing.BorderPanel.Position._
 
 class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) extends RangeDomainPanelUI(NumberFormat.getIntegerInstance) 
-                                                                  with IDomainPanelUI {
+                                                                  with IDomainPanelUI[Int] {
   
   minField.text = pud.min
   maxField.text = pud.max

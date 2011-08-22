@@ -9,7 +9,7 @@ import java.io.File
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.range.IntegerRange
 
-class IntegerRangeDomainDataUI(val name: String,val min: String,val max: String,val step: String) extends IDomainDataUI {
+class IntegerRangeDomainDataUI(val name: String,val min: String,val max: String,val step: String) extends IDomainDataUI[Int] {
   def this(n: String) = this(n,"","","")
   
   override def coreObject = new IntegerRange(min,max,step)
