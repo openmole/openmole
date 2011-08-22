@@ -21,10 +21,10 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
-trait IDomainDataUI extends IDataUI{
+trait IDomainDataUI[T] extends IDataUI{
   override def entityType = DOMAIN
   
-  def coreObject: IDomain[_]
+  def coreObject: IDomain[T]
   
-  def buildPanelUI: IDomainPanelUI
+  def buildPanelUI: IDomainPanelUI[T]
 }

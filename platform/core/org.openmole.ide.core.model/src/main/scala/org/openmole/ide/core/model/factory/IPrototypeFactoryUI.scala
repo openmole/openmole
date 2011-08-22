@@ -19,9 +19,9 @@ package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 
-trait IPrototypeFactoryUI  extends IFactoryUI{
+trait IPrototypeFactoryUI[T]  extends IFactoryUI{
   override def displayName: String = buildDataUI("").coreClass.getSimpleName
   
-  def buildDataUI(name: String): IPrototypeDataUI
+  def buildDataUI(name: String): IPrototypeDataUI[T]
   
 }

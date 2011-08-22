@@ -21,10 +21,10 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data.IPrototype
 
-trait IPrototypeDataUI extends IDataUI{
-  def coreObject: IPrototype[_]
+trait IPrototypeDataUI[T] extends IDataUI{
+  def coreObject: IPrototype[T]
   
   override def entityType: String = PROTOTYPE
   
-  def buildPanelUI: IPrototypePanelUI
+  def buildPanelUI: IPrototypePanelUI[T ]
 }
