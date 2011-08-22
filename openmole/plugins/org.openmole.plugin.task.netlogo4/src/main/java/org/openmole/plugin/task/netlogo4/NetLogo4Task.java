@@ -42,11 +42,23 @@ public class NetLogo4Task extends NetLogoTask {
 
     public NetLogo4Task(String name,
             String workspace,
-            String sriptName,
+            String scriptName,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
-        this(name, new File(workspace), sriptName, launchingCommands);
+        super(name, workspace, scriptName, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
     
+    public NetLogo4Task(String name,
+            File script,
+            Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
+    }
+    
+    public NetLogo4Task(String name,
+            String script,
+            Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
+    }
+ 
     @Override 
     public NetLogoFactory netLogoFactory() {
         return new NetLogoFactory() {

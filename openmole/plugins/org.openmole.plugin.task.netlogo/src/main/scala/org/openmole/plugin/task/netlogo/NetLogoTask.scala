@@ -32,23 +32,42 @@ object NetLogoTask extends Logger
 
 abstract class NetLogoTask(
   name: String,
-  workspace: File,
-  sriptName: String,
+  workspace: Either[(File, String), File],
   launchingCommands: Iterable[String]) extends ExternalSystemTask(name) {
 
+  def this(name: String, workspace: File, scriptName: String, launchingCommands: Iterable[String]) = 
+    this(name, Left(workspace -> scriptName), launchingCommands)
+  
+  def this(name: String, workspace: String, scriptName: String, launchingCommands: Iterable[String]) = 
+    this(name, new File(workspace), scriptName, launchingCommands)
+  
+  def this(name: String, script: File, launchingCommands: Iterable[String]) = 
+    this(name, Right(script), launchingCommands)
+  
+  def this(name: String, script: String, launchingCommands: Iterable[String]) = 
+    this(name, new File(script), launchingCommands: Iterable[String])
+    
   import NetLogoTask._
   
   val inputBinding = new ListBuffer[(IPrototype[_], String)]
   val outputBinding = new ListBuffer[(String, IPrototype[_])]
-  def relativeScriptPath = workspace.getName + "/" + sriptName
     
-  addResource(workspace)
+  workspace match {
+    case Left((workspace, scriptName)) => addResource(workspace)
+    case Right(script) => addResource(script)
+  }
 
   override def process(context: IContext): IContext = {
         
     val tmpDir = Workspace.newDir("netLogoTask")
     prepareInputFiles(context, tmpDir)
-    val script = new File(tmpDir, relativeScriptPath)
+    
+    val scriptPath = workspace match {
+      case Left((workspace, scriptName)) => workspace.getName + "/" + scriptName
+      case Right(script) => script.getName
+    }
+    
+    val script = new File(tmpDir, scriptPath)
     val netLogo = netLogoFactory()
     try {
       netLogo.open(script.getAbsolutePath)

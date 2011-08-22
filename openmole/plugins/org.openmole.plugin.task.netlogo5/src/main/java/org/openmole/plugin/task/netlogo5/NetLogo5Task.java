@@ -33,6 +33,7 @@ import scala.collection.JavaConversions;
  */
 public class NetLogo5Task extends NetLogoTask {
 
+
     public NetLogo5Task(String name,
             File workspace,
             String scriptName,
@@ -42,9 +43,21 @@ public class NetLogo5Task extends NetLogoTask {
 
     public NetLogo5Task(String name,
             String workspace,
-            String sriptName,
+            String scriptName,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
-        this(name, new File(workspace), sriptName, launchingCommands);
+        super(name, workspace, scriptName, JavaConversions.iterableAsScalaIterable(launchingCommands));
+    }
+    
+    public NetLogo5Task(String name,
+            File script,
+            Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
+    }
+    
+    public NetLogo5Task(String name,
+            String script,
+            Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
     
     @Override 
