@@ -21,37 +21,41 @@ import scala.swing._
 import swing.Swing._
 import scala.swing.event.ButtonClicked
 import swing.ListView._
-import scala.swing.BoxPanel
 import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.None
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashSet
 import scala.swing.BorderPanel.Position._
 
-class CompleteSamplingPanelUI(pud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
+class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
+  var rows = new HashSet[FactorPanel]
+  val factors = cud.factors.groupBy(f=>f._1)
+  Proxys.prototype.foreach(pud=>rows+= buildRow(pud))
   
-  Proxys.prototype.foreach(pud=>buildRow(pud))
-  
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name,contents.flatMap{
+  override def saveContent(name: String) = new CompleteSamplingDataUI(name,rows.flatMap{
         case fp: FactorPanel=> if (fp.selected) List(fp.factor) else None
-        case _=> None})
+        case _=> None}.toList)
   
   def buildRow(pud: IPrototypeDataProxyUI) = {
     val cbb = new ComboBox(Proxys.domain.toList) {enabled = false}
-    contents+= (new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}},"gap para")
+    val cb = new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}}
+    contents+= (cb,"gap para")
     contents+= cbb
+    if (factors.contains(pud)) {
+      cb.selected = true
+      cbb.selection.item = factors(pud).head._2
+      cbb.enabled = true
+    }
     new FactorPanel(pud,cbb)
   }
   
   class FactorPanel(pud: IPrototypeDataProxyUI,cbb: ComboBox[IDomainDataProxyUI]){
     def selected = cbb.enabled
-    def factor= new Factor(pud.dataUI.coreObject.asInstanceOf[IPrototype[Any]],cbb.selection.item.dataUI.coreObject)
+    def factor= (pud,cbb.selection.item)
   }
 }
