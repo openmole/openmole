@@ -19,6 +19,7 @@ import scala.collection.mutable.ListBuffer
 class CompleteSamplingDataUI(val name: String, factors: Iterable[(IFactor[T,IDomain[T]]) forSome {type T}]) extends ISamplingDataUI {
   def this(n: String) = this(n,new ListBuffer[(IFactor[T,IDomain[T]]) forSome {type T}])
   
+  println("CompleteSamplingDataUI:: " +  factors.size)
   override def coreObject = new CompleteSampling(factors)
 
   override def coreClass = classOf[CompleteSampling] 

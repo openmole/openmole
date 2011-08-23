@@ -20,27 +20,19 @@ package org.openmole.ide.plugin.task.groovy
 import java.awt.Dimension
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import scala.swing.BoxPanel
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Label
-import scala.swing.Orientation
 import scala.swing.ScrollPane
 import scala.swing.Swing
 import scala.swing.TextArea
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends BoxPanel(Orientation.Vertical) with ITaskPanelUI {
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with ITaskPanelUI {
   
-  contents += new Label("Code: ")
-  
-  val codeTextArea = new TextArea {
-    minimumSize = new Dimension(50,50)
-    border = Swing.EmptyBorder(5,15,5,15)
-    text = pud.code
-  }
-  
-  contents += new ScrollPane(codeTextArea)
+  contents += (new Label("Code"),"wrap")
+  val codeTextArea = new TextArea {text = pud.code}
+  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,200)},"span 2,growx")
   
   override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text)
-  
 }
 
 //  val editorPane= new JEditorPane

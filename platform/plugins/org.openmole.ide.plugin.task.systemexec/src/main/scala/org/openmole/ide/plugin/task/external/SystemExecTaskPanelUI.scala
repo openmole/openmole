@@ -25,9 +25,8 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import swing.Swing._
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("wrap 4", "[][grow,fill][][grow,fill]","") with ITaskPanelUI{
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,wrap 4", "[][grow,fill][][grow,fill]","") with ITaskPanelUI{
  
-  border = Swing.EmptyBorder(10, 10, 10, 10)
   val workspaceTextField = new ChooseFileTextField(ndu.workspace)
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   

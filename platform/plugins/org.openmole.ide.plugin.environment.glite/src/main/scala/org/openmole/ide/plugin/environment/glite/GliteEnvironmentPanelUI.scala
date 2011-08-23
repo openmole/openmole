@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.BoxPanel
 import scala.swing.Label
 import scala.swing.Orientation
@@ -26,27 +27,24 @@ import scala.swing.Swing
 import scala.swing.TextField
 import java.awt.Dimension
 
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends BoxPanel(Orientation.Vertical) with IEnvironmentPanelUI{
-  maximumSize = new Dimension(300,500)
-  border = Swing.EmptyBorder(10, 10, 10, 10)
-  yLayoutAlignment = 0
-  xLayoutAlignment = 0
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
+  val voTextField = new TextField
+  val vomsTextField = new TextField
+  val bdiiTextField = new TextField
   
-  val voTextField = new TextField{size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  val vomsTextField = new TextField{size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  val bdiiTextField = new TextField{size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("VO: "),voTextField)}
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("VOMS: "),vomsTextField)}
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("BDIi: "),bdiiTextField)}
-  contents+= new Separator
+  contents+= (new Label("VO"),"gap para")
+  contents+= voTextField
+  contents+= (new Label("VOMS"),"gap para")
+  contents+= vomsTextField
+  contents+= (new Label("BDII"),"gap para")
+  contents+= bdiiTextField
   
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
   
   override def saveContent(name: String) = new GliteEnvironmentDataUI(name,
-                                                                       voTextField.text,
-                                                                       vomsTextField.text,
-                                                                       bdiiTextField.text)
+                                                                      voTextField.text,
+                                                                      vomsTextField.text,
+                                                                      bdiiTextField.text)
 }

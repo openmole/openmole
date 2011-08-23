@@ -18,22 +18,20 @@
 package org.openmole.ide.plugin.domain.range
 
 import java.text.Format
-import scala.swing.BoxPanel
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.FormattedTextField
 import scala.swing.Label
-import scala.swing.Orientation
 import scala.swing.Swing
 
-class RangeDomainPanelUI(format: Format) extends BoxPanel(Orientation.Vertical){
-  border = Swing.EmptyBorder(10, 10, 10, 10)
-  yLayoutAlignment = 0
-  xLayoutAlignment = 0
+class RangeDomainPanelUI(format: Format) extends MigPanel("fillx,wrap 2","[left][grow,fill]",""){
+  val minField = new FormattedTextField(format)
+  val maxField = new FormattedTextField(format)
+  val stepField = new FormattedTextField(format)
   
-  val minField = new FormattedTextField(format){size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  val maxField = new FormattedTextField(format){size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  val stepField = new FormattedTextField(format){size.height = 30;border = Swing.EmptyBorder(5,5,5,5)}
-  
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("Min: "),minField)}
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("Max: "),maxField)}
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(new Label("Step: "),stepField)}
+  contents+= (new Label("Min"),"gap para")
+  contents+= minField
+  contents+= (new Label("Max"),"gap para")
+  contents+=  maxField
+  contents+= (new Label("Step"),"gap para")
+  contents+= stepField
 }

@@ -38,20 +38,12 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.BorderPanel.Position._
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Vertical) with ISamplingPanelUI {
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[left]rel[grow,fill]","") with ISamplingPanelUI {
   
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
-  val pathFileLabel = new Label("CSV file :") {
-    preferredSize = new Dimension(80,25)
-    border = Swing.EmptyBorder(5,5,5,5)
-  }
-  
-  val filePanel = new BoxPanel(Orientation.Horizontal) {
-    contents.append(pathFileLabel,csvTextField)
-    border = Swing.EmptyBorder(5,15,5,15)
-  }
   
   listenTo(csvTextField)
   reactions += {
@@ -66,8 +58,9 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends BoxPanel(Orientation.Ve
   val model = new DefaultTableModel(Array[Object]("CSV headers","Prototypes"),0)
   val table = buildTable(model)
   
-  contents.append(filePanel,new ScrollPane(table))
-  border = Swing.EmptyBorder(10, 10, 10, 10)
+  contents+= new Label("CSV file")
+  contents+= (csvTextField,"growx,wrap")
+  contents+= (new ScrollPane(table){minimumSize = new Dimension(150,200)},"span,growx")
   
   // Load data
   if (isFile(pud.csvFilePath)) csvTextField.text = pud.csvFilePath
