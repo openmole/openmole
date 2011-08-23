@@ -29,7 +29,7 @@ import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.commons.Constants._
 
-class PropertyPanel extends MigPanel("fillx,wrap 4","[right]rel[grow,fill]", "[]10[]"){
+class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[grow,fill]"){
   var oldName = ""
   Displays.currentType = TASK
   
