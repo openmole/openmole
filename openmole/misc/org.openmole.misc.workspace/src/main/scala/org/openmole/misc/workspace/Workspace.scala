@@ -28,12 +28,14 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
 import org.jasypt.util.text.BasicTextEncryptor
 import org.joda.time.format.ISOPeriodFormat
 import scala.collection.mutable.HashMap
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 
 object Workspace {
   
   val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
+  val PasswordRequiered = "PasswordRequiered"
   
   val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
@@ -163,8 +165,6 @@ class Workspace(val location: File) {
     configuration.setReloadingStrategy(new FileChangedReloadingStrategy)
     configuration
   }
-
-  //@transient lazy val sessionUUID = UUID.randomUUID
     
   def clean = {
     run.delete
@@ -207,10 +207,10 @@ class Workspace(val location: File) {
       }
     } 
 
-    if (!location.cyphered) {
-      return confVal
-    } else {
-      return textEncryptor.decrypt(confVal)
+    if (!location.cyphered) confVal
+    else {
+      if(!passwordIsCorrect) EventDispatcher.objectChanged(this, Workspace.PasswordRequiered)
+      textEncryptor.decrypt(confVal)
     }
   }
 
@@ -259,13 +259,10 @@ class Workspace(val location: File) {
     }
   }
   
-  def passwordChoosen = {
-    isPreferenceSet(passwordTest)
-  }
+  def passwordChoosen = isPreferenceSet(passwordTest)
 
-  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = {
+  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = 
     ISOPeriodFormat.standard.parsePeriod(preference(location)).toStandardSeconds.getSeconds * 1000L
-  }
 
   def preferenceAsDurationInS(location: ConfigurationLocation): Int = {
     val formatter = ISOPeriodFormat.standard
