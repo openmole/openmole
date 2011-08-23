@@ -48,11 +48,15 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
     val changed = synchronized {
       if(_state == null || !_state.isFinal) {
         timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
+        val oldState = _state
         _state = state
-        true
-      } else false
+        Some(oldState)
+      } else None
     }
-    if(changed) EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state))
+    changed match {
+      case Some(oldState) => EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state, oldState))
+      case None =>
+    }
   }
 
   override def perform =
