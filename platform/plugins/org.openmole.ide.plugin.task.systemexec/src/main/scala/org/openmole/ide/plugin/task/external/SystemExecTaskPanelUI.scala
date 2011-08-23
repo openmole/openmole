@@ -21,21 +21,20 @@ import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import swing.Swing._
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends BoxPanel(Orientation.Vertical) with ITaskPanelUI{
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("wrap 4", "[][grow,fill][][grow,fill]","") with ITaskPanelUI{
  
   border = Swing.EmptyBorder(10, 10, 10, 10)
-  val workspaceTextField = new ChooseFileTextField(ndu.workspace){preferredSize = new Dimension(100,25)}
+  val workspaceTextField = new ChooseFileTextField(ndu.workspace)
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   
-  contents+= new BoxPanel(Orientation.Horizontal){contents.append(buildLabel("Workspace: "),workspaceTextField)}
-  contents+= new BoxPanel(Orientation.Vertical){contents.append(buildLabel("Commands: "),new ScrollPane(launchingCommandTextArea)); border = Swing.EmptyBorder(10,10,10,10);preferredSize = new Dimension(130,25)}
-  
+  contents+= new Label("Workspace: ")
+  contents+= (workspaceTextField,"growx,span 3, wrap")
+  contents+= (new Label("Commands: "),"wrap")
+  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,200)},"span 4,growx")
   
   override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name, workspaceTextField.text, launchingCommandTextArea.text)
-  
-  def buildLabel(labelS: String) =  new Label(labelS) {
-        border = Swing.EmptyBorder(5,5,5,5)}
 }
