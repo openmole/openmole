@@ -15,25 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.model.data
 
-import scala.swing.Orientation
-import scala.swing.Button
-import scala.swing.BoxPanel
-import scala.swing.event.ButtonClicked
+import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.core.model.hook.IHook
 
-object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
-  val startButton = new Button("start")
-  val stopButton = new Button("stop")
-  contents.append(startButton,stopButton)
+trait IHookDataUI{
+  def coreObject: IHook
   
-  listenTo(`startButton`)
-  reactions += {
-    case ButtonClicked(`startButton`) =>TabManager.currentExecutionManager.start
-    case ButtonClicked(`stopButton`) =>TabManager.currentExecutionManager.cancel
-  }
-  def activate(b:Boolean) = {
-    startButton.enabled = b
-    stopButton.enabled = b
-  }
+  def coreClass: Class[_]
+  
+  def buildPanelUI: IHookPanelUI
 }

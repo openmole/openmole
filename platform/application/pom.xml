@@ -70,11 +70,11 @@
             <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>  
-        <dependency>
+        <!--dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.hook.filemanagement</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> 
+        </dependency--> 
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.complete</artifactId>

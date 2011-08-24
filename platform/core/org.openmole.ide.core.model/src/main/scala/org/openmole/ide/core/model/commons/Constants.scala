@@ -53,4 +53,5 @@ object Constants{
   val SAMPLING = "SAMPLING"
   val ENVIRONMENT = "ENVIRONMENT"
   val DOMAIN = "DOMAIN"
+  val HOOK = "HOOK"
 }

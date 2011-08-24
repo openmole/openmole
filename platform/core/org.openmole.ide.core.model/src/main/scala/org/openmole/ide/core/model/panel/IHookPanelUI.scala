@@ -5,4 +5,8 @@
 
 package org.openmole.ide.core.model.panel
 
-trait IHookPanelUI extends IPanelUI
+import org.openmole.ide.core.model.data.IHookDataUI
+
+trait IHookPanelUI extends IPanelUI {
+  def saveContent: IHookDataUI
+}

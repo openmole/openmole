@@ -40,15 +40,13 @@ import scala.collection.mutable.HashMap
 object MoleMaker {
   
   var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
-  var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_<:Any]]
+  var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_]]
   
-  def buildMoleExecution(manager: IMoleSceneManager) = (new MoleExecution(buildMole(manager)),corePrototypes,doneCapsules)
-  
-  def buildMole(manager: IMoleSceneManager):IMole = {
+  def buildMole(manager: IMoleSceneManager) = {
     doneCapsules.clear
     corePrototypes.clear
     if (manager.startingCapsule.isDefined){
-      new Mole(nextCapsule(manager,manager.startingCapsule.get))
+      (new Mole(nextCapsule(manager,manager.startingCapsule.get)),corePrototypes.toMap,doneCapsules.toMap)
     }
     else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }

@@ -22,39 +22,41 @@ import java.io.PrintStream
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 import scala.swing.Alignment
 import java.awt.Font
 import java.awt.Font._
-import scala.swing.BoxPanel
+import scala.swing.Separator
 import scala.swing.CheckBox
 import scala.swing.Label
-import scala.swing.Orientation
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.plugin.hook.display.ToStringHook
 
-class DisplayHookPanelUI(execution: IMoleExecution, 
-                         prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
-                         capsuleUI: ICapsuleUI, 
-                         capsule: ICapsule,
-                         printStream: PrintStream) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
-  xLayoutAlignment = 0.0F
-  yLayoutAlignment = 0.0F
+class DisplayHookPanelUI(executionManager: IExecutionManager) extends MigPanel("") with IHookPanelUI{
        
-  if (capsuleUI.dataProxy.get.dataUI.prototypesOut.size > 0) {
-  contents += new Label("Display: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)}
-  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pdu=> contents += displayHookCheckBox(pdu))}
-    
-  private def displayHookCheckBox(dpu: IPrototypeDataProxyUI): CheckBox = {
-    val tsh = new ToStringHook(execution, capsule, printStream, prototypes(dpu))
-    val cb = new CheckBox(dpu.dataUI.name){reactions+= {case ButtonClicked(cb) =>{
-            if (cb.selected) tsh.resume
-            else tsh.release}}}
-    tsh.release
+  var toBeHooked = new HashMap[ICapsule,Set[IPrototype[_]]]
+  executionManager.capsuleMapping.keys.foreach(c=>{
+      toBeHooked+= executionManager.capsuleMapping(c)-> Set.empty[IPrototype[_]]
+      contents+= (new Label(c.dataProxy.get.dataUI.name),"wrap")
+      c.dataProxy.get.dataUI.prototypesOut.foreach(pdu=>
+        contents+= displayHookCheckBox(c,pdu))
+      contents+= new Separator
+    })
+//    
+  private def displayHookCheckBox(capsuleUI: ICapsuleUI, pdu: IPrototypeDataProxyUI): CheckBox = {
+    val cb = new CheckBox(pdu.dataUI.name){reactions+= {case ButtonClicked(cb) =>{
+            if (cb.selected) toBeHooked(executionManager.capsuleMapping(capsuleUI))+= executionManager.prototypeMapping(pdu)
+            else toBeHooked(executionManager.capsuleMapping(capsuleUI))-= executionManager.prototypeMapping(pdu)
+            executionManager.commitHook(DisplayHookPanelUI.this)}}}
     listenTo(cb)
     cb
   }
+  
+  override def saveContent = new DisplayHookDataUI(executionManager,toBeHooked.toMap)
 }

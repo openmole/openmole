@@ -15,25 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.model.control
 
-import scala.swing.Orientation
-import scala.swing.Button
-import scala.swing.BoxPanel
-import scala.swing.event.ButtonClicked
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.mole.IMoleExecution
+import java.io.PrintStream
 
-object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
-  val startButton = new Button("start")
-  val stopButton = new Button("stop")
-  contents.append(startButton,stopButton)
+trait IExecutionManager {
+  def mole: IMole
   
-  listenTo(`startButton`)
-  reactions += {
-    case ButtonClicked(`startButton`) =>TabManager.currentExecutionManager.start
-    case ButtonClicked(`stopButton`) =>TabManager.currentExecutionManager.cancel
-  }
-  def activate(b:Boolean) = {
-    startButton.enabled = b
-    stopButton.enabled = b
-  }
+  def moleExecution: IMoleExecution
+  
+  def prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]
+  
+  def capsuleMapping: Map[ICapsuleUI, ICapsule]
+  
+  def printStream: PrintStream
+  
+  def commitHook(hookPanelUI: IHookPanelUI)
 }
