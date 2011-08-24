@@ -5,19 +5,22 @@
 
 package org.openmole.ide.plugin.sampling.complete
 
-import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+
+import java.io.File
+import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.complete.CompleteSampling
-import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.sampling.IFactor
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import scala.collection.mutable.ListBuffer
 
-  class CompleteSamplingDataUI(val name: String, val factors: List[(IPrototypeDataProxyUI,IDomainDataProxyUI)]) extends ISamplingDataUI {
-    def this(n:String) = this(n,List.empty)
-
-  override def coreObject = new CompleteSampling(factors.map(f=>new Factor(f._1.dataUI.coreObject.asInstanceOf[IPrototype[Any]],
-                                                                           f._2.dataUI.coreObject)))
+class CompleteSamplingDataUI(val name: String, factors: Iterable[(IFactor[T,IDomain[T]]) forSome {type T}]) extends ISamplingDataUI {
+  def this(n: String) = this(n,new ListBuffer[(IFactor[T,IDomain[T]]) forSome {type T}])
+  
+  println("CompleteSamplingDataUI:: " +  factors.size)
+  override def coreObject = new CompleteSampling(factors)
 
   override def coreClass = classOf[CompleteSampling] 
   
