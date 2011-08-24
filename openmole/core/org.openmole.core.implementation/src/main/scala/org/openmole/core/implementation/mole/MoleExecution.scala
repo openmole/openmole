@@ -85,9 +85,9 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
   
-  private val moleExecutionAdapterForMoleJob = new IObjectListener[IMoleJob] {
-    override def eventOccured(job: IMoleJob) = {
-      EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job))
+  private val moleExecutionAdapterForMoleJob = new IObjectListenerWithArgs[IMoleJob] {
+    override def eventOccured(job: IMoleJob, args: Array[Object]) = { 
+      EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job) ++ args)
     }
   }
  

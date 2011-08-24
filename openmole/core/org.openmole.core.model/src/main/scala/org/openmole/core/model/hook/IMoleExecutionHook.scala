@@ -18,9 +18,13 @@
 package org.openmole.core.model.hook
 
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.State.State
+import org.openmole.core.model.mole.ICapsule
 
 trait IMoleExecutionHook extends IHook {
-  def stateChanged(moleJob: IMoleJob)
+  def stateChanged(moleJob: IMoleJob, newState: State, oldState: State)
   def executionStarting
   def executionFinished
+  def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
+  def jobStarting(moleJob: IMoleJob, capsule: ICapsule) = {}
 }

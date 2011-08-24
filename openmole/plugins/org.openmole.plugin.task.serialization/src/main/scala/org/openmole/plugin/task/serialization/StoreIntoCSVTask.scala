@@ -20,6 +20,7 @@ import au.com.bytecode.opencsv.CSVWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
+import org.openmole.misc.tools.io.Prettifier._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
@@ -107,19 +108,10 @@ class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], St
             
       //body
       for (i <- 0 until listSize) 
-        writer.writeNext(columnIts.map{e => prettify(e.next)}.toArray)
+        writer.writeNext(columnIts.map{e => e.next.prettify}.toArray)
       
     } finally writer.close
     context + (filePrototype -> file)
   }
-  
-  def prettify(o: Any): String =
-    o match {
-      case null => "null"
-      case o: Array[_] => "[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
-      case o: Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
-      case o: java.lang.Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]" 
-      case o => o.toString
-    }
   
 }

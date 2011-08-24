@@ -20,6 +20,7 @@ package org.openmole.core.implementation.hook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.job.State.State
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
@@ -35,8 +36,8 @@ object CapsuleExecutionDispatcher extends Logger {
   
     private val hub = new WeakHashMap[ICapsule, HashSet[CapsuleExecutionHook]]
     
-    override def jobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) = hub.synchronized {
-      hub.getOrElse(capsule, Iterable.empty).foreach(_.safeProcess(moleJob))
+    override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = hub.synchronized {
+      hub.getOrElse(capsule, Iterable.empty).foreach(_.process(moleJob))
     }
     
     def +=(capsule: ICapsule, hook: CapsuleExecutionHook) = hub.synchronized {

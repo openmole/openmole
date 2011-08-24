@@ -24,6 +24,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.io.Prettifier._
 
 class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
 
@@ -38,7 +39,7 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
     
     prototypes.map(p => p -> context.variable(p)) foreach {
       case(prototype, option) => option match {
-          case Some(v) => out.println(v.toString)
+          case Some(v) => out.println(v.prettify)
           case None => throw new UserBadDataError("No variable " + prototype + " found.")
         }
     }

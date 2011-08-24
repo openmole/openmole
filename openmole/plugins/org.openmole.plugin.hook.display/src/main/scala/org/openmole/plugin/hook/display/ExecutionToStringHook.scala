@@ -17,17 +17,23 @@
 
 package org.openmole.plugin.hook.display
 
-import java.io.PrintStream
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.tools.VariableExpansion
+import org.openmole.core.implementation.hook.MoleExecutionHook
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.job.State.State
+import org.openmole.core.model.job.IMoleJob
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.io.Prettifier._
 
-class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: String, out: PrintStream) extends CapsuleExecutionHook(execution, capsule) {
+class ExecutionToStringHook(execution: IMoleExecution, prototypes: Map[ICapsule, Iterable[IPrototype[_]]]) extends MoleExecutionHook(execution) {
   
-  def this(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) = this(execution, capsule, toDisplay, System.out)
+  def jobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) =
+    prototypes.get(capsule) match {
+      case Some(ps) => ps.foreach (p => moleJob.context.value(p) match {
+            case Some(v) => println(p.prettify) 
+            case None => throw new UserBadDataError("No variable " + p + " found at the end of capsule "+ capsule + ".")
+          })
+      case None =>
+    }
   
-  override def process(moleJob: IMoleJob) = out.println(VariableExpansion.expandData(moleJob.context, toDisplay))
 }

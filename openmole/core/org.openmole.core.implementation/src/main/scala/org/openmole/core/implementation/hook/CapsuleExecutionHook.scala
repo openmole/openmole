@@ -31,6 +31,9 @@ abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: ICap
   override def resume = CapsuleExecutionDispatcher += (moleExecution, capsule, this)
   override def release = CapsuleExecutionDispatcher -= (moleExecution, capsule, this)
   
-  def safeProcess(moleJob: IMoleJob) = try process(moleJob) catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
+  def safeProcess(moleJob: IMoleJob) = 
+    try process(moleJob) 
+    catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
+    
   def process(moleJob: IMoleJob)
 }

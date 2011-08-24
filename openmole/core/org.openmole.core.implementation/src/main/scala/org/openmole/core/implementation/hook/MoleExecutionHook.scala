@@ -19,6 +19,7 @@ package org.openmole.core.implementation.hook
 
 import org.openmole.core.model.hook.IMoleExecutionHook
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.State.State
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.misc.eventdispatcher.IObjectListener
@@ -53,22 +54,25 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     unregisterSynchronousListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
   }
   
-  def jobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
-  def jobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) = {}
+  override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
+  override def jobStarting(moleJob: IMoleJob, capsule: ICapsule) = {}
   
-  def stateChanged(moleJob: IMoleJob) = {}
-  def executionStarting = {}
-  def executionFinished = {}
+  override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = {}
+  override def executionStarting = {}
+  override def executionFinished = {}
   
   @transient lazy val moleExecutionJobStateChangedAdapter = new IObjectListenerWithArgs[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution, args: Array[Object]) = {
       val moleJob = args(0).asInstanceOf[IMoleJob]
-      stateChanged(moleJob)
+      val newState = args(1).asInstanceOf[State]
+      val oldState = args(2).asInstanceOf[State]
+      stateChanged(moleJob, newState, oldState)
     }
   }
   
-  @transient lazy val capsuleStarting = new CapsuleChangedAdapter(jobInCapsuleStarting)
-  @transient lazy val capsuleFinished = new CapsuleChangedAdapter(jobInCapsuleFinished)
+  @transient lazy val capsuleStarting = new CapsuleChangedAdapter(jobStarting)
+  @transient lazy val capsuleFinished = new CapsuleChangedAdapter(jobFinished)
+  
   @transient lazy val moleExecutionExecutionStartingAdapter = new IObjectListener[IMoleExecution]  {
     override def eventOccured(obj: IMoleExecution) = executionStarting
   }
