@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.hook.display
 
+import java.io.PrintStream
 import org.openmole.core.implementation.hook.MoleExecutionHook
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
@@ -25,12 +26,13 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.Prettifier._
 
-class ExecutionToStringHook(execution: IMoleExecution, prototypes: Map[ICapsule, Iterable[IPrototype[_]]]) extends MoleExecutionHook(execution) {
+class ExecutionToStringHook(execution: IMoleExecution, out: PrintStream, prototypes: Map[ICapsule, Iterable[IPrototype[_]]]) extends MoleExecutionHook(execution) {
+  def this(execution: IMoleExecution, prototypes: Map[ICapsule, Iterable[IPrototype[_]]]) = this(execution,System.out,prototypes)
   
   override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) =
     prototypes.get(capsule) match {
       case Some(ps) => ps.foreach (p => moleJob.context.value(p) match {
-            case Some(v) => println(p.prettify) 
+            case Some(v) => out.println(p.prettify) 
             case None => throw new UserBadDataError("No variable " + p + " found at the end of capsule "+ capsule + ".")
           })
       case None =>
