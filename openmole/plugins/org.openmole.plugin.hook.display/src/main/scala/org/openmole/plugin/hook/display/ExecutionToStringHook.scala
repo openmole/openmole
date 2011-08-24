@@ -27,7 +27,7 @@ import org.openmole.misc.tools.io.Prettifier._
 
 class ExecutionToStringHook(execution: IMoleExecution, prototypes: Map[ICapsule, Iterable[IPrototype[_]]]) extends MoleExecutionHook(execution) {
   
-  def jobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) =
+  override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) =
     prototypes.get(capsule) match {
       case Some(ps) => ps.foreach (p => moleJob.context.value(p) match {
             case Some(v) => println(p.prettify) 
