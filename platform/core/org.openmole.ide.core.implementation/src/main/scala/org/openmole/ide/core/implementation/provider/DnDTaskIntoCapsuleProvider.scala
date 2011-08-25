@@ -22,14 +22,12 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import scala.collection.JavaConversions
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
-import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.commons.Constants._
