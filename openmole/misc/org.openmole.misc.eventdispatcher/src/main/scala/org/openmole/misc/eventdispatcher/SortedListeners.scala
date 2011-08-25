@@ -28,7 +28,7 @@ class SortedListeners[T] extends Iterable[T] {
     
     def isEmpty = listners.isEmpty
     def -(elt: T) = new Listners(listners.filter(_._2 != elt))
-    def +(priority: Int, elt: T) = new Listners(priority -> elt :: listners)
+    def +(priority: Int, elt: T) = new Listners(priority -> elt :: listners.filter(_._2 != elt))
     
   }
   
