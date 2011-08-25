@@ -16,7 +16,7 @@
  */
 
 package org.openmole.ide.plugin.hook.display
-import org.openmole.plugin.hook.display.ExecutionToStringHook
+import org.openmole.plugin.hook.display.GlobalToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
@@ -26,7 +26,7 @@ class DisplayHookDataUI(executionManager: IExecutionManager,
                         toBeHooked: Map[ICapsule,Iterable[IPrototype[_]]]) extends IHookDataUI{
   def this(exeM: IExecutionManager) = this(exeM,Map.empty[ICapsule,Iterable[IPrototype[_]]])
   
-  override def coreObject = new ExecutionToStringHook(executionManager.moleExecution,executionManager.printStream,toBeHooked)
+  override def coreObject = new GlobalToStringHook(executionManager.moleExecution,executionManager.printStream,toBeHooked)
   
   override def coreClass = classOf[Object]
   

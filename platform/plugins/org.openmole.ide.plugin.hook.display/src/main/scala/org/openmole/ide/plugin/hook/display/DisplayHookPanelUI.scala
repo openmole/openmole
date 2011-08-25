@@ -17,18 +17,13 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import java.io.OutputStream
-import java.io.PrintStream
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
-import scala.swing.Alignment
 import java.awt.Font
 import java.awt.Font._
 import scala.swing.Separator
@@ -36,19 +31,17 @@ import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.plugin.hook.display.ToStringHook
 
 class DisplayHookPanelUI(executionManager: IExecutionManager) extends MigPanel("") with IHookPanelUI{
-       
   var toBeHooked = new HashMap[ICapsule,Set[IPrototype[_]]]
   executionManager.capsuleMapping.keys.foreach(c=>{
-      toBeHooked+= executionManager.capsuleMapping(c)-> Set.empty[IPrototype[_]]
-      contents+= (new Label(c.dataProxy.get.dataUI.name),"wrap")
-      c.dataProxy.get.dataUI.prototypesOut.foreach(pdu=>
-        contents+= displayHookCheckBox(c,pdu))
-      contents+= new Separator
-    })
-//    
+      if (c.dataProxy.get.dataUI.prototypesOut.size > 0){
+        toBeHooked+= executionManager.capsuleMapping(c)-> Set.empty[IPrototype[_]]
+        contents+= (new Label(c.dataProxy.get.dataUI.name),"wrap")
+        contents+= (new MigPanel(""){
+            c.dataProxy.get.dataUI.prototypesOut.foreach(pdu=>
+              contents+= displayHookCheckBox(c,pdu))},"wrap")}})
+    
   private def displayHookCheckBox(capsuleUI: ICapsuleUI, pdu: IPrototypeDataProxyUI): CheckBox = {
     val cb = new CheckBox(pdu.dataUI.name){reactions+= {case ButtonClicked(cb) =>{
             if (cb.selected) toBeHooked(executionManager.capsuleMapping(capsuleUI))+= executionManager.prototypeMapping(pdu)
