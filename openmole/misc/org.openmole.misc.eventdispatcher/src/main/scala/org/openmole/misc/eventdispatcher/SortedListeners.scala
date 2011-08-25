@@ -21,19 +21,28 @@ import scala.collection.immutable.TreeMap
 
 class SortedListeners[T] extends Iterable[T] {
   
-  var listeners = TreeMap.empty[Int, List[T]](new Ordering[Int] {
-      def compare(a: Int, b: Int) = (b - a)
-    })
+  class Listners(listners: List[(Int, T)]) {
+    
+    def iterator = sorted.iterator
+    lazy val sorted = listners.sortBy(_._1).map(_._2).reverse
+    
+    def isEmpty = listners.isEmpty
+    def -(elt: T) = new Listners(listners.filter(_._2 != elt))
+    def +(priority: Int, elt: T) = new Listners(priority -> elt :: listners)
+    
+  }
+  
+  var listeners = new Listners(List.empty)
  
   def register(priority: Int, listener: T) = {
-    listeners += priority -> (listener :: listeners.getOrElse(priority, Nil))
+    listeners += (priority, listener)
   }
   
   override def isEmpty = listeners.isEmpty
   
   def -=(listener: T) = {
-    listeners = listeners.filter{case(k,v) => v != listener}
+    listeners -= listener
   }
 
-  override def iterator = listeners.values.flatten.iterator
+  override def iterator = listeners.iterator
 }
