@@ -22,6 +22,7 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.commons.Constants._
@@ -33,7 +34,7 @@ import org.netbeans.api.visual.action.ConnectorState
 class DnDNewTaskProvider(molescene: IMoleScene) extends DnDProvider(molescene) {
 
   override def isAcceptable(widget: Widget, point: Point,transferable: Transferable)= {
-    transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI].dataUI.entityType match {
+    Displays.dataProxy.get.dataUI.entityType match {
       case TASK=> ConnectorState.ACCEPT
       case _=> ConnectorState.REJECT
     }
