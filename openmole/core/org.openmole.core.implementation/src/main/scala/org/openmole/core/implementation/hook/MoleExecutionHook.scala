@@ -39,19 +39,19 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   resume
   
   override def resume = {
-    registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
-    registerForObjectChangedSynchronous(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-    registerForObjectChangedSynchronous(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
-    registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
-    registerForObjectChangedSynchronous(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
+    registerForObjectChanged(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
+    registerForObjectChanged(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
+    registerForObjectChanged(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
+    registerForObjectChanged(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
+    registerForObjectChanged(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
   }
   
   override def release = {
-    unregisterSynchronousListener(moleExecution(), moleExecutionExecutionStartingAdapter, Starting)
-    unregisterSynchronousListener(moleExecution(), moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-    unregisterSynchronousListener(moleExecution(), moleExecutionExecutionFinishedAdapter, Finished)
-    unregisterSynchronousListener(moleExecution(), capsuleFinished, JobInCapsuleFinished)
-    unregisterSynchronousListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
+    unregisterListener(moleExecution(), moleExecutionExecutionStartingAdapter, Starting)
+    unregisterListener(moleExecution(), moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
+    unregisterListener(moleExecution(), moleExecutionExecutionFinishedAdapter, Finished)
+    unregisterListener(moleExecution(), capsuleFinished, JobInCapsuleFinished)
+    unregisterListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
   }
   
   override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {}

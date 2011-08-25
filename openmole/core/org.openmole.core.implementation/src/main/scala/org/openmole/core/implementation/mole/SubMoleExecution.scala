@@ -128,8 +128,8 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     if(!canceled) {
       val moleJob = capsule.toJob(context, moleExecution.nextJobId)
 
-      EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.TransitionPerformed)
-      EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.JobFailedOrCanceled)
+      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.TransitionPerformed)
+      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.JobFailedOrCanceled)
 
       this += moleJob
       

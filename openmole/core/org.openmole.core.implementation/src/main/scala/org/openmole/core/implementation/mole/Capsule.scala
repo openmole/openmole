@@ -115,7 +115,7 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     val task = taskOrException
     val job = new MoleJob(task, context, jobId)
     
-    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOWEST, new CapsuleAdapter, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChanged(job, Priority.LOWEST, new CapsuleAdapter, IMoleJob.StateChanged)
     job
   }
 

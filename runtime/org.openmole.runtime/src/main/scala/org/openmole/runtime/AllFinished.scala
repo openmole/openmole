@@ -39,7 +39,7 @@ class AllFinished extends IObjectListenerWithArgs[IMoleJob] {
   def registerJob(job: IMoleJob) = synchronized {
     allFinished.drainPermits
     nbJobs += 1
-    EventDispatcher.registerForObjectChangedSynchronous(job, Priority.LOW, this, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChanged(job, Priority.LOW, this, IMoleJob.StateChanged)
   }
 
   def waitAllFinished = {

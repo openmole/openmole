@@ -115,9 +115,9 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
     MoleJobRegistry += (moleJob, this, capsule)
     
-    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
-    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
-    EventDispatcher.registerForObjectChangedSynchronous(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
+    EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
+    EventDispatcher.registerForObjectChanged(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
+    EventDispatcher.registerForObjectChanged(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
 
     inProgress += moleJob -> (subMole, ticket)
 

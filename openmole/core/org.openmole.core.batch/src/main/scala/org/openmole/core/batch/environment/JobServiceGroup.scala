@@ -101,7 +101,7 @@ class JobServiceGroup(val environment: BatchEnvironment) {
     synchronized {
       resources :+= service
       val usageControl = JobServiceControl.usageControl(service.description)
-      EventDispatcher.registerForObjectChangedSynchronous(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+      EventDispatcher.registerForObjectChanged(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
     }
     waiting.release
   }

@@ -82,7 +82,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
     
-    EventDispatcher.registerForObjectChangedSynchronous(execution, Priority.NORMAL, resultGathering, IMoleExecution.JobInCapsuleFinished)
+    EventDispatcher.registerForObjectChanged(execution, Priority.NORMAL, resultGathering, IMoleExecution.JobInCapsuleFinished)
     
     execution.start(firstTaskContext)
     execution.waitUntilEnded
