@@ -6,12 +6,14 @@
 package org.openmole.ide.core.implementation.control
 
 import java.awt.Rectangle
+import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.io.PrintStream
 import org.openide.util.Lookup
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.hook.IHook
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -28,13 +30,13 @@ import scala.swing.TextArea
 class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientation.Vertical) with IExecutionManager{
   val tabbedPane = new TabbedPane
   val logTextArea = new TextArea{columns = 20;rows = 10}
-  override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea))
+  override val printStream = new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea),1024),true)
   override val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(manager)
-  var moleExecution = new MoleExecution(mole)
+  var moleExecution: IMoleExecution = new MoleExecution(mole)
   var hookPanels= new HashMap[IHookPanelUI,IHook]
   
-  System.setOut(new PrintStream(new TextAreaOutputStream(logTextArea)))
-  System.setErr(new PrintStream(new TextAreaOutputStream(logTextArea)))
+  System.setOut(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
+  System.setErr(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
   
   Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach(hf=>{
       val dataUI = hf.buildDataUI(this)
@@ -46,25 +48,29 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   
   def start = {
     cancel
-    moleExecution = new MoleExecution(mole)
+    stopHooks
+    moleExecution = MoleMaker.buildMoleExecution(mole, manager)
     commitHooks
     moleExecution.start}
   
   def cancel = moleExecution.cancel
   
   override def commitHook(hookPanelUI: IHookPanelUI) {
-    val hookObject = hookPanelUI.saveContent.coreObject
-    hookPanels.getOrElseUpdate(hookPanelUI,hookObject).release
-    hookPanels(hookPanelUI) = hookObject
-    hookObject.resume
+    if (hookPanels.contains(hookPanelUI)) {println("realase");hookPanels(hookPanelUI).release}
+    hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
   }
-    
+  
+  def stopHooks = hookPanels.values.foreach(_.release)  
   def commitHooks = hookPanels.keys.foreach(commitHook(_))
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint
-    override def write(b:Int) = {
-      textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
+    
+    override def write(b:Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
+                      
+    override def write(b: Array[Byte], off: Int,len: Int) = {
+      // textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
+      textArea.append(new String(b,off,len))
       textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
     }
   }
