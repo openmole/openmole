@@ -39,7 +39,7 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
     
     prototypes.map(p => p -> context.variable(p)) foreach {
       case(prototype, option) => option match {
-          case Some(v) => out.println(v.prettify)
+          case Some(v) => out.println(prototype.name + " = " + v.prettify)
           case None => throw new UserBadDataError("No variable " + prototype + " found.")
         }
     }
