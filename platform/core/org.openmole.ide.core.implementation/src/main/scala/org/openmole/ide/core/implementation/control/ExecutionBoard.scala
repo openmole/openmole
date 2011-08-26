@@ -19,6 +19,10 @@ package org.openmole.ide.core.implementation.control
 
 import scala.swing.Orientation
 import scala.swing.Button
+import org.openmole.ide.misc.eventlistener.PasswordListener
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.tools.service.Priority
+import org.openmole.misc.workspace.Workspace
 import scala.swing.BoxPanel
 import scala.swing.event.ButtonClicked
 
@@ -32,6 +36,9 @@ object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
     case ButtonClicked(`startButton`) =>TabManager.currentExecutionManager.start
     case ButtonClicked(`stopButton`) =>TabManager.currentExecutionManager.cancel
   }
+  
+  EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequiered)
+  
   def activate(b:Boolean) = {
     startButton.enabled = b
     stopButton.enabled = b
