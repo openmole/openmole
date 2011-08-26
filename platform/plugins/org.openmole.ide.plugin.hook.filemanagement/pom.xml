@@ -22,6 +22,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-swing</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>

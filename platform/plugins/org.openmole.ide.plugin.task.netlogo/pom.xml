@@ -37,6 +37,11 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.core.model</artifactId>
             <version>${openmole.gui.version}</version>
