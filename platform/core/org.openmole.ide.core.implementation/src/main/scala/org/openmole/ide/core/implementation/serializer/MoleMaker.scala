@@ -29,6 +29,7 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.implementation.workflow.TransitionUI
@@ -41,6 +42,15 @@ object MoleMaker {
   
   var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
   var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_]]
+  
+  def buildMoleExecution(manager: IMoleSceneManager): IMoleExecution = buildMoleExecution(buildMole(manager)._1,manager)
+                                                                          
+  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager): IMoleExecution = {
+    val strat = new FixedEnvironmentSelection
+    manager.capsules.values.foreach(c=> if (c.dataProxy.get.dataUI.environment.isDefined) 
+      strat.select(doneCapsules(c),c.dataProxy.get.dataUI.environment.get.dataUI.coreObject))
+    new MoleExecution(mole,strat)
+  }
   
   def buildMole(manager: IMoleSceneManager) = {
     doneCapsules.clear
