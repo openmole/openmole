@@ -22,5 +22,6 @@ import org.openmole.ide.core.implementation.control.TabManager
 import scala.swing.Action
 
 class BuildExecutionAction(text: String) extends Action(text){
-  override def apply = TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene))
+  override def apply = 
+    if (TabManager.currentScene.isDefined)TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene.get))
 }

@@ -23,7 +23,8 @@ import scala.swing.Action
 
 class CleanAndBuildExecutionAction(text: String) extends Action(text){
   override def apply = {
-    MoleScenesManager.removeAllExecutionMoleScene(TabManager.currentScene)
-    TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene))
+    if (TabManager.currentScene.isDefined){
+    MoleScenesManager.removeAllExecutionMoleScene(TabManager.currentScene.get)
+    TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene.get))}
   }
 }

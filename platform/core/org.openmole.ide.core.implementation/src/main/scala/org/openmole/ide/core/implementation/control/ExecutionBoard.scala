@@ -33,8 +33,8 @@ object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
   
   listenTo(`startButton`)
   reactions += {
-    case ButtonClicked(`startButton`) =>TabManager.currentExecutionManager.start
-    case ButtonClicked(`stopButton`) =>TabManager.currentExecutionManager.cancel
+    case ButtonClicked(`startButton`) => if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.start
+    case ButtonClicked(`stopButton`) =>if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.cancel
   }
   
   EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequiered)

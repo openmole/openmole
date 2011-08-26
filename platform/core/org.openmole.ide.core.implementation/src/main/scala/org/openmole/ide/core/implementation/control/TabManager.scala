@@ -44,15 +44,15 @@ object TabManager {
         }}
   }
     
-  def currentExecutionManager = executionTabs(currentScene)
+  def currentExecutionManager = if(currentScene.isDefined) Some(executionTabs(currentScene.get)) else None
   
-  def currentScene: IMoleScene = {
+  def currentScene: Option[IMoleScene] = {
     if (tabbedPane.selection.index != -1) {
       sceneTabs.getKey(tabbedPane.selection.page) match {
-        case m: MoleScene => m
-        case _=> throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
+        case m: MoleScene => Some(m)
+        case _=> None
       }
-    } else throw new GUIUserBadDataError("The current scene is not a mole view, please first select a mole before build it")
+    } else None
   }
   
   def removeSceneTab(ms: IMoleScene) = tabbedPane.pages-=sceneTabs.get(ms)

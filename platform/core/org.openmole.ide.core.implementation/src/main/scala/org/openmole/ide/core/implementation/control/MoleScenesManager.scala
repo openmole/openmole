@@ -81,12 +81,12 @@ object MoleScenesManager{
   }
   
   def removeCurrentSceneAndChilds= {
-    val ms = TabManager.currentScene
+    if (TabManager.currentScene.isDefined){
+    val ms = TabManager.currentScene.get
     ms.moleSceneType match {
       case BUILD => {moleScenes(ms).foreach(TabManager.removeSceneTab(_))
                      removeMoleScene(ms)}
-      case EXECUTION=>  TabManager.removeSceneTab(ms)
-    }
-  }
+      case EXECUTION=>  TabManager.removeSceneTab(ms)}}
+}
 
 }
