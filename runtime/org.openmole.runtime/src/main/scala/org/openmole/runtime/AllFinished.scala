@@ -50,7 +50,6 @@ class AllFinished extends IObjectListenerWithArgs[IMoleJob] {
   override def eventOccured(job: IMoleJob, args: Array[Object]) = synchronized {
     val state = args(0).asInstanceOf[State]
     if (state.isFinal) {
-      //logger.info("Job is finished " + job.id + ".")
       nbFinished += 1
       if (nbFinished >= nbJobs) allFinished.release
     }

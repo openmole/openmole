@@ -157,7 +157,6 @@ class Runtime {
           allFinished.registerJob(toProcess)
           LocalExecutionEnvironment.default.submit(toProcess)
         }
-
         allFinished.waitAllFinished
 
         val contextResults = new ContextResults(saver.results)

@@ -80,7 +80,6 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
         val testFile = tmpSpace(token).newFileInDir("test", ".bin")
         val tmpFile = Workspace.newFile("test", ".bin")
         
-        logger.fine("Test file " + testFile)
         try {
           //BufferedWriter writter = new BufferedWriter(new FileWriter(tmpFile));
           val output = new FileOutputStream(tmpFile)

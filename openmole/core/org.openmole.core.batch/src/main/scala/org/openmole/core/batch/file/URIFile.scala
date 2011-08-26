@@ -245,7 +245,7 @@ class URIFile(val location: String) extends IURIFile with Id {
   }
 
   /* ------------------- new file in dir -------------------------*/
-  override def newFileInDir(prefix: String, sufix: String): IURIFile =  new URIFile(this, prefix + UUID.randomUUID.toString + sufix);
+  override def newFileInDir(prefix: String, sufix: String): IURIFile =  new URIFile(this, prefix + UUID.randomUUID.toString + sufix)
 
   /*-------------------------- exist -------------------------*/
   override def exist(name: String): Boolean = withToken(exist(name, _))

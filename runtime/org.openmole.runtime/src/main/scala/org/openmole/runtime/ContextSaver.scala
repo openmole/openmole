@@ -36,7 +36,7 @@ class ContextSaver extends IObjectListenerWithArgs[IMoleJob] {
   def results = _results
 
   override def eventOccured(job: IMoleJob, args: Array[Object]) = synchronized {
-    val state = args.asInstanceOf[State]
+    val state = args(0).asInstanceOf[State]
     state match {
       case COMPLETED | FAILED =>
         job.exception match {
