@@ -18,6 +18,7 @@
 package org.openmole.ui.console.internal.command.initializer
 
 
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 
 class WorkspaceInitializer extends IInitializer {
@@ -26,6 +27,15 @@ class WorkspaceInitializer extends IInitializer {
     val workspace = obj.asInstanceOf[Workspace.type]
     val message = (if(workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
     
-    do {workspace.password_=(new jline.ConsoleReader().readLine(message, '*'))} while(!workspace.passwordIsCorrect)
+    var ok = false
+    do {
+      val password = new jline.ConsoleReader().readLine(message, '*')
+      try {
+        workspace.password_=(password)
+        ok = true
+      } catch {
+        case e: UserBadDataError => println("Password incorrect.")
+      }
+    } while(!ok)
   }
 }

@@ -30,12 +30,13 @@ import org.joda.time.format.ISOPeriodFormat
 import scala.collection.mutable.HashMap
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 
 object Workspace {
   
   val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
-  val PasswordRequiered = "PasswordRequiered"
+  val PasswordRequired = "PasswordRequired"
   
   val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
@@ -121,7 +122,7 @@ object Workspace {
   
   def password_=(password: String) = instance.password_=(password)
   
-  def passwordIsCorrect = instance.passwordIsCorrect
+  def passwordIsCorrect(password: String) = instance.passwordIsCorrect(password)
   
   def passwordChoosen = instance.passwordChoosen
 
@@ -152,7 +153,18 @@ class Workspace(val location: File) {
   val tmpDir = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
   
-  @transient private var textEncryptor = new BasicTextEncryptor
+  private def textEncryptor(password: Option[String]) = {
+    password match {
+      case Some(password) =>
+        val textEncryptor = new BasicTextEncryptor
+        textEncryptor.setPassword(password)
+        textEncryptor
+      case None => throw new UserBadDataError("Password is not set.")
+    }
+
+  }
+  
+  @transient private var _password: Option[String] = None
   
   @transient private lazy val configurationFile: File = {
     val file = new File(location, ConfigurationFile)
@@ -193,30 +205,39 @@ class Workspace(val location: File) {
     }
   }
 
-  def preference(location: ConfigurationLocation): String = synchronized {
+  
+  def preferenceValue(location: ConfigurationLocation): String = synchronized {
     val conf = configuration.subset(location.group)
-    val confVal = conf.getString(location.name)
-
-    if (confVal == null) {
-      configurations.get(location) match {
-        case None => return null 
-        case Some(value) =>
-          val default = value()
-          setPreference(location, default)
-          return default
-      }
-    } 
+    conf.getString(location.name)
+  }
+  
+  def preference(location: ConfigurationLocation): String = synchronized {
+    if(!isPreferenceSet(location)) setToDefaultValue(location)
+    val confVal = preferenceValue(location)
 
     if (!location.cyphered) confVal
     else {
-      if(!passwordIsCorrect) EventDispatcher.objectChanged(this, Workspace.PasswordRequiered)
-      textEncryptor.decrypt(confVal)
+      _password match {
+        case None => EventDispatcher.objectChanged(this, Workspace.PasswordRequired)
+        case Some(p) =>
+      } 
+      textEncryptor(_password).decrypt(confVal)
+    }
+  }
+  
+  def setToDefaultValue(location: ConfigurationLocation) = synchronized {
+    configurations.get(location) match {
+      case None => null 
+      case Some(value) =>
+        val default = value()
+        setPreference(location, default)
+        default
     }
   }
 
   def setPreference(location: ConfigurationLocation, value: String) = synchronized {
     val conf = configuration.subset(location.group)
-    val prop = if(location.cyphered) textEncryptor.encrypt(value) else value
+    val prop = if(location.cyphered) textEncryptor(_password).encrypt(value) else value
     conf.setProperty(location.name, prop)
     configuration.save
   }
@@ -242,16 +263,19 @@ class Workspace(val location: File) {
 
   def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong
   
-  def password_=(password: String) = synchronized {
-    textEncryptor = new BasicTextEncryptor
-    textEncryptor.setPassword(password)
-    passwordIsCorrect //set preference
+  def password_=(password: String): Unit = synchronized {
+    if(!passwordIsCorrect(password)) throw new UserBadDataError("Password is incorrect.") 
+    this._password = Some(password)
+    if(!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)
   }
-  
-  def passwordIsCorrect = {
+
+  def passwordIsCorrect(password: String) = {
     try {
-      preference(passwordTest)
-      true
+      if(isPreferenceSet(passwordTest)) {
+        val te = textEncryptor(Some(password))
+        te.decrypt(preferenceValue(passwordTest))
+        true
+      } else true
     } catch {
       case e => 
         Logger.getLogger(Workspace.getClass.getName).log(Level.FINE, "Password incorrect", e)
@@ -267,11 +291,10 @@ class Workspace(val location: File) {
   def preferenceAsDurationInS(location: ConfigurationLocation): Int = {
     val formatter = ISOPeriodFormat.standard
     val period = formatter.parsePeriod(preference(location))
-    return period.toStandardSeconds.getSeconds
+    period.toStandardSeconds.getSeconds
   }
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
-    val conf = configuration.subset(location.group)
-    return (conf.getString(location.name) != null);
+    preferenceValue(location) != null
   }
 }
