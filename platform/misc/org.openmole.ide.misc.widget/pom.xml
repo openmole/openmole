@@ -21,6 +21,11 @@
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.misc.workspace</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout</artifactId>
             <version>3.7.4</version>

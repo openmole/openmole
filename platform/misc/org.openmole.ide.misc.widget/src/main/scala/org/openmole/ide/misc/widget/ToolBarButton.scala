@@ -17,23 +17,11 @@
 
 package org.openmole.ide.misc.widget
 
-import javax.swing.JOptionPane
-import scala.swing.PasswordField
+import java.awt.Dimension
+import javax.swing.Icon
+import scala.swing.Button
 
-object PasswordDialog {
-  def show = {
-    val passField = new  PasswordField
-    val jop = new JOptionPane(passField,JOptionPane.QUESTION_MESSAGE,JOptionPane.OK_CANCEL_OPTION)
-    val dialog = jop.createDialog("Password:")
-    dialog.setVisible(true)
-    val result = jop.getValue
-    dialog.dispose
-    if(result == JOptionPane.OK_OPTION){
-      println ("OK !!")
-    }
-  }
-  // contents+= "aaaaaaaaaaaa"
-//  new MigPanel("wrap 2") {
-//    contents+= (new Label("Password"),"gap para")
-//    contents+= (passField,"growx")}
+class ToolBarButton(ic: Icon,override val tooltip: String) extends Button{
+  icon = ic
+  maximumSize = new Dimension(30,30)
 }
