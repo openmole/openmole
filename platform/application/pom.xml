@@ -94,7 +94,13 @@
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
             <version>${openmole.gui.version}</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.environment.desktopgrid</artifactId>
+            <version>${openmole.gui.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apidesign</groupId>
             <artifactId>netbinox</artifactId>
