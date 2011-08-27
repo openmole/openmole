@@ -12,6 +12,7 @@ import java.io.PrintStream
 import org.openide.util.Lookup
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.hook.IHook
+import org.openmole.ide.misc.visualization.PiePlotter
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
@@ -43,14 +44,18 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
       val panelUI = dataUI.buildPanelUI
       tabbedPane.pages+= new TabbedPane.Page(hf.displayName,new MigPanel(""){peer.add(panelUI.peer)})})
   
+  tabbedPane.pages+= new TabbedPane.Page("Execution progress", new MigPanel("wrap 2"){
+      peer.add(new PiePlotter("Workflow",Map("Ready"-> 10.0,"Submitted"-> 20.0,"Running"-> 0.0,"Done"-> 20.0,"Failed"-> 40.0,"Killed"-> 100.0)).chartPanel)
+      peer.add(new PiePlotter("Current Environment",Map("Ready"-> 0.0,"Submitted"-> 30.0,"Running"-> 40.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 0.0)).chartPanel)})
+  
   leftComponent = new ScrollPane(tabbedPane)
   rightComponent = new ScrollPane(logTextArea)
   
   def start = {
     cancel
-    stopHooks
+    hookPanels.values.foreach(_.release)
     moleExecution = MoleMaker.buildMoleExecution(mole, manager)
-    commitHooks
+    hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
   
   def cancel = moleExecution.cancel
@@ -60,16 +65,12 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
   }
   
-  def stopHooks = hookPanels.values.foreach(_.release)  
-  def commitHooks = hookPanels.keys.foreach(commitHook(_))
-  
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint
     
     override def write(b:Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
                       
     override def write(b: Array[Byte], off: Int,len: Int) = {
-      // textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
       textArea.append(new String(b,off,len))
       textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
     }

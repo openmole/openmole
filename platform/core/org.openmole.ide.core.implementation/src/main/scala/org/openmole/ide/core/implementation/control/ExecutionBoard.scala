@@ -19,7 +19,10 @@ package org.openmole.ide.core.implementation.control
 
 import scala.swing.Orientation
 import scala.swing.Button
-import org.openmole.ide.misc.eventlistener.PasswordListener
+import java.awt.Dimension
+import javax.swing.ImageIcon
+import org.openide.util.ImageUtilities
+import org.openmole.ide.misc.widget.ToolBarButton
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.workspace.Workspace
@@ -27,17 +30,17 @@ import scala.swing.BoxPanel
 import scala.swing.event.ButtonClicked
 
 object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
-  val startButton = new Button("start")
-  val stopButton = new Button("stop")
+  val startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")),"Start the workflow")
+  val stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")),"Stop the workflow")
   contents.append(startButton,stopButton)
   
-  listenTo(`startButton`)
+  listenTo(`startButton`,`stopButton`)
   reactions += {
     case ButtonClicked(`startButton`) => if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.start
     case ButtonClicked(`stopButton`) =>if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.cancel
   }
   
-  EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequiered)
+  EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequired)
   
   def activate(b:Boolean) = {
     startButton.enabled = b

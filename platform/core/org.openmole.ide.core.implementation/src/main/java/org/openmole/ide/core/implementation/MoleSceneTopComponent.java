@@ -17,6 +17,9 @@
 package org.openmole.ide.core.implementation;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.util.NbBundle;
@@ -33,12 +36,14 @@ import org.openmole.ide.core.implementation.action.RemoveAllMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.util.ImageUtilities;
 import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
 import org.openmole.ide.core.misc.widget.MenuToggleButton;
 import scala.swing.MenuItem;
+import org.openmole.ide.misc.widget.ToolBarButton;
 
 /**
  * Top component which displays something.
@@ -56,8 +61,12 @@ preferredID = "MoleSceneTopComponent")
 public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
-    private MenuToggleButton moleButton;
-    private MenuToggleButton executionButton;
+    //private MenuToggleButton moleButton;
+    private ToolBarButton buildButton;
+    private ToolBarButton cleanAndBuildButton;
+    private ToolBarButton addMoleButton;
+    private ToolBarButton removeMoleButton;
+    private ToolBarButton removeAllMoleButton;
     private JToggleButton detailedViewButton;
     private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
@@ -74,20 +83,27 @@ public final class MoleSceneTopComponent extends TopComponent {
         detailedViewButton = new JToggleButton("Detailed view");
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        moleButton = new MenuToggleButton("Mole");
-        moleButton.addItem(new MenuItem(new AddMoleSceneAction("Add")));
-        moleButton.addItem(new MenuItem(new RemoveMoleSceneAction("Remove")));
-        moleButton.addItem(new MenuItem(new RemoveAllMoleSceneAction("Remove All")));
-
-
-        executionButton = new MenuToggleButton("Execution");
-        executionButton.addItem(new MenuItem(new BuildExecutionAction("Build")));
-        executionButton.addItem(new MenuItem(new CleanAndBuildExecutionAction("Clean and Build")));
+        addMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/addMole.png")), "Add a workflow scene");
+        addMoleButton.action_$eq(new AddMoleSceneAction(""));
+        removeMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeMole.png")), "Remove the current workflow");
+        addMoleButton.action_$eq(new RemoveMoleSceneAction(""));
+        removeAllMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeAll.png")), "Remove all the workflows");
+        addMoleButton.action_$eq(new RemoveAllMoleSceneAction(""));
+        
+        buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")), "Build the workflow");
+        buildButton.action_$eq(new BuildExecutionAction(""));
+        cleanAndBuildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/cleanAndBuild.png")), "Clean and build the workflow");
+        cleanAndBuildButton.action_$eq(new CleanAndBuildExecutionAction(""));
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(moleButton.peer());
-        toolBar.add(executionButton.peer());
+        toolBar.add(addMoleButton.peer());
+        toolBar.add(removeMoleButton.peer());
+        toolBar.add(removeAllMoleButton.peer());
+        toolBar.add(new JToolBar.Separator());
+        toolBar.add(buildButton.peer());
+        toolBar.add(cleanAndBuildButton.peer());
+        toolBar.add(new JToolBar.Separator());
         toolBar.add(ExecutionBoard.peer());
         //  add(toolBar);
         setLayout(new BorderLayout());
@@ -102,8 +118,10 @@ public final class MoleSceneTopComponent extends TopComponent {
         ic.add(palette);
     }
 
-    public PaletteController getPalette(){return palette;}
-    
+    public PaletteController getPalette() {
+        return palette;
+    }
+
     public void refresh(Boolean b) {
         ic.remove(palette);
         addPalette();
@@ -112,7 +130,8 @@ public final class MoleSceneTopComponent extends TopComponent {
     }
 
     public void updateMode(Boolean b) {
-        executionButton.enabled_$eq(b);
+        buildButton.enabled_$eq(b);
+        cleanAndBuildButton.enabled_$eq(b);
         ExecutionBoard.activate(!b);
         detailedViewButton.setEnabled(b);
         if (b) {
