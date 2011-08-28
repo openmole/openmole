@@ -80,20 +80,25 @@ public final class MoleSceneTopComponent extends TopComponent {
         associateLookup(new AbstractLookup(ic));
         addPalette();
 
-        detailedViewButton = new JToggleButton("Detailed view");
+        detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        addMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/addMole.png")), "Add a workflow scene");
-        addMoleButton.action_$eq(new AddMoleSceneAction(""));
-        removeMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeMole.png")), "Remove the current workflow");
-        addMoleButton.action_$eq(new RemoveMoleSceneAction(""));
-        removeAllMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeAll.png")), "Remove all the workflows");
-        addMoleButton.action_$eq(new RemoveAllMoleSceneAction(""));
-        
-        buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")), "Build the workflow");
-        buildButton.action_$eq(new BuildExecutionAction(""));
-        cleanAndBuildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/cleanAndBuild.png")), "Clean and build the workflow");
-        cleanAndBuildButton.action_$eq(new CleanAndBuildExecutionAction(""));
+        addMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/addMole.png")),
+                "Add a workflow scene",
+                new AddMoleSceneAction(""));
+        removeMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeMole.png")),
+                "Remove the current workflow",
+                new RemoveMoleSceneAction(""));
+        removeAllMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeAll.png")),
+                "Remove all the workflows",
+                new RemoveAllMoleSceneAction(""));
+
+        buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")),
+                "Build the workflow",
+                new BuildExecutionAction(""));
+        cleanAndBuildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/cleanAndBuild.png")),
+                "Clean and build the workflow",
+                new CleanAndBuildExecutionAction(""));
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());

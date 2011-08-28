@@ -26,19 +26,18 @@ import org.openmole.ide.misc.widget.ToolBarButton
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.workspace.Workspace
+import scala.swing.Action
 import scala.swing.BoxPanel
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.misc.widget.ToolBarButton
 
 object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
-  val startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")),"Start the workflow")
-  val stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")),"Stop the workflow")
+  val startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")),"Start the workflow",
+                                      new Action(""){override def apply = if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.start})
+                                       
+  val stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")),"Stop the workflow",
+                                     new Action(""){override def apply = if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.cancel})
   contents.append(startButton,stopButton)
-  
-  listenTo(`startButton`,`stopButton`)
-  reactions += {
-    case ButtonClicked(`startButton`) => if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.start
-    case ButtonClicked(`stopButton`) =>if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.cancel
-  }
   
   EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequired)
   
