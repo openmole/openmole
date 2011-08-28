@@ -105,10 +105,10 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
     val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
-    cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+    if (findWidget(sourceNode) != null) cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
   }
   
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
     
   override def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
@@ -245,7 +245,6 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
         manager.registerTransition(edge.get,sourceW, t.target, if (sourceW.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
       }
       else {
-        println("reconnect else ")
         val targetView= replacementWidget.asInstanceOf[InputSlotWidget]
         connectionWidget.setTargetAnchor(new InputSlotAnchor(targetView.capsule, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)   

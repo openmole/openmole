@@ -17,7 +17,6 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.Dimension
 import javax.swing.Icon
 import scala.swing.Action
 import scala.swing.Button
@@ -25,5 +24,4 @@ import scala.swing.Button
 class ToolBarButton(ic: Icon,tt: String, a: Action) extends Button(a){
   icon = ic
   tooltip = tt
-  //maximumSize = new Dimension(30,30)
 }
