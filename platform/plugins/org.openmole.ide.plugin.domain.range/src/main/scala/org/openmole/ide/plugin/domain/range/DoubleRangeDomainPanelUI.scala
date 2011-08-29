@@ -21,13 +21,10 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import scala.swing.Table.ElementMode._
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.Locale
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.swing.BorderPanel.Position._
 
-class DoubleRangeDomainPanelUI(pud: DoubleRangeDomainDataUI) extends RangeDomainPanelUI(new DecimalFormat("0.0000"))
+class DoubleRangeDomainPanelUI(pud: DoubleRangeDomainDataUI) extends RangeDomainPanelUI
                                                                   with IDomainPanelUI[Double] {
   
   minField.text = pud.min
@@ -35,7 +32,7 @@ class DoubleRangeDomainPanelUI(pud: DoubleRangeDomainDataUI) extends RangeDomain
   stepField.text = pud.step
   
   override def saveContent(name: String) = {
-    new DoubleRangeDomainDataUI(name,minField.text,
+   new DoubleRangeDomainDataUI(name,minField.text,
                                  maxField.text,
                                  stepField.text)
   }

@@ -17,16 +17,14 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import java.text.Format
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.FormattedTextField
+import scala.swing.TextField
 import scala.swing.Label
-import scala.swing.Swing
 
-class RangeDomainPanelUI(format: Format) extends MigPanel("fillx,wrap 2","[left][grow,fill]",""){
-  val minField = new FormattedTextField(format)
-  val maxField = new FormattedTextField(format)
-  val stepField = new FormattedTextField(format)
+class RangeDomainPanelUI extends MigPanel("fillx,wrap 2","[left][grow,fill]",""){
+  val minField = new TextField
+  val maxField = new TextField
+  val stepField = new TextField
   
   contents+= (new Label("Min"),"gap para")
   contents+= minField
