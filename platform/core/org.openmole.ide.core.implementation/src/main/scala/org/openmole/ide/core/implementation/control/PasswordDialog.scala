@@ -21,6 +21,7 @@ import scala.swing.Button
 import scala.swing.Dialog
 import javax.swing.JDialog
 import javax.swing.JOptionPane
+import scala.swing.Frame
 import scala.swing.Label
 import scala.swing.PasswordField
 import scala.swing.Window
@@ -34,6 +35,7 @@ object PasswordDialog extends Dialog{
   val passField = new PasswordField(12)
   val okButton = new Button("OK")
   val cancelButton = new Button("Cancel")
+  modal = true
   
   contents= new MigPanel("") {
     contents+= new Label("Password: ")
@@ -44,9 +46,8 @@ object PasswordDialog extends Dialog{
   listenTo(`okButton`,`cancelButton`) //login is a Button
   reactions += {
     case ButtonClicked(`okButton`) => 
-        if (Workspace.passwordIsCorrect(passField.text)) {
-          //Workspace.password= passField.text
-          println("YES !!")
+        if (Workspace.passwordIsCorrect(new String(passField.password))) {
+          Workspace.password_=(new String(passField.password))
           visible= false}
     case ButtonClicked(`cancelButton`) => visible = false}
   
