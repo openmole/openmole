@@ -2,7 +2,7 @@
  * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core.implementation;
@@ -24,20 +24,17 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openmole.ide.core.implementation.action.SaveXML;
-import org.openmole.ide.core.implementation.control.Settings;
-import org.openmole.ide.core.implementation.serializer.GUISerializer;
 
 @ActionID(category = "File",
-id = "org.openmole.ide.core.implementation.SaveXMLAction")
-@ActionRegistration(displayName = "#CTL_SaveXMLAction")
+id = "org.openmole.ide.core.implementation.SaveAsAction")
+@ActionRegistration(displayName = "#CTL_SaveAsAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 1000)
+    @ActionReference(path = "Menu/File", position = 900)
 })
-@Messages("CTL_SaveXMLAction=Save")
-public final class SaveXMLAction implements ActionListener {
+@Messages("CTL_SaveAsAction=Save as")
+public final class SaveAsAction implements ActionListener {
 
-    @Override
     public void actionPerformed(ActionEvent e) {
-        SaveXML.save();
+        SaveXML.show();
     }
 }

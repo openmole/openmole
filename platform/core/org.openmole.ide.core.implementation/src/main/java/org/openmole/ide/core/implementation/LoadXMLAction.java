@@ -23,6 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
+import org.openmole.ide.core.implementation.action.LoadXML;
 import org.openmole.ide.core.implementation.serializer.GUISerializer;
 
 @ActionID(category = "File",
@@ -36,6 +37,6 @@ public final class LoadXMLAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        GUISerializer.unserialize("/tmp/mole.xml");
+        LoadXML.show();
     }
 }
