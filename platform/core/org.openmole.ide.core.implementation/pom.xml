@@ -160,11 +160,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.eventlistener</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>1.7</version>
