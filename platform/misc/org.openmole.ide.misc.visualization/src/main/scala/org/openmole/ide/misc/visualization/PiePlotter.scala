@@ -51,9 +51,16 @@ class PiePlotter(title: String, data: Map[String, Double]) {
     
     plot.setSectionPaint("Ready",new Color(255,204,0))
     plot.setSectionPaint("Running",new Color(85,212,0))
-    plot.setSectionPaint("Submitted",new Color(198,233,175))
+    plot.setSectionPaint("Completed",new Color(198,233,175))
     plot.setSectionPaint("Failed",new Color(255,255,255))
-    plot.setSectionPaint("Killed",new Color(170,0,0))
-    plot.setSectionPaint("Done",new Color(0,170,212))   
+    plot.setSectionPaint("Canceled",new Color(170,0,0))
+    //plot.setSectionPaint("Done",new Color(0,170,212))  
+    
+//    plot.setSectionPaint("Ready",new Color(255,204,0))
+//    plot.setSectionPaint("Running",new Color(85,212,0))
+//    plot.setSectionPaint("Submitted",new Color(198,233,175))
+//    plot.setSectionPaint("Failed",new Color(255,255,255))
+//    plot.setSectionPaint("Killed",new Color(170,0,0))
+//    plot.setSectionPaint("Done",new Color(0,170,212))    
   }
 }

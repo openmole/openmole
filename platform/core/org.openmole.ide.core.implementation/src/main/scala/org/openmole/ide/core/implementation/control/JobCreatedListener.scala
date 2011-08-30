@@ -17,10 +17,15 @@
 
 package org.openmole.ide.core.implementation.control
 
-import org.openmole.misc.workspace._
+import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.IMoleExecution.IOneJobSubmitted
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.tools.service.Priority
 
-object PasswordListener extends Workspace.IWorkspaceListener{
-  override def passwordRequired(obj: Workspace) = {
-    PasswordDialog
+class JobCreatedListener extends IOneJobSubmitted{
+  override def oneJobSubmitted(execution: IMoleExecution, moleJob: IMoleJob) = {
+    EventDispatcher.registerForObjectChanged(execution,Priority.NORMAL,new JobSatusListener,IMoleExecution.OneJobStatusChanged)
   }
 }
+
