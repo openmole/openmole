@@ -19,13 +19,10 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.core.model.mole.ITicket
 
-class AggregationTransitionAdapter(transition: IAggregationTransition) extends IObjectListenerWithArgs[ISubMoleExecution] {
+class AggregationTransitionAdapter(transition: IAggregationTransition) extends ISubMoleExecution.IFinished {
 
-    override def eventOccured(subMole: ISubMoleExecution, args: Array[Object]) = {
-      val ticket = args(0).asInstanceOf[ITicket]
-      transition.aggregate(subMole, ticket)
-    }
+    override def finished(subMole: ISubMoleExecution, ticket: ITicket) = transition.aggregate(subMole, ticket)
+
 }

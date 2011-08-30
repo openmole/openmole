@@ -35,7 +35,6 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import scala.collection.immutable.TreeSet
@@ -54,11 +53,12 @@ object SubMoleExecution {
 
 class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution: IMoleExecution) extends ISubMoleExecution {
 
-  val subMoleExecutionAdapterForMoleJobFinished = new IObjectListenerWithArgs[IMoleJob] {
-    override def eventOccured(job: IMoleJob, args: Array[Object]) = {
-      val capsule = args(0).asInstanceOf[ICapsule]
-      jobFinished(job, capsule)
-    }
+  val subMoleExecutionAdapterForMoleJobFinished = new IMoleJob.ITransitionPerformed {
+    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = jobFinished(job, capsule)
+  }
+  
+  val subMoleExecutionAdapterForMoleJobFailedOrCancel = new IMoleJob.IJobFailedOrCanceled {
+    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = jobFinished(job, capsule)
   }
   
   private var submittedJobs = TreeSet[IMoleJob]()
@@ -129,7 +129,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       val moleJob = capsule.toJob(context, moleExecution.nextJobId)
 
       EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.TransitionPerformed)
-      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.JobFailedOrCanceled)
+      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFailedOrCancel, IMoleJob.JobFailedOrCanceled)
 
       this += moleJob
       

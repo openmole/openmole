@@ -22,21 +22,19 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.tools.service.Logger
 import scala.collection.immutable.TreeMap
 
 object ContextSaver extends Logger
 
-class ContextSaver extends IObjectListenerWithArgs[IMoleJob] {
+class ContextSaver extends IMoleJob.IStateChanged {
 
   import ContextSaver._
   
   var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp])]
   def results = _results
 
-  override def eventOccured(job: IMoleJob, args: Array[Object]) = synchronized {
-    val state = args(0).asInstanceOf[State]
+  override def stateChanged(job: IMoleJob, state: State, oldState: State) = synchronized {
     state match {
       case COMPLETED | FAILED =>
         job.exception match {

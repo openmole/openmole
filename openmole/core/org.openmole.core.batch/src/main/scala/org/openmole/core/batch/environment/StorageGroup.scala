@@ -35,8 +35,8 @@ import collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
 
 class StorageGroup(environment: BatchEnvironment) {
-  class BatchRessourceGroupAdapterUsage extends IObjectListener[UsageControl] {
-    override def eventOccured(obj: UsageControl) = waiting.release
+  class BatchRessourceGroupAdapterUsage extends UsageControl.IResourceReleased {
+    override def ressourceReleased(obj: UsageControl) = waiting.release
   }
   
   private var resources = List[Storage]()

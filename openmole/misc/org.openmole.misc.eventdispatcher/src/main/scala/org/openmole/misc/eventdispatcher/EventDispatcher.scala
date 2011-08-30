@@ -25,41 +25,26 @@ object EventDispatcher {
   //TODO maybe change to fixed thread pool some time 
   private val Executor = Executors.newCachedThreadPool
    
-  private val objectChangedMap = new ObjectListenerMap[IObjectListener[AnyRef]]
-  private val objectChangedWithArgsMap = new ObjectListenerMap[IObjectListenerWithArgs[AnyRef]]
+  private val objectChangedMap = new ObjectListenerMap
+  //private val objectChangedWithArgsMap = new ObjectListenerMap
   
-  def registerForObjectChanged[T](obj: T, priority: Int, listner: IObjectListener[T], event: String) = 
-    objectChangedMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListener[AnyRef]], event)
+  def registerForObjectChanged[T, L <: IObjectListener[T]](obj: T, priority: Int, listner: L, event: Event[T,L]) = 
+    objectChangedMap.register(obj, priority, listner, event)
   
-  def registerForObjectChanged[T](obj: T, priority: Int, listner: IObjectListenerWithArgs[T], event: String) =
-    objectChangedWithArgsMap.register(obj.asInstanceOf[AnyRef], priority, listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
-
-  def unregisterListener[T](obj: T, listner: IObjectListener[T], event: String) =
-    objectChangedMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListener[AnyRef]], event)
+  def unregisterListener[T, L <: IObjectListener[T]](obj: T, listner: L, event: Event[T,L]) =
+    objectChangedMap.unregister(obj, listner, event)
    
-  def unregisterListener[T](obj: T, listner: IObjectListenerWithArgs[T], event: String) =
-    objectChangedWithArgsMap.unregister(obj.asInstanceOf[AnyRef], listner.asInstanceOf[IObjectListenerWithArgs[AnyRef]], event)
-  
-  def objectChanged[T](obj: T, event: String, args: Array[Object]) = {
+  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L], args: Array[Object]) = {
     /* --- Listners without args ---*/
 
-    val listeners = objectChangedMap.get(obj.asInstanceOf[AnyRef], event)
+    val listeners = objectChangedMap.get(obj, event)
  
     for (listner <- listeners) {
       //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
-      listner.eventOccured(obj.asInstanceOf[AnyRef])
-    }
- 
-    /* --- Listners with args ---*/
-
-    val listenersWithArgs = objectChangedWithArgsMap.get(obj.asInstanceOf[AnyRef], event)
-
-    for (listner <- listenersWithArgs) {
-      //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
-      listner.eventOccured(obj.asInstanceOf[AnyRef], args)
+      listner.eventOccured(obj, args)
     }
   }
    
-  def objectChanged[T](obj: T, event: String): Unit = objectChanged(obj.asInstanceOf[AnyRef], event, Array.empty)
+  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L]): Unit = objectChanged(obj, event, Array.empty)
 
 }

@@ -18,12 +18,19 @@
 package org.openmole.core.batch.control
 
 import org.openmole.misc.eventdispatcher.EventDispatcher
-
+import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
 import java.util.concurrent.TimeUnit
 
 object UsageControl {
   
-  final val ResourceReleased = "ResourceReleased"
+  trait IResourceReleased extends IObjectListener[UsageControl] {
+    override def eventOccured(obj: UsageControl, args: Array[Object]) = ressourceReleased(obj)
+      
+    def ressourceReleased(usageControl: UsageControl)
+  }
+  
+  final val ResourceReleased = new Event[UsageControl, IResourceReleased]
   
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
 

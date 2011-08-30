@@ -43,9 +43,9 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
   
-  class CapsuleAdapter extends IObjectListener[IMoleJob] {
+  class CapsuleAdapter extends IMoleJob.IStateChanged {
 
-    override def eventOccured(obj: IMoleJob) = {
+    override def stateChanged(obj: IMoleJob, newState: State.State, oldStade: State.State) = {
       obj.state match {
         case COMPLETED => jobFinished(obj)
         case FAILED | CANCELED => jobFailedOrCanceled(obj)

@@ -20,20 +20,20 @@ package org.openmole.misc.eventdispatcher
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.WeakHashMap
 
-class ObjectListenerMap[L] {
+class ObjectListenerMap {
     
-  val listnerTypeMap = new WeakHashMap[AnyRef, HashMap[String, SortedListeners[L]]]
   
-  private def getOrCreateListeners(obj: AnyRef, event: String): SortedListeners[L] = {
-    listnerTypeMap.getOrElseUpdate(obj, new HashMap[String, SortedListeners[L]]).getOrElseUpdate(event, new SortedListeners[L])
-  }
+  val listnerTypeMap = new WeakHashMap[Any, HashMap[Event[Any, IObjectListener[Any]], SortedListeners[Any]]] //forSome {type T; type L <: IObjectListener[T]} = WeakHashMap.empty
   
-  def get(obj: AnyRef, event: String): Iterable[L] = synchronized {
-    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event, Iterable.empty)
+  private def getOrCreateListeners[T, L <: IObjectListener[T]](obj: T, event: Event[T, L]): SortedListeners[L] = 
+    listnerTypeMap.getOrElseUpdate(obj, HashMap.empty).getOrElseUpdate(event.asInstanceOf[Event[Any, IObjectListener[Any]]], new SortedListeners[Any]).asInstanceOf[SortedListeners[L]]
+  
+  def get[T, L <: IObjectListener[T]](obj: T, event: Event[T, L]): Iterable[L] = synchronized {
+    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event.asInstanceOf[Event[Any, IObjectListener[Any]]], Iterable.empty).asInstanceOf[Iterable[L]]
   }
 
-  def unregister(obj: AnyRef, listener: L, event: String) = synchronized {
-    val map = listnerTypeMap.getOrElse(obj, HashMap.empty)
+  def unregister[T, L <: IObjectListener[T]](obj: T, listener: L, event: Event[T, L]) = synchronized {
+    val map = listnerTypeMap.getOrElse(obj, HashMap.empty).asInstanceOf[HashMap[Event[T, L], SortedListeners[L]]]
     
     map.get(event) match {
       case Some(listeners) => 
@@ -45,7 +45,7 @@ class ObjectListenerMap[L] {
     
   }
   
-  def register(obj: AnyRef, priority: Int, listener: L, event: String) = synchronized {
+  def register[T, L <: IObjectListener[T]](obj: T, priority: Int, listener: L, event: Event[T, L]) = synchronized {
     getOrCreateListeners(obj, event).register(priority, listener)
   }
   

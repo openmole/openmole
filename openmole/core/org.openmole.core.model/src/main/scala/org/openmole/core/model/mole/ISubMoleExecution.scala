@@ -23,10 +23,18 @@ import org.openmole.core.model.tools.IContextBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
+import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
 
 object ISubMoleExecution {
-  val Finished = "Finished"
-  //val AllJobsWaitingInGroup = "AllJobsWaitingInGroup"
+  
+  trait IFinished extends IObjectListener[ISubMoleExecution] {
+    override def eventOccured(obj: ISubMoleExecution, args: Array[Object]) = finished(obj, args(0).asInstanceOf[ITicket])
+    
+    def finished(submoleExecution: ISubMoleExecution, ticket: ITicket)
+  }
+  
+  val Finished = new Event[ISubMoleExecution, IFinished]
 }
 
 trait ISubMoleExecution {

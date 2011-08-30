@@ -19,7 +19,6 @@ package org.openmole.core.implementation.task
 
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
@@ -52,14 +51,11 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
   var forcedArray = List.empty[IPrototype[_]]
   
-  class ResultGathering extends IObjectListenerWithArgs[IMoleExecution] {
+  class ResultGathering extends IMoleExecution.IJobInCapsuleFinished {
 
     val variables = new ListBuffer[IVariable[_]] 
     
-    override def eventOccured(t: IMoleExecution, os: Array[Object]) = synchronized {
-      val moleJob = os(0).asInstanceOf[IMoleJob]
-      val capsule = os(1).asInstanceOf[ICapsule]
-
+    override def jobInCapsuleFinished(t: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule) = synchronized {
       outputCapsules.get(capsule) match {
         case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
         case Some(prototypes) =>

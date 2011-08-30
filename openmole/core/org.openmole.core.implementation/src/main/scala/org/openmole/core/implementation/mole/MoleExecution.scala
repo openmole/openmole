@@ -21,6 +21,7 @@ import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.IEnvironment
@@ -34,9 +35,8 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.IObjectListener
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.job.State
+import org.openmole.core.model.job.State.State
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
@@ -71,24 +71,19 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   import IMoleExecution._
   import MoleExecution._
 
-  private val moleExecutionAdapterForMoleJobOutputTransitionPerformed = new IObjectListenerWithArgs[IMoleJob] {
-    override def eventOccured(job: IMoleJob, args: Array[Object]) = {
-      val capsule = args(0).asInstanceOf[ICapsule]
+  private val moleExecutionAdapterForMoleJobOutputTransitionPerformed = new IMoleJob.ITransitionPerformed {
+    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = 
       jobOutputTransitionsPerformed(job, capsule)
-    }
   }
 
-  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new IObjectListenerWithArgs[IMoleJob] {
-    override def eventOccured(job: IMoleJob, args: Array[Object]) = {
-      val capsule = args(0).asInstanceOf[ICapsule]
+  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new IMoleJob.IJobFailedOrCanceled {
+    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = 
       jobFailedOrCanceled(job, capsule)
-    }
   }
   
-  private val moleExecutionAdapterForMoleJob = new IObjectListenerWithArgs[IMoleJob] {
-    override def eventOccured(job: IMoleJob, args: Array[Object]) = { 
-      EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job) ++ args)
-    }
+  private val moleExecutionAdapterForMoleJob = new IMoleJob.IStateChanged {
+    override def stateChanged(job: IMoleJob, newState: State, oldState: State) = 
+      EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job, newState, oldState))
   }
  
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 

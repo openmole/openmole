@@ -19,7 +19,6 @@ package org.openmole.core.implementation.transition
 
 import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.tools.ContextBuffer

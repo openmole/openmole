@@ -17,15 +17,39 @@
 
 package org.openmole.core.model.job
 
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.IContext
+import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
 
 object IMoleJob {
   
-  final val TransitionPerformed = "TransitionPerformed"
-  final val JobFailedOrCanceled = "JobFailedOrCanceled"
-  final val StateChanged = "StateChanged"
+  trait IStateChanged extends IObjectListener[IMoleJob] {
+    override def eventOccured(obj: IMoleJob, args: Array[Object]) = 
+      stateChanged(obj, args(0).asInstanceOf[State.State], args(1).asInstanceOf[State.State])
     
+    def stateChanged(moleJob: IMoleJob, newState: State.State, oldStade: State.State)
+  }
+  
+  trait IJobFailedOrCanceled extends IObjectListener[IMoleJob] {
+    override def eventOccured(obj: IMoleJob, args: Array[Object]) =
+      jobFailedOrCanceled(obj, args(0).asInstanceOf[ICapsule])
+    
+    def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule)
+  }
+  
+  trait ITransitionPerformed extends IObjectListener[IMoleJob] {
+    override def eventOccured(obj: IMoleJob, args: Array[Object]) = 
+      transitionPerformed(obj, args(0).asInstanceOf[ICapsule])
+    
+    def transitionPerformed(moleJob: IMoleJob, caspule: ICapsule)
+  }
+  
+  final val TransitionPerformed = new Event[IMoleJob, ITransitionPerformed]
+  final val JobFailedOrCanceled = new Event[IMoleJob, IJobFailedOrCanceled]
+  final val StateChanged = new Event[IMoleJob, IStateChanged]
+  
   implicit val moleJobOrdering = new Ordering[IMoleJob] {
     
     override def compare(left: IMoleJob, right: IMoleJob) = {

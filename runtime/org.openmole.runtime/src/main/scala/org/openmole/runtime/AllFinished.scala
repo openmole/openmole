@@ -20,14 +20,13 @@ package org.openmole.runtime
 import java.util.concurrent.Semaphore
 import org.openmole.core.model.job.State.State
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListenerWithArgs
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.Logger
 import org.openmole.core.model.job.IMoleJob
 
 object AllFinished extends Logger
 
-class AllFinished extends IObjectListenerWithArgs[IMoleJob] {
+class AllFinished extends IMoleJob.IStateChanged {
 
   import AllFinished._
   
@@ -47,8 +46,7 @@ class AllFinished extends IObjectListenerWithArgs[IMoleJob] {
     allFinished.release
   }
 
-  override def eventOccured(job: IMoleJob, args: Array[Object]) = synchronized {
-    val state = args(0).asInstanceOf[State]
+  override def stateChanged(job: IMoleJob, state: State, oldState: State) = synchronized {
     if (state.isFinal) {
       nbFinished += 1
       if (nbFinished >= nbJobs) allFinished.release
