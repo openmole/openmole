@@ -19,68 +19,43 @@ package org.openmole.ide.core.implementation.control
 
 import scala.swing.Button
 import scala.swing.Dialog
+import java.awt.Dimension
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import javax.swing.JButton
 import javax.swing.JDialog
-import javax.swing.JOptionPane
-import scala.swing.Frame
 import scala.swing.Label
 import scala.swing.PasswordField
-import scala.swing.Window
-import scala.swing.event.ButtonClicked
+import net.miginfocom.swing.MigLayout
 import org.openide.windows.WindowManager
-import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.misc.workspace.Workspace
 
-object PasswordDialog extends Dialog{
+object PasswordDialog extends JDialog(WindowManager.getDefault.getMainWindow){
   
   val passField = new PasswordField(12)
-  val okButton = new Button("OK")
-  val cancelButton = new Button("Cancel")
-  modal = true
+  val okButton = new JButton("OK")
+  val cancelButton = new JButton("Cancel")
+  setLayout(new MigLayout(""))
+  add(new Label("Password: ").peer)
+  add(passField.peer)
+  add(okButton)
+  add(cancelButton)
   
-  contents= new MigPanel("") {
-    contents+= new Label("Password: ")
-    contents+= passField
-    contents+= okButton
-    contents+= cancelButton}
+  setModal(true)
+  setMinimumSize(new Dimension(350,80))
   
-  listenTo(`okButton`,`cancelButton`) //login is a Button
-  reactions += {
-    case ButtonClicked(`okButton`) => 
+  okButton.addActionListener(new ActionListener {
+      override def actionPerformed(ae: ActionEvent) = {
+        println("ok")
         if (Workspace.passwordIsCorrect(new String(passField.password))) {
           Workspace.password_=(new String(passField.password))
-          visible= false}
-    case ButtonClicked(`cancelButton`) => visible = false}
+          setVisible(false)}}});
+    
+  cancelButton.addActionListener(new ActionListener {
+      override def actionPerformed(ae: ActionEvent) = {
+        println("cancel")
+        setVisible(false);}});
   
-  visible= true
-  
+  setLocationRelativeTo(WindowManager.getDefault.getMainWindow)
+  setVisible(true)
 }
-  
-  
-//  def show = {
-//    val passField = new PasswordField
-//    val result = new JOptionPane.showConfirmDialog(null,List(new Label("Password"),passField).toArray,"Password required",JOptionPane.OK_CANCEL_OPTION)
-//   
-//    if(result == JOptionPane.OK_OPTION){
-//      if (Workspace.passwordIsCorrect) {println ("OK !!")}
-//    }
-//  }
-//  
-//     JLabel jUserName = new JLabel("User Name");
-//        JTextField userName = new JTextField();
-//        JLabel jPassword = new JLabel("Password");
-//        JTextField password = new JPasswordField();
-//        Object[] ob = {jUserName, userName, jPassword, password};
-//        int result = JOptionPane.showConfirmDialog(null, ob, "Please input password for JOptionPane showConfirmDialog", JOptionPane.OK_CANCEL_OPTION);
-// 
-//        if (result == JOptionPane.OK_OPTION) {
-//            String userNameValue = userName.getText();
-//            String passwordValue = password.getText();
-//            //Here is some validation code
-//        }
-  
-  
-// contents+= "aaaaaaaaaaaa"
-//  new MigPanel("wrap 2") {
-//    contents+= (new Label("Password"),"gap para")
-//    contents+= (passField,"growx")}
-//}

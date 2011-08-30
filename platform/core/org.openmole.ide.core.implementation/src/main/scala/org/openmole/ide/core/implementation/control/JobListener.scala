@@ -17,6 +17,4 @@
 
 package org.openmole.ide.core.implementation.control
 
-object JobListener extends IObjectListnerWithArgs{
-
-}
+object JobListener

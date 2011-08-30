@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.action
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import scala.swing.FileChooser.SelectionMode._
+import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.control.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result.Approve
@@ -28,20 +29,24 @@ import scala.swing.FileChooser
 import scala.swing.Label
 
 object SaveXML {
-  def save = GUISerializer.serialize(Settings.currentProject.getOrElse(show))
+  def save:Unit = SaveXML.save(Settings.currentProject.getOrElse(SaveXML.show))
   
-def show : String = {
+  def save(title: String): Unit = {
+    Settings.currentProject = Some(title)
+    WindowManager.getDefault.getMainWindow.setTitle(title)
+    GUISerializer.serialize(title)
+    }
+  
+  def show : String = {
     val fc = new FileChooser {
       new FileNameExtensionFilter("Save", ".xml,.XML")
       fileSelectionMode = FilesOnly
       title ="Save OpenMOLE project"
     }
   
-    var text=""
+    var text = ""
     if (fc.showDialog(new Label,"OK") == Approve) text = fc.selectedFile.getPath
-    println("Parent " + new File(text).getParentFile)
-    println("save : " + text.split('.')(0)+".xml")
-    if (new File(text).getParentFile.isDirectory()) text.split('.')(0)+".xml"
+    if (new File(text).getParentFile.isDirectory) text= text.split('.')(0)+".xml"
     text
   }
 }

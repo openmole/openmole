@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.control
 
 import javax.swing.JOptionPane
+//import org.openmole.ide.core.implementation.PasswordDialog
 import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.workspace._
 

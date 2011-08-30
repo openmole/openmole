@@ -31,7 +31,7 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer;
 id = "org.openmole.ide.core.implementation.SaveXMLAction")
 @ActionRegistration(displayName = "#CTL_SaveXMLAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 1000)
+    @ActionReference(path = "Menu/File", position = 900)
 })
 @Messages("CTL_SaveXMLAction=Save")
 public final class SaveXMLAction implements ActionListener {

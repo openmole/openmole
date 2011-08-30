@@ -29,12 +29,12 @@ import org.openmole.ide.core.implementation.action.SaveXML;
 id = "org.openmole.ide.core.implementation.SaveAsAction")
 @ActionRegistration(displayName = "#CTL_SaveAsAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 900)
+    @ActionReference(path = "Menu/File", position = 1000)
 })
 @Messages("CTL_SaveAsAction=Save as")
 public final class SaveAsAction implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
-        SaveXML.show();
+        SaveXML.save(SaveXML.show());
     }
 }
