@@ -73,6 +73,8 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
                               
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
     endCapsExecuted should equal (1)
+    new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (2)
   }
   
   "Aggregation transition" should "should also work for native types" in {      
