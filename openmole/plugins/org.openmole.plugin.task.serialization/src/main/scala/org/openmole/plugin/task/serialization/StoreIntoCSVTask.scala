@@ -35,6 +35,7 @@ import collection.JavaConversions._
  */
 class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], String)], filePrototype: IPrototype[File], delimiter: Char, quoteChar: Char) extends Task(name) {
 
+  columns.foreach{case(p,s) => addInput(p)}
   addOutput(filePrototype)
   
   /**
