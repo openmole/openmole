@@ -72,13 +72,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   import MoleExecution._
 
   private val moleExecutionAdapterForMoleJobOutputTransitionPerformed = new IMoleJob.ITransitionPerformed {
-    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = 
-      jobOutputTransitionsPerformed(job, capsule)
+    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = MoleExecution.this.jobOutputTransitionsPerformed(job, capsule)
   }
 
   private val moleExecutionAdapterForMoleJobFailedOrCanceled = new IMoleJob.IJobFailedOrCanceled {
-    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = 
-      jobFailedOrCanceled(job, capsule)
+    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = MoleExecution.this.jobFailedOrCanceled(job, capsule)
   }
   
   private val moleExecutionAdapterForMoleJob = new IMoleJob.IStateChanged {

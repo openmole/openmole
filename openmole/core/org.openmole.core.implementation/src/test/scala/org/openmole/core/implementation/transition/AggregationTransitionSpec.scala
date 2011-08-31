@@ -115,6 +115,46 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     endCapsExecuted should equal (1)
   }
   
+  "Aggregation transition" should "support cancel and start of a new execution" in {      
+    var endCapsExecuted = 0
+    
+    val data = 0 to 1000
+    val i = new Prototype("i", classOf[Int])
+     
+    val sampling = new ExplicitSampling(i, data)
+    
+    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+     
+    val emptyT = new EmptyTask("Empty")
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
+    
+    val emptyC = new Capsule(emptyT)
+    
+    val testT = new Task("Test") {
+      override def process(context: IContext) = {
+        context.contains(toArray(i)) should equal (true)
+        context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
+        endCapsExecuted += 1
+        context
+      }
+    }
+    
+    testT.addInput(toArray(i))
+    
+    val testC = new Capsule(testT)
+    
+    new ExplorationTransition(exc, emptyC)
+    new AggregationTransition(emptyC, testC)
+                              
+    new MoleExecution(new Mole(exc)).start.cancel 
+    endCapsExecuted = 0
+    new MoleExecution(new Mole(exc)).start.waitUntilEnded 
+    endCapsExecuted should equal (1)
+  }
+  
+  
+  
   
   
  /* "Aggregation transition" should "be triggered before all jobs are finished" in {
