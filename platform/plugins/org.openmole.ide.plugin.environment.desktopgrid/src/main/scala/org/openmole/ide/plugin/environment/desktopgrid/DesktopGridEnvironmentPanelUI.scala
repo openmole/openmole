@@ -27,7 +27,7 @@ import scala.swing.PasswordField
 
 class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
   val loginTextField = new TextField(20)
-  val passTextField = new PasswordField(20)
+  val passTextField = new TextField(20)
   val portTextField = new TextField(5)
   
   contents+= (new Label("Login"),"gap para")
