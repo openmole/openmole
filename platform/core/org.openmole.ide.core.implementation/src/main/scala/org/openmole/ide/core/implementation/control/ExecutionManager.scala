@@ -53,7 +53,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
       val panelUI = dataUI.buildPanelUI
       tabbedPane.pages+= new TabbedPane.Page(hf.displayName,new MigPanel(""){peer.add(panelUI.peer)})})
   
-  val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Submitted"-> 0.0,"Running"-> 0.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 100.0))
+  val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
  // val curPiePlotter = new PiePlotter("Current Environment",Map("Ready"-> 0.0,"Submitted"-> 0.0,"Running"-> 0.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 0.0))
   tabbedPane.pages+= new TabbedPane.Page("Execution progress", new MigPanel("wrap 2"){
       peer.add(wfPiePlotter.chartPanel)})
@@ -66,6 +66,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     cancel
     hookPanels.values.foreach(_.release)
     moleExecution = MoleMaker.buildMoleExecution(mole, manager)
+    initPieChart
     EventDispatcher.registerForObjectChanged(moleExecution,Priority.NORMAL,new JobCreatedListener,IMoleExecution.OneJobSubmitted)
     hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
@@ -76,6 +77,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     if (hookPanels.contains(hookPanelUI)) {println("realase");hookPanels(hookPanelUI).release}
     hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
   }
+  def initPieChart = status.keys.foreach(k=>status(k)=0)
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint

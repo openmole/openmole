@@ -19,14 +19,16 @@ package org.openmole.ide.core.implementation.control
 
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State.State
+import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IMoleExecution.IOneJobStatusChanged
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 
 class JobSatusListener extends IOneJobStatusChanged {
   override def oneJobStatusChanged(execution: IMoleExecution, moleJob: IMoleJob, newState: State, oldState: State) = {
-    val exeManager = TabManager.executionTabs.values.filter(_.moleExecution==execution).head
+    val exeManager = TabManager.executionManager(execution)
     exeManager.status(oldState) -= 1 
     exeManager.status(newState) += 1 
     exeManager.wfPiePlotter.updateData(oldState.name,exeManager.status(oldState))
-    exeManager.wfPiePlotter.updateData(newState.name,exeManager.status(newState))}}
+    exeManager.wfPiePlotter.updateData(newState.name,exeManager.status(newState))}
+}

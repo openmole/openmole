@@ -33,7 +33,7 @@ class PiePlotter(title: String, data: Map[String, Double]) {
   val chart = ChartFactory.createPieChart(title,pieData , false, false, false)
   customize(chart.getPlot.asInstanceOf[PiePlot])
   
-  def updateData(key: String, value: Double) = pieData.setValue(key,value)
+  def updateData(key: String, value: Double) = if(value>0.0) pieData.setValue(key,value)
   
   def chartPanel = new ChartPanel(chart) {setPreferredSize(new Dimension(250,250))}
   
