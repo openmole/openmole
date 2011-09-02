@@ -186,7 +186,7 @@ class Workspace(val location: File) {
   }
     
   def clean = {
-    run.delete
+    if(UUID.fromString(run.content).compareTo(sessionUUID) == 0) run.delete
     tmpDir.recursiveDelete
   }
   
