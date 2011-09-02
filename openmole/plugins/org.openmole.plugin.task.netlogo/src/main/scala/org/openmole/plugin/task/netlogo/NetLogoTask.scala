@@ -63,8 +63,8 @@ abstract class NetLogoTask(
     prepareInputFiles(context, tmpDir)
     
     val scriptPath = workspace match {
-      case Left((workspace, scriptName)) => workspace.getName + "/" + scriptName
-      case Right(script) => script.getName
+      case Left((workspace, scriptName)) => deployName(workspace) + "/" + scriptName
+      case Right(script) => deployName(script)
     }
     
     val script = new File(tmpDir, scriptPath)
