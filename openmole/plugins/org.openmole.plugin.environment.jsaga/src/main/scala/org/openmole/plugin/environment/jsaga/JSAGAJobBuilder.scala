@@ -36,7 +36,12 @@ object JSAGAJobBuilder {
     description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
 
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](tmpScript.getName))
-    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](tmpScript.toURI().toURL().toString + ">" + tmpScript.getName))
+    
+    
+    
+    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
+                                                                              {if(tmpScript.getAbsolutePath.startsWith("/")) tmpScript.getAbsolutePath.tail else tmpScript.getAbsolutePath} +
+                                                                              ">" + tmpScript.getName))
 
     attributes.get(CPU_TIME) match {
       case Some(value) => 
