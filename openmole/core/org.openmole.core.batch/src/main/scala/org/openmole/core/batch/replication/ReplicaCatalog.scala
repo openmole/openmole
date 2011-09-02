@@ -83,20 +83,14 @@ object ReplicaCatalog {
 
   def lockRead[A](op: => A): A = {
     readWriteLock.lockRead
-    try {
-      op
-    } finally {
-      readWriteLock.unlockRead
-    }
+    try op
+    finally readWriteLock.unlockRead
   }
   
   def lockWrite[A](op: => A): A = {
     readWriteLock.lockWrite
-    try {
-      op
-    } finally {
-      readWriteLock.unlockWrite
-    }
+    try op
+    finally readWriteLock.unlockWrite
   }
    
   private def getReplica(hash: String, storageDescription: StorageDescription, authenticationKey: String): Option[Replica] = {
@@ -119,17 +113,14 @@ object ReplicaCatalog {
   }
     
 
-  def getReplica(src: File, storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] = {
+  def getReplica(src: File, storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
     lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null)))
-  }
   
-  def getReplica(storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] = {
+  def getReplica(storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
     lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null)))
-  }
 
-  def inCatalog(storageDescription: StorageDescription, authenticationKey: String): Set[String] = {
+  def inCatalog(storageDescription: StorageDescription, authenticationKey: String): Set[String] =
     lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null)).map{_.destination}.toSet)
-  }
   
   def inCatalog(src: Iterable[File], authenticationKey: String): Map[File, Set[StorageDescription]] = {
     //transactionalOp( t => {

@@ -63,14 +63,11 @@ class DesktopGridEnvironment(port: Int, login: String, password: String, inRequi
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
         override def createFileSystemView(s: Session) = new NativeFileSystemView(login, false) {        
-          //println("fs view " + s)
           override def getFile(file: String) = {
             val sandboxed = 
               if(file.startsWith(path.getCanonicalPath)) new File(file)
               else new File(path, file)
-          //println("getFlie " + file)
-            
-            //println("Desktop " + sandboxed.toString)
+
             if(sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(sandboxed.getAbsolutePath)
             else super.getFile(path.getAbsolutePath)
           }

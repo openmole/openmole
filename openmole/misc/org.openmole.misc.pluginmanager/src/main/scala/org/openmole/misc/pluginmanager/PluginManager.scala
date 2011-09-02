@@ -19,6 +19,7 @@ package org.openmole.misc.pluginmanager
 
 import java.io.File
 import java.io.FileFilter
+import java.net.URI
 import java.net.URL
 import java.io.FileInputStream
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
@@ -38,7 +39,7 @@ import org.openmole.misc.hashservice.HashService
 
 object PluginManager {
   
-  private val defaultPatern = ".*\\.jar";
+  private val defaultPatern = ".*\\.jar"
 
   private var files = Map.empty[File, (Long, IHash)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
@@ -74,7 +75,7 @@ object PluginManager {
         if(noProtocol.endsWith("/")) noProtocol.substring(0, noProtocol.length - 1)
         else noProtocol
       }
-      new File(location)
+      new File(new URI(location).getPath)
     }
   }
   

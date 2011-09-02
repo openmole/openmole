@@ -42,11 +42,8 @@ object HashService {
   
   def computeHash(file: File): SHA1Hash = {
     val is = new FileInputStream(file)
-    try {
-      return computeHash(is)
-    } finally {
-      is.close
-    }
+    try computeHash(is)
+    finally is.close
   }
   
   def computeHash(is: InputStream): SHA1Hash = {
