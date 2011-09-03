@@ -18,11 +18,6 @@
             <name>OpenMole repository</name>
             <url>http://maven.openmole.org/public/</url>
         </repository>
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-        </repository>
     </repositories>
     
     <properties>

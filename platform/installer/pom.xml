@@ -22,7 +22,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
-        <izpack.standalone.compiler.version>4.3.2</izpack.standalone.compiler.version>
+        <izpack.standalone.compiler.version>4.3.4</izpack.standalone.compiler.version>
     </properties>
  
     <build>

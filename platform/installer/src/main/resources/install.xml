@@ -9,9 +9,12 @@
     </info>
     
     <packs>
-        <pack name="OpenMOLE Console" required="yes">
-            <description>OpenMOLE</description>
+        <pack name="OpenMOLE" required="yes">
+            <description>OpenMOLE GUI</description>
             <fileset dir="../dependency/application-1.0-SNAPSHOT/" targetdir="$INSTALL_PATH" />
+        </pack>
+        <pack name="OpenMOLE Runtime" required="yes">
+            <description>OpenMOLE Runtime</description>
             <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../dependency/jvm.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
         </pack>
@@ -19,6 +22,8 @@
     
     <resources>
         <res id="LicencePanel.licence" src="AGPLv3.txt"/>
+        <res id="shortcutSpec.xml" src="shortcutSpec.xml" /> 
+        <res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml" /> 
     </resources>
 
     <panels>
@@ -26,6 +31,7 @@
         <panel classname="LicencePanel"/>
         <panel classname="TargetPanel" />
         <panel classname="InstallPanel" />
+	<panel classname="ShortcutPanel"/>
         <panel classname="SimpleFinishPanel" />
     </panels>
 
@@ -34,5 +40,8 @@
     </locale>
 
     <guiprefs resizable="yes" width="640" height="480" />
+
+    <!-- for Windows shortcuts -->
+    <native type="izpack" name="ShellLink.dll"/>
 
 </installation>
