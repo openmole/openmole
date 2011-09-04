@@ -15,9 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.core.model.tools
 
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.tools.IVariableBuffer
 
-class VariableBuffer(val toVariable: IVariable[_]) extends IVariableBuffer 
+trait IVariablesBuffer {
+  def += (variable: IVariable[_]): this.type
+  def ++= (context: Iterable[IVariable[_]]): this.type
+  def toIterable: Iterable[IVariable[_]]
+}

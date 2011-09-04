@@ -18,14 +18,14 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.implementation.tools.TypeUtil._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.task.{ITask, IExplorationTask}
-import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.transition.{ICondition, ITransition, ISlot}
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.misc.tools.service.LockRepository
@@ -64,7 +64,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
   
-  protected def submitNextJobsIfReady(context: IContextBuffer, ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: IVariablesBuffer, ticket: ITicket, subMole: ISubMoleExecution) = {
     val lockKey = (end, subMole, ticket)
     lockRepository.lock(lockKey)
     try {
@@ -74,7 +74,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
       if (nextTaskReady(ticket, subMole)) {
         val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
-        end.transitions.toList.flatMap(registry.remove(_, ticket).get).map{_.toVariable}
+                          end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
                         
         val newTicket = 
           if (end.capsule.intputSlots.size <= 1) ticket 
@@ -90,10 +90,10 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     } finally lockRepository.unlock(lockKey)
   }
 
-  override def perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
+  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     if (isConditionTrue(context)) {
       /*-- Remove filtred --*/
-      _perform(context -- filtered, ticket, toClone, subMole)
+      _perform(context -- filtered, ticket, subMole)
     }
   }
 
@@ -101,6 +101,6 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   override def unFiltred = start.outputs.filterNot(d => filtered.contains(d.prototype.name))
   
-  protected def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = submitNextJobsIfReady(ContextBuffer(context, toClone), ticket, subMole)
+  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(VariablesBuffer(context), ticket, subMole)
 
 }

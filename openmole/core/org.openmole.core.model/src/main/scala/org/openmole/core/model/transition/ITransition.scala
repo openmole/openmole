@@ -84,6 +84,6 @@ trait ITransition {
    * @param toClone   variable to clone in the transition
    * @param subMole   current submole
    */
-  def perform(from: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution)
+  def perform(from: IContext, ticket: ITicket, subMole: ISubMoleExecution)
   
 }

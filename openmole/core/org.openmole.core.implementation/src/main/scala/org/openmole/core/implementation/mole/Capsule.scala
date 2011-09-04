@@ -35,7 +35,6 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 
-import org.openmole.core.implementation.tools.ToCloneFinder._
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
 
@@ -144,15 +143,10 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   }
 
   protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    
-    if(outputTransitions.size == 1 && outputDataChannels.isEmpty)
-      outputTransitions.head.perform(context, ticket, Set.empty, subMole)
-    else {
-      import subMole.moleExecution
-      val toClone = variablesToClone(this, context, moleExecution)
+    import subMole.moleExecution
 
-      outputDataChannels.foreach{_.provides(context, ticket, toClone, moleExecution)}
-      outputTransitions.foreach{_.perform(context, ticket, toClone, subMole)}
-    }
+    outputDataChannels.foreach{_.provides(context, ticket, moleExecution)}
+    outputTransitions.foreach{_.perform(context, ticket, subMole)}
   }
 
   override def toString: String = task.toString

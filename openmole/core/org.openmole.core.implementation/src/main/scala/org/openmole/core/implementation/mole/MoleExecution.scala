@@ -41,7 +41,7 @@ import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.exception.InternalProcessingError
@@ -92,7 +92,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val currentJobId = new AtomicLong
 
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
-  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IContextBuffer]
+  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IVariablesBuffer]
 
   val exceptions = new ListBuffer[Throwable]
   

@@ -19,7 +19,7 @@ package org.openmole.core.implementation.data
 
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
@@ -61,14 +61,13 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
         case Some(p) => p
       }
     }
-  
     {
-      if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket) getOrElse(new ContextBuffer)
-      else dataChannelRegistry.consult(this, currentTicket) getOrElse(new ContextBuffer)
-    }.map{_.toVariable}
+      if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket) getOrElse(new VariablesBuffer)
+      else dataChannelRegistry.consult(this, currentTicket) getOrElse(new VariablesBuffer)
+    }.toIterable
   }
 
-  override def provides(fromContext: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution) = synchronized {
+  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = synchronized {
     val levelComputing = LevelComputing(moleExecution)
 
     val startLevel = levelComputing.level(start)
@@ -79,7 +78,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
 
     dataChannelRegistry.synchronized {
       if (!toLowerLevel) {
-        val toContext = ContextBuffer(fromContext, toClone, variableNames)
+        val toContext = VariablesBuffer(fromContext.filter(v => variableNames.contains(v.prototype.name)))
         dataChannelRegistry.register(this, ticket, toContext)
       }
       else {
@@ -94,12 +93,12 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
         val toContext = dataChannelRegistry.consult(this, workingOnTicket) match {
           case Some(ctx) => ctx
           case None => 
-            val ctx = new ContextBuffer
+            val ctx = new VariablesBuffer
             dataChannelRegistry.register(this, workingOnTicket, ctx)
             ctx
         }
 
-        toContext ++= (fromContext, toClone, variableNames)
+        toContext ++= fromContext.filter(v => variableNames.contains(v.prototype.name))
       }  
     }
   }

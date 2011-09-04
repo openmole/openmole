@@ -81,7 +81,7 @@ trait IDataChannel {
    * @param toClone the set of variable wich should be cloned
    * @param moleExecution the current mole execution
    */
-  def provides(context: IContext, ticket: ITicket, toClone: Set[String], moleExecution: IMoleExecution)
+  def provides(context: IContext, ticket: ITicket, moleExecution: IMoleExecution)
     
   /**
    * Consums the provided variables and construct a context for them.

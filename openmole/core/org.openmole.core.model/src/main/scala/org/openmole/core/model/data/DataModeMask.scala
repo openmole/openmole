@@ -29,21 +29,13 @@ object DataModeMask {
    *
    */
   val optional = new DataModeMask(0x0001)
-
-  /**
-   * The value corresponding to the IData is mutable. The task will modify the
-   * value, theyrefore the workflow system will clone the value when needed
-   * to ensure consistency. This data mode only applies for task inputs.
-   *
-   */
-  val mutable = new DataModeMask(0x0002)
   
   /**
    * The value corresponding to the IData can be used by an exploration 
    * transition as a exploration set. This should be set only on array.
    *
    */
-  val explore = new DataModeMask(0x0004)
+  val explore = new DataModeMask(0x0002)
 }
 
 class DataModeMask(val value: Int)

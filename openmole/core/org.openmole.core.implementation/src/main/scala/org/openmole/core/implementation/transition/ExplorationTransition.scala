@@ -27,7 +27,7 @@ import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.transition.{IExplorationTransition, ISlot, ICondition, IAggregationTransition}
-import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.model.data.{IPrototype, IContext, IVariable, IData}
 import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -63,7 +63,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
   def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
 
 
-  override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = {
+  override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     import subMole.moleExecution
     
     val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
@@ -96,7 +96,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
 
       }
-      submitNextJobsIfReady(ContextBuffer(variables.toContext, toClone), newTicket, subSubMole)
+      submitNextJobsIfReady(VariablesBuffer(variables.toContext), newTicket, subSubMole)
     }
 
     subSubMole.decNbJobInProgress(size)
@@ -120,7 +120,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
           case t: IAggregationTransition => 
             if(level > 0) toProcess += t.end.capsule -> (level - 1)
             else if(level == 0) {
-              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ContextBuffer)
+              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new VariablesBuffer)
               EventDispatcher.registerForObjectChanged(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), ISubMoleExecution.Finished)
             }
           case t: IExplorationTransition => toProcess += t.end.capsule -> (level + 1)

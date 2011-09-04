@@ -21,7 +21,7 @@ import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.misc.tools.service.Priority
-import org.openmole.core.implementation.tools.ContextBuffer
+import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
@@ -102,19 +102,19 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
   def this(trigger: String, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
 
   
-  override def _perform(context: IContext, ticket: ITicket, toClone: Set[String], subMole: ISubMoleExecution) = subMole.synchronized {
+  override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
     
     if(!hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(resultContexts) =>
           //Store the result context
-          resultContexts ++= (context, toClone)
+          resultContexts ++= context
     
           trigger match {
             case Some(trigger) => {
                 val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
-                val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, resultContexts.map{_.toVariable})
+                val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, resultContexts.toIterable)
                 if(trigger.evaluate(context)) {
                   aggregate(subMole, ticket)
                   if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel

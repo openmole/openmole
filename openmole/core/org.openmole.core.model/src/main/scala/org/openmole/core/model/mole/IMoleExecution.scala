@@ -19,7 +19,7 @@ package org.openmole.core.model.mole
 
 
 import org.openmole.core.model.job.State.State
-import org.openmole.core.model.tools.IContextBuffer
+import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.{IObjectListener, Event}
 import org.openmole.misc.exception.InternalProcessingError
@@ -107,7 +107,7 @@ trait IMoleExecution {
   
   def nextJobId: MoleJobId
   
-  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IContextBuffer]
+  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IVariablesBuffer]
   def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
       
   def ticket(job: IMoleJob): Option[ITicket]
