@@ -20,10 +20,11 @@ package org.openmole.core.implementation.tools
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.{Task, ExplorationTask}
+import org.openmole.core.implementation.sampling.EmptySampling
 import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.implementation.data.{Prototype, DataChannel}
+import org.openmole.core.implementation.transition.{Transition, ExplorationTransition, AggregationTransition}
 import org.openmole.core.model.data.IContext
 
 import org.scalatest.FlatSpec
@@ -79,4 +80,32 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     m.toArray should equal (true)
     m.manifest.erasure should equal (classOf[Int])
   }
+  
+  "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {      
+    val i = new Prototype("i", classOf[String])
+
+    val exc = new Capsule(new ExplorationTask("Exploration",  new EmptySampling))
+     
+    val testT = new EmptyTask("Test")
+    testT.addOutput(i)
+        
+    val noOP = new EmptyTask("NoOP") 
+    val aggT = new EmptyTask("Aggregation") 
+    
+    val testC = new Capsule(testT)
+    val noOPC = new Capsule(noOP)
+    val aggC = new Capsule(aggT)
+
+    
+    new ExplorationTransition(exc, testC)
+    new Transition(testC, noOPC)
+    new AggregationTransition(noOPC, aggC)
+    
+    new DataChannel(testC, aggC, i)
+    
+    val m = TypeUtil.computeManifests(aggC.defaultInputSlot).head
+    m.toArray should equal(true)             
+    m.manifest.erasure should equal (classOf[String])
+  }
+  
 }

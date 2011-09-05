@@ -22,46 +22,63 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.transition.{ITransition,IAggregationTransition, IExplorationTransition}
-import scala.collection.mutable.HashSet
+import scala.annotation.tailrec
+import scala.collection.immutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import scala.collection.mutable.SynchronizedMap
 
 object LevelComputing {
 
-  val levelComputings = new WeakHashMap[IMoleExecution, LevelComputing] with SynchronizedMap[IMoleExecution, LevelComputing]
+  val levelComputings = new WeakHashMap[IMole, LevelComputing] with SynchronizedMap[IMole, LevelComputing]
 
-  def apply(moleExecution: IMoleExecution): LevelComputing = 
-    levelComputings.getOrElseUpdate(moleExecution, new LevelComputing(moleExecution.mole))
+  def apply(mole: IMole): LevelComputing = 
+    levelComputings.getOrElseUpdate(mole, new LevelComputing(mole.root))
     
+  def levelDelta(from: ICapsule, to: ICapsule): Int = levelDelta(from, to, HashSet.empty)
+  
+  private def levelDelta(from: ICapsule, to: ICapsule, alreadySeen: HashSet[ICapsule]): Int = {
+    if(alreadySeen.contains(from)) return Int.MaxValue
+    if (from == to) 0
+    else {
+      val newAlreadySeen = alreadySeen + from
+      from.outputTransitions.map {
+        case t: IAggregationTransition => levelDelta(t.end.capsule, to, newAlreadySeen) - 1
+        case t: IExplorationTransition => levelDelta(t.end.capsule, to, newAlreadySeen) + 1
+        case t: ITransition => levelDelta(t.end.capsule, to, newAlreadySeen)
+      }.min
+    }
+  }
 }
 
 
-class LevelComputing(mole: IMole) {
+class LevelComputing(root: ICapsule) {
   
   @transient private val levelCache = new WeakHashMap[ICapsule, Int]
 
+  def levelDelta(from: ICapsule, to: ICapsule) = level(to) - level(from)
+  
   def level(capsule: ICapsule): Int = synchronized {
     levelCache.getOrElse (capsule, {
-        val l = level(capsule, new HashSet[ICapsule], Int.MaxValue)
+        val l = level(capsule, HashSet.empty)
         if(l == Int.MaxValue) throw new InternalProcessingError("Error in level computing level could not be equal to MAXVALUE." + capsule.taskOrException.name)
         l
-    })
+      })
   }
   
-  private def level (capsule : ICapsule, alreadySeen: HashSet[ICapsule], lvl : Int): Int = {
-    if (capsule.equals (mole.root)) return 1
-    if (alreadySeen.contains(capsule)) return lvl
+  private def level (capsule : ICapsule, alreadySeen: HashSet[ICapsule]): Int = {
+    if (capsule.equals (root)) return 1
+    if (alreadySeen.contains(capsule)) return Int.MaxValue
     capsule.intputSlots map (slot => {
         if (slot.transitions.size > 0)
           slot.transitions map (t => {
-            val inLevel = levelCache.getOrElse (t.start, level (t.start, alreadySeen + capsule, Int.MaxValue))
-            t match {
-              case _ : IExplorationTransition => inLevel + 1
-              case _ : IAggregationTransition => inLevel - 1
-              case t => inLevel
-            }
-          }) min
+              val inLevel = levelCache.getOrElse (t.start, level (t.start, alreadySeen + capsule))
+              t match {
+                case _ : IExplorationTransition => inLevel + 1
+                case _ : IAggregationTransition => inLevel - 1
+                case t => inLevel
+              }
+            }) min
         else Int.MaxValue
-    }) min
+      }) min
   }
 }

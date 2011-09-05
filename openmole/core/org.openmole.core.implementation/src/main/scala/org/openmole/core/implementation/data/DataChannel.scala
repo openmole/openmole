@@ -28,6 +28,10 @@ import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.ListBuffer
 
+object DataChannel {
+  def levelDelta(dataChannel: IDataChannel): Int = LevelComputing.levelDelta(dataChannel.start, dataChannel.end)
+}
+
 class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Set[String]) extends IDataChannel {
 
   start.addOutputDataChannel(this)
@@ -44,52 +48,35 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
    
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = {
-    val levelComputing = LevelComputing(moleExecution)
+    val levelDelta = LevelComputing(moleExecution.mole).levelDelta(start, end)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
-    val startLevel = levelComputing.level(start)
-    val endLevel = levelComputing.level(end)
-
-    var levelDif = endLevel - startLevel
-    if (levelDif < 0) levelDif = 0
-   
-    var currentTicket = ticket
-
-    for (i <- 0 until levelDif) {
-      currentTicket = currentTicket.parent match {
-        case None => throw new InternalProcessingError("Bug no supposed to reach root ticket")
-        case Some(p) => p
-      }
-    }
     {
-      if(endLevel <= startLevel) dataChannelRegistry.remove(this, currentTicket) getOrElse(new VariablesBuffer)
-      else dataChannelRegistry.consult(this, currentTicket) getOrElse(new VariablesBuffer)
+      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket) getOrElse(new VariablesBuffer)
+      else {
+        val workingOnTicket = (0 until levelDelta).foldLeft(ticket) {
+          (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+        }
+        dataChannelRegistry.consult(this, workingOnTicket) getOrElse(new VariablesBuffer)
+      }
     }.toIterable
   }
 
   override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = synchronized {
-    val levelComputing = LevelComputing(moleExecution)
-
-    val startLevel = levelComputing.level(start)
-    val endLevel = levelComputing.level(end)
-    val toLowerLevel = endLevel < startLevel
+    val levelDelta = LevelComputing(moleExecution.mole).levelDelta(start, end)
 
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     dataChannelRegistry.synchronized {
-      if (!toLowerLevel) {
+      if (levelDelta >= 0) {
         val toContext = VariablesBuffer(fromContext.filter(v => variableNames.contains(v.prototype.name)))
         dataChannelRegistry.register(this, ticket, toContext)
       }
       else {
-        var workingOnTicket = ticket
-        for (i <- startLevel until endLevel) {
-          workingOnTicket = workingOnTicket.parent match {
-            case None => throw new InternalProcessingError("Bug should never get to root.")
-            case Some(p) => p
-          }
+        val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
+          (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
         }
-        
+
         val toContext = dataChannelRegistry.consult(this, workingOnTicket) match {
           case Some(ctx) => ctx
           case None => 

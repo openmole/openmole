@@ -26,6 +26,8 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
+import org.openmole.core.implementation.data.DataChannel
+import org.openmole.core.implementation.data.DataChannel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
@@ -52,17 +54,20 @@ object TypeUtil {
       varNames += output.prototype.name
       t match {
         case _: IAggregationTransition => 
-          toArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type` 
+          toArray.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
         case _: IExplorationTransition => 
           if(output.mode is explore) fromArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
-          else direct.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type` 
-        case _ => direct.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type` 
+          else direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
+        case _ => direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
       }
     }
     
-    for(d <- slot.capsule.inputDataChannels.flatMap(_.data)) {
-      varNames += d.prototype.name
-      direct.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
+    for(dc <- slot.capsule.inputDataChannels) {
+      for(d <- dc.data) {
+        varNames += d.prototype.name
+        if(DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+        else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      }
     }
     
     def s(m: Iterable[Manifest[_]]) = intersectionArray(m map (_.erasure))
