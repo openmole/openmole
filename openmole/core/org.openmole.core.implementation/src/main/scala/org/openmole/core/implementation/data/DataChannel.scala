@@ -48,7 +48,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
    
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = {
-    val levelDelta = LevelComputing(moleExecution.mole).levelDelta(start, end)
+    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     {
@@ -63,7 +63,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   }
 
   override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = synchronized {
-    val levelDelta = LevelComputing(moleExecution.mole).levelDelta(start, end)
+    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
 
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 

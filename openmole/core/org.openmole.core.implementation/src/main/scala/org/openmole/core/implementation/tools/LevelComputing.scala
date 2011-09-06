@@ -17,22 +17,21 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.{IMole, IMoleExecution}
 import org.openmole.core.model.transition.{ITransition,IAggregationTransition, IExplorationTransition}
-import scala.annotation.tailrec
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import scala.collection.mutable.SynchronizedMap
+import scala.collection.mutable.ListBuffer
 
 object LevelComputing {
 
-  val levelComputings = new WeakHashMap[IMole, LevelComputing] with SynchronizedMap[IMole, LevelComputing]
+  val levelComputings = new WeakHashMap[IMoleExecution, LevelComputing] with SynchronizedMap[IMoleExecution, LevelComputing]
 
-  def apply(mole: IMole): LevelComputing = 
-    levelComputings.getOrElseUpdate(mole, new LevelComputing(mole.root))
+  def apply(moleExecution: IMoleExecution): LevelComputing = 
+    levelComputings.getOrElseUpdate(moleExecution, new LevelComputing(moleExecution.mole.root))
     
   def levelDelta(from: ICapsule, to: ICapsule): Int = levelDelta(from, to, HashSet.empty)
   
@@ -48,37 +47,37 @@ object LevelComputing {
       }.min
     }
   }
+ 
 }
-
 
 class LevelComputing(root: ICapsule) {
   
-  @transient private val levelCache = new WeakHashMap[ICapsule, Int]
-
+  @transient private val levelCache = {
+    val cache = WeakHashMap(root -> 0)
+    def nextCaspules(from: ICapsule, lvl: Int) = 
+      from.outputTransitions.map {
+        case t: IAggregationTransition => t.end.capsule -> (lvl - 1)
+        case t: IExplorationTransition => t.end.capsule -> (lvl + 1)
+        case t: ITransition => t.end.capsule -> lvl
+      }
+    
+    val toProceed = ListBuffer(root -> 0)
+    
+    while(!toProceed.isEmpty) {
+      val proceed = toProceed.remove(0)
+      nextCaspules(proceed._1, proceed._2).foreach {
+        case(c, l) =>
+          val continue = !cache.contains(c)
+          val lvl = cache.getOrElseUpdate(c, l)
+          if(lvl != l) throw new UserBadDataError("Inconsistent level found for capsule " + c)
+          if(continue) toProceed += (c -> l)
+      }
+    }
+    cache
+  }
+  
   def levelDelta(from: ICapsule, to: ICapsule) = level(to) - level(from)
   
-  def level(capsule: ICapsule): Int = synchronized {
-    levelCache.getOrElse (capsule, {
-        val l = level(capsule, HashSet.empty)
-        if(l == Int.MaxValue) throw new InternalProcessingError("Error in level computing level could not be equal to MAXVALUE." + capsule.taskOrException.name)
-        l
-      })
-  }
-  
-  private def level (capsule : ICapsule, alreadySeen: HashSet[ICapsule]): Int = {
-    if (capsule.equals (root)) return 1
-    if (alreadySeen.contains(capsule)) return Int.MaxValue
-    capsule.intputSlots map (slot => {
-        if (slot.transitions.size > 0)
-          slot.transitions map (t => {
-              val inLevel = levelCache.getOrElse (t.start, level (t.start, alreadySeen + capsule))
-              t match {
-                case _ : IExplorationTransition => inLevel + 1
-                case _ : IAggregationTransition => inLevel - 1
-                case t => inLevel
-              }
-            }) min
-        else Int.MaxValue
-      }) min
-  }
+  def level(capsule: ICapsule) = levelCache.getOrElse(capsule, throw new UserBadDataError("Capsule " + capsule + " not connected to the mole."))
+ 
 }
