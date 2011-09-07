@@ -30,10 +30,6 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
   override def initialize = {
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.TYPE, "UserPass")
-    //ctx.setAttribute(Context.REMOTEHOST, host)
-    //ctx.setAttribute(Context.REMOTEID, host)
-    //ctx.setAttribute(Context.SERVER, host)
-    //ctx.setAttribute(Context.REMOTEPORT, port.toString)
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, password)
     JSAGASessionService.addContext("sftp://"+ login + "@" + host + ":" + port + "/.*", ctx)

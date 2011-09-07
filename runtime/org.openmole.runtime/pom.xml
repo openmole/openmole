@@ -33,57 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.fileservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.core.structuregenerator</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.exception</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.tools</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.executorservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.pluginmanager</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.hashservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.math</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.logging</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -100,65 +50,6 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.app</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <!-- dependencies for the runtime -->
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>fr.in2p3.jsaga</artifactId>
-            <version>${lib.fr.in2p3.jsaga.version}</version>
-        </dependency>
-	<dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.apache.ant</artifactId>
-	    <version>${lib.org.apache.ant.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>uk.com.robustit.cloning</artifactId>
-            <version>${lib.uk.com.robust-it.cloning.version}</version>
-	    <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.joda.time</artifactId>
-            <version>${lib.org.joda.time.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.slf4j</artifactId>
-            <version>${lib.org.slf4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.apache.log4j</artifactId>
-            <version>${lib.org.apache.log4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.jasypt.encryption</artifactId>
-            <version>${lib.org.jasypt.encryption.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.apache.commons.configuration</artifactId>
-            <version>${lib.org.apache.commons.configuration.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.objenesis</artifactId>
-            <version>${lib.org.objenesis.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-	<dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>com.ice.tar</artifactId>
-            <version>${lib.com.ice.tar.version}</version>
         </dependency>
     </dependencies>
 

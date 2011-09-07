@@ -168,7 +168,6 @@ class Workspace(val location: File) {
         textEncryptor
       case None => throw new UserBadDataError("Password is not set.")
     }
-
   }
   
   @transient private var _password: Option[String] = None
