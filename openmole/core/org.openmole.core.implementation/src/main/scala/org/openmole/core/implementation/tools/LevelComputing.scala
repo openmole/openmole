@@ -33,34 +33,39 @@ object LevelComputing {
   def apply(moleExecution: IMoleExecution): LevelComputing = 
     levelComputings.getOrElseUpdate(moleExecution, new LevelComputing(moleExecution.mole.root))
     
-  def levelDelta(from: ICapsule, to: ICapsule): Int = levelDelta(from, to, HashSet.empty)
-  
-  private def levelDelta(from: ICapsule, to: ICapsule, alreadySeen: HashSet[ICapsule]): Int = {
-    if(alreadySeen.contains(from)) return Int.MaxValue
-    if (from == to) 0
-    else {
-      val newAlreadySeen = alreadySeen + from
-      from.outputTransitions.map {
-        case t: IAggregationTransition => levelDelta(t.end.capsule, to, newAlreadySeen) - 1
-        case t: IExplorationTransition => levelDelta(t.end.capsule, to, newAlreadySeen) + 1
-        case t: ITransition => levelDelta(t.end.capsule, to, newAlreadySeen)
-      }.min
+  def levelDelta(from: ICapsule, to: ICapsule): Int = {
+    val cache = WeakHashMap(from -> 0)
+    val toProceed = ListBuffer(from -> 0)
+    
+    while(!toProceed.isEmpty) {
+      val proceed = toProceed.remove(0)
+      nextCaspules(proceed._1, proceed._2).foreach {
+        case(c, l) =>
+          if(c == to) return l
+          val continue = !cache.contains(c)
+          val lvl = cache.getOrElseUpdate(c, l)
+          if(lvl != l) throw new UserBadDataError("Inconsistent level found for capsule " + c)
+          if(continue) toProceed += (c -> l)
+      }
     }
+    throw new UserBadDataError("No connection found from capsule " + from + " to capsule " + to)
   }
+  
+  def nextCaspules(from: ICapsule, lvl: Int) = 
+    from.outputTransitions.map {
+      case t: IAggregationTransition => t.end.capsule -> (lvl - 1)
+      case t: IExplorationTransition => t.end.capsule -> (lvl + 1)
+      case t: ITransition => t.end.capsule -> lvl
+    }
  
 }
 
 class LevelComputing(root: ICapsule) {
   
+  import LevelComputing._
+
   @transient private val levelCache = {
     val cache = WeakHashMap(root -> 0)
-    def nextCaspules(from: ICapsule, lvl: Int) = 
-      from.outputTransitions.map {
-        case t: IAggregationTransition => t.end.capsule -> (lvl - 1)
-        case t: IExplorationTransition => t.end.capsule -> (lvl + 1)
-        case t: ITransition => t.end.capsule -> lvl
-      }
-    
     val toProceed = ListBuffer(root -> 0)
     
     while(!toProceed.isEmpty) {
