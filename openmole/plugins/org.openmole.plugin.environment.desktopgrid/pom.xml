@@ -30,8 +30,7 @@
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
-        </dependency>
-       
+        </dependency>       
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
@@ -59,8 +58,8 @@
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
-            <artifactId>org.apache.sshd</artifactId>
-            <version>${lib.org.apache.sshd.version}</version>
+            <artifactId>org.openmole.misc.sftpserver</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
