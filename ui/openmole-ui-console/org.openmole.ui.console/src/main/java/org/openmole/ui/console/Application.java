@@ -13,7 +13,6 @@ import org.apache.commons.cli.ParseException;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.openmole.core.structuregenerator.StructureGenerator;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.ui.console.internal.command.Init;

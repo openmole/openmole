@@ -24,7 +24,6 @@ import org.codehaus.groovy.ant.Groovy
 import org.codehaus.groovy.tools.shell.Command
 import org.codehaus.groovy.tools.shell.Groovysh
 import org.codehaus.groovy.tools.shell.IO
-import org.openmole.core.structuregenerator.StructureGenerator
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
@@ -33,7 +32,6 @@ import org.openmole.misc.workspace.Workspace
 object Console {
 
   val pluginManager = "plugin"
-  val structureGenerator = "structure"
   val workspace = "workspace"
   val registry = "registry"
   val logger = "logger"
@@ -50,7 +48,6 @@ object Console {
       }))
   
   setVariable(pluginManager, PluginManager)
-  setVariable(structureGenerator, StructureGenerator.instance)
   setVariable(workspace, Workspace)
   setVariable(logger, LoggerService)
 

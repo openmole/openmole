@@ -57,8 +57,6 @@ import org.openmole.core.model.task.ITask
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ITransition
-import org.openmole.core.structuregenerator.ComplexNode
-import org.openmole.core.structuregenerator.PrototypeNode
 import org.openmole.ui.plugin.transitionfactory.IPuzzleFirstAndLast
 import org.openmole.ui.plugin.transitionfactory.PuzzleFirstAndLast
 import org.openmole.ui.plugin.transitionfactory.TransitionFactory
@@ -343,32 +341,4 @@ object Builder {
     new PuzzleFirstAndLast(loopOnCapsule, decrementCapsule)
   }
       
-  /**
-   * Builds a prototype node.
-   *
-   * @param name, the name of the node,
-   * @param type, the type of tho node.
-   * @return an instance of PrototypeNode
-   */
-  def prototypeNode[T](name: String, `type`: Class[T]): PrototypeNode = new PrototypeNode(new Prototype[T](name, `type`))
-       
-
-  /**
-   *  Builds a complex prototype node.
-   *
-   * @param name, the name of the prototype.
-   * @return an instance of ComplexNode
-   */
-  def complexNode(name: String): ComplexNode = new ComplexNode(name)
-        
-
-  /**
-   * Builds a complex prototype node.
-   *
-   * @param name, the name of the prototype.
-   * @param parent 
-   * @return
-   */
-  def complexNode(name: String, parent: ComplexNode): ComplexNode = new ComplexNode(name, parent)
-        
 }

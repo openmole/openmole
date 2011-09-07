@@ -37,11 +37,11 @@
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
@@ -108,11 +108,6 @@
             <groupId>org.openmole</groupId>
             <artifactId>org.apache.ant</artifactId>
             <version>${lib.org.apache.ant.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.core.structuregenerator</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
