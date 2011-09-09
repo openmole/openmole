@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.in2p3.jsaga.adaptor.sftp
+package fr.in2p3.jsaga.adaptor.ssh.data
 
 import fr.in2p3.jsaga.adaptor.security.SecurityCredential
 import fr.in2p3.jsaga.adaptor.security.impl.SSHSecurityCredential

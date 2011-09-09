@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.in2p3.jsaga.adaptor.sftp
+package fr.in2p3.jsaga.adaptor.ssh.security
 
 import fr.in2p3.jsaga.adaptor.base.defaults.Default
 import fr.in2p3.jsaga.adaptor.base.usage._
@@ -32,14 +32,14 @@ import java.lang.Exception
 import java.util.Map
 import collection.JavaConversions._
 
-object SFTPSecurityAdaptor {
+object SSHSecurityAdaptor {
   val USER_PUBLICKEY = "UserPublicKey"
 }
 
-class SFTPSecurityAdaptor extends SecurityAdaptor {
-  import SFTPSecurityAdaptor._
+class SSHSecurityAdaptor extends SecurityAdaptor {
+  import SSHSecurityAdaptor._
 
-  override def getType = "SFTP"
+  override def getType = "SSH"
   
   override def getSecurityCredentialClass = classOf[SSHSecurityCredential]
 
