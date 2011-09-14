@@ -17,53 +17,36 @@
 
 package org.openmole.plugin.environment.jsaga
 
-import java.io.File
-import java.io.PrintStream
 import org.joda.time.format.ISOPeriodFormat
 
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.batch.environment.Runtime
-import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 
 object JSAGAJobBuilder {
-
-  def jobDescription(runtime: Runtime, tmpScript: File, attributes: Map[String, String]): JobDescription = {
+  
+  def description(attributes: Map[String, String]) = {
     val description = JobFactory.createJobDescription
-
-    description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
-
-    description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](tmpScript.getName))
-    
-    
-    
-    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
-                                                                              {if(tmpScript.getAbsolutePath.startsWith("/")) tmpScript.getAbsolutePath.tail else tmpScript.getAbsolutePath} +
-                                                                              ">" + tmpScript.getName))
-
     attributes.get(CPU_TIME) match {
       case Some(value) => 
         description.setAttribute(CPU_TIME, ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes.toString)
       case None =>
     }
-
     description
   }
 
   lazy val helloWorld = {
-    val helloFile = Workspace.newFile("testhello", ".txt")
+    /*val helloFile = Workspace.newFile("testhello", ".txt")
     
-    val str = new PrintStream(helloFile)
-    str.println("Hello")
-    str.close
+     val str = new PrintStream(helloFile)
+     str.println("Hello")
+     str.close*/
 
     val hello = JobFactory.createJobDescription
 
     hello.setAttribute(JobDescription.EXECUTABLE, "/bin/echo")
     hello.setVectorAttribute(JobDescription.ARGUMENTS, Array[String]("Hello"))
-    hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() + ">" + helloFile.getName))
+    //hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() + ">" + helloFile.getName))
 
     hello     
   }

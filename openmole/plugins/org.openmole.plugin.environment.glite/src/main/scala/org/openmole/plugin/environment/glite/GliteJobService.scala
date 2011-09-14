@@ -21,15 +21,19 @@ import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
 import java.net.URI
+import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
+import org.ogf.saga.job.JobFactory
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
+import org.openmole.plugin.environment.jsaga.JSAGAJobBuilder
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
-
+import org.openmole.core.batch.control.AccessToken
+import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 
 object GliteJobService {
@@ -42,9 +46,32 @@ object GliteJobService {
 
 class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
-  override protected def buildJob(id: String, resultPath: String) = new GliteJob(id, resultPath, this, environment.authentication.expires)
+  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
 
-  override protected def generateScriptString(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
+    import serializedJob._
+    import communicationStorage.stringDecorator
+    
+    val script = Workspace.newFile("script", ".sh")
+    try {
+      val outputFilePath = communicationDirPath.toURIFile.newFileInDir("job", ".out").path
+   
+      val os = script.bufferedOutputStream
+      try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
+      finally os.close
+      
+      //logger.fine(fromFile(script).getLines.mkString)
+      
+      val jobDescription = buildJobDescription(runtime, script, environment.attributes)
+      val job = jobServiceCache.createJob(jobDescription)
+      job.run
+            
+      val id = job.getAttribute(Job.JOBID)
+      val idStr = id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']'))
+      new GliteJob(idStr, outputFilePath, this, environment.authentication.expires)
+    } finally script.delete
+  }
+  
+  protected def generateScript(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
     import serializedJob.communicationStorage.stringDecorator
     import serializedJob._
     
@@ -81,7 +108,6 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     writter.print(" -o ")
     writter.print(resultPath)
     writter.print(" -w $CUR ; cd .. ; rm -rf $CUR")
-
   }
 
   private def mkLcgCpGunZipCmd(env: GliteEnvironment, from: String, to: String) = {
@@ -110,9 +136,14 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
 
   private def getTimeOut = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
   
+  protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]) = {
+    val description = JSAGAJobBuilder.description(attributes)
 
-  override protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]) = {
-    val description = super.buildJobDescription(runtime, script, attributes)
+    description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
+    description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](script.getName))
+ 
+    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
+                                                                        ">" + script.getName))
 
     attributes.get(GliteAttributes.REQUIREMENTS) match {
       case Some(requirement) => val requirements = new StringBuilder

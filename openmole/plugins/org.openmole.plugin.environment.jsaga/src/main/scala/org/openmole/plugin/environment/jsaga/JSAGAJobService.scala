@@ -55,8 +55,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
 
   import JSAGAJobService._
   
-  override def test: Boolean = {
-
+  override def test: Boolean =
     try {
       val hello = JSAGAJobBuilder.helloWorld
       val job = jobServiceCache.createJob(hello)
@@ -64,39 +63,13 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       job.run
       job.getState
       //job.cancel();
-      return true
-
+      true
     } catch {
-      case e => logger.log(FINE, jobServiceURI + ": " + e.getMessage, e)
-        return false
+      case e => 
+        logger.log(FINE, jobServiceURI + ": " + e.getMessage, e)
+        false
     } 
-  }
 
-  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
-
-    import serializedJob._
-    import communicationStorage.stringDecorator
-    
-    val script = Workspace.newFile("script", ".sh")
-    try {
-      val outputFilePath = communicationDirPath.toURIFile.newFileInDir("job", ".out").path
-   
-      val os = script.bufferedOutputStream
-      try generateScriptString(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
-      finally os.close
-      
-      //logger.fine(fromFile(script).getLines.mkString)
-      
-      val jobDescription = buildJobDescription(runtime, script, environment.attributes)
-      val job = jobServiceCache.createJob(jobDescription)
-      job.run
-            
-      val id = job.getAttribute(Job.JOBID)
-      
-      buildJob(id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']')), outputFilePath)
-    } finally script.delete
-  }
- 
   @transient lazy val jobServiceCache = {
     val task = {
       val url = URLFactory.createURL(jobServiceURI.toString)
@@ -106,11 +79,4 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
   }
 
-  protected def buildJob(id: String, resultPath: String): JSAGAJob = new JSAGAJob(id, resultPath, this)
-  
-  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = JSAGAJobBuilder.jobDescription(runtime, script, attributes)
-  
-    
-  protected def generateScriptString (serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream)
-    
 }
