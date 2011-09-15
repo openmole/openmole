@@ -149,8 +149,6 @@ class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with Cleana
   
   //TODO implement stagging
   override def submit(jobDesc: String, checkMath: Boolean, uniqId: String) = {
-    val sftpClient = new SFTPv3Client(connection)
- 
     try {
       val sjp = new SSHJobProcess(uniqId)
       sjp.setCreated(new Date)
@@ -168,10 +166,8 @@ class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with Cleana
       val executable =  (application \ "Executable" text) + " " + ((application \ "Argument" map(_.text)).foldLeft(""){_ + " " + _})
 //Matcher.quoteReplacement(application )
       //println(executable)
- 
-      val homePath = SFTPDataAdaptor.getHomeDir(sftpClient) 
-        
-      def absolute(path: String) = homePath + "/" + path
+      
+      def absolute(path: String) = "$HOME/" + path
       
       command += "((" +
       executable +
@@ -182,7 +178,7 @@ class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with Cleana
       exec(connection, "bash -c '" + command.toString + "'")
     } catch {
       case e: Exception => throw new NoSuccessException(e)
-    } finally sftpClient.close
+    }
  
     uniqId
   }
