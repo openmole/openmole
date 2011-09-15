@@ -19,10 +19,7 @@ package org.openmole.plugin.environment.jsaga
 
 import fr.in2p3.jsaga.adaptor.job.SubState
 import fr.in2p3.jsaga.impl.job.service.ReconnectionException
-import java.util.logging.Logger
-import org.ogf.saga.error.TimeoutException
 import org.ogf.saga.job.Job
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.TemporaryErrorException
 import org.openmole.core.model.execution.ExecutionState
@@ -40,9 +37,7 @@ class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGA
     import State._
     
     subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
-    
-    //Logger.getLogger(classOf[JSAGAJob].getName).fine("Substate " + subState.toString + " " + SubState.RUNNING_SUBMITTED.toString + " " + SubState.RUNNING_QUEUED.toString)
-    
+       
     state match {
       case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
@@ -65,9 +60,8 @@ class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGA
 
   override def updatedState: ES = {
     val curjob = job
-    try {
-      translateStatus(curjob, curjob.getState)
-    } catch {
+    try translateStatus(curjob, curjob.getState)
+    catch {
       case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job satus update.", e)
     }
   }

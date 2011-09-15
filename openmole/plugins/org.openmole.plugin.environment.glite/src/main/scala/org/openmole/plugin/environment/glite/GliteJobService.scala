@@ -47,7 +47,6 @@ object GliteJobService {
 class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-
     import serializedJob._
     import communicationStorage.stringDecorator
     
@@ -143,7 +142,8 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](script.getName))
  
     description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
-                                                                        ">" + script.getName))
+                                                                              {if(script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath} +
+                                                                              ">" + script.getName))
 
     attributes.get(GliteAttributes.REQUIREMENTS) match {
       case Some(requirement) => val requirements = new StringBuilder
