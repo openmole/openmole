@@ -20,19 +20,28 @@ package org.openmole.ide.plugin.task.groovy
 import java.awt.Dimension
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.misc.widget.ChooseFileTextField
+import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Label
 import scala.swing.ScrollPane
 import scala.swing.Swing
 import scala.swing.TextArea
+import scala.swing.TextField
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with ITaskPanelUI {
   
-  contents += (new Label("Code"),"wrap")
   val codeTextArea = new TextArea {text = pud.code}
-  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,200)},"span 2,growx")
+  val lib= new ChooseFileTextField(pud.lib, "Select a file", Some("Lib files"), FilesOnly,Some("jar"))
+  val importStatement= new TextField{text= pud.importStatement}
   
-  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text)
+  contents += (new Label("Code"),"wrap")
+  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span 2,growx")
+  contents += new Label("Lib")
+  contents += (lib,"growx")
+  contents += new Label("Import")
+  contents += importStatement
+  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text,lib.text,importStatement.text)
 }
 
 //  val editorPane= new JEditorPane
