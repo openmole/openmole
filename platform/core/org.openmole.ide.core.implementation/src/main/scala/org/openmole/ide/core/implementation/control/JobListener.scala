@@ -17,10 +17,6 @@
 
 package org.openmole.ide.core.implementation.control
 
-<<<<<<< HEAD
 object JobListener{
 
 }
-=======
-object JobListener
->>>>>>> f5c480509bb4c28f98c6e27b06fbcf7831760ac7
