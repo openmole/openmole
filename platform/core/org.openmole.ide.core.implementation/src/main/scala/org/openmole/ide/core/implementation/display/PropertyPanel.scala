@@ -44,7 +44,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   val samplingMenu = new Menu("Sampling")
   SamplingDisplay.implementationClasses.foreach(d=>samplingMenu.contents+= new MenuItem(new SamplingDisplayAction(d,SAMPLING)))
     
-  val saveButton = new Button("Save")
+  val saveButton = new Button("Apply")
   val cancelButton = new Button("Cancel")
   val nameTextField = new TextField(12) 
   
