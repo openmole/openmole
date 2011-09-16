@@ -9,11 +9,6 @@
 
     <repositories> 
         <repository>
-            <id>scala-tools.org</id>
-            <name>Scala-Tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-snapshots</url>
-        </repository>    
-        <repository>
             <id>maven.openmole.org.snapshots</id>
             <name>OpenMOLE snapshots repository</name>
             <url>http://maven.openmole.org/snapshots/</url>
@@ -23,11 +18,6 @@
             <name>OpenMole repository</name>
             <url>http://maven.openmole.org/public/</url>
         </repository>
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-        </repository>
     </repositories>
     
     <properties>
@@ -36,7 +26,7 @@
         <netbeans.version>RELEASE70</netbeans.version>
         <brandingToken>openmole_gui</brandingToken>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <lib.org.scala-lang.scala.version>2.9.1.RC3</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.9.1</lib.org.scala-lang.scala.version>
         <lib.org.scalatest.version>1.4-SNAPSHOT</lib.org.scalatest.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>

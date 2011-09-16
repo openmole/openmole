@@ -19,14 +19,15 @@ package org.openmole.ide.plugin.prototype.base
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import java.io.File
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class FilePrototypeDataUI(val name: String) extends IPrototypeDataUI[File]{
+class FilePrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[File](d){
   override def coreClass = classOf[IPrototype[File]]
   
-  override def coreObject = new Prototype(name,classOf[File])
+  override def coreObject = toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]
   
   override def imagePath = "img/file.png"
   
-  override def buildPanelUI = new FilePrototypePanelUI
+  override def buildPanelUI = new FilePrototypePanelUI(this)
 }

@@ -16,16 +16,16 @@
  */
 
 package org.openmole.ide.plugin.prototype.base
-import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class DoublePrototypeDataUI(val name: String) extends IPrototypeDataUI[Double]{
+class DoublePrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[Double](d){
   override def coreClass = classOf[IPrototype[Double]]
 
-  override def coreObject = new Prototype(name,classOf[Double])
+  override def coreObject = toArray(new Prototype(name,classOf[Double]),dim).asInstanceOf[IPrototype[Double]]
   
   override def imagePath = "img/double.png"
   
-  override def buildPanelUI = new DoublePrototypePanelUI
+  override def buildPanelUI = new DoublePrototypePanelUI(this)
 }

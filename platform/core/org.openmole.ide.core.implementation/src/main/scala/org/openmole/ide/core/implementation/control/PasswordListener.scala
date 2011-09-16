@@ -17,14 +17,10 @@
 
 package org.openmole.ide.core.implementation.control
 
-import javax.swing.JOptionPane
-import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.workspace._
 
-object PasswordListener extends IObjectListener[Workspace]{
-  override def eventOccured(obj: Workspace) = {
-    println("PasswordListener")
+object PasswordListener extends Workspace.IWorkspaceListener{
+  override def passwordRequired(obj: Workspace) = {
     PasswordDialog
-  //  val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", "blb blas")
   }
 }

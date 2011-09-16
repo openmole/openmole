@@ -16,10 +16,6 @@
  */
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.model.panel.IPrototypePanelUI
-import org.openmole.ide.core.model.data.IPrototypeDataUI
-import scala.swing.Panel
-
-class StringPrototypePanelUI extends Panel with IPrototypePanelUI[String] {
-  override def saveContent(name: String) =new StringPrototypeDataUI(name)
+class StringPrototypePanelUI(pud:StringPrototypeDataUI) extends GenericPrototypePanelUI[String](pud.dim) { 
+  override def saveContent(name: String) =new StringPrototypeDataUI(name,if(dim!="") dim.toInt else 0)
 }

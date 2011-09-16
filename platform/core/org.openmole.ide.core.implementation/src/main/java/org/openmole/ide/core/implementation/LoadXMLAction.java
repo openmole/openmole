@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer;
 id = "org.openmole.ide.core.implementation.LoadXMLAction")
 @ActionRegistration(displayName = "#CTL_LoadXMLAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 1000)
+    @ActionReference(path = "Menu/File", position = 800)
 })
 @Messages("CTL_LoadXMLAction=Load")
 public final class LoadXMLAction implements ActionListener {

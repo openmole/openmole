@@ -18,15 +18,16 @@
 package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class BigDecimalPrototypeDataUI(val name: String) extends IPrototypeDataUI[scala.BigDecimal]{
+class BigDecimalPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[scala.BigDecimal](d){
   override def coreClass = classOf[IPrototype[BigDecimal]]
   
-  override def coreObject= new Prototype(name,classOf[scala.BigDecimal])
+  override def coreObject= toArray(new Prototype(name,classOf[scala.BigDecimal]),dim).asInstanceOf[IPrototype[scala.BigDecimal]]
   
   override def imagePath = "img/bigdecimal.png"
   
-  override def buildPanelUI = new BigDecimalPrototypePanelUI
+  override def buildPanelUI = new BigDecimalPrototypePanelUI(this)
 }

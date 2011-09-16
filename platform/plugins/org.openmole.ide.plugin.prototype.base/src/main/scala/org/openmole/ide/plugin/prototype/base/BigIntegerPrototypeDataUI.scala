@@ -17,17 +17,16 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.model.data.IPrototypeDataUI
-import java.math.BigInteger
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class BigIntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI[scala.BigInt]{
+class BigIntegerPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[BigInt](d){
   override def coreClass = classOf[IPrototype[BigInt]]
   
-  override def coreObject = new Prototype(name,classOf[BigInt])
+  override def coreObject = toArray(new Prototype(name,classOf[BigInt]),dim).asInstanceOf[IPrototype[BigInt]]
   
   override def imagePath = "img/biginteger.png"
   
-  override def buildPanelUI = new BigIntegerPrototypePanelUI
+  override def buildPanelUI = new BigIntegerPrototypePanelUI(this)
 }

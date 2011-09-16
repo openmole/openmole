@@ -34,7 +34,7 @@ import org.openmole.ide.core.implementation.palette.PaletteSupport;
 id = "org.openmole.ide.core.implementation.ResetAll")
 @ActionRegistration(displayName = "#CTL_ResetAll")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 2000)})
+    @ActionReference(path = "Menu/File", position = 1100)})
 @Messages("CTL_ResetAll=Reset all")
 public final class ResetAll implements ActionListener {
 

@@ -29,6 +29,7 @@ import scala.collection.mutable.HashMap
 import scala.swing.ScrollPane
 import scala.swing.TabbedPane
 import scala.swing.event.SelectionChanged
+import org.openmole.core.model.mole.IMoleExecution
 
 object TabManager {
   var sceneTabs = new DualHashBidiMap[IMoleScene,TabbedPane.Page]
@@ -75,4 +76,6 @@ object TabManager {
   }
 
   def displayExecutionMoleScene(displayed: IMoleScene) = tabbedPane.selection.page= sceneTabs.get(displayed)
+  
+  def executionManager(execution: IMoleExecution) = executionTabs.values.filter(_.moleExecution==execution).head
   }

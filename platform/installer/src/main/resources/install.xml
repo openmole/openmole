@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installation version="1.0">
+    <info>
+        <appname>OpenMOLE</appname>
+        <appversion>0.3-SNAPSHOT</appversion>
+        <uninstaller write="yes" />
+        <javaversion>1.6</javaversion>
+        <pack200 />
+    </info>
+    
+    <packs>
+        <pack name="OpenMOLE" required="yes">
+            <description>OpenMOLE GUI</description>
+            <fileset dir="../dependency/application-1.0-SNAPSHOT/" targetdir="$INSTALL_PATH" />
+        </pack>
+        <pack name="OpenMOLE Runtime" required="yes">
+            <description>OpenMOLE Runtime</description>
+            <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
+            <file src="../dependency/jvm.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
+        </pack>
+    </packs>
+    
+    <resources>
+        <res id="LicencePanel.licence" src="AGPLv3.txt"/>
+        <res id="shortcutSpec.xml" src="shortcutSpec.xml" /> 
+        <res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml" /> 
+    </resources>
+
+    <panels>
+        <panel classname="HelloPanel" />
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel" />
+        <panel classname="InstallPanel" />
+	<panel classname="ShortcutPanel"/>
+        <panel classname="SimpleFinishPanel" />
+    </panels>
+
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+
+    <guiprefs resizable="yes" width="640" height="480" />
+
+    <!-- for Windows shortcuts -->
+    <native type="izpack" name="ShellLink.dll"/>
+
+</installation>

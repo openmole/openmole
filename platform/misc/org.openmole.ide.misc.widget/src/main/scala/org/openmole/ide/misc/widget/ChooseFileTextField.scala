@@ -36,7 +36,6 @@ class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDesc
     fileSelectionMode = selectionMode
     title = chooserTitle
   }
-  maximumSize = new Dimension(150,30)
   
   reactions += {
     case e: MousePressed => 

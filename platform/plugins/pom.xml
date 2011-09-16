@@ -31,11 +31,6 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
-                    <!--<archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                    </archive>-->
                 </configuration>
             </plugin>
 
@@ -46,42 +41,16 @@
                 <configuration>
                     <!-- to have the jar plugin pickup the nbm generated manifest -->
                     <useDefaultManifestFile>true</useDefaultManifestFile>
-                   <!-- <publicPackages>
-                        <publicPackage>org.apidesign.netbinox</publicPackage>
-                    </publicPackages>-->
                 </configuration>
             </plugin>
         </plugins>
     </build>
-     <!--
-    <profiles>
-        <profile>
-            <id>updatesite</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>nbm-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>site</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>autoupdate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
--->
     <modules>
         <module>org.openmole.ide.plugin.task.groovy</module>
         <module>org.openmole.ide.plugin.task.netlogo</module>
         <module>org.openmole.ide.plugin.task.systemexec</module>
         <module>org.openmole.ide.plugin.task.exploration</module>
+        <module>org.openmole.ide.plugin.task.serialization</module>
         <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.sampling.complete</module>
         <module>org.openmole.ide.plugin.domain.range</module>
