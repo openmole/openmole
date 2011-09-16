@@ -24,10 +24,13 @@ import scala.reflect.Manifest
 
 object Prototype {
   
-  def toArray[T](prototype: IPrototype[T], nbLevel: Int): IPrototype[Array[_]] = {
-    val arrayProto = new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
-    if(nbLevel == 1) arrayProto
-    else toArray(arrayProto, nbLevel - 1)
+  def toArray[T](prototype: IPrototype[T], nbLevel: Int): IPrototype[_] = {
+    if(nbLevel <= 0) prototype
+    else { 
+      val arrayProto = new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
+      if(nbLevel <= 1) arrayProto
+      else toArray(arrayProto, nbLevel - 1)
+    }
   }
 
   def fromArray[T](prototype: IPrototype[Array[T]]): IPrototype[T] =
