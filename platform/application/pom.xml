@@ -89,6 +89,11 @@
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
             <version>${openmole.gui.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.domain.distribution</artifactId>
+            <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>

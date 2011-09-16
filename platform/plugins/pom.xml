@@ -54,6 +54,7 @@
         <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.sampling.complete</module>
         <module>org.openmole.ide.plugin.domain.range</module>
+        <module>org.openmole.ide.plugin.domain.distribution</module>
         <module>org.openmole.ide.plugin.prototype.base</module>
         <module>org.openmole.ide.plugin.environment.glite</module>
         <module>org.openmole.ide.plugin.environment.desktopgrid</module>
