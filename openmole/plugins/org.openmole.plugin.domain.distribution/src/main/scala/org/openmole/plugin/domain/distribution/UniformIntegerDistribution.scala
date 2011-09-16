@@ -22,7 +22,7 @@ import org.openmole.core.model.domain.IInfiniteDomain
 import java.util.Random
 import java.lang.Integer
 
-class UniformIntegerDistribution(generator: Random,topBound: Option[Int]= None) extends IInfiniteDomain[Integer] {
+class UniformIntegerDistribution(generator: Random, topBound: Option[Int]= None) extends IInfiniteDomain[Integer] {
  
   def this(seed: Long) = this(new Random(seed),None)
   def this(seed: Long, b: Int) = this(new Random(seed),Some(b))
