@@ -21,7 +21,7 @@ class StoreIntoCSVTaskDataUI(val name: String,val columns: List[(IPrototypeDataP
   override def coreObject = {
     if (protoFile.isDefined)
       new StoreIntoCSVTask(name,
-                           columns.map{e=> (toArray(e._1.dataUI.coreObject).asInstanceOf[IPrototype[Array[_]]],e._2)},
+                           columns.map{e=> (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)},
                            protoFile.get.dataUI.coreObject.asInstanceOf[IPrototype[File]],
                            ',',CSVWriter.NO_QUOTE_CHARACTER)
     else throw new GUIUserBadDataError("No output prototype file is defined !")}

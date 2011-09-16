@@ -19,14 +19,15 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class IntegerPrototypeDataUI(val name: String) extends IPrototypeDataUI[Int]{
+class IntegerPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[Int](d){
   override def coreClass = classOf[IPrototype[Int]]
   
-  override def coreObject = new Prototype(name,classOf[Int])
+  override def coreObject = toArray(new Prototype(name,classOf[Int]),dim).asInstanceOf[IPrototype[Int]]
   
   override def imagePath = "img/integer.png"
   
-  override def buildPanelUI = new IntegerPrototypePanelUI
+  override def buildPanelUI = new IntegerPrototypePanelUI(this)
 }

@@ -2,7 +2,7 @@
  * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,11 +11,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.ide.plugin.prototype.base
 
-class StringPrototypePanelUI(pud:StringPrototypeDataUI) extends GenericPrototypePanelUI[String](pud.dim) { 
-  override def saveContent(name: String) =new StringPrototypeDataUI(name,if(dim!="") dim.toInt else 0)
-}
+import org.openmole.ide.core.model.data.IPrototypeDataUI
+
+abstract class GenericPrototypeDataUI[T](val dim: Int) extends IPrototypeDataUI[T]
