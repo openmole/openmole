@@ -33,15 +33,12 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap 2","
   
   val codeTextArea = new TextArea {text = pud.code}
   val lib= new ChooseFileTextField(pud.lib, "Select a file", Some("Lib files"), FilesOnly,Some("jar"))
-  val importStatement= new TextField{text= pud.importStatement}
   
   contents += (new Label("Code"),"wrap")
   contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span 2,growx")
   contents += new Label("Lib")
   contents += (lib,"growx")
-  contents += new Label("Import")
-  contents += importStatement
-  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text,lib.text,importStatement.text)
+  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text,lib.text)
 }
 
 //  val editorPane= new JEditorPane
