@@ -15,7 +15,7 @@ class SlicedUniformIntegerDistributionDataUI(val name: String,val seed: Long=0,v
 
   override def coreClass = classOf[SlicedUniformIntegerDistribution] 
   
-  override def imagePath = "img/domain_distribution.png"
+  override def imagePath = "img/domain_uniform_distribution.png"
   
   override def buildPanelUI = new SlicedUniformIntegerDistributionPanelUI(this)
 }
