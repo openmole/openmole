@@ -37,8 +37,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 
 object GliteJobService {
-  val ConfigGroup = GliteJobService.getClass.getSimpleName
-  val LCGCPTimeOut = new ConfigurationLocation(ConfigGroup, "RuntimeCopyOnWNTimeOut")
+  val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
     
   Workspace += (LCGCPTimeOut, "PT2M")
 }

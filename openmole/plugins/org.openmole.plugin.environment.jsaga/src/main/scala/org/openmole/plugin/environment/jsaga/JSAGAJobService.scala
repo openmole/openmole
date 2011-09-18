@@ -44,11 +44,9 @@ import org.openmole.misc.tools.io.FileUtil._
 import scala.io.Source._
 
 object JSAGAJobService extends Logger {
-  val CreationTimeout = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "CreationTimout")
-  val TestJobDoneTimeOut = new ConfigurationLocation(JSAGAJobService.getClass.getSimpleName, "TestJobDoneTimeOut")
-
+  val CreationTimeout = new ConfigurationLocation("JSAGAJobService", "CreationeTimout")
+ 
   Workspace += (CreationTimeout, "PT2M")
-  Workspace += (TestJobDoneTimeOut, "PT30M")
 }
 
 abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends JobService(environment, new JobServiceDescription(jobServiceURI.toString), nbAccess) {

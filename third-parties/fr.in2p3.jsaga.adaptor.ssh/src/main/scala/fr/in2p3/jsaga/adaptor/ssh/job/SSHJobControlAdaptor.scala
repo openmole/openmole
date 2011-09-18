@@ -170,10 +170,10 @@ class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with Cleana
       def absolute(path: String) = "$HOME/" + path
       
       command += "((" +
-      executable +
-      " > " + absolute(sjp.getOutfile) + " 2> " + absolute(sjp.getErrfile) +" ; " +
-      " echo $? > " + absolute(sjp.getEndCodeFile) + ") & " +
-      "echo $! > " + absolute(sjp.getPidFile) + " )"
+        executable +
+        " > " + absolute(sjp.getOutfile) + " 2> " + absolute(sjp.getErrfile) +" ; " +
+        " echo $? > " + absolute(sjp.getEndCodeFile) + ") & " +
+        "echo $! > " + absolute(sjp.getPidFile) + " )"
 
       exec(connection, "bash -c '" + command.toString + "'")
     } catch {

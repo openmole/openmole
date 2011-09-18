@@ -54,7 +54,6 @@ object JSAGASessionService {
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
     else  JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
     
-    //sessions = ("(file://.*)|(http://.*)" -> SessionFactory.createSession(false)) :: sessions
     Unit
   }
     
