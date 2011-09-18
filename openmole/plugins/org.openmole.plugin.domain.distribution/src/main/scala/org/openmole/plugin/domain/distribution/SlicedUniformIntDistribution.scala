@@ -20,14 +20,13 @@ package org.openmole.plugin.domain.distribution
 import java.util.Random
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import java.lang.Integer
 
-class SlicedUniformIntegerDistribution(generator: Random, size: Int, topBound: Option[Int]= None) extends IFiniteDomain[Integer]{
+class SlicedUniformIntDistribution(generator: Random, size: Int, topBound: Option[Int]= None) extends IFiniteDomain[Int]{
     
   def this(seed: Long, size: Int) = this(new Random(seed), size,None)
   def this(seed: Long, size: Int, b: Int) = this(new Random(seed), size,Some(b))
   
-  lazy val domain = new UniformIntegerDistribution(generator, topBound)
+  lazy val domain = new UniformIntDistribution(generator, topBound)
 
   override def computeValues(context: IContext) = domain.iterator(context).slice(0, size).toIterable
 }

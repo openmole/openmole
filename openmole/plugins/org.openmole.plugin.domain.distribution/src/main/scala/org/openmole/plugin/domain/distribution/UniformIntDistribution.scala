@@ -20,17 +20,16 @@ package org.openmole.plugin.domain.distribution
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IInfiniteDomain
 import java.util.Random
-import java.lang.Integer
 
-class UniformIntegerDistribution(generator: Random, topBound: Option[Int]= None) extends IInfiniteDomain[Integer] {
+class UniformIntDistribution(generator: Random, topBound: Option[Int]= None) extends IInfiniteDomain[Int] {
  
   def this(seed: Long) = this(new Random(seed),None)
   def this(seed: Long, b: Int) = this(new Random(seed),Some(b))
     
-  override def iterator(context: IContext): Iterator[Integer] = {
-    new Iterator[Integer] {
+  override def iterator(context: IContext): Iterator[Int] = {
+    new Iterator[Int] {
       override def hasNext: Boolean = true
-      override def next: Integer = topBound match {
+      override def next: Int = topBound match {
         case Some(i)=> generator.nextInt(i)
         case None=> generator.nextInt
       }
