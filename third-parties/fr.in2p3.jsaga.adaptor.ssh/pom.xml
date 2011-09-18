@@ -33,13 +33,13 @@
             <groupId>fr.in2p3.jsaga</groupId>
             <artifactId>jsaga-adaptoritf</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
-<!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency><!-- for data staging (scope runtime) and for class LocalJobProcess (scope compile) -->
             <groupId>fr.in2p3.jsaga.adaptor</groupId>
             <artifactId>jsaga-adaptor-classic</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
-<!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole</groupId>
@@ -50,7 +50,7 @@
            <groupId>org.scala-lang</groupId>
            <artifactId>scala-library</artifactId>
            <version>${lib.org.scala-lang.scala.version}</version>
-<!--           <scope>provided</scope>-->
+           <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
