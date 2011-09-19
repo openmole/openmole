@@ -11,8 +11,10 @@ import org.openmole.plugin.task.groovy.GroovyTask
 
 class GroovyTaskDataUI(val name: String,val code: String="",val lib: String="") extends TaskDataUI {
   
-  override def coreObject = new GroovyTask(name,code) {
-    if (!lib.isEmpty) addLib(lib)}
+  override def coreObject = {
+    val gt= new GroovyTask(name,code) 
+    if (!lib.isEmpty) gt.addLib(lib)
+    gt}
   
   override def coreClass= classOf[GroovyTask]
   
