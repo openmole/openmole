@@ -19,9 +19,12 @@ package org.openmole.ide.core.implementation.control
 
 import scala.swing.Button
 import scala.swing.Dialog
+import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import javax.swing.JButton
 import javax.swing.JDialog
 import scala.swing.Label
@@ -29,10 +32,18 @@ import scala.swing.PasswordField
 import net.miginfocom.swing.MigLayout
 import org.openide.windows.WindowManager
 import org.openmole.misc.workspace.Workspace
+import scala.swing.event.KeyPressed
+import scala.swing.event.Key._
+import scala.swing.event.KeyReleased
 
 object PasswordDialog extends JDialog(WindowManager.getDefault.getMainWindow){
   
-  val passField = new PasswordField(12)
+  setTitle("Preference access")
+  val passField = new PasswordField(12){
+    listenTo(keys)
+    reactions += {
+      case KeyPressed(_, Enter, _, _) => ok
+      case KeyReleased(_, _, _, _) => testPassword}}
   val okButton = new JButton("OK")
   val cancelButton = new JButton("Cancel")
   setLayout(new MigLayout(""))
@@ -45,17 +56,31 @@ object PasswordDialog extends JDialog(WindowManager.getDefault.getMainWindow){
   setMinimumSize(new Dimension(350,80))
   
   okButton.addActionListener(new ActionListener {
-      override def actionPerformed(ae: ActionEvent) = {
-        println("ok")
-        if (Workspace.passwordIsCorrect(new String(passField.password))) {
-          Workspace.password_=(new String(passField.password))
-          setVisible(false)}}});
+      override def actionPerformed(ae: ActionEvent) = {ok}})
     
   cancelButton.addActionListener(new ActionListener {
       override def actionPerformed(ae: ActionEvent) = {
-        println("cancel")
-        setVisible(false);}});
-  
+        setVisible(false)}})
+
   setLocationRelativeTo(WindowManager.getDefault.getMainWindow)
+
+  private def setColor(c: Color) = {
+    passField.foreground = c
+    passField.repaint
+  }
+  
+  def testPassword: Boolean = {
+    if (Workspace.passwordIsCorrect(new String(passField.password))) {
+      setColor(new Color(136,170,0) )
+      true
+    } else {
+      setColor(new Color(212,0,0))
+      false}
+  }
+  
+  def ok:Unit = { if (testPassword) {
+      Workspace.password_=(new String(passField.password))
+      setVisible(false)}
+  }
   setVisible(true)
 }
