@@ -19,20 +19,21 @@ package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
-import scala.collection.mutable.HashSet
 
-class SerializedProxys(var task: HashSet[ITaskDataProxyUI],
-                       var prototype: HashSet[IPrototypeDataProxyUI],
-                       var sampling: HashSet[ISamplingDataProxyUI],
-                       var environment: HashSet[IEnvironmentDataProxyUI],
-                       var domain: HashSet[IDomainDataProxyUI]) {
+class SerializedProxys(val task: Iterable[(Int,ITaskDataProxyUI)],
+                       val prototype: Iterable[(Int,IPrototypeDataProxyUI)],
+                       val sampling: Iterable[(Int,ISamplingDataProxyUI)],
+                       val environment: Iterable[(Int,IEnvironmentDataProxyUI)],
+                       val domain: Iterable[(Int,IDomainDataProxyUI)],
+                       val incr: Int) {
   
   def loadProxys = {
-    Proxys.task = task
-    Proxys.prototype = prototype
-    Proxys.sampling = sampling
-    Proxys.environment = environment
-    Proxys.domain = domain
+    task.foreach(t=>Proxys.addTaskElement(t._2,t._1))
+    prototype.foreach(p=>Proxys.addPrototypeElement(p._2,p._1))
+    sampling.foreach(s=>Proxys.addSamplingElement(s._2,s._1))
+    environment.foreach(e=>Proxys.addEnvironmentElement(e._2,e._1))
+    domain.foreach(d=>Proxys.addDomainElement(d._2,d._1))
+    Proxys.incr.set(incr)
   }
   
 }

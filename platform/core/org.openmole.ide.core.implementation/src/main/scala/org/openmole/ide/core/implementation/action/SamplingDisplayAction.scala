@@ -13,7 +13,7 @@ import org.openmole.ide.core.implementation.display.SamplingDisplay
 class SamplingDisplayAction(dpf:SamplingDataProxyFactory,tytype : String) extends Action(dpf.factory.displayName){
   override def apply = {
     Displays.currentType = tytype
-    SamplingDisplay.dataProxy = Some(dpf.buildDataProxyUI(Displays.name))
+    SamplingDisplay.currentDataProxy = Some(dpf.buildDataProxyUI(Displays.name))
     Displays.propertyPanel.initNewEntity
   }
 }

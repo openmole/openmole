@@ -44,7 +44,7 @@ class MoleSceneConverter extends Converter{
     
     var firstSlotID = new HashMap[ICapsuleUI, Int]
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
-    var taskUIs = new HashSet[TaskDataUI]
+    val taskProxyIds= (Map() ++ Proxys.task.map(_.swap))
     
     val molescene= o.asInstanceOf[IMoleScene]
     var slotcount = 0
@@ -74,9 +74,8 @@ class MoleSceneConverter extends Converter{
         
         //Task
         if (view.capsuleType != CAPSULE) {
-          taskUIs.add(view.dataProxy.get.dataUI.asInstanceOf[TaskDataUI])
           writer.startNode("task");
-          writer.addAttribute("name", view.dataProxy.get.dataUI.name)
+          writer.addAttribute("id", taskProxyIds(view.dataProxy.get).toString)
           writer.endNode
         }
         writer.endNode
@@ -117,7 +116,7 @@ class MoleSceneConverter extends Converter{
               n1 match{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
-                case "task"=> caps.encapsule(Proxys.getTaskDataProxyUI(reader.getAttribute("name")).get)  
+                case "task"=> caps.encapsule(Proxys.task(reader.getAttribute("id").toInt))  
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
               reader.moveUp

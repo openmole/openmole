@@ -96,5 +96,5 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[left]rel[
     new CSVSamplingDataUI(name,csvTextField.text,protoMapping)
   }
   
-  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.toList
+  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.values.toList
 }

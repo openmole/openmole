@@ -30,36 +30,32 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 object TaskDisplay extends IDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]
   var currentPanel: Option[ITaskPanelUI] = None
+  var currentDataProxy: Option[ITaskDataProxyUI] = None
+  
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
-  var name="task0"
-  var dataProxy: Option[ITaskDataProxyUI] = None
+  
+  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.task(pID))
   
   override def implementationClasses = modelTasks
-  
-  override def dataProxyUI(n: String):ITaskDataProxyUI = Proxys.getTaskDataProxyUI(n).getOrElse(dataProxy.get)
 
-  override def buildPanelUI(n:String) = {
-    currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
+  override def buildPanelUI = {
+    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
-  
-  override def saveContent(oldName: String) = {
-    select(oldName)
-    val env = dataProxyUI(oldName).dataUI.environment
-    val sample = dataProxyUI(oldName).dataUI.sampling
-    val protoI = dataProxyUI(oldName).dataUI.prototypesIn
-    val protoO = dataProxyUI(oldName).dataUI.prototypesOut
-    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    dataProxyUI(name).dataUI.prototypesIn_=(protoI)
-    dataProxyUI(name).dataUI.prototypesOut_=(protoO)
-    dataProxyUI(name).dataUI.sampling_=(sample)
-    dataProxyUI(name).dataUI.environment_=(env)
-    Proxys.addTaskElement(dataProxyUI(oldName))
+  override def saveContent(name: String) = {
+    // select(oldName)
+    val env = currentDataProxy.get.dataUI.environment
+    val sample = currentDataProxy.get.dataUI.sampling
+    val protoI = currentDataProxy.get.dataUI.prototypesIn
+    val protoO = currentDataProxy.get.dataUI.prototypesOut
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    currentDataProxy.get.dataUI.prototypesIn_=(protoI)
+    currentDataProxy.get.dataUI.prototypesOut_=(protoO)
+    currentDataProxy.get.dataUI.sampling_=(sample)
+    currentDataProxy.get.dataUI.environment_=(env)
+    if (Displays.initMode) Proxys.addTaskElement(currentDataProxy.get)
   }
-  
-  override def increment = name = "task" + Displays.nextInt
   
   
 }

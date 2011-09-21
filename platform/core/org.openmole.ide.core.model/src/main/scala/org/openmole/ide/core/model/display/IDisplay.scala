@@ -24,20 +24,12 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
 
 trait IDisplay{
   def implementationClasses: HashSet[_<:IDataProxyFactory]
-
-  def name: String
   
-  def name_=(s: String)
+  def currentDataProxy: Option[IDataProxyUI]
   
-  def increment: Unit
+  def buildPanelUI: IPanelUI
   
-  def dataProxyUI(name: String): IDataProxyUI
+  def saveContent(name: String)
   
-  def dataProxy: Option[IDataProxyUI]
-  
-  def buildPanelUI(name: String): IPanelUI
-  
-  def saveContent(oldName: String)
-  
-  def select(name: String)
+  def setCurrentDataProxy(pID: Int)
 }

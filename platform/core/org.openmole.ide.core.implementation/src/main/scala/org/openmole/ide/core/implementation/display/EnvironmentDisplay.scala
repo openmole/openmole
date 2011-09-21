@@ -30,29 +30,23 @@ import org.openmole.ide.core.model.display.IDisplay
 
 object EnvironmentDisplay extends IDisplay{
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
-  var name="env0"
   var currentPanel: Option[IEnvironmentPanelUI] = None
-  var dataProxy : Option[IEnvironmentDataProxyUI] = None
+  var currentDataProxy: Option[IEnvironmentDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
   
+  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.environment(pID))
+  
   override def implementationClasses = modelEnvironments
   
-  override def dataProxyUI(n: String):IEnvironmentDataProxyUI = Proxys.getEnvironmentDataProxyUI(n).getOrElse(dataProxy.get)
-  
-  override def increment = name = "env" + Displays.nextInt
-  
-  override def  buildPanelUI(n:String) = {
-    currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
+  override def  buildPanelUI = {
+    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
-  
-  override def saveContent(oldName: String) = {
-    select(oldName)
-    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    Proxys.addEnvironmentElement(dataProxyUI(oldName))
+  override def saveContent(name: String) = {
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.addEnvironmentElement(currentDataProxy.get)
   }
    
 }

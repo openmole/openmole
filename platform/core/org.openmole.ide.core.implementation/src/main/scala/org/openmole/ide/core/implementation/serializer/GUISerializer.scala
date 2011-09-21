@@ -47,11 +47,12 @@ object GUISerializer {
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    out.writeObject(new SerializedProxys(Proxys.task,
-                                         Proxys.prototype,
-                                         Proxys.sampling,
-                                         Proxys.environment,
-                                         Proxys.domain))
+    out.writeObject(new SerializedProxys(Proxys.task.map(v=>(v._1,v._2)),
+                                         Proxys.prototype.map(v=>(v._1,v._2)),
+                                         Proxys.sampling.map(v=>(v._1,v._2)),
+                                         Proxys.environment.map(v=>(v._1,v._2)),
+                                         Proxys.domain.map(v=>(v._1,v._2)),
+                                         Proxys.incr.get+1))
     //molescenes
     MoleScenesManager.moleScenes.keys.foreach(out.writeObject(_))
     

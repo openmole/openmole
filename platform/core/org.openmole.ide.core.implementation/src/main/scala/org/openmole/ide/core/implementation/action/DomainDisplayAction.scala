@@ -25,7 +25,7 @@ import scala.swing.Action
 class DomainDisplayAction (dpf:DomainDataProxyFactory,tytype : String) extends Action(dpf.factory.displayName){
   override def apply = {
     Displays.currentType = tytype
-    DomainDisplay.dataProxy = Some(dpf.buildDataProxyUI(Displays.name))
+    DomainDisplay.currentDataProxy = Some(dpf.buildDataProxyUI(Displays.name))
     Displays.propertyPanel.initNewEntity
   }
 }

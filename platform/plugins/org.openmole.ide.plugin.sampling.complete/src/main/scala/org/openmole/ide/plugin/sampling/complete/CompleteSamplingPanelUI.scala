@@ -35,14 +35,14 @@ import scala.swing.BorderPanel.Position._
 class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
   var rows = new HashSet[FactorPanel]
   val factors = cud.factors.groupBy(f=>f._1)
-  Proxys.prototype.foreach(pud=>rows+= buildRow(pud))
+  Proxys.prototype.foreach(pud=>rows+= buildRow(pud._2))
   
   override def saveContent(name: String) = new CompleteSamplingDataUI(name,rows.flatMap{
         case fp: FactorPanel=> if (fp.selected) List(fp.factor) else None
         case _=> None}.toList)
   
   def buildRow(pud: IPrototypeDataProxyUI) = {
-    val cbb = new ComboBox(Proxys.domain.toList) {enabled = false}
+    val cbb = new ComboBox(Proxys.domain.values.toList) {enabled = false}
     val cb = new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}}
     contents+= (cb,"gap para")
     contents+= cbb

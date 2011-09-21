@@ -13,7 +13,7 @@ import scala.swing.Action
 class EnvironmentDisplayAction(dpf:EnvironmentDataProxyFactory,tytype : String) extends Action(dpf.factory.displayName){
   override def apply = {
     Displays.currentType = tytype
-    EnvironmentDisplay.dataProxy = Some(dpf.buildDataProxyUI(Displays.name))
+    EnvironmentDisplay.currentDataProxy = Some(dpf.buildDataProxyUI(Displays.name))
     Displays.propertyPanel.initNewEntity
   }
 }

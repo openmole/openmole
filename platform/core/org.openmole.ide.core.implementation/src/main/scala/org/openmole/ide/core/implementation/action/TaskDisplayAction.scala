@@ -13,7 +13,7 @@ import scala.swing.Action
 class TaskDisplayAction (dpf:TaskDataProxyFactory,tytype : String) extends Action(dpf.factory.displayName){
   override def apply = {
     Displays.currentType = tytype
-    TaskDisplay.dataProxy = Some(dpf.buildDataProxyUI(Displays.name))
+    TaskDisplay.currentDataProxy = Some(dpf.buildDataProxyUI(Displays.name))
     Displays.propertyPanel.initNewEntity
   }
 }

@@ -24,13 +24,13 @@ import org.openmole.ide.core.model.palette.IGenericChildren
 import java.awt.datatransfer.DataFlavor
 import java.util.ArrayList
 
-class GenericChildren(collection: Iterable[IDataProxyUI], dataFlavor: DataFlavor) extends Index.ArrayChildren with IGenericChildren{
+class GenericChildren(collection: Map[Int,IDataProxyUI], dataFlavor: DataFlavor) extends Index.ArrayChildren with IGenericChildren{
 
   def refreshNodes= refresh
   
   override def initCollection: java.util.List[Node] = {
     val childrenNodes = new ArrayList[Node](collection.size)
-    collection.foreach(dpu=>{childrenNodes.add(new GenericNode(dataFlavor,dpu))})
+    collection.foreach(dpu=>{childrenNodes.add(new GenericNode(dataFlavor,dpu._2){setValue("proxy",dpu._1)})})
     childrenNodes
   }
 }

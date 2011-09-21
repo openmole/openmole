@@ -29,27 +29,21 @@ import org.openmole.ide.core.model.dataproxy._
 object PrototypeDisplay extends IDisplay{
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
   var currentPanel: Option[IPrototypePanelUI[_]] = None
-  var name= "proto0"
-  var dataProxy: Option[IPrototypeDataProxyUI] = None
+  var currentDataProxy: Option[IPrototypeDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
+  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.prototype(pID))
+  
   override def implementationClasses = modelPrototypes
   
-  override def dataProxyUI(n: String):IPrototypeDataProxyUI = Proxys.getPrototypeDataProxyUI(n).getOrElse(dataProxy.get)
-
-  override def increment = name = "proto" + Displays.nextInt
-  
-  def  buildPanelUI(n:String) = {
-    currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
+  def  buildPanelUI= {
+    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
-  
-  override def saveContent(oldName: String) = {
-    select(oldName)
-    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    Proxys.addPrototypeElement(dataProxyUI(oldName))  
+  override def saveContent(name: String) = {
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.addPrototypeElement(currentDataProxy.get)
   }
 }

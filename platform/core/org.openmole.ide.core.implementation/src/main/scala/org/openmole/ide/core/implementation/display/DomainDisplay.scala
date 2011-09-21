@@ -30,28 +30,22 @@ import scala.collection.JavaConversions._
 
 object DomainDisplay extends IDisplay{
   private var modelDomains = new HashSet[DomainDataProxyFactory]
-  var name = "domain0"
   var currentPanel: Option[IDomainPanelUI[_]] = None
-  var dataProxy: Option[IDomainDataProxyUI] = None
+  var currentDataProxy: Option[IDomainDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))
   
+  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.domain(pID))
+  
   override def implementationClasses = modelDomains
   
-  override def dataProxyUI(n: String):IDomainDataProxyUI = Proxys.getDomainDataProxyUI(n).getOrElse(dataProxy.get)
-  
-  override def increment = name = "domain" +  + Displays.nextInt
-  
-  override def  buildPanelUI(n:String) = {
-    currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
+  override def  buildPanelUI = {
+    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
-  
-  override def saveContent(oldName: String) = {
-    select(oldName)
-    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    Proxys.addDomainElement(dataProxyUI(oldName))
+  override def saveContent(name: String) = {
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.addDomainElement(currentDataProxy.get)
   }
 }

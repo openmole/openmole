@@ -35,12 +35,12 @@ class CategoryBuilder(val sceneType: MoleSceneType) extends Children.Keys[ICateg
     
     setKeys(sceneType match {
         case BUILD=>List(
-            new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task,TASK_DATA_FLAVOR)),
-            new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
-            new GenericCategory(DOMAIN,"Domains" ,new GenericChildren(Proxys.domain,DOMAIN_DATA_FLAVOR)),
-            new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR))).toIterable
+            new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task.toMap,TASK_DATA_FLAVOR)),
+            new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype.toMap,PROTOTYPE_DATA_FLAVOR)),
+            new GenericCategory(DOMAIN,"Domains" ,new GenericChildren(Proxys.domain.toMap,DOMAIN_DATA_FLAVOR)),
+            new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling.toMap,SAMPLING_DATA_FLAVOR))).toIterable
         case EXECUTION => List (
-            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR))).toIterable
+            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment.toMap,ENVIRONMENT_DATA_FLAVOR))).toIterable
       })
   }     
 }

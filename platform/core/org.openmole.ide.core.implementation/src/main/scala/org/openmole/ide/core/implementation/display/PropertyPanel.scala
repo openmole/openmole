@@ -30,7 +30,6 @@ import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.commons.Constants._
 
 class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[grow,fill]"){
-  var oldName = ""
   Displays.currentType = TASK
   
   val domainMenu = new Menu("Domain")
@@ -63,7 +62,6 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   contents+= (propertyScrollPane,"span 4,growx")
   
   def displayCurrentEntity = {
-    oldName = Displays.name
     nameTextField.text = Displays.name
     updateViewport(Displays.buildPanelUI.peer)
     repaint
@@ -77,16 +75,16 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   }
   
   def save = {
-    Displays.saveContent(oldName, nameTextField.text)
+    Displays.saveContent(nameTextField.text)
     PaletteSupport.refreshPalette
+    Displays.initMode = false
   }
   
   def cancel = displayCurrentEntity
   
   def initNewEntity = {
-    Displays.increment
-    nameTextField.text = Displays.name
-    oldName = Displays.name
+    Displays.initMode = true
+    nameTextField.text = ""
     updateViewport(Displays.buildPanelUI.peer)
   }
 }

@@ -30,29 +30,22 @@ import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 object SamplingDisplay extends IDisplay{
   private var modelSamplings = new HashSet[SamplingDataProxyFactory]
-  var name = "sample0"
   var currentPanel: Option[ISamplingPanelUI] = None
-  var dataProxy: Option[ISamplingDataProxyUI] = None
+  var currentDataProxy: Option[ISamplingDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>modelSamplings += new SamplingDataProxyFactory(f))
   
+  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.sampling(pID))
+  
   override def implementationClasses = modelSamplings
   
-  override def dataProxyUI(n: String):ISamplingDataProxyUI = Proxys.getSamplingDataProxyUI(n).getOrElse(dataProxy.get)
-  
-  override def increment = name = "sample" +  + Displays.nextInt
-  
-  override def  buildPanelUI(n:String) = {
-    currentPanel = Some(dataProxyUI(n).dataUI.buildPanelUI)
+  override def  buildPanelUI = {
+    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
   
-  override def select(name: String) = dataProxy = Some(dataProxyUI(name))
-  
-  override def saveContent(oldName: String) = {
-    select(oldName)
-    dataProxyUI(oldName).dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + oldName)).saveContent(name)
-    Proxys.addSamplingElement(dataProxyUI(oldName))
-  }
+  override def saveContent(name: String) = {
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.addSamplingElement(currentDataProxy.get)}
   
 }

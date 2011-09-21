@@ -18,41 +18,27 @@
 package org.openmole.ide.core.implementation.display
  
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.panel.IPanelUI
-import scala.util.Random
 
 
 object Displays {
   var currentType = TASK
   val propertyPanel = new PropertyPanel
-  private val randomGenerator = new Random 
+  var initMode = false
   
-  def name = currentDisplay.name
+  def name = if(dataProxy.isDefined) dataProxy.get.dataUI.name else ""
   
-  def setAsName(n: String) = {
-    currentDisplay.name = n
-    currentDisplay.select(n)}
-  
-  def increment = currentDisplay.increment
-  
+  def setCurrentProxyID(pID: Int) = currentDisplay.setCurrentDataProxy(pID)
+    
   def implementationClasses = currentDisplay.implementationClasses
   
-  def dataProxy = currentDisplay.dataProxy
+  def dataProxy = currentDisplay.currentDataProxy
   
-  def buildPanelUI = currentDisplay.buildPanelUI(name)
+  def buildPanelUI = currentDisplay.buildPanelUI
   
   def saveContent(name: String) = currentDisplay.saveContent(name)
-  
-  def saveContent(oldName: String, newName: String) = {
-    setAsName(newName)
-    currentDisplay.saveContent(oldName)
-  }
-    
-  def nextInt = randomGenerator.nextInt(1000)
-  
+      
   private def currentDisplay :IDisplay= {
     currentType match{
       case TASK=> TaskDisplay

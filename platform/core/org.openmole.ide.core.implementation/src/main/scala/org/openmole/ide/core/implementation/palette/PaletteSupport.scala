@@ -76,7 +76,8 @@ class MyAddPropertyChangeListener extends PropertyChangeListener  {
     val selCategoryLookup = mstc.getPalette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
       Displays.currentType = selCategoryLookup.getName
-      Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
+    //  Displays.setAsName(selItem.lookup(classOf[Node]).getDisplayName)
+    Displays.setCurrentProxyID( selItem.lookup(classOf[Node]).getValue("proxy").asInstanceOf[Int])
       Displays.propertyPanel.displayCurrentEntity 
       currentSelItem = selItem
     }
