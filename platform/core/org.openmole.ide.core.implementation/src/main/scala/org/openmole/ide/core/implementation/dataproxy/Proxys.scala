@@ -23,9 +23,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
-import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
-import scala.util.Random
 
 object Proxys {
     
@@ -38,13 +36,6 @@ object Proxys {
   var domain = new WeakHashMap[Int,IDomainDataProxyUI]
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
-
-//  def getTaskDataProxyUI(name: String) = task.filter(_.dataUI.name==name).headOption
-//  def getPrototypeDataProxyUI(name: String) = prototype.filter(_.dataUI.name==name).headOption
-//  def getSamplingDataProxyUI(name: String) = sampling.filter(_.dataUI.name==name).headOption
-//  def getEnvironmentDataProxyUI(name: String) = environment.filter(_.dataUI.name==name).headOption
-//  def getDomainDataProxyUI(name: String) = domain.filter(_.dataUI.name==name).headOption
-  
   
   def addTaskElement(dpu: ITaskDataProxyUI) = task += incr.getAndIncrement->dpu
   def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototype += incr.getAndIncrement->dpu
@@ -52,18 +43,11 @@ object Proxys {
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environment += incr.getAndIncrement->dpu
   def addDomainElement(dpu: IDomainDataProxyUI) = domain += incr.getAndIncrement->dpu
   
-  
   def addTaskElement(dpu: ITaskDataProxyUI, id:Int) = task += id->dpu
   def addPrototypeElement(dpu: IPrototypeDataProxyUI,id:Int) = prototype += id->dpu
   def addSamplingElement(dpu: ISamplingDataProxyUI,id:Int) = sampling += id->dpu
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI,id:Int) = environment += id->dpu
   def addDomainElement(dpu: IDomainDataProxyUI,id:Int) = domain += id->dpu
-  
-  def removeTaskElement(id: Int) = task.remove(id)
-  def removePrototypeElement(id: Int) = prototype.remove(id)
-  def removeSamplingElement(id: Int) = sampling.remove(id)
-  def removeEnvironmentElement(id: Int) = environment.remove(id)
-  def removeDomainElement(id: Int) = domain.remove(id)
   
   def clearAllTaskElement = task.clear
   def clearAllPrototypeElement = prototype.clear

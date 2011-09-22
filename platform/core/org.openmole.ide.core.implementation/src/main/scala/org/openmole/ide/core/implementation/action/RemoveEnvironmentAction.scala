@@ -17,12 +17,11 @@
 
 package org.openmole.ide.core.implementation.action
 
-
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.palette.PaletteSupport
+import org.openmole.ide.core.implementation.display.Displays
 import scala.swing.Action
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 
-class RemoveSamplingAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.sampling-= proxyID
-                       PaletteSupport.refreshPalette}
+class RemoveEnvironmentAction(proxyID: Int) extends Action("Remove"){
+  override def apply = {Proxys.environment-= proxyID  
+                        Displays.propertyPanel.cleanViewport}
 }

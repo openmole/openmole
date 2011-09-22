@@ -20,13 +20,17 @@ package org.openmole.ide.core.implementation.display
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
+import javax.swing.ImageIcon
 import javax.swing.JPanel
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.MenuItem
+import scala.swing._
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
+import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
+import org.openmole.ide.misc.widget.MenuToggleButton
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.commons.Constants._
 
 class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[grow,fill]"){
@@ -61,16 +65,31 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   contents+= cancelButton
   contents+= (propertyScrollPane,"span 4,growx")
   
+  
+  def displayCurrentTypeIcon = {
+    contents.remove(1) 
+    contents.insert(1,new MenuToggleButton(
+        Some(new ImageIcon(ImageUtilities.loadImage(Displays.dataProxy.get.dataUI.imagePath))))
+                    {popup= Displays.managementMenu})}
+  
   def displayCurrentEntity = {
     nameTextField.text = Displays.name
+    displayCurrentTypeIcon
     updateViewport(Displays.buildPanelUI.peer)
     repaint
   }
   
-  def cleanViewport = propertyScrollPane.peer.getViewport.removeAll
+  def cleanViewport = {
+    removeViewport
+    PaletteSupport.refreshPalette
+    nameTextField.text = ""
+    repaint
+  }
+  
+  def removeViewport = propertyScrollPane.peer.getViewport.removeAll
   
   def updateViewport(panel: JPanel)= {
-    cleanViewport
+    removeViewport
     propertyScrollPane.peer.setViewportView(panel)
   }
   
@@ -78,6 +97,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
     Displays.saveContent(nameTextField.text)
     PaletteSupport.refreshPalette
     Displays.initMode = false
+    displayCurrentTypeIcon
   }
   
   def cancel = displayCurrentEntity

@@ -20,13 +20,16 @@ package org.openmole.ide.core.implementation.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.action.RemoveSamplingAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
+import scala.swing.MenuItem
 
 object SamplingDisplay extends IDisplay{
   private var modelSamplings = new HashSet[SamplingDataProxyFactory]
@@ -34,6 +37,9 @@ object SamplingDisplay extends IDisplay{
   var currentDataProxy: Option[ISamplingDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>modelSamplings += new SamplingDataProxyFactory(f))
+  
+  override def managementMenu = new PopupMenu {
+    contents+= new MenuItem(new RemoveSamplingAction(Displays.currentProxyID))}
   
   override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.sampling(pID))
   

@@ -124,16 +124,14 @@
             <artifactId>org-openide-loaders</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-     
-        
-    <!--    <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency> -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.widget</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.display
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.core.model.dataproxy.IDataProxyFactory
 
 trait IDisplay{
@@ -32,4 +33,6 @@ trait IDisplay{
   def saveContent(name: String)
   
   def setCurrentDataProxy(pID: Int)
+  
+  def managementMenu: PopupMenu
 }

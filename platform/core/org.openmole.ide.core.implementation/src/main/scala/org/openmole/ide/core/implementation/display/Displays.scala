@@ -25,11 +25,14 @@ import org.openmole.ide.core.model.commons.Constants._
 object Displays {
   var currentType = TASK
   val propertyPanel = new PropertyPanel
+  var currentProxyID = 0
   var initMode = false
   
   def name = if(dataProxy.isDefined) dataProxy.get.dataUI.name else ""
   
-  def setCurrentProxyID(pID: Int) = currentDisplay.setCurrentDataProxy(pID)
+  def setCurrentProxyID(pID: Int) = {
+    currentDisplay.setCurrentDataProxy(pID)
+    currentProxyID = pID}
     
   def implementationClasses = currentDisplay.implementationClasses
   
@@ -38,7 +41,9 @@ object Displays {
   def buildPanelUI = currentDisplay.buildPanelUI
   
   def saveContent(name: String) = currentDisplay.saveContent(name)
-      
+  
+  def managementMenu = currentDisplay.managementMenu
+  
   private def currentDisplay :IDisplay= {
     currentType match{
       case TASK=> TaskDisplay

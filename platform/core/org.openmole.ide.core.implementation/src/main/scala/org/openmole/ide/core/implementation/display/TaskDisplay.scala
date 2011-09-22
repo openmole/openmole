@@ -20,12 +20,15 @@ package org.openmole.ide.core.implementation.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.implementation.action.RemoveTaskAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import scala.swing.MenuItem
 
 object TaskDisplay extends IDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]
@@ -42,6 +45,9 @@ object TaskDisplay extends IDisplay{
     currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
+  
+  override def managementMenu = new PopupMenu {
+    add(new MenuItem(new RemoveTaskAction(Displays.currentProxyID)))}
   
   override def saveContent(name: String) = {
     // select(oldName)

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.misc.widget
+package org.openmole.ide.misc.widget
 
 import javax.swing.JPopupMenu
 import scala.swing._

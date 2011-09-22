@@ -41,7 +41,6 @@ import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
-import org.openmole.ide.core.misc.widget.MenuToggleButton;
 import scala.swing.MenuItem;
 import org.openmole.ide.misc.widget.ToolBarButton;
 
@@ -61,7 +60,6 @@ preferredID = "MoleSceneTopComponent")
 public final class MoleSceneTopComponent extends TopComponent {
 
     private static MoleSceneTopComponent instance;
-    //private MenuToggleButton moleButton;
     private ToolBarButton buildButton;
     private ToolBarButton cleanAndBuildButton;
     private ToolBarButton addMoleButton;

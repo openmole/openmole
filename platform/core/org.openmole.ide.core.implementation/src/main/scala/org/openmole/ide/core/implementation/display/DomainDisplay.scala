@@ -18,15 +18,18 @@
 package org.openmole.ide.core.implementation.display
 
 import org.openide.util.Lookup
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.action.RemoveDomainAction
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
+import scala.swing.MenuItem
 
 object DomainDisplay extends IDisplay{
   private var modelDomains = new HashSet[DomainDataProxyFactory]
@@ -43,6 +46,9 @@ object DomainDisplay extends IDisplay{
     currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
+  
+  override def managementMenu = new PopupMenu {
+    add(new MenuItem(new RemoveDomainAction(Displays.currentProxyID)))}
   
   override def saveContent(name: String) = {
     currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)

@@ -2,7 +2,7 @@
  * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,18 +11,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.implementation.action
 
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.palette.PaletteSupport
-import scala.swing.Action
-
-class RemoveSamplingAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.sampling-= proxyID
-                       PaletteSupport.refreshPalette}
+class DetachPrototypeAction (tdp: ITaskDataProxyUI, pdp: IPrototypeDataProxyUI) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent) =  tdp.dataUI.prototypesIn-= pdp
 }

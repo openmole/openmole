@@ -22,11 +22,14 @@ import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
+import org.openmole.ide.core.implementation.action.RemoveEnvironmentAction
+import scala.swing.MenuItem
 
 object EnvironmentDisplay extends IDisplay{
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
@@ -43,6 +46,9 @@ object EnvironmentDisplay extends IDisplay{
     currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
     currentPanel.get
   }
+  
+  override def managementMenu = new PopupMenu {
+    add(new MenuItem(new RemoveEnvironmentAction(Displays.currentProxyID)))}
   
   override def saveContent(name: String) = {
     currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)

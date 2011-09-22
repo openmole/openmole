@@ -50,12 +50,12 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: CapsuleUI) extends Generic
     if (encapsulated) {
       if (capsule.dataProxy.get.dataUI.environment.isDefined) {
         val itRe= new JMenuItem("Remove environment")
-        itRe.addActionListener(new RemoveEnvironementAction(capsule.dataProxy.get))
+        itRe.addActionListener(new DetachEnvironmentAction(capsule.dataProxy.get))
         items+=itRe
       }
       if (capsule.dataProxy.get.dataUI.sampling.isDefined) {
         val itSa= new JMenuItem("Remove sampling")
-        itSa.addActionListener(new RemoveSamplingAction(capsule.dataProxy.get))
+        itSa.addActionListener(new DetachSamplingAction(capsule.dataProxy.get))
         items+=itSa
       }
     }

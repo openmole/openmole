@@ -19,12 +19,16 @@ package org.openmole.ide.core.implementation.display
 import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
+import org.openmole.ide.core.implementation.action.RemovePrototypeAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
+import scala.swing.Menu
+import scala.swing.MenuItem
 
 object PrototypeDisplay extends IDisplay{
   private var modelPrototypes = new HashSet[PrototypeDataProxyFactory]
@@ -32,6 +36,9 @@ object PrototypeDisplay extends IDisplay{
   var currentDataProxy: Option[IPrototypeDataProxyUI] = None
   
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
+  
+  override def managementMenu = new PopupMenu {
+    add(new MenuItem(new RemovePrototypeAction(Displays.currentProxyID)))}
   
   override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.prototype(pID))
   
