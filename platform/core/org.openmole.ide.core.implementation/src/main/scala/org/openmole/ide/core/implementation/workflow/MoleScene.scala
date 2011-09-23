@@ -23,6 +23,7 @@ import java.awt.Point
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
+import org.netbeans.api.visual.action.SelectProvider
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.commons.Constants
@@ -31,10 +32,13 @@ import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.display.Displays
+import org.openmole.ide.core.implementation.display.TaskDisplay
 import org.openmole.ide.core.implementation.provider.DnDNewTaskProvider
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
@@ -67,6 +71,7 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   getActions.addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(this)))
   
+  val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
@@ -113,6 +118,7 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
   override def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
     if (moleSceneType == BUILD) {
+      obUI.get.createActions(SELECT).addAction(selectAction)
       obUI.get.createActions(CONNECT).addAction(connectAction)
       obUI.get.createActions(CONNECT).addAction(moveAction)
       // obUI.get.getActions.addAction(createObjectHoverAction)
@@ -251,6 +257,24 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
         manager.registerTransition(edge.get,t.source, targetView,if (targetView.capsule.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
       }
       repaint
+    }
+  }
+  
+  class ObjectSelectProvider extends SelectProvider {
+        
+    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
+                
+    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
+        
+    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = {
+      w match {
+        case x: ICapsuleUI=> { x.dataProxy.get match{
+              case y: ITaskDataProxyUI=> {
+                  TaskDisplay.currentDataProxy = Some(y)
+                  Displays.propertyPanel.displayCurrentEntity}
+            }
+          }
+      }
     }
   }
   

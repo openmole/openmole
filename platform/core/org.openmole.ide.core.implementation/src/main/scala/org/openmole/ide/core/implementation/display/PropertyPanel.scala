@@ -51,7 +51,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   val cancelButton = new Button("Cancel")
   val nameTextField = new TextField(15) 
   
-  listenTo(`saveButton`,`cancelButton`)
+  listenTo(saveButton,cancelButton)
   reactions += {
     case ButtonClicked(`saveButton`) =>  save
     case ButtonClicked(`cancelButton`) =>  cancel}

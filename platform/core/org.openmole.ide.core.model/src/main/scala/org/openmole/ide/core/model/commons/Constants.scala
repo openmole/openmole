@@ -22,6 +22,7 @@ import java.awt.datatransfer.DataFlavor
 
 object Constants{
   val MOVE= "move"
+  val SELECT = "connect"
   val CONNECT = "connect"
   val RECONNECT = "connect"
   
