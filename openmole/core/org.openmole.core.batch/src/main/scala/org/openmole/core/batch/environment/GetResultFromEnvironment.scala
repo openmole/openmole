@@ -64,9 +64,8 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
     try {
       val result = getRuntimeResult(outputFilePath, token)
 
-      if (result.exception != null) {
+      if (result.exception != null)
         throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
-      }
 
       display(result.stdOut, "Output", token)
       display(result.stdErr, "Error output", token)
@@ -78,9 +77,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       var successfull = 0
       var firstRunning = Long.MaxValue
       var lastCompleted = 0L
-      
-      //logger.fine("Number of mole job " + job.moleJobs.size + ".")
-      
+
       //Try to download the results for all the jobs of the group
       for (moleJob <- job.moleJobs) {
         if (contextResults.results.isDefinedAt(moleJob.id)) {
@@ -120,17 +117,15 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   }
 
   private def display(message: FileMessage, description: String, token: AccessToken) = {
-    if (message == null) {
-      logger.log(WARNING, "{0} is null.", description)
-    } else {
+    if (message == null) logger.log(WARNING, "{0} is null.", description)
+    else {
       try {
         if (!message.isEmpty) {
           val stdOutFile = message.path.cacheUnziped(token)
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
-            if (stdOutHash != message.hash) {
+            if (stdOutHash != message.hash)
               logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
-            }
 
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
@@ -138,9 +133,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
               try fis.copy(System.out) finally fis.close
               System.out.println("-------------------------------------------------------")
             }
-          } finally {
-            stdOutFile.delete
-          }
+          } finally stdOutFile.delete
         }
       } catch {
         case(e: IOException) => logger.log(WARNING, description + " transfer has failed.", e);
@@ -158,13 +151,13 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
       try {
         val tarResulHash = HashService.computeHash(tarResultFile)
-        if (tarResulHash != tarResult.hash) {
+        if (tarResulHash != tarResult.hash)
           throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
-        }
 
         val tis = new TarInputStream(new FileInputStream(tarResultFile))
 
-        tis.applyAndClose(te => {
+        tis.applyAndClose {
+          te =>
             val dest = Workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
              
             val os = new FileOutputStream(dest)
@@ -182,10 +175,8 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
               file
             } else dest
             fileReplacement += fileInfo._1 -> file
-          })
-      } finally {
-        tarResultFile.delete
-      }
+        }
+      } finally tarResultFile.delete
     }
     fileReplacement
   }
