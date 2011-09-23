@@ -26,7 +26,6 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.display._
-import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.misc.widget.MenuToggleButton
@@ -47,9 +46,10 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   val samplingMenu = new Menu("Sampling")
   SamplingDisplay.implementationClasses.foreach(d=>samplingMenu.contents+= new MenuItem(new SamplingDisplayAction(d,SAMPLING)))
     
+  val fakeLabel = new Label("") {this.maximumSize.width=10}
   val saveButton = new Button("Apply")
   val cancelButton = new Button("Cancel")
-  val nameTextField = new TextField(12) 
+  val nameTextField = new TextField(15) 
   
   listenTo(`saveButton`,`cancelButton`)
   reactions += {
@@ -59,7 +59,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
   val propertyScrollPane = new ScrollPane{minimumSize = new Dimension(150,20)}
   
   contents+= (new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu)},"span 4,growx")
-  contents+= new Label("Name")
+  contents+= fakeLabel
   contents+= nameTextField
   contents+= saveButton
   contents+= cancelButton
@@ -70,13 +70,13 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
     contents.remove(1) 
     contents.insert(1,new MenuToggleButton(
         Some(new ImageIcon(ImageUtilities.loadImage(Displays.dataProxy.get.dataUI.imagePath))))
-                    {popup= Displays.managementMenu})}
+                    {popup= Displays.managementMenu})
+    revalidate}
   
   def displayCurrentEntity = {
     nameTextField.text = Displays.name
-    displayCurrentTypeIcon
     updateViewport(Displays.buildPanelUI.peer)
-    repaint
+    displayCurrentTypeIcon
   }
   
   def cleanViewport = {
@@ -84,20 +84,24 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
     PaletteSupport.refreshPalette
     nameTextField.text = ""
     repaint
+    revalidate
   }
   
-  def removeViewport = propertyScrollPane.peer.getViewport.removeAll
-  
+  def removeViewport = {
+    propertyScrollPane.peer.getViewport.removeAll
+    contents.remove(1) 
+    contents.insert(1,fakeLabel)}
+    
   def updateViewport(panel: JPanel)= {
     removeViewport
     propertyScrollPane.peer.setViewportView(panel)
+    revalidate
   }
   
   def save = {
     Displays.saveContent(nameTextField.text)
     PaletteSupport.refreshPalette
     Displays.initMode = false
-    displayCurrentTypeIcon
   }
   
   def cancel = displayCurrentEntity
@@ -106,5 +110,6 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[grow,fill]", "[]30[]rel[gr
     Displays.initMode = true
     nameTextField.text = ""
     updateViewport(Displays.buildPanelUI.peer)
+    displayCurrentTypeIcon
   }
 }
