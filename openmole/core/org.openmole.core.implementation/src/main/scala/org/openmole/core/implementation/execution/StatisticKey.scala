@@ -17,14 +17,13 @@
 
 package org.openmole.core.implementation.execution
 
-import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.task.ITask
 
 import scala.collection.JavaConversions._
 
 
-class StatisticKey(val key: Array[ITask]) extends IStatisticKey {
+class StatisticKey(val key: Array[ITask]) {
 
   def this(job: IJob) = this(job.moleJobs.toList.map( _.task ).distinct.toArray)
 

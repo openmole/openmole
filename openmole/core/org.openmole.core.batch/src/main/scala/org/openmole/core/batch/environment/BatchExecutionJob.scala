@@ -76,11 +76,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     state
   }
 
-  override def state: ExecutionState = {
-    if (killed.get) return KILLED
-    if (batchJob == null) return READY
-    batchJob.state
-  }
+  override def state =
+    if (killed.get) KILLED else if (batchJob == null) READY else batchJob.state
 
   override def update: Boolean = {
     try {

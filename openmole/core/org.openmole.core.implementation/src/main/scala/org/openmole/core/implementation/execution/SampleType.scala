@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,11 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.execution
+package org.openmole.core.implementation.execution
 
-import org.openmole.core.model.mole.IMoleExecution
-
-trait IStatistic {
-  def apply(moleExecutionId: String, key: IStatisticKey): IStatisticSamples
-  def +=(moleExecution: String, key: IStatisticKey, sample: IStatisticSample)
+object SampleType extends Enumeration{
+  val WAITING = Value("Waiting")
+  val RUNNING = Value("Running")
 }

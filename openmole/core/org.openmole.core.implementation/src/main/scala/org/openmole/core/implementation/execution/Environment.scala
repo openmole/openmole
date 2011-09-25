@@ -23,23 +23,25 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.core.model.execution.IStatisticSample
 import org.openmole.misc.workspace.Workspace
 
 object Environment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
   Workspace += (StatisticsHistorySize, "1000")
+  
+  
 }
 
 
 abstract class Environment extends IEnvironment {
-   
-  val statistic = new Statistic(Workspace.preferenceAsInt(Environment.StatisticsHistorySize))
+ 
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
-  def sample(job: IJob, sample: IStatisticSample) = statistic += (job.executionId, new StatisticKey(job), sample)
-
   def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
   
+  def sample(job: IJob, sample: StatisticSample) = 
+    statistic += (job.executionId, new StatisticKey(job), sample)
+
+  def statistic = StatisticRegistry.getOrElseUpdate(this, new Statistic(Workspace.preferenceAsInt(Environment.StatisticsHistorySize)))
 }

@@ -21,5 +21,4 @@ import org.openmole.core.model.job.IJob
 
 trait IEnvironment {
   def submit(job: IJob)
-  def statistic: IStatistic
 }

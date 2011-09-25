@@ -20,7 +20,6 @@ package org.openmole.core.batch.environment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
-import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.job.IJob
 import org.openmole.core.implementation.execution.StatisticKey
 
@@ -40,9 +39,9 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
     }
   }
   
-  //FIXME Move to tree map
+  //FIXME Move to tree map
   var jobs = new HashMap[IJob, TreeSet[EXECUTIONJOB]]
-  var categories = new HashMap[IStatisticKey, HashSet[IJob]]
+  var categories = new HashMap[StatisticKey, HashSet[IJob]]
 
   def allJobs: Iterable[IJob] = jobs.keySet
 
@@ -91,14 +90,14 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
     }
   }
 
-  def executionJobs(category: IStatisticKey): Iterable[EXECUTIONJOB] = {
+  def executionJobs(category: StatisticKey): Iterable[EXECUTIONJOB] = {
     categories.get(category) match {
       case Some(js) => for(j <- js; if jobs.contains(j); ejob <- jobs(j)) yield ejob
       case None => Iterable.empty
     }  
   }
 
-  def jobs(category: IStatisticKey): Iterable[IJob] = {
+  def jobs(category: StatisticKey): Iterable[IJob] = {
     categories.get(category) match {
       case None => Iterable.empty
       case Some(jobs) => jobs

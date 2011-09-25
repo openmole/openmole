@@ -25,7 +25,6 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.implementation.execution.StatisticKey
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.model.execution.IStatisticKey
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
