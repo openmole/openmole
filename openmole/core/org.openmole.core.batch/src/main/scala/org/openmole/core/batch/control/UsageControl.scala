@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 object UsageControl {
   
   trait IResourceReleased extends IObjectListener[UsageControl] {
-    override def eventOccured(obj: UsageControl, args: Array[Object]) = ressourceReleased(obj)
+    override def eventOccured(obj: UsageControl, args: Array[Any]) = ressourceReleased(obj)
       
     def ressourceReleased(usageControl: UsageControl)
   }

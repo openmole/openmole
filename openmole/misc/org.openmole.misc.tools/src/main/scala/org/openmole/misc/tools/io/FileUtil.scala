@@ -39,6 +39,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import scala.io.Source
 
+
 object FileUtil {
 
   implicit val fileOrdering = new Ordering[File] {
@@ -47,17 +48,19 @@ object FileUtil {
     }
   }
   
-  val DefaultBufferSize = 8 * 1024
+  val DefaultBufferSize = 32 * 1024
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
   
   implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
   
   class InputStreamDecorator(is: InputStream) {
+    
     def copy(to: OutputStream): Unit = {
       val buffer = new Array[Byte](DefaultBufferSize)
-      Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach{ 
-        count => to.write(buffer, 0, count)
+      Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach { 
+        count => 
+          to.write(buffer, 0, count)
       }
     }
 
@@ -66,29 +69,25 @@ object FileUtil {
       val executor = Executors.newSingleThreadExecutor
       val reader = new ReaderRunnable(buffer, is, maxRead)
     
-      Stream.continually(
-        {
-          val futureRead = executor.submit(reader)
+      Stream.continually {
+        val futureRead = executor.submit(reader)
             
-          try {
-            futureRead.get(timeout, TimeUnit.MILLISECONDS)
-          } catch {
-            case (e: TimeoutException) =>
-              futureRead.cancel(true)
-              throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e)
-          }
-        }).takeWhile(_ != -1).foreach{ 
-        count => 
-                
-        val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
-
-        try {
-          futureWrite.get(timeout, TimeUnit.MILLISECONDS)
-        } catch  {
+        try futureRead.get(timeout, TimeUnit.MILLISECONDS)
+        catch {
           case (e: TimeoutException) =>
-            futureWrite.cancel(true)
-            throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
-        } 
+            futureRead.cancel(true)
+            throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e)
+        }
+      }.takeWhile(_ != -1).foreach { 
+        count =>       
+          val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
+
+          try futureWrite.get(timeout, TimeUnit.MILLISECONDS)
+          catch  {
+            case (e: TimeoutException) =>
+              futureWrite.cancel(true)
+              throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
+          } 
       }     
     }
 

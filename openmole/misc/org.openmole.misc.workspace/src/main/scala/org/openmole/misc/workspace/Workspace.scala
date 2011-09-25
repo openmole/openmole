@@ -38,7 +38,7 @@ object Workspace {
   val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
   
   trait IWorkspaceListener extends IObjectListener[Workspace] {
-    override def eventOccured(obj: Workspace, args: Array[Object]) = passwordRequired(obj)
+    override def eventOccured(obj: Workspace, args: Array[Any]) = passwordRequired(obj)
     
     def passwordRequired(workspace: Workspace)
   }

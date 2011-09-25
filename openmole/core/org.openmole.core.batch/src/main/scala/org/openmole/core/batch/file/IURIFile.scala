@@ -26,11 +26,13 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageDescription
 
 object IURIFile {
+  
   implicit def ordering = new Ordering[IURIFile] {
     def compare(left: IURIFile, right: IURIFile): Int = {
       left.location.compareTo(right.location)
     }
   }
+  
 }
 
 trait IURIFile {
@@ -58,8 +60,8 @@ trait IURIFile {
   def copy(dest: File)
   def copy(dest: File, srcToken: AccessToken)
   
-  def copy(dest: IURIFile)
-  def copy(dest: IURIFile, srcToken: AccessToken)
+  //def copy(dest: IURIFile)
+  //def copy(dest: IURIFile, srcToken: AccessToken)
     
   def remove(recusrsive: Boolean) 
   def remove(recursive: Boolean, token: AccessToken)   

@@ -29,7 +29,7 @@ import org.openmole.misc.eventdispatcher.Event
 object ISubMoleExecution {
   
   trait IFinished extends IObjectListener[ISubMoleExecution] {
-    override def eventOccured(obj: ISubMoleExecution, args: Array[Object]) = finished(obj, args(0).asInstanceOf[ITicket])
+    override def eventOccured(obj: ISubMoleExecution, args: Array[Any]) = finished(obj, args(0).asInstanceOf[ITicket])
     
     def finished(submoleExecution: ISubMoleExecution, ticket: ITicket)
   }

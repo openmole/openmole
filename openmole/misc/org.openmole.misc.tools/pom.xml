@@ -60,12 +60,6 @@
             <artifactId>org.apache.commons.pool</artifactId>
             <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.tools</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

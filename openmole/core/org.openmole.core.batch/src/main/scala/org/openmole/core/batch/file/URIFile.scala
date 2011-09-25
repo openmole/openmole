@@ -37,7 +37,6 @@ import org.ogf.saga.task.TaskMode
 import org.ogf.saga.url.URL
 import org.ogf.saga.url.URLFactory
 import org.ogf.saga.namespace.Flags
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jsaga.JSAGASessionService
@@ -53,7 +52,9 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
 object URIFile extends Logger {
-    
+
+  import IURIFile._
+  
   val Timeout = new ConfigurationLocation("URIFile", "Timeout")
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
@@ -70,7 +71,7 @@ object URIFile extends Logger {
   def fromLocation(location: String): URL = URLFactory.createURL(location) 
   def fromLocation(location: URI): URL = fromLocation(location.toString)
     
-  def copy(src: IURIFile, srcToken: AccessToken, dest: IURIFile): Unit = {
+ /* def copy(src: IURIFile, srcToken: AccessToken, dest: IURIFile): Unit = {
     val srcDescrption = src.storageDescription
     val destDescrption = dest.storageDescription
 
@@ -78,9 +79,9 @@ object URIFile extends Logger {
 
     if(same) copy(src, dest, srcToken, srcToken)
     else withToken(destDescrption,copy(src, dest, srcToken,_))
-  }
+  }*/
 
-  def copy(src: IURIFile, dest: IURIFile, destToken: AccessToken): Unit = {
+  /*def copy(src: IURIFile, dest: IURIFile, destToken: AccessToken): Unit = {
     val srcDescrption = src.storageDescription
     val destDescrption = dest.storageDescription
 
@@ -88,7 +89,7 @@ object URIFile extends Logger {
 
     if(same) copy(src, dest, destToken, destToken)
     else withToken(srcDescrption, copy(src, dest, _, destToken))
-  }
+  }*/
   
   def copy(src: IURIFile, dest: File): Unit = withToken(src.storageDescription, copy(src, _, dest))
 
@@ -96,7 +97,9 @@ object URIFile extends Logger {
     val os = new FileOutputStream(dest)
     try {
       val is = src.openInputStream(srcToken)
-      try is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) finally is.close
+      try {
+        is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
+      } finally is.close
     } finally os.flushClose
   }
 
@@ -106,11 +109,14 @@ object URIFile extends Logger {
     val is = new FileInputStream(src)
     try {
       val os = dest.openOutputStream(token)
-      try withFailureControl(dest.storageDescription, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout))) finally os.flushClose
+      try withFailureControl(dest.storageDescription, 
+                             is.copy(os, Workspace.preferenceAsInt(BufferSize), 
+                                     Workspace.preferenceAsDurationInMs(CopyTimeout))) 
+      finally os.flushClose
     } finally is.close
   }
 
-  def copy(src: IURIFile, dest: IURIFile): Unit = {
+ /* def copy(src: IURIFile, dest: IURIFile): Unit = {
     val srcDescrption = src.storageDescription
     val destDescrption = dest.storageDescription
 
@@ -128,6 +134,10 @@ object URIFile extends Logger {
 
     val is = src.openInputStream(srcToken)
     try {
+      EventDispatcher.registerForObjectChanged(is, 
+                                               new TransferProxy(src, dest.URI, IURIFileTransfer),
+                                               InputStreamTransfer)
+      
       val os = dest.openOutputStream(destToken)
 
       try withFailureControl(srcDesc,
@@ -135,7 +145,7 @@ object URIFile extends Logger {
                              else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))              
       finally os.flushClose
     } finally is.close
-  }
+  }*/
 
   private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);
 }
@@ -302,8 +312,8 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def copy(dest: File) = URIFile.copy(this, dest)
   override def copy(dest: File, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
   
-  override def copy(dest: IURIFile) = URIFile.copy(this, dest)
-  override def copy(dest: IURIFile, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
+  //override def copy(dest: IURIFile) = URIFile.copy(this, dest)
+  //override def copy(dest: IURIFile, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
 
 
   /* -------------------- remove -------------------------------*/
@@ -318,11 +328,8 @@ class URIFile(val location: String) extends IURIFile with Id {
       else entry.remove(TaskMode.ASYNC)
 
       trycatch(
-        if (timeOut) {
-          task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        } else {
-          task.get
-        }
+        if (timeOut) task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+        else task.get
         , task)
     } finally close(entry)
   }

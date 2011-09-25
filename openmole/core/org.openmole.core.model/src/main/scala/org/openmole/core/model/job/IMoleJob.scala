@@ -26,21 +26,21 @@ import org.openmole.misc.eventdispatcher.Event
 object IMoleJob {
   
   trait IStateChanged extends IObjectListener[IMoleJob] {
-    override def eventOccured(obj: IMoleJob, args: Array[Object]) = 
+    override def eventOccured(obj: IMoleJob, args: Array[Any]) = 
       stateChanged(obj, args(0).asInstanceOf[State.State], args(1).asInstanceOf[State.State])
     
     def stateChanged(moleJob: IMoleJob, newState: State.State, oldStade: State.State)
   }
   
   trait IJobFailedOrCanceled extends IObjectListener[IMoleJob] {
-    override def eventOccured(obj: IMoleJob, args: Array[Object]) =
+    override def eventOccured(obj: IMoleJob, args: Array[Any]) =
       jobFailedOrCanceled(obj, args(0).asInstanceOf[ICapsule])
     
     def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule)
   }
   
   trait ITransitionPerformed extends IObjectListener[IMoleJob] {
-    override def eventOccured(obj: IMoleJob, args: Array[Object]) = 
+    override def eventOccured(obj: IMoleJob, args: Array[Any]) = 
       transitionPerformed(obj, args(0).asInstanceOf[ICapsule])
     
     def transitionPerformed(moleJob: IMoleJob, caspule: ICapsule)

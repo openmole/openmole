@@ -28,21 +28,20 @@ object EventDispatcher {
   private val objectChangedMap = new ObjectListenerMap
   //private val objectChangedWithArgsMap = new ObjectListenerMap
   
+  def registerForObjectChanged[T, L <: IObjectListener[T]](obj: T, listner: L, event: Event[T,L]) = 
+    objectChangedMap.register(obj, Priority.NORMAL, listner, event)
+  
   def registerForObjectChanged[T, L <: IObjectListener[T]](obj: T, priority: Int, listner: L, event: Event[T,L]) = 
     objectChangedMap.register(obj, priority, listner, event)
   
   def unregisterListener[T, L <: IObjectListener[T]](obj: T, listner: L, event: Event[T,L]) =
     objectChangedMap.unregister(obj, listner, event)
    
-  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L], args: Array[Object]) = {
+  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L], args: Array[Any]) = {
     /* --- Listners without args ---*/
-
     val listeners = objectChangedMap.get(obj, event)
- 
-    for (listner <- listeners) {
-      //Logger.getLogger(classOf[EventDispatcher].getName).fine("Event no arg " + event + " from " + obj.toString + " signaled to " + listner.toString)
-      listner.eventOccured(obj, args)
-    }
+
+    for (listner <- listeners) listner.eventOccured(obj, args)
   }
    
   def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L]): Unit = objectChanged(obj, event, Array.empty)

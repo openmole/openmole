@@ -18,12 +18,14 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
+import java.net.URI
 import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicInteger
 
 import java.util.concurrent.locks.ReentrantLock
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 
@@ -33,6 +35,8 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.internal.Updater
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.workspace.InteractiveConfiguration
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.IObjectListener
 
 object BatchEnvironment {
   
@@ -60,6 +64,66 @@ object BatchEnvironment {
   Workspace += (CheckInterval, "PT2M")
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
+  
+  /*final val FileUpload = new Event[BatchEnvironment, IFileUpload]
+  
+  trait IFileUpload extends IObjectListener[BatchEnvironment] {
+    override def eventOccured(obj: BatchEnvironment, args: Array[Any]) = 
+      transfer(obj, 
+               args(0).asInstanceOf[IJob],
+               args(1).asInstanceOf[File],
+               args(2).asInstanceOf[URI],
+               args(3).asInstanceOf[Long])
+    
+    def transfer(env: BatchEnvironment, 
+                 job: IJob, 
+                 from: File, 
+                 uri: URI,
+                 bytes: Long)
+  }
+  
+  final val FileUploadFinished = new Event[BatchEnvironment, IUploadFinished]
+  
+  trait IUploadFinished extends IObjectListener[BatchEnvironment] {
+    override def eventOccured(obj: BatchEnvironment, args: Array[Any]) = 
+      finished(obj, 
+               args(0).asInstanceOf[IJob],
+               args(1).asInstanceOf[File],
+               args(2).asInstanceOf[Option[Throwable]])
+    
+    def finished(env: BatchEnvironment, job: IJob, file: File, t: Option[Throwable])
+  }
+  
+  
+  final val FileDownload = new Event[BatchEnvironment, IFileDownload]
+  
+  trait IFileDownload extends IObjectListener[BatchEnvironment] {
+    override def eventOccured(obj: BatchEnvironment, args: Array[Any]) = 
+      transfer(obj, 
+               args(0).asInstanceOf[IJob],
+               args(1).asInstanceOf[IURIFile],
+               args(2).asInstanceOf[URI],
+               args(3).asInstanceOf[Long])
+    
+    def transfer(env: BatchEnvironment, 
+                 job: IJob, 
+                 from: IURIFile,
+                 to: URI,
+                 bytes: Long)
+  }
+  
+  final val FileDownloadFinished = new Event[BatchEnvironment, IDownloadFinished]
+  
+  trait IDownloadFinished extends IObjectListener[BatchEnvironment] {
+    override def eventOccured(obj: BatchEnvironment, args: Array[Any]) = 
+      finished(obj, 
+               args(0).asInstanceOf[IJob],
+               args(1).asInstanceOf[IURIFile],
+               args(2).asInstanceOf[Option[Throwable]])
+    
+    def finished(env: BatchEnvironment, job: IJob, file: IURIFile, t: Option[Throwable])
+  }
+  */
 }
 
 

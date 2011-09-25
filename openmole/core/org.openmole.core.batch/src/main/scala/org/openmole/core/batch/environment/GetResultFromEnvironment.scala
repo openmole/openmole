@@ -22,11 +22,14 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URI
 import java.util.concurrent.Callable
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
@@ -46,6 +49,7 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import scala.Boolean._
 import scala.collection.immutable.TreeMap
+import BatchEnvironment._
 
 object GetResultFromEnvironment extends Logger
 
@@ -53,6 +57,14 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   import GetResultFromEnvironment._
   import communicationStorage._
   
+  /*class BatchEnvironmentTransfertProxy extends URIFile.IURIFileTransfer {
+    override def transfered(file: IURIFile, to: URI, byte: Long) = 
+      EventDispatcher.objectChanged(environment, FileDownload, Array(job, file, to, byte))
+  }
+
+  private def registerEvent(file: IURIFile) =
+    EventDispatcher.registerForObjectChanged(file, new BatchEnvironmentTransfertProxy, URIFile.IURIFileTransfer)
+  */
   private def successFullFinish(running: Long, done: Long) = {
     import batchJob.timeStemp
     environment.sample(job, new StatisticSample(timeStemp(SUBMITTED), running, done))

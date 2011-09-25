@@ -33,39 +33,39 @@ import org.openmole.core.model.job.MoleJobId
 object IMoleExecution {
   
   trait IStarting extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = starting(obj)
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = starting(obj)
     
     def starting(moleJob: IMoleExecution)
   }
  
   trait IFinished extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = finished(obj)
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = finished(obj)
     
     def finished(moleJob: IMoleExecution)
   }
   
   trait IOneJobStatusChanged extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = 
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
       oneJobStatusChanged(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[State], args(2).asInstanceOf[State])
     
     def oneJobStatusChanged(execution: IMoleExecution, moleJob: IMoleJob, newState: State, oldState: State)
   }
   
   trait IOneJobSubmitted extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = oneJobSubmitted(obj, args(0).asInstanceOf[IMoleJob])
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = oneJobSubmitted(obj, args(0).asInstanceOf[IMoleJob])
     
     def oneJobSubmitted(execution: IMoleExecution, moleJob: IMoleJob)
   }
   
   trait IJobInCapsuleFinished extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = 
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
       jobInCapsuleFinished(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[ICapsule])
     
     def jobInCapsuleFinished(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule)
   }
   
   trait IJobInCapsuleStarting extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Object]) = 
+    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
       jobInCapsuleStarting(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[ICapsule])
     
     def jobInCapsuleStarting(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule)

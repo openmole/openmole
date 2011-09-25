@@ -20,6 +20,7 @@ package org.openmole.core.batch.environment
 import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URI
 import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.Callable
@@ -28,11 +29,13 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.ReplicatedFile
+import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 
@@ -46,9 +49,10 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.hashservice.HashService._
+import BatchEnvironment._
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
-
+  
   private def initCommunication: SerializedJob = {
     val jobFile = Workspace.newFile("job", ".tar")
     
@@ -63,14 +67,11 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
             
         val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
-        //val outputFile = new GZURIFile(communicationDir.newFileInDir("job", ".out"))
-
         val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
 
         val executionMessage = createExecutionMessage(jobFile, serializationResult, token, communicationStorage, communicationDir)
 
         /* ---- upload the execution message ----*/
-
         val executionMessageFile = Workspace.newFile("job", ".xml")
         try {
           SerializerService.serialize(executionMessage, executionMessageFile)
