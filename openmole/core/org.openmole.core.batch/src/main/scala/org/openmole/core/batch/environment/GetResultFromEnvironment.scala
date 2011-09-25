@@ -38,7 +38,7 @@ import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.core.implementation.execution.StatisticSample
+import org.openmole.core.implementation.execution.{StatisticSample, StatisticRegistry}
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
 
@@ -67,7 +67,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   */
   private def successFullFinish(running: Long, done: Long) = {
     import batchJob.timeStemp
-    environment.sample(job, new StatisticSample(timeStemp(SUBMITTED), running, done))
+    StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
   }
 
   override def call: Unit = {

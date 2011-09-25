@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.execution.local
 
+import org.openmole.core.implementation.execution.StatisticRegistry
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.State
@@ -53,7 +54,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
           }
         }
         executionJob.state = ExecutionState.DONE
-        LocalExecutionEnvironment.sample(job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
+        StatisticRegistry.sample(environment, job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
       } catch {
         case (e: InterruptedException) => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
         case e => logger.log(SEVERE, null, e)

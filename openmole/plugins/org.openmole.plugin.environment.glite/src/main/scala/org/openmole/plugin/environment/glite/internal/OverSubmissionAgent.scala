@@ -22,7 +22,7 @@ import java.util.logging.Logger
 
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.implementation.execution.StatisticKey
+import org.openmole.core.implementation.execution.{StatisticKey, StatisticRegistry}
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
@@ -67,7 +67,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running " + stillRunning.size )
   
             val stillRunningSamples = jobs.view.map{_.batchJob}.filter(bj => bj != null && bj.state == RUNNING).map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
-            val samples = (env.statistic(k._1, k._2) ++ stillRunningSamples).toArray
+            val samples = (StatisticRegistry.statistic(env)(k._1, k._2) ++ stillRunningSamples).toArray
  
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
 

@@ -18,8 +18,18 @@
 package org.openmole.core.implementation.execution
 
 import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.collection.Registry
+import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
-object StatisticRegistry extends WeakHashMap[IEnvironment, Statistic] with SynchronizedMap[IEnvironment, Statistic]
+object StatisticRegistry extends WeakHashMap[IEnvironment, Statistic] with SynchronizedMap[IEnvironment, Statistic] {
+  
+  def sample(environment: IEnvironment, job: IJob, sample: StatisticSample) = 
+    statistic(environment) += (job.executionId, new StatisticKey(job), sample)
+
+  def statistic(environment: IEnvironment) = 
+    getOrElseUpdate(environment, new Statistic(Workspace.preferenceAsInt(Environment.StatisticsHistorySize)))
+
+}
