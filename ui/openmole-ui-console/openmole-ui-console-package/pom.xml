@@ -10,7 +10,7 @@
     <parent>
         <artifactId>openmole-ui-console</artifactId>
         <groupId>org.openmole</groupId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openmole.ui.console</groupId>
@@ -124,7 +124,7 @@
                             <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>./target/dependency/plugins-0.3-SNAPSHOT/</directory>
+                                    <directory>./target/dependency/plugins-0.4-SNAPSHOT/</directory>
                                     <includes>
                                         <include>*.jar</include>
                                     </includes>
@@ -142,7 +142,7 @@
                             <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>./target/dependency/plugins-ui-0.3-SNAPSHOT/</directory>
+                                    <directory>./target/dependency/plugins-ui-0.4-SNAPSHOT/</directory>
                                     <includes>
                                         <include>*.jar</include>
                                     </includes>
