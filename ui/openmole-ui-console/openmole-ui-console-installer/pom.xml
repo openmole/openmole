@@ -164,6 +164,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+               <groupId>com.google.code.maven-replacer-plugin</groupId>
+               <artifactId>maven-replacer-plugin</artifactId>
+               <version>1.3.9</version>
+               <executions>
+                  <execution>
+                     <phase>prepare-package</phase>
+                       <goals>
+                           <goal>replace</goal>
+                       </goals>                    
+                   </execution>
+               </executions>
+               <configuration>
+                  <ignoreMissingFile>false</ignoreMissingFile>
+                  <file>target/izpack-staging/install-tpl.xml</file>
+                  <outputFile>target/izpack-staging/install.xml</outputFile>
+                  <regex>false</regex>
+                  <token>$VERSION$</token>
+                  <value>${project.version}</value>
+               </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

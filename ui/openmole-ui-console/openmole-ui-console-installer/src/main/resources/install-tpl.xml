@@ -2,7 +2,7 @@
 <installation version="1.0">
     <info>
         <appname>OpenMOLE</appname>
-        <appversion>0.3-SNAPSHOT</appversion>
+        <appversion>${VERSION}</appversion>
         <uninstaller write="yes" />
         <javaversion>1.6</javaversion>
         <pack200 />
@@ -11,11 +11,11 @@
     <packs>
         <pack name="OpenMOLE Console" required="yes">
             <description>OpenMOLE</description>
-            <fileset dir="../dependency/org.openmole.ui.console-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH" />
+            <fileset dir="../dependency/org.openmole.ui.console-$VERSION$/" targetdir="$INSTALL_PATH" />
             <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../dependency/jvm.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
-            <fileset dir="../dependency/plugins-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
-            <fileset dir="../dependency/plugins-ui-0.3-SNAPSHOT/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
+            <fileset dir="../dependency/plugins-$VERSION$/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
+            <fileset dir="../dependency/plugins-ui-$VERSION$/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
         </pack>
     </packs>
     
