@@ -270,6 +270,7 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
       w match {
         case x: ICapsuleUI=> { x.dataProxy.get match{
               case y: ITaskDataProxyUI=> {
+                  Displays.currentType = TASK
                   TaskDisplay.currentDataProxy = Some(y)
                   Displays.propertyPanel.displayCurrentEntity}
             }
