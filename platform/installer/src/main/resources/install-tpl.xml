@@ -11,7 +11,7 @@
     <packs>
         <pack name="OpenMOLE" required="yes">
             <description>OpenMOLE GUI</description>
-            <fileset dir="../dependency/application-1.0-SNAPSHOT/" targetdir="$INSTALL_PATH" />
+            <fileset dir="../dependency/application-$VERSION$/" targetdir="$INSTALL_PATH" />
         </pack>
         <pack name="OpenMOLE Runtime" required="yes">
             <description>OpenMOLE Runtime</description>
