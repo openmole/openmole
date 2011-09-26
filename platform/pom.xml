@@ -21,7 +21,7 @@
     </repositories>
     
     <properties>
-        <openmole.core.version>0.3-SNAPSHOT</openmole.core.version>
+        <openmole.core.version>0.4-SNAPSHOT</openmole.core.version>
         <openmole.gui.version>0.4-SNAPSHOT</openmole.gui.version>
         <netbeans.version>RELEASE70</netbeans.version>
         <brandingToken>openmole_gui</brandingToken>
