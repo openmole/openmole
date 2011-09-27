@@ -55,6 +55,11 @@
             <artifactId>org.joda.time</artifactId>
             <version>${lib.org.joda.time.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>com.thoughtworks.xstream</artifactId>
+            <version>${lib.com.thoughtworks.xstream.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

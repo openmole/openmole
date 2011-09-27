@@ -17,6 +17,7 @@
 
 package org.openmole.misc.workspace
 
+import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -49,7 +50,8 @@ object Workspace {
   val OpenMoleDir = ".openmole"
   val ConfigurationFile = "preferences"
   val GlobalGroup = "Global"
-  val DefaultTmpLocation = ".tmp"
+  val TmpLocation = ".tmp"
+  val PersitentLocation = "persistent"
   val running = ".running"
   val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
 
@@ -138,12 +140,14 @@ object Workspace {
   def preferenceAsDurationInS(location: ConfigurationLocation): Int = instance.preferenceAsDurationInS(location)
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = instance.isPreferenceSet(location)
+  
+  def persitentList[T](clazz: Class[T]) = instance.persitentList(clazz)
 }
 
 
 class Workspace(val location: File) {
 
-  import Workspace.{fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, DefaultTmpLocation, ConfigurationFile, configurations, sessionUUID, noUniqueResourceProperty}
+  import Workspace.{PersitentLocation,fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, TmpLocation, ConfigurationFile, configurations, sessionUUID, noUniqueResourceProperty}
   
   location.mkdirs
   val run = new File(location, running)
@@ -157,8 +161,11 @@ class Workspace(val location: File) {
     }
   }
   
-  val tmpDir = new File(new File(location, DefaultTmpLocation), sessionUUID.toString)
+  val tmpDir = new File(new File(location, TmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
+  
+  val persitentDir = new File(location, PersitentLocation)
+  persitentDir.mkdirs
   
   private def textEncryptor(password: Option[String]) = {
     password match {
@@ -303,4 +310,10 @@ class Workspace(val location: File) {
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     preferenceValue(location) != null
   }
+  
+  def persitentList[T](clazz: Class[T]) = new PersistentList[T](
+    {val xstream = new XStream
+     xstream.setClassLoader(clazz.getClassLoader)
+     xstream
+    }, file(clazz.getName))
 }
