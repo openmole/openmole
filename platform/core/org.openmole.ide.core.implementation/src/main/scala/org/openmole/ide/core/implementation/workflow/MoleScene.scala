@@ -268,12 +268,14 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
         
     override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = {
       w match {
-        case x: ICapsuleUI=> { x.dataProxy.get match{
-              case y: ITaskDataProxyUI=> {
-                  Displays.currentType = TASK
-                  TaskDisplay.currentDataProxy = Some(y)
-                  Displays.propertyPanel.displayCurrentEntity}
-            }
+        case x: ICapsuleUI=> { 
+            if(x.dataProxy.isDefined)
+              x.dataProxy.get match{
+                case y: ITaskDataProxyUI=> {
+                    Displays.currentType = TASK
+                    TaskDisplay.currentDataProxy = Some(y)
+                    Displays.propertyPanel.displayCurrentEntity}
+              }
           }
       }
     }
