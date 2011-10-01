@@ -109,6 +109,8 @@ object Workspace {
 
   def defaultValue(location: ConfigurationLocation): String = instance.defaultValue(location)
   
+  def rawPreference(location: ConfigurationLocation): String = instance.rawPreference(location)
+  
   def preference(location: ConfigurationLocation): String = instance.preference(location)
 
   def setPreference(location: ConfigurationLocation, value: String) = instance.setPreference(location,value)
@@ -142,6 +144,8 @@ object Workspace {
   def isPreferenceSet(location: ConfigurationLocation): Boolean = instance.isPreferenceSet(location)
   
   def persitentList[T](clazz: Class[T]) = instance.persitentList(clazz)
+  
+  def decrypt(s: String) = instance.decrypt(s)
 }
 
 
@@ -161,11 +165,11 @@ class Workspace(val location: File) {
     }
   }
   
-  val tmpDir = new File(new File(location, TmpLocation), sessionUUID.toString)
+  @transient val tmpDir = new File(new File(location, TmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
   
-  val persitentDir = new File(location, PersitentLocation)
-  persitentDir.mkdirs
+  @transient val persistentDir = new File(location, PersitentLocation)
+  persistentDir.mkdirs
   
   private def textEncryptor(password: Option[String]) = {
     password match {
@@ -219,23 +223,17 @@ class Workspace(val location: File) {
   }
 
   
-  def preferenceValue(location: ConfigurationLocation): String = synchronized {
+  def rawPreference(location: ConfigurationLocation): String = synchronized {
     val conf = configuration.subset(location.group)
     conf.getString(location.name)
   }
   
   def preference(location: ConfigurationLocation): String = synchronized {
     if(!isPreferenceSet(location)) setToDefaultValue(location)
-    val confVal = preferenceValue(location)
+    val confVal = rawPreference(location)
 
     if (!location.cyphered) confVal
-    else {
-      _password match {
-        case None => EventDispatcher.objectChanged(this, Workspace.PasswordRequired)
-        case Some(p) =>
-      } 
-      textEncryptor(_password).decrypt(confVal)
-    }
+    else decrypt(confVal)
   }
   
   def setToDefaultValue(location: ConfigurationLocation) = synchronized {
@@ -270,7 +268,7 @@ class Workspace(val location: File) {
   
   def newDir: File = newDir(fixedDir)
 
-  def reset = {
+  def reset {
     configurationFile.delete
   }
 
@@ -282,11 +280,19 @@ class Workspace(val location: File) {
     if(!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)
   }
 
+  def decrypt(s: String) = {
+    _password match {
+      case None => EventDispatcher.objectChanged(this, Workspace.PasswordRequired)
+      case Some(p) =>
+    } 
+    textEncryptor(_password).decrypt(s)
+  }
+  
   def passwordIsCorrect(password: String) = {
     try {
       if(isPreferenceSet(passwordTest)) {
         val te = textEncryptor(Some(password))
-        te.decrypt(preferenceValue(passwordTest))
+        te.decrypt(rawPreference(passwordTest))
         true
       } else true
     } catch {
@@ -308,12 +314,12 @@ class Workspace(val location: File) {
   }
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
-    preferenceValue(location) != null
+    rawPreference(location) != null
   }
   
   def persitentList[T](clazz: Class[T]) = new PersistentList[T](
     {val xstream = new XStream
      xstream.setClassLoader(clazz.getClassLoader)
      xstream
-    }, file(clazz.getName))
+    }, {val f = new File(persistenDir, clazz.getName); f.mkdirs; f})
 }

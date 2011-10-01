@@ -32,7 +32,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.misc.eventdispatcher.Event

@@ -15,23 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.internal
+package org.openmole.plugin.environment.glite.authentication
 
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.ogf.saga.context.Context
 import org.openmole.misc.updater.IUpdatable
-import org.openmole.plugin.environment.glite.GliteAuthentication
+import org.openmole.core.batch.jsaga.JSAGASessionService
 
-class ProxyChecker(authentication: GliteAuthentication, context: Context) extends IUpdatable {
+class ProxyChecker(context: Context) extends IUpdatable {
 
     override def update: Boolean = {
-        try {
-            authentication.initContext(context)
-        } catch {
+        try GliteAuthentication.addContext(context)
+        catch {
           case(ex: Throwable) => Logger.getLogger(classOf[ProxyChecker].getName).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } 
-        
         true
     }
 }

@@ -17,8 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.misc.updater.internal.Updater
-import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.InteractiveConfiguration
 import java.net.URI
@@ -32,7 +31,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
-import org.openmole.plugin.environment.jsaga.JSAGAJobService
+import org.openmole.plugin.environment.glite.authentication.GliteAuthentication
 
 import scala.annotation.target.field
 import scala.collection.JavaConversions._

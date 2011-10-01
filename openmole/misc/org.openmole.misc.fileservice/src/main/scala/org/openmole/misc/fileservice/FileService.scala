@@ -28,7 +28,7 @@ import org.openmole.misc.tools.service.IHash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
 import org.openmole.misc.hashservice.HashService
-import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace

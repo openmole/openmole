@@ -15,22 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.workspace
+package org.openmole.plugin.environment.glite.authentication
 
-import com.thoughtworks.xstream.XStream
-import java.io.File
-import org.openmole.misc.tools.io.FileUtil._
+import org.ogf.saga.context.Context
+import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
-class PersistentList[T](serializer: XStream, dir: File) extends Iterable[(Int, T)] {
+class P12Certificate(cypheredPassword: String, p12CertPath: String) extends Certificate(cypheredPassword) {
   
-  def file(i: Int) = new File(dir, i.toString)
+  override protected def _init(ctx: Context) = {
+    ctx.setAttribute(VOMSContext.USERCERTKEY, p12CertPath)
+  }
   
-  def -= (i: Int) = file(i).delete
-  
-  def apply(i: Int): T = serializer.fromXML(file(i).content).asInstanceOf[T]
-  
-  def update(i: Int, obj: T) = file(i).content = serializer.toXML(obj)
-  
-  override def iterator = 
-    dir.listFiles.map{_.getName.toInt}.sorted.map{i => i -> apply(i)}.iterator
 }

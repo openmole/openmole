@@ -48,7 +48,7 @@ import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.file.URIFileCleaner
-import org.openmole.misc.updater.internal.Updater
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.workspace.Workspace

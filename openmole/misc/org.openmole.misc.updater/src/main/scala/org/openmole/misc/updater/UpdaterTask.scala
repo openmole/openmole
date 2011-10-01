@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.updater.internal
+package org.openmole.misc.updater
 
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.misc.updater.IUpdatableWithVariableDelay
 
 class UpdaterTask(val updatable: IUpdatableWithVariableDelay, val purpose: ExecutorType.Value) extends Runnable {
 

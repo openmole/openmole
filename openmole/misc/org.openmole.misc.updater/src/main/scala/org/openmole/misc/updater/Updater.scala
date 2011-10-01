@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.updater.internal
+package org.openmole.misc.updater
 
 import java.util.concurrent.Executors
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.misc.updater.IUpdatable
-import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import java.util.concurrent.TimeUnit
 
 object Updater {
