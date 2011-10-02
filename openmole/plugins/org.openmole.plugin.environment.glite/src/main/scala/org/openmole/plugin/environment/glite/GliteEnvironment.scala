@@ -159,16 +159,18 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
-    val jobServices = new ListBuffer[GliteJobService]
+    //val jobServices = new ListBuffer[GliteJobService]
 
-    jss.foreach {
+    val jobServices = jss.flatMap {
       js =>
       try {
         val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
         val jobService = new GliteJobService(wms, this, threadsByWMS)
-        jobServices += jobService
+        Some(jobService)
       } catch {
-        case (e: URISyntaxException) => Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
+        case (e: URISyntaxException) =>
+          Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
+          None
       }
     }
     

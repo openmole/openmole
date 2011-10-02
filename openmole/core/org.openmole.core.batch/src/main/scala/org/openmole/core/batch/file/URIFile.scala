@@ -60,7 +60,7 @@ object URIFile extends Logger {
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
 
   Workspace += (Timeout, "PT2M")
-  Workspace += (BufferSize, "8192")
+  Workspace += (BufferSize, "32768")
   Workspace += (CopyTimeout, "PT2M")
         
   def child(url: URL, child: String): URL = {

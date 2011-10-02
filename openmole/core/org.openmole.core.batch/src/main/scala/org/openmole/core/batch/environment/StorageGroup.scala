@@ -34,47 +34,41 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
 
-class StorageGroup(environment: BatchEnvironment) {
+class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends Iterable[Storage] {
   class BatchRessourceGroupAdapterUsage extends UsageControl.IResourceReleased {
     override def ressourceReleased(obj: UsageControl) = waiting.release
   }
   
-  private var resources = List[Storage]()
+  resources.foreach {
+    service =>
+    val usageControl = StorageControl.usageControl(service.description)
+    EventDispatcher.registerForObjectChanged(usageControl, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+  }
+  
 
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
+  override def iterator = resources.iterator
+  
   def selectAService(usedFiles: Iterable[File]): (Storage, AccessToken) = {
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum
       val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)
 
-      var ret: (Storage, AccessToken) = null
+      var ret: Option[(Storage, AccessToken)] = None
       do {
-        val resourcesCopy = resources
-        //Logger.getLogger(getClass.getName).fine("On storage " + onStorage.toString)
-        
-        //Among them select one not over loaded
-        val notLoaded = new ArrayBuffer[(Storage, AccessToken, Double)]
-        var totalFitness = 0.
-        
-        //Among them select one not over loaded
-        val bestResourcesIt = resourcesCopy.iterator
-        
-        while (bestResourcesIt.hasNext) {       
-          val cur = bestResourcesIt.next
+        val notLoaded = resources.flatMap {   
+          cur =>
 
           StorageControl.usageControl(cur.description).tryGetToken match {
-            case None =>
+            case None => None
             case Some(token) => 
               val quality = StorageControl.qualityControl(cur.description)
-              
-              //Logger.getLogger(getClass.getName).fine("On storage " + cur.description + " " + onStorage.toString)
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
               
               val fitness = (
-             
                 quality match {
                   case Some(q) => 
                     val v = math.pow(1. * q.successRate, 2)
@@ -83,46 +77,23 @@ class StorageGroup(environment: BatchEnvironment) {
                   case None => 1.
                 }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * Workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
                       else 1)
-              
-              //Logger.getLogger(getClass.getName).fine("Fitness for " + cur.description + " " + fitness + " totalsize " + totalFileSize + " alreadyCopied " + sizeOnStorage(cur))
-
-              notLoaded += ((cur, token, fitness))
-              totalFitness += fitness
+            
+              Some((cur, token, fitness))
           }
         }
              
         if (notLoaded.size > 0) {
-          var selected = RNG.nextDouble * totalFitness
+          var selected = RNG.nextDouble * notLoaded.map{_._3}.sum
           
-          for (service <- notLoaded) {    
-            if(ret == null && selected <= service._3) ret = (service._1, service._2)
-            else StorageControl.usageControl(service._1.description).releaseToken(service._2) 
-            selected -= service._3
+          for ((service, token, fitness) <- notLoaded) {    
+            if(!ret.isDefined && selected <= fitness) ret = Some((service, token))
+            else StorageControl.usageControl(service.description).releaseToken(token) 
+            selected -= fitness
           }
-        } else {
-          waiting.acquire
-        }
-      } while (ret == null)
-      return ret
-    } finally {
-      selectingRessource.unlock
-    }
+        } else waiting.acquire
+      } while (ret.isDefined)
+      return ret.get
+    } finally selectingRessource.unlock
   }
-
-  def +=(service: Storage) = synchronized {
-
-    resources :+= service
-    val usageControl = StorageControl.usageControl(service.description)
-    EventDispatcher.registerForObjectChanged(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
-    
-    waiting.release
-  }
-    
-
-  def get(index: Int): Storage = resources(index)
-
-  def isEmpty: Boolean = resources.isEmpty
-
-  def size: Int = resources.size
 
 }

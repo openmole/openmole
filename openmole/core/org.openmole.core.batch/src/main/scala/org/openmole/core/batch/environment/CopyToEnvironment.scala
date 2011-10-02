@@ -53,12 +53,20 @@ import BatchEnvironment._
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
   
+  @transient private lazy val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
+  
   private def initCommunication: SerializedJob = {
     val jobFile = Workspace.newFile("job", ".tar")
     
     try {
-      val serializationResult = serializeJob(jobFile)
-      val storage = environment.selectAStorage(serializationResult._1)
+      val (serializationFile, serializatonPlugins) = serializeJob(jobFile)
+      val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap{PluginManager.pluginsForClass}
+      
+      val storage = environment.selectAStorage(serializationFile + 
+                                               environment.runtime +
+                                               environment.jvm ++ 
+                                               environmentPlugins ++
+                                               serialisationPluginFiles)
 
       val communicationStorage = storage._1
       val token = storage._2
@@ -69,7 +77,12 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
         val runtime = replicateTheRuntime(token, communicationStorage, communicationDir)
 
-        val executionMessage = createExecutionMessage(jobFile, serializationResult, token, communicationStorage, communicationDir)
+        val executionMessage = createExecutionMessage(jobFile, 
+                                                      serializationFile, 
+                                                      serialisationPluginFiles, 
+                                                      token, 
+                                                      communicationStorage, 
+                                                      communicationDir)
 
         /* ---- upload the execution message ----*/
         val executionMessageFile = Workspace.newFile("job", ".xml")
@@ -126,9 +139,10 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     new ReplicatedFile(file, isDir, hash, replica.destinationURIFile.path)
   }
 
-
-  def replicateTheRuntime(token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): Runtime = {
-    val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
+  def replicateTheRuntime(token: AccessToken, 
+                          communicationStorage: Storage, 
+                          communicationDir: IURIFile): Runtime = {
+   
 
     val environmentPluginPath = environmentPlugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
     val runtimeFileMessage = new FileMessage(toReplicatedFile(environment.runtime, communicationStorage, token))
@@ -147,21 +161,15 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmFileMessage)
   }
   
-  def createExecutionMessage(jobFile: File, serializationResult: (Iterable[File], Iterable[Class[_]]), token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {
+  def createExecutionMessage(jobFile: File, serializationFile: Iterable[File], serializationPlugin: Iterable[File], token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {
     val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 
     URIFile.copy(jobFile, jobForRuntimeFile, token)
     val jobHash = HashService.computeHash(jobFile).toString
 
-    val plugins = new TreeSet[File]
-    val pluginReplicas = new ListBuffer[ReplicatedFile]
-
-    for (c <- serializationResult._2) plugins ++= PluginManager.pluginsForClass(c)
-    for (f <- plugins) pluginReplicas += toReplicatedFile(f, communicationStorage, token)
-
-    val files = new ListBuffer[ReplicatedFile]
-    for(file <- serializationResult._1) files += toReplicatedFile(file, communicationStorage, token)
-
+    val pluginReplicas = serializationPlugin.map{toReplicatedFile(_, communicationStorage, token)}.toList
+    val files = serializationFile.map{toReplicatedFile(_, communicationStorage, token)}.toList
+  
     new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile.URI.getPath, jobHash), communicationDir.URI.getPath)
   }
 

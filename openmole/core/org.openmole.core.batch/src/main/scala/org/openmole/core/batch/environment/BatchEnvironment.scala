@@ -132,13 +132,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   val jobRegistry = new ExecutionJobRegistry[BatchExecutionJob]
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
-  
-  @transient private lazy val _storagesLock = new ReentrantLock
-  @transient private lazy val _jobServicesLock = new ReentrantLock
-  
-  @transient private lazy val _jobServices = new JobServiceGroup(this)
-  @transient private lazy val _storages = new StorageGroup(this)
-  
+      
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
     case None => Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
@@ -154,82 +148,10 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   
   @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
   @transient lazy val jvm = new File(Workspace.preference(BatchEnvironment.JVMLocation))
+
+  @transient lazy val jobServices = new JobServiceGroup(this, allJobServices) 
+  @transient lazy val storages = new StorageGroup(this, allStorages)
   
-  protected def selectStorages(storageGroup: StorageGroup) = {
-        
-    val stors = allStorages
-
-    val oneFinished = new Semaphore(0)
-    val nbLeftRunning = new AtomicInteger(stors.size)
-
-    for (storage <- stors) {
-      val r = new Runnable {
-
-        override def run = {
-          try {
-            if (storage.test) storageGroup += storage
-          } finally {
-            nbLeftRunning.decrementAndGet
-            oneFinished.release
-          }
-        }
-      }
-
-      ExecutorService.executorService(ExecutorType.OWN).submit(r)
-    }
-
-    while (storageGroup.isEmpty && nbLeftRunning.get > 0) oneFinished.acquire
-  
-    if (storageGroup.isEmpty)  throw new InternalProcessingError("No storage available")
-    
-  }
-
-  /*protected def selectWorkingJobServices(jobServiceGroup: JobServiceGroup) = {
-    val allJobServicesList = allJobServices
-    val done = new Semaphore(0)
-    val nbStillRunning = new AtomicInteger(allJobServicesList.size)
-
-    for (js <- allJobServicesList) {
-
-      val test = new Runnable {
-
-        override def run = {
-          try {
-            if (js.test) jobServiceGroup += js
-          } finally {
-            nbStillRunning.decrementAndGet
-            done.release
-          }
-        }
-      }
-
-      ExecutorService.executorService(ExecutorType.OWN).submit(test)
-    }
-    
-    while (jobServiceGroup.isEmpty && nbStillRunning.get > 0) done.acquire
-
-    if (jobServiceGroup.isEmpty) throw new InternalProcessingError("No job submission service available")
-
-  }*/
-
-
-  def jobServices: JobServiceGroup = {
-    _jobServicesLock.lock 
-    try {
-      if (_jobServices.isEmpty) _jobServices ++= allJobServices
-        //selectWorkingJobServices(_jobServices)
-      _jobServices
-    } finally _jobServicesLock.unlock 
-  }
-
-  def storages: StorageGroup = {
-    _storagesLock.lock
-    try {
-      if (_storages.isEmpty) selectStorages(_storages)
-      _storages
-    } finally _storagesLock.unlock
-  }
-
   def allStorages: Iterable[Storage]
   def allJobServices: Iterable[JobService]
   

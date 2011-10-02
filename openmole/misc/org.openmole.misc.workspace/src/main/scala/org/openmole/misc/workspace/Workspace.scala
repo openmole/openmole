@@ -143,7 +143,7 @@ object Workspace {
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = instance.isPreferenceSet(location)
   
-  def persitentList[T](clazz: Class[T]) = instance.persitentList(clazz)
+  def persistentList[T](clazz: Class[T]) = instance.persistentList(clazz)
   
   def decrypt(s: String) = instance.decrypt(s)
 }
@@ -317,9 +317,9 @@ class Workspace(val location: File) {
     rawPreference(location) != null
   }
   
-  def persitentList[T](clazz: Class[T]) = new PersistentList[T](
+  def persistentList[T](clazz: Class[T]) = new PersistentList[T](
     {val xstream = new XStream
      xstream.setClassLoader(clazz.getClassLoader)
      xstream
-    }, {val f = new File(persistenDir, clazz.getName); f.mkdirs; f})
+    }, {val f = new File(persistentDir, clazz.getName); f.mkdirs; f})
 }

@@ -40,9 +40,9 @@ object BatchExecutionJob extends Logger {
   val MaxUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
  
-  Workspace += (MinUpdateInterval, "PT2M")
-  Workspace += (MaxUpdateInterval, "PT30M")
-  Workspace += (IncrementUpdateInterval, "PT2M")
+  Workspace += (MinUpdateInterval, "PT1M")
+  Workspace += (MaxUpdateInterval, "PT20M")
+  Workspace += (IncrementUpdateInterval, "PT1M")
 }
 
 

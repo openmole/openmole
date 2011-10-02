@@ -128,7 +128,7 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
   override def initialize = {
     val authenticationMethod: GliteAuthenticationMethod = 
       if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) new GlobusProxyFile(System.getenv.get("X509_USER_PROXY"))
-      else Workspace.persitentList(classOf[GliteAuthenticationMethod]).headOption match {
+      else Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
         case Some((i,a)) => a
         case None => getAuthenticationMethodFromPrefences
       }

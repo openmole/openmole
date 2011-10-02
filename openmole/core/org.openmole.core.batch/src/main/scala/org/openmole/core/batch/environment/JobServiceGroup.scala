@@ -31,85 +31,59 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ArrayBuffer
 
-class JobServiceGroup(val environment: BatchEnvironment) {
+class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[JobService]) extends Iterable[JobService] {
 
   class BatchRessourceGroupAdapterUsage extends UsageControl.IResourceReleased {
     override def ressourceReleased(obj: UsageControl) = waiting.release
   }
   
-  private var resources = List[JobService]()
-
+  resources.foreach {
+    service =>
+    val usageControl = JobServiceControl.usageControl(service.description)
+    EventDispatcher.registerForObjectChanged(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+  }
+  
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
+  override def iterator = resources.iterator
+  
   def selectAService: (JobService, AccessToken) = {
     selectingRessource.lock
     try {
-      var ret: (JobService, AccessToken) = null
+      var ret: Option[(JobService, AccessToken)] = None
 
       do {
-        val resourcesCopy = resources
-
-        //Among them select one not over loaded
-        val notLoaded = new ArrayBuffer[(JobService, AccessToken, Double)]
-        var totalFitness = 0.
-        
-        for (cur <- resourcesCopy) {   
-          
-          JobServiceControl.usageControl(cur.description).tryGetToken match {
-            case None =>
-            case Some(token) => 
-              val quality = JobServiceControl.qualityControl(cur.description)
-              val nbSubmitted = quality.submitted
-              val fitness = (if(quality.submitted > 0) {
+        val notLoaded = resources.flatMap {   
+          cur =>
+            JobServiceControl.usageControl(cur.description).tryGetToken match {
+              case None => None
+              case Some(token) => 
+                val quality = JobServiceControl.qualityControl(cur.description)
+                val nbSubmitted = quality.submitted
+                val fitness = (if(quality.submitted > 0) {
                   val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
                   val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-                  //Logger.getLogger(getClass.getName).info("v = " + v + " ; " + "min = " + min)
                   if(v < min) min else v
-                } else {
-                  //Logger.getLogger(getClass.getName).info("sucess " + quality.successRate)
-                  quality.successRate
-                }) 
-                
-              
-              //Logger.getLogger(getClass.getName).info("Fitness for " + cur.description + " " + fitness)
-              
-              notLoaded += ((cur, token, fitness))
-              totalFitness += fitness
-          }
-          
+                } else quality.successRate) 
+  
+                Some((cur, token, fitness))
+            }   
         }
-             
-        //Logger.getLogger(getClass.getName).info("Not loaded " + notLoaded.size)
-        if (notLoaded.size > 0) {
-          var selected = RNG.nextDouble * totalFitness
+
+        if (!notLoaded.isEmpty) {
+          var selected = RNG.nextDouble * notLoaded.map{_._3}.sum
           
-          for (service <- notLoaded) { 
-            //Logger.getLogger(getClass.getName).info("Not loaded test " + ret + " " + selected + " <= " + service._3)
-            if(ret == null && selected <= service._3) ret = (service._1, service._2)
-            else JobServiceControl.usageControl(service._1.description).releaseToken(service._2) 
-            selected -= service._3
+          for ((service, token, fitness) <- notLoaded) { 
+            if(!ret.isDefined && selected <= fitness) ret = Some((service, token))
+            else JobServiceControl.usageControl(service.description).releaseToken(token) 
+            selected -= fitness
           }
         } else waiting.acquire
         
-      } while (ret == null)
-      return ret
+      } while (!ret.isDefined)
+      return ret.get
     } finally selectingRessource.unlock
   }
-
-  def +=(service: JobService) = {
-    synchronized {
-      resources :+= service
-      val usageControl = JobServiceControl.usageControl(service.description)
-      EventDispatcher.registerForObjectChanged(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
-    }
-    waiting.release
-  }
-  
-  def ++=(services: Iterable[JobService]) = services.foreach{s => this += s}
-
-  def isEmpty: Boolean = resources.isEmpty
-
-  def size: Int = resources.size
 
 }
