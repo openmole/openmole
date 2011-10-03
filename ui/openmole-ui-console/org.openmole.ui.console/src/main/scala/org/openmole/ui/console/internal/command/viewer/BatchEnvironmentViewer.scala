@@ -62,21 +62,20 @@ class BatchEnvironmentViewer extends IViewer {
       for (state <- ExecutionState.values) {
         System.out.println(state.toString + ": " + accounting(state.id))
       }
-
       
       if (v >= 1) {
         System.out.println(Separator)
         val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
 
-        for (executionJob <-  executionJobRegistry.allExecutionJobs) {
-          val batchJob = executionJob.batchJob
-          if (batchJob != null) {
-            val jobServiceInfo = jobServices.getOrElseUpdate(batchJob.jobServiceDescription,  new HashMap[ExecutionState.Value, AtomicInteger])
-            val nb = jobServiceInfo.getOrElseUpdate(batchJob.state, new AtomicInteger)
-            nb.incrementAndGet
+        for (executionJob <- executionJobRegistry.allExecutionJobs) {
+          executionJob.batchJob match {
+            case Some(batchJob) =>             
+              val jobServiceInfo = jobServices.getOrElseUpdate(batchJob.jobServiceDescription,  new HashMap[ExecutionState.Value, AtomicInteger])
+              val nb = jobServiceInfo.getOrElseUpdate(batchJob.state, new AtomicInteger)
+              nb.incrementAndGet
+            case None =>
           }
         }
-
 
         jobServices.foreach {
           case(description, map) =>
@@ -94,9 +93,9 @@ class BatchEnvironmentViewer extends IViewer {
 
         val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
         for (executionJob <- executionJobRegistry.allExecutionJobs) {
-          val batchJob = executionJob.batchJob
-          if (batchJob != null) {
-            System.out.println(batchJob.toString + " " + batchJob.state.toString)
+          executionJob.batchJob match {
+            case Some(batchJob) => System.out.println(batchJob.toString + " " + batchJob.state.toString)
+            case None =>
           }
         }
       }

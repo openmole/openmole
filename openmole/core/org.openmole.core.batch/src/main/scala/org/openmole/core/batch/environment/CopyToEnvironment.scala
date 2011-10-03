@@ -53,8 +53,6 @@ import BatchEnvironment._
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
   
-  @transient private lazy val environmentPlugins = PluginManager.pluginsForClass(environment.getClass)
-  
   private def initCommunication: SerializedJob = {
     val jobFile = Workspace.newFile("job", ".tar")
     
@@ -65,7 +63,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
       val storage = environment.selectAStorage(serializationFile + 
                                                environment.runtime +
                                                environment.jvm ++ 
-                                               environmentPlugins ++
+                                               environment.plugins ++
                                                serialisationPluginFiles)
 
       val communicationStorage = storage._1
@@ -144,7 +142,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
                           communicationDir: IURIFile): Runtime = {
    
 
-    val environmentPluginPath = environmentPlugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
+    val environmentPluginPath = environment.plugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
     val runtimeFileMessage = new FileMessage(toReplicatedFile(environment.runtime, communicationStorage, token))
     val jvmFileMessage = new FileMessage(toReplicatedFile(environment.jvm, communicationStorage, token))
     

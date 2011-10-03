@@ -37,6 +37,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.pluginmanager.PluginManager
 
 object BatchEnvironment {
   
@@ -160,5 +161,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   def selectAJobService: (JobService, AccessToken) = jobServices.selectAService
 
   def selectAStorage(usedFiles: Iterable[File]):  (Storage, AccessToken) = storages.selectAService(usedFiles)
+  
+  
+  @transient private[environment] lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
 }

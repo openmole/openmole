@@ -61,14 +61,11 @@ class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends I
             }
           }
 
-          for (ej <- executionJobsToRemove) {
-            registry.remove(ej)
-          }
+          for (ej <- executionJobsToRemove) registry.remove(ej)
 
           if (registry.nbExecutionJobs(job) == 0) {
-            try {
-              environment.submit(job)
-            } catch {
+            try environment.submit(job)
+            catch {
               case(e) => Logger.getLogger(classOf[BatchJobWatcher].getName).log(Level.SEVERE, "Submission of job failed, job isn't being executed.", e)
             }
           }

@@ -50,153 +50,141 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
   import BatchExecutionJob._
     
-  var batchJob: BatchJob = null
+  var batchJob: Option[BatchJob] = None
+  
+  val copyToEnvironmentExecFuture: Future[SerializedJob] = 
+    ExecutorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job))
+  
+  var finalizeExecutionFuture: Option[Future[_]] = None
+  
   val killed = new AtomicBoolean(false)
-  var serializedJob: SerializedJob = null
-  var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
- 
-  @transient
-  var copyToEnvironmentExecFuture: Future[SerializedJob] = null
-    
-  @transient
-  var finalizeExecutionFuture: Future[_] = null
 
-  asynchonousCopy
+  var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+
     
   private def updateAndGetState: ExecutionState = {
     if (killed.get) return KILLED
-    if (batchJob == null) return READY
-    
-    val oldState = batchJob.state
-    val newState = 
-      if (!oldState.isFinal) batchJob.updateState
-      else oldState
+    batchJob match {
+      case None => READY
+      case Some(batchJob) =>
+        val oldState = batchJob.state
+        val newState = 
+          if (!oldState.isFinal) batchJob.updateState
+          else oldState
 
-    if(oldState != newState && newState == KILLED) kill
-    state
+        if(oldState != newState && newState == KILLED) kill
+        state
+    }
   }
 
   override def state =
-    if (killed.get) KILLED else if (batchJob == null) READY else batchJob.state
+    if (killed.get) KILLED 
+    else batchJob match {
+           case None => READY
+           case Some(batchJob) => batchJob.state
+         }
 
   override def update: Boolean = {
     try {
       val oldState = state
-      val newState = updateAndGetState
 
-      newState match {
-        case READY =>
-          if (asynchonousCopy) {
-            _delay = 0
-            trySubmit
-          }
-        case (SUBMITTED | RUNNING | KILLED) => {}
-        case FAILED => retry
-        case DONE => tryFinalise
-      }
-
-      //Compute new refresh delay
-      if (oldState != state) {
-        initDelay
-      } else {
+      def incrementedDelay = {
         val newDelay = _delay + Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
-        
         val maxDelay = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
-        _delay = if (newDelay <= maxDelay) newDelay else maxDelay
+        if (newDelay <= maxDelay) newDelay else maxDelay
+      }
+      
+      _delay = batchJob match {
+        case None =>
+          if (copyToEnvironmentExecFuture.isDone) {
+            batchJob = trySubmit(copyToEnvironmentExecFuture.get)
+            Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+          } else incrementedDelay
+        case Some(batchJob) =>
+          val newState = updateAndGetState
+          newState match {
+            case READY => throw new InternalProcessingError("Bug, it should never append.")
+            case (SUBMITTED | RUNNING | KILLED) => {}
+            case FAILED => resubmit
+            case DONE => tryFinalise(batchJob)
+          }
+          if(oldState != newState) Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+          else incrementedDelay
       }
     } catch {
       case (e: TemporaryErrorException) => logger.log(FINE, "Temporary error durring job update.", e)
       case (e: CancellationException) => logger.log(FINE, "Operation interrupted cause job was killed.", e)
       case (e: ShouldBeKilledException) => 
-        logger.log(FINE, "Job should be killed", e)
         kill
       case e =>
         logger.log(WARNING, "Error in job update: " + e.getMessage)
-        logger.log(FINE, "Error in job update.", e)
         kill
     }
 
-    return !killed.get
-  }
-
-  private def initDelay = {
-    _delay = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+    !killed.get
   }
     
-  private def tryFinalise = {
-    if (finalizeExecutionFuture == null) {
-      finalizeExecutionFuture = ExecutorService.executorService(ExecutorType.DOWNLOAD).submit(new GetResultFromEnvironment(serializedJob.communicationStorage, batchJob.resultPath, job, executionEnvironment, batchJob))
-    }
-    if (finalizeExecutionFuture.isDone) {
-      finalizeExecutionFuture.get
-      finalizeExecutionFuture = null
-      kill
+  private def tryFinalise(batchJob: BatchJob) = {
+    finalizeExecutionFuture match {
+      case None => 
+        finalizeExecutionFuture = Some(ExecutorService.executorService(ExecutorType.DOWNLOAD).
+                                       submit(new GetResultFromEnvironment(copyToEnvironmentExecFuture.get.communicationStorage, 
+                                                                           batchJob.resultPath, 
+                                                                           job, 
+                                                                           executionEnvironment, 
+                                                                           batchJob)))
+      case Some(f) => 
+        if (f.isDone) {
+          f.get
+          kill
+        }
     }
   }
 
-  private def asynchonousCopy: Boolean = {
-    if (serializedJob == null) {
-      if (copyToEnvironmentExecFuture == null) {
-        copyToEnvironmentExecFuture = ExecutorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job));
-      }
-
-      if (copyToEnvironmentExecFuture.isDone) {
-        serializedJob = copyToEnvironmentExecFuture.get
-        copyToEnvironmentExecFuture = null
-      }
-    }
-
-    serializedJob != null
-  }
-
-  private def trySubmit = {
-    val js = executionEnvironment.selectAJobService
+  private def trySubmit(serializedJob: SerializedJob) = {
+    val (js, token) = executionEnvironment.selectAJobService
     try {
       if(killed.get) throw new InternalProcessingError("Job has been killed")
       //FIXME copyToEnvironmentResult may be null if job killed here
-      val bj = js._1.submit(serializedJob, js._2)
-      batchJob = bj
+      Some(js.submit(serializedJob, token))
     } catch {
-      case e => logger.log(FINE, "Error durring job submission.", e)
-    } finally {
-      JobServiceControl.usageControl(js._1.description).releaseToken(js._2)
-    }
+      case e => 
+        logger.log(FINE, "Error durring job submission.", e)
+        None
+    } finally JobServiceControl.usageControl(js.description).releaseToken(token)
   }
 
-  private def clean = {
-    if (serializedJob != null) {
+  private def clean =
+    if(copyToEnvironmentExecFuture.isDone) {
+      val serializedJob = copyToEnvironmentExecFuture.get
       val storage = serializedJob.communicationStorage
       import storage._
-      ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
-      serializedJob = null
-    }
-  }
 
-  def kill = {
-    
+      ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
+    }
+
+  def kill = 
     if (!killed.getAndSet(true)) {
       try {
-        val copy = copyToEnvironmentExecFuture
-        if (copy != null) copy.cancel(true)
-        
-        val finalize = finalizeExecutionFuture
-        if (finalize != null) finalize.cancel(true)
-        
+        copyToEnvironmentExecFuture.cancel(true)
+
+        finalizeExecutionFuture match {
+          case Some(f) => f.cancel(true)
+          case None =>
+        }       
         clean
-      } finally {
-        val bj = batchJob
-        if (bj != null) {
-          ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
-        }
+      } finally batchJob match {
+          case Some(bj) => 
+            ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          case None =>
       }
     }
+
+  def resubmit = {
+    batchJob = None
+    _delay = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
   }
 
-  def retry = {
-    batchJob = null
-    _delay = 0
-  }
-
-  def delay: Long =  _delay
+  def delay: Long = _delay
 
 }

@@ -34,15 +34,19 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
 
+
+//object StorageGroup extends Logger
+
 class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends Iterable[Storage] {
+  
   class BatchRessourceGroupAdapterUsage extends UsageControl.IResourceReleased {
     override def ressourceReleased(obj: UsageControl) = waiting.release
   }
   
   resources.foreach {
     service =>
-    val usageControl = StorageControl.usageControl(service.description)
-    EventDispatcher.registerForObjectChanged(usageControl, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+      val usageControl = StorageControl.usageControl(service.description)
+      EventDispatcher.registerForObjectChanged(usageControl, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
   }
   
 
@@ -63,7 +67,9 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
           cur =>
 
           StorageControl.usageControl(cur.description).tryGetToken match {
-            case None => None
+            case None => 
+             // logger.fine("no token")
+              None
             case Some(token) => 
               val quality = StorageControl.qualityControl(cur.description)
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
@@ -77,7 +83,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
                   case None => 1.
                 }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * Workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
                       else 1)
-            
+              //logger.fine("Token " + (cur, token, fitness))
               Some((cur, token, fitness))
           }
         }
@@ -86,12 +92,15 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
           var selected = RNG.nextDouble * notLoaded.map{_._3}.sum
           
           for ((service, token, fitness) <- notLoaded) {    
-            if(!ret.isDefined && selected <= fitness) ret = Some((service, token))
+            if(!ret.isDefined && selected <= fitness) {
+             // logger.fine("resource selected "+ service)
+              ret = Some((service, token))
+            }
             else StorageControl.usageControl(service.description).releaseToken(token) 
             selected -= fitness
           }
         } else waiting.acquire
-      } while (ret.isDefined)
+      } while (!ret.isDefined)
       return ret.get
     } finally selectingRessource.unlock
   }
