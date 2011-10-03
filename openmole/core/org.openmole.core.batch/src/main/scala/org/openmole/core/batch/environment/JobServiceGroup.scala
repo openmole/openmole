@@ -66,7 +66,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
                   val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
                   val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                   if(v < min) min else v
-                } else quality.successRate) 
+                } else math.pow(quality.successRate, 2)) 
   
                 Some((cur, token, fitness))
             }   
