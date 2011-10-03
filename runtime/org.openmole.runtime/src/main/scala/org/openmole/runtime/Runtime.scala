@@ -153,7 +153,7 @@ class Runtime {
         val saver = new ContextSaver
 
         for (toProcess <- allMoleJobs) {
-          EventDispatcher.registerForObjectChanged(toProcess, Priority.HIGH, saver, IMoleJob.StateChanged)
+          EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
           allFinished.registerJob(toProcess)
           LocalExecutionEnvironment.default.submit(toProcess)
         }

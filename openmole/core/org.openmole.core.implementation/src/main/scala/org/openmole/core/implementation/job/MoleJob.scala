@@ -54,7 +54,7 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
       } else None
     }
     changed match {
-      case Some(oldState) => EventDispatcher.objectChanged(this, IMoleJob.StateChanged, Array(state, oldState))
+      case Some(oldState) => EventDispatcher.trigger(this, new IMoleJob.StateChanged(state, oldState))
       case None =>
     }
   }

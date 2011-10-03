@@ -29,7 +29,7 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
 import org.jasypt.util.text.BasicTextEncryptor
 import org.joda.time.format.ISOPeriodFormat
 import scala.collection.mutable.HashMap
-import org.openmole.misc.eventdispatcher.{EventDispatcher, Event, IObjectListener}
+import org.openmole.misc.eventdispatcher.{EventDispatcher, Event}
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
@@ -38,13 +38,7 @@ object Workspace {
   
   val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
   
-  trait IWorkspaceListener extends IObjectListener[Workspace] {
-    override def eventOccured(obj: Workspace, args: Array[Any]) = passwordRequired(obj)
-    
-    def passwordRequired(workspace: Workspace)
-  }
-
-  val PasswordRequired = new Event[Workspace, IWorkspaceListener]
+  val PasswordRequired = new Event[Workspace]
   
   val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
@@ -282,7 +276,7 @@ class Workspace(val location: File) {
 
   def decrypt(s: String) = {
     _password match {
-      case None => EventDispatcher.objectChanged(this, Workspace.PasswordRequired)
+      case None => EventDispatcher.trigger(this, Workspace.PasswordRequired)
       case Some(p) =>
     } 
     textEncryptor(_password).decrypt(s)

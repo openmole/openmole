@@ -36,6 +36,8 @@ import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashMap
@@ -53,12 +55,12 @@ object SubMoleExecution {
 
 class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution: IMoleExecution) extends ISubMoleExecution {
 
-  val subMoleExecutionAdapterForMoleJobFinished = new IMoleJob.ITransitionPerformed {
-    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = jobFinished(job, capsule)
-  }
-  
-  val subMoleExecutionAdapterForMoleJobFailedOrCancel = new IMoleJob.IJobFailedOrCanceled {
-    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = jobFinished(job, capsule)
+  val subMoleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
+    override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
+      ev match {
+        case ev: IMoleJob.TransitionPerformed => jobFinished(job, ev.capsule)
+        case ev: IMoleJob.JobFailedOrCanceled => jobFinished(job, ev.capsule)
+      }
   }
   
   private var submittedJobs = TreeSet[IMoleJob]()
@@ -128,8 +130,8 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     if(!canceled) {
       val moleJob = capsule.toJob(context, moleExecution.nextJobId)
 
-      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFinished, IMoleJob.TransitionPerformed)
-      EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJobFailedOrCancel, IMoleJob.JobFailedOrCanceled)
+      EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
+      EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
 
       this += moleJob
       

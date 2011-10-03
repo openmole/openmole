@@ -36,7 +36,6 @@ import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.pluginmanager.PluginManager
 
 object BatchEnvironment {

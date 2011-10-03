@@ -21,7 +21,8 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.RNG
@@ -33,14 +34,14 @@ import scala.collection.mutable.ArrayBuffer
 
 class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[JobService]) extends Iterable[JobService] {
 
-  class BatchRessourceGroupAdapterUsage extends UsageControl.IResourceReleased {
-    override def ressourceReleased(obj: UsageControl) = waiting.release
+  class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
+    override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
   }
   
   resources.foreach {
     service =>
     val usageControl = JobServiceControl.usageControl(service.description)
-    EventDispatcher.registerForObjectChanged(usageControl, Priority.NORMAL, new BatchRessourceGroupAdapterUsage, UsageControl.ResourceReleased)
+    EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
   }
   
   @transient lazy val waiting = new Semaphore(0)

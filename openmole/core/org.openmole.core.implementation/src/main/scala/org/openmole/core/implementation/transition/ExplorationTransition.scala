@@ -121,7 +121,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
             if(level > 0) toProcess += t.end.capsule -> (level - 1)
             else if(level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new VariablesBuffer)
-              EventDispatcher.registerForObjectChanged(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), ISubMoleExecution.Finished)
+              EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[ISubMoleExecution.Finished])
             }
           case t: IExplorationTransition => toProcess += t.end.capsule -> (level + 1)
           case t => toProcess += t.end.capsule -> level

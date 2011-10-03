@@ -17,4 +17,4 @@
 
 package org.openmole.misc.eventdispatcher
 
-class Event[O, L <: IObjectListener[O]]
+class Event[T]

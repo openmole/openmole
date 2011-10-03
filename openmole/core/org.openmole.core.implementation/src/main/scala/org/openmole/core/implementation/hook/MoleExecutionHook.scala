@@ -22,8 +22,9 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
@@ -38,19 +39,19 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   resume
   
   override def resume = {
-    registerForObjectChanged(moleExecution(), HIGH, moleExecutionExecutionStartingAdapter, Starting)
-    registerForObjectChanged(moleExecution(), HIGH, moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-    registerForObjectChanged(moleExecution(), LOW, moleExecutionExecutionFinishedAdapter, Finished)
-    registerForObjectChanged(moleExecution(), NORMAL, capsuleFinished, JobInCapsuleFinished)
-    registerForObjectChanged(moleExecution(), NORMAL, capsuleStarting, JobInCapsuleStarting)
+    listen(moleExecution(), HIGH, moleExecutionListener, classOf[Starting])
+    listen(moleExecution(), HIGH, moleExecutionListener, classOf[OneJobStatusChanged])
+    listen(moleExecution(), LOW, moleExecutionListener, classOf[Finished])
+    listen(moleExecution(), NORMAL, moleExecutionListener, classOf[JobInCapsuleFinished])
+    listen(moleExecution(), NORMAL, moleExecutionListener, classOf[JobInCapsuleStarting])
   }
   
   override def release = {
-    unregisterListener(moleExecution(), moleExecutionExecutionStartingAdapter, Starting)
-    unregisterListener(moleExecution(), moleExecutionJobStateChangedAdapter, OneJobStatusChanged)
-    unregisterListener(moleExecution(), moleExecutionExecutionFinishedAdapter, Finished)
-    unregisterListener(moleExecution(), capsuleFinished, JobInCapsuleFinished)
-    unregisterListener(moleExecution(), capsuleStarting, JobInCapsuleStarting)
+    unlisten(moleExecution(), moleExecutionListener, classOf[Starting])
+    unlisten(moleExecution(), moleExecutionListener, classOf[OneJobStatusChanged])
+    unlisten(moleExecution(), moleExecutionListener, classOf[Finished])
+    unlisten(moleExecution(), moleExecutionListener, classOf[JobInCapsuleFinished])
+    unlisten(moleExecution(), moleExecutionListener, classOf[JobInCapsuleStarting])
   }
   
   override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
@@ -60,24 +61,17 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
   override def executionStarting = {}
   override def executionFinished = {}
   
-  @transient lazy val moleExecutionJobStateChangedAdapter = new IMoleExecution.IOneJobStatusChanged  {
-    override def oneJobStatusChanged(execution: IMoleExecution, moleJob: IMoleJob, newState: State, oldState: State) = stateChanged(moleJob, newState, oldState)
+  
+  @transient lazy val moleExecutionListener = new EventListener[IMoleExecution] {
+    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = 
+      ev match {
+        case ev: OneJobStatusChanged => stateChanged(ev.moleJob, ev.newState, ev.oldState)
+        case ev: JobInCapsuleStarting => jobStarting(ev.moleJob, ev.capsule)
+        case ev: JobInCapsuleFinished => jobFinished(ev.moleJob, ev.capsule)
+        case ev: Starting => executionStarting
+        case ev: Finished => executionFinished
+        case _ =>
+      }
   }
-  
-  @transient lazy val capsuleStarting = new IMoleExecution.IJobInCapsuleStarting {
-    override def jobInCapsuleStarting(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule) = jobStarting(moleJob, capsule)
-  } 
-  
-  @transient lazy val capsuleFinished = new IMoleExecution.IJobInCapsuleFinished {
-    override def jobInCapsuleFinished(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule) = jobFinished(moleJob, capsule)
-  } 
-  
-  @transient lazy val moleExecutionExecutionStartingAdapter = new IMoleExecution.IStarting {
-    override def starting(moleJob: IMoleExecution) = executionStarting
-  }
-
-  @transient lazy val moleExecutionExecutionFinishedAdapter = new IMoleExecution.IFinished {
-    override def finished(moleJob: IMoleExecution) = executionFinished
-  }
-  
+ 
 }

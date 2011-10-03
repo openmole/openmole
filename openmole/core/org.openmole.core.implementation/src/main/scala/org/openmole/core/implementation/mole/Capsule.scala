@@ -18,7 +18,8 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.{InternalProcessingError,UserBadDataError}
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.job.MoleJob
@@ -41,16 +42,18 @@ import org.openmole.core.model.data.IDataSet
 class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
-  
-  class CapsuleAdapter extends IMoleJob.IStateChanged {
 
-    override def stateChanged(obj: IMoleJob, newState: State.State, oldStade: State.State) = {
-      obj.state match {
-        case COMPLETED => jobFinished(obj)
-        case FAILED | CANCELED => jobFailedOrCanceled(obj)
-        case _ =>
-      }
-    }
+  class CapsuleAdapter extends EventListener[IMoleJob] {
+
+    override def triggered(obj: IMoleJob, ev: Event[IMoleJob]) = 
+      ev match {
+        case ev: IMoleJob.StateChanged => 
+          ev.newState match {
+            case COMPLETED => jobFinished(obj)
+            case FAILED | CANCELED => jobFailedOrCanceled(obj)
+            case _ =>
+          }
+     }
   }
   
   private val _inputSlots = new HashSet[ISlot]
@@ -112,9 +115,9 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = {
     val task = taskOrException
-    val job = new MoleJob(task, context, jobId)
+    val job: IMoleJob = new MoleJob(task, context, jobId)
     
-    EventDispatcher.registerForObjectChanged(job, Priority.LOWEST, new CapsuleAdapter, IMoleJob.StateChanged)
+    EventDispatcher.listen(job, Priority.LOWEST, new CapsuleAdapter, classOf[IMoleJob.StateChanged])
     job
   }
 
@@ -126,7 +129,7 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
-    EventDispatcher.objectChanged(job, IMoleJob.JobFailedOrCanceled, Array(this))
+    EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(this))
   }
   
   private def jobFinished(job: IMoleJob) = {
@@ -135,11 +138,11 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
       val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   
       val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
       
-      EventDispatcher.objectChanged(execution, IMoleExecution.JobInCapsuleFinished, Array(job, this))
+      EventDispatcher.trigger(execution, new IMoleExecution.JobInCapsuleFinished(job, this))
       performTransition(job.context, ticket, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
-    } finally  EventDispatcher.objectChanged(job, IMoleJob.TransitionPerformed, Array(this))
+    } finally  EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(this))
   }
 
   protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    

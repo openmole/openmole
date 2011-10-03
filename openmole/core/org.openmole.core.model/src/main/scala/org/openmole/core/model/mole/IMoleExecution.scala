@@ -21,7 +21,7 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
-import org.openmole.misc.eventdispatcher.{IObjectListener, Event}
+import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
@@ -31,52 +31,14 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 
 object IMoleExecution {
+   
+  case class Starting extends Event[IMoleExecution]
+  case class Finished extends Event[IMoleExecution]
+  case class OneJobStatusChanged(val moleJob: IMoleJob, val newState: State, val oldState: State) extends Event[IMoleExecution]
+  case class OneJobSubmitted(val moleJob: IMoleJob) extends Event[IMoleExecution]
+  case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
+  case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   
-  trait IStarting extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = starting(obj)
-    
-    def starting(moleJob: IMoleExecution)
-  }
- 
-  trait IFinished extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = finished(obj)
-    
-    def finished(moleJob: IMoleExecution)
-  }
-  
-  trait IOneJobStatusChanged extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
-      oneJobStatusChanged(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[State], args(2).asInstanceOf[State])
-    
-    def oneJobStatusChanged(execution: IMoleExecution, moleJob: IMoleJob, newState: State, oldState: State)
-  }
-  
-  trait IOneJobSubmitted extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = oneJobSubmitted(obj, args(0).asInstanceOf[IMoleJob])
-    
-    def oneJobSubmitted(execution: IMoleExecution, moleJob: IMoleJob)
-  }
-  
-  trait IJobInCapsuleFinished extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
-      jobInCapsuleFinished(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[ICapsule])
-    
-    def jobInCapsuleFinished(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule)
-  }
-  
-  trait IJobInCapsuleStarting extends IObjectListener[IMoleExecution] {
-    override def eventOccured(obj: IMoleExecution, args: Array[Any]) = 
-      jobInCapsuleStarting(obj, args(0).asInstanceOf[IMoleJob], args(1).asInstanceOf[ICapsule])
-    
-    def jobInCapsuleStarting(execution: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule)
-  }
-  
-  final val Starting = new Event[IMoleExecution, IStarting]
-  final val Finished = new Event[IMoleExecution, IFinished]
-  final val OneJobStatusChanged = new Event[IMoleExecution, IOneJobStatusChanged]
-  final val OneJobSubmitted = new Event[IMoleExecution, IOneJobSubmitted]
-  final val JobInCapsuleFinished = new Event[IMoleExecution, IJobInCapsuleFinished]
-  final val JobInCapsuleStarting = new Event[IMoleExecution, IJobInCapsuleStarting]
 }
 
 trait IMoleExecution {

@@ -21,19 +21,18 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.WeakHashMap
 
 class ObjectListenerMap {
-    
+
+  val listnerTypeMap = new WeakHashMap[Any, HashMap[Class[Event[Any]], SortedListeners[Any]]] //forSome {type T; type L <: IObjectListener[T]} = WeakHashMap.empty
   
-  val listnerTypeMap = new WeakHashMap[Any, HashMap[Event[Any, IObjectListener[Any]], SortedListeners[Any]]] //forSome {type T; type L <: IObjectListener[T]} = WeakHashMap.empty
+  private def getOrCreateListeners[T, E <: Event[T]](obj: T, event: Class[E]): SortedListeners[EventListener[T]] = 
+    listnerTypeMap.getOrElseUpdate(obj, HashMap.empty).getOrElseUpdate(event.asInstanceOf[Class[Event[Any]]], new SortedListeners[Any]).asInstanceOf[SortedListeners[EventListener[T]]]
   
-  private def getOrCreateListeners[T, L <: IObjectListener[T]](obj: T, event: Event[T, L]): SortedListeners[L] = 
-    listnerTypeMap.getOrElseUpdate(obj, HashMap.empty).getOrElseUpdate(event.asInstanceOf[Event[Any, IObjectListener[Any]]], new SortedListeners[Any]).asInstanceOf[SortedListeners[L]]
-  
-  def get[T, L <: IObjectListener[T]](obj: T, event: Event[T, L]): Iterable[L] = synchronized {
-    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event.asInstanceOf[Event[Any, IObjectListener[Any]]], Iterable.empty).asInstanceOf[Iterable[L]]
+  def get[T, E <: Event[T]](obj: T, event: Class[E]): Iterable[EventListener[T]] = synchronized {
+    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event.asInstanceOf[Class[Event[Any]]], Iterable.empty).asInstanceOf[Iterable[EventListener[T]]]
   }
 
-  def unregister[T, L <: IObjectListener[T]](obj: T, listener: L, event: Event[T, L]) = synchronized {
-    val map = listnerTypeMap.getOrElse(obj, HashMap.empty).asInstanceOf[HashMap[Event[T, L], SortedListeners[L]]]
+  def unregister[T, E <: Event[T], L <: EventListener[T]](obj: T, listener: L, event: Class[E]) = synchronized {
+    val map = listnerTypeMap.getOrElse(obj, HashMap.empty).asInstanceOf[HashMap[Class[E], SortedListeners[L]]]
     
     map.get(event) match {
       case Some(listeners) => 
@@ -45,7 +44,7 @@ class ObjectListenerMap {
     
   }
   
-  def register[T, L <: IObjectListener[T]](obj: T, priority: Int, listener: L, event: Event[T, L]) = synchronized {
+  def register[T, L <: EventListener[T], E <: Event[T]](obj: T, priority: Int, listener: L, event: Class[E]) = synchronized {
     getOrCreateListeners(obj, event).register(priority, listener)
   }
   

@@ -18,39 +18,26 @@
 package org.openmole.core.batch.control
 
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListener
 import org.openmole.misc.eventdispatcher.Event
 import java.util.concurrent.TimeUnit
 
 object UsageControl {
   
-  trait IResourceReleased extends IObjectListener[UsageControl] {
-    override def eventOccured(obj: UsageControl, args: Array[Any]) = ressourceReleased(obj)
-      
-    def ressourceReleased(usageControl: UsageControl)
-  }
-  
-  final val ResourceReleased = new Event[UsageControl, IResourceReleased]
+  case class ResourceReleased extends Event[UsageControl]
   
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
 
   
   def apply(nbAccess: Int) = {
-    if (nbAccess != Int.MaxValue) {
-      new UsageControl(AccessTokenPool(nbAccess));
-    } else {
-      new UsageControl(BotomlessTokenPool)
-    }
+    if (nbAccess != Int.MaxValue) new UsageControl(AccessTokenPool(nbAccess));
+    else new UsageControl(BotomlessTokenPool)
   }
 
   
   def withUsageControl[B](usageControl: UsageControl, f: (AccessToken => B)): B = {
     val token = usageControl.waitAToken
-    try {
-      f(token)
-    } finally {
-      usageControl.releaseToken(token)
-    }
+    try f(token)
+    finally usageControl.releaseToken(token)
   }
 
 }
@@ -66,7 +53,7 @@ class UsageControl(tokenPool: IAccessTokenPool) {
   
   def releaseToken(token: AccessToken) = {
     tokenPool.releaseToken(token)
-    EventDispatcher.objectChanged(this, UsageControl.ResourceReleased)
+    EventDispatcher.trigger(this, new UsageControl.ResourceReleased)
   }
  
   def load: Int = tokenPool.load

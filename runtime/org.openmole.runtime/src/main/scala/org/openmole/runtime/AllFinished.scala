@@ -20,13 +20,15 @@ package org.openmole.runtime
 import java.util.concurrent.Semaphore
 import org.openmole.core.model.job.State.State
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.Logger
 import org.openmole.core.model.job.IMoleJob
 
 object AllFinished extends Logger
 
-class AllFinished extends IMoleJob.IStateChanged {
+class AllFinished extends EventListener[IMoleJob] {
 
   import AllFinished._
   
@@ -38,7 +40,7 @@ class AllFinished extends IMoleJob.IStateChanged {
   def registerJob(job: IMoleJob) = synchronized {
     allFinished.drainPermits
     nbJobs += 1
-    EventDispatcher.registerForObjectChanged(job, Priority.LOW, this, IMoleJob.StateChanged)
+    EventDispatcher.listen(job, Priority.LOW, this, classOf[IMoleJob.StateChanged])
   }
 
   def waitAllFinished = {
@@ -46,10 +48,14 @@ class AllFinished extends IMoleJob.IStateChanged {
     allFinished.release
   }
 
-  override def stateChanged(job: IMoleJob, state: State, oldState: State) = synchronized {
-    if (state.isFinal) {
-      nbFinished += 1
-      if (nbFinished >= nbJobs) allFinished.release
+  override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = synchronized {
+    ev match {
+      case ev: IMoleJob.StateChanged =>
+        if (ev.newState.isFinal) {
+          nbFinished += 1
+          if (nbFinished >= nbJobs) allFinished.release
+        }
     }
   }
+  
 }

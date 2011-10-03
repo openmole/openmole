@@ -20,9 +20,14 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.mole.ITicket
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 
-class AggregationTransitionAdapter(transition: IAggregationTransition) extends ISubMoleExecution.IFinished {
-
-    override def finished(subMole: ISubMoleExecution, ticket: ITicket) = transition.aggregate(subMole, ticket)
-
+class AggregationTransitionAdapter(transition: IAggregationTransition) extends EventListener[ISubMoleExecution] {
+  
+  override def triggered(subMole: ISubMoleExecution, ev: Event[ISubMoleExecution]) =
+    ev match {
+      case ev: ISubMoleExecution.Finished => transition.aggregate(subMole, ev.ticket)
+    }
+  
 }

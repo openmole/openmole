@@ -34,7 +34,8 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.IObjectListener
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.mole.IMoleJobGroup
@@ -71,18 +72,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   import IMoleExecution._
   import MoleExecution._
 
-  private val moleExecutionAdapterForMoleJobOutputTransitionPerformed = new IMoleJob.ITransitionPerformed {
-    override def transitionPerformed(job: IMoleJob, capsule: ICapsule) = MoleExecution.this.jobOutputTransitionsPerformed(job, capsule)
-  }
-
-  private val moleExecutionAdapterForMoleJobFailedOrCanceled = new IMoleJob.IJobFailedOrCanceled {
-    override def jobFailedOrCanceled(job: IMoleJob, capsule: ICapsule) = MoleExecution.this.jobFailedOrCanceled(job, capsule)
-  }
-  
-  private val moleExecutionAdapterForMoleJob = new IMoleJob.IStateChanged {
-    override def stateChanged(job: IMoleJob, newState: State, oldState: State) = 
-      EventDispatcher.objectChanged(MoleExecution.this, IMoleExecution.OneJobStatusChanged, Array(job, newState, oldState))
-  }
+  private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
+    override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
+      ev match {
+        case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
+        case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
+        case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
+      }
+   }
  
   private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
@@ -103,14 +100,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
-    EventDispatcher.objectChanged(this, JobInCapsuleStarting, Array(moleJob, capsule))
-    EventDispatcher.objectChanged(this, IMoleExecution.OneJobSubmitted, Array(moleJob))
+    EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
+    EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
 
     MoleJobRegistry += (moleJob, this, capsule)
     
-    EventDispatcher.registerForObjectChanged(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, IMoleJob.StateChanged)
-    EventDispatcher.registerForObjectChanged(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobOutputTransitionPerformed, IMoleJob.TransitionPerformed)
-    EventDispatcher.registerForObjectChanged(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJobFailedOrCanceled, IMoleJob.JobFailedOrCanceled)
+    EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
+    EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
+    EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
 
     inProgress += moleJob -> (subMole, ticket)
 
@@ -155,7 +152,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def start = {
     synchronized {
       if (submiter.getState.equals(Thread.State.NEW)) {
-        EventDispatcher.objectChanged(this, Starting)
+        EventDispatcher.trigger(this, new Starting)
         start(Context.empty)      
       } else logger.warning("This MOLE execution has allready been started, this call has no effect.")
     }
@@ -198,11 +195,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     instantRerun.jobFinished(job, capsule)
     
     if (subMole.nbJobInProgess == 0)
-      EventDispatcher.objectChanged(subMole, ISubMoleExecution.Finished, Array(ticket))
+      EventDispatcher.trigger(subMole, new ISubMoleExecution.Finished(ticket))
     
     if (isFinished) {
       submiter.interrupt
-      EventDispatcher.objectChanged(this, IMoleExecution.Finished)
+      EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
   }
 

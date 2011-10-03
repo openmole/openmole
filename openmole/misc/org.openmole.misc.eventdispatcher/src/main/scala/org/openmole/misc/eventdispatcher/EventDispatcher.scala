@@ -25,25 +25,23 @@ object EventDispatcher {
   //TODO maybe change to fixed thread pool some time 
   private val Executor = Executors.newCachedThreadPool
    
-  private val objectChangedMap = new ObjectListenerMap
+  private val triggerListenerMap = new ObjectListenerMap
   //private val objectChangedWithArgsMap = new ObjectListenerMap
   
-  def registerForObjectChanged[T, L <: IObjectListener[T]](obj: T, listner: L, event: Event[T,L]) = 
-    objectChangedMap.register(obj, Priority.NORMAL, listner, event)
+  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, listner: L, event: Class[E]) = 
+    triggerListenerMap.register(obj, Priority.NORMAL, listner, event)
   
-  def registerForObjectChanged[T, L <: IObjectListener[T]](obj: T, priority: Int, listner: L, event: Event[T,L]) = 
-    objectChangedMap.register(obj, priority, listner, event)
+  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, priority: Int, listner: L, event: Class[E]) = 
+    triggerListenerMap.register(obj, priority, listner, event)
   
-  def unregisterListener[T, L <: IObjectListener[T]](obj: T, listner: L, event: Event[T,L]) =
-    objectChangedMap.unregister(obj, listner, event)
+  def unlisten[T, L <: EventListener[T], E <: Event[T]](obj: T, listner: L, event: Class[E]) =
+    triggerListenerMap.unregister(obj, listner, event)
    
-  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L], args: Array[Any]) = {
+  def trigger[T](obj: T, event: Event[T]) = {
     /* --- Listners without args ---*/
-    val listeners = objectChangedMap.get(obj, event)
+    val listeners = triggerListenerMap.get(obj, event.getClass)
 
-    for (listner <- listeners) listner.eventOccured(obj, args)
+    for (listener <- listeners) listener.triggered(obj, event)
   }
-   
-  def objectChanged[T, L <: IObjectListener[T]](obj: T, event: Event[T,L]): Unit = objectChanged(obj, event, Array.empty)
 
 }

@@ -17,6 +17,6 @@
 
 package org.openmole.misc.eventdispatcher
 
-trait IObjectListener[T] {
-  def eventOccured(obj: T, args: Array[Any])
+trait EventListener[T] {
+  def triggered(obj: T, ev: Event[T])
 }

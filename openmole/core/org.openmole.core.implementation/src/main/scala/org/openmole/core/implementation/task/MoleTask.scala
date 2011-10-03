@@ -19,6 +19,8 @@ package org.openmole.core.implementation.task
 
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
@@ -51,19 +53,20 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
   var forcedArray = List.empty[IPrototype[_]]
   
-  class ResultGathering extends IMoleExecution.IJobInCapsuleFinished {
-
-    val variables = new ListBuffer[IVariable[_]] 
+  class ResultGathering extends EventListener[IMoleExecution] {
     
-    override def jobInCapsuleFinished(t: IMoleExecution, moleJob: IMoleJob, capsule: ICapsule) = synchronized {
-      outputCapsules.get(capsule) match {
-        case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
-        case Some(prototypes) =>
-          variables ++= prototypes.flatMap(p => moleJob.context.variable(p).toList)
+    val variables = new ListBuffer[IVariable[_]] 
+     
+    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = 
+      ev match {
+        case ev: IMoleExecution.JobInCapsuleFinished =>  
+          outputCapsules.get(ev.capsule) match {
+            case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
+            case Some(prototypes) =>
+              variables ++= prototypes.flatMap(p => ev.moleJob.context.variable(p).toList)
+          } 
       }
-    }
   }
-   
 
   private val outputCapsules = new HashMap[ICapsule, ListBuffer[String]]
 
@@ -78,7 +81,7 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
     
-    EventDispatcher.registerForObjectChanged(execution, Priority.NORMAL, resultGathering, IMoleExecution.JobInCapsuleFinished)
+    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])
     
     execution.start(firstTaskContext)
     execution.waitUntilEnded
