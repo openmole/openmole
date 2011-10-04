@@ -18,7 +18,8 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.tools.obj.Id
+import java.util.UUID
 
-class MyProxy(val url: String, val userId: String, val pass: String) extends Id {
-  override def id = (url, userId, pass)
+class MyProxy(val url: String, val userId: String, val pass: String) {
+  def this(url: String, userId: String) = this(url, userId, UUID.randomUUID.toString)
 }
