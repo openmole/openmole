@@ -18,6 +18,11 @@
 package org.openmole.core.model.execution
 
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.eventdispatcher.Event
+
+object IEnvironment {
+  case class JobSubmitted(val job: IExecutionJob) extends Event[IEnvironment]
+}
 
 trait IEnvironment {
   def submit(job: IJob)

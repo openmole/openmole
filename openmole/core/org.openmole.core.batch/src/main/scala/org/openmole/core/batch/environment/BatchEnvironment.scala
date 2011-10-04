@@ -37,6 +37,8 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.workspace.InteractiveConfiguration
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution.IEnvironment
 
 object BatchEnvironment {
   
@@ -142,6 +144,7 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
     
   override def submit(job: IJob) = {
     val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
+    EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(bej))
     Updater.delay(bej, ExecutorType.UPDATE)
     jobRegistry.register(bej)
   }

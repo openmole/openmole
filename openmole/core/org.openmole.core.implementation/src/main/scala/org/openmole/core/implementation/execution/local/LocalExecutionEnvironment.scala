@@ -28,7 +28,9 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.SynchronizedPriorityQueue
+import org.openmole.core.model.execution.IEnvironment
 
 object LocalExecutionEnvironment extends Environment {
   
@@ -108,6 +110,7 @@ class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
   def submit(moleJob: IMoleJob): Unit = submit(new Job(moleJob.id.executionId, List(moleJob)))
 
   private def submit(ejob: LocalExecutionJob) = {
+    EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(ejob))
     ejob.state = ExecutionState.SUBMITTED
     jobs += ejob
     jobInQueue.release

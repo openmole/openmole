@@ -22,7 +22,16 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution.IExecutionJob
 
 class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(environment, job, id) {
-    var state: ExecutionState = READY
+  private var _state: ExecutionState = READY
+    
+  override def state = _state
+  
+  def state_=(state: ExecutionState) {
+    EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, this.state))
+    _state = state
+  }
 }

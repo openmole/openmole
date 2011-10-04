@@ -18,7 +18,12 @@
 package org.openmole.core.model.execution
 
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.eventdispatcher.Event
 import ExecutionState._
+
+object IExecutionJob {
+  case class StateChanged(val newState: ExecutionState, oldState: ExecutionState) extends Event[IExecutionJob]
+}
 
 trait IExecutionJob {  
   def state: ExecutionState

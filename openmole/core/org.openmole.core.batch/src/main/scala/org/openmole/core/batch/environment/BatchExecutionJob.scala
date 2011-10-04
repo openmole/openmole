@@ -34,6 +34,8 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution.IExecutionJob
 
 object BatchExecutionJob extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
@@ -108,8 +110,10 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             case FAILED => resubmit
             case DONE => tryFinalise(batchJob)
           }
-          if(oldState != newState) Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-          else incrementedDelay
+          if(oldState != newState) {
+            EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
+            Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+          } else incrementedDelay
       }
     } catch {
       case (e: TemporaryErrorException) => logger.log(FINE, "Temporary error durring job update.", e)
