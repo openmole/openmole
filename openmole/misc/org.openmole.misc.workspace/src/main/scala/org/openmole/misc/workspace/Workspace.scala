@@ -38,7 +38,7 @@ object Workspace {
   
   val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
   
-  val PasswordRequired = new Event[Workspace]
+  case class PasswordRequired extends Event[Workspace]
   
   val sessionUUID = UUID.randomUUID
   val OpenMoleDir = ".openmole"
@@ -276,7 +276,7 @@ class Workspace(val location: File) {
 
   def decrypt(s: String) = {
     _password match {
-      case None => EventDispatcher.trigger(this, Workspace.PasswordRequired)
+      case None => EventDispatcher.trigger(this, new Workspace.PasswordRequired)
       case Some(p) =>
     } 
     textEncryptor(_password).decrypt(s)
