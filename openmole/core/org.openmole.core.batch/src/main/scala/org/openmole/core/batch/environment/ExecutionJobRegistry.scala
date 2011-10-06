@@ -50,12 +50,11 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
     case None => Iterable.empty
   }
 
-  def remove(ejob: EXECUTIONJOB) = {
+  def remove(ejob: EXECUTIONJOB) = 
     jobs.get(ejob.job) match {
       case Some(ejobs) => ejobs -= ejob
       case None =>
     }     
-  }
 
   def isEmpty: Boolean = jobs.isEmpty
 
@@ -83,25 +82,23 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
 
   def allExecutionJobs:  Iterable[EXECUTIONJOB] = for (job <- allJobs ; ejob <- executionJobs(job)) yield ejob
 
-  def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] = {
+  def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] =
     jobs.get(job) match {
       case None => None
       case Some(ejobs) => ejobs.headOption
     }
-  }
 
-  def executionJobs(category: StatisticKey): Iterable[EXECUTIONJOB] = {
+  def executionJobs(category: StatisticKey): Iterable[EXECUTIONJOB] =
     categories.get(category) match {
       case Some(js) => for(j <- js; if jobs.contains(j); ejob <- jobs(j)) yield ejob
       case None => Iterable.empty
     }  
-  }
+ 
 
-  def jobs(category: StatisticKey): Iterable[IJob] = {
+  def jobs(category: StatisticKey): Iterable[IJob] = 
     categories.get(category) match {
       case None => Iterable.empty
       case Some(jobs) => jobs
     }
-  }
 
 }

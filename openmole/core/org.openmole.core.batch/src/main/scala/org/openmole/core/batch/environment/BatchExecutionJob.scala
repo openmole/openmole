@@ -64,56 +64,56 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
 
     
-  private def updateAndGetState: ExecutionState = {
-    if (killed.get) return KILLED
-    batchJob match {
+  private def updateAndGetState = 
+    if (killed.get) KILLED
+    else batchJob match {
       case None => READY
       case Some(batchJob) =>
         val oldState = batchJob.state
         val newState = 
           if (!oldState.isFinal) batchJob.updateState
-          else oldState
+        else oldState
 
         if(oldState != newState && newState == KILLED) kill
         state
     }
-  }
 
   override def state =
     if (killed.get) KILLED 
     else batchJob match {
-           case None => READY
-           case Some(batchJob) => batchJob.state
-         }
+      case None => READY
+      case Some(batchJob) => batchJob.state
+    }
 
   override def update: Boolean = {
     try {
       val oldState = state
-
-      def incrementedDelay = {
-        val newDelay = _delay + Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
-        val maxDelay = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
-        if (newDelay <= maxDelay) newDelay else maxDelay
-      }
+      if(oldState != KILLED) {
+        def incrementedDelay = {
+          val newDelay = _delay + Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+          val maxDelay = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
+          if (newDelay <= maxDelay) newDelay else maxDelay
+        }
       
-      _delay = batchJob match {
-        case None =>
-          if (copyToEnvironmentExecFuture.isDone) {
-            batchJob = trySubmit(copyToEnvironmentExecFuture.get)
-            Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-          } else incrementedDelay
-        case Some(batchJob) =>
-          val newState = updateAndGetState
-          newState match {
-            case READY => throw new InternalProcessingError("Bug, it should never append.")
-            case (SUBMITTED | RUNNING | KILLED) => {}
-            case FAILED => resubmit
-            case DONE => tryFinalise(batchJob)
-          }
-          if(oldState != newState) {
-            EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
-            Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-          } else incrementedDelay
+        _delay = batchJob match {
+          case None =>
+            if (copyToEnvironmentExecFuture.isDone) {
+              batchJob = trySubmit(copyToEnvironmentExecFuture.get)
+              Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+            } else incrementedDelay
+          case Some(batchJob) =>
+            val newState = updateAndGetState
+            newState match {
+              case READY => throw new InternalProcessingError("Bug, it should never append.")
+              case (SUBMITTED | RUNNING | KILLED) => {}
+              case FAILED => resubmit
+              case DONE => tryFinalise(batchJob)
+            }
+            if(oldState != newState) {
+              EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
+              Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+            } else incrementedDelay
+        }
       }
     } catch {
       case (e: TemporaryErrorException) => logger.log(FINE, "Temporary error durring job update.", e)
@@ -159,12 +159,16 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   }
 
   private def clean =
-    if(copyToEnvironmentExecFuture.isDone) {
-      val serializedJob = copyToEnvironmentExecFuture.get
-      val storage = serializedJob.communicationStorage
-      import storage._
+    if(copyToEnvironmentExecFuture.isDone && !copyToEnvironmentExecFuture.isCancelled) {
+      try {
+        val serializedJob = copyToEnvironmentExecFuture.get
+        val storage = serializedJob.communicationStorage
+        import storage._
 
-      ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
+        ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
+      } catch {
+        case e => logger.log(FINE, "Error durring job cleaning.", e)
+      }
     }
 
   def kill = 
@@ -178,9 +182,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         }       
         clean
       } finally batchJob match {
-          case Some(bj) => 
-            ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
-          case None =>
+        case Some(bj) => 
+          ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+        case None =>
       }
     }
 

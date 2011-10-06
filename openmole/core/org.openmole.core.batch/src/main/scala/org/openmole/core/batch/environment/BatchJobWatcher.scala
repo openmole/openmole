@@ -17,17 +17,20 @@
 
 package org.openmole.core.batch.environment
 
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ListBuffer
 import scala.ref.WeakReference
 
+object BatchJobWatcher extends Logger
+
 class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
 
+  import BatchJobWatcher._
+  
   def this(environment: BatchEnvironment) = this(new WeakReference(environment))
   
   override def delay = Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval)
@@ -44,14 +47,9 @@ class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends I
       for (val job <- registry.allJobs) {
 
         if (job.allMoleJobsFinished) {
-
-          for (val ej <- registry.executionJobs(job)) {
-            ej.kill
-          }
-
+          for (val ej <- registry.executionJobs(job)) ej.kill
           jobGroupsToRemove += job
         } else {
-
           val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
 
           for (ej <- registry.executionJobs(job)) {
@@ -60,21 +58,19 @@ class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends I
               case _ =>
             }
           }
-
+       
           for (ej <- executionJobsToRemove) registry.remove(ej)
 
           if (registry.nbExecutionJobs(job) == 0) {
             try environment.submit(job)
             catch {
-              case(e) => Logger.getLogger(classOf[BatchJobWatcher].getName).log(Level.SEVERE, "Submission of job failed, job isn't being executed.", e)
+              case(e) => logger.log(SEVERE, "Submission of job failed, job isn't being executed.", e)
             }
           }
         }
       }
 
-      for (j <- jobGroupsToRemove) {
-        registry.removeJob(j)
-      }
+      for (j <- jobGroupsToRemove) registry.removeJob(j)
     }
 
     true
