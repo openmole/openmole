@@ -81,7 +81,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
     
     val interval = (getTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
     Updater.delay(new ProxyChecker(ctx), ExecutorType.OWN, interval)
-    
+        
     (ctx, proxyDuration)
   }
   

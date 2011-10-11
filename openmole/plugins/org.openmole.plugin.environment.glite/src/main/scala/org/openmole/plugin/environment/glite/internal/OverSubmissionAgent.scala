@@ -56,22 +56,28 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
     val registry = env.jobRegistry
     registry.synchronized {
 
-      val toProceed = registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).filter( elt => {elt._1 != null && elt._2.size > 0})
+      val toProceed = 
+        registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
+                                  filter( elt => {elt._1 != null && elt._2.size > 0} )
       //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
     
       toProceed.foreach {
         case(k, jobs) => {
             val now = System.currentTimeMillis
             val stillRunning = jobs.filter(_.state == RUNNING)
+            val stillReady = jobs.filter(_.state == READY)
             
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running " + stillRunning.size )
   
-            val stillRunningSamples = jobs.view.flatMap{_.batchJob}.filter(_.state == RUNNING).map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
+            val stillRunningSamples = jobs.view.flatMap{_.batchJob}.
+                                                filter(_.state == RUNNING).
+                                                map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
+                                                
             val samples = (StatisticRegistry.statistic(env)(k._1, k._2) ++ stillRunningSamples).toArray
  
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
 
-            var nbRessub = if(!samples.isEmpty) {
+            var nbRessub = if(!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
               val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
               val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
             
@@ -88,6 +94,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
             Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
             val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+            
             if (nbRessub > 0) {
               // Resubmit nbRessub jobs in a fair manner
               val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
@@ -109,11 +116,8 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
                   val it = jobs.iterator
                   val job = it.next
 
-                  //Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.FINE, "Resubmit : running " + key + " nbRessub " + nbRessub);
-
-                  try {
-                    env.submit(job)
-                  } catch {
+                  try env.submit(job)
+                  catch {
                     case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
                   }
 

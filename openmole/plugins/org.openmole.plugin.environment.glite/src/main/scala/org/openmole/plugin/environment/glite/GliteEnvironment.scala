@@ -69,8 +69,9 @@ object GliteEnvironment {
   val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
   val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
   val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
-  val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
+  //val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
   val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
+  val MaxNumberOfJobReadyForOverSubmission = new ConfigurationLocation("GliteEnvironment", "MaxNumberOfJobReadyForOverSubmission")
 
 
   val LocalThreadsBySELocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
@@ -106,6 +107,7 @@ object GliteEnvironment {
   // Workspace += (OverSubmissionGridSizeRatio, "0.25")
   Workspace += (OverSubmissionInterval, "PT5M")
 
+  Workspace += (MaxNumberOfJobReadyForOverSubmission, "100")
   Workspace += (OverSubmissionMinNumberOfJob, "100")
   Workspace += (OverSubmissionNumberOfJobUnderMin, "5")
   
