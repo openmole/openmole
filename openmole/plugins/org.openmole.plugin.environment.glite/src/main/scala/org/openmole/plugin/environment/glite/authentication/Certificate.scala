@@ -38,13 +38,13 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
   
   private def getTime =
     try  UDuration.toInt(getTimeString) * 1000
-    catch {
-      case (ex: ParseException) => throw new UserBadDataError(ex)
-    }
+  catch {
+    case (ex: ParseException) => throw new UserBadDataError(ex)
+  }
   
   def password =  
     if(cypheredPassword == null) ""
-    else Workspace.decrypt(cypheredPassword)
+  else Workspace.decrypt(cypheredPassword)
    
   override def init(authentication: GliteAuthentication) = {
     import authentication._
@@ -53,20 +53,20 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
  
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
-  
+    
     val proxyDuration = myProxy match {
       case Some(proxy) => 
         ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
-        ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, Workspace.preference(GliteEnvironment.DelegationTimeLocation))
         ctx.setAttribute(VOMSContext.MYPROXYUSERID,proxy.userId)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
         None
       case None =>
         ctx.setAttribute(Context.TYPE, "VOMS")
-        ctx.setAttribute(Context.LIFETIME, getTimeString)
         Some(getTime)
     }
+  
+    ctx.setAttribute(Context.LIFETIME, getTimeString)
     ctx.setAttribute(Context.USERPASS, password)
     
     if (!fqan.isEmpty) ctx.setAttribute(VOMSContext.USERFQAN, fqan)
@@ -79,12 +79,8 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
    
     _init(ctx)
     
-    proxyDuration match {
-      case Some(duration) =>
-        val interval = (duration * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
-        Updater.delay(new ProxyChecker(ctx), ExecutorType.OWN, interval)
-      case None =>
-    }
+    val interval = (getTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+    Updater.delay(new ProxyChecker(ctx), ExecutorType.OWN, interval)
     
     (ctx, proxyDuration)
   }

@@ -61,8 +61,7 @@ object GliteEnvironment {
   //val ProxyType = new ConfigurationLocation("GliteEnvironment", "ProxyType")
   
   val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
-  val DelegationTimeLocation = new ConfigurationLocation("GliteEnvironment", "DelegationTime")
-
+ 
   val FetchRessourcesTimeOutLocation = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
@@ -92,7 +91,6 @@ object GliteEnvironment {
 
   Workspace += (CertificateType, "p12")
   Workspace += (TimeLocation, "PT24H")
-  Workspace += (DelegationTimeLocation, "P7D")
 
   Workspace += (FetchRessourcesTimeOutLocation, "PT5M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
