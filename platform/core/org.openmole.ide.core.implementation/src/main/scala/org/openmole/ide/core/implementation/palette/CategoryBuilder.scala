@@ -18,9 +18,14 @@
 package org.openmole.ide.core.implementation.palette
 
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.palette.ICategory
-import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openide.nodes.Node
 import org.openide.nodes.Children
 import org.openmole.ide.core.model.commons.MoleSceneType._
@@ -32,15 +37,19 @@ class CategoryBuilder(val sceneType: MoleSceneType) extends Children.Keys[ICateg
   
   override def addNotify = {
     super.addNotify
-    
-    setKeys(sceneType match {
+      setKeys(sceneType match {
         case BUILD=>List(
-            new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task.toMap,TASK_DATA_FLAVOR)),
-            new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype.toMap,PROTOTYPE_DATA_FLAVOR)),
-            new GenericCategory(DOMAIN,"Domains" ,new GenericChildren(Proxys.domain.toMap,DOMAIN_DATA_FLAVOR)),
-            new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling.toMap,SAMPLING_DATA_FLAVOR))).toIterable
+            new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task,TASK_DATA_FLAVOR)),
+            new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
+            new GenericCategory(DOMAIN,"Domains" ,new GenericChildren(Proxys.domain,DOMAIN_DATA_FLAVOR)),
+            new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR)),
+            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR))).toIterable
         case EXECUTION => List (
-            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment.toMap,ENVIRONMENT_DATA_FLAVOR))).toIterable
-      })
-  }     
+            new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task,TASK_DATA_FLAVOR)),
+            new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
+            new GenericCategory(DOMAIN,"Domains" ,new GenericChildren(Proxys.domain,DOMAIN_DATA_FLAVOR)),
+            new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR)),
+            new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR))).toIterable
+      }) 
+  }
 }

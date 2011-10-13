@@ -49,10 +49,10 @@
         <file name="AS-Y.shadow_hidden"/>
     </folder>
     <folder name="Toolbars">
-        <file name="Clipboard_hidden"/>
+        <!--file name="Clipboard"/>
         <file name="File_hidden"/>
-        <file name="Memory_hidden"/>
-        <file name="UndoRedo_hidden"/>
+        <file name="Memory_hidden_hidden"/>
+        <file name="UndoRedo_hidden_hidden"/-->
     </folder>
     <folder name="Windows2">
         <folder name="Modes">

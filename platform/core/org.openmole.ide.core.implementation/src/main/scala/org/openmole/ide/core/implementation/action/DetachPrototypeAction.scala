@@ -17,11 +17,18 @@
 
 package org.openmole.ide.core.implementation.action
 
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
+import org.openmole.ide.core.implementation.display.Displays
+import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import scala.swing.Action
 
-class DetachPrototypeAction (tdp: ITaskDataProxyUI, pdp: IPrototypeDataProxyUI) extends ActionListener{
-  override def actionPerformed(ae: ActionEvent) =  tdp.dataUI.prototypesIn-= pdp
+class DetachPrototypeAction(tdp: ITaskDataProxyUI, pdp: IPrototypeDataProxyUI, ty: IOType.Value) extends Action("Detach"){
+  override def apply= {
+    ty match {
+      case IOType.INPUT=> tdp.dataUI.prototypesIn-= pdp
+      case IOType.OUTPUT=> tdp.dataUI.prototypesOut-= pdp
+      case _=>
+    }
+    Displays.propertyPanel.updateTaskViewport}
 }

@@ -19,7 +19,7 @@ package org.openmole.ide.core.implementation.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
 import org.openmole.ide.core.model.workflow.IMoleScene
 
@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 class AddCapsuleAction(moleScene: IMoleScene, provider: GenericMenuProvider) extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
-    MoleScenesManager.createCapsule(moleScene,provider.currentPoint).addInputSlot(false)
+    SceneItemFactory.createCapsule(moleScene,provider.currentPoint).addInputSlot(false)
     moleScene.refresh
   }
 }

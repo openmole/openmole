@@ -22,6 +22,6 @@ import org.openmole.ide.core.implementation.display.Displays
 import scala.swing.Action
 
 class RemoveTaskAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.task-= proxyID
+  override def apply = {Proxys.tasks-= proxyID
                         Displays.propertyPanel.cleanViewport}
 }

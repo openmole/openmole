@@ -26,7 +26,7 @@ import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.netbeans.api.visual.action.ConnectorState
 
 
@@ -41,9 +41,9 @@ class DnDNewTaskProvider(molescene: IMoleScene) extends DnDProvider(molescene) {
   }
  
   override def accept(widget: Widget,point: Point,transferable: Transferable)= {
-    val capsule = MoleScenesManager.createCapsule(molescene,point)
+    val capsule = SceneItemFactory.createCapsule(molescene,point)
     capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
-    capsule.addInputSlot(false)
+    capsule.addInputSlot(molescene.manager.capsules.size == 1)
     
     molescene.graphScene.repaint
     molescene.graphScene.revalidate

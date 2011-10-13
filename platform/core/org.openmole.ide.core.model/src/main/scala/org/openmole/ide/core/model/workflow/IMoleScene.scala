@@ -33,6 +33,8 @@ trait IMoleScene {
   
   def moleSceneType: MoleSceneType.Value
   
+  def isBuildScene: Boolean = moleSceneType == MoleSceneType.BUILD
+  
   def graphScene: GraphScene[String,String]
   
   def copy: IMoleScene

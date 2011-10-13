@@ -25,13 +25,13 @@ import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.action.RemoveDomainAction
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.display.IDisplay
+import org.openmole.ide.core.model.display.IDomainDisplay
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import scala.swing.MenuItem
 
-object DomainDisplay extends IDisplay{
+object DomainDisplay extends IDomainDisplay{
   private var modelDomains = new HashSet[DomainDataProxyFactory]
   var currentPanel: Option[IDomainPanelUI[_]] = None
   var currentDataProxy: Option[IDomainDataProxyUI] = None
@@ -47,8 +47,10 @@ object DomainDisplay extends IDisplay{
     currentPanel.get
   }
   
-  override def managementMenu = new PopupMenu {
+  override def firstManagementMenu= new PopupMenu{
     add(new MenuItem(new RemoveDomainAction(Displays.currentProxyID)))}
+  
+  override def secondManagementMenu(takskProxy: ITaskDataProxyUI, domainProxy: IDomainDataProxyUI) = new PopupMenu {}
   
   override def saveContent(name: String) = {
     currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)

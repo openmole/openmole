@@ -34,5 +34,5 @@ trait IDisplay{
   
   def setCurrentDataProxy(pID: Int)
   
-  def managementMenu: PopupMenu
+  def firstManagementMenu: PopupMenu
 }

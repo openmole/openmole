@@ -24,8 +24,7 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
-import org.openmole.ide.core.implementation.control.TabManager;
-import org.openmole.ide.core.implementation.control.MoleScenesManager;
+import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.dataproxy.Proxys;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
@@ -40,9 +39,10 @@ public final class ResetAll implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        MoleScenesManager.removeMoleScenes();
+     //   TopComponentsManager.removeMoleScenes();
+        PaletteSupport.closeOpenedTopComponents();
         Proxys.clearAll();
-        TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene());
+        TopComponentsManager.addTopComponent();
         PaletteSupport.refreshPalette();
         Displays.propertyPanel().cleanViewport();
     }

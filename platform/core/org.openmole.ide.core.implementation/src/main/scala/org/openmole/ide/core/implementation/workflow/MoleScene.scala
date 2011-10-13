@@ -36,7 +36,6 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.implementation.control.MoleScenesManager
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.display.TaskDisplay
 import org.openmole.ide.core.implementation.provider.DnDNewTaskProvider
@@ -82,10 +81,10 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     manager.capsules.foreach(n=> {
         val (caps,islotMapping) = n._2.copy(ms)
         if (n._2.startingCapsule) ms.manager.setStartingCapsule(caps)
-        val c = MoleScenesManager.createCapsule(caps,ms, new Point(n._2.connectableWidget.x.toInt,n._2.connectableWidget.y.toInt))
+        val c = SceneItemFactory.createCapsule(caps,ms, new Point(n._2.connectableWidget.x.toInt,n._2.connectableWidget.y.toInt))
         capsuleMapping+= n._2-> caps
         islots++= islotMapping})
-    manager.transitions.foreach(t=> {MoleScenesManager.createEdge(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)
+    manager.transitions.foreach(t=> {SceneItemFactory.createEdge(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)
       })
     ms
   }

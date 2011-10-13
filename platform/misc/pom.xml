@@ -17,7 +17,8 @@
 
     <modules>
         <module>org.openmole.ide.misc.exception</module>
-        <module>org.openmole.ide.misc.widget</module>      
+        <module>org.openmole.ide.misc.widget</module>    
+        <module>org.openmole.ide.misc.image</module>      
         <module>org.openmole.ide.misc.visualization</module>
     </modules>
 

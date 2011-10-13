@@ -33,6 +33,11 @@
     </build>
     <dependencies> 
         <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>uk.com.robustit.cloning</artifactId>
+            <version>1.7</version>
+        </dependency>  
+        <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.core.model</artifactId>
             <version>${project.version}</version>
@@ -68,8 +73,8 @@
             <version>${openmole.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
+            <groupId>org.openmole</groupId>
+            <artifactId>com.thoughtworks.xstream</artifactId>
             <version>1.4.1</version>
         </dependency>
         <dependency>
@@ -152,6 +157,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.widget</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.image</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

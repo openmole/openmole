@@ -24,7 +24,7 @@ import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import java.awt.BasicStroke
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -43,7 +43,7 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
   
   
   def setWidthHint= {
-    if (MoleScenesManager.detailedView) {
+    if (TopComponentsManager.detailedView) {
       taskWidth = EXPANDED_TASK_CONTAINER_WIDTH
       taskImageOffset = EXPANDED_TASK_IMAGE_WIDTH_OFFSET
     }

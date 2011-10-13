@@ -29,7 +29,6 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openmole.core.implementation.mole.MoleExecution;
 import org.openmole.ide.core.implementation.control.ExecutionSupport;
-import org.openmole.ide.core.implementation.control.TabManager;
 import org.openmole.ide.core.implementation.serializer.MoleMaker;
 
 /**
@@ -80,10 +79,6 @@ public final class ExecutionTopComponent extends TopComponent {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
-
-    public void refresh(){
-        
-    }
     
     @Override
     public void componentOpened() {

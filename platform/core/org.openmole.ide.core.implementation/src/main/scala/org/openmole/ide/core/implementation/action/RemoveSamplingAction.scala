@@ -23,6 +23,6 @@ import org.openmole.ide.core.implementation.palette.PaletteSupport
 import scala.swing.Action
 
 class RemoveSamplingAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.sampling-= proxyID
+  override def apply = {Proxys.samplings-= proxyID
                        PaletteSupport.refreshPalette}
 }

@@ -21,12 +21,12 @@ import scala.collection.JavaConversions._
 import javax.swing.AbstractButton
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 
 class EnableTaskDetailedViewAction extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
-    MoleScenesManager.detailedView= ae.getSource.asInstanceOf[AbstractButton].isSelected
-    MoleScenesManager.moleScenes.keys.foreach(s=> {s.manager.capsules.values.foreach(_.connectableWidget.setDetailedView);s.validate;s.refresh})
+    TopComponentsManager.detailedView= ae.getSource.asInstanceOf[AbstractButton].isSelected
+    TopComponentsManager.topComponents.keys.foreach(tc=> {tc.getMoleScene.manager.capsules.values.foreach(_.connectableWidget.setDetailedView);tc.getMoleScene.validate;tc.getMoleScene.refresh})
   }
 }

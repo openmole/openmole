@@ -52,6 +52,8 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID+= 1
     capsules.put(getNodeID,cv)
+    if (capsules.size == 1) {
+      startingCapsule= Some(cv)}
     capsuleConnections+= cv-> HashSet.empty[ITransitionUI]
   }
   

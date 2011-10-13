@@ -33,16 +33,16 @@ import org.openmole.ide.misc.widget.ToolBarButton
 
 object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
   val startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")),"Start the workflow",
-                                      new Action(""){override def apply = if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.start})
+                                      new Action(""){override def apply = TopComponentsManager.currentExecutionManager.start})
                                        
   val stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")),"Stop the workflow",
-                                     new Action(""){override def apply = if(TabManager.currentExecutionManager.isDefined) TabManager.currentExecutionManager.get.cancel})
+                                     new Action(""){override def apply =  TopComponentsManager.currentExecutionManager.cancel})
   contents.append(startButton,stopButton)
   
-  EventDispatcher.registerForObjectChanged(Workspace.instance, Priority.NORMAL, PasswordListener , Workspace.PasswordRequired)
+  EventDispatcher.listen(Workspace.instance, PasswordListener , classOf[Workspace.PasswordRequired])
   
   def activate(b:Boolean) = {
-    startButton.enabled = b
-    stopButton.enabled = b
+    startButton.visible = b
+    stopButton.visible = b
   }
 }

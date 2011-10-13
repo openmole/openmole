@@ -17,10 +17,11 @@
 
 package org.openmole.ide.core.implementation.action
 
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
+import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import scala.swing.Action
 
-class DetachEnvironmentAction(tdp: ITaskDataProxyUI) extends ActionListener{
-  override def actionPerformed(ae: ActionEvent) = tdp.dataUI.environment = None
+class DetachEnvironmentAction(tdp: ITaskDataProxyUI) extends Action("Detach"){
+  override def apply = {tdp.dataUI.environment = None
+                        Displays.propertyPanel.updateTaskViewport}
 }

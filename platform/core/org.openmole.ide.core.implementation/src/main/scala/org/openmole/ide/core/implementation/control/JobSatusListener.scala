@@ -21,14 +21,20 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.IOneJobStatusChanged
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 
-class JobSatusListener extends IOneJobStatusChanged {
-  override def oneJobStatusChanged(execution: IMoleExecution, moleJob: IMoleJob, newState: State, oldState: State) = {
-    val exeManager = TabManager.executionManager(execution)
-    exeManager.status(oldState) -= 1 
-    exeManager.status(newState) += 1 
-    exeManager.wfPiePlotter.updateData(oldState.name,exeManager.status(oldState))
-    exeManager.wfPiePlotter.updateData(newState.name,exeManager.status(newState))}
+class JobSatusListener extends EventListener[IMoleExecution] {
+  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+    event match {
+      case x: OneJobStatusChanged=> 
+        val exeManager = TopComponentsManager.executionManager(execution)
+        exeManager.status(x.oldState) -= 1 
+        exeManager.status(x.newState) += 1 
+        exeManager.wfPiePlotter.updateData(x.oldState.name,exeManager.status(x.oldState))
+        exeManager.wfPiePlotter.updateData(x.newState.name,exeManager.status(x.newState))
+    }
+  }
 }

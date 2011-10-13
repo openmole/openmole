@@ -26,11 +26,11 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.action.RemoveTaskAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.display.IDisplay
+import org.openmole.ide.core.model.display.ITaskDisplay
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import scala.swing.MenuItem
 
-object TaskDisplay extends IDisplay{
+object TaskDisplay extends ITaskDisplay{
   private var modelTasks = new HashSet[TaskDataProxyFactory]
   var currentPanel: Option[ITaskPanelUI] = None
   var currentDataProxy: Option[ITaskDataProxyUI] = None
@@ -46,11 +46,12 @@ object TaskDisplay extends IDisplay{
     currentPanel.get
   }
   
-  override def managementMenu = new PopupMenu {
-    add(new MenuItem(new RemoveTaskAction(Displays.currentProxyID)))}
+  override def firstManagementMenu= new PopupMenu{
+   add(new MenuItem(new RemoveTaskAction(Displays.currentProxyID)))}
+  
+  override def secondManagementMenu(damainProxy: ITaskDataProxyUI) = new PopupMenu {}
   
   override def saveContent(name: String) = {
-    // select(oldName)
     val env = currentDataProxy.get.dataUI.environment
     val sample = currentDataProxy.get.dataUI.sampling
     val protoI = currentDataProxy.get.dataUI.prototypesIn
@@ -62,6 +63,4 @@ object TaskDisplay extends IDisplay{
     currentDataProxy.get.dataUI.environment_=(env)
     if (Displays.initMode) Proxys.addTaskElement(currentDataProxy.get)
   }
-  
-  
 }

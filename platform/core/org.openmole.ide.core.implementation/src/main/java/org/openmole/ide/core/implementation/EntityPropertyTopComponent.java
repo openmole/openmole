@@ -44,7 +44,7 @@ public final class EntityPropertyTopComponent extends TopComponent {
         initComponents();
         setName(NbBundle.getMessage(EntityPropertyTopComponent.class, "CTL_EntityPropertyTopComponent"));
         setToolTipText(NbBundle.getMessage(EntityPropertyTopComponent.class, "HINT_EntityPropertyTopComponent"));
-
+        
         setLayout(new BorderLayout());
         add(Displays.propertyPanel().peer(), BorderLayout.CENTER);
     }

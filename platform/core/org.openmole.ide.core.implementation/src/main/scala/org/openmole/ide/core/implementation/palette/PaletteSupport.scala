@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.palette
 
+import com.rits.cloning.Cloner
 import java.awt.Image
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
@@ -34,10 +35,12 @@ import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.display.Displays
-import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.netbeans.spi.palette.PaletteController
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.model.commons.MoleSceneType
 import org.openmole.ide.core.model.commons.MoleSceneType._
+import scala.collection.JavaConversions._
 
 object PaletteSupport {
   val TASK_DATA_FLAVOR= new DataFlavor(classOf[TaskDataProxyUI], TASK)
@@ -47,43 +50,51 @@ object PaletteSupport {
   val DOMAIN_DATA_FLAVOR= new DataFlavor(classOf[DomainDataProxyUI], DOMAIN)
 
   var currentType = BUILD
+  var modified= false
+  var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None
+    
+  def closeOpenedTopComponents = {
+    if (currentMoleSceneTopComponent.isDefined)
+      currentMoleSceneTopComponent.get.getOpened.foreach(_.close)
+  }
+  
+  def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
   
   def createPalette(mst: MoleSceneType): PaletteController = {
-    currentType = mst
-    val paletteRoot = new AbstractNode(new CategoryBuilder(mst))
-    paletteRoot.setName("Entities")
-    var palette = PaletteFactory.createPalette(paletteRoot, new MyActions, new MyPaletteFilter, new MyDnDHandler)
-    palette.addPropertyChangeListener( new MyAddPropertyChangeListener) 
-    palette
-  }
+      currentType = mst
+      val paletteR = new AbstractNode(new CategoryBuilder(mst))
+      paletteR.setName("Entities")
+      var p = PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler)
+      p.addPropertyChangeListener( new MyAddPropertyChangeListener(p))
+      p
+    }
   
   def createPalette: PaletteController = createPalette(currentType)
   
   def refreshPalette(mst: MoleSceneType) = {
-    currentType = mst
-    WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent].refresh(if(mst.equals(BUILD)) true else false)
-  }
-    
+    modified = true
+    if (currentMoleSceneTopComponent.isDefined) {
+      currentMoleSceneTopComponent.get.refresh(mst == BUILD)
+      modified = false}
+  }  
   def refreshPalette: Unit = refreshPalette(currentType)
 }
   
-class MyAddPropertyChangeListener extends PropertyChangeListener  {
+class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {
   var currentSelItem = Lookup.EMPTY
   
   override def  propertyChange(pce: PropertyChangeEvent)= {
-    val mstc = WindowManager.getDefault.findTopComponent("MoleSceneTopComponent").asInstanceOf[MoleSceneTopComponent]
-    val selItem = mstc.getPalette.getSelectedItem
-    val selCategoryLookup = mstc.getPalette.getSelectedCategory.lookup(classOf[Node])
+    val selItem = palette.getSelectedItem
+    val selCategoryLookup = palette.getSelectedCategory.lookup(classOf[Node])
     if (selItem != null && selCategoryLookup != null && selItem != currentSelItem){
       Displays.currentType = selCategoryLookup.getName
-    Displays.setCurrentProxyID( selItem.lookup(classOf[Node]).getValue("proxy").asInstanceOf[Int])
+      Displays.setCurrentProxyID(palette.getSelectedItem.lookup(classOf[Node]).getValue("proxy").asInstanceOf[Int])
       Displays.propertyPanel.displayCurrentEntity 
       currentSelItem = selItem
     }
   }
 }                                
-                                      
-                                      
+                                                                           
 class MyActions extends PaletteActions{
   override def getImportActions = null
   override def getCustomPaletteActions = null

@@ -23,6 +23,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.IOType
+import org.openmole.ide.core.implementation.display.TaskDisplay
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.implementation.dataproxy._
@@ -54,9 +55,16 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
       case dpu:ISamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
       case dpu:IEnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
     }
-    
+   // selectTask
     molescene.graphScene.repaint
-    molescene.graphScene.revalidate
+    molescene.graphScene.validate
+  }
+  
+  private def selectTask{
+    if(capsule.dataProxy.isDefined){
+      Displays.currentType = TASK
+      TaskDisplay.currentDataProxy = capsule.dataProxy
+      Displays.propertyPanel.displayCurrentEntity}
   }
   
   private def capsuleDataUI = capsule.dataProxy.get.dataUI

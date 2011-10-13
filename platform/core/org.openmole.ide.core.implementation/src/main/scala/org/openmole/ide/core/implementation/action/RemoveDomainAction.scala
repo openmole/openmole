@@ -22,6 +22,6 @@ import scala.swing.Action
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class RemoveDomainAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.domain-= proxyID 
+  override def apply = {Proxys.domains-= proxyID 
                         Displays.propertyPanel.cleanViewport}
 }

@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.display
  
 import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
 
@@ -42,9 +43,9 @@ object Displays {
   
   def saveContent(name: String) = currentDisplay.saveContent(name)
   
-  def managementMenu = currentDisplay.managementMenu
-  
-  private def currentDisplay :IDisplay= {
+  def firstManagementMenu = currentDisplay.firstManagementMenu
+    
+  private def currentDisplay :IDisplay= 
     currentType match{
       case TASK=> TaskDisplay
       case PROTOTYPE=> PrototypeDisplay
@@ -52,6 +53,5 @@ object Displays {
       case ENVIRONMENT=> EnvironmentDisplay
       case DOMAIN => DomainDisplay
       case _=> throw new GUIUserBadDataError("Unknown type " + currentType + " No display is available.")
-    }
   }
 }

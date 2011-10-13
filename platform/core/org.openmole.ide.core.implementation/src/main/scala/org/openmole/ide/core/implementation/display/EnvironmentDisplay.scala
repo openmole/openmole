@@ -26,12 +26,15 @@ import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.display.IDisplay
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.display.IEnvironmentDisplay
+import org.openmole.ide.core.implementation.action.DetachEnvironmentAction
 import org.openmole.ide.core.implementation.action.RemoveEnvironmentAction
 import scala.swing.MenuItem
 
-object EnvironmentDisplay extends IDisplay{
+object EnvironmentDisplay extends IEnvironmentDisplay{
   private var modelEnvironments = new HashSet[EnvironmentDataProxyFactory]
   var currentPanel: Option[IEnvironmentPanelUI] = None
   var currentDataProxy: Option[IEnvironmentDataProxyUI] = None
@@ -47,8 +50,14 @@ object EnvironmentDisplay extends IDisplay{
     currentPanel.get
   }
   
-  override def managementMenu = new PopupMenu {
+  override def firstManagementMenu= new PopupMenu{
     add(new MenuItem(new RemoveEnvironmentAction(Displays.currentProxyID)))}
+  
+  override def secondManagementMenu(taskProxy: ITaskDataProxyUI,environmentProxy: IEnvironmentDataProxyUI) = {
+    println("secondManagementMenu env" )
+    new PopupMenu {
+    add(new MenuItem(new DetachEnvironmentAction(taskProxy)))}}
+  
   
   override def saveContent(name: String) = {
     currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)

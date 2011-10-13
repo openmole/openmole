@@ -17,14 +17,16 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.control.MoleScenesManager
-import org.openmole.ide.core.implementation.control.TabManager
+import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.palette.FrozenProxys
 import scala.swing.Action
 
-class CleanAndBuildExecutionAction(text: String) extends Action(text){
+class CleanAndBuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
-    if (TabManager.currentScene.isDefined){
-    MoleScenesManager.removeAllExecutionMoleScene(TabManager.currentScene.get)
-    TabManager.displayExecutionMoleScene(MoleScenesManager.addExecutionMoleScene(TabManager.currentScene.get))}
+    TopComponentsManager.removeAllExecutionTopComponent(tc)
+    val clone = TopComponentsManager.addExecutionTopComponent(tc)
+    FrozenProxys.freeze(clone)
+    clone.requestActive
   }
 }

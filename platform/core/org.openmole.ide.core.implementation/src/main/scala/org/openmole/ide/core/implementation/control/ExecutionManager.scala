@@ -67,14 +67,14 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     hookPanels.values.foreach(_.release)
     moleExecution = MoleMaker.buildMoleExecution(mole, manager)
     initPieChart
-    EventDispatcher.registerForObjectChanged(moleExecution,Priority.NORMAL,new JobCreatedListener,IMoleExecution.OneJobSubmitted)
+    EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
     hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
   
   def cancel = moleExecution.cancel
   
   override def commitHook(hookPanelUI: IHookPanelUI) {
-    if (hookPanels.contains(hookPanelUI)) {println("realase");hookPanels(hookPanelUI).release}
+    if (hookPanels.contains(hookPanelUI)) hookPanels(hookPanelUI).release
     hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
   }
   def initPieChart = status.keys.foreach(k=>status(k)=0)

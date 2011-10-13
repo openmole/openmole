@@ -17,10 +17,12 @@
 
 package org.openmole.ide.core.implementation.control
 
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.workspace._
 
-object PasswordListener extends Workspace.IWorkspaceListener{
-  override def passwordRequired(obj: Workspace) = {
+object PasswordListener extends EventListener[Workspace]{
+  override def triggered(obj: Workspace,event: Event[Workspace]) = {
     PasswordDialog
   }
 }

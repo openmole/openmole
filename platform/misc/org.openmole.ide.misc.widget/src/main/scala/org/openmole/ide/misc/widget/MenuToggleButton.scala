@@ -26,16 +26,18 @@ import javax.swing.Icon
 import scala.swing._
 import swing.Swing._
 
-class MenuToggleButton(ic: Option[Icon]= None) extends ToggleButton(""){
+class MenuToggleButton(ic: Option[Icon]= None, t:String= "") extends ToggleButton(""){
   var popup = new PopupMenu
       
   popup.peer.addPropertyChangeListener( "visible", new PropertyChangeListener {
       def propertyChange(e: PropertyChangeEvent) = peer.setSelected( popup.peer.isVisible )})
-  
-  action = new Action("") { 
-    if (ic.isDefined) icon = {MenuToggleButton.this.maximumSize = new Dimension (ic.get.getIconWidth+10,ic.get.getIconHeight+10)
-                              ic.get}
-    override def apply = popup.show(MenuToggleButton.this, 0,MenuToggleButton.this.peer.getHeight-1 ) }
+  text= t
+  action = new Action(t) { 
+    if (ic.isDefined) icon = {
+      if (t=="") MenuToggleButton.this.maximumSize = new Dimension (ic.get.getIconWidth+10,ic.get.getIconHeight+10)
+      ic.get}
+    override def apply = {
+      popup.show(MenuToggleButton.this, 0,MenuToggleButton.this.peer.getHeight-1 )} }
   
   repaint
   

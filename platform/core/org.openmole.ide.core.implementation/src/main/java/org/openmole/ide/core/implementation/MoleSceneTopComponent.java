@@ -18,29 +18,38 @@ package org.openmole.ide.core.implementation;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
+import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
-import org.openmole.ide.core.implementation.control.TabManager;
-import org.openmole.ide.core.implementation.action.AddMoleSceneAction;
+import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
-import org.openmole.ide.core.implementation.action.RemoveAllMoleSceneAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
 import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
-import org.openmole.ide.core.implementation.action.RemoveMoleSceneAction;
+import org.openmole.ide.core.implementation.control.ExecutionManager;
+import org.openmole.ide.core.implementation.display.Displays;
+import org.openmole.ide.core.implementation.palette.MyAddPropertyChangeListener;
+import org.openmole.ide.core.model.commons.MoleSceneType;
+import org.openmole.ide.core.model.workflow.IMoleScene;
 import scala.swing.MenuItem;
 import org.openmole.ide.misc.widget.ToolBarButton;
 
@@ -49,92 +58,88 @@ import org.openmole.ide.misc.widget.ToolBarButton;
  */
 @ConvertAsProperties(dtd = "-//org.openmole.ide.core.implementation//MoleScene//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "MoleSceneTopComponent",
+@TopComponent.Description(preferredID = "MoleSceneTopComponent", iconBase = "img/addMole.png", persistenceType = TopComponent.PERSISTENCE_NEVER)
 //iconBase="SET/PATH/TO/ICON/HERE", 
-persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
-@ActionID(category = "Window", id = "org.openmole.ide.core.implementation.MoleSceneTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
-@TopComponent.OpenActionRegistration(displayName = "MoleScene",
-preferredID = "MoleSceneTopComponent")
-public final class MoleSceneTopComponent extends TopComponent {
+@ActionID(category = "File", id = "org.openmole.ide.core.implementation.MoleSceneTopComponent")
+//@ActionReferences({
+// @ActionReference(path = "Menu/File", position = 30),
+// @ActionReference(path = "Toolbars/File", position = 10),
+// @ActionReference(path = "Shortcuts", name = "D-N")
+//})
+@TopComponent.OpenActionRegistration(displayName = "Add Mole")
+public final class MoleSceneTopComponent extends CloneableTopComponent {
 
-    private static MoleSceneTopComponent instance;
     private ToolBarButton buildButton;
     private ToolBarButton cleanAndBuildButton;
-    private ToolBarButton addMoleButton;
-    private ToolBarButton removeMoleButton;
-    private ToolBarButton removeAllMoleButton;
     private JToggleButton detailedViewButton;
-    private PaletteController palette;
     private final InstanceContent ic = new InstanceContent();
+    private PaletteController palette;
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
+    private IMoleScene ms;
+
+    public MoleSceneTopComponent(IMoleScene clonedMoleScene) {
+        initialize(clonedMoleScene);
+    }
 
     public MoleSceneTopComponent() {
-        initComponents();
-        setName(NbBundle.getMessage(MoleSceneTopComponent.class, "CTL_MoleSceneTopComponent"));
-        setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
+        this(TopComponentsManager.buildMoleScene());
+    }
 
+    private void initialize(IMoleScene m) {
+        ms = m;
         associateLookup(new AbstractLookup(ic));
         addPalette();
+        initComponents();
+        setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
+        TopComponentsManager.registerTopComponent(this);
         detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
-        addMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/addMole.png")),
-                "Add a workflow scene",
-                new AddMoleSceneAction(""));
-        removeMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeMole.png")),
-                "Remove the current workflow",
-                new RemoveMoleSceneAction(""));
-        removeAllMoleButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/removeAll.png")),
-                "Remove all the workflows",
-                new RemoveAllMoleSceneAction(""));
-
         buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")),
                 "Build the workflow",
-                new BuildExecutionAction(""));
+                new BuildExecutionAction(this));
         cleanAndBuildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/cleanAndBuild.png")),
                 "Clean and build the workflow",
-                new CleanAndBuildExecutionAction(""));
+                new CleanAndBuildExecutionAction(this));
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(addMoleButton.peer());
-        toolBar.add(removeMoleButton.peer());
-        toolBar.add(removeAllMoleButton.peer());
-        toolBar.add(new JToolBar.Separator());
         toolBar.add(buildButton.peer());
         toolBar.add(cleanAndBuildButton.peer());
-        toolBar.add(new JToolBar.Separator());
         toolBar.add(ExecutionBoard.peer());
-        //  add(toolBar);
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
-        add(TabManager.tabbedPane().peer(), BorderLayout.CENTER);
+        setDisplayName(ms.manager().name().get());
+        setName(ms.manager().name().get());
+        add(new JScrollPane(ms.graphScene().createView()), BorderLayout.CENTER);
+        //  palette.refresh();
         etc.close();
         repaint();
+        ((EntityPropertyTopComponent) WindowManager.getDefault().findTopComponent("EntityPropertyTopComponent")).open();
+    }
+
+    public IMoleScene getMoleScene() {
+        return ms;
     }
 
     public void addPalette() {
-        palette = PaletteSupport.createPalette();
+        palette = PaletteSupport.createPalette(ms.moleSceneType());
         ic.add(palette);
-    }
-
-    public PaletteController getPalette() {
-        return palette;
     }
 
     public void refresh(Boolean b) {
         ic.remove(palette);
         addPalette();
+        palette.refresh();
         repaint();
-        updateMode(b);
+        buildMode(b);
     }
 
-    public void updateMode(Boolean b) {
-        buildButton.enabled_$eq(b);
-        cleanAndBuildButton.enabled_$eq(b);
+    public void buildMode(Boolean b) {
+        buildButton.visible_$eq(b);
+        cleanAndBuildButton.visible_$eq(b);
         ExecutionBoard.activate(!b);
         detailedViewButton.setEnabled(b);
         if (b) {
@@ -174,13 +179,33 @@ public final class MoleSceneTopComponent extends TopComponent {
     private javax.swing.JToolBar toolBar;
     // End of variables declaration//GEN-END:variables
 
+    public Set<TopComponent> getOpened() {
+        return getRegistry().getOpened();
+    }
+
+    @Override
+    public void componentActivated() {
+        PaletteSupport.setCurrentMoleSceneTopComponent(this);
+        refresh(ms.isBuildScene());
+        Displays.propertyPanel().cleanViewport();
+        TopComponentsManager.displayExecutionView(ms);
+        if (!ms.isBuildScene()) {
+            etc.open();
+        }
+        PaletteSupport.modified_$eq(false);
+    }
+
     @Override
     public void componentOpened() {
-        // TODO add custom code on component opening
+        PaletteSupport.setCurrentMoleSceneTopComponent(this);
     }
 
     @Override
     public void componentClosed() {
+        if (ms.isBuildScene()) {
+            TopComponentsManager.removeAllExecutionTopComponent(this);
+        }
+        TopComponentsManager.removeTopComponent(this);
         // TODO add custom code on component closing
     }
 

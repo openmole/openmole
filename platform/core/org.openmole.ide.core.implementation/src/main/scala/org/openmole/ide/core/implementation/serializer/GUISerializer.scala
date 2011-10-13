@@ -25,20 +25,22 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openide.windows.TopComponent
+import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.data._
+import org.openmole.ide.core.implementation.palette.FrozenProxys
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object GUISerializer {
-    
+  
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
   
-  xstream.alias("molescene", classOf[IMoleScene])
+  xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
   
   def serialize(toFile: String) = {
@@ -47,15 +49,18 @@ object GUISerializer {
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    out.writeObject(new SerializedProxys(Proxys.task.map(v=>(v._1,v._2)),
-                                         Proxys.prototype.map(v=>(v._1,v._2)),
-                                         Proxys.sampling.map(v=>(v._1,v._2)),
-                                         Proxys.environment.map(v=>(v._1,v._2)),
-                                         Proxys.domain.map(v=>(v._1,v._2)),
+    out.writeObject(new SerializedProxys(Proxys.tasks.toMap,
+                                         Proxys.prototypes.toMap,
+                                         Proxys.samplings.toMap,
+                                         Proxys.environments.toMap,
+                                         Proxys.domains.toMap,
                                          Proxys.incr.get+1))
     //molescenes
-    MoleScenesManager.moleScenes.keys.foreach(out.writeObject(_))
-    
+    TopComponentsManager.moleScenes.foreach(ms=>
+      ms match {
+        case x: IMoleScene=> 
+          out.writeObject(x)
+        case _=>})
     out.close
   }
   
@@ -64,14 +69,15 @@ object GUISerializer {
     val in = xstream.createObjectInputStream(reader)
    
     Proxys.clearAll
-    MoleScenesManager.removeMoleScenes
+    FrozenProxys.clear
+    PaletteSupport.closeOpenedTopComponents
     
     try {
       while(true) {
         val readObject = in.readObject
         readObject match{
           case x: SerializedProxys=> x.loadProxys
-          case x: MoleScene=> {TabManager.displayBuildMoleScene(MoleScenesManager.addBuildMoleScene(x))}
+          case x: IMoleScene=> {TopComponentsManager.addTopComponent(new MoleSceneTopComponent(x))}
           case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }

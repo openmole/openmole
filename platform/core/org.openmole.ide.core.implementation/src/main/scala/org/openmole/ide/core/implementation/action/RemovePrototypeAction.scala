@@ -22,6 +22,6 @@ import org.openmole.ide.core.implementation.display.Displays
 import scala.swing.Action
 
 class RemovePrototypeAction(proxyID: Int) extends Action("Remove"){
-  override def apply= {Proxys.prototype-= proxyID 
+  override def apply= {Proxys.prototypes-= proxyID 
                        Displays.propertyPanel.cleanViewport}
 }

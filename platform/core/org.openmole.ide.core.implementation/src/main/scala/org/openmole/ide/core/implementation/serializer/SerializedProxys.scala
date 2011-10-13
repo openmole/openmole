@@ -20,13 +20,19 @@ package org.openmole.ide.core.implementation.serializer
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 
-class SerializedProxys(val task: Iterable[(Int,ITaskDataProxyUI)],
-                       val prototype: Iterable[(Int,IPrototypeDataProxyUI)],
-                       val sampling: Iterable[(Int,ISamplingDataProxyUI)],
-                       val environment: Iterable[(Int,IEnvironmentDataProxyUI)],
-                       val domain: Iterable[(Int,IDomainDataProxyUI)],
+class SerializedProxys(val task: Map[Int,ITaskDataProxyUI],
+                       val prototype: Map[Int,IPrototypeDataProxyUI],
+                       val sampling: Map[Int,ISamplingDataProxyUI],
+                       val environment: Map[Int,IEnvironmentDataProxyUI],
+                       val domain: Map[Int,IDomainDataProxyUI],
                        val incr: Int) {
-  
+  def this() = this(Proxys.tasks.toMap,
+              Proxys.prototypes.toMap,
+              Proxys.samplings.toMap,
+              Proxys.environments.toMap,
+              Proxys.domains.toMap,
+              0)
+    
   def loadProxys = {
     task.foreach(t=>Proxys.addTaskElement(t._2,t._1))
     prototype.foreach(p=>Proxys.addPrototypeElement(p._2,p._1))

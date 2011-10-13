@@ -32,9 +32,8 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 
 class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],var capsuleType:CapsuleType,var startingCapsule: Boolean) extends Widget(scene.graphScene) with ICapsuleUI{
-  def this(sc: IMoleScene) = this (sc,None,CAPSULE,false)
+  def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0)
     
-  
   createActions(MOVE).addAction (ActionFactory.createMoveAction)
   
   var nbInputSlots = 0

@@ -26,7 +26,7 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.core.implementation.control.MoleScenesManager
+import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.workflow.MoleScene
@@ -107,7 +107,7 @@ class MoleSceneConverter extends Converter{
       n0 match {
         case "capsule"=> {val p= new Point
             p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
-            val caps = MoleScenesManager.createCapsule(scene, p)
+            val caps = SceneItemFactory.createCapsule(scene, p)
             val start = reader.getAttribute("start").toBoolean
             if (start) scene.manager.startingCapsule = Some(caps)
             while (reader.hasMoreChildren) {
@@ -122,7 +122,7 @@ class MoleSceneConverter extends Converter{
               reader.moveUp
             }     
           }
-        case "transition"=> {MoleScenesManager.createEdge(scene, 
+        case "transition"=> {SceneItemFactory.createEdge(scene, 
                                                           oslots(reader.getAttribute("source")), 
                                                           islots(reader.getAttribute("target")), 
                                                           TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))}

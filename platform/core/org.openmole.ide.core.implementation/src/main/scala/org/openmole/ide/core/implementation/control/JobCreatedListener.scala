@@ -19,17 +19,19 @@ package org.openmole.ide.core.implementation.control
 
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.IOneJobSubmitted
-import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.mole.IMoleExecution.OneJobSubmitted
+import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.model.job.State._
 
-class JobCreatedListener extends IOneJobSubmitted{
-  override def oneJobSubmitted(execution: IMoleExecution, moleJob: IMoleJob) = {
-    val exeManager = TabManager.executionManager(execution)
-    exeManager.status(READY)+=1
-    exeManager.wfPiePlotter.updateData("Ready",exeManager.status(READY))
-    EventDispatcher.registerForObjectChanged(execution,Priority.NORMAL,new JobSatusListener,IMoleExecution.OneJobStatusChanged)
+class JobCreatedListener extends EventListener[IMoleExecution] {
+  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+    event match {
+      case x: OneJobSubmitted=>
+        val exeManager = TopComponentsManager.executionManager(execution)
+        exeManager.status(READY)+=1
+        exeManager.wfPiePlotter.updateData("Ready",exeManager.status(READY))
+        EventDispatcher.listen(execution,new JobSatusListener,classOf[IMoleExecution.OneJobStatusChanged])
+    }
   }
 }
-
