@@ -106,7 +106,7 @@ object FileUtil {
       finally os.close
     }
     
-    def print(content: String) = new PrintWriter(os).print(content)
+    def append(content: String) = new PrintWriter(os).append(content).flush
   }
   
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)
@@ -281,7 +281,7 @@ object FileUtil {
       val fos = new FileOutputStream(file, true)
       try{
         val lock = fos.getChannel.lock
-        try fos.print(content)
+        try fos.append(content)
         finally lock.release
       } finally fos.close
     }
