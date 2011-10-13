@@ -116,8 +116,8 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     
   override def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-    if (moleSceneType == BUILD) {
       obUI.get.createActions(SELECT).addAction(selectAction)
+    if (moleSceneType == BUILD) {
       obUI.get.createActions(CONNECT).addAction(connectAction)
       obUI.get.createActions(CONNECT).addAction(moveAction)
       // obUI.get.getActions.addAction(createObjectHoverAction)
