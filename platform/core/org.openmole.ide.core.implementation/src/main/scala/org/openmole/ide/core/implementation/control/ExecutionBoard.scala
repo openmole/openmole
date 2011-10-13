@@ -18,17 +18,13 @@
 package org.openmole.ide.core.implementation.control
 
 import scala.swing.Orientation
-import scala.swing.Button
-import java.awt.Dimension
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.ToolBarButton
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.workspace.Workspace
 import scala.swing.Action
 import scala.swing.BoxPanel
-import scala.swing.event.ButtonClicked
 import org.openmole.ide.misc.widget.ToolBarButton
 
 object ExecutionBoard extends BoxPanel(Orientation.Horizontal){
