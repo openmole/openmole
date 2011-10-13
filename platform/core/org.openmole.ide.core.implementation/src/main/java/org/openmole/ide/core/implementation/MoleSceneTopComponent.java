@@ -17,12 +17,8 @@
 package org.openmole.ide.core.implementation;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.util.Set;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -38,19 +34,13 @@ import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
 import org.openide.util.ImageUtilities;
-import org.openide.util.Lookup;
 import org.openmole.ide.core.implementation.control.ExecutionBoard;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
-import org.openmole.ide.core.implementation.control.ExecutionManager;
 import org.openmole.ide.core.implementation.display.Displays;
-import org.openmole.ide.core.implementation.palette.MyAddPropertyChangeListener;
-import org.openmole.ide.core.model.commons.MoleSceneType;
+import org.openmole.ide.core.implementation.display.PropertyPanel;
 import org.openmole.ide.core.model.workflow.IMoleScene;
-import scala.swing.MenuItem;
 import org.openmole.ide.misc.widget.ToolBarButton;
 
 /**
@@ -147,6 +137,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         } else {
             etc.open();
         }
+        Displays.propertyPanel().editable_$eq(b);
         repaint();
     }
 

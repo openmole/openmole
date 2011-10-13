@@ -20,8 +20,6 @@ package org.openmole.ide.core.implementation.display
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
-import java.awt.AlphaComposite
-import java.awt.BorderLayout
 import javax.swing.ImageIcon
 import javax.swing.JPanel
 import org.openmole.ide.misc.image._
@@ -35,19 +33,13 @@ import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.widget.MenuToggleButton
-import javax.swing.border.LineBorder
-import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.core.model.commons.Constants._
-import java.awt.Color
-import java.awt.Toolkit
-import java.awt.image.BufferedImage
-import java.awt.image.FilteredImageSource
-import java.awt.image.ReplicateScaleFilter
 
 class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]rel[grow,fill]rel[grow,fill]"){
   Displays.currentType = TASK
-  
+  var editable = true
+    
   val domainMenu = new Menu("Domain")
   DomainDisplay.implementationClasses.foreach(d=>domainMenu.contents+=new MenuItem(new DomainDisplayAction(d,DOMAIN)))
   val environmentMenu = new Menu("Environment")
@@ -63,6 +55,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   val saveButton = new Button("Apply")
   val cancelButton = new Button("Cancel")
   val nameTextField = new TextField(15) 
+  val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu)}
   
   listenTo(saveButton,cancelButton)
   reactions += {
@@ -71,7 +64,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
 
   val propertyScrollPane = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
   var taskPropertyComponent = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
-  contents+= (new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu)},"span 4, growx")
+  contents+= (menuBar,"span 4, growx")
   contents+= fakeToggleButton
   contents+= nameTextField
   contents+= saveButton
@@ -92,10 +85,12 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   def displayCurrentEntity: Unit = displayCurrentEntity(Displays.dataProxy.get)
   
   def displayCurrentEntity(p: IDataProxyUI): Unit = {
-   // nameTextField.text = Displays.name
    nameTextField.text = p.dataUI.name
     updateViewport(Displays.buildPanelUI.peer)
     displayCurrentTypeIcon(p)
+    
+    peer.getComponents.foreach(_.setEnabled(editable))
+    menuBar.peer.getComponents.foreach(_.setVisible(editable))
   }
   
   def cleanViewport = {
@@ -115,6 +110,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     removeViewport
     updateTaskViewport
     propertyScrollPane.peer.setViewportView(panel)
+    panel.getComponents.foreach(_.setEnabled(editable))
     revalidate
   }
   
@@ -174,9 +170,10 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     }
     taskPropertyComponent.visible = !empty
     if (empty) taskPropertyComponent.size.height = 0
+    mp.peer.getComponents.foreach(_.setEnabled(editable))
     mp
   }
      
   def secondManagementMenu(impath: String, displayname: String,p: PopupMenu) = new MenuToggleButton(
-    Some(new ImageIcon(ImageTool.loadImage(impath,30,30))),displayname){popup= p}
+    Some(new ImageIcon(ImageTool.loadImage(impath,30,30))),displayname){popup= p; popup.peer.getComponents.foreach(_.setEnabled(editable))}
 }
