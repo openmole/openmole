@@ -279,7 +279,7 @@ object FileUtil {
       try{
         val lock = channelO.lock
         try {
-          val buffer = ByteBuffer.allocate(content.size)
+          val buffer = ByteBuffer.allocate(content.size * 2)
           content.foreach{buffer.putChar}
           channelO.write(buffer)
         }
