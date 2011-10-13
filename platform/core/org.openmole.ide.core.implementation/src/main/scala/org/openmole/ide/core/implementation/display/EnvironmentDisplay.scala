@@ -54,7 +54,6 @@ object EnvironmentDisplay extends IEnvironmentDisplay{
     add(new MenuItem(new RemoveEnvironmentAction(Displays.currentProxyID)))}
   
   override def secondManagementMenu(taskProxy: ITaskDataProxyUI,environmentProxy: IEnvironmentDataProxyUI) = {
-    println("secondManagementMenu env" )
     new PopupMenu {
     add(new MenuItem(new DetachEnvironmentAction(taskProxy)))}}
   

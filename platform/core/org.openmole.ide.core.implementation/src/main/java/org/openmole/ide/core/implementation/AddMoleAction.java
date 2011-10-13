@@ -39,8 +39,6 @@ public final class AddMoleAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println("AddMoleAction perforemed");
         TopComponentsManager.addTopComponent();
-        // TODO implement action body
     }
 }
