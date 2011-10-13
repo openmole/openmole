@@ -27,6 +27,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.io.PrintWriter
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.util.concurrent.Executors
@@ -104,6 +105,8 @@ object FileUtil {
       try os.flush
       finally os.close
     }
+    
+    def print(content: String) = new PrintWriter(os).print(content)
   }
   
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)
@@ -275,16 +278,12 @@ object FileUtil {
       new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     
     def lockAndAppend(content: String) = {
-      val channelO = new FileOutputStream(file, true).getChannel
+      val fos = new FileOutputStream(file, true)
       try{
-        val lock = channelO.lock
-        try {
-          val buffer = ByteBuffer.allocate(content.size * 2)
-          content.foreach{buffer.putChar}
-          channelO.write(buffer)
-        }
-        finally lock release
-      } finally channelO close
+        val lock = fos.getChannel.lock
+        try fos.print(content)
+        finally lock.release
+      } finally fos.close
     }
     
     def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
