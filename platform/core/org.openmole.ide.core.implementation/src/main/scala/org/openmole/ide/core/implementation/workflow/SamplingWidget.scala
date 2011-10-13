@@ -31,7 +31,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 
 class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(scene.graphScene) {
   val titleArea = new Rectangle
-  titleArea.setBounds(new Rectangle(0,48,48,Constants.TASK_TITLE_HEIGHT/2))
+  titleArea.setBounds(new Rectangle(0,33,33,Constants.TASK_TITLE_HEIGHT/2))
   
   override def paintWidget= {
     super.paintWidget
@@ -40,11 +40,14 @@ class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(
       val g = getGraphics.asInstanceOf[Graphics2D]
       g.drawImage(ImageUtilities.loadImage(sampling.get.dataUI.imagePath),0,0,new Container)
       
-      g.setColor(new Color(102,102,102))
+      g.setColor(new Color(77,77,77))
       g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
-      g.drawString(sampling.get.dataUI.name,2,46)
+      
+      val rect = g.getFontMetrics(g.getFont).getStringBounds(sampling.get.dataUI.name, g)
+      g.drawString(sampling.get.dataUI.name,
+                   ((titleArea.width- rect.getWidth)/2).asInstanceOf[Int],40)
     }
   }
   
-  def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-22,Constants.TASK_CONTAINER_HEIGHT+10))
+  def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-15,Constants.TASK_CONTAINER_HEIGHT+10))
 }

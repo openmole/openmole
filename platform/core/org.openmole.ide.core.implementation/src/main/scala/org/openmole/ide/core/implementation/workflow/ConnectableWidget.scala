@@ -23,8 +23,6 @@ import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.workflow.IConnectableWidget
 import org.openmole.ide.core.model.commons.MoleSceneType._
@@ -68,7 +66,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
   def addSampling= {
     samplingWidget = Some(new SamplingWidget(scene,capsule))
     addChild(samplingWidget.get) 
-    taskHeight += 58
+    taskHeight += 50
     setWidthHint
     setDetailedView
   }
@@ -107,7 +105,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
         enlargeWidgetArea(0, -delta)
       }
       var lineH = 0
-      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.dataUI.sampling.isDefined * 58
+      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.dataUI.sampling.isDefined * 40
       graphics.drawLine(taskWidth / 2,
                         TASK_TITLE_HEIGHT,
                         taskWidth / 2,
