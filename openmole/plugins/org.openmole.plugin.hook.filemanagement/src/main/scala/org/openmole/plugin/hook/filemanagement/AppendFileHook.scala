@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import java.io.File
-import org.openmole.misc.tools.io.FileUtil.copy
+import org.openmole.misc.tools.io.FileUtil._
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import org.openmole.core.model.job.IMoleJob
@@ -61,27 +61,15 @@ class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toBeDumpe
           val toFiles = to.list
           from.list foreach ( f => {
               if (!toFiles.contains(f)) new File(f).createNewFile
-              lockAndAppendFile(new File(from,f),new File(to,f))
+              new File(to,f).lockAndAppendFile(new File(from,f))
             })
         }
-        else if (from.isFile && to.isFile) lockAndAppendFile(from,to)
+        else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
         else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. ("+from.toString+" and "+to.toString+" found)")
       case None => throw new UserBadDataError("Variable not found " + toBeDumpedPrototype)
     }
   }
   
-  def lockAndAppendFile(from: String, to: String): Unit = lockAndAppendFile(new File(from), new File(to))
-  
-  def lockAndAppendFile(from: File,to: File): Unit = {
-    val channelI = new FileInputStream(from) getChannel()
-    try{
-      val channelO = new FileOutputStream(to,true) getChannel()
-      try{
-        val lock = channelO lock()
-        try copy(channelI,channelO)
-        finally lock release
-      } finally channelO close
-    } finally channelI close
-  }
+
 }
 

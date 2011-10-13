@@ -27,6 +27,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -60,7 +61,7 @@ object FileUtil {
       val buffer = new Array[Byte](DefaultBufferSize)
       Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach { 
         count => 
-          to.write(buffer, 0, count)
+        to.write(buffer, 0, count)
       }
     }
 
@@ -80,14 +81,14 @@ object FileUtil {
         }
       }.takeWhile(_ != -1).foreach { 
         count =>       
-          val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
+        val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
 
-          try futureWrite.get(timeout, TimeUnit.MILLISECONDS)
-          catch  {
-            case (e: TimeoutException) =>
-              futureWrite.cancel(true)
-              throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
-          } 
+        try futureWrite.get(timeout, TimeUnit.MILLISECONDS)
+        catch  {
+          case (e: TimeoutException) =>
+            futureWrite.cancel(true)
+            throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
+        } 
       }     
     }
 
@@ -273,9 +274,33 @@ object FileUtil {
     def extractUncompressDirArchiveWithRelativePath(dest: File) =
       new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     
+    def lockAndAppend(content: String) = {
+      val channelO = new FileOutputStream(file, true).getChannel
+      try{
+        val lock = channelO.lock
+        try {
+          val buffer = ByteBuffer.allocate(content.size)
+          content.foreach{buffer.putChar}
+          channelO.write(buffer)
+        }
+        finally lock release
+      } finally channelO close
+    }
+    
+    def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
+  
+    def lockAndAppendFile(from: File): Unit = {
+      val channelI = new FileInputStream(from).getChannel
+      try{
+        val channelO = new FileOutputStream(file, true).getChannel
+        try{
+          val lock = channelO.lock
+          try FileUtil.copy(channelO, channelI)
+          finally lock release
+        } finally channelO close
+      } finally channelI close
+    }
   }
-
-
  
 }
 

@@ -88,6 +88,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
               val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
             
+              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"max running " + maxNbRunning)
               val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
               if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
             } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
