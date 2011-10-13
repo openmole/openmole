@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.systemexec
+package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
-
-class SystemExecTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "System exec"
-  override def buildDataUI(name: String) = new SystemExecTaskDataUI(name)
+class GliteEnvironmentFactoryUI extends IEnvironmentFactoryUI {
+  override def buildDataUI(name: String) = new GliteEnvironmentDataUI(name)
 }
