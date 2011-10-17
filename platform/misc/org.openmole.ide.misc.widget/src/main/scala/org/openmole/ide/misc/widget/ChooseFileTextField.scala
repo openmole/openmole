@@ -39,8 +39,9 @@ class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDesc
   
   reactions += {
     case e: MousePressed => 
+      if(e.clicks == 2) {
         if (fc.showDialog(this,"OK") == Approve) text = fc.selectedFile.getPath
-        publish(new DialogClosedEvent(this))
+        publish(new DialogClosedEvent(this))}
   }
   columns = 15
   listenTo(this.mouse.clicks)
