@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.glite.authentication
 
 import org.ogf.saga.context.Context
 
-class PEMCertificate(cypheredPassword: String, certPath: String, keyPath: String) extends Certificate(cypheredPassword) {
+class PEMCertificate(val cypheredPassword: String,val certPath: String,val keyPath: String) extends Certificate(cypheredPassword) {
   
   override protected def _init(ctx: Context) = {
     ctx.setAttribute(Context.USERCERT, certPath)

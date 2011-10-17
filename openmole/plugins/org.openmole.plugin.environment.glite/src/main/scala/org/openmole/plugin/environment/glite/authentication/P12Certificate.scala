@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.glite.authentication
 import org.ogf.saga.context.Context
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
-class P12Certificate(cypheredPassword: String, p12CertPath: String) extends Certificate(cypheredPassword) {
+class P12Certificate(val cypheredPassword: String,val p12CertPath: String) extends Certificate(cypheredPassword) {
   
   override protected def _init(ctx: Context) = {
     ctx.setAttribute(VOMSContext.USERCERTKEY, p12CertPath)

@@ -31,7 +31,6 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
-import org.openmole.plugin.environment.glite.authentication.GliteAuthentication
 
 import scala.annotation.target.field
 import scala.collection.JavaConversions._
