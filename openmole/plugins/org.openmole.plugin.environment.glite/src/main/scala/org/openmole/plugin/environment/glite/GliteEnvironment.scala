@@ -28,6 +28,7 @@ import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
+import org.openmole.plugin.environment.glite.authentication.GliteAuthentication
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
