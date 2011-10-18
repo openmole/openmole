@@ -141,7 +141,7 @@ object Workspace {
   
   def decrypt(s: String) = instance.decrypt(s)
   
-  def endecrypt(s: String) = instance.encrypt(s)
+  def encrypt(s: String) = instance.encrypt(s)
 }
 
 
