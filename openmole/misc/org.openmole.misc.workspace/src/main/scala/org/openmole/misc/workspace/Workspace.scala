@@ -140,6 +140,8 @@ object Workspace {
   def persistentList[T](clazz: Class[T]) = instance.persistentList(clazz)
   
   def decrypt(s: String) = instance.decrypt(s)
+  
+  def endecrypt(s: String) = instance.encrypt(s)
 }
 
 
@@ -242,7 +244,7 @@ class Workspace(val location: File) {
 
   def setPreference(location: ConfigurationLocation, value: String) = synchronized {
     val conf = configuration.subset(location.group)
-    val prop = if(location.cyphered) textEncryptor(_password).encrypt(value) else value
+    val prop = if(location.cyphered) encrypt(value) else value
     conf.setProperty(location.name, prop)
     configuration.save
   }
@@ -280,6 +282,14 @@ class Workspace(val location: File) {
       case Some(p) =>
     } 
     textEncryptor(_password).decrypt(s)
+  }
+  
+  def encrypt(s: String) = {
+    _password match {
+      case None => EventDispatcher.trigger(this, new Workspace.PasswordRequired)
+      case Some(p) =>
+    } 
+    textEncryptor(_password).encrypt(s)
   }
   
   def passwordIsCorrect(password: String) = {
