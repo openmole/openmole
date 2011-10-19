@@ -18,12 +18,14 @@
 package org.openmole.ide.plugin.environment.glite
 
 import java.awt.Color
-import javax.swing.BorderFactory
 import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.GliteEnvironment
+import org.openmole.plugin.environment.glite.authentication.GliteAuthenticationMethod
+import org.openmole.plugin.environment.glite.authentication.GlobusProxyFile
+import org.openmole.plugin.environment.glite.authentication.P12Certificate
+import org.openmole.plugin.environment.glite.authentication.PEMCertificate
 import scala.swing.ButtonGroup
 import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
@@ -31,72 +33,107 @@ import scala.swing.PasswordField
 import scala.swing.RadioButton
 import scala.swing.Separator
 import scala.swing.event.ButtonClicked
-import scala.swing.event.SelectionChanged
+import org.openmole.misc.workspace.Workspace
+import scala.swing.event.Key._
 
-class GliteAuthentificationPanelUI extends MigPanel("") with IAuthentificationPanelUI{
-  val pem1TextField= new ChooseFileTextField("Certification path", "Select afile", Some("pem files"), FilesOnly,Some("pem")){
-    text= Workspace.preference(GliteEnvironment.CertificatePathLocation)}
-  val pem2TextField= new ChooseFileTextField("Key Path", "Select a file", Some("pem files"), FilesOnly,Some("pem")){
-    text= Workspace.preference(GliteEnvironment.KeyPathLocation)}
-  val p12TextField= new ChooseFileTextField("Certification path", "Select a file", Some("p12 file"), FilesOnly,Some("p12")){
-    text= Workspace.preference(GliteEnvironment.P12CertificateLocation)}
-  val proxyTextField = new ChooseFileTextField("nada", "Select a file", Some("proxy file"), FilesOnly,Some("proxy")){
-    text= Workspace.preference(GliteEnvironment.ProxyLocation)}
-  val password= new PasswordField(12)
-  //{text= Workspace.preference(GliteEnvironment.PasswordLocation)}
+object GliteAuthentificationPanelUI {
+  val RED = new Color(212,0,0)
+  val GREEN = new Color(136,170,0)
+}
+
+class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with IAuthentificationPanelUI{
+  val pem1TextField= new ChooseFileTextField("Certification path", "Select afile", Some("pem files"), FilesOnly,Some("pem"))
+  val pem2TextField= new ChooseFileTextField("Key Path", "Select a file", Some("pem files"), FilesOnly,Some("pem"))
+  val p12TextField= new ChooseFileTextField("Certification path", "Select a file", Some("p12 file"), FilesOnly,Some("p12"))
+  val proxyTextField = new ChooseFileTextField("nada", "Select a file", Some("proxy file"), FilesOnly,Some("proxy"))
+  val pemPassField= new PasswordField(12)
+  val p12PassField= new PasswordField(12)
+
   val pemButton = new RadioButton("pem")
   val p12Button = new RadioButton("p12")
   val proxyButton = new RadioButton("proxy")
-  val groupButton = new ButtonGroup(pemButton,p12Button,proxyButton)
-  contents+= new MigPanel("wrap"){
+  
+  val pem = (pemButton,buildPemPanel,{pem1TextField.text="";pem2TextField.text=""})
+  val p12 = (p12Button,buildP12Panel,{p12TextField.text=""})
+  val proxy = (proxyButton,buildProxyPanel,{proxyTextField.text=""})
+  val groupButton = new ButtonGroup{
+    buttons+= pemButton
+    buttons+= p12Button
+    buttons+= proxyButton}
+
+  contents+= new MigPanel("wrap","","[]15[]15[]"){
     contents+= pemButton
     contents+= p12Button
     contents+= proxyButton}
-  contents+= buildPemPanel
-  groupButton.select(pemButton)
+  contents+= new Separator
   
-  listenTo(pemButton,p12Button,proxyButton)
+  listenTo(`pemButton`,`p12Button`,`proxyButton`)
   reactions += {
-    case ButtonClicked(`pemButton`) =>  
-      contents.remove(1)
-      contents+= buildPemPanel
-      repaint
-      revalidate
-    case ButtonClicked(`p12Button`) =>  
-      contents.remove(1)
-      contents+= buildP12Panel
-      repaint
-      revalidate
-    case ButtonClicked(`proxyButton`) =>  
-      contents.remove(1)
-      contents+= buildProxyPanel
-      repaint
-      revalidate
+    case ButtonClicked(`pemButton`) => addPem
+    case ButtonClicked(`p12Button`) =>  addP12
+    case ButtonClicked(`proxyButton`) => addProxy
   }
   
-  override def saveContent = println("TO be implemented the savecontent of GliteAuth")
+  Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+    case Some((i:Int,x:P12Certificate))=> 
+      groupButton.select(p12Button)
+      p12TextField.text = x.p12CertPath
+      p12PassField.text = x.cypheredPassword
+      addP12
+    case Some((i:Int,x:PEMCertificate))=> 
+      groupButton.select(pemButton)
+      addPem
+      pem1TextField.text = x.certPath
+      pem2TextField.text = x.keyPath
+      pemPassField.text = x.cypheredPassword
+    case Some((i:Int,x: GlobusProxyFile))=> 
+      groupButton.select(proxyButton)
+      addProxy
+      proxyTextField.text = x.proxyFile
+    case _=> 
+      addP12
+      groupButton.select(p12Button)}
   
-  def buildPemPanel = new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
-    contents+= (new Label("Certification"),"gap para")
-    contents+= pem1TextField
-    contents+= (new Label("Key"),"gap para")
-    contents+= pem2TextField
-    contents+= (new Label("Password"),"gap para")
-    contents+= password
-    border= BorderFactory.createLineBorder(new Color(102,102,102),1)
+  def addPem = {clean; contents+= pem._2; refresh}
+  def addP12 = {clean; contents+= p12._2; refresh}
+  def addProxy = {clean; contents+= proxy._2; refresh}
+  
+  def clean = if(contents.size == 3) contents.remove(2)
+  
+  def refresh = {repaint
+                 revalidate}
+  
+  override def saveContent = {
+    if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new PEMCertificate(Workspace.encrypt(new String(pemPassField.password)),
+                                                                                                                pem1TextField.text,
+                                                                                                                pem2TextField.text)
+    else if(p12Button.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new P12Certificate(Workspace.encrypt(new String(p12PassField.password)),
+                                                                                                                                                 p12TextField.text)
+    else if(proxyButton.selected) {
+      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new GlobusProxyFile(proxyTextField.text)
+    }
+    
+    (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
   }
   
-  def buildP12Panel = new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
-    contents+= (new Label("Certification"),"gap para")
-    contents+= p12TextField
-    contents+= (new Label("password"),"gap para")
-    contents+= password
-    border= BorderFactory.createLineBorder(new Color(102,102,102),1)
-  }
+  def buildPemPanel =
+    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+      contents+= (new Label("Certification"),"gap para")
+      contents+= pem1TextField
+      contents+= (new Label("Key"),"gap para")
+      contents+= pem2TextField
+      contents+= (new Label("Password"),"gap para")
+      contents+= pemPassField}
   
-  def buildProxyPanel = new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
-    contents+= (new Label("Proxy"),"gap para")
-    contents+= proxyTextField
-    border= BorderFactory.createLineBorder(new Color(102,102,102),1)
-  }
+  def buildP12Panel = 
+    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+      contents+= (new Label("Certification"),"gap para")
+      contents+= p12TextField
+      contents+= (new Label("password"),"gap para")
+      contents+= p12PassField}
+  
+  def buildProxyPanel = 
+    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+      contents+= (new Label("Proxy"),"gap para")
+      contents+= proxyTextField}
 }

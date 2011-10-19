@@ -31,12 +31,13 @@ import scala.swing.Label
 import scala.swing.PasswordField
 import net.miginfocom.swing.MigLayout
 import org.openide.windows.WindowManager
+import org.openmole.ide.core.implementation.preference.PreferenceFrame
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.KeyPressed
 import scala.swing.event.Key._
 import scala.swing.event.KeyReleased
 
-object PasswordDialog extends JDialog(WindowManager.getDefault.getMainWindow){
+object PasswordDialog extends JDialog(PreferenceFrame){
   
   setTitle("Preference access")
   val passField = new PasswordField(12){

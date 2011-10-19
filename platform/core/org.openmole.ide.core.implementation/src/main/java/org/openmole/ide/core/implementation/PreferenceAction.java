@@ -37,6 +37,6 @@ public final class PreferenceAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PreferenceFrame.open();
+        PreferenceFrame.setVisible(true);
     }
 }

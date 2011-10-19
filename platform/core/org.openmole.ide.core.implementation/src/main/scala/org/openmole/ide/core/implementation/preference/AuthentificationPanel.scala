@@ -19,14 +19,21 @@ package org.openmole.ide.core.implementation.preference
 
 import org.openide.util.Lookup
 import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
+import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
+import org.openmole.ide.core.model.preference.IAuthentificationPanel
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
+import scala.collection.immutable.HashSet
 import scala.swing.Label
 import scala.swing.ScrollPane
 
-class AuthentificationPanel extends MigPanel("wrap","[grow,fill]",""){
+class AuthentificationPanel extends MigPanel("wrap","[grow,fill]","") with IAuthentificationPanel{
+  var auths = new HashSet[IAuthentificationPanelUI]()
   Lookup.getDefault.lookupAll(classOf[IAuthentificationFactoryUI]).foreach(a=>{
+      val p= a.buildPanelUI
+      auths += p
       contents+= new Label(a.displayName)
-      contents+= new ScrollPane{peer.setViewportView(a.buildPanelUI.peer)}})
+      contents+= new ScrollPane{peer.setViewportView(p.peer)}})
   
+  override def save = auths.foreach(_.saveContent)
 }
