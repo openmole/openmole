@@ -25,9 +25,9 @@ import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data._
@@ -59,7 +59,7 @@ object GUISerializer {
     TopComponentsManager.moleScenes.foreach(ms=>
       ms match {
         case x: IMoleScene=> 
-          out.writeObject(x)
+          if (x.moleSceneType == BUILD) out.writeObject(x)
         case _=>})
     out.close
   }

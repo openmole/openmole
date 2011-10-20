@@ -25,7 +25,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
-import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -37,14 +36,13 @@ import org.openmole.ide.misc.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 
 class MoleSceneConverter extends Converter{
   override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
     
     var firstSlotID = new HashMap[ICapsuleUI, Int]
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
-    val taskProxyIds= (Map() ++ Proxys.task.map(_.swap))
+    val taskProxyIds= (Map() ++ Proxys.tasks.map(_.swap))
     
     val molescene= o.asInstanceOf[IMoleScene]
     var slotcount = 0
