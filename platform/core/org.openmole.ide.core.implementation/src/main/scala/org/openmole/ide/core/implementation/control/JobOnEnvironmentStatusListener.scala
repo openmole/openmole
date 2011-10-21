@@ -17,21 +17,21 @@
 
 package org.openmole.ide.core.implementation.control
 
-import org.openmole.core.model.job.State._
+import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
+import org.openmole.misc.eventdispatcher._
 
-class JobSatusListener extends EventListener[IMoleExecution] {
-  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+class JobOnEnvironmentStatusListener(moleExecution: IMoleExecution, executionJob: IExecutionJob) extends EventListener[IExecutionJob] {
+  override def triggered(executionJob: IExecutionJob, event: Event[IExecutionJob]) = {
     event match {
-      case x: OneJobStatusChanged=> 
-        val exeManager = TopComponentsManager.executionManager(execution)
-        exeManager.status(x.oldState) -= 1 
-        exeManager.status(x.newState) += 1 
-        exeManager.wfPiePlotter.updateData(x.oldState.name,exeManager.status(x.oldState))
-        exeManager.wfPiePlotter.updateData(x.newState.name,exeManager.status(x.newState))
+      case x: IExecutionJob.StateChanged=> 
+        println("state changed from  " + x.oldState + " to " + x.newState)
+        val exeManager = TopComponentsManager.executionManager(moleExecution)
+        val env = exeManager.environments(executionJob.environment)
+        env._2(x.oldState) -= 1 
+        env._2(x.newState) += 1
+        env._1.updateData(x.oldState.name,env._2(x.oldState))
+        env._1.updateData(x.newState.name,env._2(x.newState))
     }
   }
 }

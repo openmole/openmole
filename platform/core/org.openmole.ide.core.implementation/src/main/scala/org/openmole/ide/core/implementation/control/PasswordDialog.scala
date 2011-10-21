@@ -80,6 +80,7 @@ object PasswordDialog extends JDialog(PreferenceFrame){
   }
   
   def ok:Unit = { if (testPassword) {
+      println("OKKKKK  !!!")
       Workspace.password_=(new String(passField.password))
       setVisible(false)}
   }

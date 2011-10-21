@@ -78,14 +78,15 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
     case Some((i:Int,x:P12Certificate))=> 
       groupButton.select(p12Button)
       p12TextField.text = x.p12CertPath
-      p12PassField.text = x.cypheredPassword
+      p12PassField.text = Workspace.decrypt(x.cypheredPassword)
       addP12
     case Some((i:Int,x:PEMCertificate))=> 
       groupButton.select(pemButton)
       addPem
       pem1TextField.text = x.certPath
       pem2TextField.text = x.keyPath
-      pemPassField.text = x.cypheredPassword
+      println("pass .. " + Workspace.decrypt(x.cypheredPassword))
+      pemPassField.text = Workspace.decrypt(x.cypheredPassword)
     case Some((i:Int,x: GlobusProxyFile))=> 
       groupButton.select(proxyButton)
       addProxy
@@ -104,6 +105,7 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
                  revalidate}
   
   override def saveContent = {
+    println("pass :: " + new String(pemPassField.password))
     if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new PEMCertificate(Workspace.encrypt(new String(pemPassField.password)),
                                                                                                                 pem1TextField.text,
                                                                                                                 pem2TextField.text)

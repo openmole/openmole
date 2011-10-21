@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IMole
@@ -36,6 +37,7 @@ import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 
 object MoleMaker {
@@ -43,13 +45,17 @@ object MoleMaker {
   var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
   var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_]]
   
-  def buildMoleExecution(manager: IMoleSceneManager): IMoleExecution = buildMoleExecution(buildMole(manager)._1,manager)
+  def buildMoleExecution(manager: IMoleSceneManager): (IMoleExecution,Set[(IEnvironment,String)]) = buildMoleExecution(buildMole(manager)._1,manager)
                                                                           
-  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager): IMoleExecution = {
+  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager): (IMoleExecution,Set[(IEnvironment,String)]) = {
+    var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
-    manager.capsules.values.foreach(c=> if (c.dataProxy.get.dataUI.environment.isDefined) 
-      strat.select(doneCapsules(c),c.dataProxy.get.dataUI.environment.get.dataUI.coreObject))
-    new MoleExecution(mole,strat)
+    manager.capsules.values.foreach{c=> 
+      if (c.dataProxy.get.dataUI.environment.isDefined){
+        val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
+        envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
+      strat.select(doneCapsules(c),env)}}
+    (new MoleExecution(mole,strat),envs.toSet)
   }
   
   def buildMole(manager: IMoleSceneManager) = {

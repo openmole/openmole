@@ -19,10 +19,21 @@ package org.openmole.ide.misc.visualization
 
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Font
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel
 import org.jfree.chart.plot.PiePlot
 import org.jfree.data.general.DefaultPieDataset
+
+object PiePlotter {
+  val READY_COLOR = new Color(255,230,128)
+  val RUNNING_COLOR = new Color(85,212,0)
+  val COMPLETED_COLOR = new Color(198,233,175)
+  val FAILED_COLOR = new Color(0,0,0)
+  val CANCELED_COLOR =new Color(170,0,0)
+  val KILLED_COLOR =new Color(0,0,0)
+  val SUBMITTED_COLOR =new Color(255,204,0)
+}
 
 class PiePlotter(title: String, data: Map[String, Double]) {
   def this(title: String) = this(title,Map.empty[String,Double])
@@ -35,10 +46,11 @@ class PiePlotter(title: String, data: Map[String, Double]) {
   
   def updateData(key: String, value: Double) = if(value>=0.0) pieData.setValue(key,value)
   
-  def chartPanel = new ChartPanel(chart) {setPreferredSize(new Dimension(250,250))}
+  def chartPanel = new ChartPanel(chart) {setPreferredSize(new Dimension(200,200))}
   
   private def customize(plot: PiePlot) = {
     chart.getTitle.setPaint(new Color(102,102,102))
+    chart.getTitle.setFont(new Font("Ubuntu",Font.BOLD,15))
     chart.setAntiAlias(true)
     plot.setShadowPaint(new Color(0,0,0,0))
     plot.setBackgroundPaint(new Color(0,0,0,0))
@@ -49,18 +61,14 @@ class PiePlotter(title: String, data: Map[String, Double]) {
     plot.setIgnoreZeroValues(true)
     plot.setLabelPaint(new Color(102,102,102))
     
-    plot.setSectionPaint("Ready",new Color(255,204,0))
-    plot.setSectionPaint("Running",new Color(85,212,0))
-    plot.setSectionPaint("Completed",new Color(198,233,175))
-    plot.setSectionPaint("Failed",new Color(255,255,255))
-    plot.setSectionPaint("Canceled",new Color(170,0,0))
-    //plot.setSectionPaint("Done",new Color(0,170,212))  
-    
-//    plot.setSectionPaint("Ready",new Color(255,204,0))
-//    plot.setSectionPaint("Running",new Color(85,212,0))
-//    plot.setSectionPaint("Submitted",new Color(198,233,175))
-//    plot.setSectionPaint("Failed",new Color(255,255,255))
-//    plot.setSectionPaint("Killed",new Color(170,0,0))
-//    plot.setSectionPaint("Done",new Color(0,170,212))    
+    import PiePlotter._
+    plot.setSectionPaint("Ready",READY_COLOR)
+    plot.setSectionPaint("Running",RUNNING_COLOR)
+    plot.setSectionPaint("Completed",COMPLETED_COLOR)
+    plot.setSectionPaint("Failed",FAILED_COLOR)
+    plot.setSectionPaint("Canceled",CANCELED_COLOR)
+    plot.setSectionPaint("Killed",KILLED_COLOR)
+    plot.setSectionPaint("Done",COMPLETED_COLOR)
+    plot.setSectionPaint("Submitted",SUBMITTED_COLOR)
   }
 }

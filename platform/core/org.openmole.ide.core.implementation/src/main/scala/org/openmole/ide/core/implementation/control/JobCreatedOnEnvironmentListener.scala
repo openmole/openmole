@@ -17,19 +17,22 @@
 
 package org.openmole.ide.core.implementation.control
 
+import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.OneJobSubmitted
 import org.openmole.misc.eventdispatcher._
-import org.openmole.core.model.job.State._
+import org.openmole.core.model.execution.ExecutionState._
 
-class JobCreatedListener extends EventListener[IMoleExecution] {
-  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+class JobCreatedOnEnvironmentListener(moleExecution: IMoleExecution, environment: IEnvironment) extends EventListener[IEnvironment] {
+  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
-      case x: OneJobSubmitted=>
-        val exeManager = TopComponentsManager.executionManager(execution)
-        exeManager.status(READY)+=1
-        exeManager.wfPiePlotter.updateData("Ready",exeManager.status(READY))
-        EventDispatcher.listen(execution,new JobSatusListener,classOf[IMoleExecution.OneJobStatusChanged])
+      case x: IEnvironment.JobSubmitted=>
+        println("job submitted on environment ")
+        val exeManager = TopComponentsManager.executionManager(moleExecution)
+        val env = exeManager.environments(environment)
+        env._2(READY)+=1
+        exeManager.environments(environment)._1.updateData("Ready",env._2(READY))
+        EventDispatcher.listen(x.job,new JobOnEnvironmentStatusListener(moleExecution,x.job),classOf[IExecutionJob.StateChanged])
     }
   }
 }

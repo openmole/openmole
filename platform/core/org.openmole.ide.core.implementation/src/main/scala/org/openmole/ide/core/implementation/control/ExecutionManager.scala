@@ -10,7 +10,9 @@ import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.io.PrintStream
 import org.openide.util.Lookup
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.ide.misc.visualization.PiePlotter
 import org.openmole.ide.misc.widget.MigPanel
@@ -21,6 +23,7 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 import scala.swing.Orientation
 import scala.swing.ScrollPane
 import scala.swing.SplitPane
@@ -29,7 +32,8 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Priority
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
-import org.openmole.core.model.job.State._
+import org.openmole.core.model.job.State
+import org.openmole.core.model.execution.ExecutionState
 
 class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientation.Vertical) with IExecutionManager{
   val tabbedPane = new TabbedPane
@@ -38,12 +42,11 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   override val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var hookPanels= new HashMap[IHookPanelUI,IHook]
-  var status = new HashMap[State,Int]
-  status+= READY-> 0
-  status+= RUNNING-> 0
-  status+= COMPLETED-> 0
-  status+= FAILED-> 0
-  status+= CANCELED-> 0
+  var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
+  val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
+  val envPiePanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
+  var environments = new HashMap[IEnvironment,(PiePlotter,HashMap[ExecutionState.ExecutionState,Int])]
+  environments+= LocalExecutionEnvironment.asInstanceOf[IEnvironment] -> buildEmptyEnvPlotter("Local")
   
   System.setOut(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
   System.setErr(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
@@ -52,12 +55,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
       val dataUI = hf.buildDataUI(this)
       val panelUI = dataUI.buildPanelUI
       tabbedPane.pages+= new TabbedPane.Page(hf.displayName,new MigPanel(""){peer.add(panelUI.peer)})})
-  
-  val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
- // val curPiePlotter = new PiePlotter("Current Environment",Map("Ready"-> 0.0,"Submitted"-> 0.0,"Running"-> 0.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 0.0))
-  tabbedPane.pages+= new TabbedPane.Page("Execution progress", new MigPanel("wrap 2"){
-      peer.add(wfPiePlotter.chartPanel)})
-    //  peer.add(curPiePlotter.chartPanel)
+
+  tabbedPane.pages+= new TabbedPane.Page("Execution progress", envPiePanel)
   
   leftComponent = new ScrollPane(tabbedPane)
   rightComponent = new ScrollPane(logTextArea)
@@ -65,19 +64,34 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   def start = {
     cancel
     hookPanels.values.foreach(_.release)
-    moleExecution = MoleMaker.buildMoleExecution(mole, manager)
-    initPieChart
+    val moleE = MoleMaker.buildMoleExecution(mole, manager)
+    moleExecution = moleE._1
     EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
+    moleE._2.foreach(e=>{environments+= e._1-> buildEmptyEnvPlotter(e._2)
+                         EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])})
+      
+    
+    initPieChart
+    repaint 
+    revalidate
     hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
   
   def cancel = moleExecution.cancel
   
+  def buildEmptyEnvPlotter(name: String) = {
+    val pieP = new PiePlotter(name,Map("Ready"-> 0.0,"Submitted"-> 0.0,"Running"-> 0.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 0.0))
+    envPiePanel.peer.add(pieP.chartPanel)
+    (pieP,HashMap(ExecutionState.SUBMITTED->0,ExecutionState.READY-> 0,ExecutionState.RUNNING-> 0,ExecutionState.DONE-> 0,ExecutionState.FAILED-> 0,ExecutionState.KILLED-> 0))}
+  
   override def commitHook(hookPanelUI: IHookPanelUI) {
     if (hookPanels.contains(hookPanelUI)) hookPanels(hookPanelUI).release
     hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
   }
-  def initPieChart = status.keys.foreach(k=>status(k)=0)
+  def initPieChart = {
+    status.keys.foreach(k=>status(k)=0)
+    environments.values.foreach(env=>env._2.keys.foreach(k=>{env._2(k)=0
+                                                         println(":K::" + k)}))}
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint
