@@ -25,5 +25,5 @@ object PreferenceFrame extends JDialog(WindowManager.getDefault.getMainWindow){
   setTitle("Preferences")
   setLocationRelativeTo(WindowManager.getDefault.getMainWindow)
   add(new PreferenceContent(this).peer)
-  setMinimumSize(new Dimension(550,400))
+  setMinimumSize(new Dimension(550,300))
 }
