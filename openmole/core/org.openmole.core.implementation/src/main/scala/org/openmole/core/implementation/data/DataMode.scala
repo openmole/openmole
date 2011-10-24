@@ -23,7 +23,7 @@ import org.openmole.core.model.data.DataModeMask._
 object DataMode {
   val NONE = new DataMode(0)
   
-  def apply(masks: Iterable[DataModeMask]): DataMode = {
+  def apply(masks: DataModeMask*) = {
     var mask = 0
     for(m <- masks) mask |= m.value
     new DataMode(mask)

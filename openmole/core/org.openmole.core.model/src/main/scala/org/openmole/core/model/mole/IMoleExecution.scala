@@ -19,16 +19,17 @@ package org.openmole.core.model.mole
 
 
 import org.openmole.core.model.job.State.State
-import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.IDataChannel
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
+import scala.collection.mutable.Buffer
 
 object IMoleExecution {
    
@@ -69,7 +70,7 @@ trait IMoleExecution {
   
   def nextJobId: MoleJobId
   
-  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, IVariablesBuffer]
+  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
   def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
       
   def ticket(job: IMoleJob): Option[ITicket]

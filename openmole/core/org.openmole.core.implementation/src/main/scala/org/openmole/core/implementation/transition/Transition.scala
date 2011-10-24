@@ -18,17 +18,18 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.implementation.tools.TypeUtil._
 import org.openmole.core.implementation.data.Context._
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.task.{ITask, IExplorationTask}
-import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.transition.{ICondition, ITransition, ISlot}
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.misc.tools.service.LockRepository
+import scala.collection.mutable.Buffer
+import scala.collection.mutable.ListBuffer
 
 object Transition {
   val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
@@ -64,7 +65,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
   
-  protected def submitNextJobsIfReady(context: IVariablesBuffer, ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
     val lockKey = (end, subMole, ticket)
     lockRepository.lock(lockKey)
     try {
@@ -90,17 +91,13 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     } finally lockRepository.unlock(lockKey)
   }
 
-  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
-    if (isConditionTrue(context)) {
-      /*-- Remove filtred --*/
-      _perform(context -- filtered, ticket, subMole)
-    }
-  }
+  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
+    if (isConditionTrue(context)) _perform(context -- filtered, ticket, subMole)
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
   override def unFiltred = start.outputs.filterNot(d => filtered.contains(d.prototype.name))
   
-  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(VariablesBuffer(context), ticket, subMole)
+  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context, ticket, subMole)
 
 }

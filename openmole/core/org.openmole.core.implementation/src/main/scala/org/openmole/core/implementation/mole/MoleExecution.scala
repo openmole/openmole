@@ -24,6 +24,7 @@ import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
@@ -42,7 +43,6 @@ import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.exception.InternalProcessingError
@@ -52,6 +52,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
@@ -89,7 +90,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val currentJobId = new AtomicLong
 
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
-  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, IVariablesBuffer]
+  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
   val exceptions = new ListBuffer[Throwable]
   

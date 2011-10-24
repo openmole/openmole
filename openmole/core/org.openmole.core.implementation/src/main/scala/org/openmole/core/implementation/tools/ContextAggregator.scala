@@ -31,7 +31,7 @@ object ContextAggregator {
     val toAggregate = toAggregateList.groupBy(_.prototype.name)
     
     aggregate.foldLeft(List.empty[IVariable[_]]) {
-      case(acc,d) =>
+      case(acc, d) =>
         val merging = if(toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
   
         if(toArray.isDefinedAt(d.prototype.name)) {

@@ -27,7 +27,6 @@ import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.transition.{IExplorationTransition, ISlot, ICondition, IAggregationTransition}
-import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.model.data.{IPrototype, IContext, IVariable, IData}
 import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -64,23 +63,24 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
 
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
-    import subMole.moleExecution
+    val subSubMole = SubMoleExecution(subMole.moleExecution, subMole)
     
+    registerAggregationTransitions(ticket, subSubMole)
+    submitIn(context, ticket, subSubMole)
+  }
+
+  override def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
-   
-    val subSubMole = SubMoleExecution(moleExecution, subMole)
-    
-    registerAggregationTransitions(ticket, subSubMole)
     var size = 0
         
     val endTask = end.capsule.taskOrException
     for(value <- values) {
       size += 1
-      subSubMole.incNbJobInProgress(1)
+      subMole.incNbJobInProgress(1)
 
-      val newTicket = moleExecution.nextTicket(ticket)
+      val newTicket = subMole.moleExecution.nextTicket(ticket)
       
       val variables = new ListBuffer[IVariable[_]]
       
@@ -96,12 +96,11 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
 
       }
-      submitNextJobsIfReady(VariablesBuffer(variables.toContext), newTicket, subSubMole)
+      submitNextJobsIfReady(ListBuffer() ++ variables.toContext, newTicket, subMole)
     }
 
-    subSubMole.decNbJobInProgress(size)
+    subMole.decNbJobInProgress(size)
   }
-
   
   private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {
     val alreadySeen = new HashSet[ICapsule]
@@ -120,7 +119,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
           case t: IAggregationTransition => 
             if(level > 0) toProcess += t.end.capsule -> (level - 1)
             else if(level == 0) {
-              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new VariablesBuffer)
+              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
               EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[ISubMoleExecution.Finished])
             }
           case t: IExplorationTransition => toProcess += t.end.capsule -> (level + 1)

@@ -21,7 +21,6 @@ import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.misc.tools.service.Priority
-import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.ContextAggregator
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
@@ -101,7 +100,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     
   def this(trigger: String, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
 
-  
+    
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
     
@@ -112,20 +111,20 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
           resultContexts ++= context
     
           trigger match {
-            case Some(trigger) => {
+            case Some(trigger) => 
                 val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
                 val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, resultContexts.toIterable)
                 if(trigger.evaluate(context)) {
                   aggregate(subMole, ticket)
                   if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
                 }
-              }
             case None =>
           }
         case None => throw new InternalProcessingError("No context registred for aggregation.")
       }
     }
   }
+  
 
   override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
@@ -136,14 +135,13 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
       val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
 
-      //Variable have are clonned in other transitions if necessary
       submitNextJobsIfReady(result, parentTicket, subMoleParent)
     }
   }
   
   override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)
   
-  private def allAggregationTransitionsPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
+  protected def allAggregationTransitionsPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
   
   private def oneAggregationTransitionNotPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean = {
     val alreadySeen = new HashSet[ICapsule]
@@ -151,9 +149,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     toProcess += ((this.start, 0))
     
     while(!toProcess.isEmpty) {
-      val cur = toProcess.remove(0)
-      val capsule = cur._1
-      val level = cur._2
+      val (capsule, level) = toProcess.remove(0)
       
       if(!alreadySeen(capsule)) {
         alreadySeen += capsule
@@ -176,4 +172,6 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     false
   }
  
+  
+  
 }

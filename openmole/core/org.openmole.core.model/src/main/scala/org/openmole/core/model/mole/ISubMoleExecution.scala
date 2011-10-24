@@ -18,12 +18,13 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.Event
+import scala.collection.mutable.Buffer
 
 object ISubMoleExecution {
   case class Finished(val ticket: ITicket) extends Event[ISubMoleExecution]
@@ -48,8 +49,9 @@ trait ISubMoleExecution {
   
   def cancel
   
-  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, IVariablesBuffer]
-  def transitionRegistry: IRegistryWithTicket[ITransition, IVariablesBuffer]
+  def masterTransitionRegistry: IRegistryWithTicket[IAggregationTransition, IContext]
+  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
+  def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
   def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
   def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy])

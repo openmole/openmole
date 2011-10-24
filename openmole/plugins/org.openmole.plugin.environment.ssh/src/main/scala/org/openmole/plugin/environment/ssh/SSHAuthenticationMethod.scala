@@ -18,5 +18,6 @@
 package org.openmole.plugin.environment.ssh
 
 trait SSHAuthenticationMethod {
+  def target: String
   def init
 }

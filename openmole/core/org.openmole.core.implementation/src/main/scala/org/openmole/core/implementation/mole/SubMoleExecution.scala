@@ -22,7 +22,6 @@ import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.tools.IVariablesBuffer
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -30,6 +29,7 @@ import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
@@ -40,6 +40,7 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
 import scala.collection.immutable.TreeSet
+import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
@@ -72,8 +73,9 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   private var canceled = false
   
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IVariablesBuffer]
-  val transitionRegistry = new RegistryWithTicket[ITransition, IVariablesBuffer]
+  val masterTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContext]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
+  val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
   parrentApply(_.addChild(this))
 

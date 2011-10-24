@@ -19,9 +19,7 @@ package org.openmole.core.implementation.data
 
 
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.tools.VariablesBuffer
 import org.openmole.core.implementation.tools.LevelComputing
-import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext, IVariable}
 import org.openmole.core.model.mole.ITicket
@@ -52,12 +50,12 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     {
-      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket) getOrElse(new VariablesBuffer)
+      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket) getOrElse(new ListBuffer[IVariable[_]])
       else {
         val workingOnTicket = (0 until levelDelta).foldLeft(ticket) {
           (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
         }
-        dataChannelRegistry.consult(this, workingOnTicket) getOrElse(new VariablesBuffer)
+        dataChannelRegistry.consult(this, workingOnTicket) getOrElse(new ListBuffer[IVariable[_]])
       }
     }.toIterable
   }
@@ -69,7 +67,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
 
     dataChannelRegistry.synchronized {
       if (levelDelta >= 0) {
-        val toContext = VariablesBuffer(fromContext.filter(v => variableNames.contains(v.prototype.name)))
+        val toContext = ListBuffer() ++ fromContext.filter(v => variableNames.contains(v.prototype.name))
         dataChannelRegistry.register(this, ticket, toContext)
       }
       else {
@@ -80,7 +78,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
         val toContext = dataChannelRegistry.consult(this, workingOnTicket) match {
           case Some(ctx) => ctx
           case None => 
-            val ctx = new VariablesBuffer
+            val ctx = new ListBuffer[IVariable[_]]
             dataChannelRegistry.register(this, workingOnTicket, ctx)
             ctx
         }

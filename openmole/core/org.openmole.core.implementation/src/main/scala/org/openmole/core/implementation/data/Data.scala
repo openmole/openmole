@@ -33,9 +33,9 @@ class Data[T](val prototype: IPrototype[T], val mode: IDataMode) extends IData[T
 
   def this(prototype: IPrototype[T]) = this(prototype, DataMode.NONE)
 
-  def this(prototype: IPrototype[T], masks: Array[DataModeMask]) = this(prototype, DataMode(masks))
+  def this(prototype: IPrototype[T], masks: Array[DataModeMask]) = this(prototype, DataMode(masks: _*))
 
-  def this(prototype: IPrototype[T], masks: DataModeMask*) = this(prototype, DataMode(masks))
+  def this(prototype: IPrototype[T], masks: DataModeMask*) = this(prototype, DataMode(masks: _*))
     
   def this(name: String, `type`: Class[T]) = this(new Prototype[T](name, `type`))
 
