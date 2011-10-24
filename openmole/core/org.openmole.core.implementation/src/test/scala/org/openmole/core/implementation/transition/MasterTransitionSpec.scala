@@ -64,6 +64,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     val testT = new Task("Test") {
       override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
+        context.value(toArray(i)).get.size should equal (10)
         endCapsExecuted += 1
         context
       }
@@ -72,18 +73,20 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     testT.addInput(toArray(i))
     
     val testC = new Capsule(testT)
-    
      
     val select = new Task("select") {
-      override def process(context: IContext) = context
+      override def process(context: IContext) = context + (toArray(i), context.value(toArray(i)).get.slice(0, 10))
     }
+    
     select.addInput(toArray(i))
     select.addOutput(toArray(i))
     
     val master = new Task("master") {
       override def process(context: IContext) = {
         val nVal = context.value(n).get
-        (if(context.value(toArray(i)).get.size > data.size) context + (n, nVal + 1) else context) + (toArray(i), Array(nVal.toString))
+        (if(context.value(toArray(i)).get.size > data.size)
+          context + (n, nVal + 1) 
+         else context) + (toArray(i), Array(nVal.toString))
       }
     }
     master.addInput(toArray(i))
