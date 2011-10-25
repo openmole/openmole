@@ -18,7 +18,7 @@
 package org.openmole.ide.core.model.commons
 
 import org.openmole.ide
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 
 object TransitionType extends Enumeration {
   type TransitionType= Value

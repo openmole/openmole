@@ -24,7 +24,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.commons.MoleSceneType._

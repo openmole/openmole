@@ -20,9 +20,10 @@ package org.openmole.ide.core.implementation.preference
 import javax.swing.JDialog
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Button
-import scala.swing.Component
 import scala.swing.TabbedPane
 import scala.swing.event.ButtonClicked
+import scala.swing.event.Key._
+import scala.swing.event.KeyPressed
 
 class PreferenceContent(frame: JDialog) extends MigPanel("wrap","[right]",""){ 
   val applyButton = new Button("Apply")
@@ -32,8 +33,12 @@ class PreferenceContent(frame: JDialog) extends MigPanel("wrap","[right]",""){
     contents+= new TabbedPane {
       pages.append(new TabbedPane.Page("Authentification",authentification))
     }
-    contents+= applyButton
+    contents+= applyButton 
   
+    listenTo(keys)
+    reactions += {
+      case KeyPressed(_, Enter, _, _) => save
+      case _ => println("Other key")}
   
   def save = {
     authentification.save

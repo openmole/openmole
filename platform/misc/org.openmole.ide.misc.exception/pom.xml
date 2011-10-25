@@ -13,7 +13,7 @@
     	<version>0.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.ide.misc.exception</artifactId>
+    <artifactId>org.openmole.ide.core.implementation.exception</artifactId>
     <dependencies>
     </dependencies>
 

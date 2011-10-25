@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet

@@ -10,7 +10,7 @@ import java.io.File
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.plugin.task.serialization.StoreIntoCSVTask
 import scala.collection.JavaConversions._
 import au.com.bytecode.opencsv.CSVWriter

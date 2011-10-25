@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.sampling.csv
 
 
 import java.io.File
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling

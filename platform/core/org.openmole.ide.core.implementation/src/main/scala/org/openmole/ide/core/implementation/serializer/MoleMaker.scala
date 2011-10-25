@@ -28,7 +28,7 @@ import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
@@ -51,10 +51,12 @@ object MoleMaker {
     var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
     manager.capsules.values.foreach{c=> 
+      println("env ??" + c.dataProxy.get.dataUI.environment.isDefined)
       if (c.dataProxy.get.dataUI.environment.isDefined){
         val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
         envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
       strat.select(doneCapsules(c),env)}}
+      println("return env ??" + envs.size)
     (new MoleExecution(mole,strat),envs.toSet)
   }
   

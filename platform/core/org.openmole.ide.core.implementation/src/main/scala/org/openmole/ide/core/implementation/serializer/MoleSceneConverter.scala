@@ -32,7 +32,7 @@ import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.exception.MoleExceptionManagement
+import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.mutable.HashMap

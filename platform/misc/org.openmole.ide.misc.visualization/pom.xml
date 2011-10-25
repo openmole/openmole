@@ -34,6 +34,11 @@
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout</artifactId>
             <version>3.7.4</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.openmole</groupId>
+            <artifactId>org.openmole.core.model</artifactId>
+            <version>${openmole.core.version}</version>
         </dependency>
     </dependencies>
 
