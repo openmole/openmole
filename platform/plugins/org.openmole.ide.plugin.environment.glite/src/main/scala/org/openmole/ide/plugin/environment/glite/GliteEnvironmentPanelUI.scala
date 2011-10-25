@@ -19,18 +19,20 @@ package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.BoxPanel
+import scala.swing.CheckBox
 import scala.swing.Label
-import scala.swing.Orientation
-import scala.swing.Separator
-import scala.swing.Swing
 import scala.swing.TextField
-import java.awt.Dimension
+import scala.swing.event.ButtonClicked
 
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
   val voTextField = new TextField
   val vomsTextField = new TextField
   val bdiiTextField = new TextField
+  val proxyURLTextField = new TextField
+  val proxyUserTextField = new TextField
+  val proxyCheckBox = new CheckBox("Proxy")
+  val proxyURLLabel = new Label("url")
+  val proxyUserLabel = new Label("user")
   
   contents+= (new Label("VO"),"gap para")
   contents+= voTextField
@@ -38,13 +40,34 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   contents+= vomsTextField
   contents+= (new Label("BDII"),"gap para")
   contents+= bdiiTextField
+  contents+= (proxyCheckBox,"wrap")
+  contents+= (proxyURLLabel,"gap para")
+  contents+= proxyURLTextField
+  contents+= (proxyUserLabel,"gap para")
+  contents+= proxyUserTextField
   
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
+  proxyURLTextField.text = pud.proxyURL
+  proxyUserTextField.text = pud.proxyUser
+  proxyCheckBox.selected = pud.proxy
+  showProxy(pud.proxy)
   
+  listenTo(`proxyCheckBox`)
+  reactions += {case ButtonClicked(`proxyCheckBox`) => showProxy(proxyCheckBox.selected)}
+      
+  private def showProxy(b: Boolean) = {
+    proxyURLLabel.visible = b
+    proxyUserLabel.visible = b
+    proxyURLTextField.visible = b
+    proxyUserTextField.visible = b}
+    
   override def saveContent(name: String) = new GliteEnvironmentDataUI(name,
                                                                       voTextField.text,
                                                                       vomsTextField.text,
-                                                                      bdiiTextField.text)
+                                                                      bdiiTextField.text,
+                                                                      proxyCheckBox.selected,
+                                                                      proxyURLTextField.text,
+                                                                      proxyUserTextField.text)
 }
