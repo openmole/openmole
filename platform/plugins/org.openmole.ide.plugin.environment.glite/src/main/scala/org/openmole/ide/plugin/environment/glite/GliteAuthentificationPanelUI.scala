@@ -107,7 +107,7 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
   groupButton.select(initButton.get)
  
   
-  def addPem = {println("Add PEM");clean; contents+= pem._2; refresh}
+  def addPem = {clean; contents+= pem._2; refresh}
   def addP12 = {clean; contents+= p12._2; refresh}
   def addProxy = {clean; contents+= proxy._2; refresh}
   
@@ -117,7 +117,6 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
                  revalidate}
   
   override def saveContent = {
-    println("pass :: " + new String(pemPassField.password))
     if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new PEMCertificate(Workspace.encrypt(new String(pemPassField.password)),
                                                                                                                 pem1TextField.text,
                                                                                                                 pem2TextField.text)
