@@ -28,7 +28,7 @@ import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask

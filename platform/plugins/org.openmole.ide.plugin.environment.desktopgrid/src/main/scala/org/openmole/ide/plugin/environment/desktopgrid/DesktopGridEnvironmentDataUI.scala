@@ -6,9 +6,8 @@
 package org.openmole.ide.plugin.environment.desktopgrid
 
 
-import java.io.File
 import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
 class DesktopGridEnvironmentDataUI(val name: String,val login: String,val pass: String,val port: Int) extends IEnvironmentDataUI {

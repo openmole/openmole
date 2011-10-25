@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.commons.Constants._
 
 class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {

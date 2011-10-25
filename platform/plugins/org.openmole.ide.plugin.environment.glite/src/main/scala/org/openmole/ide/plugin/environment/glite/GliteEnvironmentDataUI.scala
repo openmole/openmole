@@ -6,7 +6,7 @@
 package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.plugin.environment.glite.GliteEnvironment
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.glite.MyProxy
 

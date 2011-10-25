@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.exception.exception
+package org.openmole.ide.misc.exception
 
 class GUIUserBadDataError (exception: Throwable, message: String) extends Exception(message, exception) {
 

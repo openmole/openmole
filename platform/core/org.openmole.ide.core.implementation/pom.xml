@@ -174,10 +174,5 @@
             <artifactId>org.openmole.ide.misc.visualization</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>uk.com.robustit.cloning</artifactId>
-            <version>1.7</version>
-        </dependency>
     </dependencies>
 </project>

@@ -25,7 +25,7 @@ import org.openmole.ide.core.implementation.action.RemoveSamplingAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.ISamplingDisplay
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.dataproxy._

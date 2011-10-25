@@ -21,7 +21,7 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.action.RemoveTaskAction
 import org.openmole.ide.core.implementation.dataproxy._

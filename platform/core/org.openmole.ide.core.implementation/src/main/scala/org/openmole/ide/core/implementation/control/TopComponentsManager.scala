@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import scala.collection.JavaConversions._
 
 object TopComponentsManager{

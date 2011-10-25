@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.data.TaskDataUI
 
 class ExplorationTaskDataUI(val name: String) extends TaskDataUI{
