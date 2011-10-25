@@ -30,8 +30,8 @@ class JobOnEnvironmentStatusListener(moleExecution: IMoleExecution, executionJob
         val env = exeManager.environments(executionJob.environment)
         env._2(x.oldState) -= 1 
         env._2(x.newState) += 1
-        env._1.updateData(x.oldState.name,env._2(x.oldState))
-        env._1.updateData(x.newState.name,env._2(x.newState))
+        exeManager.envBarPlotter.updateData(env._1,x.oldState,env._2(x.oldState))
+        exeManager.envBarPlotter.updateData(env._1,x.newState,env._2(x.newState))
     }
   }
 }

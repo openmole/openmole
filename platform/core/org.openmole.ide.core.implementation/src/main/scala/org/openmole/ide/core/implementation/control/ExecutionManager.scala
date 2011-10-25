@@ -14,6 +14,7 @@ import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmen
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
+import org.openmole.ide.misc.visualization.BarPlotter
 import org.openmole.ide.misc.visualization.PiePlotter
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.core.model.mole.IMoleExecution
@@ -45,8 +46,9 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
   val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
   val envPiePanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
-  var environments = new HashMap[IEnvironment,(PiePlotter,HashMap[ExecutionState.ExecutionState,Int])]
-  environments+= LocalExecutionEnvironment.asInstanceOf[IEnvironment] -> buildEmptyEnvPlotter("Local")
+  val envBarPlotter = new BarPlotter("aaa ")
+  var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,Double])]
+  buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
   
   System.setOut(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
   System.setErr(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
@@ -67,31 +69,28 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     val moleE = MoleMaker.buildMoleExecution(mole, manager)
     moleExecution = moleE._1
     EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
-    moleE._2.foreach(e=>{environments+= e._1-> buildEmptyEnvPlotter(e._2)
-                         EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])})
-      
-    
+    moleE._2.foreach(buildEmptyEnvPlotter)
+    envPiePanel.peer.add(envBarPlotter.chartPanel) 
     initPieChart
     repaint 
     revalidate
     hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
-  
+    
   def cancel = moleExecution.cancel
   
-  def buildEmptyEnvPlotter(name: String) = {
-    val pieP = new PiePlotter(name,Map("Ready"-> 0.0,"Submitted"-> 0.0,"Running"-> 0.0,"Done"-> 0.0,"Failed"-> 0.0,"Killed"-> 0.0))
-    envPiePanel.peer.add(pieP.chartPanel)
-    (pieP,HashMap(ExecutionState.SUBMITTED->0,ExecutionState.READY-> 0,ExecutionState.RUNNING-> 0,ExecutionState.DONE-> 0,ExecutionState.FAILED-> 0,ExecutionState.KILLED-> 0))}
+  def buildEmptyEnvPlotter(e: (IEnvironment,String)) = {
+    val m = HashMap(ExecutionState.SUBMITTED->0.0,ExecutionState.READY-> 0.0,ExecutionState.RUNNING-> 0.0,ExecutionState.DONE-> 0.0,ExecutionState.FAILED-> 0.0,ExecutionState.KILLED-> 0.0)    
+    environments+= e._1-> (e._2,m)
+    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])}
   
   override def commitHook(hookPanelUI: IHookPanelUI) {
     if (hookPanels.contains(hookPanelUI)) hookPanels(hookPanelUI).release
-    hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject
-  }
+    hookPanels+= hookPanelUI-> hookPanelUI.saveContent.coreObject}
+  
   def initPieChart = {
     status.keys.foreach(k=>status(k)=0)
-    environments.values.foreach(env=>env._2.keys.foreach(k=>{env._2(k)=0
-                                                         println(":K::" + k)}))}
+    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = 0))}
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint

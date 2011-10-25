@@ -31,7 +31,7 @@ class JobCreatedOnEnvironmentListener(moleExecution: IMoleExecution, environment
         val exeManager = TopComponentsManager.executionManager(moleExecution)
         val env = exeManager.environments(environment)
         env._2(READY)+=1
-        exeManager.environments(environment)._1.updateData("Ready",env._2(READY))
+        exeManager.envBarPlotter.updateData(env._1,READY,env._2(READY))
         EventDispatcher.listen(x.job,new JobOnEnvironmentStatusListener(moleExecution,x.job),classOf[IExecutionJob.StateChanged])
     }
   }

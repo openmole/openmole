@@ -17,14 +17,10 @@
 
 package org.openmole.ide.core.implementation.control
 
-import scala.swing.Button
-import scala.swing.Dialog
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.awt.event.KeyEvent
-import java.awt.event.KeyListener
 import javax.swing.JButton
 import javax.swing.JDialog
 import scala.swing.Label
@@ -32,18 +28,20 @@ import scala.swing.PasswordField
 import net.miginfocom.swing.MigLayout
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.preference.PreferenceFrame
+import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.KeyPressed
 import scala.swing.event.Key._
 import scala.swing.event.KeyReleased
 
-object PasswordDialog extends JDialog(PreferenceFrame){
+object PasswordDialog extends JDialog(WindowManager.getDefault.getMainWindow){
   
   setTitle("Preference access")
   val passField = new PasswordField(12){
     listenTo(keys)
     reactions += {
-      case KeyPressed(_, Enter, _, _) => ok
+      case KeyPressed(_, Enter, _, _) => ok(true)
       case KeyReleased(_, _, _, _) => testPassword}}
   val okButton = new JButton("OK")
   val cancelButton = new JButton("Cancel")
@@ -57,11 +55,11 @@ object PasswordDialog extends JDialog(PreferenceFrame){
   setMinimumSize(new Dimension(350,80))
   
   okButton.addActionListener(new ActionListener {
-      override def actionPerformed(ae: ActionEvent) = {ok}})
+      override def actionPerformed(ae: ActionEvent) = {ok(true)}})
     
   cancelButton.addActionListener(new ActionListener {
       override def actionPerformed(ae: ActionEvent) = {
-        setVisible(false)}})
+        ok(false)}})
 
   setLocationRelativeTo(WindowManager.getDefault.getMainWindow)
 
@@ -72,6 +70,7 @@ object PasswordDialog extends JDialog(PreferenceFrame){
   
   def testPassword: Boolean = {
     if (Workspace.passwordIsCorrect(new String(passField.password))) {
+      println("pass is correct ")
       setColor(new Color(136,170,0) )
       true
     } else {
@@ -79,9 +78,14 @@ object PasswordDialog extends JDialog(PreferenceFrame){
       false}
   }
   
-  def ok:Unit = { if (testPassword) {
-      Workspace.password_=(new String(passField.password))
-      setVisible(false)}
-  }
+  def ok(b: Boolean):Unit = { 
+      try {
+        println(" try " + b + " " + testPassword)
+      if (b && testPassword) Workspace.password_=(new String(passField.password))}
+    catch {
+      case e: UserBadDataError=> MoleExceptionManagement.giveInformation("The preference password is not set. All the actions requiring encrypted data are unvailable")
+    case _=> println(" other exception")}
+finally setVisible(false)}
+  
   setVisible(true)
 }

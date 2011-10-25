@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import scala.collection.JavaConversions._
 
 object TopComponentsManager{
@@ -75,6 +75,7 @@ object TopComponentsManager{
     ntc}
   
   def displayExecutionView(ms:IMoleScene) {
+    println("--- > displayExecutionView " + ms.moleSceneType)
     if (ms.moleSceneType == EXECUTION) {
       val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(ms.manager)
       ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionManager(ms.manager)))
