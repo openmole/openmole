@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI

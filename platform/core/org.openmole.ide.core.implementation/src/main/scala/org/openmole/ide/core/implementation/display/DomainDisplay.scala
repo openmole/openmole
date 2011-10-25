@@ -19,7 +19,7 @@ package org.openmole.ide.core.implementation.display
 
 import org.openide.util.Lookup
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys

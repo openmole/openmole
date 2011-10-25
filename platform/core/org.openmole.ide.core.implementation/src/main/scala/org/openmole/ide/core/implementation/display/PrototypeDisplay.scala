@@ -20,7 +20,7 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.display.IPrototypeDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI

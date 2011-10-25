@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.display
  
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.ide.core.implementation.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
