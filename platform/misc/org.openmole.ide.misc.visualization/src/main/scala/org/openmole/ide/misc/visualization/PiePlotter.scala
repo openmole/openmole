@@ -25,17 +25,7 @@ import org.jfree.chart.ChartPanel
 import org.jfree.chart.plot.PiePlot
 import org.jfree.data.general.DefaultPieDataset
 
-object PiePlotter {
-  val READY_COLOR = new Color(255,230,128)
-  val RUNNING_COLOR = new Color(85,212,0)
-  val COMPLETED_COLOR = new Color(198,233,175)
-  val FAILED_COLOR = new Color(0,0,0)
-  val CANCELED_COLOR =new Color(170,0,0)
-  val KILLED_COLOR =new Color(0,0,0)
-  val SUBMITTED_COLOR =new Color(255,204,0)
-}
-
-class PiePlotter(title: String, data: Map[String, Double]) {
+class PiePlotter(title: String, data: Map[String, Double]){
   def this(title: String) = this(title,Map.empty[String,Double])
 
   val pieData = new DefaultPieDataset
@@ -61,7 +51,7 @@ class PiePlotter(title: String, data: Map[String, Double]) {
     plot.setIgnoreZeroValues(true)
     plot.setLabelPaint(new Color(102,102,102))
     
-    import PiePlotter._
+    import PlotterColor._
     plot.setSectionPaint("Ready",READY_COLOR)
     plot.setSectionPaint("Running",RUNNING_COLOR)
     plot.setSectionPaint("Completed",COMPLETED_COLOR)
