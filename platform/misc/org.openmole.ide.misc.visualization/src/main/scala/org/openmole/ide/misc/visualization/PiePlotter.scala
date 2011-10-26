@@ -52,13 +52,13 @@ class PiePlotter(title: String, data: Map[String, Double]){
     plot.setLabelPaint(new Color(102,102,102))
     
     import PlotterColor._
-    plot.setSectionPaint("Ready",READY_COLOR)
-    plot.setSectionPaint("Running",RUNNING_COLOR)
-    plot.setSectionPaint("Completed",COMPLETED_COLOR)
-    plot.setSectionPaint("Failed",FAILED_COLOR)
-    plot.setSectionPaint("Canceled",CANCELED_COLOR)
-    plot.setSectionPaint("Killed",KILLED_COLOR)
-    plot.setSectionPaint("Done",COMPLETED_COLOR)
-    plot.setSectionPaint("Submitted",SUBMITTED_COLOR)
+    plot.setSectionPaint("Ready",READY_COLOR._1)
+    plot.setSectionPaint("Running",RUNNING_COLOR._1)
+    plot.setSectionPaint("Completed",COMPLETED_COLOR._1)
+    plot.setSectionPaint("Failed",FAILED_COLOR._1)
+    plot.setSectionPaint("Canceled",CANCELED_COLOR._1)
+    plot.setSectionPaint("Killed",KILLED_COLOR._1)
+    plot.setSectionPaint("Done",COMPLETED_COLOR._1)
+    plot.setSectionPaint("Submitted",SUBMITTED_COLOR._1)
   }
 }

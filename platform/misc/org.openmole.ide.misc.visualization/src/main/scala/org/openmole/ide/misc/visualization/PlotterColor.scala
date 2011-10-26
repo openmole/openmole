@@ -20,11 +20,13 @@ package org.openmole.ide.misc.visualization
 import java.awt.Color
 
 object PlotterColor {
-  val READY_COLOR = new Color(255,230,128)
-  val RUNNING_COLOR = new Color(85,212,0)
-  val COMPLETED_COLOR = new Color(198,233,175)
-  val FAILED_COLOR = new Color(0,0,0)
-  val CANCELED_COLOR =new Color(170,0,0)
-  val KILLED_COLOR =new Color(0,0,0)
-  val SUBMITTED_COLOR =new Color(255,204,0)
+  val READY_COLOR = (new Color(255,230,128),0)
+  val SUBMITTED_COLOR =(new Color(255,204,0),1)
+  val RUNNING_COLOR = (new Color(85,212,0),1)
+  val RUNNING_ENV_COLOR = (new Color(85,212,0),2)
+  val DONE_COLOR = (new Color(98,233,175),3)
+  val COMPLETED_COLOR = (new Color(198,233,175),3)
+  val FAILED_COLOR = (new Color(0,0,0),4)
+  val CANCELED_COLOR =(new Color(170,0,0),5)
+  val KILLED_COLOR =(new Color(0,0,0),5)
 }

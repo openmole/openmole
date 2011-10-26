@@ -18,30 +18,87 @@
 package org.openmole.ide.misc.visualization
 
 
+import java.awt.Color
 import java.awt.Dimension
+import java.awt.Font
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel
+import org.jfree.chart.labels.ItemLabelAnchor
+import org.jfree.chart.labels.ItemLabelPosition
+import org.jfree.chart.plot.CategoryPlot
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.renderer.category.BarRenderer
 import org.jfree.data.category.DefaultCategoryDataset
 import org.openmole.core.model.execution.ExecutionState._
+import scala.collection.JavaConversions._
 
 class BarPlotter(title: String, val data: Map[String,Map[ExecutionState, Double]]){
   def this(t: String)  = this(t,Map.empty)
 
   val dataSet = new DefaultCategoryDataset
-  data.keys.foreach(env=> data(env).keys.foreach(k=>dataSet.addValue(data(env)(k),env,k.name)))
+  data.keys.foreach(env=> data(env).keys.foreach(k=>dataSet.addValue(data(env)(k),k.name,env)))
   val chart = ChartFactory.createBarChart(
-    "Bar Chart Demo",         // chart title
-    "Category",               // domain axis label
-    "Value",                  // range axis label
+    "Environements",         // chart title
+    "",               // domain axis label
+    "",                  // range axis label
     dataSet,                  // data
     PlotOrientation.VERTICAL, // orientation
-    true,                     // include legend
+    false,                     // include legend
     true,                     // tooltips?
     false                     // URLs?
   )
+  customize(chart.getPlot.asInstanceOf[CategoryPlot])
   
   def chartPanel = new ChartPanel(chart) {setPreferredSize(new Dimension(200,200))} 
   
-  def updateData(env: String, key: ExecutionState, value: Double) = if(value>=0.0) dataSet.setValue(value,env,key.name)
+  def updateData(env: String, key: ExecutionState, value: Double) = if(value>=0.0) dataSet.setValue(value,key.name,env)
+  
+  private def customize(plot: CategoryPlot) = {
+    chart.getTitle.setPaint(new Color(102,102,102))
+    chart.getTitle.setFont(new Font("Ubuntu",Font.BOLD,15))
+    chart.setAntiAlias(true)
+    // plot.setShadowPaint(new Color(0,0,0,0))
+    plot.setBackgroundPaint(new Color(0,0,0,0))
+    
+    
+    val barRenderer = plot.getRenderer.asInstanceOf[BarRenderer]
+    barRenderer.setMaximumBarWidth(0.1)
+    // dataSet.getColumnKeys.zipWithIndex.foreach {case (k,i) => barRenderer.setSeriesPaint(}
+    import PlotterColor._
+    barRenderer.setSeriesPaint(READY_COLOR._2, READY_COLOR._1)
+    barRenderer.setSeriesPaint(SUBMITTED_COLOR._2, SUBMITTED_COLOR._1)
+    barRenderer.setSeriesPaint(RUNNING_COLOR._2, RUNNING_COLOR._1)
+    barRenderer.setSeriesPaint(DONE_COLOR._2,DONE_COLOR._1)
+    barRenderer.setSeriesPaint(FAILED_COLOR._2,FAILED_COLOR._1)
+    barRenderer.setSeriesPaint(KILLED_COLOR._2,KILLED_COLOR._1)
+    barRenderer.setShadowVisible(true)
+        
+//    val colorList = List[Color](Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK)
+//    dataSet.getColumnKeys.zipWithIndex.foreach{case (k,i) => k match {
+//      case ("Ready",x)=> colorList
+//      }}
+   
+//    val renderer = new CustomRenderer(
+//            List(Color.red, Color.blue, Color.green,
+//                Color.yellow, Color.orange, Color.cyan,
+//                Color.magenta, Color.blue).toArray)
+   
+    
+    //  plot.setLabelBackgroundPaint(new Color(0,0,0,0))
+    // plot.setLabelOutlinePaint(new Color(0,0,0,0))
+    // plot.setLabelShadowPaint(new Color(0,0,0,0))
+    // plot.setLabelLinksVisible(false)
+    //  plot.setIgnoreZeroValues(true)
+    //  plot.setLabelPaint(new Color(102,102,102))
+    
+    //  import PlotterColor._
+//    plot.setSectionPaint("Ready",READY_COLOR)
+//    plot.setSectionPaint("Running",RUNNING_COLOR)
+//    plot.setSectionPaint("Completed",COMPLETED_COLOR)
+//    plot.setSectionPaint("Failed",FAILED_COLOR)
+//    plot.setSectionPaint("Canceled",CANCELED_COLOR)
+//    plot.setSectionPaint("Killed",KILLED_COLOR)
+//    plot.setSectionPaint("Done",COMPLETED_COLOR)
+//    plot.setSectionPaint("Submitted",SUBMITTED_COLOR)
+  }
 }
