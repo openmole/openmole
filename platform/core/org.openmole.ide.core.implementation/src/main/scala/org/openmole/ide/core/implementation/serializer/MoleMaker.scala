@@ -50,13 +50,18 @@ object MoleMaker {
   def buildMoleExecution(mole: IMole,manager: IMoleSceneManager): (IMoleExecution,Set[(IEnvironment,String)]) = {
     var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
+    println("capsules :: " + manager.capsules.size)
+    manager.capsules.foreach(c=>println("nn :: " + c._1))
     manager.capsules.values.foreach{c=> 
       println("env ??" + c.dataProxy.get.dataUI.environment.isDefined)
       if (c.dataProxy.get.dataUI.environment.isDefined){
         val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
         envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
-      strat.select(doneCapsules(c),env)}}
-      println("return env ??" + envs.size)
+        println(":: " + env + " for " + c.dataProxy.get.dataUI.name + ", " + doneCapsules(c))
+        strat.select(doneCapsules(c),env)
+      }}
+   
+    println("return env ??" + envs.size)
     (new MoleExecution(mole,strat),envs.toSet)
   }
   

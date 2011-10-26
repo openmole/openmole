@@ -45,10 +45,10 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   var hookPanels= new HashMap[IHookPanelUI,IHook]
   var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
   val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
-  val envPiePanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
+  val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
   val envBarPlotter = new BarPlotter("aaa ")
   var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,Double])]
-  buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
+  //buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
   
   System.setOut(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
   System.setErr(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
@@ -58,27 +58,35 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
       val panelUI = dataUI.buildPanelUI
       tabbedPane.pages+= new TabbedPane.Page(hf.displayName,new MigPanel(""){peer.add(panelUI.peer)})})
 
-  tabbedPane.pages+= new TabbedPane.Page("Execution progress", envPiePanel)
+  tabbedPane.pages+= new TabbedPane.Page("Execution progress", envBarPanel)
   
   leftComponent = new ScrollPane(tabbedPane)
   rightComponent = new ScrollPane(logTextArea)
   
   def start = {
     cancel
+    initBarPlotter
     hookPanels.values.foreach(_.release)
     val moleE = MoleMaker.buildMoleExecution(mole, manager)
     moleExecution = moleE._1
     EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
     moleE._2.foreach(buildEmptyEnvPlotter)
-    envPiePanel.peer.add(envBarPlotter.chartPanel) 
+    environments.values.foreach(v=>println("--- environment :: " + v._1))
+    if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+    envBarPanel.peer.add(envBarPlotter.chartPanel) 
     initPieChart
+    hookPanels.keys.foreach(commitHook(_))
     repaint 
     revalidate
-    hookPanels.keys.foreach(commitHook(_))
     moleExecution.start}
     
   def cancel = moleExecution.cancel
   
+  def initBarPlotter {
+    environments.clear
+    buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
+  }
+
   def buildEmptyEnvPlotter(e: (IEnvironment,String)) = {
     val m = HashMap(ExecutionState.SUBMITTED->0.0,ExecutionState.READY-> 0.0,ExecutionState.RUNNING-> 0.0,ExecutionState.DONE-> 0.0,ExecutionState.FAILED-> 0.0,ExecutionState.KILLED-> 0.0)    
     environments+= e._1-> (e._2,m)
