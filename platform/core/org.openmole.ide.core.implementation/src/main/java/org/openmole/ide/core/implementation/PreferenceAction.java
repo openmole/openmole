@@ -18,12 +18,15 @@ package org.openmole.ide.core.implementation;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionRegistration;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
-import org.openmole.ide.core.implementation.preference.PreferenceFrame;
+import org.openmole.ide.core.implementation.preference.PreferenceContent;
 
 @ActionID(category = "Edit",
 id = "org.openmole.ide.core.implementation.PreferenceAction")
@@ -37,6 +40,12 @@ public final class PreferenceAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PreferenceFrame.setVisible(true);
+        PreferenceContent pc = new PreferenceContent();
+        DialogDescriptor dd = new DialogDescriptor(pc.peer(), "Preferences");
+        dd.setOptions(new Object[]{DialogDescriptor.OK_OPTION});
+        Object result = DialogDisplayer.getDefault().notify(dd);
+        if (!result.equals(NotifyDescriptor.OK_OPTION)) {
+            pc.save();
+        }
     }
 }

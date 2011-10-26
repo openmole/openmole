@@ -17,12 +17,24 @@
 
 package org.openmole.ide.core.implementation.control
 
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
+import org.openide.NotifyDescriptor
+import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace._
 
 object PasswordListener extends EventListener[Workspace]{
   override def triggered(obj: Workspace,event: Event[Workspace]) = {
-    PasswordDialog
+    try {
+      val dd = new DialogDescriptor(PasswordDialog.panel.peer, "Preferences access")
+      val result = DialogDisplayer.getDefault.notify(dd)
+      if (!result.equals(NotifyDescriptor.OK_OPTION)) PasswordDialog.ok(true)
+      else PasswordDialog.ok(false)}
+    catch {
+      case e: UserBadDataError=> MoleExceptionManagement.giveInformation("The preference password is not set. All the actions requiring encrypted data are unvailable")
+      case x=> println(" other exception " + x)}
   }
 }
