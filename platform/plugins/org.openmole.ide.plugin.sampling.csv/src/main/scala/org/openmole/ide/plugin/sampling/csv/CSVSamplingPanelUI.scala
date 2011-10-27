@@ -83,8 +83,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[left]rel[
       
       override protected def editor(row: Int, column: Int) = {
         column match {
-          case 1=> new DefaultCellEditor(new ComboBox(comboContent).peer)
-          case _=> new DefaultCellEditor(new TextField{editable = false}.peer)
+          case 1=> new DefaultCellEditor((new ComboBox(comboContent)).peer)
+          case _=> new DefaultCellEditor((new TextField{editable = false}).peer)
         }
       }
     }
