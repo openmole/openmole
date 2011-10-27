@@ -17,10 +17,4 @@
 
 package org.openmole.core.model.transition
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.mole.ITicket
-
-trait IExplorationTransition extends ITransition {
-  def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution)
-}
+trait IExplorationTransition extends ITransition

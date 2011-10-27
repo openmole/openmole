@@ -17,9 +17,4 @@
 
 package org.openmole.core.model.transition
 
-import org.openmole.core.model.task.ITask
-
-trait IMasterTransition extends IAggregationTransition {
-  def master: ISlot
-  def selection: ITask
-}
+trait ISlaveTransition extends IExplorationTransition

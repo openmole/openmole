@@ -23,6 +23,7 @@ import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.IAggregationTransition
+import org.openmole.core.model.transition.IMasterTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.implementation.job.Job
@@ -73,7 +74,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   private var canceled = false
   
-  val masterTransitionRegistry = new RegistryWithTicket[IAggregationTransition, IContext]
+  val masterTransitionRegistry = new RegistryWithTicket[IMasterTransition, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 

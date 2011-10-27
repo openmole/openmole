@@ -142,7 +142,7 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
       performTransition(job.context, ticket, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
-    } finally  EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(this))
+    } finally EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(this))
   }
 
   protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    

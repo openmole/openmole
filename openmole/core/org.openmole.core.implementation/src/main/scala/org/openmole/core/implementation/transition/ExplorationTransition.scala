@@ -69,13 +69,14 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
     submitIn(context, ticket, subSubMole)
   }
 
-  override def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
+  def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
     var size = 0
         
     val endTask = end.capsule.taskOrException
+    
     for(value <- values) {
       size += 1
       subMole.incNbJobInProgress(1)

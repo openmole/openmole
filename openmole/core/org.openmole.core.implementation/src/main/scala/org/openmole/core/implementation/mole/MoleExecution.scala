@@ -195,8 +195,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
     instantRerun.jobFinished(job, capsule)
     
-    if (subMole.nbJobInProgess == 0)
-      EventDispatcher.trigger(subMole, new ISubMoleExecution.Finished(ticket))
+    if (subMole.nbJobInProgess == 0) EventDispatcher.trigger(subMole, new ISubMoleExecution.Finished(ticket))
     
     if (isFinished) {
       submiter.interrupt

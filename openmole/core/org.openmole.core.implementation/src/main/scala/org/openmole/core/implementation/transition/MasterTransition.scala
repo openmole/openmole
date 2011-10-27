@@ -43,71 +43,129 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class MasterTransition(val selection: ITask, val master: ITask, start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Set[String] = Set.empty[String], trigger: Option[ICondition] = None) extends AggregationTransition(start, end, condition, filtered, trigger) with IMasterTransition {
+class MasterTransition(val selection: ITask, start: ICapsule, val master: ISlot, end: ISlot, condition: ICondition = True, filtered: Set[String] = Set.empty[String], trigger: Option[ICondition] = None) extends AggregationTransition(start, end, condition, filtered, trigger) with IMasterTransition {
   
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule) = this(selection, master, start, end.defaultInputSlot, True, Set.empty[String], None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule) = this(selection, start, master, end.defaultInputSlot, True, Set.empty[String], None)
     
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule, condition: ICondition) = this(selection, master, start, end.defaultInputSlot, condition, Set.empty[String], None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition) = this(selection, start, master, end.defaultInputSlot, condition, Set.empty[String], None)
 
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule, condition: String) = this(selection, master, start, end.defaultInputSlot, new Condition(condition), Set.empty[String], None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule, condition: String) = this(selection, start, master, end.defaultInputSlot, new Condition(condition), Set.empty[String], None)
     
-  def this(selection: ITask, master: ITask, start: ICapsule, slot: ISlot, condition: String) = this(selection, master, start, slot, new Condition(condition), Set.empty[String], None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, slot: ISlot, condition: String) = this(selection,start,  master, slot, new Condition(condition), Set.empty[String], None)
     
-  def this(selection: ITask, master: ITask, start: ICapsule, slot: ISlot, condition: ICondition) = this(selection, master, start, slot, condition, Set.empty[String], None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, slot: ISlot, condition: ICondition) = this(selection, start, master, slot, condition, Set.empty[String], None)
    
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, ICondition.True, filtred.toSet, None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, ICondition.True, filtred.toSet, None)
     
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, condition, filtred.toSet, None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, condition, filtred.toSet, None)
 
-  def this(selection: ITask, master: ITask, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, new Condition(condition), filtred.toSet, None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, new Condition(condition), filtred.toSet, None)
     
-  def this(selection: ITask, master: ITask, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, master, start, slot, new Condition(condition), filtred.toSet, None)
+  def this(selection: ITask, start: ICapsule, master: ISlot, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, start, master, slot, new Condition(condition), filtred.toSet, None)
 
   
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule) = this(selection, master, start, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule) = this(selection, start, master, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
     
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule, condition: ICondition) = this(selection, master, start, end.defaultInputSlot, condition, Set.empty[String], Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition) = this(selection, start, master, end.defaultInputSlot, condition, Set.empty[String], Some(trigger))
 
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule, condition: String) = this(selection, master, start, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule, condition: String) = this(selection, start, master, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
     
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, slot: ISlot, condition: String) = this(selection, master, start, slot, new Condition(condition), Set.empty[String], Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, slot: ISlot, condition: String) = this(selection, start, master, slot, new Condition(condition), Set.empty[String], Some(trigger))
     
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, slot: ISlot, condition: ICondition) = this(selection, master, start, slot, condition, Set.empty[String], Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, slot: ISlot, condition: ICondition) = this(selection, start, master, slot, condition, Set.empty[String], Some(trigger))
    
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
     
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, condition, filtred.toSet, Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, condition, filtred.toSet, Some(trigger))
 
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, master, start, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, start, master, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
     
-  def this(selection: ITask, master: ITask, trigger: ICondition, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, master, start, slot, new Condition(condition), filtred.toSet, Some(trigger))
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ISlot, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, start, master, slot, new Condition(condition), filtred.toSet, Some(trigger))
   
 
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule) = this(selection, master, new Condition(trigger), start, end)  
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule) = this(selection, new Condition(trigger), start, master, end)  
   
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule, condition: ICondition) = this(selection, master, new Condition(trigger), start, end, condition)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition) = this(selection,new Condition(trigger), start, master, end, condition)
 
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule, condition: String) = this(selection, master, new Condition(trigger), start, end, condition)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule, condition: String) = this(selection, new Condition(trigger), start, master, end, condition)
   
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, slot: ISlot, condition: String) = this(selection, master, new Condition(trigger), start, slot, condition)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, slot: ISlot, condition: String) = this(selection, new Condition(trigger), start, master, slot, condition)
     
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, slot: ISlot, condition: ICondition) = this(selection, master, new Condition(trigger), start, slot, condition)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, slot: ISlot, condition: ICondition) = this(selection, new Condition(trigger), start, master, slot, condition)
    
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, master, new Condition(trigger), start, end, filtred)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule, filtred: Array[String]) = this(selection, new Condition(trigger), start, master, end, filtred)
     
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, master, new Condition(trigger), start, end, condition, filtred)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, new Condition(trigger), start, master, end, condition, filtred)
 
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, master, new Condition(trigger), start, end, condition, filtred)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, new Condition(trigger), start, master, end, condition, filtred)
     
-  def this(selection: ITask, master: ITask, trigger: String, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, master, new Condition(trigger), start, slot, condition, filtred)
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ISlot, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, new Condition(trigger), start, master, slot, condition, filtred)
+
+  
+  
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, True, Set.empty[String], None)
+    
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, condition, Set.empty[String], None)
+
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule, condition: String) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, new Condition(condition), Set.empty[String], None)
+    
+  def this(selection: ITask, start: ICapsule, master: ICapsule, slot: ISlot, condition: String) = this(selection,start,  master.defaultInputSlot, slot, new Condition(condition), Set.empty[String], None)
+    
+  def this(selection: ITask, start: ICapsule, master: ICapsule, slot: ISlot, condition: ICondition) = this(selection, start, master.defaultInputSlot, slot, condition, Set.empty[String], None)
+   
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, ICondition.True, filtred.toSet, None)
+    
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, condition, filtred.toSet, None)
+
+  def this(selection: ITask, start: ICapsule, master: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, new Condition(condition), filtred.toSet, None)
+    
+  def this(selection: ITask, start: ICapsule, master: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, slot, new Condition(condition), filtred.toSet, None)
+
+  
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
+    
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, condition, Set.empty[String], Some(trigger))
+
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule, condition: String) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
+    
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, slot: ISlot, condition: String) = this(selection, start, master.defaultInputSlot, slot, new Condition(condition), Set.empty[String], Some(trigger))
+    
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, slot: ISlot, condition: ICondition) = this(selection, start, master.defaultInputSlot, slot, condition, Set.empty[String], Some(trigger))
+   
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
+    
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, condition, filtred.toSet, Some(trigger))
+
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
+    
+  def this(selection: ITask, trigger: ICondition, start: ICapsule, master: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, start, master.defaultInputSlot, slot, new Condition(condition), filtred.toSet, Some(trigger))
+  
+
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule) = this(selection, new Condition(trigger), start, master.defaultInputSlot, end)  
+  
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition) = this(selection,new Condition(trigger), start, master.defaultInputSlot, end, condition)
+
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule, condition: String) = this(selection, new Condition(trigger), start, master.defaultInputSlot, end, condition)
+  
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, slot: ISlot, condition: String) = this(selection, new Condition(trigger), start, master.defaultInputSlot, slot, condition)
+    
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, slot: ISlot, condition: ICondition) = this(selection, new Condition(trigger), start, master.defaultInputSlot, slot, condition)
+   
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule, filtred: Array[String]) = this(selection, new Condition(trigger), start, master.defaultInputSlot, end, filtred)
+    
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(selection, new Condition(trigger), start, master.defaultInputSlot, end, condition, filtred)
+
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(selection, new Condition(trigger), start, master.defaultInputSlot, end, condition, filtred)
+    
+  def this(selection: ITask, trigger: String, start: ICapsule, master: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(selection, new Condition(trigger), start, master.defaultInputSlot, slot, condition, filtred)
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
-    
     if(!hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.remove(this, parentTicket) match {
         case Some(resultVariables) =>
-          val masterContext = subMole.masterTransitionRegistry.remove(this, parentTicket).getOrElse(new Context)
+          val selectedContext = subMole.masterTransitionRegistry.remove(this, parentTicket).getOrElse(new Context)
           
           //Manualy aggregate to ensure the last result is at the head
           val grouped = resultVariables.groupBy(_.prototype.name)
@@ -120,39 +178,35 @@ class MasterTransition(val selection: ITask, val master: ITask, start: ICapsule,
             new Variable(out.prototype.name, array)
           }.toContext
           
-          val selected = selection.perform(aggregated)
+          val selectedNewContext = selection.perform(selectedContext ++ aggregated)
           
           val variables = start.outputs.toList.flatMap {
             out =>
-            selected.value(toArray(out.prototype)) match {
-              case Some(v) => v.map{x => new Variable(out.prototype.asInstanceOf[IPrototype[Any]], x)}
-              case None => throw new UserBadDataError("In master transition " + this + " selection task should have an array of variable " + out.prototype + " in output.")
-            } 
+              selectedNewContext.value(toArray(out.prototype)) match {
+                case Some(v) => v.map{x => new Variable(out.prototype.asInstanceOf[IPrototype[Any]], x)}
+                case None => throw new UserBadDataError("In master transition " + this + " selection task should have an array of variable " + out.prototype + " in output.")
+              } 
           }
           
           subMole.aggregationTransitionRegistry.register(this, parentTicket, ListBuffer[IVariable[_]]() ++ variables)
-
-          val explore = master.perform(masterContext ++ selected)
-          
+          //println("job in prog " + subMole.nbJobInProgess)
           trigger match {
             case Some(trigger) => 
-              if(trigger.evaluate(explore ++ selected)) {
+              if(trigger.evaluate(selectedNewContext)) {
                 aggregate(subMole, ticket)
                 if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
               }
             case None =>
           }
-
-          if(!hasBeenPerformed(subMole, parentTicket)) {
-            subMole.masterTransitionRegistry.register(this, parentTicket, explore)
-            matchingExploration.submitIn(explore, parentTicket, subMole)
-          }
+          
+          subMole.submit(master.capsule, selectedNewContext, subMole.moleExecution.nextTicket(parentTicket))
+          if(!hasBeenPerformed(subMole, parentTicket)) subMole.masterTransitionRegistry.register(this, parentTicket, selectedNewContext)
         case None => throw new InternalProcessingError("No context registred for aggregation.")
       }
     }
   }
 
-  def matchingExploration: IExplorationTransition = {
+  /*def matchingExploration: IExplorationTransition = {
     val alreadySeen = new HashSet[ICapsule]
     val toProcess = new ListBuffer[(ICapsule,Int)]
     
@@ -172,6 +226,6 @@ class MasterTransition(val selection: ITask, val master: ITask, start: ICapsule,
       
     }
     throw new InternalProcessingError("No matching exploration transition has been found for master transition " + this)
-  }
+  }*/
 
 }

@@ -34,6 +34,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.model.data.DataModeMask._
 
 @RunWith(classOf[JUnitRunner])
 class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
@@ -75,29 +76,37 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     val testC = new Capsule(testT)
      
     val select = new Task("select") {
-      override def process(context: IContext) = context + (toArray(i), context.value(toArray(i)).get.slice(0, 10))
+      override def process(context: IContext) = {
+        val nVal = context.value(n).get
+        (if(context.value(toArray(i)).get.size > data.size) context + (n, nVal + 1) else context) + (toArray(i), context.value(toArray(i)).get.slice(0, 10))
+      }
     }
     
+    select.addParameter(n, 0)
+    select.addInput(n)
+    select.addOutput(n)
     select.addInput(toArray(i))
     select.addOutput(toArray(i))
     
     val master = new Task("master") {
       override def process(context: IContext) = {
         val nVal = context.value(n).get
-        (if(context.value(toArray(i)).get.size > data.size)
-          context + (n, nVal + 1) 
-         else context) + (toArray(i), Array(nVal.toString))
+        context + (toArray(i), Array(nVal.toString))
       }
     }
-    master.addInput(toArray(i))
+    
     master.addInput(n)
-    master.addParameter(n, 0)
-    master.addOutput(toArray(i))
-    master.addOutput(n)
+    master.addInput(toArray(i))
+    master.addOutput(toArray(i), Array(explore))
+
+    val masterCaps = new Capsule(master)
+    
     
     new ExplorationTransition(exc, emptyC)
-    new MasterTransition(select, master, "n >= 10", emptyC, testC)
-                              
+    new MasterTransition(select, "n >= 10", emptyC, masterCaps, testC)
+    new SlaveTransition(masterCaps, emptyC)              
+    
+    
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
     endCapsExecuted should equal (1)
     slaveExecuted should equal (data.size + 10)

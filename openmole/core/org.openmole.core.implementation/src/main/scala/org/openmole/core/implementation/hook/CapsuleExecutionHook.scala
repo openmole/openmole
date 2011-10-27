@@ -22,11 +22,18 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Logger
+import scala.ref.WeakReference
 
-abstract class CapsuleExecutionHook(moleExecution: IMoleExecution, capsule: ICapsule) extends ICapsuleExecutionHook with Logger {
+abstract class CapsuleExecutionHook(moleExecutionRef: WeakReference[IMoleExecution], capsuleRef: WeakReference[ICapsule]) extends ICapsuleExecutionHook with Logger {
+  
+  def this(moleExecution: IMoleExecution, capsule: ICapsule) = this(new WeakReference(moleExecution), new WeakReference(capsule))
   
   resume
+  
+  private def moleExecution = moleExecutionRef.get.getOrElse(throw new InternalProcessingError("Reference garabage collected."))
+  private def capsule = capsuleRef.get.getOrElse(throw new InternalProcessingError("Reference garabage collected."))
   
   override def resume = CapsuleExecutionDispatcher += (moleExecution, capsule, this)
   override def release = CapsuleExecutionDispatcher -= (moleExecution, capsule, this)
