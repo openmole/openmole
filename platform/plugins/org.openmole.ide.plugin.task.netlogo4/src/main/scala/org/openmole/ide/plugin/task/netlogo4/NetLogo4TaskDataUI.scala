@@ -17,7 +17,7 @@ class NetLogo4TaskDataUI(val name: String,val workspacePath: String,val nlogoPat
   
   override def coreClass= classOf[NetLogo4Task]
   
-  override def imagePath = "img/netlogo.png"
+  override def imagePath = "img/netlogo4.png"
   
   override def buildPanelUI = new NetLogo4TaskPanelUI(this)
   

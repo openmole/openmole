@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.netlogo4
+package org.openmole.ide.plugin.task.netlogo5
 
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
-class NetLogo4TaskFactoryUI extends ITaskFactoryUI {
-  override def buildDataUI(name: String) = new NetLogo4TaskDataUI(name)
+class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
+  override def displayName = "NetLogo5"
+  override def buildDataUI(name: String) = new NetLogo5TaskDataUI(name)
 }
