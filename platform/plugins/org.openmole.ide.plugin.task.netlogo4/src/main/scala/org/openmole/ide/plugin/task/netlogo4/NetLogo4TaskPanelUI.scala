@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.task.netlogo
+package org.openmole.ide.plugin.task.netlogo4
 
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.ide.core.model.data.ITaskDataUI
@@ -25,7 +25,7 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import swing.Swing._
 
-class NetLogoTaskPanelUI(ndu: NetLogoTaskDataUI) extends MigPanel("","[left]rel[grow,fill]","") with ITaskPanelUI{
+class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI) extends MigPanel("","[left]rel[grow,fill]","") with ITaskPanelUI{
  
   val nlogoTextField = new ChooseFileTextField(ndu.nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
   val workspaceTextField = new ChooseFileTextField(ndu.workspacePath)
@@ -39,5 +39,5 @@ class NetLogoTaskPanelUI(ndu: NetLogoTaskDataUI) extends MigPanel("","[left]rel[
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,100)},"span,growx")
   
   
-  override def saveContent(name: String): ITaskDataUI = new NetLogoTaskDataUI(name, workspaceTextField.text, nlogoTextField.text, launchingCommandTextArea.text)
+  override def saveContent(name: String): ITaskDataUI = new NetLogo4TaskDataUI(name, workspaceTextField.text, nlogoTextField.text, launchingCommandTextArea.text)
 }

@@ -7,7 +7,7 @@
         <version>0.4-SNAPSHOT</version>
     </parent>
   
-    <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
+    <artifactId>org.openmole.ide.plugin.task.netlogo4</artifactId>
     <name>${project.artifactId} ${project.version}</name>
     <packaging>nbm</packaging>
 

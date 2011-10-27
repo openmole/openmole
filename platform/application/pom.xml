@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
+            <artifactId>org.openmole.ide.plugin.task.netlogo4</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
