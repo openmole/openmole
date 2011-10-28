@@ -50,14 +50,9 @@
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.plugin.task.netlogo4</artifactId>
-            <version>${openmole.gui.version}</version>
-        </dependency>
 	<dependency>
 	    <groupId>org.openmole.ide</groupId>	   
-	    <artifactId>org.openmole.ide.plugin.task.netlogo5</artifactId>
+	    <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>

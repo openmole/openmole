@@ -35,7 +35,7 @@ object TaskDisplay extends ITaskDisplay{
   var currentPanel: Option[ITaskPanelUI] = None
   var currentDataProxy: Option[ITaskDataProxyUI] = None
   
-  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{println("++ Load Task:: " + f.displayName);modelTasks += new TaskDataProxyFactory(f)})
+  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
   
   override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.task(pID))
   
