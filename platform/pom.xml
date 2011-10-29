@@ -41,17 +41,6 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.6.2.R36x_v20101103</version>
-            <scope>provided</scope>
-        </dependency> -->
-        <!--dependency>
-            <groupId>org.openmole</groupId>
-            <artifactId>org.openmole.misc.pluginmanager</artifactId>
-            <version>${openmole.core.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
@@ -72,7 +61,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.5</version>
+                    <version>3.6</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
