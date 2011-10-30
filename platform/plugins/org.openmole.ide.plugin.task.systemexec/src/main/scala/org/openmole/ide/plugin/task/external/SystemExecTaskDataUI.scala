@@ -10,10 +10,15 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 
-class SystemExecTaskDataUI(val name: String,val workspace: String,val lauchingCommands: String) extends TaskDataUI {
-  def this(n: String) = this(n,"","")
+class SystemExecTaskDataUI(val name: String,val workspace: String,val lauchingCommands: String, val resources: List[String]) extends TaskDataUI {
+  def this(n: String) = this(n,"","",List.empty)
   
-  override def coreObject = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n')) {addResource(workspace)}
+  override def coreObject = {
+    val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n')) 
+    syet.addResource(workspace)
+    resources.foreach(syet.addResource)
+    syet
+  }
   
   override def coreClass= classOf[SystemExecTask]
   
