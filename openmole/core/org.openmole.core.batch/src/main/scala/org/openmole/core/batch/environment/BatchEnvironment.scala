@@ -47,9 +47,11 @@ object BatchEnvironment {
   @InteractiveConfiguration(label = "Runtime location")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
     
-  @InteractiveConfiguration(label = "JVM location")
-  val JVMLocation = new ConfigurationLocation("BatchEnvironment", "JVMLocation")
+  @InteractiveConfiguration(label = "JVM for linux 32 bits location")
+  val JVMLinuxI386Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxI386Location")
 
+  @InteractiveConfiguration(label = "JVM for linux 64 bits location")
+  val JVMLinuxX64Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxX64Location")
   
   val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
 
@@ -59,7 +61,8 @@ object BatchEnvironment {
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
   Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)
-  Workspace += (JVMLocation, () => new File(new File(Workspace.location, "runtime"), "jvm.tar.gz").getAbsolutePath)
+  Workspace += (JVMLinuxI386Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-i386.tar.gz").getAbsolutePath)
+  Workspace += (JVMLinuxX64Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
 
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (QualityHysteresis, "1000")
@@ -150,7 +153,8 @@ abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Env
   }
   
   @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
-  @transient lazy val jvm = new File(Workspace.preference(BatchEnvironment.JVMLocation))
+  @transient lazy val jvmLinuxI386 = new File(Workspace.preference(BatchEnvironment.JVMLinuxI386Location))
+  @transient lazy val jvmLinuxX64 = new File(Workspace.preference(BatchEnvironment.JVMLinuxX64Location))
 
   @transient lazy val jobServices = new JobServiceGroup(this, allJobServices) 
   @transient lazy val storages = new StorageGroup(this, allStorages)

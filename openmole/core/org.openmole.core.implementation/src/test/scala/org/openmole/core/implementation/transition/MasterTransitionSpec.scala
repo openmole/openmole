@@ -104,7 +104,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     
     new ExplorationTransition(exc, emptyC)
     new MasterTransition(select, "n >= 10", emptyC, masterCaps, testC)
-    new SlaveTransition(masterCaps, emptyC)              
+    new SlaveTransition(masterCaps, new Slot(emptyC))              
     
     
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 

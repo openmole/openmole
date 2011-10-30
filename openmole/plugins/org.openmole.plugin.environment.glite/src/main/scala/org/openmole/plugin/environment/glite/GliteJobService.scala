@@ -27,6 +27,7 @@ import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
 import org.ogf.saga.job.JobFactory
 import org.openmole.core.batch.environment.Runtime
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
@@ -35,8 +36,9 @@ import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
+import scala.io.Source
 
-object GliteJobService {
+object GliteJobService extends Logger {
   val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
     
   Workspace += (LCGCPTimeOut, "PT2M")
@@ -45,6 +47,8 @@ object GliteJobService {
 
 class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
 
+  import GliteJobService._
+  
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     import serializedJob._
     import communicationStorage.stringDecorator
@@ -57,7 +61,7 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
       try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
       finally os.close
       
-      //logger.fine(fromFile(script).getLines.mkString)
+      //logger.fine(Source.fromFile(script).getLines.mkString)
       
       val jobDescription = buildJobDescription(runtime, script, environment.attributes)
       val job = jobServiceCache.createJob(jobDescription)
@@ -77,12 +81,16 @@ class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAcces
     
     assert(runtime.runtime.path != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.jvm.path.toStringURI, "$PWD/jvm.tar.gz"))
+    writter.print("if [ `uname -m` = x86_64 ]; then ")
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.jvmLinuxX64.path.toStringURI, "$PWD/jvm.tar.gz"))
+    writter.print("else ")
+    writter.print(mkLcgCpGunZipCmd(environment, runtime.jvmLinuxI386.path.toStringURI, "$PWD/jvm.tar.gz"))
+    writter.print("fi; ")
     writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
     writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.path.toStringURI, "$PWD/openmole.tar.gz"))
     writter.print("tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
-    writter.print("mkdir envplugins; PLUGIN=0;");
-
+    writter.print("mkdir envplugins; PLUGIN=0;")
+    
     for (plugin <- runtime.environmentPlugins) {
       assert(plugin.path != null)
       writter.print(mkLcgCpGunZipCmd(environment, plugin.path.toStringURI, "$CUR/envplugins/plugin$PLUGIN.jar"))

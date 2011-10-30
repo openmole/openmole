@@ -62,7 +62,8 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
       
       val storage = environment.selectAStorage(serializationFile + 
                                                environment.runtime +
-                                               environment.jvm ++ 
+                                               environment.jvmLinuxI386 +
+                                               environment.jvmLinuxX64 ++
                                                environment.plugins ++
                                                serialisationPluginFiles)
 
@@ -144,8 +145,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
 
     val environmentPluginPath = environment.plugins.map{toReplicatedFile(_, communicationStorage, token)}.map{new FileMessage(_)}    
     val runtimeFileMessage = new FileMessage(toReplicatedFile(environment.runtime, communicationStorage, token))
-    val jvmFileMessage = new FileMessage(toReplicatedFile(environment.jvm, communicationStorage, token))
-    
+    val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(environment.jvmLinuxI386, communicationStorage, token))
+    val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(environment.jvmLinuxX64, communicationStorage, token))
+
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
     
@@ -156,7 +158,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     } finally authenticationFile.delete
         
     
-    new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmFileMessage)
+    new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmLinuxI386FileMessage, jvmLinuxX64FileMessage)
   }
   
   def createExecutionMessage(jobFile: File, serializationFile: Iterable[File], serializationPlugin: Iterable[File], token: AccessToken, communicationStorage: Storage, communicationDir: IURIFile): ExecutionMessage = {

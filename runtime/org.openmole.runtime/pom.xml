@@ -91,12 +91,20 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.sun.java</groupId>
-                                    <artifactId>java-jre</artifactId>
-                                    <version>6u25</version>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-i386</artifactId>
+                                    <version>7u1</version>
                                     <type>tgz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>jvm.tar.gz</destFileName>
+                                    <destFileName>jvm-linux-i386.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-x64</artifactId>
+                                    <version>7u1</version>
+                                    <type>tgz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm-linux-x64.tar.gz</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

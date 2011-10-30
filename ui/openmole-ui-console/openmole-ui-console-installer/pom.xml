@@ -45,7 +45,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
-        <izpack.standalone.compiler.version>4.3.2</izpack.standalone.compiler.version>
+        <izpack.standalone.compiler.version>4.3.4</izpack.standalone.compiler.version>
     </properties>
  
     <build>
@@ -71,11 +71,20 @@
                                     <destFileName>org.openmole.runtime.tar.gz</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.sun.java</groupId>
-                                    <artifactId>java-jre</artifactId>
-                                    <version>6u25</version>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-i386</artifactId>
+                                    <version>7u1</version>
                                     <type>tgz</type>
-                                    <destFileName>jvm.tar.gz</destFileName>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm-linux-i386.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-x64</artifactId>
+                                    <version>7u1</version>
+                                    <type>tgz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm-linux-x64.tar.gz</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

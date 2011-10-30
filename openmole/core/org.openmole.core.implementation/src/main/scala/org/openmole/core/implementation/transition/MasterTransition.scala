@@ -189,7 +189,7 @@ class MasterTransition(val selection: ITask, start: ICapsule, val master: ISlot,
           }
           
           subMole.aggregationTransitionRegistry.register(this, parentTicket, ListBuffer[IVariable[_]]() ++ variables)
-          //println("job in prog " + subMole.nbJobInProgess)
+
           trigger match {
             case Some(trigger) => 
               if(trigger.evaluate(selectedNewContext)) {
