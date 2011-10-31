@@ -62,7 +62,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     case ButtonClicked(`saveButton`) =>  save
     case ButtonClicked(`cancelButton`) =>  cancel}
 
-  val propertyScrollPane = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
+  val propertyScrollPane = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}
   var taskPropertyComponent = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
   contents+= (menuBar,"span 4, growx")
   contents+= fakeToggleButton
