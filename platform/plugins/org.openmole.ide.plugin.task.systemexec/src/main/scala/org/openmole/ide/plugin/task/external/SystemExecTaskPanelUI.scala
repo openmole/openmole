@@ -16,10 +16,8 @@
  */
 package org.openmole.ide.plugin.task.systemexec
 
-import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.MigPanel

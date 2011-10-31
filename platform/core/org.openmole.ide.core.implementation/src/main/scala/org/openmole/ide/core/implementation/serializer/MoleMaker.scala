@@ -32,6 +32,7 @@ import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -41,13 +42,8 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 
 object MoleMaker {
-  
-  var doneCapsules = new HashMap[ICapsuleUI,ICapsule]
-  var corePrototypes = new HashMap[IPrototypeDataProxyUI,IPrototype[_]]
-  
-  def buildMoleExecution(manager: IMoleSceneManager): (IMoleExecution,Set[(IEnvironment,String)]) = buildMoleExecution(buildMole(manager)._1,manager)
-                                                                          
-  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager): (IMoleExecution,Set[(IEnvironment,String)]) = {
+                                            
+  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager, capsuleMap: Map[ICapsuleUI,ICapsule]): (IMoleExecution,Set[(IEnvironment,String)]) = {
     var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
     println("capsules :: " + manager.capsules.size)
@@ -57,8 +53,8 @@ object MoleMaker {
       if (c.dataProxy.get.dataUI.environment.isDefined){
         val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
         envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
-        println(":: " + env + " for " + c.dataProxy.get.dataUI.name + ", " + doneCapsules(c))
-        strat.select(doneCapsules(c),env)
+        //   println(":: " + env + " for " + c.dataProxy.get.dataUI.name + ", " + doneCapsules(c))
+        strat.select(capsuleMap(c),env)
       }}
    
     println("return env ??" + envs.size)
@@ -66,24 +62,15 @@ object MoleMaker {
   }
   
   def buildMole(manager: IMoleSceneManager) = {
-    doneCapsules.clear
-    corePrototypes.clear
     if (manager.startingCapsule.isDefined){
-      (new Mole(nextCapsule(manager,manager.startingCapsule.get)),corePrototypes.toMap,doneCapsules.toMap)
+      val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.values.map{p=> p->p.dataUI.coreObject}.toMap
+      val capsuleMap= manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2))}.toMap
+      capsuleMap.foreach{case (cui,ccore)=> manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))}
+    
+      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
     }
     else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
-  
-  def nextCapsule(manager: IMoleSceneManager,capsuleUI: ICapsuleUI): ICapsule = {
-    val capsule = buildCapsule(capsuleUI)
-    doneCapsules+= capsuleUI-> capsule
-    manager.capsuleConnections(capsuleUI).foreach(t=>{
-        buildTransition(capsule,doneCapsules.getOrElseUpdate(t.target.capsule,nextCapsule(manager,t.target.capsule)),t)
-      })
-    capsule
-  }
-
-  def buildCapsule(capsuleUI: ICapsuleUI) = new Capsule(buildTask(capsuleUI))
   
   def buildTask(capsuleUI: ICapsuleUI) = {
     capsuleUI.capsuleType match {
@@ -94,8 +81,8 @@ object MoleMaker {
   }
   
   def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
-    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach(pui=> {task.addInput(corePrototypes.getOrElseUpdate(pui, pui.dataUI.coreObject ))})
-    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pui=> {task.addOutput(corePrototypes.getOrElseUpdate(pui, pui.dataUI.coreObject ))})
+    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach(pui=> {task.addInput( pui.dataUI.coreObject)})
+    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pui=> {task.addOutput(pui.dataUI.coreObject)})
     task
   }
   

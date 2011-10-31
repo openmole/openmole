@@ -24,7 +24,6 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import scala.swing.Orientation
 import scala.swing.ScrollPane
 import scala.swing.SplitPane
@@ -40,7 +39,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
   val tabbedPane = new TabbedPane
   val logTextArea = new TextArea{columns = 20;rows = 10}
   override val printStream = new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea),1024),true)
-  override val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(manager)
+  override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var hookPanels= new HashMap[IHookPanelUI,IHook]
   var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
@@ -67,7 +66,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends SplitPane(Orientatio
     cancel
     initBarPlotter
     hookPanels.values.foreach(_.release)
-    val moleE = MoleMaker.buildMoleExecution(mole, manager)
+    val moleE = MoleMaker.buildMoleExecution(mole, manager, capsuleMapping)
     moleExecution = moleE._1
     EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
     moleE._2.foreach(buildEmptyEnvPlotter)
