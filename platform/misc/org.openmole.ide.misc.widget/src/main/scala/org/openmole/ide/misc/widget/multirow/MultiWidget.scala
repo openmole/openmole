@@ -70,4 +70,9 @@ class MultiWidget(rowName: String, rWidgets: List[IRowWidget], nbComponent: Int)
     repaint
     revalidate
   } 
+  
+  def compose(multiWidget: MultiWidget) = {
+    multiWidget.contents.foreach{c=>println("CONTT :: " + c);contents+=c}
+    this
+  }
 }

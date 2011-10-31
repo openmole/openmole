@@ -17,6 +17,13 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-class MultiChooseFileTextField(rowName: String, initValues: List[String]) extends 
-MultiWidget(rowName,if (initValues.isEmpty) List(new ChooseTextFieldRowWidget("")) 
-            else initValues.map(iv=>new ChooseTextFieldRowWidget(iv)),1)
+import scala.swing.FileChooser.SelectionMode._
+
+class MultiChooseFileTextField(rowName: String, 
+                               initValues: List[String], 
+                               chooserTitle: String="", 
+                               chooserDescription: Option[String]=None, 
+                               selectionMode: Value= FilesOnly,
+                               extensions: Option[String]= None) extends MultiWidget(rowName,
+            if (initValues.isEmpty) List(new ChooseTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)) 
+            else initValues.map(iv=>new ChooseTextFieldRowWidget(iv,chooserTitle,chooserDescription,selectionMode,extensions)),1)

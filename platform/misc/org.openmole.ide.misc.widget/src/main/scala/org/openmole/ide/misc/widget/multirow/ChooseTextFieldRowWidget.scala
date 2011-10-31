@@ -17,12 +17,17 @@
 package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Component
 
-class ChooseTextFieldRowWidget(initValue: String) extends IRowWidget{
-  override val components: List[ChooseFileTextField] = List(new ChooseFileTextField(initValue))
+class ChooseTextFieldRowWidget(initValue: String, 
+                               chooserTitle: String="", 
+                               chooserDescription: Option[String]=None, 
+                               selectionMode: Value= FilesOnly,
+                               extensions: Option[String]= None) extends IRowWidget{
+  override val components: List[ChooseFileTextField] = List(new ChooseFileTextField(initValue,chooserTitle,chooserDescription,selectionMode,extensions))
   
-  override def buildEmptyRow: IRowWidget = new ChooseTextFieldRowWidget("")
+  override def buildEmptyRow: IRowWidget = new ChooseTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)
   
   override def content: List[(Component,String)] = components.map(c=> (c,c.text)).filterNot(_._2.isEmpty).toList
 }
