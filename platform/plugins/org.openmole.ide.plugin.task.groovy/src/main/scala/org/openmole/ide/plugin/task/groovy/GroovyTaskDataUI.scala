@@ -9,11 +9,15 @@ import java.awt.Color
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.groovy.GroovyTask
 
-class GroovyTaskDataUI(val name: String,val code: String="",val lib: String="") extends TaskDataUI {
+class GroovyTaskDataUI(val name: String,
+                       val code: String="",
+                       val libs: List[String]= List.empty,
+                       val plugins: List[String]= List.empty) extends TaskDataUI {
   
   override def coreObject = {
     val gt= new GroovyTask(name,code) 
-    if (!lib.isEmpty) gt.addLib(lib)
+    libs.foreach(gt.addLib) 
+    plugins.foreach(gt.addPlugin)
     gt}
   
   override def coreClass= classOf[GroovyTask]

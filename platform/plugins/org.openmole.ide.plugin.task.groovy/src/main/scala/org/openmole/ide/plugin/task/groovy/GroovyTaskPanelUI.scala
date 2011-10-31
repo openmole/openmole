@@ -20,25 +20,28 @@ package org.openmole.ide.plugin.task.groovy
 import java.awt.Dimension
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Label
 import scala.swing.ScrollPane
-import scala.swing.Swing
 import scala.swing.TextArea
-import scala.swing.TextField
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with ITaskPanelUI {
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
   
   val codeTextArea = new TextArea {text = pud.code}
-  val lib= new ChooseFileTextField(pud.lib, "Select a file", Some("Lib files"), FilesOnly,Some("jar"))
+  val libMultiTextField = new MultiChooseFileTextField("Lib",pud.libs,"Select a file", Some("Lib files"), FilesOnly,Some("jar"))
+  val pluginMultiTextField = new MultiChooseFileTextField("Plugin",pud.plugins,"Select a file", Some("Plugin files"), FilesOnly,Some("jar"))
   
-  contents += (new Label("Code"),"wrap")
-  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span 2,growx")
-  contents += new Label("Lib")
-  contents += (lib,"growx")
-  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,codeTextArea.text,lib.text)
+  contents += (new Label("Code"),"left")
+  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span,growx")
+  contents += libMultiTextField
+  contents += pluginMultiTextField
+  
+  override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,
+                                                                            codeTextArea.text,
+                                                                            libMultiTextField.content.flatMap(_.map(_._2)),
+                                                                            pluginMultiTextField.content.flatMap(_.map(_._2)))
 }
 
 //  val editorPane= new JEditorPane
