@@ -20,6 +20,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.MultiChooseFileTextField
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
@@ -28,12 +29,14 @@ import swing.Swing._
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,wrap 4", "[][grow,fill][][grow,fill]","") with ITaskPanelUI{
  
   val workspaceTextField = new ChooseFileTextField(ndu.workspace)
+  val resourcesTextField = new MultiChooseFileTextField("Resource",ndu.resources)
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   
-  contents+= new Label("Workspace: ")
+  contents+= new Label("Workspace")
   contents+= (workspaceTextField,"growx,span 3, wrap")
-  contents+= (new Label("Commands: "),"wrap")
+  contents+= (new Label("Commands"),"wrap")
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,200)},"span 4,growx")
+  contents+= (resourcesTextField,"growx,span 3, wrap")
   
-  override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name, workspaceTextField.text, launchingCommandTextArea.text)
+override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name, "", launchingCommandTextArea.text,resourcesTextField.content)
 }

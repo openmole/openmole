@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.image</artifactId>
+            <version>${openmole.gui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.widget</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
