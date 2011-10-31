@@ -14,8 +14,7 @@ class SystemExecTaskDataUI(val name: String,val workspace: String,val lauchingCo
   def this(n: String) = this(n,"","",List.empty)
   
   override def coreObject = {
-    val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n')) 
-    syet.addResource(workspace)
+    val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workspace)
     resources.foreach(syet.addResource)
     syet
   }
