@@ -20,7 +20,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.ide.misc.widget.MultiChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
@@ -38,5 +38,8 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,200)},"span 4,growx")
   contents+= (resourcesTextField,"growx,span 3, wrap")
   
-override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name, "", launchingCommandTextArea.text,resourcesTextField.content)
+  override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name,
+                                                                                 "", 
+                                                                                 launchingCommandTextArea.text,
+                                                                                 resourcesTextField.content.flatMap(_.map(_._2)))
 }
