@@ -181,8 +181,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
             val file = if (fileInfo._2) {
               val file = Workspace.newDir("tarResult")
-
-              new TarInputStream(new FileInputStream(dest)).extractDirArchiveWithRelativePathAndClose(file)
+              dest.extractDirArchiveWithRelativePath(file)
               dest.delete
               file
             } else dest

@@ -26,6 +26,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
+import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.UserBadDataError
@@ -66,6 +68,7 @@ object GliteAuthentication extends Logger {
   }
 
   def dowloadCACertificates(uri: URI, dir: File) = {
+    val fs = FileSystems.getDefault
 
     val site = new URIFile(uri)
 
@@ -94,7 +97,11 @@ object GliteAuthentication extends Logger {
             tarEntry = tis.getNextEntry
           }
           
-          links.foreach{e => new File(dir, e._2).copy(e._1)}
+          links.foreach{e => //new File(dir, e._2).copy(e._1)
+            val linkTo = fs.getPath(e._2)
+            val link = fs.getPath(e._1.getAbsolutePath)
+            Files.createSymbolicLink(link, linkTo)
+          }
         } catch {
           case (e: IOException) => logger.log(WARNING, "Unable to untar " + child.toString(), e)
         } finally tis.close

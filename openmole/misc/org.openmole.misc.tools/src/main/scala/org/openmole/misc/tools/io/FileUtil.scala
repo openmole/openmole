@@ -258,9 +258,9 @@ object FileUtil {
     
     def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
     
-    def archiveDirWithRelativePathNoVariableContent(dest: File) = {
+    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
       val os = new TarOutputStream(new FileOutputStream(file))
-      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
+      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
       finally os.close
     }
   
@@ -271,7 +271,7 @@ object FileUtil {
     }
     
     def extractDirArchiveWithRelativePath(dest: File) = {
-      new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
+      new TarInputStream(bufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     }  
     
     def extractUncompressDirArchiveWithRelativePath(dest: File) =

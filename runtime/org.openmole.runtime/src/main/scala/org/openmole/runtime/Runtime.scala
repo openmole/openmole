@@ -125,7 +125,7 @@ class Runtime {
 
           val local = if (repliURI.directory) {
             val local = Workspace.newDir("dirReplica")
-            new TarInputStream(new FileInputStream(cache)).extractDirArchiveWithRelativePathAndClose(local) 
+            cache.extractDirArchiveWithRelativePath(local) 
             local
           } else cache
 

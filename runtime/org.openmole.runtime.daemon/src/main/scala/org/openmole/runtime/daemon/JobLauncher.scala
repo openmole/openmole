@@ -165,7 +165,7 @@ class JobLauncher(debug: Boolean = false) {
               logger.info("Downloading the runtime.")
               val runtimeArchive = downloadCache(jobMessage.runtime)()
               logger.info("Extracting runtime.")
-              runtimeArchive.extractDirArchiveWithRelativePath(dir)
+              runtimeArchive.extractUncompressDirArchiveWithRelativePath(dir)
               runtime = Some(jobMessage.runtime.hash -> dir)
               dir
             case Some(r) => r._2
@@ -185,9 +185,9 @@ class JobLauncher(debug: Boolean = false) {
             val workspaceDir = Workspace.newDir
             try {
               
-              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\""
+              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
-              logger.info("Executing runtime: " + cmd + ".")
+              logger.info("Executing runtime: " + cmd)
               //val commandLine = CommandLine.parse(cmd)
               val process = Runtime.getRuntime.exec(cmd, null, runtimeLocation) //commandLine.toString, null, runtimeLocation)
               executeProcess(process, System.out, System.err)

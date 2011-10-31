@@ -26,6 +26,8 @@ import java.io.IOException
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
 import org.openmole.misc.tools.io.FileUtil._
+import java.nio.file.FileSystems
+import java.nio.file.Files
 
 object TarArchiver {
   
@@ -49,7 +51,7 @@ object TarArchiver {
     
     def applyAndClose[T](f: TarEntry => T): Iterable[T] = try {
       val ret = new ListBuffer[T]
-      
+    
       var e = tis.getNextEntry
       while(e != null) {
         ret += f(e)
@@ -60,11 +62,18 @@ object TarArchiver {
     
     def extractDirArchiveWithRelativePathAndClose(baseDir: File) = try {
       if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
-
+      val fs = FileSystems.getDefault
+      
       var e = tis.getNextEntry
-      while (e != null) {
+
+      while(e != null) {
         val dest = new File(baseDir, e.getName)
-        if(e.isDirectory) dest.mkdirs
+        if(!e.getLinkName.isEmpty) {
+          val linkTo = fs.getPath(e.getLinkName)
+          val link = fs.getPath(dest.getAbsolutePath)
+          Files.createSymbolicLink(link, linkTo)
+        }
+        else if(e.isDirectory) dest.mkdirs
         else {
           dest.getParentFile.mkdirs
           val fos = new FileOutputStream(dest)
@@ -77,27 +86,33 @@ object TarArchiver {
 
   private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry => Unit ) = {
     if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
-    //val tos = new TarOutputStream(archive)
-    // try {
+
+    val fs = FileSystems.getDefault 
     val toArchive = new Stack[(File, String)]
     toArchive.push((baseDir, ""))
 
+    var links = List.empty[(File, String)]
+    
     while (!toArchive.isEmpty) {
       val cur = toArchive.pop
-
-      if (cur._1.isDirectory) {
-        for (name <- cur._1.list.sorted) {
-          toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
+      if(Files.isSymbolicLink(fs.getPath(cur._1.getAbsolutePath)))  links ::= cur._1 -> cur._2
+      else if (cur._1.isDirectory) {
+          for (name <- cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
+        } else {
+          val e = new TarEntry(cur._2)
+          e.setSize(cur._1.length)
+          additionnalCommand(e)
+          tos.putNextEntry(e)
+          try cur._1.copy(tos) finally tos.closeEntry
         }
-      } else {
-        val e = new TarEntry(cur._2)
-        e.setSize(cur._1.length)
-        additionnalCommand(e)
-        tos.putNextEntry(e)
-        try cur._1.copy(tos) finally tos.closeEntry
-      }
     }
-
+    
+    links.foreach {
+      cur =>
+        val e = new TarEntry(cur._2)
+        e.setLinkName(fs.getPath(cur._1.getParentFile.getCanonicalPath).relativize(fs.getPath(cur._1.getCanonicalPath)).toString)
+        tos.putNextEntry(e)
+    }
   }
   
 }

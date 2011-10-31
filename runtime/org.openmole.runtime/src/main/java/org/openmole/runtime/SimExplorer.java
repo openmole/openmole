@@ -52,7 +52,8 @@ public class SimExplorer implements IApplication {
             options.addOption("c", true, "Path for the communication.");
             options.addOption("p", true, "Path for plugin dir to preload.");
             options.addOption("l", true, "Local authentication mode for debug.");
-
+            options.addOption("d", false, "Debug mode.");
+            
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
 
@@ -84,6 +85,8 @@ public class SimExplorer implements IApplication {
                 Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
                 debug = true;
             }
+            
+            if ( cmdLine.hasOption("d") ) debug = true;
             
             if (cmdLine.hasOption("a")) {
                 /* get env and init */

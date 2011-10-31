@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
+import org.openmole.core.batch.control.StorageDescription
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.JobService
@@ -45,7 +46,9 @@ class DesktopGridEnvironment(port: Int, login: String, password: String, inRequi
   val path = Workspace.newDir
   new SFTPServer(path, login, password, port)
   
-  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue)
+  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue) {
+    override lazy val description = new StorageDescription(login + "@localhost:" + port)
+  }
   
   @transient override lazy val allStorages = List(batchStorage)
   @transient override lazy val allJobServices = List(new DesktopGridJobService(this, new JobServiceDescription(path.getAbsolutePath)))
