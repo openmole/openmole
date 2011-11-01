@@ -128,10 +128,12 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       var continue = true
       while (continue) {
         try {
-          val p = jobs.take
-          try p._2.submit(p._1)
+          val (job, env) = jobs.take
+          try env.submit(job)
           catch {
-            case (t: Throwable) => logger.log(SEVERE, "Error durring scheduling", t)
+            case (t: Throwable) => 
+              EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.ExceptionRaised(t, SEVERE))
+              logger.log(SEVERE, "Error durring scheduling", t)
           }
         } catch {
           case (e: InterruptedException) => continue = false

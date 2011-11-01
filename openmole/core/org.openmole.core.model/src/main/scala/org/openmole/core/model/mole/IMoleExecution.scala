@@ -25,6 +25,7 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
+import java.util.logging.Level
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.data.IVariable
@@ -34,14 +35,13 @@ import org.openmole.core.model.job.MoleJobId
 import scala.collection.mutable.Buffer
 
 object IMoleExecution {
-   
   case class Starting extends Event[IMoleExecution]
   case class Finished extends Event[IMoleExecution]
   case class OneJobStatusChanged(val moleJob: IMoleJob, val newState: State, val oldState: State) extends Event[IMoleExecution]
   case class OneJobSubmitted(val moleJob: IMoleJob) extends Event[IMoleExecution]
   case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
-  
+  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleExecution]
 }
 
 trait IMoleExecution {

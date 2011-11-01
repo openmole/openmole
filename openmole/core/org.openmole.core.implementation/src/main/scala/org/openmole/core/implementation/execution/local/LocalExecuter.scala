@@ -20,8 +20,10 @@ package org.openmole.core.implementation.execution.local
 import org.openmole.core.implementation.execution.StatisticRegistry
 import org.openmole.core.implementation.execution.StatisticSample
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
@@ -49,7 +51,9 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
             
             moleJob.exception match {
               case None =>
-              case Some(e) => logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
+              case Some(e) => 
+                EventDispatcher.trigger(executionJob, new IExecutionJob.ExceptionRaised(e, SEVERE))
+                logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
             }
           }
         }

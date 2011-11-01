@@ -121,6 +121,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       case (e: ShouldBeKilledException) => 
         kill
       case e =>
+        EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, WARNING))
         logger.log(WARNING, "Error in job update: " + e.getMessage)
         kill
     }
@@ -153,6 +154,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       Some(js.submit(serializedJob, token))
     } catch {
       case e => 
+        EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, FINE))
         logger.log(FINE, "Error durring job submission.", e)
         None
     } finally JobServiceControl.usageControl(js.description).releaseToken(token)
@@ -167,7 +169,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
         ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
       } catch {
-        case e => logger.log(FINE, "Error durring job cleaning.", e)
+        case e => 
+          EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, FINE))
+          logger.log(FINE, "Error durring job cleaning.", e)
       }
     }
 
