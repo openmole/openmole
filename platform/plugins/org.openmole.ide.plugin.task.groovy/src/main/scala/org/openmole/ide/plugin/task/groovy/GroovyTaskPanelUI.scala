@@ -35,8 +35,8 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[l
   
   contents += (new Label("Code"),"left")
   contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span,growx")
-  contents += libMultiTextField
-  contents += pluginMultiTextField
+  contents += libMultiTextField.panel
+  contents += pluginMultiTextField.panel
   
   override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,
                                                                             codeTextArea.text,

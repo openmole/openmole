@@ -22,57 +22,49 @@ import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashSet
 import scala.swing.Button
+import scala.swing.Component
 import scala.swing.Label
 import scala.swing.event.ButtonClicked
 
-class MultiWidget(rowName: String, rWidgets: List[IRowWidget], nbComponent: Int) extends MigPanel("wrap "+(nbComponent + 3).toString){
- private val rowWidgets = new HashSet[IRowWidget]
-  rWidgets.foreach(addRow)
+class MultiWidget(val rowName: String, rWidgets: List[IRowWidget], nbComponent: Int){
+  val rowWidgets = new HashSet[IRowWidget]
+  val panel =  new MigPanel("wrap "+(nbComponent + 3).toString)
+  rWidgets.foreach(r=>showComponents(addRow(r)))
   
   def content =rowWidgets.map(_.content).toList
   
-  private def addRow(rowWidget: IRowWidget): Unit = {
+  private def addRow(rowWidget: IRowWidget): List[Component] = {
     rowWidgets+= rowWidget
-    
     val label= new Label(rowName)
     val addButton = buildAddButton(rowWidget)
-    val removeButton = buildRemoveButton(label,rowWidget,addButton)
-  
-    contents+= label
-    rowWidget.components.foreach(contents+=)
-    contents+= addButton
-    contents+= removeButton
-    refresh
+    val removeList = List(List(label), rowWidget.components,
+                          List(addButton)).flatMap(x=>x)
+    List(removeList,List(buildRemoveButton(removeList))).flatMap(x=>x)
   }
   
-  private def buildRemoveButton(label: Label, rWidget: IRowWidget, aButton: Button) = {
+  
+  private def buildRemoveButton(lico: List[Component]) = {
     val rButton = new Button
     rButton.icon = new ImageIcon(ImageTool.loadImage("img/removeRow.png",10,10))
-    listenTo(`rButton`)
-    reactions += {case ButtonClicked(`rButton`) =>
-        if (rowWidgets.size > 1 ) {
-          rWidget.components.foreach(contents-=)
-          contents-= label
-          contents-= aButton
-          contents-= rButton
-          rowWidgets-= rWidget
-          refresh}}
+    panel.listenTo(`rButton`)
+    panel.reactions += {case ButtonClicked(`rButton`) => if (rowWidgets.size > 1 ) hideComponents(rButton::lico)}
     rButton}
   
   private def buildAddButton(rowWidget: IRowWidget) = {
     val aButton = new Button
     aButton.icon = new ImageIcon(ImageTool.loadImage("img/addRow.png",10,10))
-    listenTo(`aButton`)
-    reactions += {case ButtonClicked(`aButton`) => addRow(rowWidget.buildEmptyRow)}
+    panel.listenTo(`aButton`)
+    panel.reactions += {case ButtonClicked(`aButton`) => showComponents(addRow(rowWidget.buildEmptyRow))}
     aButton}
   
-  private def refresh = {
-    repaint
-    revalidate
-  } 
+  private def showComponents(lico: List[Component]) = {lico.foreach(panel.contents+=)
+                                                       refresh
+                                                       lico}
   
-  def compose(multiWidget: MultiWidget) = {
-    multiWidget.contents.foreach{c=>println("CONTT :: " + c);contents+=c}
-    this
-  }
+  private def hideComponents(lico: List[Component]) = {lico.foreach(panel.contents-=);refresh}
+  
+  private def refresh = {
+    panel.repaint
+    panel.revalidate
+  } 
 }
