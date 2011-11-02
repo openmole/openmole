@@ -43,6 +43,8 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
 
+  def this(start: ICapsule, slot: ISlot) = this(start, slot, ICondition.True, Set.empty[String])
+  
   def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
 
   def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])

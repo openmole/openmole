@@ -15,10 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition
+package org.openmole.core.implementation.transition
 
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.IMaster
+import org.openmole.core.model.transition.ICondition
+import org.openmole.core.model.transition.ICondition._
+import org.openmole.core.model.transition.ISlot
 
-trait IMasterTransition extends IAggregationTransition {
-  def master: IMaster
+class Master(val selection: ITask, val master: ISlot, val condition: ICondition) extends IMaster {
+  def this(selection: ITask, master: ISlot) = this(selection, master, True)
+  def this(selection: ITask, master: ICapsule) = this(selection, master.defaultInputSlot, True)
+  def this(selection: ITask, master: ICapsule, condition: ICondition) = this(selection, master.defaultInputSlot, condition)
 }
