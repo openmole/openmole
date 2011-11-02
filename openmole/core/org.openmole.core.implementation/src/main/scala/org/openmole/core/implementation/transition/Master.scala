@@ -23,9 +23,12 @@ import org.openmole.core.model.transition.IMaster
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ICondition._
 import org.openmole.core.model.transition.ISlot
+import org.openmole.core.implementation.mole.Capsule
 
 class Master(val selection: ITask, val master: ISlot, val condition: ICondition) extends IMaster {
   def this(selection: ITask, master: ISlot) = this(selection, master, True)
   def this(selection: ITask, master: ICapsule) = this(selection, master.defaultInputSlot, True)
   def this(selection: ITask, master: ICapsule, condition: ICondition) = this(selection, master.defaultInputSlot, condition)
+  
+  val transition = new Transition(new Capsule(selection), master, condition)
 }

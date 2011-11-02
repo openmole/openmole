@@ -23,4 +23,5 @@ trait IMaster {
   def selection: ITask
   def master: ISlot
   def condition: ICondition
+  def transition: ITransition
 }
