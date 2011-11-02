@@ -20,12 +20,6 @@ class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeM
     if (csvFilePath != "") {
       val fi = new File(csvFilePath)
       if (fi.isFile) new CSVSampling(fi) {
-//        prototypeMapping.foreach{m=> m._2.dataUI match {
-//            case x:EmptyPrototypeDataUI =>
-//            case _=> addColumnAs(m._1,m._2.dataUI.coreObject)
-//          }
-//        }
-        
         prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach{m=>addColumnAs(m._1,m._2.dataUI.coreObject)}
       }
       else throw new GUIUserBadDataError("CSV file " + csvFilePath + " does not exist")
@@ -37,6 +31,5 @@ class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeM
   
   override def imagePath = "img/csvSampling.png" 
   
-//  override def buildPanelUI = new CSVSamplingPanelUI(this)
   override def buildPanelUI = new CSVSamplingPanelUI(this)
 }
