@@ -31,23 +31,25 @@ class MultiWidget(val rowName: String, rWidgets: List[IRowWidget], nbComponent: 
   val panel =  new MigPanel("wrap "+(nbComponent + 3).toString)
   rWidgets.foreach(r=>showComponents(addRow(r)))
   
-  def content =rowWidgets.map(_.content).toList
+  def content = rowWidgets.map(_.content).toList
   
   private def addRow(rowWidget: IRowWidget): List[Component] = {
     rowWidgets+= rowWidget
     val label= new Label(rowName)
     val addButton = buildAddButton(rowWidget)
     val removeList = List(List(label), rowWidget.components,
-                          List(addButton)).flatMap(x=>x)
-    List(removeList,List(buildRemoveButton(removeList))).flatMap(x=>x)
+                          List(addButton)).flatten
+    List(removeList,List(buildRemoveButton(removeList,rowWidget))).flatten
   }
   
   
-  private def buildRemoveButton(lico: List[Component]) = {
+  private def buildRemoveButton(lico: List[Component],rowWidget: IRowWidget) = {
     val rButton = new Button
     rButton.icon = new ImageIcon(ImageTool.loadImage("img/removeRow.png",10,10))
     panel.listenTo(`rButton`)
-    panel.reactions += {case ButtonClicked(`rButton`) => if (rowWidgets.size > 1 ) hideComponents(rButton::lico)}
+    panel.reactions += {case ButtonClicked(`rButton`) => if (rowWidgets.size > 1 ) {
+          hideComponents(rButton::lico)
+          rowWidgets-= rowWidget}}
     rButton}
   
   private def buildAddButton(rowWidget: IRowWidget) = {

@@ -24,5 +24,5 @@ trait IRowWidget {
   
   def buildEmptyRow: IRowWidget
   
-  def content: List[(Component,String)]
+  def content: List[(Component,_)]
 }
