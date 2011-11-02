@@ -13,8 +13,8 @@ import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 
-class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeMapping: Map[String,PrototypeDataProxyUI]) extends ISamplingDataUI {
-  def this(n:String) = this(n,"",Map())
+class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeMapping: List[(String,PrototypeDataProxyUI)]) extends ISamplingDataUI {
+  def this(n:String) = this(n,"",List())
   
   override def coreObject = {  
     if (csvFilePath != "") {

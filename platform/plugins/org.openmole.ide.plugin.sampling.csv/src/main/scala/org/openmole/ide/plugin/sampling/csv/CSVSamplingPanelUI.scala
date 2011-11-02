@@ -20,18 +20,12 @@ package org.openmole.ide.plugin.sampling.csv
 import scala.swing._
 import scala.swing.Label
 import swing.Swing._
-import scala.swing.event.ButtonClicked
-import scala.swing.event.EditDone
 import swing.ListView._
-import scala.swing.TextField
 import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
-import javax.swing.DefaultCellEditor
-import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.model.display._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import javax.swing.table.DefaultTableModel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -39,62 +33,37 @@ import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import scala.swing.BorderPanel.Position._
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[left]rel[grow,fill]","") with ISamplingPanelUI {
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[][grow,fill]","") with ISamplingPanelUI {
   
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
+  var comboMulti: Option[MultiTwoCombos[String,IPrototypeDataProxyUI]]= None
+  
+  contents+= new Label("CSV file")
+  contents+= (csvTextField,"wrap")
+  
+  readFile(pud.csvFilePath)
   
   listenTo(csvTextField)
   reactions += {
-    case DialogClosedEvent(csvTextField)=> { 
-        if (isFile(csvTextField.text)){
-          val reader = new CSVReader(new FileReader(csvTextField.text))
-          val headers = reader.readNext
-          model.setRowCount(headers.length)
-          headers.zipWithIndex.foreach{case (h,i)=> table.update(i,0,h); table.update(i,1,new PrototypeDataProxyUI(new EmptyPrototypeDataUI("")))}
-          reader.close}}}
+    case DialogClosedEvent(csvTextField)=> readFile(csvTextField.text)}
   
-  val model = new DefaultTableModel(Array[Object]("CSV headers","Prototypes"),0)
-  val table = buildTable(model)
   
-  contents+= new Label("CSV file")
-  contents+= (csvTextField,"growx,wrap")
-  contents+= (new ScrollPane(table){minimumSize = new Dimension(150,200)},"span,growx")
-  
-  // Load data
-  if (isFile(pud.csvFilePath)) csvTextField.text = pud.csvFilePath
-  model.setRowCount(pud.prototypeMapping.size)
-  
-  var i = 0
-  pud.prototypeMapping.foreach{d => table.update(i,0,d._1);
-                               table.update(i,1,comboContent.zipWithIndex.filter(_._1.dataUI.name.equals(d._2.dataUI.name))(0)._1);
-                               i+=1}
-  
-  def isFile(s: String) = new File(s).isFile
-  
-  def buildTable(m: DefaultTableModel) = 
-    new Table{
-      model = m
-      preferredViewportSize = new Dimension(150,200)
-      selection.elementMode = Cell
-      rowHeight= 30
-      
-      
-      override protected def editor(row: Int, column: Int) = {
-        column match {
-          case 1=> new DefaultCellEditor((new ComboBox(comboContent)).peer)
-          case _=> new DefaultCellEditor((new TextField{editable = false}).peer)
-        }
-      }
-    }
-  
+  def readFile(s: String) = {
+    if (new File(s).isFile){
+      val reader = new CSVReader(new FileReader(s))
+      val headers = reader.readNext
+      comboMulti = Some(new MultiTwoCombos("Mapping", (headers.toList, comboContent),pud.prototypeMapping))
+      if (contents.size == 3) contents.remove(2)
+      contents+= (comboMulti.get.panel,"span,grow,wrap")
+      reader.close}}
   
   override def saveContent(name: String) = {
-    var protoMapping = Map[String,PrototypeDataProxyUI]()   
-    for(i<- 0 to model.getRowCount-1) {println("SAVE :: "+model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI].dataUI.getClass);protoMapping += model.getValueAt(i,0).toString -> model.getValueAt(i,1).asInstanceOf[PrototypeDataProxyUI]}
-    new CSVSamplingDataUI(name,csvTextField.text,protoMapping)
-  }
+    if (comboMulti.isDefined)
+      new CSVSamplingDataUI(name,csvTextField.text,comboMulti.get.content.map(l=>(l(0)._2.asInstanceOf[String],l(1)._2.asInstanceOf[PrototypeDataProxyUI])))
+    else new CSVSamplingDataUI(name,csvTextField.text, List[(String,PrototypeDataProxyUI)]())}
   
   def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.values.toList
 }
