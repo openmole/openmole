@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.WeakHashMap
+import java.io.File
 
 object Proxys {
     
@@ -68,7 +69,10 @@ object Proxys {
     case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
       FrozenProxys.environment(PaletteSupport.currentMoleSceneTopComponent.get)
       else environments.toMap}
-      
+  
+  def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.values.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
+  .toList
+  
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
   
   def addTaskElement(dpu: ITaskDataProxyUI) = tasks += incr.getAndIncrement->dpu
