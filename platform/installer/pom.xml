@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.openmole.ide</groupId>
+        <groupId>org.openmole</groupId>
         <artifactId>platform</artifactId>
         <version>0.4-SNAPSHOT</version>
     </parent>
@@ -75,7 +75,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-        			    <groupId>org.openmole.ide</groupId>
+        			    <groupId>org.openmole</groupId>
         			    <artifactId>application</artifactId>
 		                    <version>${openmole.gui.version}</version>
                                     <type>tar.gz</type>

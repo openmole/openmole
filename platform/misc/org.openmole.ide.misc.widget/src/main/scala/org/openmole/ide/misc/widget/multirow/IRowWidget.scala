@@ -19,10 +19,10 @@ package org.openmole.ide.misc.widget.multirow
 
 import scala.swing.Component
 
-trait IRowWidget {
+trait IRowWidget[T, S] {
   def components: List[Component]
   
-  def buildEmptyRow: IRowWidget
+  def buildEmptyRow: IRowWidget[T]
   
-  def content: List[(Component,_)]
+  def content: ((Component,T), (Component,S))
 }
