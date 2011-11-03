@@ -55,14 +55,16 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[][grow,fi
     if (new File(s).isFile){
       val reader = new CSVReader(new FileReader(s))
       val headers = reader.readNext
-      comboMulti = Some(new MultiTwoCombos("Mapping", (headers.toList, comboContent),pud.prototypeMapping))
+      comboMulti = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI]("Mapping", (headers.toList, comboContent),pud.prototypeMapping))
       if (contents.size == 3) contents.remove(2)
       contents+= (comboMulti.get.panel,"span,grow,wrap")
       reader.close}}
   
   override def saveContent(name: String) = {
     if (comboMulti.isDefined)
-      new CSVSamplingDataUI(name,csvTextField.text,comboMulti.get.content.map(l=>(l(0)._2.asInstanceOf[String],l(1)._2.asInstanceOf[PrototypeDataProxyUI])))
+      new CSVSamplingDataUI(name,
+                            csvTextField.text,
+                            comboMulti.get.content)
     else new CSVSamplingDataUI(name,csvTextField.text, List[(String,PrototypeDataProxyUI)]())}
   
   def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.values.toList

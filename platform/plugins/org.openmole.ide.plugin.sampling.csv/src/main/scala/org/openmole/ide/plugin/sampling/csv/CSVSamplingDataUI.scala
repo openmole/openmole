@@ -8,12 +8,12 @@ package org.openmole.ide.plugin.sampling.csv
 
 import java.io.File
 import org.openmole.ide.misc.exception.GUIUserBadDataError
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 
-class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeMapping: List[(String,PrototypeDataProxyUI)]) extends ISamplingDataUI {
+class CSVSamplingDataUI(val name: String,var csvFilePath: String, var prototypeMapping: List[(String,IPrototypeDataProxyUI)]) extends ISamplingDataUI {
   def this(n:String) = this(n,"",List())
   
   override def coreObject = {  
