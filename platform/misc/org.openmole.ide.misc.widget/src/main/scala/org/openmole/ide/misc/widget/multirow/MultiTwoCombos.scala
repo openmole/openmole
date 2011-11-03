@@ -18,19 +18,27 @@
 package org.openmole.ide.misc.widget.multirow
 
 import scala.swing.ComboBox
-import scala.swing.Component
 
 object MultiTwoCombos {
-  class TwoCombosRowWidget[A,B](comboContentA: List[A], selectedA: A, comboContentB: List[B], selectedB: B) extends IRowWidget{
-    override val components = List(new ComboBox(comboContentA) {selection.item = selectedA},
-                                   new ComboBox(comboContentB) {selection.item = selectedB})
+  def twoCombosRowWidgetFactory[A,B](row: TwoCombosRowWidget[A,B]) = {
+    import row._
+    new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB)
+  }
   
-    override def buildEmptyRow: IRowWidget = new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB)
+  class TwoCombosRowWidget[A,B](val comboContentA: List[A], 
+                                val selectedA: A, 
+                                val comboContentB: List[B], 
+                                val selectedB: B) extends IRowWidget2[A,B]{
+    val combo1 = new ComboBox[A](comboContentA) {selection.item = selectedA}
+    val combo2 = new ComboBox[B](comboContentB) {selection.item = selectedB}
+    override val components = List(combo1,combo2)
   
-    override def content: List[(Component,_)] = components.map(c => (c, c.selection.item)).toList
+    override def content: (A,B) = (combo1.selection.item,combo2.selection.item)
   }
 }
-
+import MultiTwoCombos._
 class MultiTwoCombos[A,B](rowName: String, initValues: (List[A],List[B]), selected: List[(A,B)]) extends
-MultiWidget(rowName, if (selected.isEmpty) List(new MultiTwoCombos.TwoCombosRowWidget(initValues._1,initValues._1(0), initValues._2, initValues._2(0)))
-            else selected.map{case(s1,s2)=>new MultiTwoCombos.TwoCombosRowWidget(initValues._1, s1, initValues._2, s2)}, 2)
+MultiWidget(rowName, if (selected.isEmpty) List(new TwoCombosRowWidget(initValues._1,initValues._1(0), initValues._2, initValues._2(0)))
+             else selected.map{case(s1,s2)=>new TwoCombosRowWidget(initValues._1, s1, initValues._2, s2)}, 
+             twoCombosRowWidgetFactory[A,B],
+             2){ def content = rowWidgets.map(_.content).toList }

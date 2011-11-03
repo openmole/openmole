@@ -26,24 +26,21 @@ import scala.swing.Component
 import scala.swing.Label
 import scala.swing.event.ButtonClicked
 
-class MultiWidget(val rowName: String, rWidgets: List[IRowWidget], nbComponent: Int){
-  val rowWidgets = new HashSet[IRowWidget]
+abstract class MultiWidget[T<:IRowWidget](val rowName: String, rWidgets: List[T], factory: T=>T,nbComponent: Int){
+  val rowWidgets = new HashSet[T]
   val panel =  new MigPanel("wrap "+(nbComponent + 3).toString)
+  
   rWidgets.foreach(r=>showComponents(addRow(r)))
   
-  def content = rowWidgets.map(_.content).toList
-  
-  private def addRow(rowWidget: IRowWidget): List[Component] = {
+  def addRow(rowWidget: T): List[Component] = {
     rowWidgets+= rowWidget
     val label= new Label(rowName)
     val addButton = buildAddButton(rowWidget)
-    val removeList = List(List(label), rowWidget.components,
-                          List(addButton)).flatten
-    List(removeList,List(buildRemoveButton(removeList,rowWidget))).flatten
+    val removeList:List[Component] = List(List(label), rowWidget.components,List(addButton)).flatten
+    removeList ::: List(buildRemoveButton(removeList,rowWidget))
   }
   
-  
-  private def buildRemoveButton(lico: List[Component],rowWidget: IRowWidget) = {
+  def buildRemoveButton(lico: List[Component],rowWidget: T) = {
     val rButton = new Button
     rButton.icon = new ImageIcon(ImageTool.loadImage("img/removeRow.png",10,10))
     panel.listenTo(`rButton`)
@@ -52,11 +49,11 @@ class MultiWidget(val rowName: String, rWidgets: List[IRowWidget], nbComponent: 
           rowWidgets-= rowWidget}}
     rButton}
   
-  private def buildAddButton(rowWidget: IRowWidget) = {
+  def buildAddButton(rowWidget: T) = {
     val aButton = new Button
     aButton.icon = new ImageIcon(ImageTool.loadImage("img/addRow.png",10,10))
     panel.listenTo(`aButton`)
-    panel.reactions += {case ButtonClicked(`aButton`) => showComponents(addRow(rowWidget.buildEmptyRow))}
+    panel.reactions += {case ButtonClicked(`aButton`) => showComponents(addRow(factory(rowWidget)))}
     aButton}
   
   private def showComponents(lico: List[Component]) = {lico.foreach(panel.contents+=)
