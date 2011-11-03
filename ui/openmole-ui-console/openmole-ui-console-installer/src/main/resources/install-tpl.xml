@@ -4,7 +4,7 @@
         <appname>OpenMOLE</appname>
         <appversion>$VERSION$</appversion>
         <uninstaller write="yes" />
-        <javaversion>1.6</javaversion>
+        <javaversion>1.7</javaversion>
         <pack200 />
     </info>
     
