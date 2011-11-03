@@ -7,7 +7,7 @@
     <!-- *** POM Relationships *************************************** -->
     <!-- ************************************************************* -->
     <parent>
-        <groupId>org.openmole.ide</groupId>
+        <groupId>org.openmole</groupId>
         <artifactId>platform</artifactId>
         <version>0.4-SNAPSHOT</version>
     </parent>

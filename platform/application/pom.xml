@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.openmole.ide</groupId>
+        <groupId>org.openmole</groupId>
         <artifactId>platform</artifactId>
         <version>0.4-SNAPSHOT</version>
     </parent>
@@ -26,72 +26,67 @@
             <type>pom</type>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>branding</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.core.model</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.core.implementation</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.task.groovy</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
          <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
 	<dependency>
-	    <groupId>org.openmole.ide</groupId>	   
+	    <groupId>org.openmole</groupId>	   
 	    <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.task.systemexec</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.task.serialization</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
 	<dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>  
-        <!--dependency>
-            <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.plugin.hook.filemanagement</artifactId>
-            <version>${openmole.gui.version}</version>
-        </dependency--> 
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.complete</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>        
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.domain.distribution</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
@@ -101,12 +96,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>   
         <dependency>
-            <groupId>org.openmole.ide</groupId>
+            <groupId>org.openmole</groupId>
             <artifactId>org.openmole.ide.plugin.environment.desktopgrid</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
