@@ -16,11 +16,17 @@
  */
 package org.openmole.ide.plugin.task.systemexec
 
+import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.multirow.MultiComboTextField
+import org.openmole.ide.misc.widget.multirow.MultiTextFieldCombo
 import scala.swing._
 import swing.Swing._
 
@@ -28,16 +34,29 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
  
   val workspaceTextField = new TextField(ndu.workspace)
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource",ndu.resources)
+  val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output map",
+                                                                                   ndu.outputMap,
+                                                                                   comboContent)
+   
+  val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input map",
+                                                                                   ndu.inputMap,
+                                                                                   comboContent)                           
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   
   contents+= new Label("Workspace")
   contents+= (workspaceTextField,"growx,span 3, wrap")
   contents+= (new Label("Commands"),"wrap")
-  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,200)},"span 2,growx")
+  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span 2,growx")
   contents+= (resourcesMultiTextField.panel,"span 2, growx, wrap")
+  contents+= (inputMapMultiComboTextField.panel,"span,grow,wrap")
+  contents+= (outputMapMultiTextFieldCombo.panel,"span,grow,wrap")
   
   override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name,
                                                                                  "", 
                                                                                  launchingCommandTextArea.text,
-                                                                                 resourcesMultiTextField.content.flatMap(_.map(_._2)))
+                                                                                 resourcesMultiTextField.content,
+                                                                                 inputMapMultiComboTextField.content,
+                                                                                 outputMapMultiTextFieldCombo.content)
+  
+  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.filePrototypes
 }

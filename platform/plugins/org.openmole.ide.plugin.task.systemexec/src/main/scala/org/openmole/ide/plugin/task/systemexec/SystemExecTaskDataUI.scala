@@ -6,16 +6,26 @@
 package org.openmole.ide.plugin.task.systemexec
 
 import java.awt.Color
+import java.io.File
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 
-class SystemExecTaskDataUI(val name: String,val workspace: String,val lauchingCommands: String, val resources: List[String]) extends TaskDataUI {
-  def this(n: String) = this(n,"","",List.empty)
+class SystemExecTaskDataUI(val name: String,
+                           val workspace: String,
+                           val lauchingCommands: String, 
+                           val resources: List[String],
+                           val inputMap: List[(IPrototypeDataProxyUI,String)],
+                           val outputMap: List[(String,IPrototypeDataProxyUI)]) extends TaskDataUI {
+  def this(n: String) = this(n,"","",List.empty,List.empty,List.empty)
   
   override def coreObject = {
     val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workspace)
     resources.foreach(syet.addResource)
+    outputMap.foreach(i=>syet.addOutput(i._1,i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
+    inputMap.foreach(i=>syet.addInput(i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]],i._2))
     syet
   }
   
