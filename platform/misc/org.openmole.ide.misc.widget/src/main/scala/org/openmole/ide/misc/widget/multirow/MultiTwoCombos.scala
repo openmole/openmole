@@ -37,8 +37,12 @@ object MultiTwoCombos {
   }
 }
 import MultiTwoCombos._
-class MultiTwoCombos[A,B](rowName: String, initValues: (List[A],List[B]), selected: List[(A,B)]) extends
+class MultiTwoCombos[A,B](
+  rowName: String, 
+  initValues: (List[A],List[B]), 
+  selected: List[(A,B)],
+  factory: TwoCombosRowWidget[A,B] => TwoCombosRowWidget[A,B] = twoCombosRowWidgetFactory _) extends
 MultiWidget(rowName, if (selected.isEmpty) List(new TwoCombosRowWidget(initValues._1,initValues._1(0), initValues._2, initValues._2(0)))
              else selected.map{case(s1,s2)=>new TwoCombosRowWidget(initValues._1, s1, initValues._2, s2)}, 
-             twoCombosRowWidgetFactory[A,B],
+             factory,
              2){ def content = rowWidgets.map(_.content).toList }
