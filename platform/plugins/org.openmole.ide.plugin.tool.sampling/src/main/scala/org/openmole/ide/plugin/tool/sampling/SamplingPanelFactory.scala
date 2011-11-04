@@ -17,17 +17,24 @@
 
 package org.openmole.ide.plugin.tool.sampling
 
-import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import scala.collection.JavaConversions._
 import java.util.HashSet
 import org.openide.util.Lookup
 
 object SamplingPanelFactory {
-  val modelDomains = new HashSet[DomainDataProxyFactory]
-  Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))
+  // val modelDomains = new HashSet[DomainDataProxyFactory]
   
-  def sampleDomainPanel= "to be implemented"
+  def sampleDomainPanel(initVals: List[(IPrototypeDataProxyUI,Class[IDomainFactoryUI[_]])])= {
+    Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))
+    new MultiTwoCombos[IPrototypeDataProxyUI,Class[IDomainFactoryUI[_]]]("Mapping", 
+                                                                         (Proxys.prototypes,
+                                                                          Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).foreach(f=>modelDomains += new DomainDataProxyFactory(f))),
+                                                                         initVals)
+  }
   
   def sampleSamplingPanel= "to be implemented"
 }
