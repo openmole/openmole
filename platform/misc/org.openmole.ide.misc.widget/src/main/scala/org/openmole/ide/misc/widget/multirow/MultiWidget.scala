@@ -26,7 +26,7 @@ import scala.swing.Component
 import scala.swing.Label
 import scala.swing.event.ButtonClicked
 
-abstract class MultiWidget[T<:IRowWidget](val rowName: String, rWidgets: List[T], factory: T=>T,nbComponent: Int){
+abstract class MultiWidget[T<:IRowWidget](val rowName: String, rWidgets: List[T], factory: IRowWidgetFactory[T],nbComponent: Int){
   val rowWidgets = new HashSet[T]
   val panel =  new MigPanel("wrap "+(nbComponent + 3).toString)
   
@@ -53,7 +53,7 @@ abstract class MultiWidget[T<:IRowWidget](val rowName: String, rWidgets: List[T]
     val aButton = new Button
     aButton.icon = new ImageIcon(ImageTool.loadImage("img/addRow.png",10,10))
     panel.listenTo(`aButton`)
-    panel.reactions += {case ButtonClicked(`aButton`) => showComponents(addRow(factory(rowWidget)))}
+    panel.reactions += {case ButtonClicked(`aButton`) => showComponents(addRow(factory.apply(rowWidget)))}
     aButton}
   
   private def showComponents(lico: List[Component]) = {lico.foreach(panel.contents+=)

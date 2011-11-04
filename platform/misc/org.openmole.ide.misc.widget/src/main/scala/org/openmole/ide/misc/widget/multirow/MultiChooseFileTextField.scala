@@ -22,9 +22,11 @@ import scala.swing.Component
 import scala.swing.FileChooser.SelectionMode._
 
 object  MultiChooseFileTextField {
-  def chooseFileTextFieldRowWidgetFactory(row: ChooseFileTextFieldRowWidget) = {
-    import row._
-    new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)
+  class Factory extends IRowWidgetFactory[ChooseFileTextFieldRowWidget]{
+    def apply(row: ChooseFileTextFieldRowWidget) = {
+      import row._
+      new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)
+    }
   }
   
   class ChooseFileTextFieldRowWidget(val initValue: String, 
@@ -43,9 +45,23 @@ class MultiChooseFileTextField(rowName: String,
                                chooserTitle: String="", 
                                chooserDescription: Option[String]=None, 
                                selectionMode: Value= FilesOnly,
-                               extensions: Option[String]= None) extends MultiWidget(rowName,
-                                                                                     if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)) 
-                                                                                     else initValues.map(iv=>new ChooseFileTextFieldRowWidget(iv,chooserTitle,chooserDescription,selectionMode,extensions)),
-                                                                                     chooseFileTextFieldRowWidgetFactory,1) {  
+                               extensions: Option[String]= None,
+                               factory: IRowWidgetFactory[ChooseFileTextFieldRowWidget]) extends MultiWidget(rowName,
+                                                                                                             if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)) 
+                                                                                                             else initValues.map(iv=>new ChooseFileTextFieldRowWidget(iv,chooserTitle,chooserDescription,selectionMode,extensions)),
+                                                                                                             factory,1) {  
+  def this(rName: String , 
+           iValues: List[String], 
+           cTitle: String, 
+           cDescription: Option[String], 
+           sMode: Value,
+           exts: Option[String]) = this(rName,
+                                        iValues,
+                                        cTitle,
+                                        cDescription,
+                                        sMode,
+                                        exts,
+                                        new Factory)
+  def this(rName: String , iValues: List[String])= this (rName,iValues,"",None,FilesOnly,None)
   def content = rowWidgets.map(_.content).toList }
 

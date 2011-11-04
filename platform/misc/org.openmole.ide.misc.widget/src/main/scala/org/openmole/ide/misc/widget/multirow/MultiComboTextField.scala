@@ -21,9 +21,11 @@ import scala.swing.ComboBox
 import scala.swing.TextField
 
 object MultiComboTextField {
-  def comboTextFieldRowWidget[A](row: ComboTextFieldRowWidget[A]) = {
-    import row._
-    new ComboTextFieldRowWidget(comboContentA,selectedA,"")
+  class Factory[A] extends IRowWidgetFactory[ComboTextFieldRowWidget[A]]{
+    def apply(row: ComboTextFieldRowWidget[A]) = {
+      import row._
+      new ComboTextFieldRowWidget(comboContentA,selectedA,"")
+    }
   }
   
   class ComboTextFieldRowWidget[A](val comboContentA: List[A],
@@ -40,14 +42,21 @@ object MultiComboTextField {
 import MultiComboTextField._
 class MultiComboTextField[A] (rowName: String,
                               initValues: List[(A,String)],
-                              comboContent: List[A]) extends MultiWidget(rowName,
-                                                                         if (initValues.isEmpty) 
-                                                                           List(new ComboTextFieldRowWidget(comboContent, 
-                                                                                                            comboContent(0),
-                                                                                                            ""))
-                                                                         else initValues.map{
+                              comboContent: List[A],
+                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]]) extends MultiWidget(
+  rowName,
+  if (initValues.isEmpty) 
+    List(new ComboTextFieldRowWidget(comboContent, 
+                                     comboContent(0),
+                                     ""))
+  else initValues.map{
     case(a,s)=>new ComboTextFieldRowWidget(comboContent,a,s)},
-                                                                         comboTextFieldRowWidget[A],
-                                                                         2){
+  factory,
+  2)
+{
+  def this(rName: String,
+           iValues: List[(A,String)],
+           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A])
+
   def content = rowWidgets.map(_.content).filterNot(_._2.isEmpty).toList 
 }

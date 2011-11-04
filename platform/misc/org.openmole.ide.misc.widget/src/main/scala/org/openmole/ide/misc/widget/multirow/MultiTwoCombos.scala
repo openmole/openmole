@@ -20,11 +20,13 @@ package org.openmole.ide.misc.widget.multirow
 import scala.swing.ComboBox
 
 object MultiTwoCombos {
-  def twoCombosRowWidgetFactory[A,B](row: TwoCombosRowWidget[A,B]) = {
-    import row._
-    new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB)
-  }
   
+  class Factory[A, B] extends IRowWidgetFactory[TwoCombosRowWidget[A,B]]{
+    def apply(row: TwoCombosRowWidget[A,B]) = {
+      import row._
+      new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB)
+    }
+  }
   class TwoCombosRowWidget[A,B](val comboContentA: List[A], 
                                 val selectedA: A, 
                                 val comboContentB: List[B], 
@@ -41,8 +43,13 @@ class MultiTwoCombos[A,B](
   rowName: String, 
   initValues: (List[A],List[B]), 
   selected: List[(A,B)],
-  factory: TwoCombosRowWidget[A,B] => TwoCombosRowWidget[A,B] = twoCombosRowWidgetFactory _) extends
+  factory: IRowWidgetFactory[TwoCombosRowWidget[A,B]]) extends
 MultiWidget(rowName, if (selected.isEmpty) List(new TwoCombosRowWidget(initValues._1,initValues._1(0), initValues._2, initValues._2(0)))
-             else selected.map{case(s1,s2)=>new TwoCombosRowWidget(initValues._1, s1, initValues._2, s2)}, 
-             factory,
-             2){ def content = rowWidgets.map(_.content).toList }
+            else selected.map{case(s1,s2)=>new TwoCombosRowWidget(initValues._1, s1, initValues._2, s2)}, 
+            factory,
+            2){ 
+  def this(rName: String , iValues: (List[A],List[B]), selected: List[(A,B)]) = this(rName,
+                                                                                     iValues,
+                                                                                     selected, 
+                                                                                     new Factory[A,B])
+  def content = rowWidgets.map(_.content).toList }

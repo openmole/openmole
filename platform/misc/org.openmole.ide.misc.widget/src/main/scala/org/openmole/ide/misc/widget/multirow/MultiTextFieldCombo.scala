@@ -21,9 +21,11 @@ import scala.swing.ComboBox
 import scala.swing.TextField
 
 object MultiTextFieldCombo {
-  def textFieldComboRowWidget[B](row: TextFieldComboRowWidget[B]) = {
-    import row._
-    new TextFieldComboRowWidget("",comboContentB,selectedB)
+  class Factory[B] extends IRowWidgetFactory[TextFieldComboRowWidget[B]]{
+    def apply(row: TextFieldComboRowWidget[B]) = {
+      import row._
+      new TextFieldComboRowWidget("",comboContentB,selectedB)
+    }
   }
   
   class TextFieldComboRowWidget[B](val initValue: String, 
@@ -40,14 +42,19 @@ object MultiTextFieldCombo {
 import MultiTextFieldCombo._
 class MultiTextFieldCombo[B] (rowName: String,
                               initValues: List[(String,B)],
-                              comboContent: List[B]) extends MultiWidget(rowName,
-                                                                         if (initValues.isEmpty) 
-                                                                           List(new TextFieldComboRowWidget("",
-                                                                                                            comboContent, 
-                                                                                                            comboContent(0)))
-                                                                         else initValues.map{
+                              comboContent: List[B],
+                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]]) extends MultiWidget(rowName,
+                                                                                                          if (initValues.isEmpty) 
+                                                                                                            List(new TextFieldComboRowWidget("",
+                                                                                                                                             comboContent, 
+                                                                                                                                             comboContent(0)))
+                                                                                                          else initValues.map{
     case(s,b)=>new TextFieldComboRowWidget(s,comboContent,b)},
-                                                                         textFieldComboRowWidget[B],
-                                                                         2){
-  def content = rowWidgets.map(_.content).filterNot(_._1.isEmpty).toList 
+                                                                                                          factory,
+                                                                                                          2){
+
+  def this(rName: String,
+           iValues: List[(String,B)],
+           cContent: List[B]) = this (rName,iValues,cContent, new Factory[B])
+def content = rowWidgets.map(_.content).filterNot(_._1.isEmpty).toList 
 }

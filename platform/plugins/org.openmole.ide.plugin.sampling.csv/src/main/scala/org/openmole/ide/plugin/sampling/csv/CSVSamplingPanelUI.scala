@@ -55,7 +55,11 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[][grow,fi
     if (new File(s).isFile){
       val reader = new CSVReader(new FileReader(s))
       val headers = reader.readNext
-      comboMulti = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI]("Mapping", (headers.toList, comboContent),pud.prototypeMapping))
+      comboMulti = 
+        Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
+          "Mapping", 
+          (headers.toList, comboContent),
+           pud.prototypeMapping))
       if (contents.size == 3) contents.remove(2)
       contents+= (comboMulti.get.panel,"span,grow,wrap")
       reader.close}}
