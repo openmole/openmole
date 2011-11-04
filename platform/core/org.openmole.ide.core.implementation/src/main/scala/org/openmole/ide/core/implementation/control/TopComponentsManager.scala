@@ -29,15 +29,18 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import scala.collection.JavaConversions._
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.workspace.Workspace
 
-object TopComponentsManager{
+object TopComponentsManager {
 
   var detailedView= false
   var countMole= 0
   var countExec= 0
   var topComponents= new HashMap[MoleSceneTopComponent, ListBuffer[MoleSceneTopComponent]] 
   var executionTabs = new HashMap[IMoleScene,ExecutionManager]
-    
+  EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
+  
   def moleScenes = topComponents.keys.map(_.getMoleScene)
   
   def removeTopComponent(bs: MoleSceneTopComponent) = topComponents-= bs
@@ -50,7 +53,8 @@ object TopComponentsManager{
   def buildMoleScene = {
     val sc = new MoleScene(BUILD)
     sc.manager.name = Some({countMole+= 1; "Mole"+countMole})
-    sc}
+    sc
+  }
   
   def addTopComponent:MoleSceneTopComponent = addTopComponent(new MoleSceneTopComponent)
     
@@ -72,7 +76,8 @@ object TopComponentsManager{
     val ntc = new MoleSceneTopComponent(clone)
     topComponents(tc)+= ntc
     ntc.open
-    ntc}
+    ntc
+  }
   
   def displayExecutionView(ms:IMoleScene) {
     println("--- > displayExecutionView " + ms.moleSceneType)
