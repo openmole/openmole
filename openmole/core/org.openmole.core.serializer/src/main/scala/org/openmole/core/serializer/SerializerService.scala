@@ -19,19 +19,31 @@ package org.openmole.core.serializer
 
 import com.thoughtworks.xstream.XStream
 import java.io.File
+import java.io.FileFilter
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.serializer.structure.PluginClassAndFiles
+import java.util.UUID
 import org.openmole.core.serializer.converter._
 import org.openmole.core.serializer.structure.FileInfo
+import com.ice.tar.TarEntry
+import com.ice.tar.TarOutputStream
+import org.openmole.misc.workspace.Workspace
+import collection.JavaConversions._
+import scala.collection.immutable.TreeMap
 
 object SerializerService {
 
   private val xstream = new XStream
-
+  private val filesInfo = "filesInfo.xml"
+  private val content = "content.xml"
+  
+  private type FilesInfo = TreeMap[String, (File, Boolean)]
+  
   def deserialize[T](file: File): T = {
     val is = new FileInputStream(file)
     try deserialize(is)
@@ -39,6 +51,74 @@ object SerializerService {
   }
 
   def deserialize[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
+  
+  def deserializeAndExtractFiles[T](file: File) = {
+    val extractDir = Workspace.newDir("extraction")
+    file.extractDirArchiveWithRelativePath(extractDir)
+    
+    val fileInfoFile = new File(extractDir, filesInfo)
+    val fi = deserialize[FilesInfo](fileInfoFile)
+    fileInfoFile.delete
+    
+    val fileReplacement = 
+      new TreeMap[File, File] ++ extractDir.listFiles.filter(f => fi.contains(f.getName)).map {
+        f => 
+        val (file, isDirectory) = fi(f.getName)
+        file -> (if (isDirectory) {
+            val extractedDir = Workspace.newDir("extractionDir")
+            f.extractDirArchiveWithRelativePath(file)
+            f.delete
+            extractedDir
+          } else f)
+      }
+
+    val contentFile = new File(extractDir, content)
+    val obj = deserializeReplaceFiles[T](contentFile, fileReplacement)
+    contentFile.delete
+    obj
+  }
+  
+  def serializeAndArchiveFiles(obj: Any, file: File) = {
+    val objSerial = Workspace.newFile
+    val serializationResult = serializeGetPluginClassAndFiles(obj, objSerial)
+    
+    val tos = new TarOutputStream(new FileOutputStream(file))   
+            
+    try {
+      tos.addFile(objSerial, content)
+      objSerial.delete
+      
+      val fileInfo = new FilesInfo ++ serializationResult.files.map {
+        file =>
+        //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
+
+        val name = UUID.randomUUID        
+        val entry = new TarEntry(name.toString)
+
+        val toArchive =  if (file.isDirectory) {
+          val toArchive = Workspace.newFile
+          val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
+
+          try outputStream.createDirArchiveWithRelativePath(file)
+          finally outputStream.close
+                
+          toArchive
+        } else file
+
+        //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
+        entry.setSize(toArchive.length)
+        tos.putNextEntry(entry)
+              
+        try toArchive.copy(tos) finally tos.closeEntry
+              
+        (entry.getName, (file, file.isDirectory))
+      }
+      val filesInfoSerial = Workspace.newFile
+      serialize(fileInfo, filesInfoSerial)
+      tos.addFile(filesInfoSerial, filesInfo)
+      filesInfoSerial.delete
+    } finally tos.close
+  }
   
   def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File,FileInfo] = {
     val os = new FileOutputStream(file)

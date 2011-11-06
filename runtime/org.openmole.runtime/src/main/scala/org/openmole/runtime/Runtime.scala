@@ -81,9 +81,9 @@ class Runtime {
     var exception: Throwable = null
     var outputMessage: FileMessage = null
     var errorMessage: FileMessage = null
-    var tarResultMessage: FileMessage = null
+   // var tarResultMessage: FileMessage = null
         
-    val filesInfo = new HashMap[String, (File, Boolean)]
+    //val filesInfo = new HashMap[String, (File, Boolean)]
     var contextResult: IURIFile = null
         
     try {
@@ -162,8 +162,8 @@ class Runtime {
         val contextResults = new ContextResults(saver.results)
         val contextResultFile = Workspace.newFile
 
-        val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
-
+        //val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
+        val serializationResult = SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
         val uploadedcontextResults = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("uplodedTar", ".tgz"))
 
         retry( URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry )
@@ -173,11 +173,13 @@ class Runtime {
 
         /*-- Tar the result files --*/
 
-        val tarResult = Workspace.newFile("result", ".tar")
-
+      /*  val tarResult = Workspace.newFile("result", ".tar")
+        
       
         if (!serializationResult.files.isEmpty) {
-          val tos = new TarOutputStream(new FileOutputStream(tarResult))     
+          val tos = new TarOutputStream(new FileOutputStream(tarResult))  
+          
+          
           try {
             for (file <- serializationResult.files) {
               //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
@@ -216,7 +218,7 @@ class Runtime {
           tarResultMessage = FileMessage.EMPTY_RESULT
         }
                 
-        tarResult.delete
+        tarResult.delete*/
 
       } finally {
         outSt.close
@@ -247,7 +249,7 @@ class Runtime {
         }
     }
 
-    val runtimeResult = new RuntimeResult(outputMessage, errorMessage, tarResultMessage, exception, filesInfo, contextResult.path)
+    val runtimeResult = new RuntimeResult(outputMessage, errorMessage, exception, contextResult.path)
         
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)

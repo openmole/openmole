@@ -82,9 +82,9 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       display(result.stdOut, "Output", token)
       display(result.stdErr, "Error output", token)
 
-      val fileReplacement = getFiles(result.tarResult, result.filesInfo, token)
+      //val fileReplacement = getFiles(result.tarResult, result.filesInfo, token)
 
-      val contextResults = getContextResults(result.contextResultPath, fileReplacement, token)
+      val contextResults = getContextResults(result.contextResultPath, token)
 
       var successfull = 0
       var firstRunning = Long.MaxValue
@@ -153,7 +153,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
     }
   }
 
-  private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
+/*  private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
     if (tarResult == null) throw new InternalProcessingError("TarResult uri result is null.")
 
     var fileReplacement = new TreeMap[File, File]
@@ -190,13 +190,13 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       } finally tarResultFile.delete
     }
     fileReplacement
-  }
+  }*/
 
-  private def getContextResults(resultPath: String, fileReplacement: PartialFunction[File, File], token: AccessToken): ContextResults = {
+  private def getContextResults(resultPath: String, token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
     val contextResutsFileCache = resultPath.cacheUnziped(token)
 
-    try SerializerService.deserializeReplaceFiles(contextResutsFileCache, fileReplacement)
+    try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     finally contextResutsFileCache.delete
   }
 }
