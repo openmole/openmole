@@ -81,9 +81,6 @@ class Runtime {
     var exception: Throwable = null
     var outputMessage: FileMessage = null
     var errorMessage: FileMessage = null
-   // var tarResultMessage: FileMessage = null
-        
-    //val filesInfo = new HashMap[String, (File, Boolean)]
     var contextResult: IURIFile = null
         
     try {
@@ -170,55 +167,6 @@ class Runtime {
 
         contextResult = uploadedcontextResults
         contextResultFile.delete
-
-        /*-- Tar the result files --*/
-
-      /*  val tarResult = Workspace.newFile("result", ".tar")
-        
-      
-        if (!serializationResult.files.isEmpty) {
-          val tos = new TarOutputStream(new FileOutputStream(tarResult))  
-          
-          
-          try {
-            for (file <- serializationResult.files) {
-              //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
-
-              val name = UUID.randomUUID        
-              val entry = new TarEntry(name.toString)
-
-              val toArchive =  if (file.isDirectory) {
-                val toArchive = Workspace.newFile
-                val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
-
-                try outputStream.createDirArchiveWithRelativePath(file)
-                finally outputStream.close
-                
-                toArchive
-              } else file
-
-              //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
-              entry.setSize(toArchive.length)
-              tos.putNextEntry(entry)
-              
-              try toArchive.copy(tos) finally tos.closeEntry
-              
-              filesInfo.put(entry.getName, (file, file.isDirectory))
-            }
-          } finally tos.close
-
-          val uploadedTar = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("uplodedTar", ".tgz"))
-
-          /*-- Try 3 times to write the result --*/
-
-          retry(URIFile.copy(tarResult, uploadedTar), NbRetry)
-
-          tarResultMessage = new FileMessage(uploadedTar.path, HashService.computeHash(tarResult).toString)
-        } else {
-          tarResultMessage = FileMessage.EMPTY_RESULT
-        }
-                
-        tarResult.delete*/
 
       } finally {
         outSt.close

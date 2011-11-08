@@ -57,14 +57,6 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   import GetResultFromEnvironment._
   import communicationStorage._
   
-  /*class BatchEnvironmentTransfertProxy extends URIFile.IURIFileTransfer {
-    override def transfered(file: IURIFile, to: URI, byte: Long) = 
-      EventDispatcher.objectChanged(environment, FileDownload, Array(job, file, to, byte))
-  }
-
-  private def registerEvent(file: IURIFile) =
-    EventDispatcher.registerForObjectChanged(file, new BatchEnvironmentTransfertProxy, URIFile.IURIFileTransfer)
-  */
   private def successFullFinish(running: Long, done: Long) = {
     import batchJob.timeStemp
     StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
@@ -152,45 +144,6 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       }
     }
   }
-
-/*  private def getFiles(tarResult: FileMessage, filesInfo: PartialFunction[String, (File, Boolean)], token: AccessToken): Map[File, File] = {
-    if (tarResult == null) throw new InternalProcessingError("TarResult uri result is null.")
-
-    var fileReplacement = new TreeMap[File, File]
-
-    if (!tarResult.isEmpty) {
-      val tarResultFile = tarResult.path.cacheUnziped(token)
-
-      try {
-        val tarResulHash = HashService.computeHash(tarResultFile)
-        if (tarResulHash != tarResult.hash)
-          throw new InternalProcessingError("Archive has been corrupted durring transfert from the execution environment.")
-
-        val tis = new TarInputStream(new FileInputStream(tarResultFile))
-
-        tis.applyAndClose {
-          te =>
-            val dest = Workspace.newFile("result", ".bin")//new File(workspace.tmpDir, )
-             
-            val os = new FileOutputStream(dest)
-
-            try tis.copy(os) finally os.close
-
-            val fileInfo = filesInfo(te.getName)
-            if (fileInfo == null) throw new InternalProcessingError("FileInfo not found for entry " + te.getName + '.')
-
-            val file = if (fileInfo._2) {
-              val file = Workspace.newDir("tarResult")
-              dest.extractDirArchiveWithRelativePath(file)
-              dest.delete
-              file
-            } else dest
-            fileReplacement += fileInfo._1 -> file
-        }
-      } finally tarResultFile.delete
-    }
-    fileReplacement
-  }*/
 
   private def getContextResults(resultPath: String, token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
