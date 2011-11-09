@@ -29,4 +29,7 @@ trait NetLogo {
   
   @throws(classOf[Exception])
   def dispose
+  
+  def globals : java.util.List[String]
+  
 }

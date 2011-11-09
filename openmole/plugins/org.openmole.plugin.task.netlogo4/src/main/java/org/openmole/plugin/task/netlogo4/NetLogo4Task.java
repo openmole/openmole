@@ -17,8 +17,12 @@
 package org.openmole.plugin.task.netlogo4;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.nlogo.api.CompilerException;
 import org.nlogo.api.LogoException;
+import org.nlogo.agent.World;
+import org.nlogo.agent.Observer;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
@@ -82,6 +86,17 @@ public class NetLogo4Task extends NetLogoTask {
                     
                     public void dispose() throws Exception {
                         workspace.dispose();
+                    }
+                    
+                    @Override
+                    public List globals()  {                        
+                        World world = workspace.world();
+                        Observer observer = world.observer();
+                        List nlGlobalList = new ArrayList(world.getVariablesArraySize(observer));
+                        for(int i=0; i<nlGlobalList.size(); i++){
+                            nlGlobalList.add(world.observerOwnsNameAt(i));
+                        }
+                        return nlGlobalList;
                     }
                 };
             }

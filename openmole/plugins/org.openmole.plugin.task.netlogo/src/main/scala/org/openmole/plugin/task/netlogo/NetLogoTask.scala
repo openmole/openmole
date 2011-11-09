@@ -28,6 +28,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import scala.collection.mutable.ListBuffer
 
+
 object NetLogoTask extends Logger
 
 abstract class NetLogoTask(
