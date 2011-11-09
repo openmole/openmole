@@ -143,11 +143,10 @@ class MasterTransition(val master: IMaster, start: ICapsule, end: ISlot, conditi
             case None =>
           }
           
-          master.transition.perform(selectedNewContext, ticket, subMole)
-          /*if(master.condition.evaluate(selectedNewContext))
-             subMole.submit(master.master.capsule, selectedNewContext, ticket) //subMole.moleExecution.nextTicket(parentTicket))          if(!hasBeenPerformed(subMole, parentTicket)) subMole.masterTransitionRegistry.register(this, parentTicket, selectedNewContext)
-*/
-          if(!hasBeenPerformed(subMole, parentTicket)) subMole.masterTransitionRegistry.register(this, parentTicket, selectedNewContext)
+          if(!hasBeenPerformed(subMole, parentTicket)) {
+            master.transition.perform(selectedNewContext, ticket, subMole)
+            subMole.masterTransitionRegistry.register(this, parentTicket, selectedNewContext)
+          }
         case None => throw new InternalProcessingError("No context registred for aggregation.")
       }
     }

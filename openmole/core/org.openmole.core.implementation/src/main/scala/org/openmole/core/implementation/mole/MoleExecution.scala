@@ -74,15 +74,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   @transient lazy private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
     override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
-      if(!canceled.get) 
-        ev match {
-          case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
-          case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
-          case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
-        }
+      ev match {
+        case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
+        case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
+        case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
+      }
   }
  
-  private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
+  private var inProgress = new TreeMap[IMoleJob, ITicket] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
   private val started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
   private val finished = new Semaphore(0)
@@ -98,16 +97,19 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   
 
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
-    EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
-    EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
+    if(!canceled.get)  {
+      EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
+        
+      EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
     
-    EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
-    EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
-    EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
+      EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
+      EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
+      EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
 
-    inProgress += moleJob -> (subMole, ticket)
+      inProgress += moleJob -> ticket
 
-    if(!instantRerun.rerun(moleJob, capsule)) subMole.group(moleJob, capsule, moleJobGrouping(capsule))
+      if(!instantRerun.rerun(moleJob, capsule)) subMole.group(moleJob, capsule, moleJobGrouping(capsule))
+    }
   }
 
   override def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
@@ -120,9 +122,9 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   def start(context: IContext): this.type = {
     val ticket = nextTicket(rootTicket)
     val subMole = SubMoleExecution(this)
-    val moleJob = mole.root.toJob(context, nextJobId, subMole, ticket)
+    //val moleJob = mole.root.toJob(context, nextJobId, subMole, ticket)
       
-    submit(moleJob, mole.root, subMole, ticket)
+    subMole.submit(mole.root, context, ticket)
     this
   }
   
@@ -135,6 +137,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     if(!canceled.getAndSet(true)) {
       for (moleJob <- inProgress.keySet) moleJob.cancel
       inProgress = TreeMap.empty
+      EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
     this
   }
@@ -157,16 +160,15 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   private def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    val (subMole, ticket) = inProgress.getOrElse(job,throw new InternalProcessingError("Error in mole execution job info not found"))
-    
-    inProgress -= job
-    instantRerun.jobFinished(job, capsule)
-    
-    if (subMole.nbJobInProgess == 0) EventDispatcher.trigger(subMole, new ISubMoleExecution.Finished(ticket))
-    
-    if (isFinished) {  
-      finished.release
-      EventDispatcher.trigger(this, new IMoleExecution.Finished)
+    //val (subMole, ticket) = inProgress.getOrElse(job, throw new InternalProcessingError("Error in mole execution job info not found"))
+    if(!canceled.get)  {
+      inProgress -= job
+      instantRerun.jobFinished(job, capsule)
+     
+      if (isFinished) {  
+        finished.release
+        EventDispatcher.trigger(this, new IMoleExecution.Finished)
+      }
     }
   }
   
@@ -176,4 +178,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
         
+  def ticket(job: IMoleJob) =
+    inProgress.getOrElse(job, throw new InternalProcessingError("Error in mole execution job info not found"))
+
 }

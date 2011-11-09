@@ -103,8 +103,9 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
-    
+    //println("_perform")
     if(!hasBeenPerformed(subMole, parentTicket)) {
+      //println("perform 2")
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(resultContexts) =>
           //Store the result context
@@ -128,7 +129,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
-    
+
     if(!hasBeenPerformed(subMole, parentTicket)) {
       val result = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))

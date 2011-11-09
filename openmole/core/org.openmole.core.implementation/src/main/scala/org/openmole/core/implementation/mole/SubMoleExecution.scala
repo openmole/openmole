@@ -40,6 +40,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
+import scala.actors.threadpool.AtomicInteger
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
@@ -87,11 +88,13 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   def += (moleJob: IMoleJob) = synchronized {
     submittedJobs += moleJob
     incNbJobInProgress(1)
+    nbJobInProgess
   }
   
   def -= (moleJob: IMoleJob) = synchronized {
     submittedJobs -= moleJob
     decNbJobInProgress(1)
+    nbJobInProgess
   }
   
   override def cancel = synchronized {
@@ -172,12 +175,14 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       case Some(p) => f(p)
     }
     
-  private def jobFinished(job: IMoleJob, capsule: ICapsule): Unit = synchronized {       
-    this -= job
+  private def jobFinished(job: IMoleJob, capsule: ICapsule): Unit = { 
+    val nbJobInProgress = (this -= job)
+    if (nbJobInProgress == 0) {
+      val ticket = moleExecution.ticket(job)
+      EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
+    }
   }
   
   private def checkAllJobsWaitingInGroup = (nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
-  
-  //private def allWaitingEvent = EventDispatcher.objectChanged(this, ISubMoleExecution.AllJobsWaitingInGroup)
-  
+   
 }

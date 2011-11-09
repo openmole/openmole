@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.mole.Mole
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
@@ -40,7 +41,6 @@ import org.openmole.core.model.data.DataModeMask._
 class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
   
   "Master transition" should "resubmit 10 jobs" in {
-    var slaveExecuted = 0
     var endCapsExecuted = 0
     
     val data = List("A","A","B","C")
@@ -51,12 +51,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     
     val exc = new Capsule(new ExplorationTask("Exploration", sampling))
      
-    val emptyT = new Task("Slave") {
-      override def process(context: IContext) = synchronized {
-        slaveExecuted += 1
-        context
-      }
-    }
+    val emptyT = new EmptyTask("Slave")
     emptyT.addInput(i)
     emptyT.addOutput(i)
     
@@ -78,6 +73,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     val select = new Task("select") {
       override def process(context: IContext) = {
         val nVal = context.value(n).get
+        
         (if(context.value(toArray(i)).get.size > data.size) context + (n, nVal + 1) else context) + (toArray(i), context.value(toArray(i)).get.slice(0, 10))
       }
     }
@@ -109,8 +105,6 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
     endCapsExecuted should equal (1)
-    slaveExecuted should equal (data.size + 10)
-    
   }
   
   "Master slave transition" should "resubmit 10 jobs" in {
@@ -125,12 +119,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     
     val exc = new Capsule(new ExplorationTask("Exploration", sampling))
      
-    val emptyT = new Task("Slave") {
-      override def process(context: IContext) = synchronized {
-        slaveExecuted += 1
-        context
-      }
-    }
+    val emptyT = new EmptyTask("Slave")
     emptyT.addInput(i)
     emptyT.addOutput(i)
     
@@ -183,8 +172,7 @@ class MasterTransitionSpec extends FlatSpec with ShouldMatchers {
     
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
     endCapsExecuted should equal (1)
-    slaveExecuted should equal (data.size + 10)
-    
+   // slaveExecuted should equal (data.size + 10)
   }
 
 }

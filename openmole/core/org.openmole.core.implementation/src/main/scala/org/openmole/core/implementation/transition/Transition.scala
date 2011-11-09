@@ -74,8 +74,10 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
       import subMole.moleExecution
       val registry = subMole.transitionRegistry
       registry.register(this, ticket, context)
-
-      if (nextTaskReady(ticket, subMole)) {
+      //println("submit next if ready")
+      if (nextTaskReady(ticket, subMole)) {   
+        //println("next is ready")
+        
         val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
                           end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
                         
