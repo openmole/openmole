@@ -160,7 +160,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   private def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    //val (subMole, ticket) = inProgress.getOrElse(job, throw new InternalProcessingError("Error in mole execution job info not found"))
     if(!canceled.get)  {
       inProgress -= job
       instantRerun.jobFinished(job, capsule)
