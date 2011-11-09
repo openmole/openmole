@@ -115,11 +115,11 @@ class MasterTransition(val master: IMaster, start: ICapsule, end: ISlot, conditi
           val grouped = resultVariables.groupBy(_.prototype.name)
           val aggregated = start.outputs.toList.map { 
             out =>
-            val group = grouped.getOrElse(out.prototype.name, List())
-            val array = out.prototype.`type`.newArray(group.size + 1)
-            group.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2 + 1, e._1.value)}
-            java.lang.reflect.Array.set(array, 0, context.value(out.prototype.name).get)
-            new Variable(out.prototype.name, array)
+              val group = grouped.getOrElse(out.prototype.name, List())
+              val array = out.prototype.`type`.newArray(group.size + 1)
+              group.zipWithIndex.foreach{e => java.lang.reflect.Array.set(array, e._2 + 1, e._1.value)}
+              java.lang.reflect.Array.set(array, 0, context.value(out.prototype.name).get)
+              new Variable(out.prototype.name, array)
           }.toContext
           
           val selectedNewContext = master.selection.perform(selectedContext ++ aggregated)
