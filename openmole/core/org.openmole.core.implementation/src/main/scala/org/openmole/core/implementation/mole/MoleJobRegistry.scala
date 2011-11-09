@@ -18,22 +18,22 @@
 package org.openmole.core.implementation.mole
 
 import java.util.Collections
-import java.util.Comparator
 import java.util.TreeMap
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.mole.ITicket
 
 
 object MoleJobRegistry {
-  private val jobs = Collections.synchronizedMap(new TreeMap[MoleJobId, (IMoleExecution, ICapsule)](MoleJobId.moleJobIdOrdering))
+  private val jobs = Collections.synchronizedMap(new TreeMap[MoleJobId, (ISubMoleExecution, ICapsule, ITicket)](MoleJobId.moleJobIdOrdering))
 
-  def += (moleJob: IMoleJob, moleExecution: IMoleExecution, capsule: ICapsule) {
-    jobs.put(moleJob.id, (moleExecution, capsule))
+  def += (moleJob: IMoleJob, moleExecution: ISubMoleExecution, capsule: ICapsule, ticket: ITicket) {
+    jobs.put(moleJob.id, (moleExecution, capsule, ticket))
   }
   
-  def remove(moleJob: IMoleJob): Option[(IMoleExecution, ICapsule)] = jobs.remove(moleJob.id) match {
+  def remove(moleJob: IMoleJob): Option[(ISubMoleExecution, ICapsule, ITicket)] = jobs.remove(moleJob.id) match {
     case null => None
     case e => Some(e)
   }

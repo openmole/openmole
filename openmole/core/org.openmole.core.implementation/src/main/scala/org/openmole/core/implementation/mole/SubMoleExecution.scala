@@ -131,7 +131,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
-      val moleJob = capsule.toJob(context, moleExecution.nextJobId)
+      val moleJob = capsule.toJob(context, moleExecution.nextJobId, this, ticket)
 
       EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
       EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])

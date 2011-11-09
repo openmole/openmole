@@ -113,10 +113,9 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     this
   }
 
-  override def toJob(context: IContext, jobId: MoleJobId): IMoleJob = {
-    val task = taskOrException
-    val job: IMoleJob = new MoleJob(task, context, jobId)
-    
+  override def toJob(context: IContext, jobId: MoleJobId, subMoleExecution: ISubMoleExecution, ticket: ITicket): IMoleJob = {
+    val job: IMoleJob = new MoleJob(taskOrException, context, jobId)
+    MoleJobRegistry += (job, subMoleExecution, this, ticket)
     EventDispatcher.listen(job, Priority.LOWEST, new CapsuleAdapter, classOf[IMoleJob.StateChanged])
     job
   }
@@ -134,11 +133,9 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   
   private def jobFinished(job: IMoleJob) = {
     try {
-      val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
-      val subMole = execution.subMoleExecution(job).getOrElse(throw new InternalProcessingError("BUG: submole not registred for job"))   
-      val ticket = execution.ticket(job).getOrElse(throw new InternalProcessingError("BUG: ticket not registred for job"))
-      
-      EventDispatcher.trigger(execution, new IMoleExecution.JobInCapsuleFinished(job, this))
+      val (subMole, capsule, ticket) = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))
+       
+      EventDispatcher.trigger(subMole.moleExecution, new IMoleExecution.JobInCapsuleFinished(job, this))
       performTransition(job.context, ticket, subMole)
     } catch {
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)

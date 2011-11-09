@@ -73,7 +73,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   import IMoleExecution._
   import MoleExecution._
 
-  private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
+  @transient lazy private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
     override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
       ev match {
         case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
@@ -103,8 +103,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
     EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
     EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
-
-    MoleJobRegistry += (moleJob, this, capsule)
     
     EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
     EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
@@ -144,9 +142,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
  
   def start(context: IContext): this.type = {
     val ticket = nextTicket(rootTicket)
-    val moleJob = mole.root.toJob(context, nextJobId)
+    val subMole = SubMoleExecution(this)
+    val moleJob = mole.root.toJob(context, nextJobId, subMole, ticket)
       
-    submit(moleJob, mole.root, SubMoleExecution(this), ticket)
+    submit(moleJob, mole.root, subMole, ticket)
     submiter.start
   
     this
@@ -210,18 +209,5 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
   override def nextJobId: MoleJobId = new MoleJobId(id, currentJobId.getAndIncrement)
-    
-  override def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution] = {
-    inProgress.get(job) match {
-      case None => None
-      case Some(j) => Some(j._1)
-    }
-  }
-    
-  override def ticket(job: IMoleJob): Option[ITicket] = 
-    inProgress.get(job) match {
-      case None => None
-      case Some(j) => Some(j._2)
-    }
-    
+        
 }

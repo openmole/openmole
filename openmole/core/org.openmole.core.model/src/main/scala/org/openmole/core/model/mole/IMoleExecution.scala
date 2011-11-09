@@ -73,10 +73,7 @@ trait IMoleExecution {
   def nextJobId: MoleJobId
   
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
-  def subMoleExecution(job: IMoleJob): Option[ISubMoleExecution]
-      
-  def ticket(job: IMoleJob): Option[ITicket]
-    
+
   def moleJobs: Iterable[IMoleJob]
   def id: String
 }

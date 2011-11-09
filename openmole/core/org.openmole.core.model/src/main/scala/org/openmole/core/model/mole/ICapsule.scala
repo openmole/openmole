@@ -132,9 +132,11 @@ trait ICapsule {
    *
    * @param context the context in which the MoleJob will be executed
    * @param jobId the id of the MoleJob
+   * @param subMoleExecution the submole excution the capsule is running in
+   * @param subMoleExecution the ticket the capsule is running in
    * @return the MoleJob
    */
-  def toJob(context: IContext, jobId: MoleJobId): IMoleJob
+  def toJob(context: IContext, jobId: MoleJobId, subMoleExecution: ISubMoleExecution, ticket: ITicket): IMoleJob
 
   /**
    * Assing a task to this capsule.
