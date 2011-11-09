@@ -19,6 +19,8 @@ package org.openmole.core.implementation.mole
 
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.Semaphore
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.job.State
@@ -55,6 +57,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
+import scala.concurrent.Lock
 
 object MoleExecution extends Logger
 
@@ -75,16 +78,19 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   @transient lazy private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
     override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
-      ev match {
+      if(!canceled.get) 
+        ev match {
         case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
         case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
         case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
       }
-   }
+  }
  
-  private val jobs = new LinkedBlockingQueue[(IJob, IEnvironment)] 
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
-  
+  private var started = new AtomicBoolean(false)
+  private var canceled = new AtomicBoolean(false)
+  private val finished = new Semaphore(0)
+
   override val id = UUID.randomUUID.toString  
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
@@ -94,11 +100,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   val exceptions = new ListBuffer[Throwable]
   
-  @transient lazy val submiter = {
-    val t = new Thread(new Submiter)
-    t.setDaemon(true)
-    t
-  }
 
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
     EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
@@ -114,30 +115,10 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   override def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
-    environmentSelection.select(capsule) match {
-      case Some(environment) => jobs.add((job, environment))
-      case None => jobs.add((job, LocalExecutionEnvironment))
-    }
-  }
-
-  class Submiter extends Runnable {
-
-    override def run {
-      var continue = true
-      while (continue) {
-        try {
-          val (job, env) = jobs.take
-          try env.submit(job)
-          catch {
-            case (t: Throwable) => 
-              EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.ExceptionRaised(t, SEVERE))
-              logger.log(SEVERE, "Error durring scheduling", t)
-          }
-        } catch {
-          case (e: InterruptedException) => continue = false
-        }
-      }
-    }
+    (environmentSelection.select(capsule) match {
+        case Some(environment) => environment//jobs.add((job, environment))
+        case None => LocalExecutionEnvironment //jobs.add((job, LocalExecutionEnvironment))
+      }).submit(job)
   }
  
   def start(context: IContext): this.type = {
@@ -146,24 +127,16 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     val moleJob = mole.root.toJob(context, nextJobId, subMole, ticket)
       
     submit(moleJob, mole.root, subMole, ticket)
-    submiter.start
-  
     this
   }
   
   override def start = {
-    synchronized {
-      if (submiter.getState.equals(Thread.State.NEW)) {
-        EventDispatcher.trigger(this, new Starting)
-        start(Context.empty)      
-      } else logger.warning("This MOLE execution has allready been started, this call has no effect.")
-    }
+    if(!started.getAndSet(true)) start(Context.empty) 
     this
   }
   
   override def cancel: this.type = {
-    synchronized { 
-      submiter.interrupt
+    if(!canceled.getAndSet(true)) {
       for (moleJob <- inProgress.keySet) moleJob.cancel
       inProgress = TreeMap.empty
     }
@@ -173,12 +146,13 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def moleJobs: Iterable[IMoleJob] = {inProgress.map{ _._1 }}
 
   override def waitUntilEnded = {
-    submiter.join
+    finished.acquire
+    finished.release
     if(!exceptions.isEmpty) throw new MultipleException(exceptions)
     this
   }
     
-  private def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = {
+  private def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
     moleJob.exception match {
       case None =>
       case Some(e) => exceptions += e
@@ -187,23 +161,19 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   private def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    val jobInfo = inProgress.getOrElse(job,throw new InternalProcessingError("Error in mole execution job info not found"))
+    val (subMole, ticket) = inProgress.getOrElse(job,throw new InternalProcessingError("Error in mole execution job info not found"))
     
     inProgress -= job
-    
-    val subMole = jobInfo._1
-    val ticket = jobInfo._2
-
     instantRerun.jobFinished(job, capsule)
     
     if (subMole.nbJobInProgess == 0) EventDispatcher.trigger(subMole, new ISubMoleExecution.Finished(ticket))
     
-    if (isFinished) {
-      submiter.interrupt
+    if (isFinished) {  
+      finished.release
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
   }
-
+  
   override def isFinished: Boolean = inProgress.isEmpty
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)

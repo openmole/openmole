@@ -30,7 +30,6 @@ import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.mole.MoleJobRegistry
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.mole.ICapsule
