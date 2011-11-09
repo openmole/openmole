@@ -44,20 +44,16 @@ import org.openmole.core.model.job.State.State
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
-import scala.concurrent.Lock
 
 object MoleExecution extends Logger
 
@@ -80,15 +76,15 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
       if(!canceled.get) 
         ev match {
-        case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
-        case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
-        case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
-      }
+          case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
+          case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
+          case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
+        }
   }
  
   private var inProgress = new TreeMap[IMoleJob, (ISubMoleExecution, ITicket)] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
-  private var started = new AtomicBoolean(false)
-  private var canceled = new AtomicBoolean(false)
+  private val started = new AtomicBoolean(false)
+  private val canceled = new AtomicBoolean(false)
   private val finished = new Semaphore(0)
 
   override val id = UUID.randomUUID.toString  
@@ -116,8 +112,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
     (environmentSelection.select(capsule) match {
-        case Some(environment) => environment//jobs.add((job, environment))
-        case None => LocalExecutionEnvironment //jobs.add((job, LocalExecutionEnvironment))
+        case Some(environment) => environment
+        case None => LocalExecutionEnvironment
       }).submit(job)
   }
  
@@ -143,7 +139,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     this
   }
 
-  override def moleJobs: Iterable[IMoleJob] = {inProgress.map{ _._1 }}
+  override def moleJobs = inProgress.keys
 
   override def waitUntilEnded = {
     finished.acquire
@@ -178,6 +174,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  override def nextJobId: MoleJobId = new MoleJobId(id, currentJobId.getAndIncrement)
+  override def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
         
 }
