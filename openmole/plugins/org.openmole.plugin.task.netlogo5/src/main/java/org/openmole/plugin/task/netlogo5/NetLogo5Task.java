@@ -68,38 +68,7 @@ public class NetLogo5Task extends NetLogoTask {
     public NetLogoFactory netLogoFactory() {
         return new NetLogoFactory() {
             public NetLogo apply() {
-                return new NetLogo() {
-                    private HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
-                    @Override
-                    public void open(String script) throws Exception {
-                        workspace.open(script);
-                    }
-                    
-                    @Override
-                    public void command(String cmd) throws Exception {
-                        workspace.command(cmd);
-                    }
-                    
-                    @Override
-                    public Object report(String variable) throws Exception {
-                        return workspace.report(variable);
-                    }
-                    
-                    public void dispose() throws Exception {
-                        workspace.dispose();
-                    }
-                    
-                    @Override
-                    public List globals() {                
-                        World world = workspace.world();
-                        Observer observer = world.observer();
-                        List nlGlobalList = new ArrayList(world.getVariablesArraySize(observer));
-                        for(int i=0;i<nlGlobalList.size();i++){
-                            nlGlobalList.add(world.observerOwnsNameAt(i));
-                        }
-                        return nlGlobalList;
-                    }
-                };
+                return new NetLogo5();
             }
         };
     }

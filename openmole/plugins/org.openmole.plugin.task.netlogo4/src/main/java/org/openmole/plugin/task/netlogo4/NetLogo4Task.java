@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.nlogo.api.CompilerException;
 import org.nlogo.api.LogoException;
-import org.nlogo.agent.World;
-import org.nlogo.agent.Observer;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.openmole.misc.exception.InternalProcessingError;
 import org.openmole.misc.exception.UserBadDataError;
@@ -67,38 +65,7 @@ public class NetLogo4Task extends NetLogoTask {
     public NetLogoFactory netLogoFactory() {
         return new NetLogoFactory() {
             public NetLogo apply() {
-                return new NetLogo() {
-                    private HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
-                    @Override
-                    public void open(String script) throws Exception {
-                        workspace.open(script);
-                    }
-                    
-                    @Override
-                    public void command(String cmd) throws Exception {
-                        workspace.command(cmd);
-                    }
-                    
-                    @Override
-                    public Object report(String variable) throws Exception {
-                        return workspace.report(variable);
-                    }
-                    
-                    public void dispose() throws Exception {
-                        workspace.dispose();
-                    }
-                    
-                    @Override
-                    public List globals()  {                        
-                        World world = workspace.world();
-                        Observer observer = world.observer();
-                        List nlGlobalList = new ArrayList(world.getVariablesArraySize(observer));
-                        for(int i=0; i<nlGlobalList.size(); i++){
-                            nlGlobalList.add(world.observerOwnsNameAt(i));
-                        }
-                        return nlGlobalList;
-                    }
-                };
+                return new NetLogo4();
             }
         };
     }
