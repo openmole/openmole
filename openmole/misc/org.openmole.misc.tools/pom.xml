@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>misc</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -26,37 +26,37 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
             <version>${lib.com.thoughtworks.xstream.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.ibm.icu</artifactId>
             <version>${lib.com.ibm.icu.version}</version>
         </dependency>
 	<dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
             <version>${lib.org.codehaus.groovy.version}</version>
         </dependency>
 	<dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.ice.tar</artifactId>
             <version>${lib.com.ice.tar.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
             <version>${lib.org.apache.commons.exec.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.objenesis</artifactId>
             <version>${lib.org.objenesis.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.pool</artifactId>
             <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>

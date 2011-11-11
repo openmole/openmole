@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>plugins</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -17,33 +17,33 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.environment.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.updater</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.batch</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -52,17 +52,17 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
 	<dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.ice.tar</artifactId>
             <version>${lib.com.ice.tar.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${lib.fr.in2p3.jsaga.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.executorservice</artifactId>
             <version>${project.version}</version>
         </dependency>

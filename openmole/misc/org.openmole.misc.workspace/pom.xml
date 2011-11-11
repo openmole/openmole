@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>misc</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -17,17 +17,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.eventdispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -36,27 +36,27 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.jasypt.encryption</artifactId>
             <version>${lib.org.jasypt.encryption.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.configuration</artifactId>
             <version>${lib.org.apache.commons.configuration.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.log4j</artifactId>
             <version>${lib.org.apache.log4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.joda.time</artifactId>
             <version>${lib.org.joda.time.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
             <version>${lib.com.thoughtworks.xstream.version}</version>
         </dependency>

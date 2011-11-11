@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>openmole-ecosystem</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -22,7 +22,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>

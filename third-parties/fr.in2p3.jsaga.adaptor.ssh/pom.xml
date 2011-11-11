@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>third-parties</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -42,7 +42,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>ch.ethz.ssh2</artifactId>
             <version>${lib.ch.ethz.ssh2.version}</version>
         </dependency>

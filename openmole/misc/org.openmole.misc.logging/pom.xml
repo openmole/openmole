@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>misc</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -17,17 +17,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.slf4j</artifactId>
             <version>${lib.org.slf4j.version}</version>
         </dependency>

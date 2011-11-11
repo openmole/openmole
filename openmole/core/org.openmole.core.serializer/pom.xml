@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>core</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -17,12 +17,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
             <version>${lib.com.thoughtworks.xstream.version}</version>
         </dependency>
@@ -31,27 +31,27 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
 	<dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.pool</artifactId>
 	    <version>${lib.org.apache.commons.pool.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.pluginmanager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.hashservice</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.fileservice</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>

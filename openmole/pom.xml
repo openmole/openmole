@@ -7,7 +7,7 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <artifactId>openmole-ecosystem</artifactId>
         <version>0.4-SNAPSHOT</version>
     </parent>
@@ -27,7 +27,7 @@
 
     <dependencies>
 	<dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
@@ -48,7 +48,7 @@
     <!--<build>
         <plugins>
             <plugin>
-                <groupId>org.openmole</groupId>
+                <groupId>org.openmole.core</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
                 <version>${lib.org.aspectj.version}</version>
                 <configuration>
@@ -57,12 +57,12 @@
                     <verbose>true</verbose>
                     <aspectLibrarys>
                         <aspectLibrary>
-                            <groupId>org.openmole</groupId>
+                            <groupId>org.openmole.core</groupId>
                             <artifactId>org.openmole.misc.eventdispatcher</artifactId>
 			    <version>${project.version}</version>
                         </aspectLibrary>
                         <aspectLibrary>
-                            <groupId>org.openmole</groupId>
+                            <groupId>org.openmole.core</groupId>
                             <artifactId>org.openmole.commons.aspect.caching</artifactId>
 			    <version>${project.version}</version>
                         </aspectLibrary>

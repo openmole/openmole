@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>libraries</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -38,7 +38,7 @@
         </dependency>
 <!--
         <dependency>
-           <groupId>org.openmole</groupId>
+           <groupId>org.openmole.core</groupId>
            <artifactId>ccl.northwestern.edu.netlogo4.scala</artifactId>
            <version>${lib.ccl.northwestern.edu.netlogo4.scala.version}</version>
 	   <scope>provided</scope>

@@ -9,7 +9,7 @@
 
     <parent>
         <artifactId>runtime</artifactId>
-        <groupId>org.openmole</groupId>
+        <groupId>org.openmole.core</groupId>
         <version>0.4-SNAPSHOT</version>
     </parent>
 
@@ -29,7 +29,7 @@
 
     <dependencies>
         <dependency>
-           <groupId>org.openmole</groupId>
+           <groupId>org.openmole.core</groupId>
     	   <artifactId>org.apache.sshd</artifactId>
 	   <version>${lib.org.apache.sshd.version}</version>
         </dependency>
