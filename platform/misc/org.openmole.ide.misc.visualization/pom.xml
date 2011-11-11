@@ -36,7 +36,7 @@
             <version>3.7.4</version>
         </dependency> 
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>

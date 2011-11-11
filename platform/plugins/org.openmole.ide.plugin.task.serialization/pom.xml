@@ -22,12 +22,12 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.implementation</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
@@ -47,7 +47,7 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
@@ -77,7 +77,7 @@
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.task.serialization</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
