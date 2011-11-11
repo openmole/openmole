@@ -129,6 +129,7 @@
         <module>core</module>
 	<module>misc</module>
         <module>plugins</module>
+        <module>osgi</module>
     </modules>
 
 </project>
