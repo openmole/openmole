@@ -29,8 +29,4 @@ trait NetLogo {
   
   @throws(classOf[Exception])
   def dispose
-  
-  @throws(classOf[Exception])
-  def globals : Array[String]
-  
 }

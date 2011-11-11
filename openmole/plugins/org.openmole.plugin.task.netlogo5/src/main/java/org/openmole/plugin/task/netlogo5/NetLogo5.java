@@ -16,10 +16,6 @@
  */
 package org.openmole.plugin.task.netlogo5;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.nlogo.agent.World;
-import org.nlogo.agent.Observer;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.openmole.plugin.task.netlogo.NetLogo;
 
@@ -29,7 +25,7 @@ import org.openmole.plugin.task.netlogo.NetLogo;
  */
 public class NetLogo5 implements NetLogo {
 
-    private HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
+    protected HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
 
     @Override
     public void open(String script) throws Exception {
@@ -51,14 +47,4 @@ public class NetLogo5 implements NetLogo {
         workspace.dispose();
     }
 
-    @Override
-    public String[] globals() {
-        World world = workspace.world();
-        Observer observer = world.observer();
-        String nlGlobalList[] = new String[world.getVariablesArraySize(observer)];
-        for (int i = 0; i < nlGlobalList.length; i++) {
-            nlGlobalList[i] = world.observerOwnsNameAt(i);
-        }
-        return nlGlobalList;
-    }
 }
