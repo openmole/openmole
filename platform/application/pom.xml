@@ -69,17 +69,17 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
             <version>${openmole.gui.version}</version>
-        </dependency> 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
-            <version>${openmole.gui.version}</version>
         </dependency>  
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.complete</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
+            <version>${openmole.gui.version}</version>
+        </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
@@ -136,6 +136,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
                 <executions>
                     <execution>
                         <id>copy-icons</id>

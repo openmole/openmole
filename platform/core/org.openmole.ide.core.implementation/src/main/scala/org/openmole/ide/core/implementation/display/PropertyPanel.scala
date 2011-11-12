@@ -22,6 +22,7 @@ import swing.Swing._
 import swing.ListView._
 import javax.swing.ImageIcon
 import javax.swing.JPanel
+import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.misc.image._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
@@ -70,7 +71,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   contents+= saveButton
   contents+= cancelButton
   
-  contents+= (propertyScrollPane,"span 4,growx")
+  contents+= (propertyScrollPane,"span 4,growx, growy")
   contents+= (taskPropertyComponent,"span 4,growx")
   
   def displayCurrentTypeIcon: Unit = displayCurrentTypeIcon(Displays.dataProxy.get)
@@ -85,7 +86,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   def displayCurrentEntity: Unit = displayCurrentEntity(Displays.dataProxy.get)
   
   def displayCurrentEntity(p: IDataProxyUI): Unit = {
-   nameTextField.text = p.dataUI.name
+    nameTextField.text = p.dataUI.name
     updateViewport(Displays.buildPanelUI.peer)
     displayCurrentTypeIcon(p)
     
@@ -106,11 +107,19 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     contents.remove(1) 
     contents.insert(1,fakeToggleButton)}
     
+//  def updateViewport(panel: JPanel)= {
+//    removeViewport
+//    updateTaskViewport
+//    propertyScrollPane.peer.setViewportView(panel)
+//    panel.getComponents.foreach(_.setEnabled(editable))
+//    revalidate
+//  }
+  
   def updateViewport(panel: JPanel)= {
     removeViewport
     updateTaskViewport
     propertyScrollPane.peer.setViewportView(panel)
-    panel.getComponents.foreach(_.setEnabled(editable))
+    //panel.contents.foreach(_.enabled = editable)
     revalidate
   }
   
@@ -118,8 +127,11 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     taskPropertyComponent.peer.getViewport.removeAll
     Displays.dataProxy.get match {
       case x: ITaskDataProxyUI=> {
-          taskPropertyComponent.peer.setViewportView(buildTaskPropertyPanel(x).peer)}
-      case _=>}
+          taskPropertyComponent.peer.setViewportView(buildTaskPropertyPanel(x).peer)
+          taskPropertyComponent.visible =  true
+        }
+      case _=> taskPropertyComponent.visible = false
+    }
     taskPropertyComponent.revalidate
   }
   

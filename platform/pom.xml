@@ -36,6 +36,10 @@
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.fr.in2p3.jsaga.version>0.9.15-SNAPSHOT</lib.fr.in2p3.jsaga.version>
+        <lib.uk.com.robust-it.cloning.version>1.7.4</lib.uk.com.robust-it.cloning.version>
+        <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
+        <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
+        <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
     </properties>
 
     <dependencies>

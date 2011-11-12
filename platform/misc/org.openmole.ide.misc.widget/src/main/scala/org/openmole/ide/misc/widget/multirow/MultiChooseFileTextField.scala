@@ -17,40 +17,46 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import scala.swing.Component
 import scala.swing.FileChooser.SelectionMode._
+import scala.swing.Panel
 
 object  MultiChooseFileTextField {
   class Factory extends IRowWidgetFactory[ChooseFileTextFieldRowWidget]{
-    def apply(row: ChooseFileTextFieldRowWidget) = {
+    def apply(row: ChooseFileTextFieldRowWidget, panel: Panel) = {
       import row._
-      new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)
+      new ChooseFileTextFieldRowWidget(name,"",chooserTitle,chooserDescription,selectionMode,extensions)
     }
   }
   
-  class ChooseFileTextFieldRowWidget(val initValue: String, 
+  class ChooseFileTextFieldRowWidget(val name: String,
+                                     val initValue: String, 
                                      val chooserTitle: String="", 
                                      val chooserDescription: Option[String]=None, 
                                      val selectionMode: Value= FilesOnly,
                                      val extensions: Option[String]= None) extends IRowWidget1[String]{
-    override val components = List(new ChooseFileTextField(initValue,chooserTitle,chooserDescription,selectionMode,extensions))
+    val fileTextField = new ChooseFileTextField(initValue,chooserTitle,chooserDescription,selectionMode,extensions)
+    
+    override val panel = new RowPanel(name,List(fileTextField))
+    
+    // var components = List(fileTextField.asInstanceOf[Component])
   
-    override def content: String = components(0).text
+    override def content: String = fileTextField.text
   }
 }
 import MultiChooseFileTextField._
-class MultiChooseFileTextField(rowName: String, 
+class MultiChooseFileTextField(rowName: String,
                                initValues: List[String], 
                                chooserTitle: String="", 
                                chooserDescription: Option[String]=None, 
                                selectionMode: Value= FilesOnly,
                                extensions: Option[String]= None,
-                               factory: IRowWidgetFactory[ChooseFileTextFieldRowWidget]) extends MultiWidget(rowName,
-                                                                                                             if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget("",chooserTitle,chooserDescription,selectionMode,extensions)) 
-                                                                                                             else initValues.map(iv=>new ChooseFileTextFieldRowWidget(iv,chooserTitle,chooserDescription,selectionMode,extensions)),
+                               factory: IRowWidgetFactory[ChooseFileTextFieldRowWidget]) extends MultiWidget(if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget(rowName,"",chooserTitle,chooserDescription,selectionMode,extensions)) 
+                                                                                                             else initValues.map(iv=>new ChooseFileTextFieldRowWidget(rowName,iv,chooserTitle,chooserDescription,selectionMode,extensions)),
                                                                                                              factory,1) {  
-  def this(rName: String , 
+  def this(rName:String,
            iValues: List[String], 
            cTitle: String, 
            cDescription: Option[String], 
@@ -62,6 +68,7 @@ class MultiChooseFileTextField(rowName: String,
                                         sMode,
                                         exts,
                                         new Factory)
-  def this(rName: String , iValues: List[String])= this (rName,iValues,"",None,FilesOnly,None)
-  def content = rowWidgets.map(_.content).toList }
+  def this(rName:String,iValues: List[String])= this (rName,iValues,"",None,FilesOnly,None)
+  def content = rowWidgets.map(_.content).toList 
+}
 

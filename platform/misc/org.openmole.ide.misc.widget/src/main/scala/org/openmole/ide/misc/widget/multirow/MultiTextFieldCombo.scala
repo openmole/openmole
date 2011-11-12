@@ -17,23 +17,27 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.ComboBox
+import scala.swing.Panel
 import scala.swing.TextField
 
 object MultiTextFieldCombo {
   class Factory[B] extends IRowWidgetFactory[TextFieldComboRowWidget[B]]{
-    def apply(row: TextFieldComboRowWidget[B]) = {
+    def apply(row: TextFieldComboRowWidget[B], panel: Panel) = {
       import row._
-      new TextFieldComboRowWidget("",comboContentB,selectedB)
+      new TextFieldComboRowWidget(name,"",comboContentB,selectedB)
     }
   }
   
-  class TextFieldComboRowWidget[B](val initValue: String, 
+  class TextFieldComboRowWidget[B](override val name:String,
+                                   val initValue: String, 
                                    val comboContentB: List[B],
                                    val selectedB: B) extends IRowWidget2[String,B]{
     val textFied = new TextField(initValue,10)
     val comboBox = new ComboBox(comboContentB) {selection.item = selectedB}
-    override val components = List(textFied,comboBox)
+    override val panel = new RowPanel(name,List(textFied,comboBox))
+    //var components = List(textFied,comboBox)
   
     override def content: (String,B) = (textFied.text,comboBox.selection.item)
   }
@@ -43,13 +47,13 @@ import MultiTextFieldCombo._
 class MultiTextFieldCombo[B] (rowName: String,
                               initValues: List[(String,B)],
                               comboContent: List[B],
-                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]]) extends MultiWidget(rowName,
-                                                                                                          if (initValues.isEmpty) 
-                                                                                                            List(new TextFieldComboRowWidget("",
+                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]]) extends MultiWidget(if (initValues.isEmpty) 
+                                                                                                            List(new TextFieldComboRowWidget(rowName,
+                                                                                                                                             "",
                                                                                                                                              comboContent, 
                                                                                                                                              comboContent(0)))
                                                                                                           else initValues.map{
-    case(s,b)=>new TextFieldComboRowWidget(s,comboContent,b)},
+    case(s,b)=>new TextFieldComboRowWidget(rowName,s,comboContent,b)},
                                                                                                           factory,
                                                                                                           2){
 

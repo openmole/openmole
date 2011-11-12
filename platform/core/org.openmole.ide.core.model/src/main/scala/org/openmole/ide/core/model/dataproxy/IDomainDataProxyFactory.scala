@@ -17,4 +17,6 @@
 
 package org.openmole.ide.core.model.dataproxy
 
-trait IDomainDataProxyFactory extends IDataProxyFactory
+trait IDomainDataProxyFactory extends IDataProxyFactory {
+  def buildDataProxyUI(name:String): IDomainDataProxyUI
+}

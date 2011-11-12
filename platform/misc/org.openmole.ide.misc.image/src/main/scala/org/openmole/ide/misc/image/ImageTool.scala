@@ -29,11 +29,9 @@ import java.awt.Image
 //import org.apache.batik.transcoder.TranscoderOutput
 //import org.apache.batik.transcoder.image.ImageTranscoder
 //import org.apache.batik.transcoder.SVGAbstractTranscoder._
-import magick.MagickImage
 import java.awt.Toolkit
 import java.awt.image.FilteredImageSource
 import java.awt.image.ReplicateScaleFilter
-import magick.ImageInfo
 import org.openide.util.ImageUtilities
 
 object ImageTool { 

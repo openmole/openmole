@@ -16,10 +16,10 @@
     <artifactId>org.openmole.ide.misc.image</artifactId>
     
     <repositories>
-        <repository>
+        <!--repository>
             <id>cedarsoft-thirdparty</id>
             <url>http://maven.cedarsoft.com/content/repositories/thirdparty/</url>
-        </repository>
+        </repository-->
     </repositories>
     
     <dependencies>
@@ -36,12 +36,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
-            <version>RELEASE701</version>
-        </dependency>
-        <dependency>
-            <groupId>jmagick</groupId>
-            <artifactId>jmagick</artifactId>
-            <version>6.2.4</version>
+            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 

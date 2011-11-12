@@ -11,3 +11,5 @@ private/*
 release/
 release/*
 *~
+/platform/plugins/org.openmole.ide.plugin.sampling.complete/[?]/.m2/
+/platform/[?]/.m2/

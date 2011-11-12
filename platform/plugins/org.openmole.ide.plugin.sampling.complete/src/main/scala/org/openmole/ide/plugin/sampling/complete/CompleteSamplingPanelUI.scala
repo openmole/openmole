@@ -19,43 +19,96 @@ package org.openmole.ide.plugin.sampling.complete
 
 import scala.swing._
 import swing.Swing._
-import scala.swing.event.ButtonClicked
+import scala.swing.event.SelectionChanged
+import scala.swing.event.SelectionEvent
 import swing.ListView._
-import scala.swing.Table.ElementMode._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.display.DomainDisplay
+import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.factory._
+import org.openmole.ide.core.model.panel._
+import org.openide.util.Lookup
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.MigPanel
-import scala.None
-import scala.collection.mutable.HashSet
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
+import scala.collection.mutable.HashMap
 import scala.swing.BorderPanel.Position._
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos.TwoCombosRowWidget
+import scala.collection.JavaConversions._
+
+object CompleteSamplingPanelUI{
+  def rowFactory(csPanel: CompleteSamplingPanelUI) = new Factory[IPrototypeDataProxyUI,String] {
+    override def apply(row: TwoCombosRowWidget[IPrototypeDataProxyUI,String], panel: Panel) = {
+      import row._
+      val twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String] = 
+        new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB, inBetweenString)
+      twocombrow.combo2.selection.item = comboContentB(0)
+      
+      twocombrow.combo2.selection.reactions += {
+        case SelectionChanged(twocombrow.`combo2`)=>
+          // csPanel.rowMap(twocombrow) = Some(DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("name").dataUI.buildPanelUI)
+          // twocombrow.panel.extend(csPanel.rowMap(twocombrow).get.peer)                                                        
+          csPanel.addExtendedPanel(twocombrow)
+      }
+      twocombrow
+    }
+  }
+}
 
 class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
-  var rows = new HashSet[FactorPanel]
-  val factors = cud.factors.groupBy(f=>f._1)
-  Proxys.prototype.foreach(pud=>rows+= buildRow(pud._2))
-  
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name,rows.flatMap{
-        case fp: FactorPanel=> if (fp.selected) List(fp.factor) else None
-        case _=> None}.toList)
-  
-  def buildRow(pud: IPrototypeDataProxyUI) = {
-    val cbb = new ComboBox(Proxys.domain.values.toList) {enabled = false}
-    val cb = new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>cbb.enabled = selected}}
-    contents+= (cb,"gap para")
-    contents+= cbb
-    if (factors.contains(pud)) {
-      cb.selected = true
-      cbb.selection.item = factors(pud).head._2
-      cbb.enabled = true
-    }
-    new FactorPanel(pud,cbb)
+  var sampleDomainCombos: Option[MultiTwoCombos[IPrototypeDataProxyUI,String]]= None
+  var rowMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IDomainPanelUI[_]]
+   
+  Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{a=>a.displayName}
+  import CompleteSamplingPanelUI._
+  if (!Proxys.prototypes.isEmpty){
+    rowFactory(this)
+    val protos = Proxys.prototypes.map(_._2).toList
+    val domains = Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{_.displayName}
+    sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
+        if (cud.factors.size>0) cud.factors.map{f=> 
+          val rw = new TwoCombosRowWidget("Factor",protos,f._1,domains,f._2,"defined on ")
+          addExtendedPanel(rw)
+          //rowMap+= rw-> f._3.buildPanelUI
+          
+          rw}
+        else {
+          val rw = new TwoCombosRowWidget("Factor",protos,protos(0),domains, domains(0),"defined on ")
+          addExtendedPanel(rw)
+          //  rowMap+= rw-> DomainDataProxyFactory.factoryByName(domains(0)).buildDataProxyUI("name").dataUI.buildPanelUI
+          List(rw)
+        },
+        rowFactory(this)))
+    
+    // rowMap.foreach{case(k,v)=>k.panel.extend(v.peer)}
+    contents+= sampleDomainCombos.get.panel
+      
+//                              ("Factor",
+//                               "defined on ",
+//                               (Proxys.prototypes.map(_._2).toList,Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{_.displayName}),
+//                               cud.factors.map(f=>(f._1,f._2)),
+//                               rowFactory(this)))
   }
   
-  class FactorPanel(pud: IPrototypeDataProxyUI,cbb: ComboBox[IDomainDataProxyUI]){
-    def selected = cbb.enabled
-    def factor= (pud,cbb.selection.item)
+//  sampleDomainCombos match {
+//    case Some(x:MultiTwoCombos[IPrototypeDataProxyUI,String])=>
+  //     contents+= x.panel
+//      x.
+//      x.rowWidgets.zip(cud.factors.map(_._3)).foreach{r=> 
+//        rowMap+= r._1-> Some(r._2.buildPanelUI)
+//        r._1.panel.extend(rowMap(r._1).get.peer)}
+  //   case _=>
+//  } 
+  def addExtendedPanel(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String]) = {
+    rowMap.getOrElseUpdate(twocombrow, DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("name").dataUI.buildPanelUI)
+    twocombrow.panel.extend(rowMap(twocombrow).peer)
+  }
+  
+  override def saveContent(name: String) = sampleDomainCombos match {
+    case x:Some[MultiTwoCombos[IPrototypeDataProxyUI,String]]=> new CompleteSamplingDataUI(name,x.get.rowWidgets.map(r=>
+          (r.content._1,r.content._2,rowMap(r).saveContent(""))).toList)
+    case _=> new CompleteSamplingDataUI(name,List[(IPrototypeDataProxyUI,String,IDomainDataUI[_])]())
   }
 }

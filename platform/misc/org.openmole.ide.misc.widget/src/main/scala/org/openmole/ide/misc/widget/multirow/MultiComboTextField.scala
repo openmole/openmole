@@ -17,24 +17,28 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.ComboBox
+import scala.swing.Panel
 import scala.swing.TextField
 
 object MultiComboTextField {
   class Factory[A] extends IRowWidgetFactory[ComboTextFieldRowWidget[A]]{
-    def apply(row: ComboTextFieldRowWidget[A]) = {
+    def apply(row: ComboTextFieldRowWidget[A], panel: Panel) = {
       import row._
-      new ComboTextFieldRowWidget(comboContentA,selectedA,"")
+      new ComboTextFieldRowWidget(name,comboContentA,selectedA,"")
     }
   }
   
-  class ComboTextFieldRowWidget[A](val comboContentA: List[A],
+  class ComboTextFieldRowWidget[A](override val name: String,
+                                   val comboContentA: List[A],
                                    val selectedA: A,
                                    val initValue: String) extends IRowWidget2[A,String]{
     val textFied = new TextField(initValue,10)
     val comboBox = new ComboBox(comboContentA) {selection.item = selectedA}
-    override val components = List(comboBox,textFied)
-  
+    override val panel = new RowPanel(name,List(comboBox,textFied))
+    //var components = List(comboBox,textFied)
+    
     override def content: (A,String) = (comboBox.selection.item,textFied.text)
   }
 }
@@ -44,13 +48,13 @@ class MultiComboTextField[A] (rowName: String,
                               initValues: List[(A,String)],
                               comboContent: List[A],
                               factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]]) extends MultiWidget(
-  rowName,
   if (initValues.isEmpty) 
-    List(new ComboTextFieldRowWidget(comboContent, 
+    List(new ComboTextFieldRowWidget(rowName,
+                                     comboContent, 
                                      comboContent(0),
                                      ""))
   else initValues.map{
-    case(a,s)=>new ComboTextFieldRowWidget(comboContent,a,s)},
+    case(a,s)=>new ComboTextFieldRowWidget(rowName,comboContent,a,s)},
   factory,
   2)
 {

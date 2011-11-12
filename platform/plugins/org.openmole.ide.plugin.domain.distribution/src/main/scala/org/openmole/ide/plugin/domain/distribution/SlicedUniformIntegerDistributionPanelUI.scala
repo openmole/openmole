@@ -21,21 +21,18 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import scala.swing.Table.ElementMode._
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.Locale
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.BorderPanel.Position._
 
-class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IDomainPanelUI[Int]{
-  val seedField = new TextField
-  val sizeField = new TextField
+class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IDomainPanelUI[Int]{
+  val seedField = new TextField(6)
+  val sizeField = new TextField(6)
   
   contents+= (new Label("Seed"),"gap para")
   contents+= seedField
   contents+= (new Label("Size"),"gap para")
-  contents+=  sizeField
+  contents+=  (sizeField,"wrap")
   
   seedField.text = pud.seed.toString
   sizeField.text = pud.size.toString

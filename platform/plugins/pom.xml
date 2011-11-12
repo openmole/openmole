@@ -41,8 +41,9 @@
         <module>org.openmole.ide.plugin.task.systemexec</module>
         <module>org.openmole.ide.plugin.task.exploration</module>
         <module>org.openmole.ide.plugin.task.serialization</module>
-        <module>org.openmole.ide.plugin.sampling.csv</module>
+        <!--module>org.openmole.ide.plugin.tool.sampling</module-->
         <module>org.openmole.ide.plugin.sampling.complete</module>
+        <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.domain.range</module>
         <module>org.openmole.ide.plugin.domain.distribution</module>
         <module>org.openmole.ide.plugin.prototype.base</module>

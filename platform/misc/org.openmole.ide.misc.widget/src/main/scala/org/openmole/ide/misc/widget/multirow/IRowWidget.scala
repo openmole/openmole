@@ -17,8 +17,8 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import scala.swing.Component
-
 trait IRowWidget {
-  def components: List[Component]
+  def name: String
+  
+  val panel: IRowPanel
 }

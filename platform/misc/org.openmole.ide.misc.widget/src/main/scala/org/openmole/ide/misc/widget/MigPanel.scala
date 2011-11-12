@@ -18,6 +18,7 @@
 package org.openmole.ide.misc.widget
 
 import swing._
+import javax.swing.JPanel
 import net.miginfocom.swing.MigLayout
 import scala.collection.mutable._
 
@@ -33,7 +34,10 @@ class MigPanel(constraints: String, colConst: String, rowConst: String) extends 
 
   override def contents: MigContent = new MigContent
 
-  protected class MigContent extends Content { def +=(c: Component, l: Constraints) = add(c, l) }
+  protected class MigContent extends Content { 
+    def +=(c: Component, l: Constraints) = add(c, l) 
+    def +=(p: JPanel) = peer.add(p)
+    def -=(p: JPanel) = peer.remove(p)}
 
   protected def constraintsFor(comp: Component) =
     layoutManager.getConstraintMap.get(comp.peer).toString

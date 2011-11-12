@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.range
+package org.openmole.ide.misc.widget.multirow
 
+import javax.swing.JPanel
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.TextField
+import scala.swing.Component
 import scala.swing.Label
 
-class RangeDomainPanelUI extends MigPanel("fillx","[left][grow,fill]",""){
-  val minField = new TextField(6)
-  val maxField = new TextField(6)
-  val stepField = new TextField(6)
+class RowPanel(rowName: String,val components: List[Component]) extends MigPanel("wrap") with IRowPanel{
+  var extendedPanel: Option[JPanel] = None
   
-  contents+= (new Label("Min"),"gap para")
-  contents+= minField
-  contents+= (new Label("Max"),"gap para")
-  contents+=  maxField
-  contents+= (new Label("Step"),"gap para")
-  contents+= (stepField,"wrap")
+  contents+= new MigPanel(""){
+    contents+= new Label(rowName)
+    components.foreach(contents+=)
+    contents += addButton
+    contents += removeButton
+  }
+  
+  def extend(ext: JPanel) = {
+    if (extendedPanel.isDefined) contents-= extendedPanel.get
+    contents+= ext
+    extendedPanel = Some(ext)
+    repaint
+    revalidate
+  }
 }

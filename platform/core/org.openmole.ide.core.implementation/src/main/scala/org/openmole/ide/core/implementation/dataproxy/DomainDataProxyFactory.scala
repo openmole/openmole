@@ -17,9 +17,17 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
+import org.openide.util.Lookup
 import org.openmole.ide.core.model.dataproxy.IDomainDataProxyFactory
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import scala.collection.JavaConversions._
+
+object DomainDataProxyFactory{
+  def factoryByName(name: String) = 
+    new DomainDataProxyFactory(Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).filter(df=> df.displayName == name).head)
+}
 
 class DomainDataProxyFactory(val factory: IDomainFactoryUI[_]) extends IDomainDataProxyFactory {
- override def buildDataProxyUI(name:String) = new DomainDataProxyUI(factory.buildDataUI(name))
+  override def buildDataProxyUI(name:String) = new DomainDataProxyUI(factory.buildDataUI(name))
+  override def toString= factory.displayName
 }

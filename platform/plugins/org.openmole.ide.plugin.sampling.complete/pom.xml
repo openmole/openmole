@@ -52,11 +52,6 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.core.model</artifactId>
-            <version>${openmole.gui.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole</groupId>
             <artifactId>org.openmole.plugin.sampling.complete</artifactId>
             <version>${openmole.core.version}</version>
@@ -75,6 +70,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.core.model</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 </project>

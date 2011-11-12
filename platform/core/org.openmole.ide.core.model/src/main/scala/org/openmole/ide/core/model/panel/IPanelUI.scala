@@ -21,4 +21,6 @@ import javax.swing.JPanel
 
 trait IPanelUI{
   def peer: JPanel
+  //def toto: scala.swing.Panel
+  //def tata: String
 }

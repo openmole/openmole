@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.dataproxy
+package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
+import javax.swing.ImageIcon
+import javax.swing.JPanel
+import org.openmole.ide.misc.image.ImageTool
+import scala.swing.Button
+import scala.swing.Panel
 
-class DomainDataProxyUI(var dataUI: IDomainDataUI[_]) extends IDomainDataProxyUI
+trait IRowPanel extends Panel{
+  val addButton: Button = new Button{icon = new ImageIcon(ImageTool.loadImage("img/addRow.png",10,10))}
+  val removeButton: Button = new Button{icon = new ImageIcon(ImageTool.loadImage("img/removeRow.png",10,10))}
+    
+  def extend(extendedPanel: JPanel): Unit
+  
+  
+}

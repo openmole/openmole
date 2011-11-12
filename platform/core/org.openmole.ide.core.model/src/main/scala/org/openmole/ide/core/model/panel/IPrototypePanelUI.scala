@@ -18,7 +18,6 @@
 package org.openmole.ide.core.model.panel
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
-import scala.swing.Panel
 
 trait IPrototypePanelUI[T] extends IPanelUI{
   def saveContent(name:String): IPrototypeDataUI[T]
