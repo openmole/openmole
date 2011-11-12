@@ -40,17 +40,13 @@ import scala.collection.JavaConversions._
 
 object CompleteSamplingPanelUI{
   def rowFactory(csPanel: CompleteSamplingPanelUI) = new Factory[IPrototypeDataProxyUI,String] {
-    override def apply(row: TwoCombosRowWidget[IPrototypeDataProxyUI,String], panel: Panel) = {
+    override def apply(row: TwoCombosRowWidget[IPrototypeDataProxyUI,String], p: Panel) = {
       import row._
       val twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String] = 
         new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB, inBetweenString)
-      twocombrow.combo2.selection.item = comboContentB(0)
-      
+      if (csPanel.extMap.contains(row)) csPanel.addRow(twocombrow, csPanel.extMap(row)) else csPanel.addRow(twocombrow)
       twocombrow.combo2.selection.reactions += {
-        case SelectionChanged(twocombrow.`combo2`)=>
-          // csPanel.rowMap(twocombrow) = Some(DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("name").dataUI.buildPanelUI)
-          // twocombrow.panel.extend(csPanel.rowMap(twocombrow).get.peer)                                                        
-          csPanel.addExtendedPanel(twocombrow)
+        case SelectionChanged(twocombrow.`combo2`)=>csPanel.addRow(twocombrow)
       }
       twocombrow
     }
@@ -60,55 +56,40 @@ object CompleteSamplingPanelUI{
 class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
   var sampleDomainCombos: Option[MultiTwoCombos[IPrototypeDataProxyUI,String]]= None
   var rowMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IDomainPanelUI[_]]
+  var extMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IDomainDataUI[_]]
    
-  Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{a=>a.displayName}
   import CompleteSamplingPanelUI._
   if (!Proxys.prototypes.isEmpty){
     rowFactory(this)
     val protos = Proxys.prototypes.map(_._2).toList
     val domains = Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{_.displayName}
-    sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
-        if (cud.factors.size>0) cud.factors.map{f=> 
-          val rw = new TwoCombosRowWidget("Factor",protos,f._1,domains,f._2,"defined on ")
-          addExtendedPanel(rw)
-          //rowMap+= rw-> f._3.buildPanelUI
-          
-          rw}
-        else {
-          val rw = new TwoCombosRowWidget("Factor",protos,protos(0),domains, domains(0),"defined on ")
-          addExtendedPanel(rw)
-          //  rowMap+= rw-> DomainDataProxyFactory.factoryByName(domains(0)).buildDataProxyUI("name").dataUI.buildPanelUI
-          List(rw)
-        },
-        rowFactory(this)))
+    val csrs = if (cud.factors.size>0) cud.factors.map{f=> 
+      val rw = new TwoCombosRowWidget("Factor",protos,f._1,domains,f._2,"defined on ")
+      extMap += rw->f._3
+      rw}
+    else {
+      List(new TwoCombosRowWidget("Factor",protos,protos(0),domains, domains(0),"defined on "))
+    }
     
-    // rowMap.foreach{case(k,v)=>k.panel.extend(v.peer)}
+    sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](csrs,
+                                                                               rowFactory(this)))
+    
     contents+= sampleDomainCombos.get.panel
-      
-//                              ("Factor",
-//                               "defined on ",
-//                               (Proxys.prototypes.map(_._2).toList,Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).toList.map{_.displayName}),
-//                               cud.factors.map(f=>(f._1,f._2)),
-//                               rowFactory(this)))
+  }
+ 
+
+  def addRow(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String],dd: IDomainDataUI[_]) : Unit = {
+    rowMap+= twocombrow ->  dd.buildPanelUI
+    twocombrow.panel.extend(rowMap(twocombrow).peer) 
   }
   
-//  sampleDomainCombos match {
-//    case Some(x:MultiTwoCombos[IPrototypeDataProxyUI,String])=>
-  //     contents+= x.panel
-//      x.
-//      x.rowWidgets.zip(cud.factors.map(_._3)).foreach{r=> 
-//        rowMap+= r._1-> Some(r._2.buildPanelUI)
-//        r._1.panel.extend(rowMap(r._1).get.peer)}
-  //   case _=>
-//  } 
-  def addExtendedPanel(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String]) = {
-    rowMap.getOrElseUpdate(twocombrow, DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("name").dataUI.buildPanelUI)
-    twocombrow.panel.extend(rowMap(twocombrow).peer)
-  }
+  def addRow(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String]):Unit =
+    addRow(twocombrow ,DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("").dataUI)
   
   override def saveContent(name: String) = sampleDomainCombos match {
     case x:Some[MultiTwoCombos[IPrototypeDataProxyUI,String]]=> new CompleteSamplingDataUI(name,x.get.rowWidgets.map(r=>
           (r.content._1,r.content._2,rowMap(r).saveContent(""))).toList)
     case _=> new CompleteSamplingDataUI(name,List[(IPrototypeDataProxyUI,String,IDomainDataUI[_])]())
   }
+                                         
 }
