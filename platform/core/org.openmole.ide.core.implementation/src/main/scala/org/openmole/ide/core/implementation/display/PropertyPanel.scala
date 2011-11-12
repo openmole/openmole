@@ -41,8 +41,6 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   Displays.currentType = TASK
   var editable = true
     
-  val domainMenu = new Menu("Domain")
-  DomainDisplay.implementationClasses.foreach(d=>domainMenu.contents+=new MenuItem(new DomainDisplayAction(d,DOMAIN)))
   val environmentMenu = new Menu("Environment")
   EnvironmentDisplay.implementationClasses.foreach(d=>environmentMenu.contents+=new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT)))
   val taskMenu = new Menu("Task")
@@ -56,7 +54,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   val saveButton = new Button("Apply")
   val cancelButton = new Button("Cancel")
   val nameTextField = new TextField(15) 
-  val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,domainMenu,samplingMenu,environmentMenu)}
+  val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,samplingMenu,environmentMenu)}
   
   listenTo(saveButton,cancelButton)
   reactions += {
@@ -107,19 +105,11 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
     contents.remove(1) 
     contents.insert(1,fakeToggleButton)}
     
-//  def updateViewport(panel: JPanel)= {
-//    removeViewport
-//    updateTaskViewport
-//    propertyScrollPane.peer.setViewportView(panel)
-//    panel.getComponents.foreach(_.setEnabled(editable))
-//    revalidate
-//  }
   
   def updateViewport(panel: JPanel)= {
     removeViewport
     updateTaskViewport
     propertyScrollPane.peer.setViewportView(panel)
-    //panel.contents.foreach(_.enabled = editable)
     revalidate
   }
   

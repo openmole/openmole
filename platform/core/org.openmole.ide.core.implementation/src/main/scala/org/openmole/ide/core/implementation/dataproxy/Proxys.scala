@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.palette.FrozenProxys
 import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.model.data._
@@ -37,7 +36,6 @@ object Proxys {
   var prototypes = new WeakHashMap[Int,IPrototypeDataProxyUI]
   var samplings = new WeakHashMap[Int,ISamplingDataProxyUI]
   var environments = new WeakHashMap[Int,IEnvironmentDataProxyUI]
-  var domains = new WeakHashMap[Int,IDomainDataProxyUI]
       
   def task = {
     PaletteSupport.currentMoleSceneTopComponent match {
@@ -58,12 +56,6 @@ object Proxys {
       FrozenProxys.sampling(PaletteSupport.currentMoleSceneTopComponent.get)
       else samplings.toMap}
   
-  def domain = PaletteSupport.currentMoleSceneTopComponent match {
-    case None => domains.toMap
-    case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
-      FrozenProxys.domain(PaletteSupport.currentMoleSceneTopComponent.get)
-      else domains.toMap}
-  
   def environment = PaletteSupport.currentMoleSceneTopComponent match {
     case None => environments.toMap
     case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
@@ -79,26 +71,22 @@ object Proxys {
   def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototypes += incr.getAndIncrement->dpu
   def addSamplingElement(dpu: ISamplingDataProxyUI) = samplings += incr.getAndIncrement->dpu
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environments += incr.getAndIncrement->dpu
-  def addDomainElement(dpu: IDomainDataProxyUI) = domains += incr.getAndIncrement->dpu
   
   def addTaskElement(dpu: ITaskDataProxyUI, id:Int) = tasks += id->dpu
   def addPrototypeElement(dpu: IPrototypeDataProxyUI,id:Int) = prototypes += id->dpu
   def addSamplingElement(dpu: ISamplingDataProxyUI,id:Int) = samplings += id->dpu
   def addEnvironmentElement(dpu: IEnvironmentDataProxyUI,id:Int) = environments += id->dpu
-  def addDomainElement(dpu: IDomainDataProxyUI,id:Int) = domains += id->dpu
   
   def clearAllTaskElement = tasks.clear
   def clearAllPrototypeElement = prototypes.clear
   def clearAllSamplingElement = samplings.clear
   def clearAllEnvironmentElement = environments.clear
-  def clearAllDomainElement = domains.clear
   
   def clearAll: Unit = {
     clearAllTaskElement
     clearAllPrototypeElement
     clearAllSamplingElement
     clearAllEnvironmentElement
-    clearAllDomainElement
     FrozenProxys.clear
   }
   

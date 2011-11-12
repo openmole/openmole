@@ -53,7 +53,6 @@ object GUISerializer {
                                          Proxys.prototypes.toMap,
                                          Proxys.samplings.toMap,
                                          Proxys.environments.toMap,
-                                         Proxys.domains.toMap,
                                          Proxys.incr.get+1))
     //molescenes
     TopComponentsManager.moleScenes.foreach(ms=>

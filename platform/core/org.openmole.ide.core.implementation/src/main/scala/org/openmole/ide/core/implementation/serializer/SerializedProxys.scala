@@ -24,13 +24,11 @@ class SerializedProxys(val task: Map[Int,ITaskDataProxyUI],
                        val prototype: Map[Int,IPrototypeDataProxyUI],
                        val sampling: Map[Int,ISamplingDataProxyUI],
                        val environment: Map[Int,IEnvironmentDataProxyUI],
-                       val domain: Map[Int,IDomainDataProxyUI],
                        val incr: Int) {
   def this() = this(Proxys.tasks.toMap,
               Proxys.prototypes.toMap,
               Proxys.samplings.toMap,
               Proxys.environments.toMap,
-              Proxys.domains.toMap,
               0)
     
   def loadProxys = {
@@ -38,7 +36,6 @@ class SerializedProxys(val task: Map[Int,ITaskDataProxyUI],
     prototype.foreach(p=>Proxys.addPrototypeElement(p._2,p._1))
     sampling.foreach(s=>Proxys.addSamplingElement(s._2,s._1))
     environment.foreach(e=>Proxys.addEnvironmentElement(e._2,e._1))
-    domain.foreach(d=>Proxys.addDomainElement(d._2,d._1))
     Proxys.incr.set(incr)
   }
   

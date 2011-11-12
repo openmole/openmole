@@ -27,8 +27,7 @@ object FrozenProxys {
   val maps= new WeakHashMap[MoleSceneTopComponent,SerializedProxys]
   def task(tc: MoleSceneTopComponent) = maps(tc).task
   def prototype(tc: MoleSceneTopComponent) = maps(tc).prototype
-  def sampling(tc: MoleSceneTopComponent) = maps(tc).sampling                                                            
-  def domain(tc: MoleSceneTopComponent) = maps(tc).domain
+  def sampling(tc: MoleSceneTopComponent) = maps(tc).sampling  
   def environment(tc: MoleSceneTopComponent) = maps(tc).environment
   def freeze(tc: MoleSceneTopComponent) = {
     val cloner = new Cloner
@@ -36,7 +35,6 @@ object FrozenProxys {
                                      cloner.deepClone(Proxys.prototypes).toMap,
                                      cloner.deepClone(Proxys.sampling).toMap,
                                      cloner.deepClone(Proxys.environment).toMap,
-                                     cloner.deepClone(Proxys.domain).toMap,
                                      Proxys.incr.get+1)
   }
   def clear = maps.clear

@@ -20,10 +20,8 @@ package org.openmole.ide.plugin.sampling.complete
 import scala.swing._
 import swing.Swing._
 import scala.swing.event.SelectionChanged
-import scala.swing.event.SelectionEvent
 import swing.ListView._
 import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.implementation.display.DomainDisplay
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
