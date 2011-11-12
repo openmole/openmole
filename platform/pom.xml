@@ -50,7 +50,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
             <type>jar</type>
@@ -133,6 +133,7 @@
         <module>core</module>
 	<module>misc</module>
         <module>plugins</module>
+        <module>osgi</module>
     </modules>
 
 </project>

@@ -29,7 +29,7 @@
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole</groupId>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
