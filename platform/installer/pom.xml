@@ -75,8 +75,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-        			    <groupId>org.openmole.core</groupId>
-        			    <artifactId>application</artifactId>
+        			    <groupId>org.openmole.ide</groupId>
+        			    <artifactId>org.openmole.ide.application</artifactId>
 		                    <version>${openmole.gui.version}</version>
                                     <type>tar.gz</type>
                                 </artifactItem>
