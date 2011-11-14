@@ -23,7 +23,16 @@ import scala.swing._
 import swing.Swing._
 
 class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
-                                                                              ndu.workspacePath,
-                                                                              ndu.lauchingCommands) with ITaskPanelUI{
-  override def saveContent(name: String): ITaskDataUI = new NetLogo4TaskDataUI(name, workspaceTextField.text, nlogoTextField.text, launchingCommandTextArea.text)
+                                                                                 ndu.workspacePath,
+                                                                                 ndu.lauchingCommands,
+                                                                                 ndu.prototypeMappingInput,
+                                                                                 ndu.prototypeMappingOutput,
+                                                                                 ndu.globals) with ITaskPanelUI{
+  override def saveContent(name: String): ITaskDataUI = new NetLogo4TaskDataUI(name, 
+                                                                               workspaceTextField.text, 
+                                                                               nlogoTextField.text, 
+                                                                               launchingCommandTextArea.text,
+                                                                               if (multiProtoString.isDefined) multiProtoString.get.content else List(),
+                                                                               if (multiStringProto.isDefined) multiStringProto.get.content else List(),
+                                                                               globals)
 }

@@ -16,23 +16,88 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import swing.Swing._
+import org.openmole.ide.osgi.netlogo4.NetLogo4
+import java.io.File
 
 class GenericNetLogoPanelUI(nlogoPath: String,
-                         workspacePath: String,
-                         lauchingCommands: String) extends MigPanel("","[left]rel[grow,fill]",""){
+                            workspacePath: String,
+                            lauchingCommands: String,
+                            prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
+                            prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
+                            g: List[String]) extends MigPanel("","[left]rel[grow,fill]","[]5[]5[]5[]2[]0[]"){
  
   val nlogoTextField = new ChooseFileTextField(nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
   val workspaceTextField = new ChooseFileTextField(workspacePath)
   val launchingCommandTextArea = new TextArea(lauchingCommands) 
+  var multiStringProto : Option[MultiTwoCombos[String,IPrototypeDataProxyUI]] = None
+  var multiProtoString : Option[MultiTwoCombos[IPrototypeDataProxyUI,String]] = None
+  var globals = g
+  
+  listenTo(nlogoTextField)
+  reactions += {
+    case DialogClosedEvent(nlogoTextField)=> 
+      globals = List()
+      buildMultis(nlogoTextField.text)}
   
   contents+= new Label("Nlogo file")
   contents+= (nlogoTextField,"growx,wrap")
   contents+= new Label("Workspace directory")
   contents+= (workspaceTextField,"span,growx,wrap")
   contents+= (new Label("Commands"),"wrap")
-  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,100)},"span,growx")}
+  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span,growx")
+
+  buildMultis(nlogoPath)
+  
+  def buildMultis(path: String) = {
+    println("build multis")
+    if (globals.isEmpty){
+      val nl = new NetLogo4
+      try{
+        println("Try " + path)
+        if ((new File(path)).isFile){
+          println("in if " + path)
+          nl.open(path)
+          println("opened ")
+          globals = nl.globals.toList
+          println("got globals ")
+          globals.foreach(println)
+          println("dispose")
+          nl.dispose
+        }
+      }
+    }
+    if (!globals.isEmpty){
+      multiStringProto = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
+          "Map",
+          "with",
+          (globals, comboContent),
+          prototypeMappingOutput))
+      
+    multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
+          "Map",
+          "with",
+          (comboContent,globals),
+          prototypeMappingInput))
+    }
+    
+    println("size " + contents.size)
+    if (multiStringProto.isDefined) {
+      println("defined ")
+      if (contents.size == 8) {contents.remove(6); contents.remove(7)}
+      contents+= (multiProtoString.get.panel,"span,grow,wrap")
+      contents+= (multiStringProto.get.panel,"span,grow,wrap")
+    }
+  }
+  
+  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.prototype.values.toList
+}
