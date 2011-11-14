@@ -37,7 +37,7 @@ import org.openmole.ide.misc.widget.MenuToggleButton
 import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.core.model.commons.Constants._
 
-class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]rel[grow,fill]rel[grow,fill]"){
+class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[fill]30[]rel[grow,fill]rel[grow,fill]"){
   Displays.currentType = TASK
   var editable = true
     
@@ -55,6 +55,7 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[]30[]
   val cancelButton = new Button("Cancel")
   val nameTextField = new TextField(15) 
   val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,samplingMenu,environmentMenu)}
+  menuBar.minimumSize = new Dimension(size.width,30)
   
   listenTo(saveButton,cancelButton)
   reactions += {
