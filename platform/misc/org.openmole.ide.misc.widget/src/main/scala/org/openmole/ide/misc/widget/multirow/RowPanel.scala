@@ -22,7 +22,7 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Component
 import scala.swing.Label
 
-class RowPanel(rowName: String,val components: List[Component]) extends MigPanel("wrap") with IRowPanel{
+class RowPanel(rowName: String,val components: List[Component]) extends MigPanel("wrap,insets -2 5 -2 5") with IRowPanel{
   var extendedPanel: Option[JPanel] = None
   
   contents+= new MigPanel(""){

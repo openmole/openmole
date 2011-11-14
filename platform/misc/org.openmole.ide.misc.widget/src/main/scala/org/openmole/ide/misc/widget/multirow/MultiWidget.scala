@@ -23,7 +23,7 @@ import scala.swing.event.ButtonClicked
 
 abstract class MultiWidget[T<:IRowWidget](rWidgets: List[T], factory: IRowWidgetFactory[T],nbComponent: Int){
   val rowWidgets = new HashSet[T]
-  val panel =  new MigPanel("wrap "+(nbComponent + 3).toString)
+  val panel =  new MigPanel("wrap "+(nbComponent + 3).toString +", insets -2 5 -2 5")
   
   rWidgets.foreach(r=>showComponents(addRow(factory.apply(r,panel))))
   
@@ -39,7 +39,6 @@ abstract class MultiWidget[T<:IRowWidget](rWidgets: List[T], factory: IRowWidget
     
     panel.listenTo(rowWidget.panel.`addButton`)
     panel.reactions += {case ButtonClicked(rowWidget.panel.`addButton`) => showComponents(addRow(factory.apply(rowWidget,panel)))}
-    // rowWidget.components = List(new Label(rowName)) ::: rowWidget.components ::: List(buildAddButton(rowWidget),buildRemoveButton(rowWidget))
     rowWidget
   }
   
