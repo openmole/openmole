@@ -119,9 +119,8 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
       obUI.get.createActions(SELECT).addAction(selectAction)
     if (moleSceneType == BUILD) {
       obUI.get.createActions(CONNECT).addAction(connectAction)
-      obUI.get.createActions(CONNECT).addAction(moveAction)
-      // obUI.get.getActions.addAction(createObjectHoverAction)
     }
+      obUI.get.createActions(CONNECT).addAction(moveAction)
   }
   
   override def attachNodeWidget(n: String)= {
