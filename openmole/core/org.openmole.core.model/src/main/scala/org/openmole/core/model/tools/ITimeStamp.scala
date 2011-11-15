@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.job
+package org.openmole.core.model.tools
 
-trait ITimeStamp {
-  def state: State.State
+trait ITimeStamp[S] {
+  def state: S
   def hostName: String
   def time: Long
 }

@@ -58,7 +58,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
           }
         }
         executionJob.state = ExecutionState.DONE
-        StatisticRegistry.sample(environment, job, new StatisticSample(executionJob.creationTime, running, System.currentTimeMillis))
+        StatisticRegistry.sample(environment, job, new StatisticSample(executionJob.timeStamps.head.time, running, System.currentTimeMillis))
       } catch {
         case (e: InterruptedException) => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
         case e => logger.log(SEVERE, null, e)

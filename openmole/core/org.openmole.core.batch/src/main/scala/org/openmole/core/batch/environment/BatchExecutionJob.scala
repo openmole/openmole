@@ -36,6 +36,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.IExecutionJob
+import org.openmole.core.implementation.tools.TimeStamp
 
 object BatchExecutionJob extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
@@ -50,6 +51,8 @@ object BatchExecutionJob extends Logger {
 
 class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IUpdatableWithVariableDelay {
 
+  timeStamps += new TimeStamp(READY)
+  
   import BatchExecutionJob._
     
   var batchJob: Option[BatchJob] = None
@@ -72,7 +75,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         val oldState = batchJob.state
         val newState = 
           if (!oldState.isFinal) batchJob.updateState
-        else oldState
+          else oldState
 
         if(oldState != newState && newState == KILLED) kill
         state
@@ -111,6 +114,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             }
             if(oldState != newState) {
               EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
+              timeStamps += new TimeStamp(newState)
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
         }

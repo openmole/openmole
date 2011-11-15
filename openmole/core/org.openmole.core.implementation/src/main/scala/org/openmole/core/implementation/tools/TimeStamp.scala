@@ -15,9 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.job
+package org.openmole.core.implementation.tools
 
-import org.openmole.core.model.job.ITimeStamp
+import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.job.State._
 
-class TimeStamp(val state: State, val hostName: String, val time: Long) extends ITimeStamp
+class TimeStamp[T](val state: T, val hostName: String, val time: Long) extends ITimeStamp[T] {
+  def this(state: T, time: Long) = this(state, LocalHostName.localHostName, time)
+  def this(state: T) = this(state, LocalHostName.localHostName, System.currentTimeMillis)
+}

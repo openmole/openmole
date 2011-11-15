@@ -18,7 +18,8 @@
 package org.openmole.core.batch.message
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.ITimeStamp
+import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.job.MoleJobId
+import org.openmole.core.model.job.State.State
 
-class ContextResults(val results: PartialFunction[MoleJobId, (Either[IContext, Throwable], Seq[ITimeStamp])])
+class ContextResults(val results: PartialFunction[MoleJobId, (Either[IContext, Throwable], Seq[ITimeStamp[State]])])

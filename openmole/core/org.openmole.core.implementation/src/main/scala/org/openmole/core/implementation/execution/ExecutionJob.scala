@@ -21,7 +21,11 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
+import org.openmole.core.model.tools.ITimeStamp
+import org.openmole.core.implementation.tools.TimeStamp
+import scala.collection.mutable.ListBuffer
+import  org.openmole.core.model.execution.ExecutionState._
 
 abstract class ExecutionJob[ENV <: IEnvironment](val environment: ENV, val job: IJob, val id: IExecutionJobId) extends IExecutionJob {
-  val creationTime = System.currentTimeMillis
+   val timeStamps: ListBuffer[ITimeStamp[ExecutionState]] = new ListBuffer
 }

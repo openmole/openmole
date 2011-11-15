@@ -33,7 +33,7 @@ class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
 
   private def ExecutionJobOrderOnTime = new Comparator[EXECUTIONJOB] {
     override def compare(o1: EXECUTIONJOB, o2: EXECUTIONJOB): Int = {
-      val comp = o2.creationTime.compare(o1.creationTime)
+      val comp = o2.timeStamps.head.time.compare(o1.timeStamps.head.time)
       if(comp != 0) comp
       else IExecutionJobId.order.compare(o2.id, o1.id)
     }

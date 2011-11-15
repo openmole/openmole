@@ -18,6 +18,7 @@
 package org.openmole.core.model.job
 
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.eventdispatcher.Event
@@ -34,6 +35,7 @@ object IMoleJob {
       MoleJobId.moleJobIdOrdering.compare(left.id, right.id)
     }
   }
+
 }
 
 trait IMoleJob {
@@ -42,8 +44,8 @@ trait IMoleJob {
   def isFinished: Boolean
   def context: IContext
   def exception: Option[Throwable]
-  def timeStamps: Seq[ITimeStamp]
-  def finished(context: IContext, timeStamps: Seq[ITimeStamp])
+  def timeStamps: Seq[ITimeStamp[State.State]]
+  def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]])
   def perform
   def id: MoleJobId
   def cancel 

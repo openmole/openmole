@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.implementation.execution.ExecutionJob
+import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.IExecutionJobId
@@ -31,6 +32,7 @@ class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob, id: I
   override def state = _state
   
   def state_=(state: ExecutionState) {
+    timeStamps += (new TimeStamp(state))
     EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, this.state))
     _state = state
   }

@@ -20,6 +20,7 @@ package org.openmole.core.model.execution
 import java.util.logging.Level
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.eventdispatcher.Event
+import org.openmole.core.model.tools.ITimeStamp
 import ExecutionState._
 
 object IExecutionJob {
@@ -31,6 +32,6 @@ trait IExecutionJob {
   def state: ExecutionState
   def environment: IEnvironment
   def job: IJob
-  def creationTime: Long
+  def timeStamps: Seq[ITimeStamp[ExecutionState]]
   def id: IExecutionJobId
 }

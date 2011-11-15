@@ -19,17 +19,16 @@ package org.openmole.runtime
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.ITimeStamp
+import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
-import org.openmole.misc.tools.service.Logger
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.eventdispatcher.Event
 
 class ContextSaver extends EventListener[IMoleJob] {
   
-  var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp])]
+  var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp[State]])]
   def results = _results
 
   override def triggered(job: IMoleJob, ev: Event[IMoleJob])= synchronized {

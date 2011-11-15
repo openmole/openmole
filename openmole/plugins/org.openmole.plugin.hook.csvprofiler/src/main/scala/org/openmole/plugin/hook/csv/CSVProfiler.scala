@@ -25,7 +25,7 @@ import org.openmole.core.implementation.hook.MoleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.plugin.hook.csvprofiler.MoleJobInfoToCSV._
+import ToCSV._
 import scala.ref.WeakReference
 
 class CSVProfiler(moleExecution:  WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook(moleExecution) {

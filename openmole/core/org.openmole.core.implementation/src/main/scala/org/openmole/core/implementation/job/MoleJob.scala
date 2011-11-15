@@ -18,10 +18,11 @@
 package org.openmole.core.implementation.job
 
 import org.openmole.core.implementation.tools.LocalHostName
+import org.openmole.core.implementation.tools.TimeStamp
+import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.job.ITimeStamp
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.ITask
@@ -29,13 +30,14 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
-object MoleJob extends Logger
+object MoleJob extends Logger 
 
 class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
-  
+   
+  import IMoleJob._
   import MoleJob._
 
-  val timeStamps: ListBuffer[ITimeStamp] = new ListBuffer
+  val timeStamps: ListBuffer[ITimeStamp[State.State]] = new ListBuffer
   var exception: Option[Throwable] = None
   
   @volatile  private var _state: State = null
@@ -47,7 +49,7 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
   def state_=(state: State) = {
     val changed = synchronized {
       if(_state == null || !_state.isFinal) {
-        timeStamps += new TimeStamp(state, LocalHostName.localHostName, System.currentTimeMillis)
+        timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
         Some(oldState)
@@ -71,7 +73,7 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
         if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
     }
   
-  override def finished(context: IContext, timeStamps: Seq[ITimeStamp]) = {
+  override def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {
     _context = context
     this.timeStamps ++= timeStamps
     state = COMPLETED
