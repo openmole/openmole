@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.hook
 
+import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.hook.IEnvironmentHook
@@ -50,8 +51,8 @@ class EnvironmentHook(private val environment: WeakReference[IEnvironment]) exte
     override def triggered(obj: IEnvironment, ev: Event[IEnvironment]) =
       ev match {
         case ev: JobSubmitted => 
-          listen(ev.job, new ExecutionJobListner, classOf[StateChanged])
-          jobSubmitted(ev.job)
+          try jobStatusChanged(ev.job, SUBMITTED, READY)
+          finally listen(ev.job, new ExecutionJobListner, classOf[StateChanged])
         case _ =>
       }
   }
