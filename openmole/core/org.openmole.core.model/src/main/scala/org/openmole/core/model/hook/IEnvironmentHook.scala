@@ -21,6 +21,5 @@ import org.openmole.core.model.execution.ExecutionState.ExecutionState
 import org.openmole.core.model.execution.IExecutionJob
 
 trait IEnvironmentHook extends IHook {
-  def jobSubmitted(job: IExecutionJob) = {}
   def jobStatusChanged(job: IExecutionJob, newState: ExecutionState, oldState: ExecutionState) = {}
 }
