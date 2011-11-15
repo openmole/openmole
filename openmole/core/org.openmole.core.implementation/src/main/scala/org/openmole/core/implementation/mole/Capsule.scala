@@ -149,6 +149,9 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     outputTransitions.foreach{_.perform(context, ticket, subMole)}
   }
 
-  override def toString: String = task.toString
+  override def toString = task match {
+    case Some(t) => t.toString
+    case None => "[None]"
+  }
   
 }

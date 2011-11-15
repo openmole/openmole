@@ -59,5 +59,5 @@ class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype
     obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
   
   override def id = (name, `type`)
-  override def toString: String = '(' + `type`.toString + ')' + name
+  override def toString = name + ": " + `type`.toString
 }
