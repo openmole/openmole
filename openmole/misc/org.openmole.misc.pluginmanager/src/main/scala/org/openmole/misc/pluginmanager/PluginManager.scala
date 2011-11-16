@@ -23,7 +23,7 @@ import java.net.URI
 import java.net.URL
 import java.io.FileInputStream
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.pluginmanager.internal.Activator
 import org.openmole.misc.tools.service.IHash
 import org.osgi.framework.Bundle
@@ -34,6 +34,7 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleException
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.hashservice.HashService
 
 
@@ -136,6 +137,7 @@ object PluginManager {
   }
 
   private def installBundle(f: File) = {
+    if(!f.exists) throw new UserBadDataError("Bundle file " + f + " doesn't exists.")
     val file = f.getAbsoluteFile
 
     files.get(file) match {
