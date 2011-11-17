@@ -45,7 +45,6 @@ class MultiWidget[T<:IRowWidget](rWidgets: List[T],
   
   def addRow(rowWidget: T):T = {
     rowWidgets+= rowWidget
-    println ("add to contents : " + rowWidgets.size)
     
     panel.listenTo(rowWidget.panel.`removeButton`)
     panel.reactions += {case ButtonClicked(rowWidget.panel.`removeButton`) => if (allowEmpty == CLOSE_IF_EMPTY || 
@@ -63,7 +62,7 @@ class MultiWidget[T<:IRowWidget](rWidgets: List[T],
   
   def showComponent: Unit = showComponent(addRow) 
   
-  private def showComponent(rowWidget: T): Unit = {println("show c " + rowWidget);panel.contents+=(rowWidget.panel,"wrap");refresh}
+  private def showComponent(rowWidget: T): Unit = {panel.contents+=(rowWidget.panel,"wrap");refresh}
   
   private def hideComponent(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
   

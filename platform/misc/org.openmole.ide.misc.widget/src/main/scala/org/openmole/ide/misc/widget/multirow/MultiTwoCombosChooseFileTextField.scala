@@ -18,17 +18,19 @@
 package org.openmole.ide.misc.widget.multirow
 
   
+import javax.swing.ImageIcon
+import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing.Button
 import scala.swing.ComboBox
 import scala.swing.Label
 import scala.swing.Panel
 
 object MultiTwoCombosChooseFileTextField
 {
-  
   class Factory[A, B] extends IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A,B]]{
     def apply(row: TwoCombosChooseFileTextFieldRowWidget[A,B], panel: Panel) = {
       import row._
@@ -58,11 +60,13 @@ object MultiTwoCombosChooseFileTextField
     val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
     val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
     val chooseFileText = new ChooseFileTextField(filePath)
+    val refreshButton = new Button{icon = new ImageIcon(ImageTool.loadImage("img/refresh.png",10,10))}
     
     override val panel = new RowPanel(name,
                                       List(combo1,new Label(inBetweenString1),
                                            combo2,new Label(inBetweenString2),
-                                           chooseFileText),
+                                           chooseFileText,
+                                           refreshButton),
                                       plus)
     
     override def content: (A,B,String) = (combo1.selection.item,combo2.selection.item,chooseFileText.text)
