@@ -16,19 +16,21 @@
  */
 
 package org.openmole.ide.plugin.hook.display
-import org.openmole.plugin.hook.display.GlobalToStringHook
+import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 
-class DisplayHookDataUI(executionManager: IExecutionManager,
-                        toBeHooked: Map[ICapsule,Iterable[IPrototype[_]]]) extends IHookDataUI{
-  def this(exeM: IExecutionManager) = this(exeM,Map.empty[ICapsule,Iterable[IPrototype[_]]])
-  
-  override def coreObject = new GlobalToStringHook(executionManager.moleExecution,executionManager.printStream,toBeHooked)
-  
+class ToStringHookDataUI(executionManager: IExecutionManager,
+                        toBeHooked: (ICapsule,IPrototype[_])) extends IHookDataUI{
+    
+  override def coreObject = new ToStringHook(executionManager.moleExecution, 
+                                             toBeHooked._1, 
+                                             executionManager.printStream, 
+                                             toBeHooked._2)
+ 
   override def coreClass = classOf[Object]
   
-  override def buildPanelUI = new DisplayHookPanelUI(executionManager)
+  override def buildPanelUI = new ToStringHookPanelUI(executionManager)
 }

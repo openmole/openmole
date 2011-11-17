@@ -1,2 +1,2 @@
-org.openmole.ide.plugin.hook.display.DisplayHookFactoryUI
+org.openmole.ide.plugin.hook.display.ToStringHookFactoryUI
 #position=10

@@ -17,12 +17,14 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openmole.plugin.hook.display.GlobalToStringHook
+import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 
-class DisplayHookFactoryUI extends IHookFactoryUI {
-  override def buildDataUI(executionManager: IExecutionManager) = new DisplayHookDataUI(executionManager)
+class ToStringHookFactoryUI extends IHookFactoryUI {
+  def buildPanelUI(executionManager: IExecutionManager) = new ToStringHookPanelUI(executionManager)
   
-  override def coreClass = classOf[GlobalToStringHook]
+  def coreClass = classOf[ToStringHook]
+  
+  override def toString = "Display prototypes"
 }            
