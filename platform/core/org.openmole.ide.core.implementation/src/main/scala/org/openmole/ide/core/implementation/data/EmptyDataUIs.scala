@@ -21,22 +21,18 @@ import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
-import org.openmole.ide.misc.widget.MigPanel
 
 object EmptyDataUIs {
-  //def prototype = new 
-  
   
   class  EmptyPrototypeDataUI(val name: String) extends IPrototypeDataUI[Any]  {
+    def dim = 0
     def coreClass = classOf[IPrototype[_]]
     def coreObject = new Prototype(name,classOf[Any])
     def imagePath = ""
     def buildPanelUI = new EmptyPrototypePanelUI
     
     class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
-        def peer = this.peer
-    //  def toto = new MigPanel("")
-    // def tata = "tata in EmptyDataUIs"
+      def peer = this.peer
       def saveContent(name:String) = new EmptyPrototypeDataUI("")}
   }
 }
