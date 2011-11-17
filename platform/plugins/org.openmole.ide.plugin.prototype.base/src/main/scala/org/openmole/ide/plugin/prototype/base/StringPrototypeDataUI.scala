@@ -22,7 +22,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 
-class StringPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[String](d){
+class StringPrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[String](d){
   override def coreClass = classOf[IPrototype[String]]
   
   override def coreObject = toArray(new Prototype(name,classOf[String]),dim).asInstanceOf[IPrototype[String]]

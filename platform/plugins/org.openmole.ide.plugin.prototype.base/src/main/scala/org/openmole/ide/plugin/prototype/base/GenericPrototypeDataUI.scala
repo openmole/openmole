@@ -19,4 +19,4 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 
-abstract class GenericPrototypeDataUI[T](val dim: Int) extends IPrototypeDataUI[T]
+abstract class GenericPrototypeDataUI[T](override val dim: Int) extends IPrototypeDataUI[T]

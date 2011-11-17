@@ -22,7 +22,7 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
-class BigDecimalPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[scala.BigDecimal](d){
+class BigDecimalPrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[scala.BigDecimal](d){
   override def coreClass = classOf[IPrototype[BigDecimal]]
   
   override def coreObject= toArray(new Prototype(name,classOf[scala.BigDecimal]),dim).asInstanceOf[IPrototype[scala.BigDecimal]]

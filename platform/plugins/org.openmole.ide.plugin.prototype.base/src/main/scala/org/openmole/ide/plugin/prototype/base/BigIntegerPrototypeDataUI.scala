@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class BigIntegerPrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[BigInt](d){
+class BigIntegerPrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[BigInt](d){
   override def coreClass = classOf[IPrototype[BigInt]]
   
   override def coreObject = toArray(new Prototype(name,classOf[BigInt]),dim).asInstanceOf[IPrototype[BigInt]]

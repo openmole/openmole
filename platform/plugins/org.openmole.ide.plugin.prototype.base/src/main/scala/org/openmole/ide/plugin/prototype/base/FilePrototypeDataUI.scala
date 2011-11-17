@@ -22,10 +22,10 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class FilePrototypeDataUI(val name: String, val d: Int=0) extends GenericPrototypeDataUI[File](d){
+class FilePrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[File](d){
   override def coreClass = classOf[IPrototype[File]]
   
-  override def coreObject = toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]
+  override def coreObject = {println ("dim before call: " + dim);toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]}
   
   override def imagePath = "img/file.png"
   
