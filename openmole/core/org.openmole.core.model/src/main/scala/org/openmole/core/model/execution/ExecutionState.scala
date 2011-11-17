@@ -24,7 +24,7 @@ object ExecutionState extends Enumeration {
   val READY = new ExecutionState("Ready")
   val SUBMITTED = new ExecutionState("Submitted")
   val RUNNING = new ExecutionState("Running")
-  val DONE = new ExecutionState("Done", true)
+  val DONE = new ExecutionState("Done")
   val FAILED = new ExecutionState("Failed")
   val KILLED = new ExecutionState("Killed", true)
 }

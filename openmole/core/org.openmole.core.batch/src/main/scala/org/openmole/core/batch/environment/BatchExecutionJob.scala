@@ -73,9 +73,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       case None => READY
       case Some(batchJob) =>
         val oldState = batchJob.state
-        val newState = 
-          if (!oldState.isFinal) batchJob.updateState
-          else oldState
+        val newState = batchJob.updateState
+         /* if (!oldState.isFinal) batchJob.updateState
+          else oldState*/
 
         if(oldState != newState && newState == KILLED) kill
         state
@@ -106,6 +106,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             } else incrementedDelay
           case Some(batchJob) =>
             val newState = updateAndGetState
+            if(newState != oldState) timeStamps += new TimeStamp(newState)
             newState match {
               case READY => throw new InternalProcessingError("Bug, it should never append.")
               case (SUBMITTED | RUNNING | KILLED) => {}
@@ -114,7 +115,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             }
             if(oldState != newState) {
               EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
-              timeStamps += new TimeStamp(newState)
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
         }

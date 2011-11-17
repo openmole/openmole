@@ -93,8 +93,7 @@ object SerializerService {
         //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
 
         val name = UUID.randomUUID        
-        val entry = new TarEntry(name.toString)
-
+        
         val toArchive =  if (file.isDirectory) {
           val toArchive = Workspace.newFile
           val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
@@ -105,13 +104,17 @@ object SerializerService {
           toArchive
         } else file
 
+        tos.addFile(toArchive, name.toString)
+        /*val entry = new TarEntry(name.toString)
+
         //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
         entry.setSize(toArchive.length)
+        entry.setMode
         tos.putNextEntry(entry)
               
-        try toArchive.copy(tos) finally tos.closeEntry
+        try toArchive.copy(tos) finally tos.closeEntry*/
               
-        (entry.getName, (file, file.isDirectory))
+        (name.toString, (file, file.isDirectory))
       }
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)

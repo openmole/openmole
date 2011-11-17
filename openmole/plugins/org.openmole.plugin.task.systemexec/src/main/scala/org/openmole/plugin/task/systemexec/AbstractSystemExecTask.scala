@@ -30,14 +30,20 @@ import java.io.IOException
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.ProcessUtil._
 import scala.collection.JavaConversions._
+
+object AbstractSystemExecTask extends Logger
+
 abstract class AbstractSystemExecTask (name: String, 
                                        val cmd: String, 
                                        val returnValue: Option[IPrototype[Int]] = null, 
                                        exceptionIfReturnValueNotZero: Boolean = true,
                                        relativeDir: String = "") extends ExternalSystemTask(name) {
  
+  import AbstractSystemExecTask._
+  
   returnValue match {
     case None =>
     case Some(returnValue) => addOutput(returnValue)
@@ -46,18 +52,20 @@ abstract class AbstractSystemExecTask (name: String,
   override protected def process(context: IContext) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
-    prepareInputFiles(context, tmpDir)
+    val links = prepareInputFiles(context, tmpDir)
     val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
+    val commandLine = CommandLine.parse( workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
       
     try {    
+      val f = new File(commandLine.getExecutable)
+      //logger.fine(f + " " + f.exists)
       val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
       
       execute(process,context) match {
         case(retCode, variables) =>
           if(exceptionIfReturnValueNotZero && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + retCode)
         
-          val retContext = fetchOutputFiles(context, workDir) ++ variables
+          val retContext = fetchOutputFiles(context, workDir, links) ++ variables
       
           returnValue match {
             case None => retContext

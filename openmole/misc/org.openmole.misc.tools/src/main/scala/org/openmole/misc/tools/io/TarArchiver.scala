@@ -36,9 +36,11 @@ object TarArchiver {
 
 
   class TarOutputStreamDecorator(tos: TarOutputStream) {
+ 
     def addFile(f: File, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(f.length)
+      entry.setMode(f.mode)
       tos.putNextEntry(entry)
       try f.copy(tos) finally tos.closeEntry
     }
@@ -69,16 +71,19 @@ object TarArchiver {
       while(e != null) {
         val dest = new File(baseDir, e.getName)
         if(!e.getLinkName.isEmpty) {
-          val linkTo = fs.getPath(e.getLinkName)
-          val link = fs.getPath(dest.getAbsolutePath)
-          Files.createSymbolicLink(link, linkTo)
+          dest.createLink(e.getLinkName)
+          /* val linkTo = fs.getPath(e.getLinkName)
+           val link = fs.getPath(dest.getAbsolutePath)
+           Files.createSymbolicLink(link, linkTo)*/
         }
-        else if(e.isDirectory) dest.mkdirs
-        else {
+        else if(e.isDirectory) {
+          dest.mkdirs
+        } else {
           dest.getParentFile.mkdirs
           val fos = new FileOutputStream(dest)
           try tis.copy(fos) finally fos.close
         }
+        dest.mode = e.getMode
         e = tis.getNextEntry
       }
     } finally tis.close
@@ -96,22 +101,33 @@ object TarArchiver {
     while (!toArchive.isEmpty) {
       val cur = toArchive.pop
       if(Files.isSymbolicLink(fs.getPath(cur._1.getAbsolutePath)))  links ::= cur._1 -> cur._2
-      else if (cur._1.isDirectory) {
-          for (name <- cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
+      else {       
+        
+        
+        val e =  if (cur._1.isDirectory) {
+          for (name <- cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2  + '/' + name))
+          new TarEntry(cur._2 + '/')
         } else {
           val e = new TarEntry(cur._2)
           e.setSize(cur._1.length)
-          additionnalCommand(e)
-          tos.putNextEntry(e)
-          try cur._1.copy(tos) finally tos.closeEntry
+          e
         }
+        // } else {
+   
+          
+        e.setMode(cur._1.mode)
+        additionnalCommand(e)
+        tos.putNextEntry(e)
+        if (!cur._1.isDirectory) try cur._1.copy(tos) finally tos.closeEntry
+      }
     }
     
     links.foreach {
       cur =>
-        val e = new TarEntry(cur._2)
-        e.setLinkName(fs.getPath(cur._1.getParentFile.getCanonicalPath).relativize(fs.getPath(cur._1.getCanonicalPath)).toString)
-        tos.putNextEntry(e)
+      val e = new TarEntry(cur._2)
+      e.setLinkName(fs.getPath(cur._1.getParentFile.getCanonicalPath).relativize(fs.getPath(cur._1.getCanonicalPath)).toString)
+      e.setMode(cur._1.mode)
+      tos.putNextEntry(e)
     }
   }
   

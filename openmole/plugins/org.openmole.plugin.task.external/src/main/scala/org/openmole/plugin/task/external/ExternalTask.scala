@@ -40,39 +40,37 @@ object ExternalTask {
 
 abstract class ExternalTask(name: String) extends Task(name) {
  
-  val inContextFiles = new ListBuffer[(IPrototype[File], String)]
-  val inContextFileList = new ListBuffer[(IPrototype[Array[File]], IPrototype[Array[String]])]
-  val inFileNames = new HashMap[File, String]
+  val inContextFiles = new ListBuffer[(IPrototype[File], String, Boolean)]
+  //val inContextFileList = new ListBuffer[(IPrototype[Array[File]], IPrototype[Array[String]], Boolean)]
+  val inFileNames = new HashMap[File, (String, Boolean)]
 
   val outFileNames = new ListBuffer[(IPrototype[File], String, Option[IPrototype[String]])]
   val outFileNamesFromVar = new ListBuffer[(IPrototype[File], IPrototype[String])]
 
-  protected class ToPut(val file: File, val name: String)
+  protected class ToPut(val file: File, val name: String, val link: Boolean)
   protected class ToGet(val name: String, val file: File)
 
   protected def listInputFiles(context: IContext): Iterable[ToPut] = {
     val file1 = inFileNames.map {
-      entry => 
-      val localFile = entry._1         
-      new ToPut(localFile, expandData(context, entry._2))
+      case (localFile, (name, link)) => new ToPut(localFile, expandData(context, name), link)
     } 
     
     val file2 = inContextFiles.map { 
-      p => 
-      val f = context.value(p._1).getOrElse(throw new UserBadDataError("File supposed to be present in variable \"" + p._1.name + "\" at the beging of the task \"" + name + "\" and is not."))
-      new ToPut(f, expandData(context, p._2))
+      case (protoFile, name, link) => 
+      val f = context.value(protoFile).getOrElse(throw new UserBadDataError("File supposed to be present in variable \"" + protoFile.name + "\" at the beging of the task \"" + name + "\" and is not."))
+      new ToPut(f, expandData(context, name), link)
     } 
     
-    val file3 = inContextFileList.flatMap { 
+    /*val file3 = inContextFileList.flatMap { 
       p => 
         val lstFile = context.value(p._1).get
         val lstName = context.value(p._2).get
         lstFile zip lstName map {
-          case(f, name) => new ToPut(f, expandData(context, name)) 
+          case(f, name, link) => new ToPut(f, expandData(context, name), link) 
         }
-    }
+    }*/
     
-    file1 ++ file2 ++ file3
+    file1 ++ file2 //++ file3
   }
 
 
@@ -101,19 +99,21 @@ abstract class ExternalTask(name: String) extends Task(name) {
     (context ++ file1.flatMap{_._1} ++ file2.map{_._1}) -> (file1.map{_._2} ++ file2.map{_._2})
   }
 
-  def addInput(fileList: IPrototype[Array[File]], names: IPrototype[Array[String]]): this.type = {
+  /*def addInput(fileList: IPrototype[Array[File]], names: IPrototype[Array[String]], link: Boolean): this.type = {
     inContextFileList += ((fileList, names))
     super.addInput(fileList)
     super.addInput(names)
     this
-  }
+  }*/
 
-  def addInput(fileProt: IPrototype[File], name: String): this.type = {
-    inContextFiles += ((fileProt, name))
+  def addInput(fileProt: IPrototype[File], name: String, link: Boolean): this.type = {
+    inContextFiles += ((fileProt, name, link))
     super.addInput(fileProt)
     this
   }
 
+  def addInput(fileProt: IPrototype[File], name: String): this.type = addInput(fileProt, name, false)
+  
   def addOutput(fileName: String, v: IPrototype[File]): this.type = {
     outFileNames += ((v, fileName, None))
     addOutput(v)
@@ -133,17 +133,29 @@ abstract class ExternalTask(name: String) extends Task(name) {
     this
   }
 
-  def addResource(file: File, name: String): this.type = {
-    inFileNames.put(file, name)
+  def addResource(file: File, name: String, link: Boolean): this.type = {
+    inFileNames.put(file, (name, link))
     this
   }
-
+ 
+  def addResource(file: File, name: String): this.type = addResource(file, name, false)
+  
+  
   def addResource(file: File): this.type = addResource(file, file.getName)
-    
+   
+  def addResource(file: File, link: Boolean): this.type = addResource(file, file.getName, link)
+  
+ 
   def addResource(location: String): this.type = addResource(new File(location))
 
+  def addResource(location: String, link: Boolean): this.type = addResource(new File(location), link) 
+  
+  
   def addResource(location: String, name: String): this.type =  addResource(new File(location), name)
 
-  def deployName(file: File) = inFileNames(file)
+  def addResource(location: String, name: String, link: Boolean): this.type =  addResource(new File(location), name, link)
+  
+  
+  def deployName(file: File) = inFileNames(file)._1
   
 }

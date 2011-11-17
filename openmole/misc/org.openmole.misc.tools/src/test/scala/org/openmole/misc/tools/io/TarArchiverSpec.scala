@@ -55,4 +55,53 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
     archive.delete
     tmpDir.recursiveDelete
   }
+  
+  "Archive" should "preserve file permissions" in {
+    val tmpDir = Files.createTempDirectory("testArch").toFile
+    val file1 = new File(tmpDir, "file1")
+    val file2 = new File(tmpDir, "file2")
+    val file3 = new File(tmpDir, "dir/file1")
+    file3.getParentFile.mkdirs
+    
+    file1.createNewFile
+    file2.createNewFile
+    file3.createNewFile
+    
+    file1.setExecutable(true)
+    file1.setReadable(true)
+    file1.setWritable(true)
+    
+    file2.setExecutable(false)
+    file2.setReadable(true)
+    file2.setWritable(false)
+    
+    file3.setExecutable(true)
+    file3.setReadable(true)
+    file3.setWritable(true)
+    
+    val archive = Files.createTempFile("archiveTest", ".tar").toFile
+    archive.archiveDirWithRelativePathNoVariableContent(tmpDir)
+    
+    val extractDir = Files.createTempDirectory("testArchExtract").toFile
+    archive.extractDirArchiveWithRelativePath(extractDir)
+    
+    val file1Arch = new File(extractDir, "file1")
+    val file2Arch = new File(extractDir, "file2")
+    val file3Arch = new File(extractDir, "dir/file1")
+    
+    file1Arch.canExecute should equal (true)
+    file1Arch.canRead should equal (true)
+    file1Arch.canWrite should equal (true)
+    
+    file2Arch.canExecute should equal (false)
+    file2Arch.canRead should equal (true)
+    file2Arch.canWrite should equal (false)
+    
+    file3Arch.canExecute should equal (true)
+    file3Arch.canRead should equal (true)
+    file3Arch.canWrite should equal (true)
+    
+    tmpDir.recursiveDelete
+    extractDir.recursiveDelete
+  }
 }

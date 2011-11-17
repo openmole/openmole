@@ -30,6 +30,8 @@ import java.io.OutputStreamWriter
 import java.io.PrintWriter
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
+import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -44,6 +46,10 @@ import scala.io.Source
 
 object FileUtil {
 
+  val exec = 0x4
+  val write = 0x2
+  val read = 0x1
+  
   implicit val fileOrdering = new Ordering[File] {
     override def compare(left: File, right: File) = {
       left.getAbsolutePath.compareTo(right.getAbsolutePath)
@@ -140,11 +146,22 @@ object FileUtil {
       applyRecursive((f: File) => if(filter.accept(f)) ret += f)
       ret
     }
+       
+    
+    
+    def mode = 
+      (if(file.canExecute) exec else 0x0) + (if(file.canWrite) write else 0x0) + (if(file.canRead) read else 0x0)
+    
+    def mode_=(m: Int) = {
+      if((m & exec) != 0) file.setExecutable(true) else file.setExecutable(false)
+      if((m & write) != 0) file.setWritable(true) else file.setWritable(false)
+      if((m & read) != 0) file.setReadable(true) else file.setReadable(false)
+    }
     
     def applyRecursive(operation: File => Unit): Unit = 
       applyRecursive(operation, Set.empty)
 
-    def applyRecursive(operation: File => Unit, stopPath: Set[File]): Unit = {
+    def applyRecursive(operation: File => Unit, stopPath: Set[File], followSymLinks: Boolean = true): Unit = {
       val toProceed = new ListBuffer[File]
       toProceed += file
 
@@ -152,7 +169,7 @@ object FileUtil {
         val f = toProceed.remove(0)
         if (!stopPath.contains(f)) {
           operation(f)
-          if (f.isDirectory) {
+          if (f.isDirectory && (followSymLinks && !f.isSymbolicLink)) {
             for (child <- f.listFiles)  toProceed += child
           }
         }
@@ -224,9 +241,14 @@ object FileUtil {
         recursiveDelete
       }
     }
+    
+    def isSymbolicLink = {
+      val fs = FileSystems.getDefault
+      Files.isSymbolicLink(fs.getPath(file.getAbsolutePath))
+    }
   
     def recursiveDelete: Boolean = {
-      if(file.exists && file.isDirectory) {		
+      if(file.exists && file.isDirectory && !file.isSymbolicLink) {		
         for(f <- file.listFiles) f.recursiveDelete
       }
       file.delete
@@ -299,8 +321,19 @@ object FileUtil {
         } finally channelO close
       } finally channelI close
     }
+   
+    def createLink(target: String) = {
+      val fs = FileSystems.getDefault
+      val linkTo = fs.getPath(target)
+      val link = fs.getPath(file.getAbsolutePath)
+      Files.createSymbolicLink(link, linkTo)
+    }
   }
  
+  
+
+  
+
 }
 
 

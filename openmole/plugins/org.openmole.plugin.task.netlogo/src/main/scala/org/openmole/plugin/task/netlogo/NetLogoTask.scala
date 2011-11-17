@@ -54,14 +54,14 @@ abstract class NetLogoTask(
   val outputBinding = new ListBuffer[(String, IPrototype[_])]
     
   workspace match {
-    case Left((workspace, scriptName)) => addResource(workspace)
-    case Right(script) => addResource(script)
+    case Left((workspace, scriptName)) => addResource(workspace, false)
+    case Right(script) => addResource(script, true)
   }
 
   override def process(context: IContext): IContext = {
         
     val tmpDir = Workspace.newDir("netLogoTask")
-    prepareInputFiles(context, tmpDir)
+    val links = prepareInputFiles(context, tmpDir)
     
     val scriptPath = workspace match {
       case Left((workspace, scriptName)) => deployName(workspace) + "/" + scriptName
@@ -80,7 +80,7 @@ abstract class NetLogoTask(
 
       for (cmd <- launchingCommands) netLogo.command(VariableExpansion.expandData(context, cmd))
                 
-      fetchOutputFiles(context, tmpDir) ++ outputBinding.map {
+      fetchOutputFiles(context, tmpDir, links) ++ outputBinding.map {
         case(name, prototype) =>
           val outputValue = netLogo.report(name)
           if (!prototype.`type`.erasure.isArray) new Variable(prototype.asInstanceOf[IPrototype[Any]], outputValue)
