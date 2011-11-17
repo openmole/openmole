@@ -6,12 +6,12 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.data.IHookDataUI
+import org.openmole.ide.core.model.panel.IHookPanelUI
 
 trait IHookFactoryUI extends IFactoryUI{
-  override def displayName: String = coreClass.getSimpleName
+  override def displayName: String = ""
   
   def coreClass : Class[_]
   
-  def buildDataUI(executionManager: IExecutionManager): IHookDataUI
+  def buildPanelUI(executionManager: IExecutionManager): IHookPanelUI
 }

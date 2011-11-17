@@ -26,5 +26,7 @@ trait IPrototypeDataUI[T] extends IDataUI{
   
   override def entityType: String = PROTOTYPE
   
-  def buildPanelUI: IPrototypePanelUI[T ]
+  def buildPanelUI: IPrototypePanelUI[T]
+  
+  def dim: Int
 }

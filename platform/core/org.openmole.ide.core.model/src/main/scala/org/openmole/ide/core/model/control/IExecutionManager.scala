@@ -20,7 +20,6 @@ package org.openmole.ide.core.model.control
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -37,5 +36,5 @@ trait IExecutionManager {
   
   def printStream: PrintStream
   
-  def commitHook(hookPanelUI: IHookPanelUI)
+  def commitHook(hookName: String)
 }
