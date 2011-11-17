@@ -40,10 +40,8 @@ object ToStringHookPanelUI{
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
       
-      twocombrow.combo2.selection.reactions += {
-        case SelectionChanged(twocombrow.`combo1`)=>commit
-        case SelectionChanged(twocombrow.`combo2`)=>commit
-      }
+      twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
+      twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>commit}
       
       def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
       
