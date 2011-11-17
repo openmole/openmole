@@ -17,19 +17,14 @@
 
 package org.openmole.ide.plugin.hook.filemanagement
 
-import java.io.PrintStream
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import scala.collection.mutable.HashMap
+import org.openmole.plugin.hook.filemanagement.CopyFileHook
 
 class CopyFileHookFactoryUI extends IHookFactoryUI {
-  override def buildPanelUI(execution: IMoleExecution, 
-                            prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
-                            capsuleUI: ICapsuleUI, 
-                            capsule: ICapsule,
-                            printStream: PrintStream) = new CopyFileHookPanelUI(execution,prototypes,capsuleUI,capsule)
-}            
+  def buildPanelUI(executionManager: IExecutionManager) = new CopyFileHookPanelUI(executionManager)
+  
+  def coreClass = classOf[CopyFileHook]
+  
+  override def toString = "Copy file"
+}                     

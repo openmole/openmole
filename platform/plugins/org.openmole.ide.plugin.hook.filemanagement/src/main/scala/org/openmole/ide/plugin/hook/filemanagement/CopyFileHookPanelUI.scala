@@ -20,42 +20,107 @@ package org.openmole.ide.plugin.hook.filemanagement
 import java.io.File
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import scala.collection.mutable.HashMap
-import scala.swing.Alignment
+import org.openmole.ide.core.model.control.IExecutionManager
 import java.awt.Font
 import java.awt.Font._
-import scala.swing.BoxPanel
-import scala.swing.CheckBox
-import scala.swing.Label
-import scala.swing.Orientation
+import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField._
+import scala.swing.Panel
 import scala.swing.event.ButtonClicked
-import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.plugin.hook.filemanagement.CopyFileHook
+import scala.swing.event.SelectionChanged
 
-class CopyFileHookPanelUI(execution: IMoleExecution, 
-                          prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
-                          capsuleUI: ICapsuleUI, 
-                          capsule: ICapsule) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
-  xLayoutAlignment = 0.0F
-  yLayoutAlignment = 0.0F
-  var currentCopyFileHook= new HashMap[IPrototypeDataProxyUI,Option[CopyFileHook]]
-  
-  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach( 
-    p=> {if(p.dataUI.coreObject.`type`.erasure == classOf[File]) {
-        contents.append(copyHookPanel(p))
-      }})               
-
-  if (contents.size > 0) contents.insert(0,new Label("Save in File: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)})
-  private def copyHookPanel(dpu: IPrototypeDataProxyUI): BoxPanel = {
-    val cftf = new ChooseFileTextField("","Select a file path")
-    val cb = new CheckBox("Save " + dpu.dataUI.name +" in "){reactions+= {case ButtonClicked(cb) =>
-          if (selected) {currentCopyFileHook+= dpu-> Some(new CopyFileHook(execution,capsule,prototypes(dpu).asInstanceOf[IPrototype[File]],cftf.text))}
-          else currentCopyFileHook(dpu).get.release}}
-    listenTo(cb)
-    new BoxPanel(Orientation.Horizontal){xLayoutAlignment = 0; contents.append(cb,cftf)}
+object CopyFileHookPanelUI{
+  def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File],ICapsule] {
+    override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: Panel) = {
+      import row._
+      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(name,
+                                                                comboContentA,
+                                                                selectedA,
+                                                                inBetweenString1,
+                                                                comboContentB,
+                                                                selectedB,
+                                                                inBetweenString2,
+                                                                filePath,
+                                                                plus) {
+        override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.CopyFileHook")
+      }
+      twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
+      twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>commit}
+      twocombrow.refreshButton.reactions += {case ButtonClicked(twocombrow.`refreshButton`)=>commit}
+      
+      
+      def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.CopyFileHook")
+      
+      twocombrow
+    }
   }
 }
+
+import CopyFileHookPanelUI._
+
+class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IHookPanelUI{
+  var multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = None
+  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
+  
+  if (capsules.size>0) {
+    if (protosFromTask(capsules(0)).size>0){
+      val r =  new TwoCombosChooseFileTextFieldRowWidget("Save",
+                                                         protosFromTask(capsules(0)),
+                                                         protosFromTask(capsules(0))(0),
+                                                         "from",
+                                                         capsules,
+                                                         capsules(0),
+                                                         "in",
+                                                         "",
+                                                         NO_ADD)
+    
+      multiRow =  Some(new MultiTwoCombosChooseFileTextField(List(r),
+                                                             rowFactory(this),
+                                                             CLOSE_IF_EMPTY,
+                                                             NO_ADD))
+    }
+  }
+  
+  if (multiRow.isDefined) contents+= multiRow.get.panel
+    
+  def protosFromTask(c: ICapsule): List[IPrototype[File]] = {
+    c.outputs.map(_.prototype).foreach(println)
+    c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).foreach(println)
+    c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+  }
+  
+  def saveContent = {
+    if (multiRow.isDefined) multiRow.get.content.map{c=>new CopyFileHookDataUI(executionManager,(c._2,c._1,c._3))}
+    else List()
+  }
+  
+  def addHook = if (multiRow.isDefined) multiRow.get.showComponent
+}
+
+//class CopyFileHookPanelUI(execution: IMoleExecution, 
+//                          prototypes: HashMap[IPrototypeDataProxyUI,IPrototype[_]], 
+//                          capsuleUI: ICapsuleUI, 
+//                          capsule: ICapsule) extends BoxPanel(Orientation.Vertical) with IHookPanelUI{
+//  xLayoutAlignment = 0.0F
+//  yLayoutAlignment = 0.0F
+//  var currentCopyFileHook= new HashMap[IPrototypeDataProxyUI,Option[CopyFileHook]]
+//  
+//  capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach( 
+//    p=> {if(p.dataUI.coreObject.`type`.erasure == classOf[File]) {
+//        contents.append(copyHookPanel(p))
+//      }})               
+//
+//  if (contents.size > 0) contents.insert(0,new Label("Save in File: "){xAlignment = Alignment.Left; font = new Font("Ubuntu", BOLD,font.getSize)})
+//  private def copyHookPanel(dpu: IPrototypeDataProxyUI): BoxPanel = {
+//    val cftf = new ChooseFileTextField("","Select a file path")
+//    val cb = new CheckBox("Save " + dpu.dataUI.name +" in "){reactions+= {case ButtonClicked(cb) =>
+//          if (selected) {currentCopyFileHook+= dpu-> Some(new CopyFileHook(execution,capsule,prototypes(dpu).asInstanceOf[IPrototype[File]],cftf.text))}
+//          else currentCopyFileHook(dpu).get.release}}
+//    listenTo(cb)
+//    new BoxPanel(Orientation.Horizontal){xLayoutAlignment = 0; contents.append(cb,cftf)}
+//  }
+//}
