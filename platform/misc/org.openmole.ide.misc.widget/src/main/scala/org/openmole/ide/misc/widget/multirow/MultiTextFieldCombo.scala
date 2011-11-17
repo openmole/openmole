@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.ComboBox
 import scala.swing.Panel
 import scala.swing.TextField
@@ -47,18 +47,19 @@ import MultiTextFieldCombo._
 class MultiTextFieldCombo[B] (rowName: String,
                               initValues: List[(String,B)],
                               comboContent: List[B],
-                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]]) extends MultiWidget(if (initValues.isEmpty) 
-                                                                                                            List(new TextFieldComboRowWidget(rowName,
-                                                                                                                                             "",
-                                                                                                                                             comboContent, 
-                                                                                                                                             comboContent(0)))
-                                                                                                          else initValues.map{
+                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]],
+                              minus: Minus) extends MultiWidget(if (initValues.isEmpty) 
+                                List(new TextFieldComboRowWidget(rowName,
+                                                                 "",
+                                                                 comboContent, 
+                                                                 comboContent(0)))
+                                                                else initValues.map{
     case(s,b)=>new TextFieldComboRowWidget(rowName,s,comboContent,b)},
-                                                                                                          factory,
-                                                                                                          2){
+                                                                factory,
+                                                                2,minus){
 
   def this(rName: String,
            iValues: List[(String,B)],
-           cContent: List[B]) = this (rName,iValues,cContent, new Factory[B])
-def content = rowWidgets.map(_.content).filterNot(_._1.isEmpty).toList 
+           cContent: List[B]) = this (rName,iValues,cContent, new Factory[B],NO_EMPTY)
+  def content = rowWidgets.map(_.content).filterNot(_._1.isEmpty).toList 
 }

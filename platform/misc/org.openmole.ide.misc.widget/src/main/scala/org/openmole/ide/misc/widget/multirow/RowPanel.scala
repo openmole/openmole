@@ -19,16 +19,18 @@ package org.openmole.ide.misc.widget.multirow
 
 import javax.swing.JPanel
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.Component
-import scala.swing.Label
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing._
 
-class RowPanel(rowName: String,val components: List[Component]) extends MigPanel("wrap,insets -2 5 -2 5") with IRowPanel{
+class RowPanel(rowName: String,
+               val components: List[Component],
+               val plusAllowed: Plus= ADD) extends MigPanel("wrap,insets -2 5 -2 5") with IRowPanel{
   var extendedPanel: Option[JPanel] = None
   
   contents+= new MigPanel(""){
     contents+= new Label(rowName)
     components.foreach(contents+=)
-    contents += addButton
+    if (plusAllowed == ADD) contents += addButton
     contents += removeButton
   }
   

@@ -12,12 +12,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.ComboBox
 import scala.swing.Panel
 import scala.swing.TextField
@@ -47,7 +48,8 @@ import MultiComboTextField._
 class MultiComboTextField[A] (rowName: String,
                               initValues: List[(A,String)],
                               comboContent: List[A],
-                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]]) extends MultiWidget(
+                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
+                              minus: Minus) extends MultiWidget(
   if (initValues.isEmpty) 
     List(new ComboTextFieldRowWidget(rowName,
                                      comboContent, 
@@ -56,11 +58,11 @@ class MultiComboTextField[A] (rowName: String,
   else initValues.map{
     case(a,s)=>new ComboTextFieldRowWidget(rowName,comboContent,a,s)},
   factory,
-  2)
+  2,minus)
 {
   def this(rName: String,
            iValues: List[(A,String)],
-           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A])
+           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A],NO_EMPTY)
 
   def content = rowWidgets.map(_.content).filterNot(_._2.isEmpty).toList 
 }

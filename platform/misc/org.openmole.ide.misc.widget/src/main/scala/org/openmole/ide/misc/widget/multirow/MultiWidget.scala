@@ -20,31 +20,52 @@ package org.openmole.ide.misc.widget.multirow
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashSet
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.misc.widget.multirow.RowWidget._
 
-abstract class MultiWidget[T<:IRowWidget](rWidgets: List[T], factory: IRowWidgetFactory[T],nbComponent: Int){
+object MultiWidget extends Enumeration {
+
+  class Minus(val name: String) extends Val(name)
+
+  val NO_EMPTY = new Minus("NO_EMPTY")
+  val CLOSE_IF_EMPTY = new Minus("CLOSE_IF_EMPTY")
+}
+
+import MultiWidget._
+class MultiWidget[T<:IRowWidget](rWidgets: List[T],
+                                          factory: IRowWidgetFactory[T],
+                                          nbComponent: Int,
+                                          allowEmpty: Minus= NO_EMPTY){
+  val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel =  new MigPanel("wrap "+(nbComponent + 3).toString +", insets -2 5 -2 5")
+  val panel =  new MigPanel("wrap "+(nbComponent + 2 + {if(rWidgets.head.plusAllowed == ADD) 1 else 0}).toString +", insets -2 5 -2 5")
   
-  rWidgets.foreach(r=>showComponents(addRow(factory.apply(r,panel))))
+  rWidgets.foreach(r=>showComponent(addRow(factory.apply(r,panel))))
+  
+  def addRow: T = addRow(factory.apply(specimen,panel))
   
   def addRow(rowWidget: T):T = {
     rowWidgets+= rowWidget
+    println ("add to contents : " + rowWidgets.size)
     
     panel.listenTo(rowWidget.panel.`removeButton`)
-    panel.reactions += {case ButtonClicked(rowWidget.panel.`removeButton`) => if (rowWidgets.size > 1 ) {
-          hideComponents(rowWidget)
+    panel.reactions += {case ButtonClicked(rowWidget.panel.`removeButton`) => if (allowEmpty == CLOSE_IF_EMPTY || 
+                                                                                  (allowEmpty == NO_EMPTY && rowWidgets.size > 1) ) {
+          hideComponent(rowWidget)
           rowWidgets-= rowWidget
+          rowWidget.doOnClose
         }
     }
     
     panel.listenTo(rowWidget.panel.`addButton`)
-    panel.reactions += {case ButtonClicked(rowWidget.panel.`addButton`) => showComponents(addRow(factory.apply(rowWidget,panel)))}
+    panel.reactions += {case ButtonClicked(rowWidget.panel.`addButton`) => showComponent(addRow(factory.apply(rowWidget,panel)))}
     rowWidget
   }
   
-  private def showComponents(rowWidget: T) = {panel.contents+=(rowWidget.panel,"wrap");refresh}
+  def showComponent: Unit = showComponent(addRow) 
   
-  private def hideComponents(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
+  private def showComponent(rowWidget: T): Unit = {println("show c " + rowWidget);panel.contents+=(rowWidget.panel,"wrap");refresh}
+  
+  private def hideComponent(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
   
   def refresh = {
     panel.repaint

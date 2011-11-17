@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,20 +11,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.multirow.RowWidget._
+object RowWidget  extends Enumeration {
 
-trait IRowWidget {
-  def name: String
-  
-  val panel: IRowPanel
-  
-  val plusAllowed: Plus = ADD
-  
-  def doOnClose: Unit = {}
+  class Plus(val name: String) extends Val(name)
+  val ADD = new Plus("ADD")
+  val NO_ADD = new Plus("NO ADD")
 }

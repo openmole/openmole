@@ -17,10 +17,10 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ChooseFileTextField
-import scala.swing.Component
-import scala.swing.FileChooser.SelectionMode._
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing.FileChooser._
 import scala.swing.Panel
 
 object  MultiChooseFileTextField {
@@ -35,7 +35,7 @@ object  MultiChooseFileTextField {
                                      val initValue: String, 
                                      val chooserTitle: String="", 
                                      val chooserDescription: Option[String]=None, 
-                                     val selectionMode: Value= FilesOnly,
+                                     val selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
                                      val extensions: Option[String]= None) extends IRowWidget1[String]{
     val fileTextField = new ChooseFileTextField(initValue,chooserTitle,chooserDescription,selectionMode,extensions)
     
@@ -51,24 +51,26 @@ class MultiChooseFileTextField(rowName: String,
                                initValues: List[String], 
                                chooserTitle: String="", 
                                chooserDescription: Option[String]=None, 
-                               selectionMode: Value= FilesOnly,
+                               selectionMode: SelectionMode.Value= SelectionMode.FilesOnly,
                                extensions: Option[String]= None,
-                               factory: IRowWidgetFactory[ChooseFileTextFieldRowWidget]) extends MultiWidget(if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget(rowName,"",chooserTitle,chooserDescription,selectionMode,extensions)) 
-                                                                                                             else initValues.map(iv=>new ChooseFileTextFieldRowWidget(rowName,iv,chooserTitle,chooserDescription,selectionMode,extensions)),
-                                                                                                             factory,1) {  
+                               factory: IRowWidgetFactory[ChooseFileTextFieldRowWidget],
+                               minus: Minus) extends MultiWidget(if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget(rowName,"",chooserTitle,chooserDescription,selectionMode,extensions)) 
+                                                                 else initValues.map(iv=>new ChooseFileTextFieldRowWidget(rowName,iv,chooserTitle,chooserDescription,selectionMode,extensions)),
+                                                                 factory,1,minus) {  
   def this(rName:String,
            iValues: List[String], 
            cTitle: String, 
            cDescription: Option[String], 
-           sMode: Value,
+           sMode: SelectionMode.Value,
            exts: Option[String]) = this(rName,
-                                        iValues,
-                                        cTitle,
-                                        cDescription,
-                                        sMode,
-                                        exts,
-                                        new Factory)
-  def this(rName:String,iValues: List[String])= this (rName,iValues,"",None,FilesOnly,None)
+                            iValues,
+                            cTitle,
+                            cDescription,
+                            sMode,
+                            exts,
+                            new Factory,
+                            NO_EMPTY)
+  def this(rName:String,iValues: List[String])= this (rName,iValues,"",None,SelectionMode.FilesOnly,None)
   def content = rowWidgets.map(_.content).toList 
 }
 
