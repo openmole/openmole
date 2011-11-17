@@ -56,7 +56,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach{f=>hookMenu.contents+= new MenuItem(new AddHookRowAction(f))}
   val menuBar = new MenuBar{contents.append(hookMenu,groupingMenu)}
   menuBar.minimumSize = new Dimension(menuBar.size.width,30)
-  val hookPanel = new MigPanel("wrap"){contents+= menuBar}
+  val hookPanel = new MigPanel(""){contents+= (menuBar,"wrap")}
   
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)
