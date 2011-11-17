@@ -40,8 +40,8 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[l
   
   override def saveContent(name: String):ITaskDataUI = new GroovyTaskDataUI(name,
                                                                             codeTextArea.text,
-                                                                            libMultiTextField.content,
-                                                                            pluginMultiTextField.content)
+                                                                            libMultiTextField.content.filterNot(_.isEmpty),
+                                                                            pluginMultiTextField.content.filterNot(_.isEmpty))
 }
 
 //  val editorPane= new JEditorPane

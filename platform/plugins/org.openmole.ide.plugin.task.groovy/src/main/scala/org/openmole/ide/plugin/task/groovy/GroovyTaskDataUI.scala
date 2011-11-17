@@ -17,7 +17,7 @@ class GroovyTaskDataUI(val name: String,
   override def coreObject = {
     val gt= new GroovyTask(name,code) 
     libs.foreach(gt.addLib) 
-    plugins.foreach(gt.addPlugin)
+    plugins.foreach{gt.addPlugin}
     gt}
   
   override def coreClass= classOf[GroovyTask]
