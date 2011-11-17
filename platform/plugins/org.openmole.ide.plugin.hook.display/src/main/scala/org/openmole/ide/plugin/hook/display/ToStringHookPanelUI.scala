@@ -55,18 +55,20 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
   
   if (capsules.size>0){
-    val r =  new TwoCombosRowWidget("Display",
-                                    protosFromTask(capsules(0)),
-                                    protosFromTask(capsules(0))(0),
-                                    capsules,
-                                    capsules(0),
-                                    "from ",
-                                    NO_ADD)
+    if (protosFromTask(capsules(0)).size>0){
+      val r =  new TwoCombosRowWidget("Display",
+                                      protosFromTask(capsules(0)),
+                                      protosFromTask(capsules(0))(0),
+                                      capsules,
+                                      capsules(0),
+                                      "from ",
+                                      NO_ADD)
     
-    multiRow =  Some(new MultiTwoCombos(List(r),
-                                        rowFactory(this),
-                                        CLOSE_IF_EMPTY,
-                                        NO_ADD))
+      multiRow =  Some(new MultiTwoCombos(List(r),
+                                          rowFactory(this),
+                                          CLOSE_IF_EMPTY,
+                                          NO_ADD))
+    }
   }
   
   if (multiRow.isDefined) contents+= multiRow.get.panel
