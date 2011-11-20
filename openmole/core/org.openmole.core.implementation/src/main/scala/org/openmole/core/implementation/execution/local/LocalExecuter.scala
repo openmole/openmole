@@ -38,8 +38,8 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
   override def run = {
     
     while (!stop) {
+      val executionJob = environment.takeNextjob
       try {
-        val executionJob = environment.takeNextjob
         val job = executionJob.job
         executionJob.state = ExecutionState.RUNNING
         val running = System.currentTimeMillis
@@ -62,7 +62,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
       } catch {
         case (e: InterruptedException) => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
         case e => logger.log(SEVERE, null, e)
-      }
+      } finally executionJob.state = ExecutionState.KILLED
     }
   }
 

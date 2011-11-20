@@ -24,12 +24,13 @@ object ToCSV {
 
   def toColumns(moleJob: IMoleJob): Array[String] = {
     val timeStamps = moleJob.timeStamps
-    val toWrite = new Array[String]((timeStamps.size) + 2)
+    val toWrite = new Array[String]((timeStamps.size) + 3)
         
     toWrite(0) = moleJob.task.name
     val (created, timeStampsStr) = toCSV(timeStamps)
     toWrite(1) = created.toString
-    timeStampsStr.zipWithIndex.foreach { case(timeStamp, i) => toWrite(i + 2) = timeStamp}
+    toWrite(2) = moleJob.id.toString
+    timeStampsStr.zipWithIndex.foreach { case(timeStamp, i) => toWrite(i + 3) = timeStamp}
     toWrite
   }
   

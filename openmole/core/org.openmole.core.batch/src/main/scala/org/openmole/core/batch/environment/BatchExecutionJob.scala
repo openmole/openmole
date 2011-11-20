@@ -69,17 +69,20 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     
   private def updateAndGetState = 
     if (killed.get) KILLED
-    else batchJob match {
-      case None => READY
-      case Some(batchJob) =>
-        val oldState = batchJob.state
-        val newState = batchJob.updateState
-         /* if (!oldState.isFinal) batchJob.updateState
-          else oldState*/
-
-        if(oldState != newState && newState == KILLED) kill
-        state
-    }
+  else batchJob match {
+    case None => READY
+    case Some(batchJob) =>
+      val oldState = batchJob.state
+      val newState = batchJob.updateState
+      /* if (!oldState.isFinal) batchJob.updateState
+       else oldState*/
+      if(oldState != newState) {
+        timeStamps += new TimeStamp(state)
+        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, oldState))
+      }
+      //if(oldState != newState && newState == KILLED) kill
+      state
+  }
 
   override def state =
     if (killed.get) KILLED 
@@ -106,7 +109,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
             } else incrementedDelay
           case Some(batchJob) =>
             val newState = updateAndGetState
-            if(newState != oldState) timeStamps += new TimeStamp(newState)
+ 
             newState match {
               case READY => throw new InternalProcessingError("Bug, it should never append.")
               case (SUBMITTED | RUNNING | KILLED) => {}
@@ -114,7 +117,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
               case DONE => tryFinalise(batchJob)
             }
             if(oldState != newState) {
-              EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
         }
@@ -179,7 +181,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       }
     }
 
-  def kill = 
+  def kill = {
+    val oldState = state
     if (!killed.getAndSet(true)) {
       try {
         copyToEnvironmentExecFuture.cancel(true)
@@ -189,12 +192,17 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
           case None =>
         }       
         clean
-      } finally batchJob match {
-        case Some(bj) => 
-          ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
-        case None =>
+      } finally {
+        timeStamps += new TimeStamp(KILLED)
+        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(KILLED, oldState))
+        batchJob match {
+          case Some(bj) => 
+            ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          case None =>
+        }
       }
     }
+  }
 
   def resubmit = {
     batchJob = None
