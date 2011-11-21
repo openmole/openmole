@@ -19,16 +19,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>ccl.northwestern.edu</groupId>
-            <artifactId>netlogo</artifactId>
-	    <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
-	    <scope>provided</scope>
+           <groupId>ccl.northwestern.edu</groupId>
+           <artifactId>netlogo</artifactId>
+	   <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
+	   <scope>provided</scope>
         </dependency>
         <dependency>
            <groupId>org.picocontainer</groupId>
            <artifactId>picocontainer</artifactId>
-           <version>2.11.1</version>
-	    <scope>provided</scope>
+           <version>2.13.6</version>
+	   <scope>provided</scope>
         </dependency>
         <dependency>
            <groupId>org.scala-lang</groupId>
