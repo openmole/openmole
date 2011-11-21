@@ -28,7 +28,7 @@ import org.openmole.misc.workspace.Workspace
 
 class PasswordListener extends EventListener[Workspace] {
   override def triggered(obj: Workspace, event: Event[Workspace]): Unit = {
-    /*event match {
+    event match {
       case event: Workspace.PasswordRequired =>
         try {
           val dd = new DialogDescriptor(PasswordDialog.panel.peer, "Preferences access")
@@ -41,7 +41,7 @@ class PasswordListener extends EventListener[Workspace] {
           case x => println(" other exception " + x)
         }
       case _ => 
-    }*/
+    }
 
   }
 }
