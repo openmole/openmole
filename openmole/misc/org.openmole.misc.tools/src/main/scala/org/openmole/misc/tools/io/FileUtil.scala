@@ -66,10 +66,7 @@ object FileUtil {
     
     def copy(to: OutputStream): Unit = {
       val buffer = new Array[Byte](DefaultBufferSize)
-      Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach { 
-        count => 
-        to.write(buffer, 0, count)
-      }
+      Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
     }
 
     def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
@@ -77,7 +74,7 @@ object FileUtil {
       val executor = Executors.newSingleThreadExecutor
       val reader = new ReaderRunnable(buffer, is, maxRead)
     
-      Stream.continually {
+      Iterator.continually {
         val futureRead = executor.submit(reader)
             
         try futureRead.get(timeout, TimeUnit.MILLISECONDS)

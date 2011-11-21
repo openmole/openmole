@@ -72,17 +72,14 @@ object TarArchiver {
         val dest = new File(baseDir, e.getName)
         if(!e.getLinkName.isEmpty) {
           dest.createLink(e.getLinkName)
-          /* val linkTo = fs.getPath(e.getLinkName)
-           val link = fs.getPath(dest.getAbsolutePath)
-           Files.createSymbolicLink(link, linkTo)*/
         }
         else if(e.isDirectory) {
           dest.mkdirs
         } else {
-          dest.getParentFile.mkdirs
-          val fos = new FileOutputStream(dest)
-          try tis.copy(fos) finally fos.close
-        }
+            dest.getParentFile.mkdirs
+            val fos = new FileOutputStream(dest)
+            try tis.copy(fos) finally fos.close
+          }
         dest.mode = e.getMode
         e = tis.getNextEntry
       }
@@ -102,8 +99,6 @@ object TarArchiver {
       val cur = toArchive.pop
       if(Files.isSymbolicLink(fs.getPath(cur._1.getAbsolutePath)))  links ::= cur._1 -> cur._2
       else {       
-        
-        
         val e =  if (cur._1.isDirectory) {
           for (name <- cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2  + '/' + name))
           new TarEntry(cur._2 + '/')
@@ -112,9 +107,7 @@ object TarArchiver {
           e.setSize(cur._1.length)
           e
         }
-        // } else {
-   
-          
+
         e.setMode(cur._1.mode)
         additionnalCommand(e)
         tos.putNextEntry(e)
