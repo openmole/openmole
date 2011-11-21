@@ -29,6 +29,7 @@ import org.openmole.core.batch.jsaga.JSAGASessionService
 import GliteAuthentication._
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.executorservice.ExecutorType
+import scala.ref.WeakReference
 
 abstract class Certificate(cypheredPassword: String) extends GliteAuthenticationMethod {
   
@@ -38,13 +39,13 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
   
   private def getTime =
     try  UDuration.toInt(getTimeString) * 1000
-  catch {
-    case (ex: ParseException) => throw new UserBadDataError(ex)
-  }
+    catch {
+      case (ex: ParseException) => throw new UserBadDataError(ex)
+    }
   
   def password =  
     if(cypheredPassword == null) ""
-  else Workspace.decrypt(cypheredPassword)
+    else Workspace.decrypt(cypheredPassword)
    
   override def init(authentication: GliteAuthentication) = {
     import authentication._
@@ -80,7 +81,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
     _init(ctx)
     
     val interval = (getTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
-    Updater.delay(new ProxyChecker(ctx), ExecutorType.OWN, interval)
+    Updater.delay(new ProxyChecker(ctx, proxyDuration, new WeakReference(authentication)), ExecutorType.OWN, interval)
         
     (ctx, proxyDuration)
   }

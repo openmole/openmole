@@ -21,15 +21,20 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.ogf.saga.context.Context
 import org.openmole.misc.updater.IUpdatable
-import org.openmole.core.batch.jsaga.JSAGASessionService
+import scala.ref.WeakReference
 
-class ProxyChecker(context: Context) extends IUpdatable {
+class ProxyChecker(context: Context, duration: Option[Int], authentication: WeakReference[GliteAuthentication]) extends IUpdatable {
 
-    override def update: Boolean = {
-        try GliteAuthentication.addContext(context)
+  override def update: Boolean =
+    authentication.get match {
+      case Some(auth) => 
+        try auth.reinit(context, duration)
         catch {
           case(ex: Throwable) => Logger.getLogger(classOf[ProxyChecker].getName).log(Level.SEVERE, "Error while renewing the proxy.", ex);
         } 
         true
+      case None =>
+        false
     }
+  
 }

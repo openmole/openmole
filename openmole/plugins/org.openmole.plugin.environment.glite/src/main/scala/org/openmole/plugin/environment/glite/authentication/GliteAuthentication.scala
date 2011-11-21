@@ -141,13 +141,16 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
       }
     
     val (ctx, time) = authenticationMethod.init(this)
-    time match {
-      case Some(t) => 
-        _proxyExpiresTime = System.currentTimeMillis + t
+    reinit(ctx, time)
+  }
+  
+  def reinit(context: Context, duration: Option[Int]) = {
+    duration match {
+      case Some(t) => _proxyExpiresTime = System.currentTimeMillis + t
       case None =>
     }
     
-    addContext(ctx)
+    addContext(context)
   }
   
   def getAuthenticationMethodFromPrefences = Workspace.preference(CertificateType) match {
