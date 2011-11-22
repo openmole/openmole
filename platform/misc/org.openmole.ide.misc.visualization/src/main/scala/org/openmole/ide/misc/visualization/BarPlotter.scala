@@ -31,6 +31,8 @@ import org.jfree.chart.renderer.category.BarRenderer
 import org.jfree.data.category.DefaultCategoryDataset
 import org.openmole.core.model.execution.ExecutionState._
 import scala.collection.JavaConversions._
+import java.awt.Paint
+import java.awt.Paint._
 
 class BarPlotter(title: String, val data: Map[String,Map[ExecutionState, Double]]){
   def this(t: String)  = this(t,Map.empty)
@@ -65,13 +67,15 @@ class BarPlotter(title: String, val data: Map[String,Map[ExecutionState, Double]
     barRenderer.setMaximumBarWidth(0.1)
     // dataSet.getColumnKeys.zipWithIndex.foreach {case (k,i) => barRenderer.setSeriesPaint(}
     import PlotterColor._
+   
     barRenderer.setSeriesPaint(READY_COLOR._2, READY_COLOR._1)
     barRenderer.setSeriesPaint(SUBMITTED_COLOR._2, SUBMITTED_COLOR._1)
     barRenderer.setSeriesPaint(RUNNING_COLOR._2, RUNNING_COLOR._1)
     barRenderer.setSeriesPaint(DONE_COLOR._2,DONE_COLOR._1)
     barRenderer.setSeriesPaint(FAILED_COLOR._2,FAILED_COLOR._1)
     barRenderer.setSeriesPaint(KILLED_COLOR._2,KILLED_COLOR._1)
-    barRenderer.setShadowVisible(true)
+    barRenderer.setShadowVisible(false)
+    plot.setRenderer(barRenderer)
         
 //    val colorList = List[Color](Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK)
 //    dataSet.getColumnKeys.zipWithIndex.foreach{case (k,i) => k match {
