@@ -50,6 +50,6 @@
         <module>org.openmole.ide.plugin.environment.glite</module>
         <module>org.openmole.ide.plugin.environment.desktopgrid</module>
         <module>org.openmole.ide.plugin.hook.display</module>
-        <!--module>org.openmole.ide.plugin.hook.filemanagement</module-->
+        <module>org.openmole.ide.plugin.hook.filemanagement</module>
     </modules>
 </project>
