@@ -29,8 +29,4 @@ class ToStringHookDataUI(executionManager: IExecutionManager,
                                              toBeHooked._1, 
                                              executionManager.printStream, 
                                              toBeHooked._2)
- 
-  override def coreClass = classOf[Object]
-  
-  override def buildPanelUI = new ToStringHookPanelUI(executionManager)
 }

@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.hook.display
 
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -28,6 +29,8 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.misc.widget.MigPanel
+import scala.swing.ComboBox
+import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
@@ -35,22 +38,26 @@ object ToStringHookPanelUI{
   def rowFactory(hookpanel: ToStringHookPanelUI) = new Factory[IPrototype[_],ICapsule] {
     override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: Panel) = {
       import row._
-      val twocombrow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
+      val twocomborow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
         new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
       
-      twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
-      twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>commit}
+      twocomborow.combo1.selection.reactions += {case SelectionChanged(twocomborow.`combo1`)=>commit}
+      twocomborow.combo2.selection.reactions += {case SelectionChanged(twocomborow.`combo2`)=>
+         // To be uncommented when the ComboBox is fixed 
+        // twocomborow.combo1.peer.setModel(ComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
+          commit}
       
-      def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
+      def commit = 
+        hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
       
-      twocombrow
+      twocomborow
     }
   }
 }
 import ToStringHookPanelUI._
-class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IHookPanelUI{
+class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
   var multiRow : Option[MultiTwoCombos[IPrototype[_],ICapsule]] = None
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
   
@@ -71,9 +78,15 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPa
     }
   }
   
-  if (multiRow.isDefined) contents+= multiRow.get.panel
+  if (multiRow.isDefined) {
+    contents+= (new Label("Display prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
+    contents+= multiRow.get.panel
+  }
     
-  def protosFromTask(c: ICapsule): List[IPrototype[_]] = c.outputs.map(_.prototype).toList
+  def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
+    executionManager.prototypeMapping.values.toList
+    // To be uncommented when the ComboBox is fixed 
+    //c.outputs.map(_.prototype).toList
   
   def saveContent = {
     if (multiRow.isDefined) multiRow.get.content.map{c=>new ToStringHookDataUI(executionManager,(c._2,c._1))}
