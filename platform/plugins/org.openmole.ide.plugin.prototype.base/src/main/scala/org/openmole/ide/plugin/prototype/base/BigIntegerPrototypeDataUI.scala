@@ -22,11 +22,13 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
 class BigIntegerPrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[BigInt](d){
-  override def coreClass = classOf[IPrototype[BigInt]]
+  def displayTypedName = displayName + " : BigInt"
   
-  override def coreObject = toArray(new Prototype(name,classOf[BigInt]),dim).asInstanceOf[IPrototype[BigInt]]
+  def coreClass = classOf[IPrototype[BigInt]]
   
-  override def imagePath = "img/biginteger.png"
+  def coreObject = toArray(new Prototype(name,classOf[BigInt]),dim).asInstanceOf[IPrototype[BigInt]]
   
-  override def buildPanelUI = new BigIntegerPrototypePanelUI(this)
+  def imagePath = "img/biginteger.png"
+  
+  def buildPanelUI = new BigIntegerPrototypePanelUI(this)
 }

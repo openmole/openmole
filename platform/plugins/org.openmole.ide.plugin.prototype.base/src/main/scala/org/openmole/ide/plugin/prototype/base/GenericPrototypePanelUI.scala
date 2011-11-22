@@ -17,30 +17,16 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-
-import java.awt.BorderLayout
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.BorderPanel
-import scala.swing.CheckBox
 import scala.swing.Label
-import scala.swing.Panel
 import scala.swing.TextField
-import scala.swing.event.ButtonClicked
 
-abstract class GenericPrototypePanelUI[T](d: Int) extends MigPanel("") with IPrototypePanelUI[T] {
+abstract class GenericPrototypePanelUI[T](d: Int=0) extends MigPanel("") with IPrototypePanelUI[T] {
   val dimTextField= new TextField(if(d>0) d.toString else "",2)
-  val cb = new CheckBox("Array"){reactions+= {case ButtonClicked(cb) =>
-        dimTextField.enabled = selected}
-  }
-    
-  if (d<=0) cb.selected = false
   
-  def toto: Panel = new BorderPanel {add(new Label("border"),BorderPanel.Position.North)}
-     def tata = "tata in GenericPrototypePanelUI"
-    
-    contents+= cb
-    contents += dimTextField
+  contents += new Label("Dimension")
+  contents += dimTextField
  
   def dim= dimTextField.text 
 }

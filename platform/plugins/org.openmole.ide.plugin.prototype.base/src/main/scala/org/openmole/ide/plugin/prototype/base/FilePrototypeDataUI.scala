@@ -22,11 +22,13 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
 class FilePrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[File](d){
-  override def coreClass = classOf[IPrototype[File]]
+  def displayTypedName = displayName + " : File"
   
-  override def coreObject = toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]
+   def coreClass = classOf[IPrototype[File]]
   
-  override def imagePath = "img/file.png"
+   def coreObject = toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]
   
-  override def buildPanelUI = new FilePrototypePanelUI(this)
+   def imagePath = "img/file.png"
+  
+   def buildPanelUI = new FilePrototypePanelUI(this)
 }

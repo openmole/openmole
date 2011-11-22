@@ -20,6 +20,8 @@ package org.openmole.ide.core.model.data
 trait IDataUI{
   def name: String
   
+  def displayName: String = name
+  
   def entityType: String
   
   def coreClass: Class[_]

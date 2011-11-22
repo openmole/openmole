@@ -17,17 +17,18 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
 class IntegerPrototypeDataUI(val name: String, d: Int = 0) extends GenericPrototypeDataUI[Int](d){
-  override def coreClass = classOf[IPrototype[Int]]
+  def displayTypedName = displayName + " : Int"
   
-  override def coreObject = toArray(new Prototype(name,classOf[Int]),dim).asInstanceOf[IPrototype[Int]]
+  def coreClass = classOf[IPrototype[Int]]
   
-  override def imagePath = "img/integer.png"
+  def coreObject = toArray(new Prototype(name,classOf[Int]),dim).asInstanceOf[IPrototype[Int]]
   
-  override def buildPanelUI = new IntegerPrototypePanelUI(this)
+  def imagePath = "img/integer.png"
+  
+  def buildPanelUI = new IntegerPrototypePanelUI(this)
 }

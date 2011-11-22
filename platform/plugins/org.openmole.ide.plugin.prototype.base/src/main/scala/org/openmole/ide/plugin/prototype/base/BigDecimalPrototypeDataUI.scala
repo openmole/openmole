@@ -23,11 +23,13 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
 class BigDecimalPrototypeDataUI(val name: String, d: Int=0) extends GenericPrototypeDataUI[scala.BigDecimal](d){
-  override def coreClass = classOf[IPrototype[BigDecimal]]
+  def displayTypedName = displayName + " : BigDecimal"
   
-  override def coreObject= toArray(new Prototype(name,classOf[scala.BigDecimal]),dim).asInstanceOf[IPrototype[scala.BigDecimal]]
+  def coreClass = classOf[IPrototype[BigDecimal]]
   
-  override def imagePath = "img/bigdecimal.png"
+  def coreObject= toArray(new Prototype(name,classOf[scala.BigDecimal]),dim).asInstanceOf[IPrototype[scala.BigDecimal]]
   
-  override def buildPanelUI = new BigDecimalPrototypePanelUI(this)
+  def imagePath = "img/bigdecimal.png"
+  
+  def buildPanelUI = new BigDecimalPrototypePanelUI(this)
 }

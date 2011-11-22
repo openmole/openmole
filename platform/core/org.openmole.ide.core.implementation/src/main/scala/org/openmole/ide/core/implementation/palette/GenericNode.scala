@@ -30,7 +30,7 @@ import org.openmole.ide.misc.image.ImageTool
 
 class GenericNode(dataFlavor: DataFlavor,val dataProxy: IDataProxyUI) extends AbstractNode(Children.LEAF, Lookups.fixed(Array[Object](dataFlavor))) {
   setIconBaseWithExtension(dataProxy.dataUI.imagePath)
-  setName(dataProxy.dataUI.name)
+  setName(dataProxy.dataUI.displayName)
   setValue(PaletteController.ATTR_IS_READONLY, false)
   
   override def drag: Transferable = {
