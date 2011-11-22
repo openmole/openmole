@@ -67,24 +67,24 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
 
     
-  private def updateAndGetState = 
+  private def updateAndGetState = {
+    val oldState = state
     if (killed.get) KILLED
   else batchJob match {
     case None => READY
     case Some(batchJob) =>
-      val oldState = state
+
       batchJob.updateState
       val newState = state
       /* if (!oldState.isFinal) batchJob.updateState
        else oldState*/
       if(oldState != newState) {
-        timeStamps += new TimeStamp(newState)
-        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, oldState))
+        
       }
       //if(oldState != newState && newState == KILLED) kill
       state
   }
-
+  }
   override def state =
     if (killed.get) KILLED 
     else batchJob match {
@@ -93,8 +93,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     }
 
   override def update: Boolean = {
+    val oldState = state
     try {
-      val oldState = state
       if(oldState != KILLED) {
         def incrementedDelay = {
           val newDelay = _delay + Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
@@ -121,7 +121,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
         }
+        
       }
+
     } catch {
       case (e: TemporaryErrorException) => logger.log(FINE, "Temporary error durring job update.", e)
       case (e: CancellationException) => logger.log(FINE, "Operation interrupted cause job was killed.", e)
@@ -132,7 +134,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         logger.log(WARNING, "Error in job update: " + e.getMessage)
         kill
     }
-
+    val newState = state
+    if(oldState != newState) {
+      timeStamps += new TimeStamp(newState)
+      EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
+    }
     !killed.get
   }
     
@@ -194,8 +200,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         }       
         clean
       } finally {
-        timeStamps += new TimeStamp(KILLED)
-        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(KILLED, oldState))
         batchJob match {
           case Some(bj) => 
             ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
