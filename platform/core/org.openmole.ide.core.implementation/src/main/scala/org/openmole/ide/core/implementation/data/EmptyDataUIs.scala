@@ -30,6 +30,7 @@ object EmptyDataUIs {
     def coreObject = new Prototype(name,classOf[Any])
     def imagePath = ""
     def buildPanelUI = new EmptyPrototypePanelUI
+    def displayTypedName = ""
     
     class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
       def peer = this.peer
