@@ -26,36 +26,26 @@ import scala.collection.mutable.ListBuffer
 class Mole(val root: ICapsule) extends IMole {
 
   @throws(classOf[Throwable])
-  override def tasks: Iterable[ITask] = {
-    val tasks = new HashSet[ITask]
-
-    capsules.foreach(visited => { 
-        visited.task match {
-          case None =>
-          case Some(task) => tasks += task
-        }
-            
-      })
-
-    tasks
-  }
+  override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
 
   @throws(classOf[Throwable])
-  override def capsules: Iterable[ICapsule] = {
-    val caps = new HashSet[ICapsule]
+  override def capsules: Seq[ICapsule] = {
+    val visited = new HashSet[ICapsule]
+    val list = new ListBuffer[ICapsule]
     val toExplore = new ListBuffer[ICapsule]
     toExplore += root
 
     while (!(toExplore.isEmpty)) {
       val current = toExplore.remove(0)
 
-      if (!caps.contains(current)) {
+      if (!visited.contains(current)) {
         for (transition <- current.outputTransitions) {
           toExplore += transition.end.capsule
         }
-        caps += current
+        visited += current
+        list += current
       }
     }
-    caps
+    list
   }
 }

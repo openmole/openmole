@@ -24,7 +24,7 @@ trait IMole {
   def root: ICapsule
     
   @throws(classOf[Throwable])
-  def capsules: Iterable[ICapsule]
+  def capsules: Seq[ICapsule]
    
   @throws(classOf[Throwable])
   def tasks: Iterable[ITask]

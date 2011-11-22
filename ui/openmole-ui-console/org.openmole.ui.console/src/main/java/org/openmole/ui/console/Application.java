@@ -15,6 +15,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
+import org.openmole.ui.console.internal.command.Get;
 import org.openmole.ui.console.internal.command.Init;
 import org.openmole.ui.console.internal.command.Print;
 
@@ -60,7 +61,8 @@ public class Application implements IApplication {
         Groovysh muteShell = Console.muteGroovysh();
         g.leftShift(new Print(g, "print", "\\pr"));
         g.leftShift(new Init(g, muteShell, "init", "\\in"));
-
+        g.leftShift(new Get(g, muteShell, "get", "\\g"));
+        
         Console.run("init " + Console.workspace());
         
         // Process CLI options

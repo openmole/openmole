@@ -21,12 +21,14 @@ import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer
 import org.openmole.ui.console.internal.command.viewer.LocalExecutionEnvironmentViewer
 import org.openmole.ui.console.internal.command.viewer.IViewer
 import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer
 import java.util.List
+import org.openmole.ui.console.internal.command.viewer.MoleViewer
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 
@@ -36,14 +38,12 @@ class Print(shell: Shell, string: String, string1: String) extends UICommand(she
   viewers.register(LocalExecutionEnvironment.getClass, new LocalExecutionEnvironmentViewer)
   viewers.register(classOf[BatchEnvironment], new BatchEnvironmentViewer)
   viewers.register(classOf[IMoleExecution], new MoleExecutionViewer)
-    
+  viewers.register(classOf[IMole], new MoleViewer)
 
   override def execute(list: List[_]): Object = {
-
     if (list.isEmpty) return null
-        
+     
     val args = (shell.execute(list.head.asInstanceOf[String]), list.asInstanceOf[List[String]].tail.toArray)
-
     for (viewer <- viewers.closestRegistred(args._1.getClass)) viewer.view(args._1, args._2)
     
     null
