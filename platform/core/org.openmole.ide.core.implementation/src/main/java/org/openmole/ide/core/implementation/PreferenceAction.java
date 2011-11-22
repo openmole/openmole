@@ -44,7 +44,7 @@ public final class PreferenceAction implements ActionListener {
         DialogDescriptor dd = new DialogDescriptor(pc.peer(), "Preferences");
         dd.setOptions(new Object[]{DialogDescriptor.OK_OPTION});
         Object result = DialogDisplayer.getDefault().notify(dd);
-        if (!result.equals(NotifyDescriptor.OK_OPTION)) {
+        if (result.equals(NotifyDescriptor.OK_OPTION)) {
             pc.save();
         }
     }
