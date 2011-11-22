@@ -72,8 +72,9 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   else batchJob match {
     case None => READY
     case Some(batchJob) =>
-      val oldState = batchJob.state
-      val newState = batchJob.updateState
+      val oldState = state
+      batchJob.updateState
+      val newState = state
       /* if (!oldState.isFinal) batchJob.updateState
        else oldState*/
       if(oldState != newState) {
