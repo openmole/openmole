@@ -29,6 +29,7 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField._
+import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.event.ButtonClicked
 import scala.swing.event.SelectionChanged
@@ -46,14 +47,14 @@ object CopyFileHookPanelUI{
                                                                 inBetweenString2,
                                                                 filePath,
                                                                 plus) {
-        override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.CopyFileHook")
+        override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.filemanagement.CopyFileHook")
       }
       twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
       twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>commit}
       twocombrow.refreshButton.reactions += {case ButtonClicked(twocombrow.`refreshButton`)=>commit}
       
       
-      def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.CopyFileHook")
+      def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.filemanagement.CopyFileHook")
       
       twocombrow
     }
@@ -62,7 +63,7 @@ object CopyFileHookPanelUI{
 
 import CopyFileHookPanelUI._
 
-class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IHookPanelUI{
+class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
   var multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = None
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
   
@@ -85,13 +86,16 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
     }
   }
   
-  if (multiRow.isDefined) contents+= multiRow.get.panel
-    
-  def protosFromTask(c: ICapsule): List[IPrototype[File]] = {
-    c.outputs.map(_.prototype).foreach(println)
-    c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).foreach(println)
-    c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+  if (multiRow.isDefined) {
+    contents+= (new Label("Save prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
+    contents+= multiRow.get.panel
   }
+    
+  def protosFromTask(c: ICapsule): List[IPrototype[File]] = 
+    executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+    // To be uncommented when the ComboBox is fixed 
+  //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+  
   
   def saveContent = {
     if (multiRow.isDefined) multiRow.get.content.map{c=>new CopyFileHookDataUI(executionManager,(c._2,c._1,c._3))}

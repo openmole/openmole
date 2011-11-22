@@ -31,8 +31,4 @@ class CopyFileHookDataUI(executionManager: IExecutionManager,
                                              toBeHooked._1, 
                                              toBeHooked._2, 
                                              toBeHooked._3)
- 
-  override def coreClass = classOf[CopyFileHook]
-  
-  override def buildPanelUI = new CopyFileHookPanelUI(executionManager)
 }

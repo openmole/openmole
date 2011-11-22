@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.hook.filemanagement
+package org.openmole.ide.plugin.groupingstrategy.batch
 
+import org.openmole.plugin.groupingstrategy.batch.NumberOfMoleJobsGroupingStrategy
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.plugin.hook.filemanagement.CopyFileHook
+import org.openmole.ide.core.model.factory.IGroupingStrategyFactoryUI
 
-class CopyFileHookFactoryUI extends IHookFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new CopyFileHookPanelUI(executionManager)
+class NumberOfMoleJobsGroupingStrategyFactoryUI extends IGroupingStrategyFactoryUI {
+  def buildPanelUI(executionManager: IExecutionManager) = new NumberOfMoleJobsGroupingStrategyPanelUI(executionManager)
   
-  def coreClass = classOf[CopyFileHook]
+  def coreClass = classOf[NumberOfMoleJobsGroupingStrategy]
   
-  override def toString = "Save prototypes"
-}                     
+  override def toString = "Group by number of jobs"
+}            
