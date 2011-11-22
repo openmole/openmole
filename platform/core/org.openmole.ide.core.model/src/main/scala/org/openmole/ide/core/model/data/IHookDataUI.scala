@@ -23,8 +23,4 @@ import org.openmole.core.model.hook.IHook
 
 trait IHookDataUI{
   def coreObject: IHook
-  
-  def coreClass: Class[_]
-  
-  def buildPanelUI: IHookPanelUI
 }
