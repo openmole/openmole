@@ -33,7 +33,7 @@ class PasswordListener extends EventListener[Workspace] {
         try {
           val dd = new DialogDescriptor(PasswordDialog.panel.peer, "Preferences access")
           val result = DialogDisplayer.getDefault.notify(dd)
-          if (!result.equals(NotifyDescriptor.OK_OPTION)) PasswordDialog.ok(true)
+          if (result == NotifyDescriptor.OK_OPTION) PasswordDialog.ok(true)
           else PasswordDialog.ok(false)
         }
         catch {
