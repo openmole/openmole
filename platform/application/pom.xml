@@ -45,14 +45,14 @@
             <artifactId>org.openmole.ide.plugin.task.groovy</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
-         <dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
-	<dependency>
-	    <groupId>${project.groupId}</groupId>	   
-	    <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
+        <dependency>
+            <groupId>${project.groupId}</groupId>	   
+            <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
         <dependency>
@@ -65,7 +65,7 @@
             <artifactId>org.openmole.ide.plugin.task.serialization</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency> 
-	<dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
             <version>${openmole.gui.version}</version>
@@ -200,10 +200,26 @@
                 </configuration>
             </plugin>
             -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <configuration>
+                    <etcConfFile>src/main/resources/openmole_gui.conf</etcConfFile>
+                </configuration>
+                <!--<executions>
+                    <execution>
+                        <id>extra</id>
+                        <goals>
+                            <goal>autoupdate</goal>
+                            <goal>webstart-app</goal>
+                        </goals>
+                    </execution>
+                </executions>-->
+            </plugin>
         </plugins>
     </build>
 
-    <profiles>
+    <!--<profiles>
         <profile>
             <id>deployment</id>
             <build>
@@ -211,6 +227,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>nbm-maven-plugin</artifactId>
+            <configuration>
+                <etcConfFile>src/main/resources/openmole_gui.conf</etcConfFile>
+            </configuration>
                         <executions>
                             <execution>
                                 <id>extra</id>
@@ -224,6 +243,6 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>-->
     
 </project>
