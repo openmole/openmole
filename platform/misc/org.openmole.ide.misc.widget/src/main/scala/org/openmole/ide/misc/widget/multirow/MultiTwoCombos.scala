@@ -17,6 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import java.awt.Dimension
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -42,14 +43,13 @@ object MultiTwoCombos {
                                 val inBetweenString: String,
                                 val plus: Plus) extends IRowWidget2[A,B]{
     
-    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
-    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
+    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
+    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB ; preferredSize = new Dimension(8,size.height) }
     
     override val panel = new RowPanel(name,List(combo1,new Label(inBetweenString),combo2),plus)
     
-    // var components = List(combo1,new Label(inBetweenString),combo2)
-    
     override def content: (A,B) = (combo1.selection.item,combo2.selection.item)
+    
     
   }
 }

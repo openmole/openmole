@@ -12,13 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
+ import org.openmole.ide.misc.widget.multirow.MultiWidget._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import scala.swing.ComboBox
 import scala.swing.Panel
 import scala.swing.TextField
@@ -27,17 +29,18 @@ object MultiComboTextField {
   class Factory[A] extends IRowWidgetFactory[ComboTextFieldRowWidget[A]]{
     def apply(row: ComboTextFieldRowWidget[A], panel: Panel) = {
       import row._
-      new ComboTextFieldRowWidget(name,comboContentA,selectedA,"")
+      new ComboTextFieldRowWidget(name,comboContentA,selectedA,"",plus)
     }
   }
   
   class ComboTextFieldRowWidget[A](override val name: String,
                                    val comboContentA: List[A],
                                    val selectedA: A,
-                                   val initValue: String) extends IRowWidget2[A,String]{
+                                   val initValue: String,
+                                   val plus: Plus) extends IRowWidget2[A,String]{
     val textFied = new TextField(initValue,10)
     val comboBox = new ComboBox(comboContentA) {selection.item = selectedA}
-    override val panel = new RowPanel(name,List(comboBox,textFied))
+    override val panel = new RowPanel(name,List(comboBox,textFied),plus)
     //var components = List(comboBox,textFied)
     
     override def content: (A,String) = (comboBox.selection.item,textFied.text)
@@ -45,24 +48,28 @@ object MultiComboTextField {
 }
 
 import MultiComboTextField._
-class MultiComboTextField[A] (rowName: String,
-                              initValues: List[(A,String)],
-                              comboContent: List[A],
-                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
-                              minus: Minus) extends MultiWidget(
-  if (initValues.isEmpty) 
-    List(new ComboTextFieldRowWidget(rowName,
-                                     comboContent, 
-                                     comboContent(0),
-                                     ""))
-  else initValues.map{
-    case(a,s)=>new ComboTextFieldRowWidget(rowName,comboContent,a,s)},
-  factory,
-  2,minus)
-{
+
+class MultiComboTextField[A](rWidgets: List[ComboTextFieldRowWidget[A]], 
+                             factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
+                             minus: Minus= NO_EMPTY,
+                             plus: Plus= ADD) extends MultiWidget(rWidgets,factory,2,minus){
+
+  def this(rowName: String,
+           initValues: List[(A,String)],
+           comboContent: List[A],
+           factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
+           minus: Minus,
+           plus: Plus) = this(if (initValues.isEmpty) List(new ComboTextFieldRowWidget(rowName,
+                                                                                       comboContent, 
+                                                                                       comboContent(0),
+                                                                                       "",
+                                                                                       plus))
+                              else initValues.map{
+      case(a,s)=>new ComboTextFieldRowWidget(rowName,comboContent,a,s,plus)},
+                              factory,minus,plus)
   def this(rName: String,
            iValues: List[(A,String)],
-           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A],NO_EMPTY)
+           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A],NO_EMPTY,ADD)
 
   def content = rowWidgets.map(_.content).filterNot(_._2.isEmpty).toList 
 }

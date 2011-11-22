@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout</artifactId>
-            <version>3.7.4</version>
+            <version>${com.miglayout.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
