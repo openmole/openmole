@@ -78,7 +78,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       /* if (!oldState.isFinal) batchJob.updateState
        else oldState*/
       if(oldState != newState) {
-        timeStamps += new TimeStamp(state)
+        timeStamps += new TimeStamp(newState)
         EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, oldState))
       }
       //if(oldState != newState && newState == KILLED) kill
