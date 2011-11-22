@@ -116,11 +116,12 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
   def refresh = {repaint
                  revalidate}
   
-  override def saveContent = {
+  def saveContent = {
     if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new PEMCertificate(Workspace.encrypt(new String(pemPassField.password)),
                                                                                                                 pem1TextField.text,
                                                                                                                 pem2TextField.text)
-    else if(p12Button.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new P12Certificate(Workspace.encrypt(new String(p12PassField.password)),
+    else if(p12Button.selected) 
+      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new P12Certificate(Workspace.encrypt(new String(p12PassField.password)),
                                                                                                                     p12TextField.text)
     else if(proxyButton.selected) {
       Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new GlobusProxyFile(proxyTextField.text)
