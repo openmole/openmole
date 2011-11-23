@@ -16,6 +16,7 @@
     <artifactId>libraries</artifactId>
 
     <modules>
+	<module>de.erichseifert.gral</module>
     </modules>
 
     <!-- ************************************************************* -->
