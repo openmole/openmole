@@ -35,6 +35,7 @@ object Console {
   val workspace = "workspace"
   val registry = "registry"
   val logger = "logger"
+  val serializer = "serializer"
   
   val binding = new Binding
   val groovysh = new Groovysh(classOf[Groovy].getClassLoader, binding, new IO())
@@ -50,6 +51,17 @@ object Console {
   setVariable(pluginManager, PluginManager)
   setVariable(workspace, Workspace)
   setVariable(logger, LoggerService)
+  setVariable(serializer, new Serializer)
+
+  run("import org.openmole.core.implementation.data.*")
+  run("import org.openmole.core.implementation.execution.*")
+  run("import org.openmole.core.implementation.execution.local.*")
+  run("import org.openmole.core.implementation.hook.*")
+  run("import org.openmole.core.implementation.job.*")
+  run("import org.openmole.core.implementation.mole.*")
+  run("import org.openmole.core.implementation.sampling.*")
+  run("import org.openmole.core.implementation.task.*")
+  run("import org.openmole.core.implementation.transition.*")
 
   def setVariable(name: String, value: Object) = binding.setVariable(name, value)
 
