@@ -41,7 +41,7 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends MigPanel("wra
   
   def buildColumn(pud: IPrototypeDataProxyUI) = {
     val tf= new TextField(15){enabled = false}
-    val cb = new CheckBox(pud.dataUI.name) {reactions+= {case ButtonClicked(cb) =>tf.enabled = selected}}
+    val cb = new CheckBox(pud.dataUI.displayName) {reactions+= {case ButtonClicked(cb) =>tf.enabled = selected}}
     contents+= (cb,"gap para")
     contents+= tf
     if (loaded.contains(pud)) {

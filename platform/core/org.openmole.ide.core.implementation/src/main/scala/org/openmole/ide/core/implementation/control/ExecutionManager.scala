@@ -21,6 +21,7 @@ import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.ide.misc.visualization.BarPlotter2
 import org.openmole.ide.misc.visualization.BarPlotter
 import org.openmole.ide.misc.visualization.PiePlotter
 import org.openmole.ide.misc.widget.MigPanel
@@ -57,8 +58,10 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   var hookPanels= new HashMap[String,(IHookPanelUI,List[IHook])]
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[IGroupingStrategy])]
   var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
-  val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
-  val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
+ // val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
+  val wfPiePlotter = new BarPlotter2("title",List("Ready","Submitted"))
+ // val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
+  val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter)}
   val envBarPlotter = new BarPlotter("aaa ")
   var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,Double])]
   

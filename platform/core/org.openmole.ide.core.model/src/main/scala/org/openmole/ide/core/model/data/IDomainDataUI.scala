@@ -18,13 +18,14 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
-trait IDomainDataUI[T] extends IDataUI{
+trait IDomainDataUI extends IDataUI{
   override def entityType = DOMAIN
   
-  def coreObject: IDomain[T]
+  def coreObject(proto: IPrototype[_]): IDomain[_]
   
-  def buildPanelUI: IDomainPanelUI[T]
+  def buildPanelUI: IDomainPanelUI
 }

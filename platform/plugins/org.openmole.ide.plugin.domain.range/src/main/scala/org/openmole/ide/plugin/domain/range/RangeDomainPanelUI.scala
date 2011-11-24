@@ -17,14 +17,16 @@
 
 package org.openmole.ide.plugin.domain.range
 
+import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.TextField
 import scala.swing.Label
 
-class RangeDomainPanelUI extends MigPanel("fillx","[left][grow,fill]",""){
-  val minField = new TextField(6)
-  val maxField = new TextField(6)
-  val stepField = new TextField(6)
+class RangeDomainPanelUI(pud: RangeDomainDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
+  val minField = new TextField(6) {text = pud.min}
+  val maxField = new TextField(6) {text = pud.max}
+  val stepField = new TextField(6) {text = pud.step}
   
   contents+= (new Label("Min"),"gap para")
   contents+= minField
@@ -32,4 +34,10 @@ class RangeDomainPanelUI extends MigPanel("fillx","[left][grow,fill]",""){
   contents+=  maxField
   contents+= (new Label("Step"),"gap para")
   contents+= (stepField,"wrap")
+  
+  def saveContent(name: String) = new RangeDomainDataUI(name,
+                                                        minField.text,
+                                                        maxField.text,
+                                                        stepField.text)
+  
 }

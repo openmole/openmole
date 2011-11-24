@@ -70,7 +70,7 @@ class BarPlotter(title: String, val data: Map[String,Map[ExecutionState, Double]
    
     barRenderer.setSeriesPaint(READY_COLOR._2, READY_COLOR._1)
     barRenderer.setSeriesPaint(SUBMITTED_COLOR._2, SUBMITTED_COLOR._1)
-    barRenderer.setSeriesPaint(RUNNING_COLOR._2, RUNNING_COLOR._1)
+    barRenderer.setSeriesPaint(RUNNING_ENV_COLOR._2, RUNNING_ENV_COLOR._1)
     barRenderer.setSeriesPaint(DONE_COLOR._2,DONE_COLOR._1)
     barRenderer.setSeriesPaint(FAILED_COLOR._2,FAILED_COLOR._1)
     barRenderer.setSeriesPaint(KILLED_COLOR._2,KILLED_COLOR._1)

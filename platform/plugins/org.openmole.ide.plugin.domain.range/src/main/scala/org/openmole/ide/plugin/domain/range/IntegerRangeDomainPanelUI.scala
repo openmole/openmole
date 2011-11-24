@@ -27,16 +27,18 @@ import java.util.Locale
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.swing.BorderPanel.Position._
 
-class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) extends RangeDomainPanelUI 
-                                                                  with IDomainPanelUI[Int] {
-  
-  minField.text = pud.min
-  maxField.text = pud.max
-  stepField.text = pud.step
-  
-  override def saveContent(name: String) = {
-    new IntegerRangeDomainDataUI(name,minField.text,
-                                 maxField.text,
-                                 stepField.text)
-  }
-}
+class IntegerRangeDomainPanelUI(pud: IntegerRangeDomainDataUI) 
+
+//extends RangeDomainPanelUI 
+//                                                                  with IDomainPanelUI[Int] {
+//  
+//  minField.text = pud.min
+//  maxField.text = pud.max
+//  stepField.text = pud.step
+//  
+//  override def saveContent(name: String) = {
+//    new IntegerRangeDomainDataUI(name,minField.text,
+//                                 maxField.text,
+//                                 stepField.text)
+//  }
+//}

@@ -174,5 +174,10 @@
             <artifactId>org.openmole.ide.misc.visualization</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>de.erichseifert.gral</artifactId>
+            <version>${lib.de.erichseifert.gral.version}</version>
+        </dependency>
     </dependencies>
 </project>

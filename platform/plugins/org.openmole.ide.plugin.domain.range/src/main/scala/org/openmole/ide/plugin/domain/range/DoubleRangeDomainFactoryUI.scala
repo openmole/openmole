@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.domain.range
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-class DoubleRangeDomainFactoryUI extends IDomainFactoryUI[Double] {
-  override def buildDataUI(name: String) = new DoubleRangeDomainDataUI(name)
-}
+class DoubleRangeDomainFactoryUI 
+//extends IDomainFactoryUI[Double] {
+//  override def buildDataUI(name: String) = new DoubleRangeDomainDataUI(name)
+//}

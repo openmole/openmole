@@ -22,7 +22,7 @@ import java.awt.Color
 object PlotterColor {
   val READY_COLOR = (new Color(255,230,128),0)
   val SUBMITTED_COLOR =(new Color(255,204,0),1)
-  val RUNNING_COLOR = (new Color(85,212,0),1)
+  val RUNNING_EXE_COLOR = (new Color(85,212,0),1)
   val RUNNING_ENV_COLOR = (new Color(85,212,0),2)
   val DONE_COLOR = (new Color(98,233,175),3)
   val COMPLETED_COLOR = (new Color(198,233,175),3)

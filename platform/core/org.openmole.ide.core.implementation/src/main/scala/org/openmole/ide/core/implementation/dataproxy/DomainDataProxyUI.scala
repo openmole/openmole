@@ -20,4 +20,4 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
 
-class DomainDataProxyUI(var dataUI: IDomainDataUI[_]) extends IDomainDataProxyUI
+class DomainDataProxyUI(var dataUI: IDomainDataUI) extends IDomainDataProxyUI

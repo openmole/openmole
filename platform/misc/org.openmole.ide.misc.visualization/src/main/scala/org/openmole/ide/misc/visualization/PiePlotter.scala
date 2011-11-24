@@ -53,12 +53,9 @@ class PiePlotter(title: String, data: Map[String, Double]){
     
     import PlotterColor._
     plot.setSectionPaint("Ready",READY_COLOR._1)
-    plot.setSectionPaint("Running",RUNNING_COLOR._1)
+    plot.setSectionPaint("Running",RUNNING_EXE_COLOR._1)
     plot.setSectionPaint("Completed",COMPLETED_COLOR._1)
     plot.setSectionPaint("Failed",FAILED_COLOR._1)
     plot.setSectionPaint("Canceled",CANCELED_COLOR._1)
-    plot.setSectionPaint("Killed",KILLED_COLOR._1)
-    plot.setSectionPaint("Done",COMPLETED_COLOR._1)
-    plot.setSectionPaint("Submitted",SUBMITTED_COLOR._1)
   }
 }

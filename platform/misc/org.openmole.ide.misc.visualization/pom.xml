@@ -31,6 +31,11 @@
             <version>${org.jfree.chart.jcommon.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>de.erichseifert.gral</artifactId>
+            <version>${lib.de.erichseifert.gral.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
             <version>${openmole.core.version}</version>

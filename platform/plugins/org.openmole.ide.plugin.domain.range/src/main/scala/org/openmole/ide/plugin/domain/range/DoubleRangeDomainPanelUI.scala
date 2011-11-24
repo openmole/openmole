@@ -24,16 +24,18 @@ import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import scala.swing.BorderPanel.Position._
 
-class DoubleRangeDomainPanelUI(pud: DoubleRangeDomainDataUI) extends RangeDomainPanelUI
-                                                                  with IDomainPanelUI[Double] {
-  
-  minField.text = pud.min
-  maxField.text = pud.max
-  stepField.text = pud.step
-  
-  override def saveContent(name: String) = {
-   new DoubleRangeDomainDataUI(name,minField.text,
-                                 maxField.text,
-                                 stepField.text)
-  }
-}
+class DoubleRangeDomainPanelUI
+//(pud: DoubleRangeDomainDataUI,
+//prototypeClass: Class[_]) extends RangeDomainPanelUI
+//                                                                  with IDomainPanelUI[Double] {
+//  
+//  minField.text = pud.min
+//  maxField.text = pud.max
+//  stepField.text = pud.step
+//  
+//  override def saveContent(name: String) = {
+//   new DoubleRangeDomainDataUI(name,minField.text,
+//                                 maxField.text,
+//                                 stepField.text)
+//  }
+//}

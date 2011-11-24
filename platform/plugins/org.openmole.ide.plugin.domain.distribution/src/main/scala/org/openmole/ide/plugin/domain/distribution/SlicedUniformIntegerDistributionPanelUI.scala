@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.BorderPanel.Position._
 
-class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IDomainPanelUI[Int]{
+class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
   val seedField = new TextField(6)
   val sizeField = new TextField(6)
   

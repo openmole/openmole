@@ -24,10 +24,10 @@ import scala.collection.JavaConversions._
 
 object DomainDataProxyFactory{
   def factoryByName(name: String) = 
-    new DomainDataProxyFactory(Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI[_]]).filter(df=> df.displayName == name).head)
+    new DomainDataProxyFactory(Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).filter(df=> df.displayName == name).head)
 }
 
-class DomainDataProxyFactory(val factory: IDomainFactoryUI[_]) extends IDomainDataProxyFactory {
+class DomainDataProxyFactory(val factory: IDomainFactoryUI) extends IDomainDataProxyFactory {
   override def buildDataProxyUI(name:String) = new DomainDataProxyUI(factory.buildDataUI(name))
   override def toString= factory.displayName
 }

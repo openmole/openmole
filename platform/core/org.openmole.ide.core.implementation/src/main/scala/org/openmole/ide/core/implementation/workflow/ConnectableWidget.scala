@@ -89,7 +89,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
             x += taskWidth / 2 - 1
             otherColumn = false
           }
-          var st = p.dataUI.name
+          var st = p.dataUI.displayTypedName
           if (st.length> 10) st = st.substring(0, 8).concat("...")
           val h = 5 + TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
           graphics.drawImage(Images.thumb(p.dataUI.imagePath),x - taskWidth / 2, h ,new Container)

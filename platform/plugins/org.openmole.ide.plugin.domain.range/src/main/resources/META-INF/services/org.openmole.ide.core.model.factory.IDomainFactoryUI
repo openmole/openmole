@@ -1,4 +1,2 @@
-org.openmole.ide.plugin.domain.range.IntegerRangeDomainFactoryUI
+org.openmole.ide.plugin.domain.range.RangeDomainFactoryUI
 #position=10
-org.openmole.ide.plugin.domain.range.DoubleRangeDomainFactoryUI
-#position=20

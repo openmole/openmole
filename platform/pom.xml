@@ -33,7 +33,7 @@
         <org.jfree.chart.jcommon.version>1.0.15</org.jfree.chart.jcommon.version>
         <com.miglayout.version>3.7.4</com.miglayout.version>
         <brandingToken>openmole_gui</brandingToken>
-</properties>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -67,7 +67,7 @@
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
                         <cluster>${brandingToken}</cluster>
-                        <useOSGiDependencies>true</useOSGiDependencies>
+                        <useOSGiDependencies>true</useOSGiDependencies>      
                     </configuration>
                 </plugin> 
                 <plugin>
@@ -124,7 +124,7 @@
         <module>branding</module>
         <module>application</module>
         <module>core</module>
-	<module>misc</module>
+        <module>misc</module>
         <module>plugins</module>
         <module>osgi</module>
     </modules>

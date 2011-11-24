@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.domain.distribution
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-class SlicedUniformIntegerDistributionFactoryUI extends IDomainFactoryUI[Int] {
+class SlicedUniformIntegerDistributionFactoryUI extends IDomainFactoryUI {
+  override def displayName = "Uniform distribution"
   override def buildDataUI(name: String) = new SlicedUniformIntegerDistributionDataUI(name)
 }

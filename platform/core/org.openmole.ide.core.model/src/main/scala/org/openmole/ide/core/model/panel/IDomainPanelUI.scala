@@ -19,6 +19,6 @@ package org.openmole.ide.core.model.panel
 
 import org.openmole.ide.core.model.data.IDomainDataUI
 
-trait IDomainPanelUI[T] extends IPanelUI{
-  def saveContent(name:String): IDomainDataUI[T]
+trait IDomainPanelUI extends IPanelUI{
+  def saveContent(name:String): IDomainDataUI
 }
