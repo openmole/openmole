@@ -22,10 +22,15 @@ import java.io.File
 import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
+
+object ListFilesDomain extends Logger
 
 class ListFilesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDomain[File] {
 
+  import ListFilesDomain._
+  
   def this(dir: File) = this(dir, None)
 
   def this(dir: File, pattern: String) = {
@@ -36,10 +41,14 @@ class ListFilesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDoma
   }
 
   override def computeValues(context: IContext): Iterable[File] = {
-    filter match {
+    val files = filter match {
       case None => dir.listFiles
       case Some(filter) => dir.listFiles(filter)
     }
+    if(files == null) {
+      logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
+      Iterable.empty
+    } else files
   }
 
 }
