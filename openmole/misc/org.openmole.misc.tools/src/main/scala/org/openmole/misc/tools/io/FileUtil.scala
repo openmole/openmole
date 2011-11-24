@@ -192,9 +192,7 @@ object FileUtil {
       toCopy += ((file, toF))
 
       while (!toCopy.isEmpty) {
-        val cur = toCopy.remove(0)
-        val curFrom = cur._1
-        val curTo = cur._2
+        val (curFrom, curTo) = toCopy.remove(0)
         if (curFrom.isDirectory) {
           curTo.mkdir
 
@@ -203,7 +201,14 @@ object FileUtil {
             toCopy += ((child, to))
           }
         } else curFrom.copyFile(curTo)
+        curTo.setSamePermissionsAs(curFrom)
       }
+    }
+    
+    def setSamePermissionsAs(other: File) = {
+      file.setExecutable(other.canExecute)
+      file.setReadable(other.canRead)
+      file.setWritable(other.canWrite)
     }
     
     def copyFile(toF: File): Unit = {

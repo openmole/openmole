@@ -105,14 +105,6 @@ object SerializerService {
         } else file
 
         tos.addFile(toArchive, name.toString)
-        /*val entry = new TarEntry(name.toString)
-
-        //TarArchiveEntry entry = new TarArchiveEntry(file.getName());
-        entry.setSize(toArchive.length)
-        entry.setMode
-        tos.putNextEntry(entry)
-              
-        try toArchive.copy(tos) finally tos.closeEntry*/
               
         (name.toString, (file, file.isDirectory))
       }

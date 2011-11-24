@@ -16,11 +16,13 @@
  */
 
 package org.openmole.misc.tools.io
+import com.ice.tar.TarOutputStream
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
+import java.io.FileOutputStream
 import java.io.FileWriter
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -40,7 +42,7 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
     val fs = FileSystems.getDefault
 
     Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "link"), fs.getPath(file.getAbsolutePath))
-   // Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "linkNoDest"), fs.getPath(file.getAbsolutePath))
+    // Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "linkNoDest"), fs.getPath(file.getAbsolutePath))
     
     val archive = Files.createTempFile("archiveTest", ".tar").toFile
 
@@ -104,4 +106,31 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
     tmpDir.recursiveDelete
     extractDir.recursiveDelete
   }
+  
+  "Archive addFile method" should "preserve file permissions" in {
+    val file1 = Files.createTempFile("testArch", ".tmp").toFile
+    
+    file1.setExecutable(true)
+    file1.setReadable(true)
+    file1.setWritable(false)
+    
+    val archive = Files.createTempFile("archiveTest", ".tar").toFile
+    val tos = new TarOutputStream(new FileOutputStream(archive))   
+    tos.addFile(file1, file1.getName)
+    tos.close
+    
+    val extractDir = Files.createTempDirectory("testArchExtract").toFile
+    archive.extractDirArchiveWithRelativePath(extractDir)
+     
+    extractDir.list.foreach{println}
+    
+    val extracted = new File(extractDir, file1.getName)
+    extracted.canExecute should equal (true)
+    extracted.canRead should equal (true)
+    extracted.canWrite should equal (false)
+     
+    file1.delete
+    extractDir.recursiveDelete
+  }
+  
 }
