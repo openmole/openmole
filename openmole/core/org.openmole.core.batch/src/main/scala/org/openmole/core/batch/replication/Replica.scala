@@ -25,7 +25,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 
-class Replica( _source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String) extends Activatable {
+class Replica( _source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String, _lastCheckExists: java.lang.Long ) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -33,6 +33,11 @@ class Replica( _source: String, _storageDescription: String, _hash: String, _aut
   def destination: String = {
     activate(ActivationPurpose.READ)
     _destination
+  }
+  
+  def lastCheckExists = {
+    activate(ActivationPurpose.READ)
+    if(_lastCheckExists == null) new java.lang.Long(0) else _lastCheckExists
   }
   
   def destinationURIFile: IURIFile = new GZURIFile(new URIFile(destination))
@@ -85,6 +90,6 @@ class Replica( _source: String, _storageDescription: String, _hash: String, _aut
   }
 
   override def toString = 
-    "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "]";
+    "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "," + lastCheckExists + "]";
 
 }

@@ -44,6 +44,7 @@ import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.BatchServiceDescription
 import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
@@ -95,14 +96,14 @@ object ReplicaCatalog {
    
   private def getReplica(hash: String, storageDescription: StorageDescription, authenticationKey: String): Option[Replica] = {
     lockRead({
-        val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null))
+        val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
 
   private def getReplica(src: File, hash: String, storageDescription: StorageDescription,  authenticationKey: String): Option[Replica] = {
     lockRead({
-        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null))
+        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null, null))
 
           return set.size match {
           case 0 => None
@@ -114,13 +115,13 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
-    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null)))
+    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null, null)))
   
   def getReplica(storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
-    lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null)))
+    lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null)))
 
   def inCatalog(storageDescription: StorageDescription, authenticationKey: String): Set[String] =
-    lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null)).map{_.destination}.toSet)
+    lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null, null)).map{_.destination}.toSet)
   
   def inCatalog(src: Iterable[File], authenticationKey: String): Map[File, Set[StorageDescription]] = {
     //transactionalOp( t => {
@@ -162,26 +163,17 @@ object ReplicaCatalog {
                 
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
-              //LOGGER.log(Level.FINE, "Replica with same content found for {0}.", srcPath.getAbsolutePath + " " + storage)            
-
-              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription.description, hash, authenticationKey, sameContent.destination)
+              val replica = checkExists(sameContent, src, srcPath, hash, authenticationKey, storage, token)
+              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription.description, hash, authenticationKey, replica.destination, replica.lastCheckExists)
               insert(newReplica)
               newReplica
-            case None =>
-              //LOGGER.log(Level.FINE, "Replicating {0}.", srcPath.getAbsolutePath + " " + storage)            
-
-              val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
-
-              URIFile.copy(src, newFile, token)
-
-              val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, authenticationKey, newFile.location)
-              insert(newReplica)
-              newReplica 
+            case None => 
+              uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
           }
         case Some(r) => {
             //LOGGER.log(Level.FINE, "Found Replica for {0}.", srcPath.getAbsolutePath + " " + storage)
             objectServer.activate(r, Int.MaxValue)
-            r
+            checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
           }
       }   
       replica
@@ -190,6 +182,29 @@ object ReplicaCatalog {
     }
   }
 
+  private def checkExists(replica: Replica, src: File, srcPath: File,hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = 
+    if(System.currentTimeMillis > (replica.lastCheckExists + Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckFileExistsInterval))) {
+      if(replica.destinationURIFile.exists(token)) {
+        remove(replica)
+        val toInsert = new Replica(replica.source, replica.storageDescriptionString, replica.hash, replica.authenticationKey, replica.destination, System.currentTimeMillis)
+        insert(toInsert)
+        toInsert
+      } else {
+        remove(replica)
+        uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
+      }
+    } else replica
+ 
+ 
+  private def uploadAndInsert(src: File, srcPath: File,hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
+    val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
+    URIFile.copy(src, newFile, token)
+    val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
+    insert(newReplica)
+    newReplica
+  }
+  
+  
   private def fix(toFix: Iterable[Replica]): Replica = {
     lockWrite({
         for(rep <- toFix.tail) objectServer.delete(rep)

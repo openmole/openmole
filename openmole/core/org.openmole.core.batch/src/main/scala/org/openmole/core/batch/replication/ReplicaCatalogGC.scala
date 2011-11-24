@@ -24,8 +24,7 @@ class ReplicaCatalogGC extends IUpdatable {
 
   override def update: Boolean = {
     for (replica <- ReplicaCatalog.allReplicas) {  
-      if (AuthenticationRegistry.isRegistred(replica.authenticationKey) && !replica.sourceFile.exists) 
-        ReplicaCatalog.clean(replica)
+      if (AuthenticationRegistry.isRegistred(replica.authenticationKey) && !replica.sourceFile.exists) ReplicaCatalog.clean(replica)
     }
     true
   }

@@ -54,6 +54,8 @@ object Console {
   setVariable(serializer, new Serializer)
 
   run("import org.openmole.core.implementation.data.*")
+  run("import static org.openmole.core.implementation.data.Prototype.*")
+  run("import static org.openmole.core.implementation.data.Data.*")
   run("import org.openmole.core.implementation.execution.*")
   run("import org.openmole.core.implementation.execution.local.*")
   run("import org.openmole.core.implementation.hook.*")

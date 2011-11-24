@@ -205,6 +205,13 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   protected def SAGAURL: URL = trycatch(fromLocation(location))
   
+  private def parentLocationAndName = {
+    val noFinalS = location.reverse.dropWhile(_ == '/')
+    val parent = noFinalS.dropWhile(_ != '/').reverse
+    val name = noFinalS.takeWhile(_ != '/').reverse
+    (parent, name)
+  }
+  
   /*-------------------- is a directory ---------------------------*/
   override def isDirectory: Boolean = withToken(isDirectory(_))
 
@@ -272,6 +279,14 @@ class URIFile(val location: String) extends IURIFile with Id {
     } finally close(dir)
   }
 
+  override def exists: Boolean = withToken(exists(_))
+  
+  override def exists(token: AccessToken): Boolean = {
+    val (parent, name) = parentLocationAndName
+    logger.fine("Testing if " + name + " exists in " + parent + ".")
+    new URIFile(parent).exist(name, token)
+  }
+  
   override def openInputStream: InputStream = withToken(openInputStream(_))
 
   override def openInputStream(token: AccessToken): InputStream = trycatch {

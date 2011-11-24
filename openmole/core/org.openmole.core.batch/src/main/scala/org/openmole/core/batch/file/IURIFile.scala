@@ -72,6 +72,9 @@ trait IURIFile {
   def list: Iterable[String]
   def list(token: AccessToken): Iterable[String]
     
+  def exists: Boolean 
+  def exists(token: AccessToken): Boolean 
+
   def exist(name: String): Boolean 
   def exist(name: String, token: AccessToken): Boolean 
 

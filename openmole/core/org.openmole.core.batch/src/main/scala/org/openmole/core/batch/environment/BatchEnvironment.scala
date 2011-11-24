@@ -60,6 +60,8 @@ object BatchEnvironment {
   
   val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
   
+  val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
+  
   Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)
   Workspace += (JVMLinuxI386Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-i386.tar.gz").getAbsolutePath)
   Workspace += (JVMLinuxX64Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
@@ -69,6 +71,7 @@ object BatchEnvironment {
   Workspace += (CheckInterval, "PT2M")
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
+  Workspace += (CheckFileExistsInterval, "PT24H")
   
   /*final val FileUpload = new Event[BatchEnvironment, IFileUpload]
   
