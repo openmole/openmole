@@ -107,7 +107,6 @@ object TarArchiver {
           e.setSize(cur._1.length)
           e
         }
-
         e.setMode(cur._1.mode)
         additionnalCommand(e)
         tos.putNextEntry(e)

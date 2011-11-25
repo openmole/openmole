@@ -46,9 +46,9 @@ import scala.io.Source
 
 object FileUtil {
 
-  val exec = 0x4
-  val write = 0x2
-  val read = 0x1
+  val exec = 4
+  val write = 2
+  val read = 1
   
   implicit val fileOrdering = new Ordering[File] {
     override def compare(left: File, right: File) = {
@@ -143,12 +143,11 @@ object FileUtil {
       applyRecursive((f: File) => if(filter.accept(f)) ret += f)
       ret
     }
-       
-    
     
     def mode = 
-      (if(file.canExecute) exec else 0x0) + (if(file.canWrite) write else 0x0) + (if(file.canRead) read else 0x0)
+      (if(file.canExecute) exec else 0) | (if(file.canWrite) write else 0) | (if(file.canRead) read else 0)
     
+      
     def mode_=(m: Int) = {
       if((m & exec) != 0) file.setExecutable(true) else file.setExecutable(false)
       if((m & write) != 0) file.setWritable(true) else file.setWritable(false)

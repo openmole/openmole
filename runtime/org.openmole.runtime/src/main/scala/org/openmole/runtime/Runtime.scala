@@ -124,7 +124,10 @@ class Runtime {
             val local = Workspace.newDir("dirReplica")
             cache.extractDirArchiveWithRelativePath(local) 
             local
-          } else cache
+          } else {
+            cache.mode = repliURI.mode
+            cache
+          }
 
           usedFiles.put(repliURI.src, local)
         }
