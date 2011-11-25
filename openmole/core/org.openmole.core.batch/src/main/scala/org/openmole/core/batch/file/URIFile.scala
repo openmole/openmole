@@ -206,9 +206,9 @@ class URIFile(val location: String) extends IURIFile with Id {
   protected def SAGAURL: URL = trycatch(fromLocation(location))
   
   private def parentLocationAndName = {
-    val noFinalS = location.reverse.dropWhile(_ == '/')
-    val parent = noFinalS.dropWhile(_ != '/').reverse
-    val name = noFinalS.takeWhile(_ != '/').reverse
+    val name = fetchEntry.getName.getPath
+    val indice = location.lastIndexOfSlice (name)
+    val parent = location.slice(0, indice )
     (parent, name)
   }
   

@@ -71,7 +71,7 @@ object BatchEnvironment {
   Workspace += (CheckInterval, "PT2M")
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
-  Workspace += (CheckFileExistsInterval, "PT24H")
+  Workspace += (CheckFileExistsInterval, "PT1H")
   
   /*final val FileUpload = new Event[BatchEnvironment, IFileUpload]
   
