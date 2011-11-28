@@ -30,12 +30,11 @@ class RangeDomainDataUI (val name: String = "",
                          val step: String = "") extends IDomainDataUI {
   
   def coreObject(prototypeObject: IPrototype[_]) = {
-    prototypeObject.`type` match {
-      case Manifest.Int=> println("IntegerRange");new IntegerRange(min,max,step)
-      case Manifest.Double=> println("DoubleRange");new DoubleRange(min,max,step)
-      case x:BigDecimal=> println("BigDecimalRange");new BigDecimalRange(min,max,step)
-    }
+    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE){println("DoubleRange");new IntegerRange(min,max,step)}
+    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE){println("DoubleRange");new DoubleRange(min,max,step)}
+    else {println("BigD");new BigDecimalRange(min,max,step)}
 }
+
   def coreClass = classOf[IDomain[_]]
   
   def imagePath = "img/domain_range.png"
