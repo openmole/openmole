@@ -48,7 +48,11 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
     
   def state_=(state: State) = {
     val changed = synchronized {
-      if(_state == null || !_state.isFinal) {
+      if(_state == null) {
+        timeStamps += new TimeStamp(state)
+        _state = state
+        None
+      } else if(!_state.isFinal) {
         timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
