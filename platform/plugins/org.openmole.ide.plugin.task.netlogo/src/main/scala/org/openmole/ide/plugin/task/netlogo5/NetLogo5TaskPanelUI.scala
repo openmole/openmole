@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.netlogo5
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.plugin.task.netlogo.GenericNetLogoPanelUI
+import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import scala.swing._
 import swing.Swing._
 
@@ -32,7 +33,9 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI
                                                                                workspaceTextField.text, 
                                                                                nlogoTextField.text, 
                                                                                launchingCommandTextArea.text,
-                                                                               if (multiProtoString.isDefined) multiProtoString.get.content else List(),
-                                                                               if (multiStringProto.isDefined) multiStringProto.get.content else List(),
+                                                                               if (multiProtoString.isDefined) multiProtoString.get.content.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+                                                                               else List(),
+                                                                               if (multiStringProto.isDefined) multiStringProto.get.content.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+                                                                               else List(),
                                                                                globals)
 }
