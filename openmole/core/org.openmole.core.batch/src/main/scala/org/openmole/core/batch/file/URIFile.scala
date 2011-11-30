@@ -98,7 +98,8 @@ object URIFile extends Logger {
     try {
       val is = src.openInputStream(srcToken)
       try {
-        is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)) 
+        withFailureControl(src.storageDescription,
+                           is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally is.close
     } finally os.flushClose
   }
@@ -111,41 +112,10 @@ object URIFile extends Logger {
       val os = dest.openOutputStream(token)
       try withFailureControl(dest.storageDescription, 
                              is.copy(os, Workspace.preferenceAsInt(BufferSize), 
-                                     Workspace.preferenceAsDurationInMs(CopyTimeout))) 
+                                     Workspace.preferenceAsDurationInMs(CopyTimeout)))
       finally os.flushClose
     } finally is.close
   }
-
- /* def copy(src: IURIFile, dest: IURIFile): Unit = {
-    val srcDescrption = src.storageDescription
-    val destDescrption = dest.storageDescription
-
-    val same = sameRessource(srcDescrption, destDescrption)
-    withToken(srcDescrption,
-              srcToken =>
-              if(!same) withToken(destDescrption, copy(src, dest, srcToken, _))
-              else copy(src, dest, srcToken, srcToken))
-  }
-
-  private def copy(src: IURIFile, dest: IURIFile, srcToken: AccessToken, destToken: AccessToken): Unit = {
-    val srcDesc = src.storageDescription
-    val destDesc = dest.storageDescription
-    val same = sameRessource(srcDesc, destDesc)
-
-    val is = src.openInputStream(srcToken)
-    try {
-      EventDispatcher.registerForObjectChanged(is, 
-                                               new TransferProxy(src, dest.URI, IURIFileTransfer),
-                                               InputStreamTransfer)
-      
-      val os = dest.openOutputStream(destToken)
-
-      try withFailureControl(srcDesc,
-                             if(!same) withFailureControl(destDesc, is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
-                             else is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))              
-      finally os.flushClose
-    } finally is.close
-  }*/
 
   private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);
 }
@@ -206,10 +176,13 @@ class URIFile(val location: String) extends IURIFile with Id {
   protected def SAGAURL: URL = trycatch(fromLocation(location))
   
   private def parentLocationAndName = {
-    val name = fetchEntry.getName.getPath
-    val indice = location.lastIndexOfSlice (name)
-    val parent = location.slice(0, indice )
-    (parent, name)
+    val entry = fetchEntry
+    try {
+      val name = entry.getName.getPath
+      val indice = location.lastIndexOfSlice (name)
+      val parent = location.slice(0, indice )
+      (parent, name)
+    } finally close(entry)
   }
   
   /*-------------------- is a directory ---------------------------*/
@@ -219,7 +192,6 @@ class URIFile(val location: String) extends IURIFile with Id {
     val entry = fetchEntry
     try isDirectory(entry)
     finally close(entry)
-    
   }
 
   private def isDirectory(entry: NSEntry): Boolean = trycatch {
@@ -283,7 +255,6 @@ class URIFile(val location: String) extends IURIFile with Id {
   
   override def exists(token: AccessToken): Boolean = {
     val (parent, name) = parentLocationAndName
-    logger.fine("Testing if " + name + " exists in " + parent + ".")
     new URIFile(parent).exist(name, token)
   }
   

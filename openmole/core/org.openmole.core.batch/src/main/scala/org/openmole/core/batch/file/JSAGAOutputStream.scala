@@ -35,15 +35,14 @@ class JSAGAOutputStream(stream: FileOutputStream) extends OutputStream {
 
   override def flush = stream.flush()
     
-  override def close() =  {
+  override def close = {
     val task = stream.close(TaskMode.ASYNC)
         
-    try {
-      task.get(Workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
-    } catch {
+    try task.get(Workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
+    catch {
       case (e: TimeoutException) => 
         task.cancel(true)
         throw e
-    } 
+    }
   }
 }
