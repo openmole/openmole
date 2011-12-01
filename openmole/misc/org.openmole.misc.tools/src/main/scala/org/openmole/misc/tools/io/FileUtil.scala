@@ -329,12 +329,13 @@ object FileUtil {
       val link = fs.getPath(file.getAbsolutePath)
       Files.createSymbolicLink(link, linkTo)
     }
+    
   }
- 
   
-
+  implicit def toFileFilterConverter(f: File => Boolean) = new FileFilter {
+    override def accept(file: File) = f(file)     
+  }
   
-
 }
 
 
