@@ -59,19 +59,13 @@ class GenericNetLogoPanelUI(nlogoPath: String,
   buildMultis(nlogoPath)
   
   def buildMultis(path: String) = {
-    println("build multis")
     if (globals.isEmpty){
       val nl = new NetLogo4
       try{
-        println("Try " + path)
         if ((new File(path)).isFile){
-          println("in if " + path)
           nl.open(path)
-          println("opened ")
           globals = nl.globals.toList
-          println("got globals ")
           globals.foreach(println)
-          println("dispose")
           nl.dispose
         }
       }
@@ -90,10 +84,8 @@ class GenericNetLogoPanelUI(nlogoPath: String,
           prototypeMappingInput))
     }
     
-    println("size " + contents.size)
     if (multiStringProto.isDefined) {
-      println("defined ")
-      if (contents.size == 8) {contents.remove(6); contents.remove(7)}
+      if (contents.size == 8) {contents.remove(6); contents.remove(6)}
       contents+= (multiProtoString.get.panel,"span,grow,wrap")
       contents+= (multiStringProto.get.panel,"span,grow,wrap")
     }
