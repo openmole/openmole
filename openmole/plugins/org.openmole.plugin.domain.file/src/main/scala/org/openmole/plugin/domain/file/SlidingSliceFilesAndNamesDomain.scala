@@ -25,7 +25,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 
 object SlidingSliceFilesAndNamesDomain {
-  val defaultPattern = "^[a-zA-Z]+([0-9]+).*"
+  val defaultPattern = "^[a-zA-Z]*([0-9]+).*"
 }
 
 class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IFiniteDomain[Array[(File,String)]] {
@@ -45,7 +45,7 @@ class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSiz
       })
     
     (0 until files.size - sliceSize).map{
-      i => files.slice(i, i + sliceSize).map(f => f -> f.name)
+      i => files.slice(i, i + sliceSize).map(f => f -> f.getName)
     }
   }
 
