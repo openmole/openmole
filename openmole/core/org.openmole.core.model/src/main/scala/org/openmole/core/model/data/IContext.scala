@@ -22,6 +22,8 @@ package org.openmole.core.model.data
  * A task execution can remove variables from context, change the values of 
  * the variables and add values to it.
  */
+import org.openmole.misc.exception.UserBadDataError
+
 trait IContext extends Iterable[IVariable[_]] {
     
   /**
@@ -68,6 +70,10 @@ trait IContext extends Iterable[IVariable[_]] {
    * otherwise
    */
   def value[T](proto: IPrototype[T]): Option[T]
+  
+  def valueOrException[T](name: String): T = value(name).getOrElse(throw new UserBadDataError("Variable " + name + " has not been found in the context"))
+  def valueOrException[T](proto: IPrototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
+
   
   /**
    * Add a variable to this context.
