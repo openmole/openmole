@@ -32,20 +32,22 @@ object ExecutorService {
   private val executorServices = new HashMap[ExecutorType.Value, java.util.concurrent.ExecutorService]
   private def nbThreads = Workspace.preferenceAsInt(ExecutorService.NbTread)
 
+  private val threadFactory = new ThreadFactory {
+    override def newThread(r: Runnable): Thread = {
+      val t = daemonThreadFactory.newThread(r)
+      t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
+          override def uncaughtException(t: Thread, e: Throwable) = {}
+        })
+      t
+    }
+  }
+  
   def executorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
-    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(new ThreadFactory {
-        override def newThread(r: Runnable): Thread = {
-          val t = daemonThreadFactory.newThread(r)
-          t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
-              override def uncaughtException(t: Thread, e: Throwable) = {}
-            })
-          t
-        }
-    })
+    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(threadFactory)
     getOrCreateExecutorService(purpose)
   }
     
-  private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
-    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, daemonThreadFactory))
-  }
+  private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = 
+    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, threadFactory))
+  
 }

@@ -162,7 +162,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     val (js, token) = executionEnvironment.selectAJobService
     try {
       if(killed.get) throw new InternalProcessingError("Job has been killed")
-      //FIXME copyToEnvironmentResult may be null if job killed here
       Some(js.submit(serializedJob, token))
     } catch {
       case e => 
