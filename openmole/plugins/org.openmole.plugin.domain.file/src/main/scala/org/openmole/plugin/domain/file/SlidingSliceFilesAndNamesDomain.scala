@@ -53,7 +53,7 @@ class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSiz
     }.sortBy{ case(f, num) => num }.map{ case(f, num) => f}
     
     
-    (0 until files.size - sliceSize).map{
+    (0 to files.size - sliceSize).map {
       i => files.slice(i, i + sliceSize).map(f => f -> f.getName)
     }
   }
