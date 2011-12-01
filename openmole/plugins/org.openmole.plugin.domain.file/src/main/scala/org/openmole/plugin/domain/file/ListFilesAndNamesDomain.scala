@@ -21,19 +21,17 @@ import java.io.File
 import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 
-class ListFilesAndNamesDomain(dir: File, filter: Option[FileFilter]) extends IFiniteDomain[(File,String)] {
+class ListFilesAndNamesDomain(dir: File, filter: File => Boolean) extends IFiniteDomain[(File,String)] {
 
   @transient lazy val listFiles = new ListFilesDomain(dir, filter)
   
-  def this(dir: File) = this(dir, None)
+  def this(dir: File) = this(dir, f => true)
 
   def this(dir: File, pattern: String) = {
-    this(dir, Some(new FileFilter {
-          override def accept(file: File): Boolean = file.getName.matches(pattern)     
-        })
-    )
+    this(dir, _.getName.matches(pattern))
   }
   
   def this(dir: String) = this(new File(dir))
