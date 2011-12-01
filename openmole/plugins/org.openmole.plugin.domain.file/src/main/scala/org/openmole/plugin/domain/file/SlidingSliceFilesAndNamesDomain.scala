@@ -39,10 +39,12 @@ class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSiz
   override def computeValues(context: IContext): Iterable[Array[(File,String)]] = {
     val pattern = Pattern.compile(numberPattern)
     
-    val files = dir.listFiles(filter).sortBy(f => pattern.matcher(f.getName).group(1) match {
-        case null => throw new UserBadDataError("File " + f + " doesn't match regexp " + numberPattern)
-        case s: String => s.toLong
+    val files = dir.listFiles(filter).sortBy(f => 
+      try pattern.matcher(f.getName).group(1).toLong
+      catch {
+        case e: IllegalStateException => throw new UserBadDataError("File " + f + " doesn't match regexp " + numberPattern)
       })
+    
     
     (0 until files.size - sliceSize).map{
       i => files.slice(i, i + sliceSize).map(f => f -> f.getName)
