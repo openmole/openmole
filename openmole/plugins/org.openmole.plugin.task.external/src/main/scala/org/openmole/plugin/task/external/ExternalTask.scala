@@ -121,6 +121,8 @@ abstract class ExternalTask(name: String) extends Task(name) {
     this
   } 
   
+  def addInputs(prot: IPrototype[Array[(File, String)]], link: Boolean): this.type = addInputs(prot, "", link)
+  
   def addInputs(prot: IPrototype[Array[(File, String)]], dir: String): this.type = addInputs(prot, dir, false)
   
   def addInputs(prot: IPrototype[Array[(File, String)]]): this.type = addInputs(prot, "")
