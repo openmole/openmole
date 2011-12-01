@@ -23,10 +23,13 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.service.Logger
 
-object SlidingSliceFilesAndNamesDomain {
+object SlidingSliceFilesAndNamesDomain extends Logger {
   val defaultPattern = "^[a-zA-Z]*([0-9]+).*"
 }
+
+import SlidingSliceFilesAndNamesDomain._
 
 class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IFiniteDomain[Array[(File,String)]] {
  
@@ -39,11 +42,15 @@ class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSiz
   override def computeValues(context: IContext): Iterable[Array[(File,String)]] = {
     val pattern = Pattern.compile(numberPattern)
     
-    val files = dir.listFiles(filter).sortBy(f => 
-      try pattern.matcher(f.getName).group(1).toLong
-      catch {
-        case e: IllegalStateException => throw new UserBadDataError("File " + f + " doesn't match regexp " + numberPattern)
-      })
+    val files = dir.listFiles(filter).flatMap{
+      f =>
+      val m = pattern.matcher(f.getName)
+      if(m.find) Some(f, m.group(1).toLong)
+      else {
+        logger.warning("File " + f.getName + " in dir " + dir + " doesn't match regexp " + numberPattern + ", it has been ignored.")
+        None
+      }
+    }.sortBy{ case(f, num) => num }.map{ case(f, num) => f}
     
     
     (0 until files.size - sliceSize).map{
