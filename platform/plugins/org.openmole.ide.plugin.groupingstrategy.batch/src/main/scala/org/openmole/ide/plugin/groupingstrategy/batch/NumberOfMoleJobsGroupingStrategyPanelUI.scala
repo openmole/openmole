@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.groupingstrategy.batch
 
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -29,9 +28,7 @@ import java.awt.Font._
 import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
 import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.ComboBox
 import scala.swing.Panel
-import scala.swing.event.SelectionChanged
 
 object NumberOfMoleJobsGroupingStrategyPanelUI {
   def rowFactory(strategypanel: NumberOfMoleJobsGroupingStrategyPanelUI) = new Factory[ICapsule] {
@@ -46,39 +43,18 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
     }
   }
 }
-//object ToStringHookPanelUI{
-//  def rowFactory(hookpanel: ToStringHookPanelUI) = new Factory[IPrototype[_],ICapsule] {
-//    override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: Panel) = {
-//      import row._
-//      val twocombrow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
-//        new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
-//          override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
-//        }
-//      
-//      twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
-//      twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>
-//          val items = hookpanel.protosFromTask(twocombrow.`combo2`.selection.item)
-//          twocombrow.changeCombo1Items(items)
-//          commit}
-//      
-//      def commit = 
-//        hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
-//      
-//      twocombrow
-//    }
-//  }
-//}
+
 import NumberOfMoleJobsGroupingStrategyPanelUI._
 //
 class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IGroupingStrategyPanelUI{
   var multiRow : Option[MultiComboTextField[ICapsule]] = None
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
+  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.inputs.size > 0).toList
   
   if (capsules.size>0){
-    val r =  new ComboTextFieldRowWidget("Display",
+    val r =  new ComboTextFieldRowWidget("Group",
                                          capsules,
                                          capsules(0),
-                                         "",
+                                         "by",
                                          NO_ADD)
     
     multiRow =  Some(new MultiComboTextField(List(r),
