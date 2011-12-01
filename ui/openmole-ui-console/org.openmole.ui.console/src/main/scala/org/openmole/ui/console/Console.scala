@@ -64,6 +64,7 @@ object Console {
   run("import org.openmole.core.implementation.sampling.*")
   run("import org.openmole.core.implementation.task.*")
   run("import org.openmole.core.implementation.transition.*")
+  run("import scala.Tuple2")
 
   def setVariable(name: String, value: Object) = binding.setVariable(name, value)
 
