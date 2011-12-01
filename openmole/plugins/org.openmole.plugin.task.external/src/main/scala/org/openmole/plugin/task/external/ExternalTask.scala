@@ -41,6 +41,8 @@ object ExternalTask {
 abstract class ExternalTask(name: String) extends Task(name) {
  
   val inContextFiles = new ListBuffer[(IPrototype[File], String, Boolean)]
+  val inContextFilesAndNames = new ListBuffer[(IPrototype[Array[(File, String)]], String, Boolean)]
+  
   //val inContextFileList = new ListBuffer[(IPrototype[Array[File]], IPrototype[Array[String]], Boolean)]
   val inFileNames = new HashMap[File, (String, Boolean)]
 
@@ -57,20 +59,19 @@ abstract class ExternalTask(name: String) extends Task(name) {
     
     val file2 = inContextFiles.map { 
       case (protoFile, name, link) => 
-      val f = context.value(protoFile).getOrElse(throw new UserBadDataError("File supposed to be present in variable \"" + protoFile.name + "\" at the beging of the task \"" + name + "\" and is not."))
+      val f = context.valueOrException(protoFile)
       new ToPut(f, expandData(context, name), link)
     } 
     
-    /*val file3 = inContextFileList.flatMap { 
-      p => 
-        val lstFile = context.value(p._1).get
-        val lstName = context.value(p._2).get
-        lstFile zip lstName map {
-          case(f, name, link) => new ToPut(f, expandData(context, name), link) 
+    val file3 = inContextFilesAndNames.flatMap {
+      case(proto, dir, link) =>
+        context.valueOrException(proto).map {
+          case (file, name) =>
+            new ToPut(file, expandData(context, dir + '/' + name), link)
         }
-    }*/
+    }
     
-    file1 ++ file2 //++ file3
+    file1 ++ file2 ++ file3
   }
 
 
@@ -113,6 +114,17 @@ abstract class ExternalTask(name: String) extends Task(name) {
   }
 
   def addInput(fileProt: IPrototype[File], name: String): this.type = addInput(fileProt, name, false)
+  
+  def addInputs(prot: IPrototype[Array[(File, String)]], dir: String, link: Boolean): this.type = {
+    inContextFilesAndNames += ((prot, dir, link))
+    super.addInput(prot)
+    this
+  } 
+  
+  def addInputs(prot: IPrototype[Array[(File, String)]], dir: String): this.type = addInputs(prot, dir, false)
+  
+  def addInputs(prot: IPrototype[Array[(File, String)]]): this.type = addInputs(prot, "")
+  
   
   def addOutput(fileName: String, v: IPrototype[File]): this.type = {
     outFileNames += ((v, fileName, None))
