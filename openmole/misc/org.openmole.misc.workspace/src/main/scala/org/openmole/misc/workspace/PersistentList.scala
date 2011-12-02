@@ -21,6 +21,10 @@ import com.thoughtworks.xstream.XStream
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 
+object PersistentList {
+  val pattern = "[0-9]+"
+}
+
 class PersistentList[T](serializer: XStream, dir: File) extends Iterable[(Int, T)] {
   
   def file(i: Int) = new File(dir, i.toString)
@@ -32,5 +36,5 @@ class PersistentList[T](serializer: XStream, dir: File) extends Iterable[(Int, T
   def update(i: Int, obj: T) = file(i).content = serializer.toXML(obj)
   
   override def iterator = 
-    dir.listFiles.map{_.getName.toInt}.sorted.map{i => i -> apply(i)}.iterator
+    dir.listFiles{f: File => f.getName.matches(PersistentList.pattern)}.map{_.getName.toInt}.sorted.map{i => i -> apply(i)}.iterator
 }

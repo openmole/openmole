@@ -322,8 +322,13 @@ class Workspace(val location: File) {
   }
   
   def persistentList[T](clazz: Class[T]) = new PersistentList[T](
-    {val xstream = new XStream
-     xstream.setClassLoader(clazz.getClassLoader)
-     xstream
-    }, {val f = new File(persistentDir, clazz.getName); f.mkdirs; f})
+    {
+      val xstream = new XStream
+      xstream.setClassLoader(clazz.getClassLoader)
+      xstream
+    }, {
+      val f = new File(persistentDir, clazz.getName)
+      f.mkdirs
+      f
+    })
 }
