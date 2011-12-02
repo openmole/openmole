@@ -17,4 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-abstract class BatchService(val environment: BatchEnvironment)
+trait BatchService {
+  def environment: BatchEnvironment
+  def nbAccess: Int = Int.MaxValue
+}

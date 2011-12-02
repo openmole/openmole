@@ -27,7 +27,7 @@ import collection.JavaConversions._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.io.FileUtil._
 
-class DesktopGridJobService(environment: DesktopGridEnvironment, description: JobServiceDescription) extends JobService(environment, description){
+class DesktopGridJobService(val environment: DesktopGridEnvironment, val description: JobServiceDescription) extends JobService {
   import DesktopEnvironment._
   
   val timeStempsDir = new File(environment.path, timeStempsDirName){mkdirs}
@@ -52,5 +52,5 @@ class DesktopGridJobService(environment: DesktopGridEnvironment, description: Jo
     new DesktopGridJob(this, jobId) 
   }
   
-  override def test = true
+  //override def test = true
 }

@@ -41,7 +41,7 @@ object PersistentStorage extends Logger {
   val tmp = "tmp/"
 }
 
-class PersistentStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends Storage(environment, URI, nbAccess) {
+class PersistentStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {
 
   import PersistentStorage._
   

@@ -23,13 +23,10 @@ import org.openmole.core.batch.control.JobServiceControl._
 import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.control.JobServiceQualityControl
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.file.IURIFile
 import org.openmole.misc.workspace.Workspace
 
-abstract class JobService(environment: BatchEnvironment, val description: JobServiceDescription, nbAccess: Int) extends BatchService(environment) {
-  
-  def this(environment: BatchEnvironment, description: JobServiceDescription) = this(environment, description, Int.MaxValue)
-  
+trait JobService extends BatchService {
+
   JobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   def submit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
@@ -40,5 +37,7 @@ abstract class JobService(environment: BatchEnvironment, val description: JobSer
 
   override def toString: String = description.toString
   
-  def test: Boolean
+  //def test: Boolean
+  def description: JobServiceDescription
+
 }

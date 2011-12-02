@@ -49,11 +49,15 @@ object JSAGAJobService extends Logger {
   Workspace += (CreationTimeout, "PT2M")
 }
 
-abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment, nbAccess: Int) extends JobService(environment, new JobServiceDescription(jobServiceURI.toString), nbAccess) {
+abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
 
   import JSAGAJobService._
   
-  override def test: Boolean =
+  override def environment: JSAGAEnvironment
+  
+  @transient override lazy val description = new JobServiceDescription(jobServiceURI.toString)
+  
+  /*override def test: Boolean =
     try {
       val hello = JSAGAJobBuilder.helloWorld
       val job = jobServiceCache.createJob(hello)
@@ -66,7 +70,7 @@ abstract class JSAGAJobService(jobServiceURI: URI, environment: JSAGAEnvironment
       case e => 
         logger.log(FINE, jobServiceURI + ": " + e.getMessage, e)
         false
-    } 
+    } */
 
   @transient lazy val jobServiceCache = {
     val task = {

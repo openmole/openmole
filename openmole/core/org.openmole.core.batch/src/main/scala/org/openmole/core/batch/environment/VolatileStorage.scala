@@ -17,14 +17,14 @@
 
 package org.openmole.core.batch.environment
 
-import java.net.URI
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.JavaConversions._
+import java.net.URI
 
-class VolatileStorage(environment: BatchEnvironment, URI: URI, nbAccess: Int) extends Storage(environment, URI, nbAccess) {
+class VolatileStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {
   ReplicaCatalog.getReplica(description, environment.authentication.key).foreach{ReplicaCatalog.remove}
   override def baseDir(token: AccessToken) = new URIFile(URI)
   override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)

@@ -73,5 +73,6 @@ object JSAGASessionService {
     case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
   }
   
+  
   def createContext: Context = ContextFactory.createContext
 }

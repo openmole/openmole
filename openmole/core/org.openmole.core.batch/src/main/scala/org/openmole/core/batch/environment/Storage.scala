@@ -44,7 +44,7 @@ import scala.collection.JavaConversions._
 
 object Storage extends Logger
 
-abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: Int) extends BatchService(environment) {
+abstract class Storage(val URI: URI) extends BatchService {
     
   @transient lazy val description = new StorageDescription(URI)
   
@@ -53,7 +53,7 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
   import Storage._
   
   @transient protected var baseSpaceVar: IURIFile = null
-
+  
   def persistentSpace(token: AccessToken): IURIFile 
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile
@@ -64,7 +64,7 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
  
   implicit def stringDecorator(path: String) = new RelativePath(root).stringDecorator(path)
   
-  def test: Boolean = {
+  /*def test: Boolean = {
     try {
       
 
@@ -105,7 +105,7 @@ abstract class Storage(environment: BatchEnvironment, val URI: URI, nbAccess: In
       case e => logger.log(FINE, URI.toString, e)
     }
     return false
-  }
+  }*/
 
   override def toString: String = URI.toString
 }

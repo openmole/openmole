@@ -38,7 +38,7 @@
         <module>org.openmole.plugin.task.groovy</module>
         <module>org.openmole.plugin.task.templatefilegenerator</module>
         <module>org.openmole.plugin.task.datasetdistribution</module>
-	<module>org.openmole.plugin.hook.filemanagement</module>
+	<module>org.openmole.plugin.hook.file</module>
         <module>org.openmole.plugin.hook.csvprofiler</module>
         <module>org.openmole.plugin.hook.display</module>
         <module>org.openmole.plugin.domain.range</module>

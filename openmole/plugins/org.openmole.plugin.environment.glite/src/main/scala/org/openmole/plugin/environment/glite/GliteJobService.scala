@@ -45,7 +45,7 @@ object GliteJobService extends Logger {
 }
 
 
-class GliteJobService(jobServiceURI: URI, environment: GliteEnvironment, nbAccess: Int) extends JSAGAJobService(jobServiceURI, environment, nbAccess)  {
+class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, override val nbAccess: Int) extends JSAGAJobService(jobServiceURI)  {
 
   import GliteJobService._
   
