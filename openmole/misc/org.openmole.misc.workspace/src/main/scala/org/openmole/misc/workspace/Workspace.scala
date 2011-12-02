@@ -331,4 +331,28 @@ class Workspace(val location: File) {
       f.mkdirs
       f
     })
+  
+  object PersistentList {
+    val pattern = "[0-9]+"
+    def wsync[T] = Workspace.this.synchronized[T] _
+  }
+
+  class PersistentList[T](serializer: XStream, dir: File) extends Iterable[(Int, T)] {
+  
+    import PersistentList._
+    
+    def file(i: Int) = new File(dir, i.toString)
+  
+    def -= (i: Int) = wsync { file(i).delete }
+  
+    def apply(i: Int): T = wsync { serializer.fromXML(file(i).content).asInstanceOf[T] }
+  
+    def update(i: Int, obj: T) = wsync { file(i).content = serializer.toXML(obj) }
+  
+    override def iterator = wsync {
+      dir.listFiles{f: File => f.getName.matches(pattern)}.map{_.getName.toInt}.sorted.map{i => i -> apply(i)}.iterator
+    }
+  }
+  
+  
 }
