@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.filemanagement
+package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._

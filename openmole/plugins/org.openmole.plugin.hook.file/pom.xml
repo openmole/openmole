@@ -8,7 +8,7 @@
         <version>0.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.hook.filemanagement</artifactId>
+    <artifactId>org.openmole.plugin.hook.file</artifactId>
 
     <dependencies>
         <dependency>

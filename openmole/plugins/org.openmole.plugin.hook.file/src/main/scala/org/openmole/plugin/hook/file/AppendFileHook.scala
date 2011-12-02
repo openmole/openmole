@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.filemanagement
+package org.openmole.plugin.hook.file
 
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.task.Task
