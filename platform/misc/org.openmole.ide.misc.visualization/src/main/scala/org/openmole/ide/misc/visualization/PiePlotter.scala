@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 mathieu
  *
- * This program is free software: foryou can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -17,45 +17,71 @@
 
 package org.openmole.ide.misc.visualization
 
+import de.erichseifert.gral.data.DataTable
+import de.erichseifert.gral.plots._
+import de.erichseifert.gral.plots.colors._
+import de.erichseifert.gral.util.Orientation
+import de.erichseifert.gral.util.Orientation._
+import de.erichseifert.gral.ui.InteractivePanel
+import de.erichseifert.gral.util.Insets2D
+import de.erichseifert.gral.Legend
+import de.erichseifert.gral.Legend._
+import de.erichseifert.gral.Location
 import java.awt.Color
+import java.awt.Color._
+import org.openmole.core.model.job.State._
 import java.awt.Dimension
-import java.awt.Font
-import org.jfree.chart.ChartFactory
-import org.jfree.chart.ChartPanel
-import org.jfree.chart.plot.PiePlot
-import org.jfree.data.general.DefaultPieDataset
 
-class PiePlotter(title: String, data: Map[String, Double]){
-  def this(title: String) = this(title,Map.empty[String,Double])
-
-  val pieData = new DefaultPieDataset
-  data.foreach(d=>pieData.setValue(d._1,d._2))
+class PiePlotter(title: String) {
   
-  val chart = ChartFactory.createPieChart(title,pieData , false, false, false)
-  customize(chart.getPlot.asInstanceOf[PiePlot])
+  val data = new DataTable(classOf[java.lang.Integer])
+  data.add(0)
+  data.add(0)
+  data.add(0)
+	
+  // Create new pie plot
+  val plot = new PiePlot(data)
+  plot.setSetting(Plot.TITLE,title)
   
-  def updateData(key: String, value: Double) = if(value>=0.0) pieData.setValue(key,value)
+  // Change relative size of pie
+  plot.setSetting(PiePlot.RADIUS, 0.9)
+  // Change relative size of inner region
+  plot.setSetting(PiePlot.RADIUS_INNER, 0.4)
+  // Change the width of gaps between segments
+  plot.setSetting(PiePlot.GAP, 0.2)
+  // Change the colors
+  val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
+  colors.setMode(ColorMapper.Mode.REPEAT)
+  plot.setSetting(PiePlot.COLORS, colors)
+  plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
   
-  def chartPanel = new ChartPanel(chart) {setPreferredSize(new Dimension(200,200))}
+  plot.setSetting(Plot.LEGEND, true)
+  plot.setSetting(Plot.LEGEND_LOCATION, Location.SOUTH_WEST)
+	
+  // Format legend
+  //plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
   
-  private def customize(plot: PiePlot) = {
-    chart.getTitle.setPaint(new Color(102,102,102))
-    chart.getTitle.setFont(new Font("Ubuntu",Font.BOLD,15))
-    chart.setAntiAlias(true)
-    plot.setShadowPaint(new Color(0,0,0,0))
-    plot.setBackgroundPaint(new Color(0,0,0,0))
-    plot.setLabelBackgroundPaint(new Color(0,0,0,0))
-    plot.setLabelOutlinePaint(new Color(0,0,0,0))
-    plot.setLabelShadowPaint(new Color(0,0,0,0))
-    plot.setLabelLinksVisible(false)
-    plot.setIgnoreZeroValues(true)
-    plot.setLabelPaint(new Color(102,102,102))
-    
-    import PlotterColor._
-    plot.setSectionPaint("Ready",READY_COLOR._1)
-    plot.setSectionPaint("Running",RUNNING_EXE_COLOR._1)
-    plot.setSectionPaint("Completed",COMPLETED_COLOR._1)
-    plot.setSectionPaint("Failed",FAILED_COLOR._1)
-    plot.setSectionPaint("Canceled",CANCELED_COLOR._1)
+  def update(ready: Int,
+             completed: Int,
+             canceled: Int): Unit = {
+    updateReady(ready)
+    updateCompleted(completed)
+    updateCancel(canceled)
   }
+  
+  def update(key: State, value: Int): Unit = {
+    key match {
+      case READY=> updateReady(value)
+      case COMPLETED=> updateCompleted(value)
+      case CANCELED=> updateCancel(value)
+      case _=>
+    }
+  }
+  
+  def updateReady(ready: Int) = {data.set(0,0,ready);panel.repaint()}
+  def updateCompleted(completed: Int) = {data.set(0,1,completed);panel.repaint()}
+  def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
+  
+  val panel = new InteractivePanel(plot)
+  panel.setPreferredSize(new Dimension(200,200))
 }

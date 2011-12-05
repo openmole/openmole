@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.visualization
+package org.openmole.ide.misc.visualization.example
 
-import java.awt.Color
+import java.awt.Dimension
+import scala.swing.MainFrame
+import scala.swing.SimpleSwingApplication
+import org.openmole.core.model.job.State._
 
-object PlotterColor {
-  val READY_COLOR = (new Color(255,230,128),0)
-  val SUBMITTED_COLOR =(new Color(255,204,0),1)
-  val RUNNING_EXE_COLOR = (new Color(85,212,0),1)
-  val RUNNING_ENV_COLOR = (new Color(85,212,0),2)
-  val DONE_COLOR = (new Color(98,233,175),3)
-  val COMPLETED_COLOR = (new Color(198,233,175),3)
-  val FAILED_COLOR = (new Color(0,0,0),4)
-  val CANCELED_COLOR =(new Color(170,0,0),5)
-  val KILLED_COLOR =(new Color(0,0,0),5)
+object ExampleApp extends SimpleSwingApplication
+{
+  def top = new MainFrame {
+    title = "Image Panel Demo"
+    peer.add((new ExampleStackedPanel).peer)
+    size = new Dimension(800,200)
+  }
 }

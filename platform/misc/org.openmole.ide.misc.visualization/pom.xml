@@ -21,16 +21,6 @@
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>${org.jfree.chart.jfree.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jfree</groupId>
-            <artifactId>jcommon</artifactId>
-            <version>${org.jfree.chart.jcommon.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>de.erichseifert.gral</artifactId>
             <version>${lib.de.erichseifert.gral.version}</version>
@@ -40,6 +30,11 @@
             <artifactId>org.openmole.core.model</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.widget</artifactId>
+            <version>${openmole.gui.version}</version>
+        </dependency> 
     </dependencies>
 
     <!-- ************************************************************* -->
