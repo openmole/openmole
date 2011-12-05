@@ -50,9 +50,8 @@ class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGA
 
   override def deleteJob =  {
     if (state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
-      try {
-        job.cancel
-      } catch {
+      try job.cancel
+      catch {
         case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job deletion.", e)
       }
     }
