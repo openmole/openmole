@@ -27,11 +27,10 @@ class JobCreatedOnEnvironmentListener(moleExecution: IMoleExecution, environment
   override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
       case x: IEnvironment.JobSubmitted=>
-        println("job submitted on environment ")
         val exeManager = TopComponentsManager.executionManager(moleExecution)
         val env = exeManager.environments(environment)
-        env._2(READY)+=1
-        exeManager.envBarPlotter.updateData(env._1,READY,env._2(READY))
+        exeManager.envBarPlotter.update(READY,env._2(READY).incrementAndGet)
+        exeManager.envBarPlotter.panel.repaint()
         EventDispatcher.listen(x.job,new JobOnEnvironmentStatusListener(moleExecution,x.job),classOf[IExecutionJob.StateChanged])
     }
   }

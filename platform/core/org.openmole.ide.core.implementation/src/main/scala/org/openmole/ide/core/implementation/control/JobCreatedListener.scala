@@ -27,9 +27,7 @@ class JobCreatedListener extends EventListener[IMoleExecution] {
     event match {
       case x: OneJobSubmitted=>
         val exeManager = TopComponentsManager.executionManager(execution)
-        exeManager.status(READY)+=1
-        exeManager.wfPiePlotter.updateData("Ready",exeManager.status(READY))
-        EventDispatcher.listen(execution,new JobSatusListener,classOf[IMoleExecution.OneJobStatusChanged])
+        exeManager.wfPiePlotter.update(READY,exeManager.status(READY).incrementAndGet)
     }
   }
 }

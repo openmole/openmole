@@ -28,10 +28,8 @@ class JobSatusListener extends EventListener[IMoleExecution] {
     event match {
       case x: OneJobStatusChanged=> 
         val exeManager = TopComponentsManager.executionManager(execution)
-        exeManager.status(x.oldState) -= 1 
-        exeManager.status(x.newState) += 1 
-        exeManager.wfPiePlotter.updateData(x.oldState.name,exeManager.status(x.oldState))
-        exeManager.wfPiePlotter.updateData(x.newState.name,exeManager.status(x.newState))
+        exeManager.wfPiePlotter.update(x.oldState,exeManager.status(x.oldState).decrementAndGet)
+        exeManager.wfPiePlotter.update(x.newState,exeManager.status(x.newState).incrementAndGet)
     }
   }
 }
