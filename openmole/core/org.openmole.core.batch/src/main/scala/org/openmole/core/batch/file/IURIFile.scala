@@ -21,9 +21,8 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
-import org.openmole.core.batch.control.BatchServiceDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.StorageDescription
 
 object IURIFile {
   
@@ -93,5 +92,5 @@ trait IURIFile {
   def location: String
   def path: String
     
-  def storageDescription: StorageDescription
+  def storageDescription: ServiceDescription
 }

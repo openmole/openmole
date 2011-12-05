@@ -20,14 +20,16 @@ package org.openmole.core.batch.control
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import java.util.concurrent.TimeUnit
+import org.openmole.misc.tools.service.Logger
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
 
-object UsageControl {
+object UsageControl extends Logger {
   
   case class ResourceReleased extends Event[UsageControl]
   
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
 
-  
   def apply(nbAccess: Int) = {
     if (nbAccess != Int.MaxValue) new UsageControl(AccessTokenPool(nbAccess));
     else new UsageControl(BotomlessTokenPool)
@@ -40,6 +42,25 @@ object UsageControl {
     finally usageControl.releaseToken(token)
   }
 
+  def withToken[B]( desc: ServiceDescription, f: (AccessToken => B)): B = {
+    val usageControl = this.get(desc)
+    withUsageControl(usageControl, f)
+  }
+  
+  
+  val controls = new HashMap[ServiceDescription, UsageControl] with SynchronizedMap[ServiceDescription, UsageControl]
+ 
+  def register(ressource: ServiceDescription, usageControl: UsageControl) = {
+    logger.fine("Register " + ressource)
+    controls.getOrElseUpdate(ressource, usageControl) 
+  }
+  
+  def get(ressource: ServiceDescription) = 
+    controls.get(ressource) match {
+      case Some(ctrl) => ctrl
+      case None => botomlessUsage
+    }
+  
 }
 
 

@@ -21,12 +21,13 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.JobServiceDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.JobServiceControl._
+import org.openmole.core.batch.control.UsageControl._
 
 
-abstract class BatchJob(val jobServiceDescription: JobServiceDescription) {
+abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
   
   def this(jobService: JobService) = this(jobService.description)
   

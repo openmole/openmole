@@ -45,8 +45,8 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.tools.io.Network._
 import org.openmole.core.batch.control.StorageControl._
-import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.control.UsageControl._
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.QualityControl._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
@@ -117,7 +117,7 @@ object URIFile extends Logger {
     } finally is.close
   }
 
-  private def sameRessource(srcDescrption: BatchServiceDescription, destDescrption: BatchServiceDescription) = srcDescrption.equals(destDescrption);
+  private def sameRessource(srcDescrption: ServiceDescription, destDescrption: ServiceDescription) = srcDescrption.equals(destDescrption);
 }
 
 class URIFile(val location: String) extends IURIFile with Id {
@@ -134,7 +134,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   def this(file: IURIFile) = this(file.location)
     
-  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.StorageControl.withToken(storageDescription,a)
+  private def withToken[A](a: (AccessToken) => A): A = org.openmole.core.batch.control.UsageControl.withToken(storageDescription,a)
   private def withFailureControl[A](a: => A, isFailure: Throwable => Boolean): A = org.openmole.core.batch.control.StorageControl.withFailureControl(storageDescription,a,isFailure)
   private def withFailureControl[A](a: => A): A = org.openmole.core.batch.control.StorageControl.withFailureControl(storageDescription,a)
 
@@ -358,7 +358,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def child(childVal: String): URIFile =  new URIFile(this, childVal)
 
-  override def storageDescription = new StorageDescription(new URI(location))
+  override def storageDescription = new ServiceDescription(new URI(location))
   override def URI: URI = new URI(location)
   override def path = URI.getPath
   

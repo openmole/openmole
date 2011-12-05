@@ -46,7 +46,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
 
   resources.foreach {
     service =>
-      val usageControl = StorageControl.usageControl(service.description)
+      val usageControl = UsageControl.get(service.description)
       EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
   }
   
@@ -67,7 +67,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
         val notLoaded = resources.flatMap {   
           cur =>
 
-          StorageControl.usageControl(cur.description).tryGetToken match {
+          UsageControl.get(cur.description).tryGetToken match {
             case None => 
              // logger.fine("no token")
               None
@@ -97,7 +97,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
              // logger.fine("resource selected "+ service)
               ret = Some((service, token))
             }
-            else StorageControl.usageControl(service.description).releaseToken(token) 
+            else UsageControl.get(service.description).releaseToken(token) 
             selected -= fitness
           }
         } else waiting.acquire

@@ -25,7 +25,7 @@ import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.OptionBuilder
 import org.apache.commons.cli.Options
 import org.apache.commons.cli.ParseException
-import org.openmole.core.batch.control.BatchServiceDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
@@ -65,7 +65,7 @@ class BatchEnvironmentViewer extends IViewer {
       
       if (v >= 1) {
         System.out.println(Separator)
-        val jobServices = new HashMap[BatchServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
+        val jobServices = new HashMap[ServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
 
         for (executionJob <- executionJobRegistry.allExecutionJobs) {
           executionJob.batchJob match {

@@ -18,11 +18,23 @@
 package org.openmole.core.batch.control
 
 import java.net.URI
-import org.openmole.core.batch.environment.Storage
 
-class StorageDescription(description: String) extends BatchServiceDescription(description) {
+object ServiceDescription {
+  implicit def odering = new Ordering[ServiceDescription] {
+    override def compare(left: ServiceDescription, right: ServiceDescription): Int = left.toString.compareTo(right.toString)
+  }
+}
 
-  def this(uri: URI) = this(uri.getScheme + "://" + {if(uri.getHost == null) "localhost" else uri.getHost} + ":" + uri.getPort)
-  def this(storage: Storage) = this(storage.URI)
+class ServiceDescription(val description: String) {
   
+  def this(uri: URI) = this({if(uri.getHost == null) "localhost" else uri.getHost} + ":" + uri.getPort)
+  
+  override def equals(other: Any): Boolean = {
+    if(other == null) return false
+    if(!classOf[ServiceDescription].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) return false
+    description == other.asInstanceOf[ServiceDescription].description
+  }
+  override def hashCode = description.hashCode
+  
+  override def toString = description
 }

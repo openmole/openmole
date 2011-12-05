@@ -24,6 +24,7 @@ import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.JobServiceControl
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.IExecutionJobId
@@ -168,7 +169,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, FINE))
         logger.log(FINE, "Error durring job submission.", e)
         None
-    } finally JobServiceControl.usageControl(js.description).releaseToken(token)
+    } finally UsageControl.get(js.description).releaseToken(token)
   }
 
   private def clean =

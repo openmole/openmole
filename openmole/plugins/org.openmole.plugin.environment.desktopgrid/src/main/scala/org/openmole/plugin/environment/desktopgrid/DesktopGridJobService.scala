@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.JobServiceDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
@@ -27,7 +27,7 @@ import collection.JavaConversions._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.io.FileUtil._
 
-class DesktopGridJobService(val environment: DesktopGridEnvironment, val description: JobServiceDescription) extends JobService {
+class DesktopGridJobService(val environment: DesktopGridEnvironment, val description: ServiceDescription) extends JobService {
   import DesktopEnvironment._
   
   val timeStempsDir = new File(environment.path, timeStempsDirName){mkdirs}

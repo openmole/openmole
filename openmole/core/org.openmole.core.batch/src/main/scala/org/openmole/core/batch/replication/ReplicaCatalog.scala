@@ -42,8 +42,7 @@ import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.BatchServiceDescription
-import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
@@ -94,14 +93,14 @@ object ReplicaCatalog {
     finally readWriteLock.unlockWrite
   }
    
-  private def getReplica(hash: String, storageDescription: StorageDescription, authenticationKey: String): Option[Replica] = {
+  private def getReplica(hash: String, storageDescription: ServiceDescription, authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       })
   }
 
-  private def getReplica(src: File, hash: String, storageDescription: StorageDescription,  authenticationKey: String): Option[Replica] = {
+  private def getReplica(src: File, hash: String, storageDescription: ServiceDescription,  authenticationKey: String): Option[Replica] = {
     lockRead({
         val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null, null))
 
@@ -114,16 +113,16 @@ object ReplicaCatalog {
   }
     
 
-  def getReplica(src: File, storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
+  def getReplica(src: File, storageDescription: ServiceDescription, authenticationKey: String): ObjectSet[Replica] =
     lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null, null)))
   
-  def getReplica(storageDescription: StorageDescription, authenticationKey: String): ObjectSet[Replica] =
+  def getReplica(storageDescription: ServiceDescription, authenticationKey: String): ObjectSet[Replica] =
     lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null)))
 
-  def inCatalog(storageDescription: StorageDescription, authenticationKey: String): Set[String] =
+  def inCatalog(storageDescription: ServiceDescription, authenticationKey: String): Set[String] =
     lockRead(objectServer.queryByExample[Replica](new Replica(null, storageDescription.description,null, authenticationKey, null, null)).map{_.destination}.toSet)
   
-  def inCatalog(src: Iterable[File], authenticationKey: String): Map[File, Set[StorageDescription]] = {
+  def inCatalog(src: Iterable[File], authenticationKey: String): Map[File, Set[ServiceDescription]] = {
     //transactionalOp( t => {
     if(src.isEmpty) return Map.empty
     lockRead({
@@ -133,10 +132,10 @@ object ReplicaCatalog {
         query.descend("_authenticationKey").constrain(authenticationKey)
           .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
-        var ret = new HashMap[File, HashSet[StorageDescription]] 
+        var ret = new HashMap[File, HashSet[ServiceDescription]] 
         
         query.execute[Replica].foreach {
-          replica =>  ret.getOrElseUpdate(replica.sourceFile, new HashSet[StorageDescription]) += replica.storageDescription
+          replica =>  ret.getOrElseUpdate(replica.sourceFile, new HashSet[ServiceDescription]) += replica.storageDescription
         }
         
         ret.map{ elt => (elt._1, elt._2.toSet) }.toMap

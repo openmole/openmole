@@ -40,7 +40,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
   
   resources.foreach {
     service =>
-    val usageControl = JobServiceControl.usageControl(service.description)
+    val usageControl = UsageControl.get(service.description)
     EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
   }
   
@@ -57,7 +57,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
       do {
         val notLoaded = resources.flatMap {   
           cur =>
-            JobServiceControl.usageControl(cur.description).tryGetToken match {
+            UsageControl.get(cur.description).tryGetToken match {
               case None => None
               case Some(token) => 
                 val quality = JobServiceControl.qualityControl(cur.description)
@@ -77,7 +77,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
           
           for ((service, token, fitness) <- notLoaded) { 
             if(!ret.isDefined && selected <= fitness) ret = Some((service, token))
-            else JobServiceControl.usageControl(service.description).releaseToken(token) 
+            else UsageControl.get(service.description).releaseToken(token) 
             selected -= fitness
           }
         } else waiting.acquire

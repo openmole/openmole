@@ -28,7 +28,7 @@ import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
 import org.ogf.saga.url.URLFactory
-import org.openmole.core.batch.control.JobServiceDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.Runtime
@@ -55,7 +55,7 @@ abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
   
   override def environment: JSAGAEnvironment
   
-  @transient override lazy val description = new JobServiceDescription(jobServiceURI.toString)
+  @transient override lazy val description = new ServiceDescription(jobServiceURI.toString)
   
   /*override def test: Boolean =
     try {

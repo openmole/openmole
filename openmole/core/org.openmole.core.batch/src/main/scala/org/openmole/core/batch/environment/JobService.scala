@@ -20,14 +20,12 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.JobServiceControl._
-import org.openmole.core.batch.control.JobServiceDescription
 import org.openmole.core.batch.control.JobServiceQualityControl
-import org.openmole.core.batch.control.UsageControl
 import org.openmole.misc.workspace.Workspace
 
 trait JobService extends BatchService {
 
-  JobServiceControl.registerRessouce(description, UsageControl(nbAccess), new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+  JobServiceControl.register(description, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   def submit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
     withFailureControl(description, doSubmit(serializedJob, token))
@@ -36,8 +34,5 @@ trait JobService extends BatchService {
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob
 
   override def toString: String = description.toString
-  
-  //def test: Boolean
-  def description: JobServiceDescription
 
 }

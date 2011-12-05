@@ -26,7 +26,7 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
-import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.QualityControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.RelativePath
@@ -46,9 +46,9 @@ object Storage extends Logger
 
 abstract class Storage(val URI: URI) extends BatchService {
     
-  @transient lazy val description = new StorageDescription(URI)
+  @transient lazy val description = new ServiceDescription(URI)
   
-  StorageControl.registerRessouce(description, UsageControl(nbAccess), new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+  StorageControl.register(description, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
 
   import Storage._
   

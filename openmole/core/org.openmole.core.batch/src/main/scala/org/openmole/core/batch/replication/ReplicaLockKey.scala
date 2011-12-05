@@ -18,8 +18,8 @@
 package org.openmole.core.batch.replication
 
 import org.openmole.misc.tools.obj.Id
-import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.control.ServiceDescription
 
-class ReplicaLockKey(hash: String, desc: StorageDescription, auth: String) extends Id {
+class ReplicaLockKey(hash: String, desc: ServiceDescription, auth: String) extends Id {
   override def id = (hash, desc, auth) 
 }

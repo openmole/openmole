@@ -34,7 +34,8 @@ import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
 import org.openmole.core.batch.control.StorageControl
-import org.openmole.core.batch.control.StorageDescription
+import org.openmole.core.batch.control.ServiceDescription
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
@@ -63,7 +64,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   }
 
   override def call: Unit = {
-    val token = StorageControl.usageControl(communicationStorage.description).waitAToken
+    val token = UsageControl.get(communicationStorage.description).waitAToken
 
     try {
       val result = getRuntimeResult(outputFilePath, token)
@@ -110,7 +111,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       //If sucessfull for full group update stats
       if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
-    } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
+    } finally UsageControl.get(communicationStorage.description).releaseToken(token)
   }
 
 

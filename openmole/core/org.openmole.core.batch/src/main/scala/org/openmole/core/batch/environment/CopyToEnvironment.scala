@@ -32,6 +32,7 @@ import org.openmole.core.batch.message.ReplicatedFile
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
@@ -91,7 +92,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         } finally executionMessageFile.delete
             
         new SerializedJob(communicationStorage, communicationDir.path, inputFile.path, runtime)
-      } finally StorageControl.usageControl(communicationStorage.description).releaseToken(token)
+      } finally UsageControl.get(communicationStorage.description).releaseToken(token)
     } finally jobFile.delete
   }
 
