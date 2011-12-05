@@ -21,6 +21,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -33,32 +34,29 @@ import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.workflow.MoleSceneManager
-import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.HashMap
 
 object MoleMaker {
                                             
-  def buildMoleExecution(mole: IMole,manager: IMoleSceneManager, capsuleMap: Map[ICapsuleUI,ICapsule]): (IMoleExecution,Set[(IEnvironment,String)]) = {
+  def buildMoleExecution(mole: IMole,
+                         manager: IMoleSceneManager, 
+                         capsuleMap: Map[ICapsuleUI,ICapsule],
+                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Set[(IEnvironment,String)]) = {
     var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
-    println("capsules :: " + manager.capsules.size)
-    manager.capsules.foreach(c=>println("nn :: " + c._1))
     manager.capsules.values.foreach{c=> 
-      println("env ??" + c.dataProxy.get.dataUI.environment.isDefined)
       if (c.dataProxy.get.dataUI.environment.isDefined){
         val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
         envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
-        //   println(":: " + env + " for " + c.dataProxy.get.dataUI.name + ", " + doneCapsules(c))
         strat.select(capsuleMap(c),env)
       }}
+    val mgs = new MoleJobGrouping
+    groupingStrategies.foreach(s=>mgs.set(s._2,s._1))
    
-    println("return env ??" + envs.size)
-    (new MoleExecution(mole,strat),envs.toSet)
+    (new MoleExecution(mole,strat,mgs),envs.toSet)
   }
   
   def buildMole(manager: IMoleSceneManager) = {
