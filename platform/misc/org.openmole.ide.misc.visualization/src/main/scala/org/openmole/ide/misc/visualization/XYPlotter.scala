@@ -34,6 +34,8 @@ import de.erichseifert.gral.util.Insets2D
 import java.awt.Color
 import java.text.SimpleDateFormat
 import org.openmole.core.model.execution.ExecutionState
+import de.erichseifert.gral.util.Orientation
+import de.erichseifert.gral.Legend
 import de.erichseifert.gral.Location
 import java.awt.Dimension
 
@@ -41,7 +43,6 @@ class XYPlotter(t: String,
                 totalDuration: Int,
                 nbInterval: Int){
   val buffer_size = totalDuration/nbInterval
-  println("buffer_s : " + buffer_size)
   var yMax = 0
   var ready = 0
   var submitted = 0
@@ -65,6 +66,7 @@ class XYPlotter(t: String,
   title(t)
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.NORTH_WEST)
+  plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
   
   plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
   
@@ -105,7 +107,7 @@ class XYPlotter(t: String,
     
     
     yMax = scala.math.max(scala.math.max(ready,submitted),scala.math.max(running,yMax))
-    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 2*yMax)
+    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 2.5*yMax)
     panel.repaint()
   }
   
