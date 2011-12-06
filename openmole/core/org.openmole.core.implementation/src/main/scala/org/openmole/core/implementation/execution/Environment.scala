@@ -54,7 +54,8 @@ abstract class Environment extends IEnvironment {
     }
   } 
   
-  
+  EventDispatcher.listen(this.asInstanceOf[IEnvironment], new JobSubmissionListner, classOf[IEnvironment.JobSubmitted])
+   
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 
