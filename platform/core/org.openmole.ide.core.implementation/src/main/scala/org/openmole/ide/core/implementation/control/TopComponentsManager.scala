@@ -20,7 +20,6 @@ package org.openmole.ide.core.implementation.control
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.model.commons.MoleSceneType._
@@ -80,7 +79,6 @@ object TopComponentsManager {
   }
   
   def displayExecutionView(ms:IMoleScene) {
-    println("--- > displayExecutionView " + ms.moleSceneType)
     if (ms.moleSceneType == EXECUTION) {
       val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(ms.manager)
       ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionManager(ms.manager)))
