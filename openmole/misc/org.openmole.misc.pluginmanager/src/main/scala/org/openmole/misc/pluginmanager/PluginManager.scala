@@ -76,7 +76,7 @@ object PluginManager {
         if(noProtocol.endsWith("/")) noProtocol.substring(0, noProtocol.length - 1)
         else noProtocol
       }
-      new File(new URI(location).getPath)
+      new File(location)
     }
   }
   
