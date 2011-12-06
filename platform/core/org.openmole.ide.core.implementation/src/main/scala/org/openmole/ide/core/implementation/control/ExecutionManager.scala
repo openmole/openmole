@@ -12,6 +12,7 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
+import java.util.concurrent.atomic.AtomicInteger
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
@@ -20,10 +21,10 @@ import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmen
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.ide.misc.visualization.BarPlotter2
-import org.openmole.ide.misc.visualization.BarPlotter
 import org.openmole.ide.misc.visualization.PiePlotter
+import org.openmole.ide.misc.visualization.XYPlotter
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
@@ -33,7 +34,6 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
 import scala.swing.Action
-import scala.swing.Dialog
 import scala.swing.Label
 import scala.swing.Menu
 import scala.swing.MenuBar
@@ -51,24 +51,28 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
 
 class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager{
-  val logTextArea = new TextArea{columns = 20;rows = 10}
+  val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   override val printStream = new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea),1024),true)
   override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
+  var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
   var hookPanels= new HashMap[String,(IHookPanelUI,List[IHook])]
-  var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[IGroupingStrategy])]
-  var status = HashMap(State.READY-> 0,State.RUNNING-> 0,State.COMPLETED-> 0,State.FAILED-> 0,State.CANCELED-> 0)
- // val wfPiePlotter = new PiePlotter("Workflow",Map("Ready"-> 0.0,"Running"-> 0.0,"Completed"-> 0.0,"Failed"-> 0.0,"Canceled"-> 0.0))
-  val wfPiePlotter = new BarPlotter2("title",List("Ready","Submitted"))
- // val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter.chartPanel)}
-  val envBarPanel = new MigPanel(""){peer.add(wfPiePlotter)}
-  val envBarPlotter = new BarPlotter("aaa ")
-  var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,Double])]
+  var status = HashMap(State.READY-> new AtomicInteger,
+                       State.RUNNING-> new AtomicInteger,
+                       State.COMPLETED-> new AtomicInteger,
+                       State.FAILED-> new AtomicInteger,
+                       State.CANCELED-> new AtomicInteger)
+  val wfPiePlotter = new PiePlotter("Worflow execution")
+  val envBarPanel = new MigPanel("","[][grow,fill]",""){
+    peer.add(wfPiePlotter.panel)
+    preferredSize = new Dimension(200,200)}
+  val envBarPlotter = new XYPlotter("Environment",3600000,36) {preferredSize = new Dimension(200,200)}
+  var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,AtomicInteger])]
   
   val hookMenu = new Menu("Hooks")
   val groupingMenu = new Menu("Grouping")
   Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach{f=>hookMenu.contents+= new MenuItem(new AddHookRowAction(f))}
-  Lookup.getDefault.lookupAll(classOf[IGroupingStrategyFactoryUI]).foreach{f=>println("gmenu :: " + f);groupingMenu.contents+= new MenuItem(new AddGroupingStrategyRowAction(f))}
+  Lookup.getDefault.lookupAll(classOf[IGroupingStrategyFactoryUI]).foreach{f=>groupingMenu.contents+= new MenuItem(new AddGroupingStrategyRowAction(f))}
   val menuBar = new MenuBar{contents.append(hookMenu,groupingMenu)}
   menuBar.minimumSize = new Dimension(menuBar.size.width,30)
   val hookPanel = new MigPanel(""){contents+= (menuBar,"wrap")}
@@ -99,13 +103,19 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
-      val moleE = MoleMaker.buildMoleExecution(mole, manager, capsuleMapping)
+      val moleE = MoleMaker.buildMoleExecution(mole, 
+                                               manager, 
+                                               capsuleMapping,
+                                               gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
       moleExecution = moleE._1
+      EventDispatcher.listen(moleExecution,new JobSatusListener,classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
       moleE._2.foreach(buildEmptyEnvPlotter)
-      environments.values.foreach(v=>println("--- environment :: " + v._1))
       if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
-      envBarPanel.peer.add(envBarPlotter.chartPanel) 
+      if (moleE._2.size > 0) {
+        envBarPlotter.title(moleE._2.toList(0)._2)
+        envBarPanel.peer.add(envBarPlotter.panel) 
+      }
       initPieChart
       hookPanels.keys.foreach{commitHook}
       repaint 
@@ -122,9 +132,16 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   }
 
   def buildEmptyEnvPlotter(e: (IEnvironment,String)) = {
-    val m = HashMap(ExecutionState.SUBMITTED->0.0,ExecutionState.READY-> 0.0,ExecutionState.RUNNING-> 0.0,ExecutionState.DONE-> 0.0,ExecutionState.FAILED-> 0.0,ExecutionState.KILLED-> 0.0)    
+    val m = HashMap(ExecutionState.SUBMITTED-> new AtomicInteger,
+                    ExecutionState.READY-> new AtomicInteger,
+                    ExecutionState.RUNNING-> new AtomicInteger,
+                    ExecutionState.DONE-> new AtomicInteger,
+                    ExecutionState.FAILED->new AtomicInteger,
+                    ExecutionState.KILLED-> new AtomicInteger)    
     environments+= e._1-> (e._2,m)
-    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])}
+    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
+  }
+  
   
   override def commitHook(hookClassName: String) {
     if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
@@ -132,8 +149,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   }
   
   def initPieChart = {
-    status.keys.foreach(k=>status(k)=0)
-    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = 0))}
+    status.keys.foreach(k=>status(k)=new AtomicInteger)
+    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))}
   
   class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
     override def flush = textArea.repaint
@@ -171,12 +188,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
         hookPanel.peer.add(pui.peer)
         gStrategyPanels+= cl-> (pui,List.empty)
       }
-        //gStrategyPanels+= cl -> (gStrategyPanels(cl)._1,gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
+      gStrategyPanels+= cl-> (gStrategyPanels(cl)._1,gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
     }
   }
-  //  class AddStrategyRowAction extends Action("S1"){
-  //    def apply = {
-  //      println("add strategy : not imp yet")
-  //    }
-  //  }
 }
