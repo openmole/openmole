@@ -86,9 +86,12 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[fill]
   
   def displayCurrentEntity(p: IDataProxyUI): Unit = {
     nameTextField.text = p.dataUI.name
-    updateViewport(Displays.buildPanelUI.peer)
+    val pui = Displays.buildPanelUI
+    updateViewport(pui.peer)
     displayCurrentTypeIcon(p)
     
+    pui.peer.getComponents.foreach(_.setEnabled(editable))
+    pui.peer.getComponents.foreach(_.setEnabled(editable))
     peer.getComponents.foreach(_.setEnabled(editable))
     menuBar.peer.getComponents.foreach(_.setVisible(editable))
   }
