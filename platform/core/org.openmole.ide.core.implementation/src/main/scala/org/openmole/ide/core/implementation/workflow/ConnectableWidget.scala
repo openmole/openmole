@@ -75,7 +75,6 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
   override def paintWidget= {
     super.paintWidget
     val graphics = getGraphics.asInstanceOf[Graphics2D]
-    graphics.setColor(new Color(204,204,204))
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
     if (capsule.dataProxy.isDefined) {
@@ -98,6 +97,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
           i+= 1
         })
 
+      graphics.setColor(new Color(204,204,204))
       val newH= scala.math.max(dataUI.prototypesIn.size, dataUI.prototypesOut.size) * 22 + 45
       val delta= bodyArea.height - newH
       if (delta < 0) {
@@ -109,7 +109,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
       graphics.drawLine(taskWidth / 2,
                         TASK_TITLE_HEIGHT,
                         taskWidth / 2,
-                        TASK_CONTAINER_HEIGHT - 3 + lineH)
+                        math.max(TASK_CONTAINER_HEIGHT- 3,newH) + lineH)
       
       if (dataUI.environment.isDefined) graphics.drawImage(Images.thumb(dataUI.environment.get.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
     }
