@@ -41,7 +41,7 @@ object IMoleExecution {
   case class OneJobSubmitted(val moleJob: IMoleJob) extends Event[IMoleExecution]
   case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
-  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class ExceptionRaised(val moleJob: IMoleJob, val exception: Throwable, level: Level) extends Event[IMoleExecution]
 }
 
 trait IMoleExecution {

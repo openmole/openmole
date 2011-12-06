@@ -43,6 +43,7 @@ import org.openmole.core.implementation.execution.{StatisticSample, StatisticReg
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
 
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.hashservice.HashService
@@ -101,6 +102,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
                     moleJob.finished(context, executionResult._2)
                     successfull +=1 
                   case Right(e) => 
+                    EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, WARNING))
                     logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
                 }
             } //else logger.fine("Molejob " + moleJob.id + " is finished.")

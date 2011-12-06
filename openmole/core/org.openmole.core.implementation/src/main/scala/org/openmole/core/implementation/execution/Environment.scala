@@ -22,6 +22,9 @@ import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.IJob
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
@@ -33,6 +36,25 @@ object Environment {
 
 abstract class Environment extends IEnvironment {
  
+  class JobSubmissionListner extends EventListener[IEnvironment] {
+    override def triggered(job: IEnvironment, ev: Event[IEnvironment]) = {
+      ev match {
+        case ev: IEnvironment.JobSubmitted => 
+          EventDispatcher.listen(ev.job, new JobExceptionListner, classOf[IExecutionJob.ExceptionRaised])
+      }
+    } 
+  }
+  
+  class JobExceptionListner extends EventListener[IExecutionJob] {
+    override def triggered(job: IExecutionJob, ev: Event[IExecutionJob]) {
+      ev match  {
+        case ev: IExecutionJob.ExceptionRaised => 
+          EventDispatcher.trigger(Environment.this, new IEnvironment.ExceptionRaised(job, ev.exception, ev.level))
+      }
+    }
+  } 
+  
+  
   val id = UUID.randomUUID.toString
   val executionJobId = new AtomicLong
 

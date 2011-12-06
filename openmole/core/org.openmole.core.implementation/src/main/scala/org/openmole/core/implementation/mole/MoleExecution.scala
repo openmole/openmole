@@ -78,6 +78,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
         case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
         case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
         case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
+        case ev: IMoleJob.ExceptionRaised => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.ExceptionRaised(job, ev.exception, ev.level))
       }
   }
  
@@ -99,7 +100,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
     if(!canceled.get)  {
       EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
-        
       EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
     
       EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
