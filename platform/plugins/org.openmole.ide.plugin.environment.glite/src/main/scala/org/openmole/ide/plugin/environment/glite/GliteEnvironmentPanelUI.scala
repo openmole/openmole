@@ -30,7 +30,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   val bdiiTextField = new TextField
   val proxyURLTextField = new TextField
   val proxyUserTextField = new TextField
-  val proxyCheckBox = new CheckBox("Proxy")
+  val proxyCheckBox = new CheckBox("MyProxy")
   val proxyURLLabel = new Label("url")
   val proxyUserLabel = new Label("user")
   
