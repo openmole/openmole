@@ -22,10 +22,10 @@ import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.authentication.GliteAuthenticationMethod
-import org.openmole.plugin.environment.glite.authentication.GlobusProxyFile
-import org.openmole.plugin.environment.glite.authentication.P12Certificate
-import org.openmole.plugin.environment.glite.authentication.PEMCertificate
+import org.openmole.plugin.environment.glite.GliteAuthenticationMethod
+import org.openmole.plugin.environment.glite.GlobusProxyFile
+import org.openmole.plugin.environment.glite.P12Certificate
+import org.openmole.plugin.environment.glite.PEMCertificate
 import scala.swing.ButtonGroup
 import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
