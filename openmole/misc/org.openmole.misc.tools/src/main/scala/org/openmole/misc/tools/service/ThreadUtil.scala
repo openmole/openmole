@@ -17,6 +17,7 @@
 
 package org.openmole.misc.tools.service
 
+import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
@@ -26,6 +27,9 @@ object ThreadUtil {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r)
       t.setDaemon(true)
+      t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
+          override def uncaughtException(t: Thread, e: Throwable) = {}
+        })
       t
     }
 

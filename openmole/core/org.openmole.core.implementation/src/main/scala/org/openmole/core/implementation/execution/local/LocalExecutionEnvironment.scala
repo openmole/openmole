@@ -29,6 +29,7 @@ import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.tools.service.ThreadUtil._
 import scala.collection.mutable.SynchronizedPriorityQueue
 import org.openmole.core.model.execution.IEnvironment
 
@@ -67,8 +68,7 @@ class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
     for (i <- 0 until nbExecuters) {
       val executer = new LocalExecuter(this)
       executers.synchronized {
-        val thread = new Thread(executer)
-        thread.setDaemon(true)
+        val thread = daemonThreadFactory.newThread(executer)
         thread.start
         executers.add(executer)
       }

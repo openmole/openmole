@@ -17,10 +17,8 @@
 
 package org.openmole.misc.executorservice
 
-import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.Executors
 import org.openmole.misc.workspace.ConfigurationLocation
-import java.util.concurrent.ThreadFactory
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
@@ -32,22 +30,12 @@ object ExecutorService {
   private val executorServices = new HashMap[ExecutorType.Value, java.util.concurrent.ExecutorService]
   private def nbThreads = Workspace.preferenceAsInt(ExecutorService.NbTread)
 
-  private val threadFactory = new ThreadFactory {
-    override def newThread(r: Runnable): Thread = {
-      val t = daemonThreadFactory.newThread(r)
-      t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
-          override def uncaughtException(t: Thread, e: Throwable) = {}
-        })
-      t
-    }
-  }
-  
   def executorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = {
-    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(threadFactory)
+    if (purpose == ExecutorType.OWN) return Executors.newSingleThreadExecutor(daemonThreadFactory)
     getOrCreateExecutorService(purpose)
   }
     
   private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = 
-    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, threadFactory))
+    executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, daemonThreadFactory))
   
 }
