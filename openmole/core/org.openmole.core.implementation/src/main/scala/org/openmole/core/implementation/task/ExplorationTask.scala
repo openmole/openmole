@@ -26,6 +26,7 @@ import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.DataModeMask._
+import org.openmole.misc.exception.UserBadDataError
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 
@@ -47,8 +48,15 @@ class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) 
       case Some(b) => b += v.value
       case None =>
     }
-   
-    context ++ variablesValues.map{case(k,v) => new Variable(toArray(k).asInstanceOf[IPrototype[Array[_]]], v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))}
+    
+    context ++ variablesValues.map{
+      case(k,v) => 
+        try new Variable(toArray(k).asInstanceOf[IPrototype[Array[_]]], 
+                         v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
+        catch {
+          case e: ArrayStoreException => throw new UserBadDataError("Cannot fill factor values in " + toArray(k) + ", values " + v)
+        }
+    }
   }
  
 }
