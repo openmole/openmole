@@ -28,7 +28,6 @@ import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.authentication.GliteAuthentication
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
@@ -117,7 +116,7 @@ object GliteEnvironment {
  
 }
 
-class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes, memoryForRuntime) {
+class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], val memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes) {
 
   import GliteEnvironment._
 

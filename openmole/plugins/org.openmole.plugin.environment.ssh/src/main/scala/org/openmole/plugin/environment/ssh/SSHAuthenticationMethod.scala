@@ -15,15 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.ssh
 
+import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.ogf.saga.context.Context
+import org.openmole.core.batch.environment.AuthenticationMethod
 
-class PEMCertificate(val cypheredPassword: String,val certPath: String,val keyPath: String) extends Certificate(cypheredPassword) {
+trait SSHAuthenticationMethod extends AuthenticationMethod {
+  def method = classOf[SSHAuthenticationMethod]
   
-  override protected def _init(ctx: Context) = {
-    ctx.setAttribute(Context.USERCERT, certPath)
-    ctx.setAttribute(Context.USERKEY, keyPath)
-  }
-
+  def target: String
+  
+  def init = JSAGASessionService.addContext(target, context)
+  
+  def context: Context
 }

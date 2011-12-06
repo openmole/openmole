@@ -30,7 +30,7 @@ object JSAGAEnvironment {
 }
 
 
-abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]], inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
+abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]]) extends BatchEnvironment {
   import JSAGAEnvironment._
     
   val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), memorySizeForRuntime).toString

@@ -135,12 +135,14 @@ object BatchEnvironment {
 }
 
 
-abstract class BatchEnvironment(inMemorySizeForRuntime: Option[Int]) extends Environment {
+abstract class BatchEnvironment extends Environment {
   
   val jobRegistry = new ExecutionJobRegistry[BatchExecutionJob]
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
       
+  def inMemorySizeForRuntime: Option[Int] = None
+  
   val memorySizeForRuntime = inMemorySizeForRuntime match {
     case Some(mem) => mem
     case None => Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)

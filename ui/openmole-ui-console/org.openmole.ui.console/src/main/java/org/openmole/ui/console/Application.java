@@ -18,7 +18,7 @@ import org.openmole.misc.workspace.Workspace;
 import org.openmole.ui.console.internal.command.Get;
 import org.openmole.ui.console.internal.command.Init;
 import org.openmole.ui.console.internal.command.Print;
-
+import org.openmole.ui.console.internal.command.Auth;
 
 public class Application implements IApplication {
 
@@ -62,7 +62,8 @@ public class Application implements IApplication {
         g.leftShift(new Print(g, "print", "\\pr"));
         g.leftShift(new Init(g, muteShell, "init", "\\in"));
         g.leftShift(new Get(g, muteShell, "get", "\\g"));
-        
+        g.leftShift(new Auth(g, muteShell, "auth", "\\au"));
+          
         Console.run("init " + Console.workspace());
         
         // Process CLI options

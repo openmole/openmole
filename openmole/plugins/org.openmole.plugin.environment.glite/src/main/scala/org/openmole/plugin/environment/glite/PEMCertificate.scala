@@ -15,23 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.glite
 
-import GliteAuthentication._
 import org.ogf.saga.context.Context
-import org.openmole.core.batch.jsaga.JSAGASessionService
-import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
-class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
+class PEMCertificate(val cypheredPassword: String,val certPath: String,val keyPath: String) extends Certificate(cypheredPassword) {
   
-  override def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
-    val ctx = JSAGASessionService.createContext
-    
-    //logger.fine(proxyFile.getCanonicalPath + " " + proxyFile.exists)
-    ctx.setAttribute(Context.TYPE, "GlobusLegacy")
-    ctx.setAttribute(Context.USERPROXY, proxyFile)
-    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
-    ctx.setAttribute(VOMSContext.VOMSDIR, "")
-    (ctx, None)
+  override protected def _init(ctx: Context) = {
+    ctx.setAttribute(Context.USERCERT, certPath)
+    ctx.setAttribute(Context.USERKEY, keyPath)
   }
+
 }

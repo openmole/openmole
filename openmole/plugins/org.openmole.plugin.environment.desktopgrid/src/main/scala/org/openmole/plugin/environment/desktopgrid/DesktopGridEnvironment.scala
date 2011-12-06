@@ -38,7 +38,7 @@ object DesktopEnvironment {
   val timeStempSeparator = '@'
 }
 
-class DesktopGridEnvironment(port: Int, login: String, password: String, inRequieredMemory: Option[Int]) extends BatchEnvironment(inRequieredMemory) {
+class DesktopGridEnvironment(port: Int, login: String, password: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
   
   def this(port: Int, login: String, password: String) = this(port, login, password, None)
   

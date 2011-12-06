@@ -316,7 +316,7 @@ class Workspace(val location: File) {
     val period = formatter.parsePeriod(preference(location))
     period.toStandardSeconds.getSeconds
   }
-
+  
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     rawPreference(location) != null
   }

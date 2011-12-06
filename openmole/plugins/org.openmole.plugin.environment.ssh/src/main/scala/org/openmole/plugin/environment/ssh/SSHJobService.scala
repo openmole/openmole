@@ -15,10 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.ssh
 
-import org.ogf.saga.context.Context
+import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.control.ServiceDescription
+import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.JobService
+import org.openmole.core.batch.environment.SerializedJob
 
-trait GliteAuthenticationMethod {
-  def init(authentication: GliteAuthentication): (Context, Option[Int])
+class SSHJobService(val environment: BatchEnvironment, val description: ServiceDescription, override val nbAccess: Int) extends JobService {
+  
+  protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
+    new SSHBatchJob(description)
+  }
+
 }

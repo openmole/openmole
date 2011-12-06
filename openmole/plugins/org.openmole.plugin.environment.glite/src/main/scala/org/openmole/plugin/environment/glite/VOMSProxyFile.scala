@@ -15,15 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.glite
 
 import org.ogf.saga.context.Context
+import GliteAuthentication._
+import org.openmole.core.batch.jsaga.JSAGASessionService
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
-class P12Certificate(val cypheredPassword: String,val p12CertPath: String) extends Certificate(cypheredPassword) {
+class VOMSProxyFile(proxyFile: String) extends GliteAuthenticationMethod {
   
-  override protected def _init(ctx: Context) = {
-    ctx.setAttribute(VOMSContext.USERCERTKEY, p12CertPath)
+  def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
+    val ctx = JSAGASessionService.createContext
+    
+    ctx.setAttribute(Context.TYPE, "VOMS")
+    ctx.setAttribute(Context.USERPROXY, proxyFile)
+    ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+    ctx.setAttribute(VOMSContext.VOMSDIR, "")
+    ctx.setAttribute(VOMSContext.PROXYTYPE, "RFC820")
+    (ctx, None)
   }
-  
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.glite
 
 import java.io.File
 import org.ogf.saga.context.Context
@@ -24,7 +24,6 @@ import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import fr.in2p3.jsaga.generated.parser.ParseException
 import fr.in2p3.jsaga.adaptor.base.usage.UDuration
-import org.openmole.plugin.environment.glite.GliteEnvironment
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import GliteAuthentication._
 import org.openmole.misc.updater.Updater

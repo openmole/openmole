@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.authentication
+package org.openmole.plugin.environment.glite
 
 import com.ice.tar.TarInputStream
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
@@ -38,9 +38,7 @@ import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.MyProxy
-import org.openmole.plugin.environment.glite.GliteEnvironment
-import org.openmole.plugin.environment.glite.GliteEnvironment._
+import GliteEnvironment._
 
 import scala.collection.JavaConversions._
 
