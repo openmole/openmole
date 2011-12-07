@@ -31,7 +31,6 @@ class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventLi
   override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
       case x: ExceptionRaised=> 
-        println("EnvironmentExceptionListener " + x.job)
         exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)
         
         val stream = new PrintStream(exeManager.moleExecutionExceptionTextArea.toStream)

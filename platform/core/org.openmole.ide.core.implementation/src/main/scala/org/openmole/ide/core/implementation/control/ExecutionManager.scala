@@ -50,7 +50,7 @@ import scala.swing.TextArea
 import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
 
-class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager{
+class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
@@ -93,33 +93,40 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   pages+= new TabbedPane.Page("Execution job errors", executionJobExceptionTextArea)
   
   def start = {
-    var canBeRun = true
-    if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
+    val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
       val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?")
                                     {background = Color.white}.peer,
                                     "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
-      if (result.equals(NotifyDescriptor.OK_OPTION)) (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
-      else canBeRun = false
-    }
+      if (result.equals(NotifyDescriptor.OK_OPTION)) {
+       (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
+       true
+      } else false
+    } else true
     
     if (canBeRun){
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
-      val moleE = MoleMaker.buildMoleExecution(mole, 
+      val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
                                                manager, 
                                                capsuleMapping,
                                                gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
-      moleExecution = moleE._1
+
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
-      //EventDispatcher.listen(moleExecution,new EnvironmentExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
-      moleE._2.foreach(buildEmptyEnvPlotter)
+      
+      environments.foreach {
+        case(env, _) => EventDispatcher.listen(env, new EnvironmentExceptionListener(this),classOf[IEnvironment.ExceptionRaised])
+      }
+
+      environments.foreach(buildEmptyEnvPlotter)
       if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
-      if (moleE._2.size > 0) {
-        envBarPlotter.title(moleE._2.toList(0)._2)
+      
+      //FIXME Displays several environments
+      if (environments.size > 0) {
+        envBarPlotter.title(environments.toList(0)._2)
         envBarPanel.peer.add(envBarPlotter.panel) 
       }
       initPieChart
