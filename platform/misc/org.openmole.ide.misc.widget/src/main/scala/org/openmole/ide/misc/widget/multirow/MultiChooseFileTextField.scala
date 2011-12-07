@@ -27,7 +27,7 @@ object  MultiChooseFileTextField {
   class Factory extends IRowWidgetFactory[ChooseFileTextFieldRowWidget]{
     def apply(row: ChooseFileTextFieldRowWidget, panel: Panel) = {
       import row._
-      new ChooseFileTextFieldRowWidget(name,"",chooserTitle,chooserDescription,selectionMode,extensions)
+      new ChooseFileTextFieldRowWidget(name,initValue,chooserTitle,chooserDescription,selectionMode,extensions)
     }
   }
   
@@ -40,8 +40,6 @@ object  MultiChooseFileTextField {
     val fileTextField = new ChooseFileTextField(initValue,chooserTitle,chooserDescription,selectionMode,extensions)
     
     override val panel = new RowPanel(name,List(fileTextField))
-    
-    // var components = List(fileTextField.asInstanceOf[Component])
   
     override def content: String = fileTextField.text
   }
