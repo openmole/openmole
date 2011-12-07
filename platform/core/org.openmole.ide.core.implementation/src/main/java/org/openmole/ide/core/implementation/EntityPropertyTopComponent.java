@@ -36,7 +36,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "properties", openAtStartup = true)
 @ActionID(category = "Window", id = "org.openmole.ide.core.implementation.EntityPropertyTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
-@TopComponent.OpenActionRegistration(displayName = "EntityProperty",
+@TopComponent.OpenActionRegistration(displayName = "Properties",
 preferredID = "EntityPropertyTopComponent")
 public final class EntityPropertyTopComponent extends TopComponent {
 
