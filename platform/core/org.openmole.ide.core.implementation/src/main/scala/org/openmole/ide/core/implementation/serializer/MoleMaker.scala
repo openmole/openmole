@@ -44,7 +44,7 @@ object MoleMaker {
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager, 
                          capsuleMap: Map[ICapsuleUI,ICapsule],
-                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Set[(IEnvironment,String)]) = {
+                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = {
     var envs = new HashSet[(IEnvironment,String)]
     val strat = new FixedEnvironmentSelection
     manager.capsules.values.foreach{c=> 
