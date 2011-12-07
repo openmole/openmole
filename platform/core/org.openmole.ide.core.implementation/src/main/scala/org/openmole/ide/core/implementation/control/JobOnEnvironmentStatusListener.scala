@@ -21,11 +21,12 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher._
 
-class JobOnEnvironmentStatusListener(moleExecution: IMoleExecution, executionJob: IExecutionJob) extends EventListener[IExecutionJob] {
+class JobOnEnvironmentStatusListener(exeManager: ExecutionManager,
+                                     moleExecution: IMoleExecution, 
+                                     executionJob: IExecutionJob) extends EventListener[IExecutionJob] {
   override def triggered(executionJob: IExecutionJob, event: Event[IExecutionJob]) = {
     event match {
       case x: IExecutionJob.StateChanged=> 
-        val exeManager = TopComponentsManager.executionManager(moleExecution)
         val env = exeManager.environments(executionJob.environment)
         exeManager.envBarPlotter.update(x.oldState,env._2(x.oldState).incrementAndGet)
         exeManager.envBarPlotter.update(x.newState,env._2(x.newState).incrementAndGet)

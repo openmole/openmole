@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,23 @@
 
 package org.openmole.ide.core.implementation.control
 
-import org.openmole.core.model.job.State._
+import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
+import java.awt.Color
+import java.io.BufferedOutputStream
+import java.io.PrintStream
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
 
-class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
+class ExecutionExceptionListener(exeManager: ExecutionManager)  extends EventListener[IMoleExecution] {
+  val stream = new TextAreaOutputStream(exeManager.executionJobExceptionTextArea)
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: OneJobStatusChanged=> 
-        exeManager.wfPiePlotter.update(x.oldState,exeManager.status(x.oldState).decrementAndGet)
-        exeManager.wfPiePlotter.update(x.newState,exeManager.status(x.newState).incrementAndGet)
+      case x: ExceptionRaised=> 
+        println(" ExecutionExceptionListener" + x.moleJob)
+        exeManager.executionJobExceptionTextArea.append(x.level + ": Exception in task " + x.moleJob)
+        x.exception.printStackTrace(new PrintStream(new BufferedOutputStream(stream)))
+        exeManager.executionJobExceptionTextArea.background = Color.red
     }
   }
 }

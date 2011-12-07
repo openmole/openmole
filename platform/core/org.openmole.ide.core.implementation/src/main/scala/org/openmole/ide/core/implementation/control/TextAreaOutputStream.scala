@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,17 @@
 
 package org.openmole.ide.core.implementation.control
 
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.OneJobSubmitted
-import org.openmole.misc.eventdispatcher._
-import org.openmole.core.model.job.State._
+import java.awt.Rectangle
+import java.io.OutputStream
+import scala.swing.TextArea
 
-class JobCreatedListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
-  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
-    event match {
-      case x: OneJobSubmitted=>
-        exeManager.wfPiePlotter.update(READY,exeManager.status(READY).incrementAndGet)
+class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
+    override def flush = textArea.repaint
+    
+    override def write(b:Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
+                      
+    override def write(b: Array[Byte], off: Int,len: Int) = {
+      textArea.append(new String(b,off,len))
+      textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
     }
   }
-}

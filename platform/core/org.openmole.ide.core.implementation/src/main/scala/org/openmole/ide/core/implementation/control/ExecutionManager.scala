@@ -52,6 +52,8 @@ import org.openmole.core.model.execution.ExecutionState
 
 class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager{
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
+  val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
+  val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea),1024),true)
   override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
@@ -87,6 +89,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   pages+= new TabbedPane.Page("Settings",hookPanel)
   pages+= new TabbedPane.Page("Execution progress", splitPane)
+  pages+= new TabbedPane.Page("Mole execution job errors", moleExecutionExceptionTextArea)
+  pages+= new TabbedPane.Page("Execution job errors", executionJobExceptionTextArea)
   
   def start = {
     var canBeRun = true
@@ -108,8 +112,10 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
                                                capsuleMapping,
                                                gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
       moleExecution = moleE._1
-      EventDispatcher.listen(moleExecution,new JobSatusListener,classOf[IMoleExecution.OneJobStatusChanged])
-      EventDispatcher.listen(moleExecution,new JobCreatedListener,classOf[IMoleExecution.OneJobSubmitted])
+      EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
+      EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
+      EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
+      EventDispatcher.listen(moleExecution,new EnvironmentExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
       moleE._2.foreach(buildEmptyEnvPlotter)
       if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
       if (moleE._2.size > 0) {
@@ -139,7 +145,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
                     ExecutionState.FAILED->new AtomicInteger,
                     ExecutionState.KILLED-> new AtomicInteger)    
     environments+= e._1-> (e._2,m)
-    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
+    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(this,moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
   }
   
   
@@ -152,17 +158,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     status.keys.foreach(k=>status(k)=new AtomicInteger)
     environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))}
   
-  class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
-    override def flush = textArea.repaint
     
-    override def write(b:Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
-                      
-    override def write(b: Array[Byte], off: Int,len: Int) = {
-      textArea.append(new String(b,off,len))
-      textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
-    }
-  }
-  
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {
       val cl = fui.coreClass.getCanonicalName
