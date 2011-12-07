@@ -28,7 +28,9 @@ object ThreadUtil {
       val t = new Thread(r)
       t.setDaemon(true)
       t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
-          override def uncaughtException(t: Thread, e: Throwable) = {}
+          override def uncaughtException(t: Thread, e: Throwable) = {
+            println("Uncaught"); e.printStackTrace
+          }
         })
       t
     }

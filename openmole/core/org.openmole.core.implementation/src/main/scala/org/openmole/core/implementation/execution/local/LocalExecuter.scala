@@ -52,7 +52,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
             
             moleJob.exception match {
               case None =>
-              case Some(e) => 
+              case Some(e) =>
                 EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, SEVERE))
                 //EventDispatcher.trigger(executionJob, new IExecutionJob.ExceptionRaised(e, SEVERE))
                 logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
@@ -62,7 +62,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         executionJob.state = ExecutionState.DONE
         StatisticRegistry.sample(environment, job, new StatisticSample(executionJob.timeStamps.head.time, running, System.currentTimeMillis))
       } catch {
-        case (e: InterruptedException) => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
+        case e: InterruptedException => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
         case e => logger.log(SEVERE, null, e)
       } finally executionJob.state = ExecutionState.KILLED
     }
