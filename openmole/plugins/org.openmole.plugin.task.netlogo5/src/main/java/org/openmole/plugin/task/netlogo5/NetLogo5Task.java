@@ -37,36 +37,48 @@ import scala.collection.JavaConversions;
  */
 public class NetLogo5Task extends NetLogoTask {
 
-
-    public NetLogo5Task(String name,
+    public NetLogo5Task(
+            String name,
             File workspace,
             String scriptName,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name, workspace, scriptName, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
 
-    public NetLogo5Task(String name,
+    public NetLogo5Task(
+            String name,
             String workspace,
             String scriptName,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name, workspace, scriptName, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
-    
-    public NetLogo5Task(String name,
+
+    public NetLogo5Task(
+            String name,
             File script,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
-    
-    public NetLogo5Task(String name,
+
+    public NetLogo5Task(
+            String name,
             String script,
             Iterable<String> launchingCommands) throws UserBadDataError, InternalProcessingError {
         super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands));
     }
-    
-    @Override 
+
+    public NetLogo5Task(
+            String name,
+            String script,
+            Iterable<String> launchingCommands,
+            Boolean embedWorkspace) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands), embedWorkspace);
+    }
+
+    @Override
     public NetLogoFactory netLogoFactory() {
         return new NetLogoFactory() {
+
             public NetLogo apply() {
                 return new NetLogo5();
             }

@@ -48,6 +48,25 @@ abstract class NetLogoTask(
   def this(name: String, script: String, launchingCommands: Iterable[String]) = 
     this(name, new File(script), launchingCommands: Iterable[String])
     
+  def this(name: String, script: File, launchingCommands: Iterable[String], embedWorkspace: Boolean) = 
+    this(
+      name, 
+      if(embedWorkspace) Left(script.getParentFile, script.getName) 
+      else Right(script),
+      launchingCommands
+    )
+  
+  def this(name: String, script: String, launchingCommands: Iterable[String], embedWorkspace: Boolean) = 
+    this(
+      name, 
+      {
+        val scriptFile = new File(script) 
+        if(embedWorkspace) Left(scriptFile.getParentFile, scriptFile.getName) else Right(scriptFile)
+      },
+      launchingCommands
+    )
+  
+  
   import NetLogoTask._
   
   val inputBinding = new ListBuffer[(IPrototype[_], String)]
