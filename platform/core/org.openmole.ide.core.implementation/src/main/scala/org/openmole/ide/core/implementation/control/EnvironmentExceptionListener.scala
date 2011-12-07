@@ -28,7 +28,7 @@ import TextAreaOutputStream._
 
 class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventListener[IEnvironment] {
 
-  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
+  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = synchronized {
     event match {
       case x: ExceptionRaised=> 
         exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)
@@ -37,7 +37,7 @@ class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventLi
         try x.exception.printStackTrace(stream)
         finally stream.close
         
-        exeManager.executionJobExceptionTextArea.background = Color.red
+       // exeManager.moleExecutionExceptionTextArea.background = Color.red
     }
   }
 }

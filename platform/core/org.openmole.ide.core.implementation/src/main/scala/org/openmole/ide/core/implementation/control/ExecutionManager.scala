@@ -49,6 +49,7 @@ import scala.collection.JavaConversions._
 import scala.swing.TextArea
 import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
+import TextAreaOutputStream._
 
 class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
@@ -84,13 +85,13 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     rightComponent = new ScrollPane(logTextArea)
   }
   
-  System.setOut(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
-  System.setErr(new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea)),true))
+  System.setOut(new PrintStream(logTextArea.toStream))
+  System.setErr(new PrintStream(logTextArea.toStream))
   
   pages+= new TabbedPane.Page("Settings",hookPanel)
   pages+= new TabbedPane.Page("Execution progress", splitPane)
-  pages+= new TabbedPane.Page("Mole execution job errors", moleExecutionExceptionTextArea)
-  pages+= new TabbedPane.Page("Execution job errors", executionJobExceptionTextArea)
+  pages+= new TabbedPane.Page("Execution errors", new ScrollPane(moleExecutionExceptionTextArea))
+  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(executionJobExceptionTextArea))
   
   def start = {
     val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
