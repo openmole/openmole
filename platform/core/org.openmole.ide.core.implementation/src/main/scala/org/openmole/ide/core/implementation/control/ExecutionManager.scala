@@ -115,7 +115,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
-      EventDispatcher.listen(moleExecution,new EnvironmentExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
+      //EventDispatcher.listen(moleExecution,new EnvironmentExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
       moleE._2.foreach(buildEmptyEnvPlotter)
       if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
       if (moleE._2.size > 0) {

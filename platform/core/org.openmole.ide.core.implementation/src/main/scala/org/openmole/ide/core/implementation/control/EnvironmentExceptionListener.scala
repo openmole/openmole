@@ -17,21 +17,21 @@
 
 package org.openmole.ide.core.implementation.control
 
-import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
+import org.openmole.core.model.execution.IEnvironment.ExceptionRaised
 import java.awt.Color
 import java.io.BufferedOutputStream
 import java.io.PrintStream
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 
-class EnvironmentExceptionListener(exeManager: ExecutionManager)  extends EventListener[IMoleExecution] {
+class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventListener[IEnvironment] {
   val stream = new TextAreaOutputStream(exeManager.moleExecutionExceptionTextArea)
-  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
       case x: ExceptionRaised=> 
-        println("EnvironmentExceptionListener " + x.moleJob)
-        exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.moleJob)
+        println("EnvironmentExceptionListener " + x.job)
+        exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)
         x.exception.printStackTrace(new PrintStream(new BufferedOutputStream(stream)))
         exeManager.executionJobExceptionTextArea.background = Color.red
     }
