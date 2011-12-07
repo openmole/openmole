@@ -24,15 +24,20 @@ import java.io.PrintStream
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
+import TextAreaOutputStream._
 
 class ExecutionExceptionListener(exeManager: ExecutionManager)  extends EventListener[IMoleExecution] {
-  val stream = new TextAreaOutputStream(exeManager.executionJobExceptionTextArea)
+
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
       case x: ExceptionRaised=> 
         println(" ExecutionExceptionListener" + x.moleJob)
         exeManager.executionJobExceptionTextArea.append(x.level + ": Exception in task " + x.moleJob)
-        x.exception.printStackTrace(new PrintStream(new BufferedOutputStream(stream)))
+        
+        val stream = new PrintStream(exeManager.executionJobExceptionTextArea.toStream)
+        try x.exception.printStackTrace(new PrintStream(stream))
+        finally stream.close
+        
         exeManager.executionJobExceptionTextArea.background = Color.red
     }
   }
