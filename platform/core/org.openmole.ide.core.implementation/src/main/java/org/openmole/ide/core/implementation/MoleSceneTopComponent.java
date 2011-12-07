@@ -111,7 +111,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         setDisplayName(ms.manager().name().get());
         setName(ms.manager().name().get());
         add(new JScrollPane(ms.graphScene().createView()), BorderLayout.CENTER);
-        //  palette.refresh();
         etc.close();
         repaint();
         ((EntityPropertyTopComponent) WindowManager.getDefault().findTopComponent("EntityPropertyTopComponent")).open();
