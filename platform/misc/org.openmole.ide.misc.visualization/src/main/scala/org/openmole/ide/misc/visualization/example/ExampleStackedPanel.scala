@@ -19,8 +19,7 @@ package org.openmole.ide.misc.visualization.example
 
 import java.awt.Color
 import java.awt.Dimension
-import org.openmole.ide.misc.visualization.PiePlotter
-import org.openmole.ide.misc.visualization.XYPlotter
+import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.GridPanel
 import scala.util.Random
@@ -47,13 +46,13 @@ class ExampleStackedPanel extends MigPanel("","[][grow,fill]",""){
   
   for(i <- 1 to 30) {
     Thread.sleep(40)
-  plot2.update(200,100,50)
+  plot2.update(new States(200,100,50))
   }
   
   for(i <- 1 to 50) {
     Thread.sleep(40)
     println(i)
-    plot2.update(g.nextInt(200),g.nextInt(100),g.nextInt(50))
+    plot2.update(new States(g.nextInt(200),g.nextInt(100),g.nextInt(50)))
   }
   preferredSize = new Dimension(200,800)
 

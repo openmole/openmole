@@ -33,7 +33,6 @@ import de.erichseifert.gral.util.GraphicsUtils
 import de.erichseifert.gral.util.Insets2D
 import java.awt.Color
 import java.text.SimpleDateFormat
-import org.openmole.core.model.execution.ExecutionState
 import de.erichseifert.gral.util.Orientation
 import de.erichseifert.gral.Legend
 import de.erichseifert.gral.Location
@@ -43,11 +42,6 @@ class XYPlotter(t: String,
                 totalDuration: Int,
                 nbInterval: Int){
   val buffer_size = totalDuration/nbInterval
-  var yMax = 0
-  var ready = 0
-  var submitted = 0
-  var running = 0
-  
   
   val data = new DataTable(classOf[java.lang.Long],
                            classOf[java.lang.Integer],
@@ -89,14 +83,9 @@ class XYPlotter(t: String,
   
   def title(t: String) = plot.setSetting(Plot.TITLE,t)
   
-  def update(re: Int,
-             s: Int,
-             ru: Int): Unit = {
+  def update(states: States): Unit = synchronized {
+    import states._
     val time = System.currentTimeMillis
-    
-    ready = re
-    submitted = s
-    running = ru
     
     data.add(time,ready,submitted,running)
     val col1 = data.getColumn(0)
@@ -105,20 +94,10 @@ class XYPlotter(t: String,
                                          col1.getStatistics(Statistics.MAX))
     data.remove(0)
     
-    
-    yMax = scala.math.max(scala.math.max(ready,submitted),scala.math.max(running,yMax))
-    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*yMax)
+    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*scala.math.max(scala.math.max(ready,submitted),running))
     panel.repaint()
   }
   
-  def update(key: ExecutionState.ExecutionState, value: Int): Unit = {
-    key match {
-      case ExecutionState.READY=> update(value,submitted,running)
-      case ExecutionState.SUBMITTED=> update(ready,value,running)
-      case ExecutionState.RUNNING=> update(ready,submitted,value)
-      case _=>
-    }
-  }
   
   def formatFilledArea(plot: XYPlot,data: DataSource,color: Color) = {
     plot.setPointRenderer(data, null)
