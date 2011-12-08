@@ -107,7 +107,7 @@ class XYPlotter(t: String,
     
     
     yMax = scala.math.max(scala.math.max(ready,submitted),scala.math.max(running,yMax))
-    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 2.5*yMax)
+    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*yMax)
     panel.repaint()
   }
   
