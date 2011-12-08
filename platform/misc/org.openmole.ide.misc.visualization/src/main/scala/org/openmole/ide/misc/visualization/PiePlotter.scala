@@ -17,6 +17,7 @@
 
 package org.openmole.ide.misc.visualization
 
+import de.erichseifert.gral.plots.PiePlot.PieSliceRenderer
 import de.erichseifert.gral.data.DataTable
 import de.erichseifert.gral.plots._
 import de.erichseifert.gral.plots.colors._
@@ -46,13 +47,14 @@ class PiePlotter(title: String) {
   // Change relative size of pie
   plot.setSetting(PiePlot.RADIUS, 0.9)
   // Change relative size of inner region
-  plot.setSetting(PiePlot.RADIUS_INNER, 0.4)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.9)
   // Change the width of gaps between segments
-  plot.setSetting(PiePlot.GAP, 0.2)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.GAP, 0.2)
+  
   // Change the colors
   val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
   colors.setMode(ColorMapper.Mode.REPEAT)
-  plot.setSetting(PiePlot.COLORS, colors)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.COLORS, colors)
   plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
   
   plot.setSetting(Plot.LEGEND, true)
