@@ -28,7 +28,7 @@ class JobOnEnvironmentStatusListener(exeManager: ExecutionManager,
     event match {
       case x: IExecutionJob.StateChanged=> 
         val env = exeManager.environments(executionJob.environment)
-        exeManager.envBarPlotter.update(x.oldState,env._2(x.oldState).incrementAndGet)
+        exeManager.envBarPlotter.update(x.oldState,env._2(x.oldState).decrementAndGet)
         exeManager.envBarPlotter.update(x.newState,env._2(x.newState).incrementAndGet)
     }
   }
