@@ -40,6 +40,9 @@ class SSHAuthentication(val method: SSHAuthenticationMethod) extends Authenticat
   
   override def key = method.target
   
-  override def initialize = JSAGASessionService.addContext(method.target, method.context)
+  override def initialize = {
+    JSAGASessionService.addContext("ssh://" + method.target, method.context)
+    JSAGASessionService.addContext("sftp://" + method.target, method.context)
+  }
 
 }

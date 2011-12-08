@@ -19,32 +19,23 @@ package org.openmole.ui.console.internal.command
 
 import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
+import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.misc.workspace.Workspace
-import org.openmole.core.batch.environment.AuthenticationMethod
-import org.openmole.core.batch.environment.AuthenticationMethod._
+import org.openmole.ui.console.internal.command.getter.IGetter
+import org.openmole.ui.console.internal.command.getter.MoleGetter
 import java.util.List
 import scala.collection.JavaConversions._
+import org.openmole.ui.console.Console
 
-
-class Auth(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
+class Encrypted(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
 
   override def execute(list: List[_]): Object = {
-    if(list.head == "-l") {
-      val method = shell.execute(list.tail.head.asInstanceOf[String]).asInstanceOf[Class[_]]
-      Workspace.persistentList(method).foreach {
-        case (i, m) => println(i + ": " + m)
-      }
-      null
-    } else {
-      val index = shell.execute(list.head.asInstanceOf[String]).asInstanceOf[Int]
-      if(list.tail.isEmpty) return null
-      val cmd = list.asInstanceOf[List[String]].tail.reduce(_ + " " + _)
-      
-      val auth = shell.execute(cmd).asInstanceOf[AuthenticationMethod]
-      Workspace.instance.register(index, auth)
-      null
-    }
+    if (list.isEmpty) return null
+    
+    val password = Workspace.encrypt(new jline.ConsoleReader().readLine("cypher:", '*'))
+    
+    Console.setVariable(list.head.asInstanceOf[String], password)
+    null
   }
-  
-  
+
 }
