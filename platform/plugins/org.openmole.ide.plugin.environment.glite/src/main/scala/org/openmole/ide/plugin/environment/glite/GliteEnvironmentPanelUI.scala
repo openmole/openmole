@@ -28,11 +28,21 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   val voTextField = new TextField
   val vomsTextField = new TextField
   val bdiiTextField = new TextField
+  
+  val proxyCheckBox = new CheckBox("MyProxy")
   val proxyURLTextField = new TextField
   val proxyUserTextField = new TextField
-  val proxyCheckBox = new CheckBox("MyProxy")
   val proxyURLLabel = new Label("url")
   val proxyUserLabel = new Label("user")
+  
+  val requirementCheckBox = new CheckBox("Requirements")
+  val architectureCheckBox = new CheckBox("64 bits")
+  val runtimeMemoryLabel = new Label("Runtime memory")
+  val runtimeMemoryTextField = new TextField(4)
+  val workerNodeMemoryLabel = new Label("Worker node memory")
+  val workerNodeMemoryTextField = new TextField(4)
+  val maxCPUTimeLabel = new Label("Max CPU Time")
+  val maxCPUTimeTextField = new TextField(4)
   
   contents+= (new Label("VO"),"gap para")
   contents+= voTextField
@@ -45,6 +55,14 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   contents+= proxyURLTextField
   contents+= (proxyUserLabel,"gap para")
   contents+= proxyUserTextField
+  contents+= (requirementCheckBox,"wrap")
+  contents+= (architectureCheckBox,"wrap")
+  contents+= (runtimeMemoryLabel,"gap para")
+  contents+= runtimeMemoryTextField
+  contents+= (workerNodeMemoryLabel,"gap para")
+  contents+= workerNodeMemoryTextField
+  contents+= (maxCPUTimeLabel,"gap para")
+  contents+= maxCPUTimeTextField  
   
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
@@ -52,22 +70,42 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   proxyURLTextField.text = pud.proxyURL
   proxyUserTextField.text = pud.proxyUser
   proxyCheckBox.selected = pud.proxy
+  requirementCheckBox.selected = pud.requirement
+  architectureCheckBox.selected = pud.architecture64
+  runtimeMemoryTextField.text = pud.runtimeMemory
+  workerNodeMemoryTextField.text = pud.workerNodeMemory
+  maxCPUTimeTextField.text = pud.maxCPUTime
   showProxy(pud.proxy)
+  showRequirements(pud.requirement)
   
-  listenTo(`proxyCheckBox`)
-  reactions += {case ButtonClicked(`proxyCheckBox`) => showProxy(proxyCheckBox.selected)}
+  listenTo(`proxyCheckBox`,`requirementCheckBox`)
+  reactions += {
+    case ButtonClicked(`requirementCheckBox`) => showRequirements(requirementCheckBox.selected)
+    case ButtonClicked(`proxyCheckBox`) => showProxy(proxyCheckBox.selected)}
       
   private def showProxy(b: Boolean) = {
-    proxyURLLabel.visible = b
-    proxyUserLabel.visible = b
-    proxyURLTextField.visible = b
-    proxyUserTextField.visible = b}
+    List(proxyURLLabel, proxyURLLabel, proxyUserLabel, proxyURLTextField, proxyUserTextField).foreach{
+      _.visible = b
+    }
+  }
     
+  private def showRequirements(b: Boolean) = {
+    List(architectureCheckBox, runtimeMemoryLabel, 
+    runtimeMemoryTextField, workerNodeMemoryLabel,
+    workerNodeMemoryTextField, maxCPUTimeLabel,
+    maxCPUTimeTextField).foreach{_.visible = b}
+    }
+  
   override def saveContent(name: String) = new GliteEnvironmentDataUI(name,
                                                                       voTextField.text,
                                                                       vomsTextField.text,
                                                                       bdiiTextField.text,
                                                                       proxyCheckBox.selected,
                                                                       proxyURLTextField.text,
-                                                                      proxyUserTextField.text)
+                                                                      proxyUserTextField.text,
+                                                                      requirementCheckBox.selected,
+                                                                      architectureCheckBox.selected,
+                                                                      runtimeMemoryTextField.text,
+                                                                      workerNodeMemoryTextField.text,
+                                                                      maxCPUTimeTextField.text)
 }

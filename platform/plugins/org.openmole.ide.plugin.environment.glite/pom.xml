@@ -33,6 +33,11 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.batch</artifactId>
+            <version>${openmole.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${openmole.core.version}</version>
         </dependency>
