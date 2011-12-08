@@ -20,8 +20,8 @@
 
 <shortcut
 	name="OpenMOLE Uninstall"
-	target="java"
-	commandLine="-jar $INSTALL_PATH/Uninstaller/uninstaller.jar"
+	target='java'
+	commandLine='-jar "$INSTALL_PATH/Uninstaller/uninstaller.jar"'
 	description="Uninstall OpenMOLE"
 	iconFile="$INSTALL_PATH/uninstall.ico" 
 	initialState="normal"
