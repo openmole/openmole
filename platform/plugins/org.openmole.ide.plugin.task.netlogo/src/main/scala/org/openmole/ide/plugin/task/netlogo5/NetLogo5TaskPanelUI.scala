@@ -24,13 +24,13 @@ import scala.swing._
 import swing.Swing._
 
 class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
-                                                                                 ndu.workspacePath,
+                                                                                 ndu.workspaceEmbedded,
                                                                                  ndu.lauchingCommands,
                                                                                  ndu.prototypeMappingInput,
                                                                                  ndu.prototypeMappingOutput,
                                                                                  ndu.globals) with ITaskPanelUI{
   override def saveContent(name: String): ITaskDataUI = new NetLogo5TaskDataUI(name, 
-                                                                               workspaceTextField.text, 
+                                                                               workspaceCheckBox.selected, 
                                                                                nlogoTextField.text, 
                                                                                launchingCommandTextArea.text,
                                                                                if (multiProtoString.isDefined) multiProtoString.get.content.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI])

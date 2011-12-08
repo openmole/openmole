@@ -12,18 +12,18 @@ import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import scala.collection.JavaConversions._
 
 class NetLogo5TaskDataUI(val name: String,
-                         val workspacePath: String,
-                         val nlogoPath: String, 
-                         val lauchingCommands: String,
-                         var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
-                         var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
-                         val globals: List[String]) extends TaskDataUI {
-  def this(n: String) = this(n,"","","",List(),List(),List())
+                         val workspaceEmbedded: Boolean=false,
+                         val nlogoPath: String = "", 
+                         val lauchingCommands: String = "",
+                         var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)]= List(),
+                         var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)] = List(),
+                         val globals: List[String] = List()) extends TaskDataUI {
   
   override def coreObject = {
     val nlt = new NetLogo5Task(name,
-                           workspacePath,nlogoPath.split('/').toList.last,
-                           asJavaIterable(lauchingCommands.split('\n')))
+                               nlogoPath.split('/').toList.last,
+                               asJavaIterable(lauchingCommands.split('\n')),
+                               workspaceEmbedded)
     prototypeMappingInput.foreach(pm=>nlt.addNetLogoInput(pm._1.dataUI.coreObject,pm._2))
     prototypeMappingOutput.foreach(pm=>nlt.addNetLogoOutput(pm._1,pm._2.dataUI.coreObject))
     nlt

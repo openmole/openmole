@@ -30,14 +30,14 @@ import org.openmole.ide.osgi.netlogo4.NetLogo4
 import java.io.File
 
 class GenericNetLogoPanelUI(nlogoPath: String,
-                            workspacePath: String,
+                            workspaceEmbedded: Boolean,
                             lauchingCommands: String,
                             prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
                             prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
                             g: List[String]) extends MigPanel("","[left]rel[grow,fill]","[]5[]5[]5[]2[]0[]"){
  
   val nlogoTextField = new ChooseFileTextField(nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
-  val workspaceTextField = new ChooseFileTextField(workspacePath)
+  val workspaceCheckBox = new CheckBox("Embedd Workspace"){selected = workspaceEmbedded}
   val launchingCommandTextArea = new TextArea(lauchingCommands) 
   var multiStringProto : Option[MultiTwoCombos[String,IPrototypeDataProxyUI]] = None
   var multiProtoString : Option[MultiTwoCombos[IPrototypeDataProxyUI,String]] = None
@@ -51,8 +51,7 @@ class GenericNetLogoPanelUI(nlogoPath: String,
   
   contents+= new Label("Nlogo file")
   contents+= (nlogoTextField,"growx,wrap")
-  contents+= new Label("Workspace directory")
-  contents+= (workspaceTextField,"span,growx,wrap")
+  contents+= (workspaceCheckBox,"span,growx,wrap")
   contents+= (new Label("Commands"),"wrap")
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span,growx")
 
