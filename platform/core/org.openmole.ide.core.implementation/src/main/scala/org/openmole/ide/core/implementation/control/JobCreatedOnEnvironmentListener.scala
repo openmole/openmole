@@ -22,6 +22,7 @@ import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.execution.ExecutionState._
+import ExecutionManager._
 
 class JobCreatedOnEnvironmentListener(exeManager: ExecutionManager,
                                       moleExecution: IMoleExecution, 
@@ -30,7 +31,8 @@ class JobCreatedOnEnvironmentListener(exeManager: ExecutionManager,
     event match {
       case x: IEnvironment.JobSubmitted=>
         val env = exeManager.environments(environment)
-        exeManager.envBarPlotter.update(READY,env._2(READY).incrementAndGet)
+        env._2(READY).incrementAndGet
+        exeManager.envBarPlotter.update(env._2.states)
         EventDispatcher.listen(x.job,new JobOnEnvironmentStatusListener(exeManager,moleExecution,x.job),classOf[IExecutionJob.StateChanged])
     }
   }

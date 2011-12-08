@@ -23,8 +23,7 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.ide.misc.visualization.PiePlotter
-import org.openmole.ide.misc.visualization.XYPlotter
+import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
@@ -51,11 +50,18 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
 import TextAreaOutputStream._
 
+
+object ExecutionManager {
+  implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState,AtomicInteger]) = new {
+    def states = new States(s(ExecutionState.READY).get, s(ExecutionState.SUBMITTED).get, s(ExecutionState.RUNNING).get)
+  }
+}
+
 class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
-  override val printStream = new PrintStream(new BufferedOutputStream(new TextAreaOutputStream(logTextArea),1024),true)
+  override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
   override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
@@ -70,7 +76,9 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(200,200)}
   val envBarPlotter = new XYPlotter("Environment",3600000,36) {preferredSize = new Dimension(200,200)}
-  var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,AtomicInteger])]
+
+  
+  var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,AtomicInteger])] 
   
   val hookMenu = new Menu("Hooks")
   val groupingMenu = new Menu("Grouping")
