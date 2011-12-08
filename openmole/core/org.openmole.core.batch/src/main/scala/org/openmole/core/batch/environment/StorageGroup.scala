@@ -57,6 +57,11 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
   override def iterator = resources.iterator
   
   def selectAService(usedFiles: Iterable[File]): (Storage, AccessToken) = {
+    if(resources.size == 1) {
+      val r = resources.head
+      return (r, UsageControl.get(r.description).waitAToken)
+    } 
+    
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map{_.size}.sum

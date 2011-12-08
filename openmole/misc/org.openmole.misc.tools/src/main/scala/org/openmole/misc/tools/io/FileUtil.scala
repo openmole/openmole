@@ -46,9 +46,9 @@ import scala.io.Source
 
 object FileUtil {
 
-  val exec = 4
-  val write = 2
-  val read = 1
+  val exec = 1 + 8 + 64
+  val write = 2 + 16 + 128
+  val read = 4 + 32 + 256
   
   implicit val fileOrdering = new Ordering[File] {
     override def compare(left: File, right: File) = {

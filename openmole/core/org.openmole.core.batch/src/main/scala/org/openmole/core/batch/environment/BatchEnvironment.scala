@@ -161,8 +161,17 @@ abstract class BatchEnvironment extends Environment {
   @transient lazy val jvmLinuxI386 = new File(Workspace.preference(BatchEnvironment.JVMLinuxI386Location))
   @transient lazy val jvmLinuxX64 = new File(Workspace.preference(BatchEnvironment.JVMLinuxX64Location))
 
-  @transient lazy val jobServices = new JobServiceGroup(this, allJobServices) 
-  @transient lazy val storages = new StorageGroup(this, allStorages)
+  @transient lazy val jobServices = {
+    val jobServices = allJobServices
+    if(jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
+    new JobServiceGroup(this, jobServices) 
+  }
+  
+  @transient lazy val storages = {
+    val storages = allStorages
+    if(storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
+    new StorageGroup(this, storages)
+  }
   
   def allStorages: Iterable[Storage]
   def allJobServices: Iterable[JobService]

@@ -50,6 +50,11 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
   override def iterator = resources.iterator
   
   def selectAService: (JobService, AccessToken) = {
+    if(resources.size == 1) {
+      val r = resources.head
+      return (r, UsageControl.get(r.description).waitAToken)
+    } 
+
     selectingRessource.lock
     try {
       var ret: Option[(JobService, AccessToken)] = None
@@ -85,6 +90,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
       } while (!ret.isDefined)
       return ret.get
     } finally selectingRessource.unlock
+    
   }
 
 }
