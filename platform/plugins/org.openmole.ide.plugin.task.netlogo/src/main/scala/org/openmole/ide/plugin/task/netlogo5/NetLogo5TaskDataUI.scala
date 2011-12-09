@@ -10,6 +10,8 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import scala.collection.JavaConversions._
+import scala.io.Source
+import java.io.File
 
 class NetLogo5TaskDataUI(val name: String,
                          val workspaceEmbedded: Boolean=false,
@@ -21,8 +23,8 @@ class NetLogo5TaskDataUI(val name: String,
   
   override def coreObject = {
     val nlt = new NetLogo5Task(name,
-                               nlogoPath.split('/').toList.last,
-                               asJavaIterable(lauchingCommands.split('\n')),
+                               new File(nlogoPath),
+                               asJavaIterable(Source.fromString(lauchingCommands).getLines.toIterable),
                                workspaceEmbedded)
     prototypeMappingInput.foreach(pm=>nlt.addNetLogoInput(pm._1.dataUI.coreObject,pm._2))
     prototypeMappingOutput.foreach(pm=>nlt.addNetLogoOutput(pm._1,pm._2.dataUI.coreObject))
