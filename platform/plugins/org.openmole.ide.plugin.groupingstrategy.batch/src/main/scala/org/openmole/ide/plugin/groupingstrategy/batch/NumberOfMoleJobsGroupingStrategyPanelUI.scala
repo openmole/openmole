@@ -48,7 +48,7 @@ import NumberOfMoleJobsGroupingStrategyPanelUI._
 //
 class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IGroupingStrategyPanelUI{
   var multiRow : Option[MultiComboTextField[ICapsule]] = None
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.inputs.size > 0).toList
+  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
   if (capsules.size>0){
     val r =  new ComboTextFieldRowWidget("Group",
