@@ -43,7 +43,7 @@ object CompleteSamplingPanelUI{
     override def apply(row: TwoCombosRowWidget[IPrototypeDataProxyUI,String], p: Panel) = {
       import row._
       val twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String] = 
-        new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB, inBetweenString,plus)
+        new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB, inBetweenString,plus)
       val protoObject = selectedA.dataUI.coreObject
       if (csPanel.extMap.contains(row)) csPanel.addRow(twocombrow, csPanel.extMap(row),protoObject) else csPanel.addRow(twocombrow,protoObject)
       twocombrow.combo2.selection.reactions += {
@@ -65,14 +65,15 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wra
     val protos = Proxys.prototypes.map(_._2).toList
     val domains = Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).toList.map{_.displayName}
     val csrs = if (cud.factors.size>0) cud.factors.map{f=> 
-      val rw = new TwoCombosRowWidget("Factor",protos,f._1,domains,f._2,"defined on ",ADD)
+      val rw = new TwoCombosRowWidget(protos,f._1,domains,f._2,"defined on ",ADD)
       extMap += rw->f._3
       rw}
     else {
-      List(new TwoCombosRowWidget("Factor",protos,protos(0),domains, domains(0),"defined on ",ADD))
+      List(new TwoCombosRowWidget(protos,protos(0),domains, domains(0),"defined on ",ADD))
     }
     
-    sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](csrs,
+    sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String]("Factors",
+                                                                               csrs,
                                                                                rowFactory(this)))
     
     contents+= sampleDomainCombos.get.panel

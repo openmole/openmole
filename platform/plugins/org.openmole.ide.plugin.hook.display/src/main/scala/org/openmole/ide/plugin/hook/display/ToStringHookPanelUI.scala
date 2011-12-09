@@ -39,7 +39,7 @@ object ToStringHookPanelUI{
     override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: Panel) = {
       import row._
       val twocomborow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
-        new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
+        new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
       
@@ -63,15 +63,15 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   
   if (capsules.size>0){
     if (protosFromTask(capsules(0)).size>0){
-      val r =  new TwoCombosRowWidget("Display",
-                                      protosFromTask(capsules(0)),
+      val r =  new TwoCombosRowWidget(protosFromTask(capsules(0)),
                                       protosFromTask(capsules(0))(0),
                                       capsules,
                                       capsules(0),
                                       "from ",
                                       NO_ADD)
     
-      multiRow =  Some(new MultiTwoCombos(List(r),
+      multiRow =  Some(new MultiTwoCombos("Displaying prototypes",
+                                          List(r),
                                           rowFactory(this),
                                           CLOSE_IF_EMPTY,
                                           NO_ADD))
@@ -79,14 +79,11 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   }
   
   if (multiRow.isDefined) {
-    contents+= (new Label("Display prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
     contents+= multiRow.get.panel
   }
     
   def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
     executionManager.prototypeMapping.values.toList
-    // To be uncommented when the ComboBox is fixed 
-    //c.outputs.map(_.prototype).toList
   
   def saveContent = {
     if (multiRow.isDefined) multiRow.get.content.map{c=>new ToStringHookDataUI(executionManager,(c._2,c._1))}

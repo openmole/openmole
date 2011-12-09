@@ -36,7 +36,7 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
       import row._
      
       val combotfrow: ComboTextFieldRowWidget[ICapsule] = 
-        new ComboTextFieldRowWidget(name,comboContentA,selectedA,"",plus) {
+        new ComboTextFieldRowWidget(comboContentA,selectedA,"",plus) {
           override def doOnClose = strategypanel.executionManager.commitHook("org.openmole.plugin.groupingstrategy.batch.NumberOfMoleJobsGroupingStrategy")
         }
       combotfrow
@@ -51,13 +51,13 @@ class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionMa
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
   if (capsules.size>0){
-    val r =  new ComboTextFieldRowWidget("Group",
-                                         capsules,
+    val r =  new ComboTextFieldRowWidget(capsules,
                                          capsules(0),
                                          "by",
                                          NO_ADD)
     
-    multiRow =  Some(new MultiComboTextField(List(r),
+    multiRow =  Some(new MultiComboTextField("Group",
+                                             List(r),
                                              rowFactory(this),
                                              CLOSE_IF_EMPTY,
                                              NO_ADD))

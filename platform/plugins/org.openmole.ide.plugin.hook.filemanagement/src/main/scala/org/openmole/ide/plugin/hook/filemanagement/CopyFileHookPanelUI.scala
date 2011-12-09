@@ -38,8 +38,7 @@ object CopyFileHookPanelUI{
   def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File],ICapsule] {
     override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: Panel) = {
       import row._
-      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(name,
-                                                                comboContentA,
+      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
                                                                 selectedA,
                                                                 inBetweenString1,
                                                                 comboContentB,
@@ -69,8 +68,7 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   
   if (capsules.size>0) {
     if (protosFromTask(capsules(0)).size>0){
-      val r =  new TwoCombosChooseFileTextFieldRowWidget("Save",
-                                                         protosFromTask(capsules(0)),
+      val r =  new TwoCombosChooseFileTextFieldRowWidget(protosFromTask(capsules(0)),
                                                          protosFromTask(capsules(0))(0),
                                                          "from",
                                                          capsules,
@@ -79,7 +77,8 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
                                                          "",
                                                          NO_ADD)
     
-      multiRow =  Some(new MultiTwoCombosChooseFileTextField(List(r),
+      multiRow =  Some(new MultiTwoCombosChooseFileTextField("Save prototypes in file",
+                                                             List(r),
                                                              rowFactory(this),
                                                              CLOSE_IF_EMPTY,
                                                              NO_ADD))
@@ -87,7 +86,6 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   }
   
   if (multiRow.isDefined) {
-    contents+= (new Label("Save prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
     contents+= multiRow.get.panel
   }
     

@@ -71,13 +71,13 @@ class GenericNetLogoPanelUI(nlogoPath: String,
     }
     if (!globals.isEmpty){
       multiStringProto = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
-          "Map",
+          "Input Mapping",
           "with",
           (globals, comboContent),
           prototypeMappingOutput))
       
     multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
-          "Map",
+          "Output Mapping",
           "with",
           (comboContent,globals),
           prototypeMappingInput))

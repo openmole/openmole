@@ -57,7 +57,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[][grow,fi
       val headers = reader.readNext
       comboMulti = 
         Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
-          "Map",
+          "Map columns to prototypes",
           "with",
           (headers.toList, comboContent),
            pud.prototypeMapping))
