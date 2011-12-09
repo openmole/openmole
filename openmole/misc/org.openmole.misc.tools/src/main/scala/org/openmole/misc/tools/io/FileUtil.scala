@@ -39,13 +39,14 @@ import scala.collection.mutable.ListBuffer
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import TarArchiver._
+import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import scala.io.Source
 
 
 object FileUtil {
-
+  
   val exec = 1 + 8 + 64
   val write = 2 + 16 + 128
   val read = 4 + 32 + 256
@@ -327,9 +328,15 @@ object FileUtil {
       val fs = FileSystems.getDefault
       val linkTo = fs.getPath(target)
       val link = fs.getPath(file.getAbsolutePath)
-      Files.createSymbolicLink(link, linkTo)
+      try Files.createSymbolicLink(link, linkTo)
+      catch {
+        case e: UnsupportedOperationException => 
+          Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, copying the file instead")
+          copyFile(new File(target))
+      }
     }
     
+
   }
   
   implicit def toFileFilterConverter(f: File => Boolean) = new FileFilter {
