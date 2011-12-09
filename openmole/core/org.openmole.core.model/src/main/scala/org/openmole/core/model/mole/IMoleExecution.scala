@@ -46,21 +46,17 @@ object IMoleExecution {
 
 trait IMoleExecution {
 
-  @throws(classOf[InternalProcessingError])
-  @throws(classOf[UserBadDataError])
+  def started: Boolean
+
   def start: this.type
     
-  @throws(classOf[InternalProcessingError])
-  @throws(classOf[UserBadDataError])
   def cancel: this.type
     
-  @throws(classOf[InterruptedException])
-  @throws(classOf[MultipleException])
   def waitUntilEnded: this.type
       
   def exceptions: Iterable[Throwable]
   
-  def isFinished: Boolean
+  def finished: Boolean
 
   def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket)
   def submitToEnvironment(job: IJob, capsule: ICapsule)

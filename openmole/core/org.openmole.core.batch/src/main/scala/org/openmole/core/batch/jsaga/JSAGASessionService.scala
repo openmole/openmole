@@ -17,18 +17,16 @@
 
 package org.openmole.core.batch.jsaga
 
-import java.util.Hashtable
 import java.util.logging.Level
 import java.util.logging.{Logger => JLogger}
 import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
 import org.ogf.saga.session.Session
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 
-object JSAGASessionService {
+object JSAGASessionService extends Logger {
   
   private var sessions = List[(String, Session)]()
   private lazy val defaultSession = SessionFactory.createSession(false)
@@ -68,7 +66,7 @@ object JSAGASessionService {
     }
   }
   
-  def session(url: String) = sessions.filter{case(p, s) => url.matches(p)}.headOption match {
+  def session(url: String) = sessions.filter{case(p, s) => url.matches(p + ".*")}.headOption match {
     case Some((p, s)) => s
     case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
   }

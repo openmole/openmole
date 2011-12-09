@@ -25,7 +25,7 @@ class SSHLoginPassword(val login: String, val cypheredPassword: String, val targ
   
   override def context = {
     val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "SSH")
+    ctx.setAttribute(Context.TYPE, "UserPass")
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, Workspace.decrypt(cypheredPassword))
     ctx

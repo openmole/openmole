@@ -83,9 +83,9 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
  
   private var inProgress = new TreeMap[IMoleJob, ITicket] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
-  private val started = new AtomicBoolean(false)
+  private val _started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
-  private val finished = new Semaphore(0)
+  private val _finished = new Semaphore(0)
 
   override val id = UUID.randomUUID.toString  
   private val ticketNumber = new AtomicLong
@@ -130,7 +130,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
   
   override def start = {
-    if(!started.getAndSet(true)) start(Context.empty) 
+    if(!_started.getAndSet(true)) start(Context.empty) 
     this
   }
   
@@ -146,8 +146,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def moleJobs = inProgress.keys
 
   override def waitUntilEnded = {
-    finished.acquire
-    finished.release
+    _finished.acquire
+    _finished.release
     if(!exceptions.isEmpty) throw new MultipleException(exceptions)
     this
   }
@@ -165,14 +165,16 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       inProgress -= job
       instantRerun.jobFinished(job, capsule)
      
-      if (isFinished) {  
-        finished.release
+      if (finished) {  
+        _finished.release
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
       }
     }
   }
   
-  override def isFinished: Boolean = inProgress.isEmpty
+  override def finished: Boolean = inProgress.isEmpty
+  
+  override def started: Boolean = _started.get
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
