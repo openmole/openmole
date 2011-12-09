@@ -20,8 +20,6 @@ package org.openmole.ide.misc.widget.multirow
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 
 trait IRowWidget {
-  def name: String
-  
   val panel: IRowPanel
   
   val plusAllowed: Plus = ADD

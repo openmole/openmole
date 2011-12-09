@@ -17,8 +17,11 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import java.awt.Color
+import java.awt.Font
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashSet
+import scala.swing.Label
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 
@@ -31,13 +34,16 @@ object MultiWidget extends Enumeration {
 }
 
 import MultiWidget._
-class MultiWidget[T<:IRowWidget](rWidgets: List[T],
-                                          factory: IRowWidgetFactory[T],
-                                          nbComponent: Int,
-                                          allowEmpty: Minus= NO_EMPTY){
+class MultiWidget[T<:IRowWidget](title: String = "",
+                                 rWidgets: List[T],
+                                 factory: IRowWidgetFactory[T],
+                                 nbComponent: Int,
+                                 allowEmpty: Minus= NO_EMPTY){
   val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel =  new MigPanel("wrap "+(nbComponent + 2 + {if(rWidgets.head.plusAllowed == ADD) 1 else 0}).toString +", insets -2 5 -2 5")
+  val panel =  new MigPanel("wrap "+(nbComponent + 2 + {if(rWidgets.head.plusAllowed == ADD) 1 else 0}).toString +", insets -2 5 -2 5","[]3[]","")
+  val titleLabel = new Label(title){foreground = new Color(0,113,187)}
+  panel.contents+= (titleLabel,"wrap")
   
   rWidgets.foreach(r=>showComponent(addRow(factory.apply(r,panel))))
   
@@ -51,10 +57,11 @@ class MultiWidget[T<:IRowWidget](rWidgets: List[T],
                                                                                   (allowEmpty == NO_EMPTY && rowWidgets.size > 1) ) {
           hideComponent(rowWidget)
           rowWidgets-= rowWidget
+          if (rowWidgets.isEmpty && allowEmpty == CLOSE_IF_EMPTY) titleLabel.visible = false
           rowWidget.doOnClose
         }
     }
-    
+    titleLabel.visible = true
     panel.listenTo(rowWidget.panel.`addButton`)
     panel.reactions += {case ButtonClicked(rowWidget.panel.`addButton`) => showComponent(addRow(factory.apply(rowWidget,panel)))}
     rowWidget
