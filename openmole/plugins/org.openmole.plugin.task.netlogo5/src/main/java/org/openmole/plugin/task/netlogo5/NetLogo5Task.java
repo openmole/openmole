@@ -69,6 +69,14 @@ public class NetLogo5Task extends NetLogoTask {
 
     public NetLogo5Task(
             String name,
+            File script,
+            Iterable<String> launchingCommands,
+            Boolean embedWorkspace) throws UserBadDataError, InternalProcessingError {
+        super(name, script, JavaConversions.iterableAsScalaIterable(launchingCommands), embedWorkspace);
+    }
+    
+    public NetLogo5Task(
+            String name,
             String script,
             Iterable<String> launchingCommands,
             Boolean embedWorkspace) throws UserBadDataError, InternalProcessingError {
