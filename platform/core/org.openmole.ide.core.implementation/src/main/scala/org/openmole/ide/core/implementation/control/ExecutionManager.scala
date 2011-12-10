@@ -98,8 +98,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   pages+= new TabbedPane.Page("Settings",hookPanel)
   pages+= new TabbedPane.Page("Execution progress", splitPane)
-  pages+= new TabbedPane.Page("Execution errors", new ScrollPane(moleExecutionExceptionTextArea))
-  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(executionJobExceptionTextArea))
+  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
+  pages+= new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
   
   def start = {
     val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
