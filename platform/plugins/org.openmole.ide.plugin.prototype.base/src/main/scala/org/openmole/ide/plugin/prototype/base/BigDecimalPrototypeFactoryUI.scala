@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
+import java.math.BigDecimal
 
 class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
   

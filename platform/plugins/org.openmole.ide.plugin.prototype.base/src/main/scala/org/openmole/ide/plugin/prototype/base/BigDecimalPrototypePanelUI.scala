@@ -16,6 +16,8 @@
  */
 package org.openmole.ide.plugin.prototype.base
 
+import java.math.BigDecimal
+
 class BigDecimalPrototypePanelUI(pud: BigDecimalPrototypeDataUI) extends GenericPrototypePanelUI[BigDecimal](pud.dim) {
   override def saveContent(name: String) = new BigDecimalPrototypeDataUI(name,if(dim!="") dim.toInt else 0)
 }
