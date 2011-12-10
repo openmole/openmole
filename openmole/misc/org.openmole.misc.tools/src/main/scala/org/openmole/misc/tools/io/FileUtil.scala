@@ -331,8 +331,8 @@ object FileUtil {
       try Files.createSymbolicLink(link, linkTo)
       catch {
         case e: UnsupportedOperationException => 
-          Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, copying the file instead")
-          copyFile(new File(target))
+          Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
+          new File(target).copy(file)
       }
     }
     
