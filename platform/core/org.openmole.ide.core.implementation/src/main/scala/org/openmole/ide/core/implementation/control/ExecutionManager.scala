@@ -113,7 +113,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       } else false
     } else true
   
-  def start = {
+  def start = synchronized {
     if (canBeRun){
       cancel
       initBarPlotter
@@ -149,7 +149,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     }
   }
     
-  def cancel = moleExecution.cancel
+  def cancel = synchronized { moleExecution.cancel }
   
   def initBarPlotter {
     environments.clear
