@@ -101,26 +101,27 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   pages+= new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
   pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
   
-  def start = {
-    val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
+  def canBeRun = 
+    if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
       val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?")
                                     {background = Color.white}.peer,
                                     "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
       if (result.equals(NotifyDescriptor.OK_OPTION)) {
-       (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
-       true
+        (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
+        true
       } else false
     } else true
-    
+  
+  def start = {
     if (canBeRun){
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
       val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
-                                               manager, 
-                                               capsuleMapping,
-                                               gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
+                                                                       manager, 
+                                                                       capsuleMapping,
+                                                                       gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
 
       this.moleExecution = moleExecution
       
