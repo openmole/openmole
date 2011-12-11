@@ -65,7 +65,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
-  var hookPanels= new HashMap[String,(IHookPanelUI,List[IHook])]
+  val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY-> new AtomicInteger,
                        State.RUNNING-> new AtomicInteger,
                        State.COMPLETED-> new AtomicInteger,
@@ -98,8 +98,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   pages+= new TabbedPane.Page("Settings",hookPanel)
   pages+= new TabbedPane.Page("Execution progress", splitPane)
-  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
   pages+= new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
+  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
   
   def start = {
     val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
@@ -122,6 +122,8 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
                                                capsuleMapping,
                                                gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
 
+      this.moleExecution = moleExecution
+      
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
@@ -167,13 +169,13 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   override def commitHook(hookClassName: String) {
     if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
-    hookPanels(hookClassName) =  (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+    hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
   }
   
   def initPieChart = {
     status.keys.foreach(k=>status(k)=new AtomicInteger)
-    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))}
-  
+    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
+  }
     
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {
