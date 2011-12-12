@@ -50,7 +50,8 @@ class PiePlotter(title: String) {
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.5)
   // Change the width of gaps between segments
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.GAP, 0.2)
-  
+  // Display labels
+  //plot.getPointRenderer(data).setSetting(PieSliceRenderer.VALUE_DISPLAYED, true)
   // Change the colors
   val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
   colors.setMode(ColorMapper.Mode.REPEAT)
