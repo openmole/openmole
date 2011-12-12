@@ -42,13 +42,23 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[fill]
   var editable = true
     
   val environmentMenu = new Menu("Environment")
-  EnvironmentDisplay.implementationClasses.foreach(d=>environmentMenu.contents+=new MenuItem(new EnvironmentDisplayAction(d,ENVIRONMENT)))
+  EnvironmentDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+    d => environmentMenu.contents += new MenuItem(new EnvironmentDisplayAction(d, ENVIRONMENT))
+  )
+  
   val taskMenu = new Menu("Task")
-  TaskDisplay.implementationClasses.foreach(d=>taskMenu.contents+=new MenuItem(new TaskDisplayAction(d,TASK)))
+  TaskDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+    d => taskMenu.contents += new MenuItem(new TaskDisplayAction(d, TASK))
+  )
   val prototypeMenu = new Menu("Prototype")
-  PrototypeDisplay.implementationClasses.foreach(d=>prototypeMenu.contents+= new MenuItem(new PrototypeDisplayAction(d,PROTOTYPE)))
+  PrototypeDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+    d => prototypeMenu.contents += new MenuItem(new PrototypeDisplayAction(d, PROTOTYPE))
+  )
+  
   val samplingMenu = new Menu("Sampling")
-  SamplingDisplay.implementationClasses.foreach(d=>samplingMenu.contents+= new MenuItem(new SamplingDisplayAction(d,SAMPLING)))
+  SamplingDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+    d => samplingMenu.contents += new MenuItem(new SamplingDisplayAction(d, SAMPLING))
+  )
     
   val fakeToggleButton = new MenuToggleButton(Some(new ImageIcon(ImageTool.loadImage("img/empty.png",30,30))))
   val saveButton = new Button("Apply")
