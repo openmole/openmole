@@ -168,7 +168,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   }
   
   
-  override def commitHook(hookClassName: String) {
+  override def commitHook(hookClassName: String) { 
     if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
     hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
   }
@@ -181,15 +181,14 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {
       val cl = fui.coreClass.getCanonicalName
-      if(hookPanels.contains(cl)) 
-        hookPanels(cl)._1.addHook
+      if(hookPanels.contains(cl)) hookPanels(cl)._1.addHook
       else {
         val pui = fui.buildPanelUI(ExecutionManager.this)
         hookPanel.peer.add(pui.peer)
         hookPanel.peer.add((new Separator).peer)
-        hookPanels+= cl-> (pui,List.empty)
+        hookPanels+= cl -> (pui, List.empty)
       }
-      hookPanels+= cl-> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
+      hookPanels+= cl -> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
     }
   }
   
