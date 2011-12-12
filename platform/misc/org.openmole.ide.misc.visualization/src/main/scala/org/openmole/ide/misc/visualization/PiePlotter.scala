@@ -23,6 +23,7 @@ import de.erichseifert.gral.plots._
 import de.erichseifert.gral.plots.colors._
 import de.erichseifert.gral.util.Orientation
 import de.erichseifert.gral.util.Orientation._
+import de.erichseifert.gral.plots.points.PointRenderer
 import de.erichseifert.gral.ui.InteractivePanel
 import de.erichseifert.gral.util.Insets2D
 import de.erichseifert.gral.Legend
@@ -51,7 +52,8 @@ class PiePlotter(title: String) {
   // Change the width of gaps between segments
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.GAP, 0.2)
   // Display labels
-  //plot.getPointRenderer(data).setSetting(PieSliceRenderer.VALUE_DISPLAYED, true)
+  plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_DISPLAYED, true)
+  plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_COLOR, Color.WHITE)
   // Change the colors
   val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
   colors.setMode(ColorMapper.Mode.REPEAT)
@@ -85,6 +87,6 @@ class PiePlotter(title: String) {
   def updateCompleted(completed: Int) = {data.set(0,1,completed);panel.repaint()}
   def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
   
-  val panel = new InteractivePanel(plot)
+  val panel = new InteractivePanel(plot){setZoomable(false)}
   panel.setPreferredSize(new Dimension(200,200))
 }
