@@ -103,13 +103,13 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   def start = {
     val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
-      val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?")
+      val dd = new DialogDescriptor(new Label("<html>A simulation is currently running.<br>Two simulations can not run concurrently, overwrite ?</html>")
                                     {background = Color.white}.peer,
                                     "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
       if (result.equals(NotifyDescriptor.OK_OPTION)) {
-       (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
-       true
+        (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
+        true
       } else false
     } else true
     
@@ -118,10 +118,10 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
       val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
-                                               manager, 
-                                               capsuleMapping,
-                                               gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
-
+                                                                       manager, 
+                                                                       capsuleMapping,
+                                                                       gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
+      this.moleExecution = moleExecution
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
