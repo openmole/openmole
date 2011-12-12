@@ -43,37 +43,53 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   val rowWidgets = new HashSet[T]
   val panel =  new MigPanel("wrap "+(nbComponent + 2 + {if(rWidgets.head.plusAllowed == ADD) 1 else 0}).toString +", insets -2 5 -2 5","[]3[]","")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
-  panel.contents+= (titleLabel,"wrap")
+  panel.contents += (titleLabel,"wrap")
   
-  rWidgets.foreach(r=>showComponent(addRow(factory.apply(r,panel))))
+  rWidgets.foreach {
+    r => 
+      addRow(factory(r, panel))
+  }
   
-  def addRow: T = addRow(factory.apply(specimen,panel))
+  def addRow: T = {
+    val r = addRow(factory.apply(specimen,panel))
+    refresh
+    r
+  }
   
   def addRow(rowWidget: T):T = {
-    rowWidgets+= rowWidget
+    rowWidgets += rowWidget
+    panel.contents += rowWidget.panel
     
     panel.listenTo(rowWidget.panel.`removeButton`)
-    panel.reactions += {case ButtonClicked(rowWidget.panel.`removeButton`) => if (allowEmpty == CLOSE_IF_EMPTY || 
-                                                                                  (allowEmpty == NO_EMPTY && rowWidgets.size > 1) ) {
-          hideComponent(rowWidget)
-          rowWidgets-= rowWidget
-          if (rowWidgets.isEmpty && allowEmpty == CLOSE_IF_EMPTY) titleLabel.visible = false
+    panel.reactions += {
+      case ButtonClicked(rowWidget.panel.`removeButton`) => 
+        if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
+          removeRow(rowWidget)
           rowWidget.doOnClose
         }
     }
     titleLabel.visible = true
     panel.listenTo(rowWidget.panel.`addButton`)
-    panel.reactions += {case ButtonClicked(rowWidget.panel.`addButton`) => showComponent(addRow(factory.apply(rowWidget,panel)))}
+    panel.reactions += {
+      case ButtonClicked(rowWidget.panel.`addButton`) => 
+        addRow(factory(rowWidget,panel))
+    }
     rowWidget
   }
   
-  def showComponent: Unit = showComponent(addRow) 
+  def removeRow(rowWidget: T) = {
+    rowWidgets -= rowWidget
+    panel.contents -= rowWidget.panel
+    refresh
+  }
+  //def showComponent: Unit = showComponent(addRow) 
   
-  private def showComponent(rowWidget: T): Unit = {panel.contents+=(rowWidget.panel,"wrap");refresh}
+  //private def showComponent(rowWidget: T): Unit = {panel.contents+=(rowWidget.panel,"wrap");refresh}
   
-  private def hideComponent(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
+  //private def hideComponent(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
   
   def refresh = {
+    if (rowWidgets.isEmpty && allowEmpty == CLOSE_IF_EMPTY) titleLabel.visible = false
     panel.repaint
     panel.revalidate
   } 
