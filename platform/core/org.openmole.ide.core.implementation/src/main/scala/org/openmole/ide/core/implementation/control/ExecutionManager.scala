@@ -91,6 +91,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)
     rightComponent = new ScrollPane(logTextArea)
+    resizeWeight = 0.5
   }
   
   System.setOut(new PrintStream(logTextArea.toStream))
