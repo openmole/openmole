@@ -23,10 +23,11 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.provider.IGenericMenuProvider
+import scala.collection.mutable.ListBuffer
 
 class GenericMenuProvider extends IGenericMenuProvider{
-
-  var items= HashSet.empty[JMenuItem]
+ 
+  var items= ListBuffer.empty[JMenuItem]
   var menus= HashSet.empty[JMenu]
   var currentPoint= new Point(0,0)
   

@@ -81,7 +81,10 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     connectableWidget.clearInputSlots
   }
   
-  def removeInputSlot= nbInputSlots-= 1
+  def removeInputSlot= {
+    nbInputSlots-= 1
+    connectableWidget.removeFirstInputSlot
+  }
   
   def setDataProxy(dpu: ITaskDataProxyUI)={
     dataProxy= Some(dpu)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,13 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.display.Displays
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import scala.swing.Action
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-class DetachEnvironmentAction(tdp: Option[ITaskDataProxyUI]) extends Action("Detach"){
-  override def apply = {
-    tdp match {
-      case Some(x: ITaskDataProxyUI)=> x.dataUI.environment = None
-        Displays.propertyPanel.updateTaskViewport
-      case None=>
-    }
+class RemoveInputSlot(capsule: ICapsuleUI) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent )= {
+    if (capsule.nbInputSlots > 1 )
+      capsule.removeInputSlot
   }
 }
