@@ -43,7 +43,7 @@ object SamplingDisplay extends ISamplingDisplay{
     add(new MenuItem(new RemoveSamplingAction(Displays.currentProxyID)))}
   
   override def secondManagementMenu(taskProxy : ITaskDataProxyUI, samplingProxy: ISamplingDataProxyUI) = new PopupMenu {
-    add(new MenuItem(new DetachSamplingAction(taskProxy)))}
+    add(new MenuItem(new DetachSamplingAction(Some(taskProxy))))}
   
   override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.samplings(pID))
   

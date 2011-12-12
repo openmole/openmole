@@ -21,10 +21,8 @@ package org.openmole.ide.core.implementation.provider
 import javax.swing.JMenuItem
 import org.openmole.ide.core.implementation.action.AddCapsuleAction
 import org.openmole.ide.core.model.workflow.IMoleScene
-import scala.collection.mutable.HashSet
 
 class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
-  var tasks= HashSet.empty[Class[_]]
   
   val itemTCapsule= new JMenuItem("Add a Task Capsule")
   itemTCapsule.addActionListener(new AddCapsuleAction(moleScene,this))

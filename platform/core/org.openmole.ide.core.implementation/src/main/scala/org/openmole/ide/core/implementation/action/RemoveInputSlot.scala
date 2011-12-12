@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,17 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.display.Displays
-import scala.swing.Action
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-class RemoveEnvironmentAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.environments-= proxyID  
-                        Displays.propertyPanel.cleanViewport}
+class RemoveInputSlot(capsule: ICapsuleUI) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent )= {
+    if (capsule.nbInputSlots > 1 )
+      capsule.removeInputSlot
+  }
 }

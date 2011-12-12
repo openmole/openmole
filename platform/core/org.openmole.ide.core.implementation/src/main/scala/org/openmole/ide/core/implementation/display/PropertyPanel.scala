@@ -119,8 +119,8 @@ class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[fill]
   
   def updateTaskViewport = {
     taskPropertyComponent.peer.getViewport.removeAll
-    Displays.dataProxy.get match {
-      case x: ITaskDataProxyUI=> {
+    Displays.dataProxy match {
+      case Some(x: ITaskDataProxyUI)=> {
           taskPropertyComponent.peer.setViewportView(buildTaskPropertyPanel(x).peer)
           taskPropertyComponent.visible =  true
         }

@@ -25,7 +25,7 @@ import scala.collection.mutable.HashSet
 
 trait IGenericMenuProvider extends PopupMenuProvider{
   
-  def items: HashSet[JMenuItem]
+  def items: Iterable[JMenuItem]
   
   def menus: HashSet[JMenu]
   

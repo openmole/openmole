@@ -25,6 +25,8 @@ trait ICapsuleUI {
   
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
   
+  def removeInputSlot: Unit
+  
   def nbInputSlots: Int
   
   def setDataProxy(dpu: ITaskDataProxyUI)

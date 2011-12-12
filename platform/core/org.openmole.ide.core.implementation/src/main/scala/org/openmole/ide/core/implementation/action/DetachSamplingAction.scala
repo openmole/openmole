@@ -21,7 +21,11 @@ import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import scala.swing.Action
 
-class DetachSamplingAction (tdp: ITaskDataProxyUI) extends Action("Detach"){
-  override def apply= {tdp.dataUI.sampling = None
-                       Displays.propertyPanel.updateTaskViewport}
+class DetachSamplingAction (tdp: Option[ITaskDataProxyUI]) extends Action("Detach"){
+  override def apply= {tdp match {
+      case Some(x: ITaskDataProxyUI)=> x.dataUI.sampling = None
+        Displays.propertyPanel.updateTaskViewport
+      case None=>
+    }
+  }
 }

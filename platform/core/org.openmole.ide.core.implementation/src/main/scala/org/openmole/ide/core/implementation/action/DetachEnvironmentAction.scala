@@ -21,7 +21,12 @@ import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import scala.swing.Action
 
-class DetachEnvironmentAction(tdp: ITaskDataProxyUI) extends Action("Detach"){
-  override def apply = {tdp.dataUI.environment = None
-                        Displays.propertyPanel.updateTaskViewport}
+class DetachEnvironmentAction(tdp: Option[ITaskDataProxyUI]) extends Action("Detach"){
+  override def apply = {
+    tdp match {
+      case Some(x: ITaskDataProxyUI)=> x.dataUI.environment = None
+        Displays.propertyPanel.updateTaskViewport
+      case None=>
+    }
+  }
 }
