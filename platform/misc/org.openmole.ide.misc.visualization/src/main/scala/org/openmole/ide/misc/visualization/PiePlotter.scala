@@ -48,7 +48,7 @@ class PiePlotter(title: String) {
   // Change relative size of pie
   plot.setSetting(PiePlot.RADIUS, 0.9)
   // Change relative size of inner region
-  plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.5)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.3)
   // Change the width of gaps between segments
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.GAP, 0.2)
   // Display labels
