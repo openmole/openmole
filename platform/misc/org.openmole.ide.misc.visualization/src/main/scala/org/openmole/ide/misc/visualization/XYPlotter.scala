@@ -45,18 +45,16 @@ class XYPlotter(t: String,
   
   val data = new DataTable(classOf[java.lang.Long],
                            classOf[java.lang.Integer],
-                           classOf[java.lang.Integer],
                            classOf[java.lang.Integer])
   val start = System.currentTimeMillis
   for(i <- nbInterval to 1 by -1) {
-    data.add((start - (i*buffer_size)).toLong, null, null, null)
+    data.add((start - (i*buffer_size)).toLong, null, null)
   }
   
-  val data1 = new DataSeries("Ready", data, 0, 1)
-  val data2 = new DataSeries("Submitted", data, 0, 2)
-  val data3 = new DataSeries("Running", data, 0, 3)
+  val data2 = new DataSeries("Submitted", data, 0, 1)
+  val data3 = new DataSeries("Running", data, 0, 2)
   
-  val plot = new XYPlot(data1, data2, data3)
+  val plot = new XYPlot(data2, data3)
   title(t)
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.NORTH_WEST)
@@ -71,9 +69,8 @@ class XYPlotter(t: String,
   axisRendererX.setSetting(AxisRenderer.TICK_LABELS_FORMAT, new SimpleDateFormat("HH:mm"))
   
   // Format data series
-  formatFilledArea(plot, data1, new Color(77,77,77))
-  formatFilledArea(plot, data2, new Color(187,200,7))
-  formatFilledArea(plot, data3, new Color(55,170,20))
+  formatFilledArea(plot, data2, new Color(77,77,77))
+  formatFilledArea(plot, data3, new Color(187,200,7))
   
   // Add plot to Swing component
   val panel = new InteractivePanel(plot)
@@ -87,14 +84,14 @@ class XYPlotter(t: String,
     import states._
     val time = System.currentTimeMillis
     
-    data.add(time,ready,submitted,running)
+    data.add(time,submitted,running)
     val col1 = data.getColumn(0)
                                               
     plot.getAxis(XYPlot.AXIS_X).setRange(col1.getStatistics(Statistics.MIN),
                                          col1.getStatistics(Statistics.MAX))
     data.remove(0)
     
-    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*scala.math.max(scala.math.max(ready,submitted),running))
+    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*scala.math.max(submitted,running))
     panel.repaint()
   }
   
