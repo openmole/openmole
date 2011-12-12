@@ -123,7 +123,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
                                                                        capsuleMapping,
                                                                        gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
 
-      this.moleExecution = moleExecun
+      this.moleExecution = moleExecution
       
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
