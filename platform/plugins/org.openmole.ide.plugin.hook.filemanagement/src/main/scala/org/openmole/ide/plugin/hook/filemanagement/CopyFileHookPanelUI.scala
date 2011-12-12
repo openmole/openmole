@@ -80,22 +80,20 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
                                                          "in",
                                                          "",
                                                          NO_ADD)
-    
-      Some(new MultiTwoCombosChooseFileTextField("Save prototypes in file",
+      val multiRow = new MultiTwoCombosChooseFileTextField("Save prototypes in file",
                                                              List(r),
                                                              rowFactory(this),
                                                              CLOSE_IF_EMPTY,
-                                                             NO_ADD))
+                                                             NO_ADD)
+    
+      contents += multiRow.panel
+      Some(multiRow)
     } else { 
       StatusDisplayer.getDefault.setStatusText("No capsules or no prototypes are defined")
       None
     }
   }
   
-  
-  if (multiRow.isDefined) {
-    contents+= multiRow.get.panel
-  }
     
   def protosFromTask: List[IPrototype[File]] = 
     executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
