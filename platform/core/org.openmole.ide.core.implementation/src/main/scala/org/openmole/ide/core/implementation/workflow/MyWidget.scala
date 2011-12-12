@@ -75,15 +75,6 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
       graphics.drawString(tpud.name, 10, 15)
     }
     else drawBox(graphics,new Color(204,204,204,128),new Color(204,204,204))
-
-    
-    /* if(capsuleModel.taskUI.isDefined) graphics.drawImage(ImageUtilities.loadImage(capsuleModel.taskUI.get.factory.imagePath),
-     taskImageOffset,
-     TASK_IMAGE_HEIGHT_OFFSET,
-     TASK_IMAGE_WIDTH,
-     TASK_IMAGE_HEIGHT,
-     capsuleModel.taskUI.get.factory.backgroundColor,
-     new Container)*/
   }
   
   def drawBox(graphics: Graphics2D,c1: Color, c2: Color) = {

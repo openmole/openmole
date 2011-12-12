@@ -52,6 +52,10 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
     val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule)
     connectableWidget.islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
+    if (dataProxy.isDefined) {
+      c.setDataProxy(dataProxy.get)
+    } 
+    else capsuleType = BASIC_TASK
     (c,slotMapping)
   }
   
