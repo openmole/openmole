@@ -18,7 +18,6 @@
 package org.openmole.ide.misc.widget.multirow
 
 import java.awt.Color
-import java.awt.Font
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashSet
 import scala.swing.Label
@@ -79,11 +78,6 @@ class MultiWidget[T<:IRowWidget](title: String = "",
     panel.contents -= rowWidget.panel
     refresh
   }
-  //def showComponent: Unit = showComponent(addRow) 
-  
-  //private def showComponent(rowWidget: T): Unit = {panel.contents+=(rowWidget.panel,"wrap");refresh}
-  
-  //private def hideComponent(rowWidget: T) = {panel.contents-=rowWidget.panel;refresh}
   
   def refresh = {
     if (rowWidgets.isEmpty && allowEmpty == CLOSE_IF_EMPTY) titleLabel.visible = false
