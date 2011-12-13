@@ -179,8 +179,8 @@ class URIFile(val location: String) extends IURIFile with Id {
     val entry = fetchEntry
     try {
       val name = entry.getName.getPath
-      val indice = location.lastIndexOfSlice (name)
-      val parent = location.slice(0, indice )
+      val indice = location.lastIndexOfSlice(name)
+      val parent = location.slice(0, indice)
       (parent, name)
     } finally close(entry)
   }
@@ -215,8 +215,7 @@ class URIFile(val location: String) extends IURIFile with Id {
       trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
 
       new URIFile(this, name)
-    } 
-    finally close(dir)
+    } finally close(dir)
   }
   
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))

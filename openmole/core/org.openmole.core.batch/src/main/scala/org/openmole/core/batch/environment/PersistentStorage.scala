@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import java.io.File
 import java.net.URI
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
@@ -39,6 +40,14 @@ object PersistentStorage extends Logger {
     
   val persistent = "persistent/"
   val tmp = "tmp/"
+  
+  def createBaseDir(environment: BatchEnvironment, base: URI, dir: String, nbAccess: Int) = {
+    val baseURIFile = Iterator.iterate(new File(dir))(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft(new URIFile(base): IURIFile) {
+      (uriFile, file) => uriFile.mkdirIfNotExist(file.getName)
+    }
+    new PersistentStorage(environment, baseURIFile.URI, nbAccess)
+  }
+  
 }
 
 class PersistentStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {

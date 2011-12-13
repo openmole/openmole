@@ -26,6 +26,7 @@ import org.openmole.core.batch.environment.SerializedJob
 class SSHJobService(val environment: BatchEnvironment, val description: ServiceDescription, override val nbAccess: Int) extends JobService {
   
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
+    
     new SSHBatchJob(description)
   }
 
