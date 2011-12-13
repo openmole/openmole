@@ -41,7 +41,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
                                  allowEmpty: Minus= NO_EMPTY){
   val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel =  new MigPanel("wrap "+(nbComponent + 2 + {if(rWidgets.head.plusAllowed == ADD) 1 else 0}).toString +", insets -2 5 -2 5","[]3[]","")
+  val panel =  new MigPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 -2 5")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
   panel.contents += (titleLabel,"wrap")
   
@@ -50,12 +50,8 @@ class MultiWidget[T<:IRowWidget](title: String = "",
       addRow(factory(r, panel))
   }
   
-  def addRow: T = {
-    val r = addRow(factory.apply(specimen,panel))
-    refresh
-    r
-  }
-  
+  def addRow: T = addRow(factory.apply(specimen,panel))
+ 
   def addRow(rowWidget: T):T = {
     rowWidgets += rowWidget
     panel.contents += rowWidget.panel
@@ -74,6 +70,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
       case ButtonClicked(rowWidget.panel.`addButton`) => 
         addRow(factory(rowWidget,panel))
     }
+    refresh
     rowWidget
   }
   
