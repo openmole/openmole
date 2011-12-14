@@ -65,7 +65,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   }
   
   def addInputSlot(on: Boolean): IInputSlotWidget =  {
-    if (on || startingCapsule) clearInputSlots(on)
+    if (on) clearInputSlots(on)
     
     nbInputSlots+= 1
     val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,startingCapsule,scene.moleSceneType == EXECUTION)
