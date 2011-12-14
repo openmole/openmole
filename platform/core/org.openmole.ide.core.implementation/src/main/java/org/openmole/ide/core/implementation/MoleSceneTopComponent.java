@@ -31,6 +31,7 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
+import org.openide.windows.Workspace;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
@@ -65,7 +66,7 @@ autostore = false)
 //})
 @TopComponent.OpenActionRegistration(displayName = "Add Mole")
 public final class MoleSceneTopComponent extends CloneableTopComponent {
-    
+
     private ToolBarButton buildButton;
     private ToolBarButton cleanAndBuildButton;
     private ToolBarButton startButton;
@@ -75,26 +76,26 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     private PaletteController palette;
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
     private IMoleScene ms;
-    
+
     public MoleSceneTopComponent(IMoleScene clonedMoleScene) {
         initialize(clonedMoleScene);
     }
-    
+
     public MoleSceneTopComponent() {
         this(TopComponentsManager.buildMoleScene());
     }
-    
+
     private void initialize(IMoleScene m) {
         ms = m;
         associateLookup(new AbstractLookup(ic));
         addPalette();
         initComponents();
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
-        
+
         TopComponentsManager.registerTopComponent(this);
         detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
-        
+
         buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")),
                 "Build the workflow",
                 new BuildExecutionAction(this));
@@ -105,7 +106,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
                 new StartMoleAction());
         stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")), "Stop the workflow",
                 new StopMoleAction());
-        
+
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(buildButton.peer());
@@ -121,16 +122,16 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         repaint();
         ((EntityPropertyTopComponent) WindowManager.getDefault().findTopComponent("EntityPropertyTopComponent")).open();
     }
-    
+
     public IMoleScene getMoleScene() {
         return ms;
     }
-    
+
     public void addPalette() {
         palette = PaletteSupport.createPalette(ms.moleSceneType());
         ic.add(palette);
     }
-    
+
     public void refresh(Boolean b) {
         ic.remove(palette);
         addPalette();
@@ -138,7 +139,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         repaint();
         buildMode(b);
     }
-    
+
     public void buildMode(Boolean b) {
         buildButton.visible_$eq(b);
         cleanAndBuildButton.visible_$eq(b);
@@ -186,7 +187,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     public Set<TopComponent> getOpened() {
         return getRegistry().getOpened();
     }
-    
+
     @Override
     public void componentActivated() {
         PaletteSupport.setCurrentMoleSceneTopComponent(this);
@@ -198,26 +199,30 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         }
         PaletteSupport.modified_$eq(false);
     }
-    
+
     @Override
     public void componentOpened() {
         PaletteSupport.setCurrentMoleSceneTopComponent(this);
     }
-    
+
     @Override
-    public void componentClosed() {
-        Boolean closeComponent = false;
+    public boolean canClose() {
         if (ms.isBuildScene()) {
-            TopComponentsManager.removeAllExecutionTopComponent(this);
-            closeComponent = true;
-        } 
-        else closeComponent = DialogFactory.closeExecutionTab(ms);
-        
-        if (closeComponent) 
-            TopComponentsManager.removeTopComponent(this);
+            return true;
+        } else {
+            return DialogFactory.closeExecutionTab(ms);
+        }
     }
 
-void writeProperties(java.util.Properties p) {
+    @Override
+    public void componentClosed() {
+        if (ms.isBuildScene()) {
+            TopComponentsManager.removeAllExecutionTopComponent(this);
+        }
+        TopComponentsManager.removeTopComponent(this);
+    }
+
+    void writeProperties(java.util.Properties p) {
         // better to version settings since initial version as advocated at
         // http://wiki.apidesign.org/wiki/PropertyFiles
         p.setProperty("version", "1.0");
