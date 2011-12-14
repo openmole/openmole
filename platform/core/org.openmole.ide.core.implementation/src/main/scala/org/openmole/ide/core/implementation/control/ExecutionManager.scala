@@ -175,7 +175,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     moleExecution.cancel 
   }
   
-  def initBarPlotter {
+  def initBarPlotter = synchronized{
     environments.clear
     buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
   }
@@ -197,7 +197,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
     hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
   }
   
-  def initPieChart = {
+  def initPieChart = synchronized{
     status.keys.foreach(k=>status(k)=new AtomicInteger)
     environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
   }
