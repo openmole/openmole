@@ -23,8 +23,5 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 
 class DefineMoleStartAction(moleScene: IMoleScene,capsule: ICapsuleUI) extends ActionListener{
-
-  override def actionPerformed(ae: ActionEvent)= {
-    moleScene.manager.setStartingCapsule(capsule).foreach(moleScene.graphScene.removeEdge(_))
-  }
+  override def actionPerformed(ae: ActionEvent)= moleScene.manager.setStartingCapsule(capsule)
 }

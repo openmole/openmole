@@ -73,6 +73,7 @@ object TopComponentsManager {
   def registerTopComponent(tc: MoleSceneTopComponent) = topComponents.getOrElseUpdate(tc, new ListBuffer[MoleSceneTopComponent])
   
   def addExecutionTopComponent(tc : MoleSceneTopComponent): MoleSceneTopComponent = {
+    MoleMaker.buildMole(tc.getMoleScene.manager) // test wether the mole can be built
     val clone = tc.getMoleScene.copy
     clone.manager.name = Some({countExec+= 1; tc.getMoleScene.manager.name.get+"_"+countExec})
     val ntc = new MoleSceneTopComponent(clone)
@@ -84,7 +85,10 @@ object TopComponentsManager {
   def displayExecutionView(ms:IMoleScene) {
     if (ms.moleSceneType == EXECUTION) {
       val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(ms.manager)
-      ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionManager(ms.manager)))
+      ExecutionSupport.changeView(executionTabs.getOrElseUpdate(ms, new ExecutionManager(ms.manager,
+                                                                                         mole,
+                                                                                         prototypeMapping,
+                                                                                         capsuleMapping)))
     }
   }
 }

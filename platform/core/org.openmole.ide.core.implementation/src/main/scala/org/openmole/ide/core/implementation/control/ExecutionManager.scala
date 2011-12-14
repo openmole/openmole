@@ -28,9 +28,11 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
@@ -50,7 +52,9 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 import org.openmole.core.model.job.State
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
 
 
@@ -60,12 +64,15 @@ object ExecutionManager {
   }
 }
 
-class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager {
+class ExecutionManager(manager : IMoleSceneManager,
+                       val mole: IMole,
+                       val capsuleMapping: Map[ICapsuleUI, ICapsule],
+                       val prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
-  override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
+ // override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
   val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]

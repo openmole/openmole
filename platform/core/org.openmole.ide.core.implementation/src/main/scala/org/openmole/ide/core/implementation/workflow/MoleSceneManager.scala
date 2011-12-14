@@ -41,7 +41,6 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     if (startingCapsule.isDefined) startingCapsule.get.addInputSlot(false)
     startingCapsule= Some(stCapsule)
     startingCapsule.get.addInputSlot(true)
-    removeTransitonsBeforeStartingCapsule
   }
   
   override def getNodeID: String= "node" + nodeID
@@ -57,6 +56,11 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   }
   
   override def removeCapsuleUI(nodeID: String) = {
+    startingCapsule match {
+      case None=>
+      case Some(caps)=> if (capsules.get(nodeID) == caps) startingCapsule = None
+    }
+    
     //remove following transitionMap
     capsuleConnections(capsules.get(nodeID)).foreach(transitionMap.removeValue(_))
     
