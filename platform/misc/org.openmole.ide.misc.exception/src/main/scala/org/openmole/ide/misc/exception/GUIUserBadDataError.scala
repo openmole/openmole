@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.exception
 
-class GUIUserBadDataError (exception: Throwable, message: String) extends Exception(message, exception) {
+class GUIUserBadDataError (exception: Throwable,val message: String) extends Exception(message, exception) {
 
     def this (message: String) = {
         this(null, message)

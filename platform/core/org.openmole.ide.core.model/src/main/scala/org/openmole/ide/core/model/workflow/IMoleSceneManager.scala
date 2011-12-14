@@ -45,7 +45,7 @@ trait IMoleSceneManager {
   
   def registerCapsuleUI(cv: ICapsuleUI):Unit
   
-  def setStartingCapsule(capsule: ICapsuleUI): Iterable[String]
+  def setStartingCapsule(capsule: ICapsuleUI)
   
   def transitions: Iterable[ITransitionUI] 
   
