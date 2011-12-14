@@ -24,9 +24,11 @@ import scala.swing.Action
 
 class CleanAndBuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
-    TopComponentsManager.removeAllExecutionTopComponent(tc)
-    val clone = TopComponentsManager.addExecutionTopComponent(tc)
-    FrozenProxys.freeze(clone)
-    clone.requestActive
+    if (tc.getMoleScene.manager.capsules.size > 0) {
+      TopComponentsManager.removeAllExecutionTopComponent(tc)
+      val clone = TopComponentsManager.addExecutionTopComponent(tc)
+      FrozenProxys.freeze(clone)
+      clone.requestActive
+    }
   }
 }

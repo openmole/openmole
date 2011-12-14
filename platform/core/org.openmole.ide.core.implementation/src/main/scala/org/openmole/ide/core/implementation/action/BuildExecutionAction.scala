@@ -24,8 +24,10 @@ import scala.swing.Action
 
 class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
+    if (tc.getMoleScene.manager.capsules.size > 0) {
     val clone = TopComponentsManager.addExecutionTopComponent(tc)
     FrozenProxys.freeze(clone)
     clone.requestActive
+    }
   }
 }
