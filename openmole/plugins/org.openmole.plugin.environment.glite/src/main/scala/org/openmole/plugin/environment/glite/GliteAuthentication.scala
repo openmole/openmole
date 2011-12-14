@@ -95,10 +95,8 @@ object GliteAuthentication extends Logger {
             tarEntry = tis.getNextEntry
           }
           
-          links.foreach{e => //new File(dir, e._2).copy(e._1)
-            val linkTo = fs.getPath(e._2)
-            val link = fs.getPath(e._1.getAbsolutePath)
-            Files.createSymbolicLink(link, linkTo)
+          links.foreach {
+            case (file, linkTo) => file.createLink(linkTo)
           }
         } catch {
           case (e: IOException) => logger.log(WARNING, "Unable to untar " + child.toString(), e)

@@ -123,7 +123,7 @@ object SSHJobControlAdaptor {
   val executableKey = "_Executable"
 }
 
-class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with CleanableJobAdaptor with StreamableJobInteractiveSet {
+class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with CleanableJobAdaptor {
 
   import SSHJobControlAdaptor._
 
