@@ -70,10 +70,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   override def transitions= transitionMap.values 
   
-  override def transition(edgeID: String) = {
-    transitionMap.keys.foreach(println)
-    transitionMap.get(edgeID)
-    }
+  override def transition(edgeID: String) = transitionMap.get(edgeID)
   
   private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) removeTransition(t._1)})
   
@@ -86,7 +83,6 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   }
   
   override def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
-    transitionMap.keys.foreach(println)
    if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)

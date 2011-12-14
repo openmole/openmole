@@ -16,7 +16,6 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.Color
 import java.awt.Dimension
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
