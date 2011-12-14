@@ -46,7 +46,9 @@ object TopComponentsManager {
   def removeTopComponent(bs: MoleSceneTopComponent) = topComponents-= bs
   
   def removeAllExecutionTopComponent(tc: MoleSceneTopComponent) = {
-    topComponents(tc).foreach(_.close)
+    topComponents(tc).foreach{tc=>
+      executionTabs(tc.getMoleScene).cancel
+      tc.close}
     topComponents(tc).clear
   }
   
