@@ -27,7 +27,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 
 class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IMoleSceneManager{
   
@@ -71,7 +70,10 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   override def transitions= transitionMap.values 
   
-  override def transition(edgeID: String) = transitionMap.get(edgeID)
+  override def transition(edgeID: String) = {
+    transitionMap.keys.foreach(println)
+    transitionMap.get(edgeID)
+    }
   
   private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) removeTransition(t._1)})
   
@@ -83,20 +85,14 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     registerTransition(getEdgeID,s,t,transitionType,cond)
   }
   
-  //def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
   override def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
-    if (!isTransition(s, t.capsule)) {
+    transitionMap.keys.foreach(println)
+   if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)
       capsuleConnections(transition.source)+= transition
       return true
     }
-    false
-    // capsuleConnections(transition.target.capsule)+= transition
-  }
-  
-  private def isTransition(source: ICapsuleUI, target: ICapsuleUI): Boolean = {
-    capsuleConnections(source).foreach(trans=> {if (trans.target.capsule.equals(target)) return true})
     false
   }
   

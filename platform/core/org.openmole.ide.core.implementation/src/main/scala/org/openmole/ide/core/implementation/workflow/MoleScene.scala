@@ -117,11 +117,11 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     
   override def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-      obUI.get.createActions(SELECT).addAction(selectAction)
+    obUI.get.createActions(SELECT).addAction(selectAction)
     if (moleSceneType == BUILD) {
       obUI.get.createActions(CONNECT).addAction(connectAction)
     }
-      obUI.get.createActions(CONNECT).addAction(moveAction)
+    obUI.get.createActions(CONNECT).addAction(moveAction)
   }
   
   override def attachNodeWidget(n: String)= {
@@ -159,16 +159,13 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     
     override def isTargetWidget(sourceWidget: Widget, targetWidget: Widget): ConnectorState = {
       val o= findObject(targetWidget)
-      
       target= None
       if(isNode(o)) target= Some(o.asInstanceOf[String])
       if (targetWidget.getClass.equals(classOf[InputSlotWidget])){
         val iw= targetWidget.asInstanceOf[InputSlotWidget]
-        if (! iw.startingSlot){
-          currentSlotIndex = iw.index
-          if (source.equals(target)) return ConnectorState.REJECT_AND_STOP
-          else return ConnectorState.ACCEPT
-        }
+        currentSlotIndex = iw.index
+        if (source.equals(target)) return ConnectorState.REJECT_AND_STOP 
+        else return ConnectorState.ACCEPT
       }
       if (o == null) return ConnectorState.REJECT
       return ConnectorState.REJECT_AND_STOP
@@ -213,12 +210,13 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     
     override def isTargetReconnectable(connectionWidget: ConnectionWidget): Boolean = {
       val o = findObject(connectionWidget)
-      edge = None
-      if (isEdge(o)) edge = Some(o.asInstanceOf[String])
-      originalNode = None
-      if (edge.isDefined) originalNode= Some(getEdgeTarget(edge.get))
-      originalNode.isDefined
       
+      if (isEdge(o)) {
+        edge = Some(o.asInstanceOf[String])
+        originalNode = Some(getEdgeTarget(edge.get))
+        true
+      }
+      else false
     }
     
     override def isReplacementWidget(connectionWidget: ConnectionWidget, replacementWidget: Widget, reconnectingSource: Boolean): ConnectorState = {
@@ -240,11 +238,12 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
     
     override def resolveReplacementWidget(scene: Scene,sceneLocation: Point)= null
     
+    
     override def reconnect(connectionWidget: ConnectionWidget,replacementWidget: Widget,reconnectingSource: Boolean)= {
       val t= manager.transition(edge.get)
       manager.removeTransition(edge.get)
       if (replacementWidget == null) removeEdge(edge.get)
-      else if (reconnectingSource) {   
+      else if (reconnectingSource) { 
         setEdgeSource(edge.get, replacementNode.get)
         val sourceW = replacementWidget.asInstanceOf[OutputSlotWidget].capsule
         manager.registerTransition(edge.get,sourceW, t.target, if (sourceW.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
