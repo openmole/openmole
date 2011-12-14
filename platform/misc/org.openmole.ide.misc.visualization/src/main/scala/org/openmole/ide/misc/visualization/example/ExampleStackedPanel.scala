@@ -21,11 +21,9 @@ import java.awt.Color
 import java.awt.Dimension
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.GridPanel
 import scala.util.Random
 import org.openmole.core.model.job.State._
 
-//class ExampleStackedPanel extends GridPanel(1, 2){
 class ExampleStackedPanel extends MigPanel("","[][grow,fill]",""){
   val g= new Random(51)
 
@@ -40,20 +38,15 @@ class ExampleStackedPanel extends MigPanel("","[][grow,fill]",""){
     background = Color.white
   }
   
-  
   peer.add(plot.panel)
   peer.add(plot2.panel)
   
-  for(i <- 1 to 30) {
-    Thread.sleep(40)
+  for(i <- 1 to 5) {
+    println(i)
+    Thread.sleep(7000)
   plot2.update(new States(200,100,50))
   }
   
-  for(i <- 1 to 50) {
-    Thread.sleep(40)
-    println(i)
-    plot2.update(new States(g.nextInt(200),g.nextInt(100),g.nextInt(50)))
-  }
   preferredSize = new Dimension(200,800)
 
 }

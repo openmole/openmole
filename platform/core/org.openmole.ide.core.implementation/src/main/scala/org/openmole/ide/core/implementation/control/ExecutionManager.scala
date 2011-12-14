@@ -8,11 +8,14 @@ package org.openmole.ide.core.implementation.control
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Rectangle
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
+import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
@@ -71,13 +74,19 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
                        State.COMPLETED-> new AtomicInteger,
                        State.FAILED-> new AtomicInteger,
                        State.CANCELED-> new AtomicInteger)
+  
   val wfPiePlotter = new PiePlotter("Worflow execution")
   val envBarPanel = new MigPanel("","[][grow,fill]",""){
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(200,200)}
-  val envBarPlotter = new XYPlotter("Environment",3600000,36) {preferredSize = new Dimension(200,200)}
-
+  val envBarPlotter = new XYPlotter("Environment",5000,120) {preferredSize = new Dimension(200,200)}
   
+  var states = new States(0,0,0)
+  val timer = new Timer(5000, new ActionListener {
+      def actionPerformed(e: ActionEvent) = {
+        envBarPlotter.update(states)
+      }
+    })
   var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,AtomicInteger])] 
   
   val hookMenu = new Menu("Hooks")
@@ -91,7 +100,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)
     rightComponent = new ScrollPane(logTextArea)
-    resizeWeight = 0.5
+    resizeWeight = 0.6
   }
   
   System.setOut(new PrintStream(logTextArea.toStream))
@@ -146,11 +155,25 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       hookPanels.keys.foreach{commitHook}
       repaint 
       revalidate
+      timer.start
       moleExecution.start
     }
   }
     
-  def cancel = synchronized { moleExecution.cancel }
+  def incrementEnvironmentState(environment: IEnvironment,
+                                state: ExecutionState.ExecutionState) = synchronized {
+    states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
+  }
+  
+  def decrementEnvironmentState(environment: IEnvironment,
+                                state: ExecutionState.ExecutionState) = synchronized {
+    states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
+  }
+  
+  def cancel = synchronized { 
+    timer.stop
+    moleExecution.cancel 
+  }
   
   def initBarPlotter {
     environments.clear

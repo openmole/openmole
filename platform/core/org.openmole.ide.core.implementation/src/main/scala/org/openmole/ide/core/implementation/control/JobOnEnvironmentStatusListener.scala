@@ -28,12 +28,8 @@ class JobOnEnvironmentStatusListener(exeManager: ExecutionManager,
   override def triggered(executionJob: IExecutionJob, event: Event[IExecutionJob]) = {
     event match {
       case x: IExecutionJob.StateChanged=> 
-        val env = exeManager.environments(executionJob.environment)
-        env._2(x.oldState).decrementAndGet
-        env._2(x.newState).incrementAndGet
-        exeManager.envBarPlotter.update(env._2.states)
-       // exeManager.envBarPlotter.update(x.oldState,env._2(x.oldState).decrementAndGet)
-      //  exeManager.envBarPlotter.update(x.newState,env._2(x.newState).incrementAndGet)
+        exeManager.decrementEnvironmentState(executionJob.environment, x.oldState)
+        exeManager.incrementEnvironmentState(executionJob.environment, x.newState)
     }
   }
 }

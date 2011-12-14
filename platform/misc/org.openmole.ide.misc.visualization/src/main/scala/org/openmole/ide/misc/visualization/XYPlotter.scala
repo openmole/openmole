@@ -32,6 +32,7 @@ import de.erichseifert.gral.ui.InteractivePanel
 import de.erichseifert.gral.util.GraphicsUtils
 import de.erichseifert.gral.util.Insets2D
 import java.awt.Color
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import de.erichseifert.gral.util.Orientation
 import de.erichseifert.gral.Legend
@@ -39,9 +40,8 @@ import de.erichseifert.gral.Location
 import java.awt.Dimension
 
 class XYPlotter(t: String,
-                totalDuration: Int,
+                buffer_size: Int,
                 nbInterval: Int){
-  val buffer_size = totalDuration/nbInterval
   
   val data = new DataTable(classOf[java.lang.Long],
                            classOf[java.lang.Integer],
@@ -62,10 +62,11 @@ class XYPlotter(t: String,
   
   plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
   
-  val axisRendererY = plot.getAxisRenderer(XYPlot.AXIS_Y);
+  val axisRendererY = plot.getAxisRenderer(XYPlot.AXIS_Y)
+  axisRendererY.setSetting(AxisRenderer.TICK_LABELS_FORMAT, new DecimalFormat)
                            
   val axisRendererX = plot.getAxisRenderer(XYPlot.AXIS_X)
-  axisRendererX.setSetting(AxisRenderer.TICKS_SPACING, buffer_size);
+  axisRendererX.setSetting(AxisRenderer.TICKS_SPACING, 60000);
   axisRendererX.setSetting(AxisRenderer.TICK_LABELS_FORMAT, new SimpleDateFormat("HH:mm"))
   
   // Format data series
@@ -77,7 +78,8 @@ class XYPlotter(t: String,
   panel.setPreferredSize(new Dimension(600,200))
   panel.setZoomable(false)
   panel.setPannable(false)
-  
+  update(new States(0,0,0))
+    
   def title(t: String) = plot.setSetting(Plot.TITLE,t)
   
   def update(states: States): Unit = synchronized {
@@ -90,8 +92,9 @@ class XYPlotter(t: String,
     plot.getAxis(XYPlot.AXIS_X).setRange(col1.getStatistics(Statistics.MIN),
                                          col1.getStatistics(Statistics.MAX))
     data.remove(0)
-    
-    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*scala.math.max(submitted,running))
+                              
+    plot.getAxis(XYPlot.AXIS_Y).setRange(0, 1.5*scala.math.max(data.getColumn(1).getStatistics(Statistics.MAX),
+                              data.getColumn(2).getStatistics(Statistics.MAX)))
     panel.repaint()
   }
   
