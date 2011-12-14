@@ -35,6 +35,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
@@ -78,22 +79,18 @@ object GliteAuthentication extends Logger {
         val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 
         try {
-          //Bypass the directory
-          var tarEntry = tis.getNextEntry
-          tarEntry = tis.getNextEntry
+          val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
+            tarEntry =>
+              val destForName = new File(dir, tarEntry.getName)
+              val dest = new File(dir, destForName.getName)
 
-          var links = List.empty[(File, String)]
-          
-          while (tarEntry != null) {
-            val destForName = new File(dir, tarEntry.getName)
-            val dest = new File(dir, destForName.getName)
-
-            if (dest.exists) dest.delete
-            if(!tarEntry.getLinkName.isEmpty) links ::= dest -> tarEntry.getLinkName
-            else tis.copy(dest)
-            
-            tarEntry = tis.getNextEntry
-          }
+              if (dest.exists) dest.delete
+              if(!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
+              else {
+                tis.copy(dest)
+                None
+              }
+          }.toList
           
           links.foreach {
             case (file, linkTo) => file.createLink(linkTo)
@@ -145,17 +142,21 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
       case Some(t) => _proxyExpiresTime = System.currentTimeMillis + t
       case None =>
     }
-    
     addContext(context)
   }
   
   def getAuthenticationMethodFromPrefences = Workspace.preference(CertificateType) match {
-    case "pem" => new PEMCertificate(Workspace.rawPreference(PasswordLocation), 
-                                     Workspace.preference(CertificatePathLocation), 
-                                     Workspace.preference(KeyPathLocation))
-    case "p12" => new P12Certificate(Workspace.rawPreference(PasswordLocation),
-                                     Workspace.preference(P12CertificateLocation))
-    case "proxy" => new VOMSProxyFile(Workspace.preference(ProxyLocation))
+    case "pem" => 
+      if(!Workspace.isPreferenceSet(PasswordLocation)) throw new UserBadDataError("Preferences not set for grid authentication")
+      new PEMCertificate(Workspace.rawPreference(PasswordLocation), 
+                         Workspace.preference(CertificatePathLocation), 
+                         Workspace.preference(KeyPathLocation))
+    case "p12" => 
+      if(!Workspace.isPreferenceSet(PasswordLocation)) throw new UserBadDataError("Preferences not set for grid authentication")
+      new P12Certificate(Workspace.rawPreference(PasswordLocation),
+                         Workspace.preference(P12CertificateLocation))
+    case "proxy" => 
+      new VOMSProxyFile(Workspace.preference(ProxyLocation))
   }
 
 }

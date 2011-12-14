@@ -332,7 +332,9 @@ object FileUtil {
       catch {
         case e: UnsupportedOperationException => 
           Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          new File(target).copy(file)
+          val targetFile = new File(target)
+          if(targetFile.isAbsolute) targetFile.copy(file)
+          else new File(file.getParentFile, target).copy(file)
       }
     }
     
