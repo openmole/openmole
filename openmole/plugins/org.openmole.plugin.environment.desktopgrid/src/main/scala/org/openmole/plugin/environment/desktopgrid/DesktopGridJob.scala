@@ -19,7 +19,6 @@ package org.openmole.plugin.environment.desktopgrid
 
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.serializer.SerializerService
 
 class DesktopGridJob(jobService: DesktopGridJobService, jobId: String) extends BatchJob(jobService.description) {
 

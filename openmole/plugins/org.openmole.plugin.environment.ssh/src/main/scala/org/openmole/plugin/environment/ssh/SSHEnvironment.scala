@@ -39,7 +39,7 @@ class SSHEnvironment(login: String, host: String, port: Int, dir: String, overri
   def this(login: String, host: String, port: Int, dir: String) = this(login, host, port, dir, None)
 
   def allStorages = List(PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host + ':' + port), dir, Workspace.preferenceAsInt(MaxConnections)))
-  def allJobServices: Iterable[JobService] = List(new SSHJobService(this, new ServiceDescription("ssh://" + login + '@' + host + ':' + port), Workspace.preferenceAsInt(MaxConnections)))
+  def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host + ':' + port), this, Workspace.preferenceAsInt(MaxConnections)))
   
   override def authentication = SSHAuthentication(login, host)
 }

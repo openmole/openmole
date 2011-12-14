@@ -17,17 +17,44 @@
 
 package org.openmole.plugin.environment.ssh
 
+import org.ogf.saga.job.JobDescription
+import org.ogf.saga.job.JobFactory
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.workspace.Workspace
+import org.openmole.plugin.environment.jsaga.JSAGAJobService
+import java.net.URI
 
-class SSHJobService(val environment: BatchEnvironment, val description: ServiceDescription, override val nbAccess: Int) extends JobService {
-  
+class SSHJobService(uri: URI, val environment: BatchEnvironment, override val nbAccess: Int) extends JSAGAJobService(uri) {
+
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    
+    //preparedRuntime(serializedJob.runtime)
     new SSHBatchJob(description)
   }
 
+  @transient private var installed: Runtime = null
+  
+  def preparedRuntime(runtime: Runtime) = synchronized {
+    if(installed == null) {
+      val install = JobFactory.createJobDescription
+
+      val script = Workspace.newFile("install", ".sh")
+      try {
+        script.content = "echo work >itsworking"
+        install.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
+                                                                              {if(script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath} + ">" + script.getName))
+        val job = jobServiceCache.createJob(install)
+        job.run
+        //println("Executed job install")
+      } finally script.delete
+      installed = runtime
+    }
+    installed
+  }
+  
 }

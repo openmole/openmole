@@ -123,7 +123,7 @@ object SSHJobControlAdaptor {
   val executableKey = "_Executable"
 }
 
-class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with CleanableJobAdaptor {
+class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with CleanableJobAdaptor with StreamableJobInteractiveSet {
 
   import SSHJobControlAdaptor._
 
@@ -189,7 +189,7 @@ class SSHJobControlAdaptor extends SSHAdaptor with JobControlAdaptor with Cleana
   }
 
   override def clean(nativeJobId: String) {
-    val cde = "rm -rf " +  SSHJobProcess.rootDir + "/" + nativeJobId + "*"
+    val cde = "rm -rf " + SSHJobProcess.rootDir + "/" + nativeJobId + "*"
     exec(connection, cde)
   }
 

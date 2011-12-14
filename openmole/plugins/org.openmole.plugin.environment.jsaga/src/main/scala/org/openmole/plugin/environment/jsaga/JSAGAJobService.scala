@@ -53,7 +53,7 @@ abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
 
   import JSAGAJobService._
   
-  override def environment: JSAGAEnvironment
+  //override def environment: JSAGAEnvironment
   
   @transient override lazy val description = new ServiceDescription(jobServiceURI.toString)
   
