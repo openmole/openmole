@@ -17,6 +17,8 @@ trait ICapsuleUI {
   
   def startingCapsule: Boolean
   
+  def defineAsStartingCapsule(b: Boolean): Unit
+  
   def scene: IMoleScene
   
   def connectableWidget: IConnectableWidget
