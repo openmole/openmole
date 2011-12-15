@@ -75,7 +75,7 @@ class XYPlotter(t: String,
   
   // Add plot to Swing component
   val panel = new InteractivePanel(plot)
-  panel.setPreferredSize(new Dimension(600,200))
+  panel.setPreferredSize(new Dimension(600,250))
   panel.setZoomable(false)
   panel.setPannable(false)
   update(new States(0,0,0))

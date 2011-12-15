@@ -85,8 +85,8 @@ class ExecutionManager(manager : IMoleSceneManager,
   val wfPiePlotter = new PiePlotter("Worflow execution")
   val envBarPanel = new MigPanel("","[][grow,fill]",""){
     peer.add(wfPiePlotter.panel)
-    preferredSize = new Dimension(200,200)}
-  val envBarPlotter = new XYPlotter("Environment",5000,120) {preferredSize = new Dimension(200,200)}
+    preferredSize = new Dimension(250,250)}
+  val envBarPlotter = new XYPlotter("Environment",5000,120) {preferredSize = new Dimension(400,250)}
   
   var states = new States(0,0,0)
   val timer = new Timer(5000, new ActionListener {

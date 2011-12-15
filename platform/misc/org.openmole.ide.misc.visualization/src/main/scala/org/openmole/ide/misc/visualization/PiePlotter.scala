@@ -63,9 +63,6 @@ class PiePlotter(title: String) {
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.SOUTH_WEST)
 	
-  // Format legend
-  //plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
-  
   def update(ready: Int,
              completed: Int,
              canceled: Int): Unit = {
@@ -88,5 +85,5 @@ class PiePlotter(title: String) {
   def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
   
   val panel = new InteractivePanel(plot){setZoomable(false)}
-  panel.setPreferredSize(new Dimension(200,200))
+  panel.setPreferredSize(new Dimension(250,250))
 }
