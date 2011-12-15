@@ -38,9 +38,12 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   var name: Option[String]= None
   
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
-    if (startingCapsule.isDefined) startingCapsule.get.addInputSlot(false)
+    startingCapsule match {
+      case Some(x: ICapsuleUI)=> x.defineAsStartingCapsule(false)
+      case None=>
+    }
     startingCapsule= Some(stCapsule)
-    startingCapsule.get.addInputSlot(true)
+    startingCapsule.get.defineAsStartingCapsule(true)
   }
   
   override def getNodeID: String= "node" + nodeID

@@ -46,9 +46,9 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
     
-  override def widget = this
+  def widget = this
   
-  override def copy(sc: IMoleScene) = {
+  def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
     val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule)
     connectableWidget.islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
@@ -59,13 +59,22 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     (c,slotMapping)
   }
   
-  override def encapsule(dpu: ITaskDataProxyUI)= {
+  def defineAsStartingCapsule(b : Boolean) = {
+    startingCapsule = b
+    connectableWidget.islots.foreach{ isw=>
+      isw.setStartingSlot(b)}
+    scene.validate
+    scene.refresh
+  }
+  
+  def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
   }
   
+  
   def addInputSlot(on: Boolean): IInputSlotWidget =  {
-    if (on) clearInputSlots(on)
+    if (on) startingCapsule = on
     
     nbInputSlots+= 1
     val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,startingCapsule,scene.moleSceneType == EXECUTION)
@@ -75,12 +84,6 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     im
   }
 
-  private def clearInputSlots(on: Boolean) = {
-    startingCapsule = on
-    nbInputSlots= 0
-    connectableWidget.clearInputSlots
-  }
-  
   def removeInputSlot= {
     nbInputSlots-= 1
     connectableWidget.removeFirstInputSlot

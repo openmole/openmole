@@ -59,21 +59,11 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
   }
     
   def removeFirstInputSlot = {
-    println("removeFirstInputSlot") 
-    println("size:" + islots.size)
-    
-    println("tail:" + islots.tail)
-    println("tail0:" + islots.tail(0))
-    println("widget:" + islots.tail(0).widget)
     val toBeRemoved = islots.tail(0)
     removeChild(toBeRemoved.widget)
     islots-= toBeRemoved
   }
   
-  def clearInputSlots= {
-    islots.foreach(c=>removeChild(c.widget))
-    islots.clear
-  }
   
   def addSampling= {
     samplingWidget = Some(new SamplingWidget(scene,capsule))
