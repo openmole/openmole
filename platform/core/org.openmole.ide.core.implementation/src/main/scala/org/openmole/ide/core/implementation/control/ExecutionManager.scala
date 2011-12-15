@@ -7,12 +7,9 @@ package org.openmole.ide.core.implementation.control
 
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Rectangle
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.OutputStream
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.Timer
@@ -82,7 +79,7 @@ class ExecutionManager(manager : IMoleSceneManager,
                        State.FAILED-> new AtomicInteger,
                        State.CANCELED-> new AtomicInteger)
   
-  val wfPiePlotter = new PiePlotter("Worflow execution")
+  val wfPiePlotter = new PiePlotter("Workflow execution")
   val envBarPanel = new MigPanel("","[][grow,fill]",""){
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(250,250)}
