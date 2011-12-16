@@ -274,6 +274,12 @@ object FileUtil {
       finally s.close
     }
     
+     def contentOption =    
+       try Some(file.content)
+       catch {
+        case e: IOException => None
+       }
+    
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
     
     def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))

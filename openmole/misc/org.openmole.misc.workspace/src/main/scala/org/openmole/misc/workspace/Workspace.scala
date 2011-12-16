@@ -64,7 +64,11 @@ object Workspace {
   
   def anotherIsRunningAt(location: File) = {
     val f = new File(location, running)
-    f.exists && UUID.fromString(f.content).compareTo(sessionUUID) != 0
+    f.contentOption match {
+      case Some(uuid) =>
+        !uuid.isEmpty && UUID.fromString(uuid).compareTo(sessionUUID) != 0
+      case None => false
+    }
   }
   
   lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
@@ -192,7 +196,12 @@ class Workspace(val location: File) {
   }
     
   def clean = {
-    if(UUID.fromString(run.content).compareTo(sessionUUID) == 0) run.delete
+    run.contentOption match {
+      case Some(uuid) =>
+        if(!uuid.isEmpty && UUID.fromString(uuid).compareTo(sessionUUID) == 0) run.delete
+      case None =>
+    }
+    
     tmpDir.recursiveDelete
   }
   
