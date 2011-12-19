@@ -23,6 +23,7 @@ import de.erichseifert.gral.plots._
 import de.erichseifert.gral.plots.colors._
 import de.erichseifert.gral.util.Orientation
 import de.erichseifert.gral.util.Orientation._
+import de.erichseifert.gral.plots.points.PointRenderer
 import de.erichseifert.gral.ui.InteractivePanel
 import de.erichseifert.gral.util.Insets2D
 import de.erichseifert.gral.Legend
@@ -45,12 +46,14 @@ class PiePlotter(title: String) {
   plot.setSetting(Plot.TITLE,title)
   
   // Change relative size of pie
-  plot.setSetting(PiePlot.RADIUS, 0.9)
+  plot.setSetting(PiePlot.RADIUS, 0.95)
   // Change relative size of inner region
-  plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.9)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.RADIUS_INNER, 0.25)
   // Change the width of gaps between segments
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.GAP, 0.2)
-  
+  // Display labels
+  plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_DISPLAYED, true)
+  plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_COLOR, Color.WHITE)
   // Change the colors
   val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
   colors.setMode(ColorMapper.Mode.REPEAT)
@@ -60,9 +63,6 @@ class PiePlotter(title: String) {
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.SOUTH_WEST)
 	
-  // Format legend
-  //plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
-  
   def update(ready: Int,
              completed: Int,
              canceled: Int): Unit = {
@@ -84,6 +84,6 @@ class PiePlotter(title: String) {
   def updateCompleted(completed: Int) = {data.set(0,1,completed);panel.repaint()}
   def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
   
-  val panel = new InteractivePanel(plot)
-  panel.setPreferredSize(new Dimension(200,200))
+  val panel = new InteractivePanel(plot){setZoomable(false)}
+  panel.setPreferredSize(new Dimension(250,250))
 }

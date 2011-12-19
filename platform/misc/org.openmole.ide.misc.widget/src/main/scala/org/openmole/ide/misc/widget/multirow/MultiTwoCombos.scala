@@ -30,13 +30,12 @@ object MultiTwoCombos {
   class Factory[A, B] extends IRowWidgetFactory[TwoCombosRowWidget[A,B]]{
     def apply(row: TwoCombosRowWidget[A,B], panel: Panel) = {
       import row._
-      new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB, inBetweenString,plus)
+      new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB, inBetweenString,plus)
       
     }
   }
   
-  class TwoCombosRowWidget[A,B](override val name: String,
-                                val comboContentA: List[A], 
+  class TwoCombosRowWidget[A,B](val comboContentA: List[A], 
                                 val selectedA: A, 
                                 val comboContentB: List[B], 
                                 val selectedB: B,
@@ -46,7 +45,7 @@ object MultiTwoCombos {
     val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
     val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB ; preferredSize = new Dimension(8,size.height) }
     
-    override val panel = new RowPanel(name,List(combo1,new Label(inBetweenString),combo2),plus)
+    override val panel = new RowPanel(List(combo1,new Label(inBetweenString),combo2),plus)
     
     override def content: (A,B) = (combo1.selection.item,combo2.selection.item)
     
@@ -55,49 +54,54 @@ object MultiTwoCombos {
 }
 
 import MultiTwoCombos._
-class MultiTwoCombos[A,B](rWidgets: List[TwoCombosRowWidget[A,B]], 
+class MultiTwoCombos[A,B](title: String,
+                          rWidgets: List[TwoCombosRowWidget[A,B]], 
                           factory: IRowWidgetFactory[TwoCombosRowWidget[A,B]],
                           minus: Minus= NO_EMPTY,
                           plus: Plus= ADD) 
-extends MultiWidget(rWidgets,factory,3,minus){ 
-  def this(
-    rowName: String,
-    inbetweenString: String,
-    initValues: (List[A],List[B]), 
-    selected: List[(A,B)],
-    factory: IRowWidgetFactory[TwoCombosRowWidget[A,B]],
-    minus: Minus,
-    plus: Plus) = this (if (selected.isEmpty) { List(new TwoCombosRowWidget(rowName,
-                                                                            initValues._1,
-                                                                            initValues._1(0),
-                                                                            initValues._2, 
-                                                                            initValues._2(0),
-                                                                            inbetweenString,
-                                                                            plus))}
-                        else
-                          selected.map{case(s1,s2)=> new TwoCombosRowWidget(rowName,
-                                                                            initValues._1, 
-                                                                            s1,
-                                                                            initValues._2,
-                                                                            s2,
-                                                                            inbetweenString,
-                                                                            plus)}, 
-                        factory,minus,plus)
+extends MultiWidget(title,rWidgets,factory,3,minus){ 
+  def this(title: String,
+           inbetweenString: String,
+           initValues: (List[A],List[B]), 
+           selected: List[(A,B)],
+           factory: IRowWidgetFactory[TwoCombosRowWidget[A,B]],
+           minus: Minus,
+           plus: Plus) = this (title,
+                               if (selected.isEmpty) { List(new TwoCombosRowWidget(initValues._1,
+                                                                                   initValues._1(0),
+                                                                                   initValues._2, 
+                                                                                   initValues._2(0),
+                                                                                   inbetweenString,
+                                                                                   plus))}
+                               else
+                                 selected.map{case(s1,s2)=> new TwoCombosRowWidget(initValues._1, 
+                                                                                   s1,
+                                                                                   initValues._2,
+                                                                                   s2,
+                                                                                   inbetweenString,
+                                                                                   plus)}, 
+                               factory,minus,plus)
 
-  def this(rName: String , ibString: String,iValues: (List[A],List[B]), selected: List[(A,B)]) = this(rName,
-                                                                                                      ibString,
-                                                                                                      iValues,
-                                                                                                      selected, 
-                                                                                                      new Factory[A,B],
-                                                                                                      NO_EMPTY,
-                                                                                                      ADD)
+  def this(title: String,
+           ibString: String,
+           iValues: (List[A],List[B]), selected: List[(A,B)]) = this(title,
+                                                                     ibString,
+                                                                     iValues,
+                                                                     selected, 
+                                                                     new Factory[A,B],
+                                                                     NO_EMPTY,
+                                                                     ADD)
   
-  def this(rName: String , ibString: String,iValues: (List[A],List[B]), selected: List[(A,B)],minus: Minus, plus: Plus) = this(rName,
-                                                                                                                               ibString,
-                                                                                                                               iValues,
-                                                                                                                               selected, 
-                                                                                                                               new Factory[A,B],
-                                                                                                                               minus,
-                                                                                                                               plus)
+  def this(title: String,
+           ibString: String,iValues: (List[A],List[B]), 
+           selected: List[(A,B)],
+           minus: Minus, 
+           plus: Plus) = this(title,
+                              ibString,
+                              iValues,
+                              selected, 
+                              new Factory[A,B],
+                              minus,
+                              plus)
   def content = rowWidgets.map(_.content).toList 
 }

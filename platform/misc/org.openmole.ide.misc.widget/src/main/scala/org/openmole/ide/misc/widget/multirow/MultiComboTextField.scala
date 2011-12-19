@@ -29,19 +29,17 @@ object MultiComboTextField {
   class Factory[A] extends IRowWidgetFactory[ComboTextFieldRowWidget[A]]{
     def apply(row: ComboTextFieldRowWidget[A], panel: Panel) = {
       import row._
-      new ComboTextFieldRowWidget(name,comboContentA,selectedA,"",plus)
+      new ComboTextFieldRowWidget(comboContentA,selectedA,"",plus)
     }
   }
   
-  class ComboTextFieldRowWidget[A](override val name: String,
-                                   val comboContentA: List[A],
+  class ComboTextFieldRowWidget[A](val comboContentA: List[A],
                                    val selectedA: A,
                                    val initValue: String,
                                    val plus: Plus) extends IRowWidget2[A,String]{
     val textFied = new TextField(initValue,10)
     val comboBox = new ComboBox(comboContentA) {selection.item = selectedA}
-    override val panel = new RowPanel(name,List(comboBox,textFied),plus)
-    //var components = List(comboBox,textFied)
+    override val panel = new RowPanel(List(comboBox,textFied),plus)
     
     override def content: (A,String) = (comboBox.selection.item,textFied.text)
   }
@@ -49,27 +47,28 @@ object MultiComboTextField {
 
 import MultiComboTextField._
 
-class MultiComboTextField[A](rWidgets: List[ComboTextFieldRowWidget[A]], 
+class MultiComboTextField[A](title: String,
+                             rWidgets: List[ComboTextFieldRowWidget[A]], 
                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
                              minus: Minus= NO_EMPTY,
-                             plus: Plus= ADD) extends MultiWidget(rWidgets,factory,2,minus){
+                             plus: Plus= ADD) extends MultiWidget(title,rWidgets,factory,2,minus){
 
-  def this(rowName: String,
+  def this(title: String,
            initValues: List[(A,String)],
            comboContent: List[A],
            factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
            minus: Minus,
-           plus: Plus) = this(if (initValues.isEmpty) List(new ComboTextFieldRowWidget(rowName,
-                                                                                       comboContent, 
+           plus: Plus) = this(title,
+                              if (initValues.isEmpty) List(new ComboTextFieldRowWidget(comboContent, 
                                                                                        comboContent(0),
                                                                                        "",
                                                                                        plus))
                               else initValues.map{
-      case(a,s)=>new ComboTextFieldRowWidget(rowName,comboContent,a,s,plus)},
+      case(a,s)=>new ComboTextFieldRowWidget(comboContent,a,s,plus)},
                               factory,minus,plus)
-  def this(rName: String,
+  def this(title: String,
            iValues: List[(A,String)],
-           cContent: List[A]) = this (rName,iValues,cContent, new Factory[A],NO_EMPTY,ADD)
+           cContent: List[A]) = this (title,iValues,cContent, new Factory[A],NO_EMPTY,ADD)
 
   def content = rowWidgets.map(_.content).filterNot(_._2.isEmpty).toList 
 }

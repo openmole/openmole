@@ -17,6 +17,8 @@ trait ICapsuleUI {
   
   def startingCapsule: Boolean
   
+  def defineAsStartingCapsule(b: Boolean): Unit
+  
   def scene: IMoleScene
   
   def connectableWidget: IConnectableWidget
@@ -24,6 +26,8 @@ trait ICapsuleUI {
   def encapsule(dpu: ITaskDataProxyUI)
   
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
+  
+  def removeInputSlot: Unit
   
   def nbInputSlots: Int
   

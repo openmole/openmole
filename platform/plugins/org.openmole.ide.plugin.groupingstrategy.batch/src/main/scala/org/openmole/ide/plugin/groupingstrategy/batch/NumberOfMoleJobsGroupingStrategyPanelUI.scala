@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.groupingstrategy.batch
 
+import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -36,9 +37,7 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
       import row._
      
       val combotfrow: ComboTextFieldRowWidget[ICapsule] = 
-        new ComboTextFieldRowWidget(name,comboContentA,selectedA,"",plus) {
-          override def doOnClose = strategypanel.executionManager.commitHook("org.openmole.plugin.groupingstrategy.batch.NumberOfMoleJobsGroupingStrategy")
-        }
+        new ComboTextFieldRowWidget(comboContentA,selectedA,"",plus)
       combotfrow
     }
   }
@@ -47,33 +46,39 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
 import NumberOfMoleJobsGroupingStrategyPanelUI._
 //
 class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IGroupingStrategyPanelUI{
-  var multiRow : Option[MultiComboTextField[ICapsule]] = None
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.inputs.size > 0).toList
+  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
-  if (capsules.size>0){
-    val r =  new ComboTextFieldRowWidget("Group",
-                                         capsules,
-                                         capsules(0),
-                                         "by",
-                                         NO_ADD)
+  val multiRow = 
+    capsules.headOption match {
+      case Some(capsule) =>
+        val r =  new ComboTextFieldRowWidget(capsules, capsule, "by", NO_ADD)
     
-    multiRow =  Some(new MultiComboTextField(List(r),
-                                             rowFactory(this),
-                                             CLOSE_IF_EMPTY,
-                                             NO_ADD))
-  }
+        Some(new MultiComboTextField("Group", List(r), rowFactory(this), CLOSE_IF_EMPTY, NO_ADD))
+      case None =>
+        StatusDisplayer.getDefault().setStatusText("No capsules are defined")
+        None
+    }
+
   
   if (multiRow.isDefined) contents+= multiRow.get.panel
   
-  def saveContent = {
-    if (multiRow.isDefined) multiRow.get.content.map{c=> try{
-        new NumberOfMoleJobsGroupingStrategyDataUI(executionManager,(c._1,c._2.toInt))
-      } catch {
-        case e:NumberFormatException=> throw new GUIUserBadDataError(c._2 + " is not an integer")
+  def saveContent = 
+    multiRow match {
+     case Some(multiRow) =>
+       multiRow.content.map {
+        case(capsule, num)=>
+          try new NumberOfMoleJobsGroupingStrategyDataUI(executionManager, (capsule, num.toInt))
+          catch {
+            case e:NumberFormatException=> throw new GUIUserBadDataError(num + " is not an integer")
+          }
       }
+     case None => List()
     }
-    else List()
-  }
   
-  def addStrategy = if (multiRow.isDefined) multiRow.get.showComponent
+  def addStrategy = multiRow match {
+    case Some(multiRow) => 
+      multiRow.addRow
+      multiRow.refresh
+    case None => 
+  }
 }

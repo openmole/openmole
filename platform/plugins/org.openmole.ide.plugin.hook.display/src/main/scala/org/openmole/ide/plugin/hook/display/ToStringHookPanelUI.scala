@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.hook.display
 
+import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -29,8 +30,6 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.ComboBox
-import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
@@ -39,14 +38,14 @@ object ToStringHookPanelUI{
     override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: Panel) = {
       import row._
       val twocomborow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
-        new TwoCombosRowWidget(name,comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
+        new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
       
       twocomborow.combo1.selection.reactions += {case SelectionChanged(twocomborow.`combo1`)=>commit}
       twocomborow.combo2.selection.reactions += {case SelectionChanged(twocomborow.`combo2`)=>
-         // To be uncommented when the ComboBox is fixed 
-        // twocomborow.combo1.peer.setModel(ComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
+          // To be uncommented when the ComboBox is fixed 
+          // twocomborow.combo1.peer.setModel(ComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
           commit}
       
       def commit = 
@@ -58,40 +57,51 @@ object ToStringHookPanelUI{
 }
 import ToStringHookPanelUI._
 class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
-  var multiRow : Option[MultiTwoCombos[IPrototype[_],ICapsule]] = None
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
+
+  val capsules = executionManager.capsuleMapping.values.filter(!_.outputs.isEmpty).toList
   
-  if (capsules.size>0){
-    if (protosFromTask(capsules(0)).size>0){
-      val r =  new TwoCombosRowWidget("Display",
-                                      protosFromTask(capsules(0)),
-                                      protosFromTask(capsules(0))(0),
+  val multiRow = {
+    import  executionManager.prototypeMapping
+    
+    if (!capsules.isEmpty && !prototypeMapping.isEmpty) {
+      val r =  new TwoCombosRowWidget(//protosFromTask(capsules(0)), //protosFromTask(capsules(0))(0),
+                                      prototypeMapping.values.toList,
+                                      prototypeMapping.values.toList.head,
                                       capsules,
                                       capsules(0),
                                       "from ",
                                       NO_ADD)
-    
-      multiRow =  Some(new MultiTwoCombos(List(r),
-                                          rowFactory(this),
-                                          CLOSE_IF_EMPTY,
-                                          NO_ADD))
+      
+      val multiRow = new MultiTwoCombos("Displaying prototypes",
+                                        List(r),
+                                        rowFactory(this),
+                                        CLOSE_IF_EMPTY,
+                                        NO_ADD)
+      
+      contents += multiRow.panel
+      Some(multiRow)
+    } else {
+      StatusDisplayer.getDefault.setStatusText("No capsules or no prototypes are defined")
+      None
     }
   }
+ 
   
-  if (multiRow.isDefined) {
-    contents+= (new Label("Display prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
-    contents+= multiRow.get.panel
+    
+ /* def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
+    executionManager.prototypeMapping.values.toList*/
+  
+  def saveContent = multiRow match {
+    case Some(multiRow) => 
+      multiRow.content.map{
+        case(capsule, proto) => 
+          new ToStringHookDataUI(executionManager,(proto, capsule))
+      }
+    case None => List()
   }
     
-  def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
-    executionManager.prototypeMapping.values.toList
-    // To be uncommented when the ComboBox is fixed 
-    //c.outputs.map(_.prototype).toList
-  
-  def saveContent = {
-    if (multiRow.isDefined) multiRow.get.content.map{c=>new ToStringHookDataUI(executionManager,(c._2,c._1))}
-    else List()
+  def addHook = multiRow match {
+    case Some(multiRow) => multiRow.addRow
+    case None =>
   }
-  
-  def addHook = if (multiRow.isDefined) multiRow.get.showComponent
 }

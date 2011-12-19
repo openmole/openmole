@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.hook.filemanagement
 
 import java.io.File
+import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.panel.IHookPanelUI
@@ -38,8 +39,7 @@ object CopyFileHookPanelUI{
   def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File],ICapsule] {
     override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: Panel) = {
       import row._
-      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(name,
-                                                                comboContentA,
+      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
                                                                 selectedA,
                                                                 inBetweenString1,
                                                                 comboContentB,
@@ -64,45 +64,60 @@ object CopyFileHookPanelUI{
 import CopyFileHookPanelUI._
 
 class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
-  var multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = None
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
   
-  if (capsules.size>0) {
-    if (protosFromTask(capsules(0)).size>0){
-      val r =  new TwoCombosChooseFileTextFieldRowWidget("Save",
-                                                         protosFromTask(capsules(0)),
-                                                         protosFromTask(capsules(0))(0),
+  val multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = {
+    import  executionManager.prototypeMapping
+    
+    if (!capsules.isEmpty && !prototypeMapping.isEmpty) {
+      val r =  new TwoCombosChooseFileTextFieldRowWidget(//protosFromTask(capsules(0)),
+                                                         //protosFromTask(capsules(0))(0),
+                                                         protosFromTask,
+                                                         protosFromTask.head,
                                                          "from",
                                                          capsules,
                                                          capsules(0),
                                                          "in",
                                                          "",
                                                          NO_ADD)
-    
-      multiRow =  Some(new MultiTwoCombosChooseFileTextField(List(r),
+      val multiRow = new MultiTwoCombosChooseFileTextField("Save prototypes in file",
+                                                             List(r),
                                                              rowFactory(this),
                                                              CLOSE_IF_EMPTY,
-                                                             NO_ADD))
+                                                             NO_ADD)
+    
+      contents += multiRow.panel
+      Some(multiRow)
+    } else { 
+      StatusDisplayer.getDefault.setStatusText("No capsules or no prototypes are defined")
+      None
     }
   }
   
-  if (multiRow.isDefined) {
-    contents+= (new Label("Save prototypes") {font = new Font("Ubuntu", Font.BOLD, 15)},"left")
-    contents+= multiRow.get.panel
-  }
     
-  def protosFromTask(c: ICapsule): List[IPrototype[File]] = 
+  def protosFromTask: List[IPrototype[File]] = 
     executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
     // To be uncommented when the ComboBox is fixed 
   //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
   
   
-  def saveContent = {
-    if (multiRow.isDefined) multiRow.get.content.map{c=>new CopyFileHookDataUI(executionManager,(c._2,c._1,c._3))}
-    else List()
-  }
+  def saveContent = 
+    multiRow match {
+      case Some(multiRow) => 
+        multiRow.content.map {
+          case (proto, capsule, name) => 
+            new CopyFileHookDataUI(executionManager, (capsule, proto, name))
+        }
+      case None => List()
+    }
   
-  def addHook = if (multiRow.isDefined) multiRow.get.showComponent
+  def addHook = 
+    multiRow match {
+      case Some(multiRow) =>
+        multiRow.addRow
+        multiRow.refresh
+      case None =>
+    }
 }
 
 //class CopyFileHookPanelUI(execution: IMoleExecution, 

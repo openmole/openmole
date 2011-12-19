@@ -52,10 +52,10 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
     buttons+= p12Button
     buttons+= proxyButton}
   
-  val pem1TextField= new ChooseFileTextField("Certification path", "Select afile", Some("pem files"), FilesOnly,Some("pem"))
+  val pem1TextField= new ChooseFileTextField("Certificate path", "Select afile", Some("pem files"), FilesOnly,Some("pem"))
   val pem2TextField= new ChooseFileTextField("Key Path", "Select a file", Some("pem files"), FilesOnly,Some("pem"))
-  val p12TextField= new ChooseFileTextField("Certification path", "Select a file", Some("p12 file"), FilesOnly,Some("p12"))
-  val proxyTextField = new ChooseFileTextField("nada", "Select a file", Some("proxy file"), FilesOnly,Some("proxy"))
+  val p12TextField= new ChooseFileTextField("Certificate path", "Select a file", Some("p12 file"), FilesOnly,Some("p12"))
+  val proxyTextField = new ChooseFileTextField("", "Select a file", Some("proxy file"), FilesOnly,Some("proxy"))
   
   contents+= new MigPanel("wrap","","[]15[]15[]"){
     contents+= pemButton

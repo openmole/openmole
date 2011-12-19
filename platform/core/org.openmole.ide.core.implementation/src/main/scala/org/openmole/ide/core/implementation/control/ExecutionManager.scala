@@ -7,12 +7,12 @@ package org.openmole.ide.core.implementation.control
 
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Rectangle
-import java.io.BufferedOutputStream
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.io.File
-import java.io.OutputStream
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
+import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
@@ -25,9 +25,11 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
@@ -47,7 +49,9 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 import org.openmole.core.model.job.State
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
 
 
@@ -57,27 +61,36 @@ object ExecutionManager {
   }
 }
 
-class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExecutionManager {
+class ExecutionManager(manager : IMoleSceneManager,
+                       val mole: IMole,
+                       val capsuleMapping: Map[ICapsuleUI, ICapsule],
+                       val prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
-  override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
+ // override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
-  var hookPanels= new HashMap[String,(IHookPanelUI,List[IHook])]
+  val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY-> new AtomicInteger,
                        State.RUNNING-> new AtomicInteger,
                        State.COMPLETED-> new AtomicInteger,
                        State.FAILED-> new AtomicInteger,
                        State.CANCELED-> new AtomicInteger)
-  val wfPiePlotter = new PiePlotter("Worflow execution")
+  
+  val wfPiePlotter = new PiePlotter("Workflow execution")
   val envBarPanel = new MigPanel("","[][grow,fill]",""){
     peer.add(wfPiePlotter.panel)
-    preferredSize = new Dimension(200,200)}
-  val envBarPlotter = new XYPlotter("Environment",3600000,36) {preferredSize = new Dimension(200,200)}
-
+    preferredSize = new Dimension(250,250)}
+  val envBarPlotter = new XYPlotter("Environment",5000,120) {preferredSize = new Dimension(400,250)}
   
+  var states = new States(0,0,0)
+  val timer = new Timer(5000, new ActionListener {
+      def actionPerformed(e: ActionEvent) = {
+        envBarPlotter.update(states)
+      }
+    })
   var environments = new HashMap[IEnvironment,(String,HashMap[ExecutionState.ExecutionState,AtomicInteger])] 
   
   val hookMenu = new Menu("Hooks")
@@ -91,6 +104,7 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)
     rightComponent = new ScrollPane(logTextArea)
+    resizeWeight = 0.6
   }
   
   System.setOut(new PrintStream(logTextArea.toStream))
@@ -98,30 +112,33 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   
   pages+= new TabbedPane.Page("Settings",hookPanel)
   pages+= new TabbedPane.Page("Execution progress", splitPane)
-  pages+= new TabbedPane.Page("Execution errors", new ScrollPane(moleExecutionExceptionTextArea))
-  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(executionJobExceptionTextArea))
+  pages+= new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
+  pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
   
-  def start = {
-    val canBeRun = if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
+  def canBeRun = 
+    if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
       val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?")
                                     {background = Color.white}.peer,
                                     "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
       if (result.equals(NotifyDescriptor.OK_OPTION)) {
-       (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
-       true
+        (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
+        true
       } else false
     } else true
-    
+  
+  def start = synchronized {
     if (canBeRun){
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
       val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
-                                               manager, 
-                                               capsuleMapping,
-                                               gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
+                                                                       manager, 
+                                                                       capsuleMapping,
+                                                                       gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
 
+      this.moleExecution = moleExecution
+      
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
@@ -142,13 +159,27 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
       hookPanels.keys.foreach{commitHook}
       repaint 
       revalidate
+      timer.start
       moleExecution.start
     }
   }
     
-  def cancel = moleExecution.cancel
+  def incrementEnvironmentState(environment: IEnvironment,
+                                state: ExecutionState.ExecutionState) = synchronized {
+    states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
+  }
   
-  def initBarPlotter {
+  def decrementEnvironmentState(environment: IEnvironment,
+                                state: ExecutionState.ExecutionState) = synchronized {
+    states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
+  }
+  
+  def cancel = synchronized { 
+    timer.stop
+    moleExecution.cancel 
+  }
+  
+  def initBarPlotter = synchronized{
     environments.clear
     buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
   }
@@ -165,28 +196,27 @@ class ExecutionManager(manager : IMoleSceneManager) extends TabbedPane with IExe
   }
   
   
-  override def commitHook(hookClassName: String) {
+  override def commitHook(hookClassName: String) { 
     if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
-    hookPanels(hookClassName) =  (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+    hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
   }
   
-  def initPieChart = {
+  def initPieChart = synchronized{
     status.keys.foreach(k=>status(k)=new AtomicInteger)
-    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))}
-  
+    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
+  }
     
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {
       val cl = fui.coreClass.getCanonicalName
-      if(hookPanels.contains(cl)) 
-        hookPanels(cl)._1.addHook
+      if(hookPanels.contains(cl)) hookPanels(cl)._1.addHook
       else {
         val pui = fui.buildPanelUI(ExecutionManager.this)
         hookPanel.peer.add(pui.peer)
         hookPanel.peer.add((new Separator).peer)
-        hookPanels+= cl-> (pui,List.empty)
+        hookPanels+= cl -> (pui, List.empty)
       }
-      hookPanels+= cl-> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
+      hookPanels+= cl -> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
     }
   }
   

@@ -30,8 +30,8 @@ class RangeDomainDataUI (val name: String = "",
                          val step: String = "") extends IDomainDataUI {
   
   def coreObject(prototypeObject: IPrototype[_]) = {
-    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE)new IntegerRange(min,max,step)
-    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE)new DoubleRange(min,max,step)
+    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new IntegerRange(min,max,step)
+    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new DoubleRange(min,max,step)
     else new BigDecimalRange(min,max,step)
 }
 

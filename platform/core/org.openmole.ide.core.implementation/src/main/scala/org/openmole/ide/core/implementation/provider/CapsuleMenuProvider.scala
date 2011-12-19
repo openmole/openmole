@@ -34,12 +34,15 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: CapsuleUI) extends Generic
     items.clear
     val itStart = new JMenuItem("Define as starting capsule")
     val itIS= new JMenuItem("Add an input slot")
+    val itRIS = new JMenuItem("Remove an input slot")
     val itR = new JMenuItem("Remove capsule")
+    
     itIS.addActionListener(new AddInputSlotAction(capsule))
     itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
     itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
-  
-    items+= (itIS,itR,itStart)
+    itRIS.addActionListener(new RemoveInputSlot(capsule))
+    
+    items+= (itIS,itRIS,itR,itStart)
     
   }
   
@@ -49,13 +52,13 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: CapsuleUI) extends Generic
     initMenu
     if (encapsulated) {
       if (capsule.dataProxy.get.dataUI.environment.isDefined) {
-        val itRe= new JMenuItem("Remove environment")
-        itRe.addActionListener(new DetachEnvironmentAction(capsule.dataProxy.get).peer)
+        val itRe= new JMenuItem("Detach environment")
+        itRe.addActionListener(new DetachEnvironmentAction(capsule.dataProxy).peer)
         items+=itRe
       }
       if (capsule.dataProxy.get.dataUI.sampling.isDefined) {
-        val itSa= new JMenuItem("Remove sampling")
-        itSa.addActionListener(new DetachSamplingAction(capsule.dataProxy.get).peer)
+        val itSa= new JMenuItem("Detach sampling")
+        itSa.addActionListener(new DetachSamplingAction(capsule.dataProxy).peer)
         items+=itSa
       }
     }

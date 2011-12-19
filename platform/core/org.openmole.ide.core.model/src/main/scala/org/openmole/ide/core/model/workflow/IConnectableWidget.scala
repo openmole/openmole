@@ -17,9 +17,6 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.netbeans.api.visual.widget.Widget
-import scala.collection.mutable.HashSet
-
 trait IConnectableWidget {
   def x: Double
   
@@ -29,5 +26,5 @@ trait IConnectableWidget {
   
   def widgetWidth: Int
   
-  def islots: HashSet[IInputSlotWidget]
+  def islots: Iterable[IInputSlotWidget]
 }

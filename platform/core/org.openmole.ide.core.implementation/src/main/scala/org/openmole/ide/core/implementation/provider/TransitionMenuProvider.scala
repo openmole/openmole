@@ -35,7 +35,7 @@ class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectio
   items+= (itCond,itAgreg)
   
   override def getPopupMenu(widget: Widget, point: Point)= {
-    items.remove(itAgreg)
+    items-= itAgreg
     if(!(connectionWidget.transition.transitionType == EXPLORATION_TRANSITION)){
       var transitonTypeString = if (connectionWidget.transition.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
       itAgreg = new JMenuItem("Set as "+ transitonTypeString +" transition")

@@ -47,7 +47,8 @@
         <plugins>
             <!-- Bundles creation -->
             <plugin>
-                <groupId>org.apache.felix</groupId>
+                <groupId>org.apache.felix</groupId>               
+		 <version>2.3.5</version>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>

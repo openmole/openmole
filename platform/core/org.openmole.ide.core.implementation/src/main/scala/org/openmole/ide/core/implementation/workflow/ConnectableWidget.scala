@@ -28,11 +28,11 @@ import org.openmole.ide.core.model.workflow.IConnectableWidget
 import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
 class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
 
-  var islots= HashSet.empty[IInputSlotWidget]
+  var islots= ListBuffer.empty[IInputSlotWidget]
   val oslot= new OutputSlotWidget(scene.graphScene,capsule,scene.moleSceneType == EXECUTION)
   var samplingWidget: Option[SamplingWidget] = None
   
@@ -53,15 +53,17 @@ class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWid
   }
   
   def addInputSlot(iw: InputSlotWidget) {
-    islots.add(iw)
+    islots += iw
     addChild(iw)
     scene.validate
   }
     
-  def clearInputSlots= {
-    islots.foreach(c=>removeChild(c.widget))
-    islots.clear
+  def removeFirstInputSlot = {
+    val toBeRemoved = islots.tail(0)
+    removeChild(toBeRemoved.widget)
+    islots-= toBeRemoved
   }
+  
   
   def addSampling= {
     samplingWidget = Some(new SamplingWidget(scene,capsule))

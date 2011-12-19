@@ -34,11 +34,11 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
  
   val workspaceTextField = new TextField(ndu.workspace)
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource",ndu.resources)
-  val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output map",
+  val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
                                                                                    ndu.outputMap,
                                                                                    comboContent)
    
-  val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input map",
+  val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input mapping",
                                                                                    ndu.inputMap,
                                                                                    comboContent)                           
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 

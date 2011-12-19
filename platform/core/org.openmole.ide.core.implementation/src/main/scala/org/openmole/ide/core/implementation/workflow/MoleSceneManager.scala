@@ -27,7 +27,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 
 class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IMoleSceneManager{
   
@@ -39,10 +38,12 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   var name: Option[String]= None
   
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
-    if (startingCapsule.isDefined) startingCapsule.get.addInputSlot(false)
+    startingCapsule match {
+      case Some(x: ICapsuleUI)=> x.defineAsStartingCapsule(false)
+      case None=>
+    }
     startingCapsule= Some(stCapsule)
-    startingCapsule.get.addInputSlot(true)
-    removeTransitonsBeforeStartingCapsule
+    startingCapsule.get.defineAsStartingCapsule(true)
   }
   
   override def getNodeID: String= "node" + nodeID
@@ -58,6 +59,11 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   }
   
   override def removeCapsuleUI(nodeID: String) = {
+    startingCapsule match {
+      case None=>
+      case Some(caps)=> if (capsules.get(nodeID) == caps) startingCapsule = None
+    }
+    
     //remove following transitionMap
     capsuleConnections(capsules.get(nodeID)).foreach(transitionMap.removeValue(_))
     
@@ -83,20 +89,13 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     registerTransition(getEdgeID,s,t,transitionType,cond)
   }
   
-  //def registerTransition(edgeID: String,transition: TransitionUI): Unit = {
   override def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
-    if (!isTransition(s, t.capsule)) {
+   if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)
       capsuleConnections(transition.source)+= transition
       return true
     }
-    false
-    // capsuleConnections(transition.target.capsule)+= transition
-  }
-  
-  private def isTransition(source: ICapsuleUI, target: ICapsuleUI): Boolean = {
-    capsuleConnections(source).foreach(trans=> {if (trans.target.capsule.equals(target)) return true})
     false
   }
   

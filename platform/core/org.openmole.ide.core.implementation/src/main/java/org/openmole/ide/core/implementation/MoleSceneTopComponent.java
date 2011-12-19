@@ -17,8 +17,10 @@
 package org.openmole.ide.core.implementation;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.util.Set;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -29,17 +31,22 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
+import org.openide.windows.Workspace;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.netbeans.spi.palette.PaletteController;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.action.StartMoleAction;
 import org.openmole.ide.core.implementation.action.StopMoleAction;
+import org.openmole.ide.core.implementation.dialog.DialogFactory;
 import org.openmole.ide.core.model.workflow.IMoleScene;
 import org.openmole.ide.misc.widget.ToolBarButton;
 
@@ -95,10 +102,10 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         cleanAndBuildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/cleanAndBuild.png")),
                 "Clean and build the workflow",
                 new CleanAndBuildExecutionAction(this));
-         startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")),"Start the workflow",
-                                      new StartMoleAction());
-         stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")),"Stop the workflow",
-                                      new StopMoleAction());                            
+        startButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/startExe.png")), "Start the workflow",
+                new StartMoleAction());
+        stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")), "Stop the workflow",
+                new StopMoleAction());
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
@@ -199,12 +206,20 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     }
 
     @Override
+    public boolean canClose() {
+        if (ms.isBuildScene()) {
+            return true;
+        } else {
+            return DialogFactory.closeExecutionTab(ms);
+        }
+    }
+
+    @Override
     public void componentClosed() {
         if (ms.isBuildScene()) {
             TopComponentsManager.removeAllExecutionTopComponent(this);
         }
         TopComponentsManager.removeTopComponent(this);
-        // TODO add custom code on component closing
     }
 
     void writeProperties(java.util.Properties p) {

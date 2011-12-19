@@ -18,14 +18,20 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.palette.FrozenProxys
+import org.openide.awt.StatusDisplayer
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import scala.swing.Action
 
 class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
-    val clone = TopComponentsManager.addExecutionTopComponent(tc)
-    FrozenProxys.freeze(clone)
-    clone.requestActive
+    try {
+        val clone = TopComponentsManager.addExecutionTopComponent(tc)
+        FrozenProxys.freeze(clone)
+        clone.requestActive
+    } catch {
+      case e: GUIUserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+    }
   }
 }

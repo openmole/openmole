@@ -16,6 +16,7 @@
  */
 
 package org.openmole.ide.plugin.hook.display
+
 import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.core.model.data.IPrototype

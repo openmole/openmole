@@ -23,4 +23,6 @@ trait IInputSlotWidget {
   def widget: Widget
   
   def capsule: ICapsuleUI
+  
+  def setStartingSlot(b: Boolean)
 }
