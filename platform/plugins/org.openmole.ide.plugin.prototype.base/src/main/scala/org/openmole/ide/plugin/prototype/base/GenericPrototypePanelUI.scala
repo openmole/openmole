@@ -23,7 +23,7 @@ import scala.swing.Label
 import scala.swing.TextField
 
 abstract class GenericPrototypePanelUI[T](d: Int=0) extends MigPanel("") with IPrototypePanelUI[T] {
-  val dimTextField= new TextField(if(d>0) d.toString else "",2)
+  val dimTextField= new TextField(if(d>=0) d.toString else "0",2)
   
   contents += new Label("Dimension")
   contents += dimTextField
