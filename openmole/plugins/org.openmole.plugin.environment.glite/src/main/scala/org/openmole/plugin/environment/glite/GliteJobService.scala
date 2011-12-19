@@ -21,6 +21,7 @@ import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
 import java.net.URI
+import java.util.UUID
 import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
 import org.openmole.core.batch.environment.SerializedJob
@@ -61,15 +62,11 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
       try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
       finally os.close
       
-      //logger.fine(Source.fromFile(script).getLines.mkString)
-      
       val jobDescription = buildJobDescription(runtime, script, environment.attributes)
       val job = jobServiceCache.createJob(jobDescription)
       job.run
             
-      val id = job.getAttribute(Job.JOBID)
-      val idStr = id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']'))
-      new GliteJob(idStr, outputFilePath, this, environment.authentication.expires)
+      new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
   }
   
@@ -103,6 +100,7 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
     writter.print(" export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))
     writter.print("m ")
+    writter.print(UUID.randomUUID)
     writter.print(" -s ")
     writter.print(communicationStorage.root.toString)
     writter.print(" -c ")

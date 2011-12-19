@@ -185,7 +185,7 @@ class JobLauncher(debug: Boolean = false) {
             val workspaceDir = Workspace.newDir
             try {
               
-              val cmd = "java -Xmx" + jobMessage.memory +"m -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
+              val cmd = "java -Xmx" + jobMessage.memory + "m " + UUID.randomUUID +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
               logger.info("Executing runtime: " + cmd)
               //val commandLine = CommandLine.parse(cmd)

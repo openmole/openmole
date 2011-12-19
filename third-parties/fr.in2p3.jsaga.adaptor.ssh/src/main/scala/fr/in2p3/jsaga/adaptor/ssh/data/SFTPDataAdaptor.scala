@@ -54,15 +54,15 @@ object SFTPDataAdaptor {
   
   private def mapExceptions[T](f: => T) = 
     try f
-  catch {
-    case e: SFTPException => 
-      throw e.getServerErrorCode match {
-        case ErrorCodes.SSH_FX_NO_SUCH_FILE => new DoesNotExistException(e)
-        case ErrorCodes.SSH_FX_PERMISSION_DENIED => new PermissionDeniedException(e)
-        case _ => new NoSuccessException(e)
-      }
-    case e: Exception => throw new NoSuccessException(e)
-  }
+    catch {
+      case e: SFTPException => 
+        throw e.getServerErrorCode match {
+          case ErrorCodes.SSH_FX_NO_SUCH_FILE => new DoesNotExistException(e)
+          case ErrorCodes.SSH_FX_PERMISSION_DENIED => new PermissionDeniedException(e)
+          case _ => new NoSuccessException(e)
+        }
+      case e: Exception => throw new NoSuccessException(e)
+    }
   
   
   def makeDir(sftpClient: SFTPv3Client, parentPath: String, directoryName: String, additionalArgs: String = "") = mapExceptions {
@@ -96,17 +96,29 @@ object SFTPDataAdaptor {
   def putFromStream(sftpClient: SFTPv3Client, absolutePath: String, append: Boolean, additionalArgs: String, stream: InputStream) = mapExceptions {
     val fileHandler = if(append) sftpClient.createFile(absolutePath) else sftpClient.createFileTruncate(absolutePath)
     try {
-      val buffer = new Array[Byte](BUFFER_SIZE)
-      var cupPos = if(append) {
+      def readStream = {
+        val buffer = new Array[Byte](BUFFER_SIZE)
+        val nbRead = stream.read(buffer, 0, BUFFER_SIZE)
+        (buffer, nbRead)
+      }
+
+      val initPos = if(append) {
         val size = sftpClient.stat(absolutePath).size
         if(size == null) 0L else size.toLong
       } else 0L
           
-      Stream.continually(stream.read(buffer, 0, BUFFER_SIZE)).takeWhile(_ != -1).foreach{ 
-        count => {
-          sftpClient.write(fileHandler, cupPos, buffer, 0, count)
-          cupPos += count
-        }
+      Iterator.iterate {
+        val (buffer, nbRead) = readStream
+        (initPos, buffer, nbRead)
+      } {
+        case(pos, _, nbRead) => 
+          val (buffer, nextNbRead) = readStream
+          (pos + nbRead, buffer, nextNbRead)
+      }.takeWhile {
+        case(_, _, nbRead) => nbRead != -1
+      }.foreach { 
+        case(pos, buffer, nbRead) => 
+          sftpClient.write(fileHandler, pos, buffer, 0, nbRead)
       }
     } finally sftpClient.closeFile(fileHandler)
   }
@@ -114,14 +126,14 @@ object SFTPDataAdaptor {
   def getToStream(sftpClient: SFTPv3Client, absolutePath: String, additionalArgs: String, stream: OutputStream) = mapExceptions {
     val fileHandler = sftpClient.openFileRO(absolutePath)
     try {
-      val buffer = new Array[Byte](BUFFER_SIZE)
-      var cupPos = 0
-      Stream.continually(sftpClient.read(fileHandler, cupPos, buffer, 0, BUFFER_SIZE)).takeWhile(_ != -1).foreach{ 
-        count => {
-          //println("Read " + count + " for " + absolutePath)
-          stream.write(buffer, 0, count)
-          cupPos += count
-        }
+      def fillBuffer(pos: Int) = {
+        val buffer = new Array[Byte](BUFFER_SIZE)
+        val nbRead = sftpClient.read(fileHandler, pos, buffer, 0, BUFFER_SIZE)
+        (buffer, nbRead, pos + nbRead)
+      }
+      
+      Iterator.iterate(fillBuffer(0)){case (buffer, nbRead, pos) => fillBuffer(pos)}.takeWhile{case (buffer, nbRead, pos) => nbRead != -1}.foreach{ 
+        case(buffer, nbRead, pos) => stream.write(buffer, 0, nbRead)
       }
     } finally sftpClient.closeFile(fileHandler)
   }
@@ -170,27 +182,29 @@ class SFTPDataAdaptor extends SSHAdaptor with FileReaderGetter with FileWriterPu
 
   override def removeDir(parentAbsolutePath: String, directoryName: String, additionalArgs: String) = mapExceptions {
     val fullPath = parentAbsolutePath + "/" +  directoryName
-    try sftpClient.rmdir(fullPath)
-    catch {
-      case e: SFTPException =>
-        getAttributes(parentAbsolutePath, "").getType match {
-          case TYPE_FILE => throw new BadParameterException("Entry is a file: " + fullPath)
-          case TYPE_LINK => throw new BadParameterException("Entry is a link: " + fullPath)
-          case _ => throw e
-        }
-    }
+    //try
+    sftpClient.rmdir(fullPath)
+//    catch {
+//      case e: SFTPException =>
+//        getAttributes(fullPath, "").getType match {
+//          case TYPE_FILE => throw new BadParameterException("Entry is a file: " + fullPath)
+//          case TYPE_LINK => throw new BadParameterException("Entry is a link: " + fullPath)
+//          case _ => throw e
+//        }
+//    }
   }
 
   override def removeFile(parentAbsolutePath: String, fileName: String, additionalArgs: String) = mapExceptions {
     val fullPath = parentAbsolutePath + "/" +  fileName
-    try sftpClient.rm(fullPath)
-    catch {
-      case e: SFTPException =>
-        if(getAttributes(parentAbsolutePath, "").getType == TYPE_DIRECTORY) throw new BadParameterException("Entry is a directory: " + fullPath)
-        else throw e
-    }
+    //try 
+    sftpClient.rm(fullPath)
+    //catch {
+    //  case e: SFTPException =>
+    //    if(getAttributes(fullPath, "").getType == TYPE_DIRECTORY) throw new BadParameterException("Entry is a directory: " + fullPath)
+    //    else throw e
+    //}
   }
-
+ 
   override def rename(sourceAbsolutePath: String, targetAbsolutePath: String, overwrite: Boolean, additionalArgs: String) = mapExceptions {
     if (overwrite) throw new NoSuccessException("Overwrite not implemented")
     sftpClient.mv(sourceAbsolutePath, targetAbsolutePath)

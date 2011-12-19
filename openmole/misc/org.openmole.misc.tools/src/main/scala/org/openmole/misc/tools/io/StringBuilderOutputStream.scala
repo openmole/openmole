@@ -20,6 +20,6 @@ package org.openmole.misc.tools.io
 import com.ibm.icu.text.UTF16
 import java.io.OutputStream
 
-class StringBuilderOutputStream(val builder: StringBuilder) extends OutputStream {
+class StringBuilderOutputStream(val builder: StringBuilder = new StringBuilder) extends OutputStream {
   override def write(b: Int) = builder.append(UTF16.valueOf(b))
 }

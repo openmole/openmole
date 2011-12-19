@@ -29,21 +29,24 @@ class SSHJobMonitorAdaptor extends SSHAdaptor with QueryIndividualJob {
 
   override def getType = "ssh"
     
-  override def  getStatus(jobId: String) = 
-    try  
-  {
-    val sftpClient = new SFTPv3Client(connection)
+  override def getStatus(jobId: String) = 
     try {
-      val stream = new ByteArrayOutputStream
-      SFTPDataAdaptor.getToStream(sftpClient, SSHJobProcess.getEndCodeFile(jobId), "", stream)
-      SSHJobStatus(jobId, new String(stream.toByteArray).toInt)
+      val sftpClient = new SFTPv3Client(connection)
+      try {
+        val stream = new ByteArrayOutputStream
+        if(SFTPDataAdaptor.exists(sftpClient, SSHJobProcess.getEndCodeFile(jobId), "")) {
+          SFTPDataAdaptor.getToStream(sftpClient, SSHJobProcess.getEndCodeFile(jobId), "", stream)
+          val endCode = new String(stream.toByteArray).split('\n').head.toInt
+          SSHJobStatus(jobId, endCode)
+        } else {
+          if(SFTPDataAdaptor.exists(sftpClient, SSHJobProcess.getPidFile(jobId), "")) SSHJobStatus.running(jobId)
+          else throw new NoSuccessException("Cannot find process info for job " + jobId)
+        }
+      } finally sftpClient.close
     } catch {
       case e => 
-        if(SFTPDataAdaptor.exists(sftpClient, SSHJobProcess.getPidFile(jobId), "")) SSHJobStatus.running(jobId)
-        else throw e
-    } finally sftpClient.close
-  } catch {
-    case e => throw new NoSuccessException(e)
-  }
+        e.printStackTrace
+        throw new NoSuccessException(e)
+    }
   
 }

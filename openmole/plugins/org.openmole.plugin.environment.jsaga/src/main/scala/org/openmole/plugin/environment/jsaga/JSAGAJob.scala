@@ -28,6 +28,15 @@ import org.openmole.core.model.execution.ExecutionState.{ExecutionState => ES}
 import org.ogf.saga.monitoring.Metric
 import org.ogf.saga.task.State
 
+object JSAGAJob {
+  
+  def id(job: Job) = {
+    val id = job.getAttribute(Job.JOBID)
+    id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']'))
+  }
+  
+}
+
 class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
   var subState: String = ""

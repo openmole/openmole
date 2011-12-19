@@ -2,4 +2,13 @@
 
 MEMORY=$1
 shift
-java -Xmx${MEMORY} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar $@ 
+
+CONFIGDIR=$1
+shift
+
+cp -r configuration ${CONFIGDIR}
+
+java -Xmx${MEMORY} -Dosgi.configuration.area=${CONFIGDIR} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar $@ 
+
+rm -rf ${CONFIGDIR}
+

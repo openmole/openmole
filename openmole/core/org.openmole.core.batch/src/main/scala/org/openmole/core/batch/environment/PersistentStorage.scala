@@ -64,11 +64,9 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       
       val service = ExecutorService.executorService(ExecutorType.REMOVE)
       val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
-      for (dir <- persistentSpaceVar.list(token)) {
-        val child = new URIFile(persistentSpaceVar, dir)
-        if(!inCatalog.contains(child.location)) {
-          service.submit(new URIFileCleaner(child, false))
-        }
+      for (file <- persistentSpaceVar.list(token)) {
+        val child = new URIFile(persistentSpaceVar, file)
+        if(!inCatalog.contains(child.location)) service.submit(new URIFileCleaner(child, false))
       }
         
     }
@@ -90,19 +88,12 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
         if (child.URLRepresentsADirectory) {
           try {
             val timeOfDir = dir.substring(0, dir.length - 1).toLong
-
-            if (timeOfDir < removalDate) {
-              //LOGGER.log(Level.FINE, "Removing {0} because it's too old.", dir)
-              service.submit(new URIFileCleaner(child, true, false))
-            }
+            if (timeOfDir < removalDate) service.submit(new URIFileCleaner(child, true, false))
           } catch  {
             case (ex: NumberFormatException) =>
-              //LOGGER.log(Level.FINE, "Removing {0} because it doesn't match a date.", dir)
               service.submit(new URIFileCleaner(child, true, false))
           }
-        } else {
-          service.submit(new URIFileCleaner(child, false, false))
-        }
+        } else service.submit(new URIFileCleaner(child, false, false))
       }
 
       val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
