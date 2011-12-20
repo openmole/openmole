@@ -69,7 +69,13 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
   val multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = {
     import  executionManager.prototypeMapping
     
-    if (!capsules.isEmpty && !prototypeMapping.isEmpty) {
+    
+  val protosFromTask = 
+    executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+    // To be uncommented when the ComboBox is fixed 
+  //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+  
+    if (!capsules.isEmpty && !protosFromTask.isEmpty) {
       val r =  new TwoCombosChooseFileTextFieldRowWidget(//protosFromTask(capsules(0)),
                                                          //protosFromTask(capsules(0))(0),
                                                          protosFromTask,
@@ -89,17 +95,10 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPa
       contents += multiRow.panel
       Some(multiRow)
     } else { 
-      StatusDisplayer.getDefault.setStatusText("No capsules or no prototypes are defined")
+      StatusDisplayer.getDefault.setStatusText("No capsule or no prototype is defined")
       None
     }
   }
-  
-    
-  def protosFromTask: List[IPrototype[File]] = 
-    executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
-    // To be uncommented when the ComboBox is fixed 
-  //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
-  
   
   def saveContent = 
     multiRow match {
