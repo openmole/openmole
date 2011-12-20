@@ -17,15 +17,42 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.control.ServiceDescription
+import org.ogf.saga.job.Job
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.plugin.environment.jsaga.JSAGAJob
+import scala.actors.threadpool.AtomicInteger
 
-class SSHBatchJob(jobServiceDescription: ServiceDescription) extends BatchJob(jobServiceDescription) {
+object SSHBatchJob {
+  
+  val id = new AtomicInteger
+  implicit val oder = Ordering.by[SSHBatchJob, Int](j => j.id)
+  
+}
 
-  def deleteJob = {}
-  def resultPath: String = ""
+
+class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobService) extends BatchJob(jobService) {
+
+  val id = SSHBatchJob.id.getAndIncrement
+  var jsagaJob: Option[JSAGAJob] = None
   
-  protected def updatedState: ExecutionState = READY
+  def unqueue = synchronized {
+    job.run
+    jsagaJob = Some(new JSAGAJob(JSAGAJob.id(job), resultPath, jobService))
+  }
   
+  def deleteJob = synchronized { 
+    jsagaJob match {
+      case Some(j) => j.deleteJob 
+      case None => 
+    }
+  }
+   
+  protected def updatedState = synchronized {    
+    jsagaJob match {
+      case Some(j) => j.updatedState 
+      case None => SUBMITTED
+    }
+  }
+
 }

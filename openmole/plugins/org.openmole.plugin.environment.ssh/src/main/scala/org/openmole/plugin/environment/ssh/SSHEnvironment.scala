@@ -34,14 +34,14 @@ object SSHEnvironment {
 
 import SSHEnvironment._
 
-class SSHEnvironment(login: String, host: String, port: Int, dir: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
+class SSHEnvironment(login: String, host: String, port: Int, nbSlots: Int, dir: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
   
-  def this(login: String, host: String, port: Int, dir: String) = this(login, host, port, dir, None)
+  def this(login: String, host: String, port: Int, nbSlots: Int, dir: String) = this(login, host, port, nbSlots, dir, None)
 
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host + ':' + port), dir, Workspace.preferenceAsInt(MaxConnections))
   
   def allStorages = List(storage)
-  def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host + ':' + port), this, Workspace.preferenceAsInt(MaxConnections)))
+  def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host + ':' + port), this, nbSlots, Workspace.preferenceAsInt(MaxConnections)))
 
   override def authentication = SSHAuthentication(login, host)
 }

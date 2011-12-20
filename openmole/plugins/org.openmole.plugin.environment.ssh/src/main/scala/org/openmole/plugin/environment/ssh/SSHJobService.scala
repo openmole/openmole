@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.ssh
 
+
 import java.util.UUID
 import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
@@ -26,17 +27,54 @@ import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.UsageControl._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.Runtime
+import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.batch.file.URIFile
+import org.openmole.core.model.execution.ExecutionState
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import java.net.URI
+import SSHBatchJob._
+import scala.collection.immutable.TreeSet
 
-class SSHJobService(uri: URI, val environment: SSHEnvironment, override val nbAccess: Int) extends JSAGAJobService(uri) {
+class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, override val nbAccess: Int) extends JSAGAJobService(uri) {
 
+  var queue = new TreeSet[SSHBatchJob]
+  var nbRunning = 0
+  
+  object BatchJobStatusListner extends EventListener[BatchJob] {
+    
+    import ExecutionState._
+    
+    override def triggered(job: BatchJob, ev: Event[BatchJob]) = SSHJobService.this.synchronized {
+      ev match {
+        case ev: BatchJob.StateChanged =>
+          ev.newState match {
+            case DONE | KILLED | FAILED => 
+              queue -= job.asInstanceOf[SSHBatchJob]
+              ev.oldState match {
+                case DONE | FAILED | KILLED =>
+                case _ =>
+                  val sshJob = queue.headOption match {
+                    case Some(j) => 
+                      queue -= j
+                      j.unqueue
+                    case None => nbRunning -= 1
+                  }
+
+              }
+            case _ =>
+          }
+      } 
+    }
+  }
+    
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     val installed = preparedRuntime(serializedJob.runtime)
     val (remoteScript, result) = withToken(serializedJob.communicationStorage.description, {
@@ -65,8 +103,17 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, override val nbAc
       jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
             
       val job = jobServiceCache.createJob(jobDesc)
-      job.run
-      new JSAGAJob(JSAGAJob.id(job), result.path, this)
+      val sshJob = new SSHBatchJob(job, result.path, this)
+      
+      EventDispatcher.listen(sshJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
+    
+      synchronized {
+        if(nbRunning < nbSlot) {
+          nbRunning += 1
+          sshJob.unqueue
+        } else queue += sshJob
+      }
+      sshJob
   }
 
   @transient private var installed: String = null

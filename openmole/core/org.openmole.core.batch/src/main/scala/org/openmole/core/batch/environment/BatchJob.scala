@@ -17,6 +17,8 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
@@ -26,6 +28,11 @@ import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.JobServiceControl._
 import org.openmole.core.batch.control.UsageControl._
 
+object BatchJob {
+  
+  case class StateChanged(val newState: ExecutionState.ExecutionState, val oldState: ExecutionState.ExecutionState) extends Event[BatchJob]
+  
+}
 
 abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
   
@@ -51,6 +58,8 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
         case RUNNING => JobServiceControl.qualityControl(jobServiceDescription).incrementRunning
         case _ => 
       }
+      
+      EventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
       
       _state = state
     }

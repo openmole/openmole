@@ -65,27 +65,23 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
   
   val killed = new AtomicBoolean(false)
 
-  var _delay: Long = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+  var _delay: Long = minUpdateInterval
 
-    
+  def minUpdateInterval = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+  
   private def updateAndGetState = {
-    val oldState = state
+    //val oldState = state
     if (killed.get) KILLED
-  else batchJob match {
-    case None => READY
-    case Some(batchJob) =>
-
-      batchJob.updateState
-      val newState = state
-      /* if (!oldState.isFinal) batchJob.updateState
-       else oldState*/
-      if(oldState != newState) {
-        
+    else batchJob match {
+      case None => READY
+      case Some(batchJob) =>
+        batchJob.updateState
+        state
       }
-      //if(oldState != newState && newState == KILLED) kill
-      state
   }
-  }
+  
   override def state =
     if (killed.get) KILLED 
     else batchJob match {
@@ -98,8 +94,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     try {
       if(oldState != KILLED) {
         def incrementedDelay = {
-          val newDelay = _delay + Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
-          val maxDelay = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
+          val newDelay = _delay + incrementUpdateInterval
+          val maxDelay = maxUpdateInterval
           if (newDelay <= maxDelay) newDelay else maxDelay
         }
       
@@ -118,9 +114,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
               case FAILED => resubmit
               case DONE => tryFinalise(batchJob)
             }
-            if(oldState != newState) {
-              Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-            } else incrementedDelay
+            if(oldState != newState) minUpdateInterval
+            else incrementedDelay
         }
         
       }
@@ -210,7 +205,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
 
   def resubmit = {
     batchJob = None
-    _delay = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+    _delay = minUpdateInterval
   }
 
   def delay: Long = _delay

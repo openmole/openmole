@@ -39,22 +39,22 @@ object JSAGAJob {
 
 class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
-  var subState: String = ""
+  //var subState: String = ""
   def job: Job = jobService.jobServiceCache.getJob(jobId)
   
-  private def translateStatus(job: Job, state: State): ES = {
+  private def translateStatus(job: Job, state: State) = {
     import State._
     
-    subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
+    val subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
        
-    state match {
+    (state match {
       case NEW => ExecutionState.SUBMITTED
       case RUNNING =>
         if (subState.contains(SubState.RUNNING_SUBMITTED.toString) || subState.contains(SubState.RUNNING_QUEUED.toString)) ExecutionState.SUBMITTED
         else ExecutionState.RUNNING        
       case DONE => ExecutionState.DONE
       case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
-    }
+    }, subState)
   }
 
   override def deleteJob =  {
@@ -65,14 +65,17 @@ class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGA
       }
     }
   }
-
-  override def updatedState: ES = {
+  
+  
+  def updatedStateAndSubState = {
     val curjob = job
     try translateStatus(curjob, curjob.getState)
     catch {
       case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job satus update.", e)
     }
   }
+
+  override def updatedState: ES = updatedStateAndSubState._1
 
   override def toString: String = jobId
   

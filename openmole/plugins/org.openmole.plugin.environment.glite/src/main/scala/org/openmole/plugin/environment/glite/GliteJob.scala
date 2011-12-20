@@ -31,11 +31,11 @@ class GliteJob(jobId: String, resultPath: String, jobService: GliteJobService, p
   var lastUpdate = System.currentTimeMillis
   
   override def updateState: ExecutionState = {
-    val ret = super.updateState
+    val (state, subState) = super.updatedStateAndSubState
     
-    if(!ret.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
+    if(!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     
-    if(ret == SUBMITTED) {
+    if(state == SUBMITTED) {
       val jobShakingInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
 
       val probability = {
@@ -53,6 +53,6 @@ class GliteJob(jobId: String, resultPath: String, jobService: GliteJobService, p
     }
     
     lastUpdate = System.currentTimeMillis
-    ret   
+    state
   }
 }
