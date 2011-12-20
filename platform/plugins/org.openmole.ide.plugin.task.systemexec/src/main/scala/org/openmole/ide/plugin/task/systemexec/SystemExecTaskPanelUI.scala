@@ -32,7 +32,7 @@ import swing.Swing._
 
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,wrap 2", "[left][grow,fill]","") with ITaskPanelUI{
  
-  val workspaceTextField = new TextField(ndu.workspace)
+  val workdirTextField = new TextField(ndu.workdir)
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource",ndu.resources)
   val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
                                                                                    ndu.outputMap,
@@ -43,8 +43,8 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
                                                                                    comboContent)                           
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) 
   
-  contents+= new Label("Workspace")
-  contents+= (workspaceTextField,"growx,span 3, wrap")
+  contents+= new Label("Workdir")
+  contents+= (workdirTextField,"growx,span 3, wrap")
   contents+= (new Label("Commands"),"wrap")
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span 2,growx")
   contents+= (resourcesMultiTextField.panel,"span 2, growx, wrap")
@@ -52,7 +52,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
   contents+= (outputMapMultiTextFieldCombo.panel,"span,grow,wrap")
   
   override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name,
-                                                                                 "", 
+                                                                                 workdirTextField.text, 
                                                                                  launchingCommandTextArea.text,
                                                                                  resourcesMultiTextField.content,
                                                                                  inputMapMultiComboTextField.content,

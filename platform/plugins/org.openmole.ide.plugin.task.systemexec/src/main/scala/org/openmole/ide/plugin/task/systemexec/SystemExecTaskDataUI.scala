@@ -14,7 +14,7 @@ import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 
 class SystemExecTaskDataUI(val name: String,
-                           val workspace: String,
+                           val workdir: String,
                            val lauchingCommands: String, 
                            val resources: List[String],
                            val inputMap: List[(IPrototypeDataProxyUI,String)],
@@ -22,7 +22,7 @@ class SystemExecTaskDataUI(val name: String,
   def this(n: String) = this(n,"","",List.empty,List.empty,List.empty)
   
   override def coreObject = {
-    val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workspace)
+    val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workdir)
     resources.foreach(syet.addResource)
     outputMap.foreach(i=>syet.addOutput(i._1,i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
     inputMap.foreach(i=>syet.addInput(i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]],i._2))
