@@ -31,26 +31,31 @@ object SSHBatchJob {
 }
 
 
-class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobService) extends BatchJob(jobService) {
+class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobService) extends JSAGAJob(resultPath, jobService) {
 
   val id = SSHBatchJob.id.getAndIncrement
-  var jsagaJob: Option[JSAGAJob] = None
+  var jobIdOption: Option[String] = None
+  
+  def jobId = jobIdOption match {
+    case Some(jobId) => jobId
+    case None => throw new InternalError("Bug: JSAGA job is not lanched yet.")
+  }
   
   def unqueue = synchronized {
     job.run
-    jsagaJob = Some(new JSAGAJob(JSAGAJob.id(job), resultPath, jobService))
+    jobIdOption = Some(JSAGAJob.id(job))
   }
   
-  def deleteJob = synchronized { 
-    jsagaJob match {
-      case Some(j) => j.deleteJob 
+  override def deleteJob = synchronized { 
+    jobIdOption match {
+      case Some(j) => super.deleteJob 
       case None => 
     }
   }
    
-  protected def updatedState = synchronized {    
-    jsagaJob match {
-      case Some(j) => j.updatedState 
+  override def updatedState = synchronized {    
+    jobIdOption match {
+      case Some(j) => super.updatedState 
       case None => SUBMITTED
     }
   }

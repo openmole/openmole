@@ -27,8 +27,10 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
 object SSHEnvironment {
-  val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
-  
+  val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections") 
+  val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
+
+  Workspace += (UpdateInterval, "PT10S")
   Workspace += (MaxConnections, "10")
 }
 
@@ -38,10 +40,18 @@ class SSHEnvironment(login: String, host: String, port: Int, nbSlots: Int, dir: 
   
   def this(login: String, host: String, port: Int, nbSlots: Int, dir: String) = this(login, host, port, nbSlots, dir, None)
 
+  def this(login: String, host: String, nbSlots: Int, dir: String) = this(login, host, 22, nbSlots, dir, None)
+
+  
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host + ':' + port), dir, Workspace.preferenceAsInt(MaxConnections))
   
   def allStorages = List(storage)
   def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host + ':' + port), this, nbSlots, Workspace.preferenceAsInt(MaxConnections)))
 
   override def authentication = SSHAuthentication(login, host)
+  
+  override def minUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
+  override def maxUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
+  override def incrementUpdateInterval = 0
+
 }

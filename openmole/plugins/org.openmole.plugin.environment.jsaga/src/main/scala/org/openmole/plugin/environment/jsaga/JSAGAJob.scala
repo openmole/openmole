@@ -37,10 +37,11 @@ object JSAGAJob {
   
 }
 
-class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
+abstract class JSAGAJob(override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
    
   //var subState: String = ""
   def job: Job = jobService.jobServiceCache.getJob(jobId)
+  def jobId: String
   
   private def translateStatus(job: Job, state: State) = {
     import State._
@@ -48,23 +49,22 @@ class JSAGAJob(jobId: String, override val resultPath: String, jobService: JSAGA
     val subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
        
     (state match {
-      case NEW => ExecutionState.SUBMITTED
-      case RUNNING =>
-        if (subState.contains(SubState.RUNNING_SUBMITTED.toString) || subState.contains(SubState.RUNNING_QUEUED.toString)) ExecutionState.SUBMITTED
-        else ExecutionState.RUNNING        
-      case DONE => ExecutionState.DONE
-      case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
-    }, subState)
+        case NEW => ExecutionState.SUBMITTED
+        case RUNNING =>
+          if (subState.contains(SubState.RUNNING_SUBMITTED.toString) || subState.contains(SubState.RUNNING_QUEUED.toString)) ExecutionState.SUBMITTED
+          else ExecutionState.RUNNING        
+        case DONE => ExecutionState.DONE
+        case FAILED | CANCELED | SUSPENDED | _ => ExecutionState.FAILED
+      }, subState)
   }
 
-  override def deleteJob =  {
-    if (state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
-      try job.cancel
-      catch {
-        case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job deletion.", e)
-      }
+  override def deleteJob = 
+    if(state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
+        try job.cancel
+        catch {
+          case e: ReconnectionException => throw new TemporaryErrorException("Service is being reconnected durring job deletion.", e)
+        }
     }
-  }
   
   
   def updatedStateAndSubState = {

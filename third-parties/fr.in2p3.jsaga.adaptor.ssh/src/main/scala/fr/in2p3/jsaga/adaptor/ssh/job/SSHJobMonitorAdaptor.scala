@@ -23,6 +23,7 @@ import fr.in2p3.jsaga.adaptor.job.monitor.QueryIndividualJob
 import fr.in2p3.jsaga.adaptor.ssh.SSHAdaptor
 import fr.in2p3.jsaga.adaptor.ssh.data.SFTPDataAdaptor
 import java.io.ByteArrayOutputStream
+import java.util.logging.Logger
 import org.ogf.saga.error.NoSuccessException
 
 class SSHJobMonitorAdaptor extends SSHAdaptor with QueryIndividualJob {
@@ -44,9 +45,7 @@ class SSHJobMonitorAdaptor extends SSHAdaptor with QueryIndividualJob {
         }
       } finally sftpClient.close
     } catch {
-      case e => 
-        e.printStackTrace
-        throw new NoSuccessException(e)
+      case e => throw new NoSuccessException(e)
     }
   
 }

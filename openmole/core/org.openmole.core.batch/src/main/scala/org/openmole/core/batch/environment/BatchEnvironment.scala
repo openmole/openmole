@@ -62,6 +62,14 @@ object BatchEnvironment {
   
   val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
   
+  val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
+  val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
+  val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval");
+ 
+  Workspace += (MinUpdateInterval, "PT1M")
+  Workspace += (MaxUpdateInterval, "PT20M")
+  Workspace += (IncrementUpdateInterval, "PT1M")
+  
   Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)
   Workspace += (JVMLinuxI386Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-i386.tar.gz").getAbsolutePath)
   Workspace += (JVMLinuxX64Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
@@ -134,6 +142,7 @@ object BatchEnvironment {
   */
 }
 
+import BatchEnvironment._
 
 abstract class BatchEnvironment extends Environment {
   
@@ -151,11 +160,17 @@ abstract class BatchEnvironment extends Environment {
   Updater.registerForUpdate(new BatchJobWatcher(this), ExecutorType.OWN)
     
   override def submit(job: IJob) = {
-    val bej = new BatchExecutionJob(this, job, nextExecutionJobId)
+    val bej = executionJob(job)
     EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(bej))
     Updater.delay(bej, ExecutorType.UPDATE)
     jobRegistry.register(bej)
   }
+  
+  def executionJob(job: IJob) = new BatchExecutionJob(this, job, nextExecutionJobId)
+  
+  def minUpdateInterval = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
   
   @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
   @transient lazy val jvmLinuxI386 = new File(Workspace.preference(BatchEnvironment.JVMLinuxI386Location))

@@ -38,20 +38,14 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.implementation.tools.TimeStamp
+import BatchEnvironment._
 
-object BatchExecutionJob extends Logger {
-  val MinUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MinUpdateInterval")
-  val MaxUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "MaxUpdateInterval")
-  val IncrementUpdateInterval = new ConfigurationLocation("BatchExecutionJob", "IncrementUpdateInterval");
- 
-  Workspace += (MinUpdateInterval, "PT1M")
-  Workspace += (MaxUpdateInterval, "PT20M")
-  Workspace += (IncrementUpdateInterval, "PT1M")
-}
-
+object BatchExecutionJob extends Logger
 
 class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IUpdatableWithVariableDelay {
 
+  import executionEnvironment.{minUpdateInterval, incrementUpdateInterval, maxUpdateInterval}
+  
   timeStamps += new TimeStamp(READY)
   
   import BatchExecutionJob._
@@ -62,14 +56,12 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     ExecutorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job))
   
   var finalizeExecutionFuture: Option[Future[_]] = None
-  
+ 
   val killed = new AtomicBoolean(false)
 
-  var _delay: Long = minUpdateInterval
+  var _delay = minUpdateInterval
 
-  def minUpdateInterval = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-  def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
-  def incrementUpdateInterval = Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+
   
   private def updateAndGetState = {
     //val oldState = state
@@ -195,8 +187,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
         clean
       } finally {
         batchJob match {
-          case Some(bj) => 
-            ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
+          case Some(bj) => ExecutorService.executorService(ExecutorType.KILL).submit(new BatchJobKiller(bj))
           case None =>
         }
       }
