@@ -36,17 +36,20 @@ object SSHEnvironment {
 
 import SSHEnvironment._
 
-class SSHEnvironment(login: String, host: String, port: Int, nbSlots: Int, dir: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
+class SSHEnvironment(login: String, host: String, nbSlots: Int, dir: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
   
-  def this(login: String, host: String, port: Int, nbSlots: Int, dir: String) = this(login, host, port, nbSlots, dir, None)
+  def this(login: String, host: String, nbSlots: Int, dir: String) = this(login, host, nbSlots, dir, None)
 
-  def this(login: String, host: String, nbSlots: Int, dir: String) = this(login, host, 22, nbSlots, dir, None)
+  def this(login: String, host: String, nbSlots: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.UniqueID)
+ 
+  def this(login: String, host: String, nbSlots: Int, dir: String, memory: Int) = this(login, host, nbSlots, dir, Some(memory))
 
-  
-  val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host + ':' + port), dir, Workspace.preferenceAsInt(MaxConnections))
+  def this(login: String, host: String, nbSlots: Int, memory: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.UniqueID, Some(memory))
+ 
+  val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
   
   def allStorages = List(storage)
-  def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host + ':' + port), this, nbSlots, Workspace.preferenceAsInt(MaxConnections)))
+  def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host), this, nbSlots, Workspace.preferenceAsInt(MaxConnections)))
 
   override def authentication = SSHAuthentication(login, host)
   
