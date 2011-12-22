@@ -16,6 +16,7 @@ import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
+import org.openide.awt.StatusDisplayer
 import org.openide.util.Lookup
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.mole.MoleExecution
@@ -23,6 +24,7 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.core.model.mole.IMole
@@ -69,7 +71,7 @@ class ExecutionManager(manager : IMoleSceneManager,
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
- // override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
+  // override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
   val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]
@@ -128,109 +130,110 @@ class ExecutionManager(manager : IMoleSceneManager,
     } else true
   
   def start = synchronized {
-    if (canBeRun){
-      cancel
-      initBarPlotter
-      hookPanels.values.foreach(_._2.foreach(_.release))
-      val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
-                                                                       manager, 
-                                                                       capsuleMapping,
-                                                                       gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
+      if (canBeRun){
+        cancel
+        initBarPlotter
+        hookPanels.values.foreach(_._2.foreach(_.release))
+        val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole, 
+                                                                         manager, 
+                                                                         capsuleMapping,
+                                                                         gStrategyPanels.values.map{v=>v._1.saveContent.map(_.coreObject)}.flatten.toList)
 
-      this.moleExecution = moleExecution
+        this.moleExecution = moleExecution
       
-      EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
-      EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
-      EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
+        EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
+        EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
+        EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
       
-      environments.foreach {
-        case(env, _) => EventDispatcher.listen(env, new EnvironmentExceptionListener(this),classOf[IEnvironment.ExceptionRaised])
-      }
+        environments.foreach {
+          case(env, _) => EventDispatcher.listen(env, new EnvironmentExceptionListener(this),classOf[IEnvironment.ExceptionRaised])
+        }
 
-      environments.foreach(buildEmptyEnvPlotter)
-      if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+        environments.foreach(buildEmptyEnvPlotter)
+        if(envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
       
-      //FIXME Displays several environments
-      if (environments.size > 0) {
-        envBarPlotter.title(environments.toList(0)._2)
-        envBarPanel.peer.add(envBarPlotter.panel) 
+        //FIXME Displays several environments
+        if (environments.size > 0) {
+          envBarPlotter.title(environments.toList(0)._2)
+          envBarPanel.peer.add(envBarPlotter.panel) 
+        }
+        initPieChart
+        hookPanels.keys.foreach{commitHook}
+        repaint 
+        revalidate
       }
-      initPieChart
-      hookPanels.keys.foreach{commitHook}
-      repaint 
-      revalidate
-      timer.start
-      moleExecution.start
-    }
+    
+    timer.start
+    moleExecution.start
   }
     
-  def incrementEnvironmentState(environment: IEnvironment,
-                                state: ExecutionState.ExecutionState) = synchronized {
-    states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
-  }
+def incrementEnvironmentState(environment: IEnvironment,
+                              state: ExecutionState.ExecutionState) = synchronized {
+  states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
+}
   
-  def decrementEnvironmentState(environment: IEnvironment,
-                                state: ExecutionState.ExecutionState) = synchronized {
-    states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
-  }
+def decrementEnvironmentState(environment: IEnvironment,
+                              state: ExecutionState.ExecutionState) = synchronized {
+  states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
+}
   
-  def cancel = synchronized { 
-    timer.stop
-    moleExecution.cancel 
-  }
+def cancel = synchronized { 
+  timer.stop
+  moleExecution.cancel 
+}
   
-  def initBarPlotter = synchronized{
-    environments.clear
-    buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
-  }
+def initBarPlotter = synchronized{
+  environments.clear
+  buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment],"Local"))
+}
 
-  def buildEmptyEnvPlotter(e: (IEnvironment,String)) = {
-    val m = HashMap(ExecutionState.SUBMITTED-> new AtomicInteger,
-                    ExecutionState.READY-> new AtomicInteger,
-                    ExecutionState.RUNNING-> new AtomicInteger,
-                    ExecutionState.DONE-> new AtomicInteger,
-                    ExecutionState.FAILED->new AtomicInteger,
-                    ExecutionState.KILLED-> new AtomicInteger)    
-    environments+= e._1-> (e._2,m)
-    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(this,moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
-  }
+def buildEmptyEnvPlotter(e: (IEnvironment,String)) = {
+  val m = HashMap(ExecutionState.SUBMITTED-> new AtomicInteger,
+                  ExecutionState.READY-> new AtomicInteger,
+                  ExecutionState.RUNNING-> new AtomicInteger,
+                  ExecutionState.DONE-> new AtomicInteger,
+                  ExecutionState.FAILED->new AtomicInteger,
+                  ExecutionState.KILLED-> new AtomicInteger)    
+  environments+= e._1-> (e._2,m)
+  EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(this,moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
+}
   
   
-  override def commitHook(hookClassName: String) { 
-    if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
-    hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
-  }
+override def commitHook(hookClassName: String) { 
+  if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
+  hookPanels(hookClassName) = (hookPanels(hookClassName)._1,hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+}
   
-  def initPieChart = synchronized{
-    status.keys.foreach(k=>status(k)=new AtomicInteger)
-    environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
-  }
+def initPieChart = synchronized{
+  status.keys.foreach(k=>status(k)=new AtomicInteger)
+  environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
+}
     
-  class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
-    def apply = {
-      val cl = fui.coreClass.getCanonicalName
-      if(hookPanels.contains(cl)) hookPanels(cl)._1.addHook
-      else {
-        val pui = fui.buildPanelUI(ExecutionManager.this)
-        hookPanel.peer.add(pui.peer)
-        hookPanel.peer.add((new Separator).peer)
-        hookPanels+= cl -> (pui, List.empty)
-      }
-      hookPanels+= cl -> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
+class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
+  def apply = {
+    val cl = fui.coreClass.getCanonicalName
+    if(hookPanels.contains(cl)) hookPanels(cl)._1.addHook
+    else {
+      val pui = fui.buildPanelUI(ExecutionManager.this)
+      hookPanel.peer.add(pui.peer)
+      hookPanel.peer.add((new Separator).peer)
+      hookPanels+= cl -> (pui, List.empty)
     }
+    hookPanels+= cl -> (hookPanels(cl)._1,hookPanels(cl)._1.saveContent.map(_.coreObject))
   }
+}
   
-  class AddGroupingStrategyRowAction(fui: IGroupingStrategyFactoryUI) extends Action(fui.toString){
-    def apply = {
-      val cl = fui.coreClass.getCanonicalName
-      if(gStrategyPanels.contains(cl)) 
-        gStrategyPanels(cl)._1.addStrategy
-      else {
-        val pui = fui.buildPanelUI(ExecutionManager.this)
-        hookPanel.peer.add(pui.peer)
-        gStrategyPanels+= cl-> (pui,List.empty)
-      }
-      gStrategyPanels+= cl-> (gStrategyPanels(cl)._1,gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
+class AddGroupingStrategyRowAction(fui: IGroupingStrategyFactoryUI) extends Action(fui.toString){
+  def apply = {
+    val cl = fui.coreClass.getCanonicalName
+    if(gStrategyPanels.contains(cl)) 
+      gStrategyPanels(cl)._1.addStrategy
+    else {
+      val pui = fui.buildPanelUI(ExecutionManager.this)
+      hookPanel.peer.add(pui.peer)
+      gStrategyPanels+= cl-> (pui,List.empty)
     }
+    gStrategyPanels+= cl-> (gStrategyPanels(cl)._1,gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
   }
+}
 }

@@ -22,4 +22,4 @@ import scala.swing.Action
 
 class StartMoleAction extends Action(""){
   override def apply = TopComponentsManager.currentExecutionManager.start
-}
+  }

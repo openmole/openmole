@@ -27,6 +27,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
+import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.exception.GUIUserBadDataError
@@ -44,20 +45,25 @@ object MoleMaker {
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager, 
                          capsuleMap: Map[ICapsuleUI,ICapsule],
-                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = {
-    var envs = new HashSet[(IEnvironment,String)]
-    val strat = new FixedEnvironmentSelection
-    manager.capsules.values.foreach{c=> 
-      if (c.dataProxy.get.dataUI.environment.isDefined){
-        val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
-        envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
-        strat.select(capsuleMap(c),env)
-      }}
-    val mgs = new MoleJobGrouping
-    groupingStrategies.foreach(s=>mgs.set(s._2,s._1))
+                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
+                           try{
+      var envs = new HashSet[(IEnvironment,String)]
+      val strat = new FixedEnvironmentSelection
+      manager.capsules.values.foreach{c=> 
+        if (c.dataProxy.get.dataUI.environment.isDefined){ 
+          try {
+            val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
+            envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
+            strat.select(capsuleMap(c),env)
+          }catch {
+            case e: GUIUserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+          }
+        }}
+      val mgs = new MoleJobGrouping
+      groupingStrategies.foreach(s=>mgs.set(s._2,s._1))
    
-    (new MoleExecution(mole,strat,mgs),envs.toSet)
-  }
+      (new MoleExecution(mole,strat,mgs),envs.toSet)
+    }
   
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
