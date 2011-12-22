@@ -103,12 +103,4 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     }
     false
   }
-  
-  private def removeTransitonsBeforeStartingCapsule = {
-    val l = new HashSet[String]
-    transitionMap.foreach{t=> 
-      if (t._2.target.capsule.equals(startingCapsule.get)) l += t._1}
-    l.foreach{removeTransition(_)}
-    l
-  } 
 }
