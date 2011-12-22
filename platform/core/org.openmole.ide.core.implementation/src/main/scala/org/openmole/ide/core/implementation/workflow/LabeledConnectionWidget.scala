@@ -29,7 +29,6 @@ import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.model.commons.TransitionType._
 
 class LabeledConnectionWidget(val scene: Scene,val transition: ITransitionUI) extends ConnectionWidget(scene) {
-  println("transition : " + transition)
   val conditionLabel = new LabelWidget(scene, transition.condition.getOrElse(""))
   conditionLabel.setBackground(Constants.CONDITION_LABEL_BACKGROUND_COLOR)
   conditionLabel.setBorder(BorderFactory.createLineBorder(2,Constants.CONDITION_LABEL_BORDER_COLOR))
