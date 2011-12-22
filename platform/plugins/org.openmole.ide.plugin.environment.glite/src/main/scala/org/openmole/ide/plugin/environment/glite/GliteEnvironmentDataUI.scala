@@ -11,6 +11,7 @@ import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 import org.openmole.plugin.environment.glite.MyProxy
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.ide.misc.exception.GUIUserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._
@@ -27,23 +28,28 @@ class GliteEnvironmentDataUI(val name: String,
                              val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
                              val workerNodeMemory: String="",
                              val maxCPUTime:String="") extends IEnvironmentDataUI {
-  override def coreObject = {
+  def coreObject = {
     val requirementMap = new HashMap[String,String]
     if (architecture64 == true) requirementMap+= CPU_ARCHITECTURE-> "x86_64"
     if (workerNodeMemory != "") requirementMap+= MEMORY->runtimeMemory
     if (maxCPUTime != "") requirementMap+= CPU_TIME-> maxCPUTime
-    println("runtimeMemory :: " + runtimeMemory)
     val rtm = if (runtimeMemory != "") runtimeMemory.toInt else Workspace.preference(BatchEnvironment.MemorySizeForRuntime).toInt
     
-    if (vo != "" && voms != "" && bdii != "") 
+    
+    if (vo == "" || voms == "" || bdii == "") throw new GUIUserBadDataError("The glite environment "+name+" is not properly set")
+    
+    try {
       if (proxy && proxyURL != "" && proxyUser != "") new GliteEnvironment(vo,voms,bdii,new MyProxy(proxyURL,proxyUser),rtm,requirementMap.toMap)
-    else new GliteEnvironment(vo,voms,bdii,rtm,requirementMap.toMap)
-    else throw new GUIUserBadDataError("CSV file path missing to instanciate the CSV sampling " + name)
+      else new GliteEnvironment(vo,voms,bdii,rtm,requirementMap.toMap)
+    }
+    catch {
+      case _=> throw new GUIUserBadDataError("An error occured when initialiazing the glite environment" + name +". Please check your certificate settings in the Preferences menu.")
+    }
   }
-
-  override def coreClass = classOf[GliteEnvironment] 
   
-  override def imagePath = "img/glite.png" 
+  def coreClass = classOf[GliteEnvironment] 
   
-  override def buildPanelUI = new GliteEnvironmentPanelUI(this)
+  def imagePath = "img/glite.png" 
+  
+  def buildPanelUI = new GliteEnvironmentPanelUI(this)
 }
