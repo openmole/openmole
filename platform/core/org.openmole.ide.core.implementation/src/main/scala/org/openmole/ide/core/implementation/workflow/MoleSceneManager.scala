@@ -65,7 +65,9 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     }
     
     //remove following transitionMap
-    capsuleConnections(capsules.get(nodeID)).foreach(transitionMap.removeValue(_))
+    capsuleConnections(capsules.get(nodeID)).foreach{x=>transitionMap.removeValue(x)}
+    capsuleConnections-= capsules.get(nodeID)
+    capsuleConnections.keys.foreach{k=> if (capsuleConnections(k).isEmpty) capsuleConnections-= k}
     
     //remove incoming transitionMap
     removeIncomingTransitions(capsules.get(nodeID))
@@ -79,7 +81,11 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   override def transition(edgeID: String) = transitionMap.get(edgeID)
   
-  private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) removeTransition(t._1)})
+  private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) {
+        removeTransition(t._1)
+        capsuleConnections(t._2.source)-= t._2    
+      }
+    })
   
   
   override def removeTransition(edge: String) = transitionMap.remove(edge)
@@ -90,7 +96,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   }
   
   override def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
-   if (!transitionMap.keys.contains(edgeID)) { 
+    if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)
       capsuleConnections(transition.source)+= transition
