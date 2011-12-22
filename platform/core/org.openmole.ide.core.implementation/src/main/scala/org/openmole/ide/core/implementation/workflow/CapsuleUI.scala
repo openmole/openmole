@@ -77,7 +77,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     if (on) startingCapsule = on
     
     nbInputSlots+= 1
-    val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,startingCapsule,scene.moleSceneType == EXECUTION)
+    val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,on,scene.moleSceneType == EXECUTION)
     connectableWidget.addInputSlot(im)
     scene.validate
     scene.refresh
