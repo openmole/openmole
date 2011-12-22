@@ -30,7 +30,7 @@ class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobServic
 
   var lastUpdate = System.currentTimeMillis
   
-  override def updateState: ExecutionState = {
+  override def updatedState: ExecutionState = {
     val (state, subState) = super.updatedStateAndSubState
     
     if(!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")

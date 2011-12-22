@@ -81,7 +81,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       case Some(batchJob) => batchJob.state
     }
 
-  override def update: Boolean = {
+  override def update: Boolean = synchronized {
     val oldState = state
     try {
       if(oldState != KILLED) {
@@ -174,10 +174,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       }
     }
 
-  def kill = {
+  def kill = synchronized {
     val oldState = state
     if (!killed.getAndSet(true)) {
       try {
+        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(KILLED, oldState))
         copyToEnvironmentExecFuture.cancel(true)
 
         finalizeExecutionFuture match {
@@ -194,7 +195,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
     }
   }
 
-  def resubmit = {
+  private def resubmit = {
     batchJob = None
     _delay = minUpdateInterval
   }

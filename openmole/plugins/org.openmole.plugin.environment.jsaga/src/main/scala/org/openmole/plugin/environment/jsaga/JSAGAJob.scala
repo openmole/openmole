@@ -27,8 +27,9 @@ import org.openmole.core.model.execution.ExecutionState.{ExecutionState => ES}
 
 import org.ogf.saga.monitoring.Metric
 import org.ogf.saga.task.State
+import org.openmole.misc.tools.service.Logger
 
-object JSAGAJob {
+object JSAGAJob extends Logger {
   
   def id(job: Job) = {
     val id = job.getAttribute(Job.JOBID)
@@ -44,6 +45,7 @@ abstract class JSAGAJob(override val resultPath: String, jobService: JSAGAJobSer
   def jobId: String
   
   private def translateStatus(job: Job, state: State) = {
+    //JSAGAJob.logger.fine(state.name)
     import State._
     
     val subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
