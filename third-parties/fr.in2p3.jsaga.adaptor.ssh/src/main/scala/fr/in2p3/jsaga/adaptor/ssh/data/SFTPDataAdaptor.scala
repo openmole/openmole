@@ -146,44 +146,48 @@ class SFTPDataAdaptor extends SSHAdaptor with FileReaderGetter with FileWriterPu
   import SFTPDataAdaptor._
   import SSHAdaptor._
   
-  private var sftpClient: SFTPv3Client = _
+  //private var sftpClient: SFTPv3Client = _
+  private def withSftpClient[A](f: SFTPv3Client => A): A = {
+    val sftpClient = new SFTPv3Client(connection)
+    try f(sftpClient) finally sftpClient.close
+  }
   
   override def getType = "sftp"
   
   override def connect(userInfo: String, host: String, port: Int, basePath: String, attributes: java.util.Map[_, _]) = {
     super.connect(userInfo, host, port, basePath, attributes)
-    sftpClient = new SFTPv3Client(connection)
+
   }
  
   override def disconnect = mapExceptions {
-    sftpClient.close
+    //sftpClient.close
     super.disconnect
   }
 
   override def getToStream(absolutePath: String, additionalArgs: String, stream: OutputStream) = 
-    SFTPDataAdaptor.getToStream(sftpClient, absolutePath, additionalArgs, stream)
+    withSftpClient(SFTPDataAdaptor.getToStream(_, absolutePath, additionalArgs, stream))
     
   override def exists(absolutePath: String, additionalArgs: String) = 
-    SFTPDataAdaptor.exists(sftpClient, absolutePath, additionalArgs)
+    withSftpClient(SFTPDataAdaptor.exists(_, absolutePath, additionalArgs))
 
   override def getAttributes(absolutePath: String, additionalArgs: String) = 
-    SFTPDataAdaptor.getAttributes(sftpClient, absolutePath, additionalArgs)
+    withSftpClient(SFTPDataAdaptor.getAttributes(_, absolutePath, additionalArgs))
 
   override def listAttributes(absolutePath: String, additionalArgs: String) =
-    mapExceptions(sftpClient.ls(absolutePath).asInstanceOf[java.util.Vector[SFTPv3DirectoryEntry]].filterNot(e => {e.filename == "." || e.filename == ".."}).map{e => new SFTPFileAttributes(e.filename, e.attributes)}).toArray
+    mapExceptions(withSftpClient(_.ls(absolutePath)).asInstanceOf[java.util.Vector[SFTPv3DirectoryEntry]].filterNot(e => {e.filename == "." || e.filename == ".."}).map{e => new SFTPFileAttributes(e.filename, e.attributes)}).toArray
  
 
   override def putFromStream(absolutePath: String, append: Boolean, additionalArgs: String, stream: InputStream) = 
-    SFTPDataAdaptor.putFromStream(sftpClient, absolutePath, append, additionalArgs, stream)
+    withSftpClient(SFTPDataAdaptor.putFromStream(_, absolutePath, append, additionalArgs, stream))
 
   override def makeDir(parentPath: String, directoryName: String, additionalArgs: String) = 
-    SFTPDataAdaptor.makeDir(sftpClient, parentPath, directoryName, additionalArgs)
+    withSftpClient(SFTPDataAdaptor.makeDir(_, parentPath, directoryName, additionalArgs))
    
 
   override def removeDir(parentAbsolutePath: String, directoryName: String, additionalArgs: String) = mapExceptions {
     val fullPath = parentAbsolutePath + "/" +  directoryName
     //try
-    sftpClient.rmdir(fullPath)
+    withSftpClient(_.rmdir(fullPath))
 //    catch {
 //      case e: SFTPException =>
 //        getAttributes(fullPath, "").getType match {
@@ -197,7 +201,7 @@ class SFTPDataAdaptor extends SSHAdaptor with FileReaderGetter with FileWriterPu
   override def removeFile(parentAbsolutePath: String, fileName: String, additionalArgs: String) = mapExceptions {
     val fullPath = parentAbsolutePath + "/" +  fileName
     //try 
-    sftpClient.rm(fullPath)
+    withSftpClient(_.rm(fullPath))
     //catch {
     //  case e: SFTPException =>
     //    if(getAttributes(fullPath, "").getType == TYPE_DIRECTORY) throw new BadParameterException("Entry is a directory: " + fullPath)
@@ -207,6 +211,6 @@ class SFTPDataAdaptor extends SSHAdaptor with FileReaderGetter with FileWriterPu
  
   override def rename(sourceAbsolutePath: String, targetAbsolutePath: String, overwrite: Boolean, additionalArgs: String) = mapExceptions {
     if (overwrite) throw new NoSuccessException("Overwrite not implemented")
-    sftpClient.mv(sourceAbsolutePath, targetAbsolutePath)
+    withSftpClient(_.mv(sourceAbsolutePath, targetAbsolutePath))
   }
 }
