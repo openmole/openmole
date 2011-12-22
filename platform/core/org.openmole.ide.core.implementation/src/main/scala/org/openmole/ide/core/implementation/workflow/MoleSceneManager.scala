@@ -67,7 +67,6 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     //remove following transitionMap
     capsuleConnections(capsules.get(nodeID)).foreach{x=>transitionMap.removeValue(x)}
     capsuleConnections-= capsules.get(nodeID)
-    capsuleConnections.keys.foreach{k=> if (capsuleConnections(k).isEmpty) capsuleConnections-= k}
     
     //remove incoming transitionMap
     removeIncomingTransitions(capsules.get(nodeID))
