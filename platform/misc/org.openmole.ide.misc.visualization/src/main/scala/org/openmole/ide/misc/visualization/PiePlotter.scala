@@ -84,6 +84,8 @@ class PiePlotter(title: String) {
   def updateCompleted(completed: Int) = {data.set(0,1,completed);panel.repaint()}
   def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
   
-  val panel = new InteractivePanel(plot){setZoomable(false)}
+  val panel = new InteractivePanel(plot){
+    setZoomable(false)
+    setPannable(false)}
   panel.setPreferredSize(new Dimension(250,250))
 }
