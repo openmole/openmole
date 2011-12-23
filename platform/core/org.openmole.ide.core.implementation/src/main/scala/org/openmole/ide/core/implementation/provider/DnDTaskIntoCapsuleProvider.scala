@@ -48,6 +48,7 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
     Displays.dataProxy.get match {
       case dpu:ITaskDataProxyUI => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
+        if (molescene.manager.capsules.size == 1) capsule.defineAsStartingCapsule(true)
       case dpu:IPrototypeDataProxyUI=> { 
           if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
           else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
@@ -55,7 +56,7 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
       case dpu:ISamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
       case dpu:IEnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
     }
-   // selectTask
+    // selectTask
     molescene.graphScene.repaint
     molescene.graphScene.validate
   }
