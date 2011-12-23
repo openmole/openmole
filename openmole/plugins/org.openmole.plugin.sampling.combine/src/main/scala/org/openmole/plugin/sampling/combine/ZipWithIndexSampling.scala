@@ -21,17 +21,13 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 
 class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
-
-  def this(factor: IFactor[T, IDomain[T]] forSome{type T}, index: IPrototype[Int]) = this(new FactorSampling(factor), index)
   
   override def prototypes = reference.prototypes ++ List(index) 
   
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = 
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
     reference.build(context).zipWithIndex.map {
       case(line, i) => line ++ List(new Variable(index, i))
     }

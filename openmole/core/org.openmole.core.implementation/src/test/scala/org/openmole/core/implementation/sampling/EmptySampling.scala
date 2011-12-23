@@ -22,5 +22,5 @@ import org.openmole.core.model.sampling.ISampling
 
 class EmptySampling extends ISampling {
   override def prototypes = List.empty
-  override def build(context: IContext) = List.empty
+  override def build(context: IContext) = Iterator.empty
 }

@@ -43,7 +43,7 @@ class CSVSamplingSpec extends FlatSpec with ShouldMatchers {
     val sampling = new CSVSampling(tmpCsvFile)
     sampling.addColumn(p1)
     
-    sampling.build(Context.empty).head.head.value should equal ("myTest")
+    sampling.build(Context.empty).toIterable.head.head.value should equal ("myTest")
     
     sampling.addColumnAs("badName",p2)
     val exception = evaluating { sampling.build(Context.empty)} should produce [UserBadDataError]

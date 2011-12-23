@@ -49,7 +49,6 @@
 	<module>org.openmole.plugin.domain.collection</module>
 	<module>org.openmole.plugin.domain.file</module>
         <module>org.openmole.plugin.sampling.csv</module>
-        <module>org.openmole.plugin.sampling.complete</module>
         <module>org.openmole.plugin.sampling.lhs</module>
         <module>org.openmole.plugin.sampling.combine</module>
         <module>org.openmole.plugin.sampling.filter</module>

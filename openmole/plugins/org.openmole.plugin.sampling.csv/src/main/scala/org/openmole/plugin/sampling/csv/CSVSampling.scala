@@ -102,7 +102,7 @@ class CSVSampling(val csvFile: File) extends ISampling{
    * Builds the plan.
    *
    */
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
     var listOfListOfValues = List[Iterable[IVariable[_]]]()
     val reader = new CSVReader(new FileReader(csvFile))
     val headers = reader.readNext.toArray
@@ -125,7 +125,7 @@ class CSVSampling(val csvFile: File) extends ISampling{
       nextLine = reader.readNext
     }
     reader.close
-    listOfListOfValues
+    listOfListOfValues.iterator
   }
   
   class PrototypeColumn(val name: String,val proto: IPrototype[_],var index: Int = -1)

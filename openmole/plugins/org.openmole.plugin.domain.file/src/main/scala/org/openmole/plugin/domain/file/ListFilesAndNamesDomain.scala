@@ -18,7 +18,6 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import java.io.FileFilter
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.misc.tools.io.FileUtil._
@@ -30,9 +29,7 @@ class ListFilesAndNamesDomain(dir: File, filter: File => Boolean) extends IFinit
   
   def this(dir: File) = this(dir, f => true)
 
-  def this(dir: File, pattern: String) = {
-    this(dir, _.getName.matches(pattern))
-  }
+  def this(dir: File, pattern: String) = this(dir, _.getName.matches(pattern))
   
   def this(dir: String) = this(new File(dir))
   def this(dir: String, pattern: String) = this(new File(dir), pattern)

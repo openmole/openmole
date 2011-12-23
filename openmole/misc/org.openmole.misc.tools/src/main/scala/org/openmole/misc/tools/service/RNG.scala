@@ -17,39 +17,34 @@
 
 package org.openmole.misc.tools.service
 
-import scala.util.Random
+import java.util.Random
 import scala.collection.mutable.IndexedSeq
 
-object RNG extends Random {
+object RNG {
   
-  /*def shuffle[T](a: Array[T]) = {
-    for (i <- 1 until a.size reverse) {
-      val j = nextInt (i + 1)
-      val t = a(i)
-      a(i) = a(j)
-      a(j) = t
-    }
-    a
-  }*/
- 
+  lazy val rng = new Random
+  
   @transient lazy val longInterval = {
     val min = BigDecimal(Long.MinValue)
     val max = BigDecimal(Long.MaxValue) + 1
     max - min
   }
- 
-  def nextLong(max: Long): Long = {
-    val v = BigDecimal(nextLong())
-    ((v - Long.MinValue) * (BigDecimal(max) / longInterval)).toLong
+  
+  implicit def randomDecorator(rng: Random) = new {
+    def shuffle[T](a: IndexedSeq[T]) ={
+      for (i <- 1 until a.size reverse) {
+        val j = rng.nextInt (i + 1)
+        val t = a(i)
+        a(i) = a(j)
+        a(j) = t
+      }
+      a
+    }
+  
+    def nextLong(max: Long): Long = {
+      val v = BigDecimal(rng.nextLong())
+      ((v - Long.MinValue) * (BigDecimal(max) / longInterval)).toLong
+    }
   }
   
-  def shuffle[T](a: IndexedSeq[T]) = {
-    for (i <- 1 until a.size reverse) {
-      val j = nextInt (i + 1)
-      val t = a(i)
-      a(i) = a(j)
-      a(j) = t
-    }
-    a
-  }
 }

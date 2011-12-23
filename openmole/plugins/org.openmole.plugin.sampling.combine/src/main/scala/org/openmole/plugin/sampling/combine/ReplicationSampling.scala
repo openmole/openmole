@@ -28,11 +28,11 @@ class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IInfi
 
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
   
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
     val factorIts = seederFactor.domain.iterator(context).sliding(nbReplication, nbReplication)
 
-    (for(sample <- sampling.build(context)) yield sample -> factorIts.next).flatMap {
+    (for(sample <- sampling.build(context).toIterable) yield sample -> factorIts.next).flatMap {
       case(sample, factorIt) => factorIt.map(rep => sample ++ List(new Variable(seederFactor.prototype, rep)))
-    }
+    }.iterator
   }
 }

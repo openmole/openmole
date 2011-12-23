@@ -21,12 +21,10 @@ package org.openmole.core.batch.environment
 import java.io.File
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
-import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.tools.service.Priority
-import org.openmole.misc.tools.service.RNG
+import org.openmole.misc.tools.service.RNG._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
@@ -95,7 +93,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
         }
              
         if (notLoaded.size > 0) {
-          var selected = RNG.nextDouble * notLoaded.map{_._3}.sum
+          var selected = rng.nextDouble * notLoaded.map{_._3}.sum
           
           for ((service, token, fitness) <- notLoaded) {    
             if(!ret.isDefined && selected <= fitness) {

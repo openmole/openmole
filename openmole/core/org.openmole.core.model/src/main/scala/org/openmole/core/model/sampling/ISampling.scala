@@ -36,6 +36,6 @@ trait ISampling {
    * @param context context in which the exploration takes place
    */
   @throws(classOf[Throwable])
-  def build(context: IContext): Iterable[Iterable[IVariable[_]]]
+  def build(context: IContext): Iterator[Iterable[IVariable[_]]]
 
 }

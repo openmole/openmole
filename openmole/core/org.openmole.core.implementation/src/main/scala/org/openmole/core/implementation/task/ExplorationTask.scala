@@ -40,7 +40,7 @@ class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) 
   
   //If input prototype as the same name as the output it is erased
   override protected def process(context: IContext) = {
-    val sampled = sampling.build(context)
+    val sampled = sampling.build(context).toIterable
 
     val variablesValues = TreeMap.empty[IPrototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map{p => p -> new ArrayBuffer[Any](sampled.size)}
  

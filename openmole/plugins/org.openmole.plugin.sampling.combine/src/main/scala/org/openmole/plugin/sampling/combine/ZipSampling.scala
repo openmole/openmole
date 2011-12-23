@@ -26,50 +26,43 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
 
-class ZipSampling(reference: ISampling, samplings: Iterable[ISampling]) extends ISampling {
+class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
 
-  def this(reference: ISampling) = this(reference, Iterable.empty) 
-    
-  def this(reference: ISampling, head: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(reference, (List(head) ++ factors).map{new FactorSampling(_)})
+  def this(samplings: ISampling*) = this(samplings)
+  def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings) 
 
-  def this(reference: IFactor[T,IDomain[T]] forSome{type T}, factors: Array[IFactor[T,IDomain[T]] forSome{type T}]) = this(new FactorSampling(reference), factors.map{new FactorSampling(_)})
-
-  def this(reference: ISampling, head: ISampling, samplings: Array[ISampling]) = this(reference, List(head) ++ samplings) 
-
-  override def prototypes = reference.prototypes ++ samplings.flatMap(_.prototypes)
+  override def prototypes = if(samplings.isEmpty) List() else samplings.flatMap(_.prototypes)
   
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] = {
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    samplings.headOption match {
+      case Some(reference) =>
+        /* Compute plans */
+        val cachedSample = samplings.tail.map{_.build(context)}.toArray
 
-    /* Compute plans */
-    val cachedSample = new ArrayBuffer[Iterator[Iterable[IVariable[_]]]](samplings.size)
+        /* Compose plans */
+        val factorValuesCollection = new ListBuffer[Iterable[IVariable[_]]]
 
-    for(otherSampler <- samplings) {
-      cachedSample += otherSampler.build(context).iterator
-    }
+        val valuesIterator = reference.build(context)
+        var oneFinished = false
 
-    /* Compose plans */
-    val factorValuesCollection = new ListBuffer[Iterable[IVariable[_]]]
-
-    val valuesIterator = reference.build(context).iterator
-    var oneFinished = false
-
-    while(valuesIterator.hasNext && !oneFinished) {
-      val values = new ListBuffer[IVariable[_]]
+        while(valuesIterator.hasNext && !oneFinished) {
+          val values = new ListBuffer[IVariable[_]]
       
-      for(it <- cachedSample) {
-        if(!it.hasNext)  oneFinished = true
-        else values ++= (it.next)
-      }
+          for(it <- cachedSample) {
+            if(!it.hasNext)  oneFinished = true
+            else values ++= (it.next)
+          }
 
-      if(!oneFinished) {
-        values ++= (valuesIterator.next)
-        factorValuesCollection +=  values
-      }
+          if(!oneFinished) {
+            values ++= (valuesIterator.next)
+            factorValuesCollection +=  values
+          }
+        }
+
+        factorValuesCollection.iterator
+  
+      case None => Iterator.empty
     }
-
-    factorValuesCollection
-  }
-
 
 
 }
