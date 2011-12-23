@@ -70,6 +70,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
+    if (scene.manager.capsules.size == 1) defineAsStartingCapsule(true)
   }
   
   
