@@ -24,7 +24,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.commons.MoleSceneType._
@@ -77,7 +77,7 @@ object GUISerializer {
         readObject match{
           case x: SerializedProxys=> x.loadProxys
           case x: IMoleScene=> {TopComponentsManager.addTopComponent(new MoleSceneTopComponent(x))}
-          case _=> throw new GUIUserBadDataError("Failed to unserialize object " + readObject.toString)
+          case _=> throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }
     } catch {

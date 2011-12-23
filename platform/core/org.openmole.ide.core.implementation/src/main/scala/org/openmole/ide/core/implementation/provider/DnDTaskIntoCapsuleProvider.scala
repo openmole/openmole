@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.commons.Constants._
 
 class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) extends DnDProvider(molescene) {
@@ -41,7 +41,7 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
       case PROTOTYPE=> ConnectorState.ACCEPT
       case SAMPLING=> if (capsule.capsuleType == EXPLORATION_TASK) ConnectorState.ACCEPT else ConnectorState.REJECT
       case ENVIRONMENT=> if (capsule.capsuleType != CAPSULE) ConnectorState.ACCEPT else ConnectorState.REJECT
-      case _=> throw new GUIUserBadDataError("Unknown entity type")
+      case _=> throw new UserBadDataError("Unknown entity type")
     }
   }
   

@@ -25,7 +25,7 @@ import org.openmole.ide.core.implementation.action.RemoveSamplingAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.display.ISamplingDisplay
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.dataproxy._
@@ -55,7 +55,7 @@ object SamplingDisplay extends ISamplingDisplay{
   }
   
   override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
     if (Displays.initMode) Proxys.addSamplingElement(currentDataProxy.get)}
   
 }

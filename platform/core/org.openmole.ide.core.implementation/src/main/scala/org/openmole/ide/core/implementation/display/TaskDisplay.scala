@@ -21,7 +21,7 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.action.RemoveTaskAction
 import org.openmole.ide.core.implementation.dataproxy._
@@ -56,7 +56,7 @@ object TaskDisplay extends ITaskDisplay{
     val sample = currentDataProxy.get.dataUI.sampling
     val protoI = currentDataProxy.get.dataUI.prototypesIn
     val protoO = currentDataProxy.get.dataUI.prototypesOut
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
     currentDataProxy.get.dataUI.prototypesIn_=(protoI)
     currentDataProxy.get.dataUI.prototypesOut_=(protoO)
     currentDataProxy.get.dataUI.sampling_=(sample)

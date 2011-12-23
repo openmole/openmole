@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.display
  
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.display.IDisplay
 import org.openmole.ide.core.model.commons.Constants._
 
@@ -50,6 +50,6 @@ object Displays {
       case PROTOTYPE=> PrototypeDisplay
       case SAMPLING=> SamplingDisplay
       case ENVIRONMENT=> EnvironmentDisplay
-      case _=> throw new GUIUserBadDataError("Unknown type " + currentType + " No display is available.")
+      case _=> throw new UserBadDataError("Unknown type " + currentType + " No display is available.")
   }
 }

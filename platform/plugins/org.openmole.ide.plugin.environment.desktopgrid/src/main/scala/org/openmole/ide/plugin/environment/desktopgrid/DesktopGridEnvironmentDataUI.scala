@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.environment.desktopgrid
 
 
 import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
 class DesktopGridEnvironmentDataUI(val name: String,val login: String,val pass: String,val port: Int) extends IEnvironmentDataUI {
@@ -15,7 +15,7 @@ class DesktopGridEnvironmentDataUI(val name: String,val login: String,val pass: 
 
   override def coreObject = {
     if (login != "" && pass != "") new DesktopGridEnvironment(port,login,pass)
-    else throw new GUIUserBadDataError("The login and the password are required fore the environment " + name)
+    else throw new UserBadDataError("The login and the password are required fore the environment " + name)
   }
 
   override def coreClass = classOf[DesktopGridEnvironment] 

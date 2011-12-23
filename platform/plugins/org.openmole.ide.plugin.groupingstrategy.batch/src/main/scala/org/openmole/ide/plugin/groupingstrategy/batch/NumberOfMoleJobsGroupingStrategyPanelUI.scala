@@ -27,7 +27,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Panel
 
@@ -69,7 +69,7 @@ class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionMa
         case(capsule, num)=>
           try new NumberOfMoleJobsGroupingStrategyDataUI(executionManager, (capsule, num.toInt))
           catch {
-            case e:NumberFormatException=> throw new GUIUserBadDataError(num + " is not an integer")
+            case e:NumberFormatException=> throw new UserBadDataError(num + " is not an integer")
           }
       }
      case None => List()

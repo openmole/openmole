@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.palette.FrozenProxys
 import org.openide.awt.StatusDisplayer
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Action
 
 class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
@@ -31,7 +31,7 @@ class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
         FrozenProxys.freeze(clone)
         clone.requestActive
     } catch {
-      case e: GUIUserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+      case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
     }
   }
 }

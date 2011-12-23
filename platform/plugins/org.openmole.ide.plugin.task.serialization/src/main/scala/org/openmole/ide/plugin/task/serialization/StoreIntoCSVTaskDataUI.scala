@@ -10,7 +10,7 @@ import java.io.File
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.task.serialization.StoreIntoCSVTask
 import scala.collection.JavaConversions._
 import au.com.bytecode.opencsv.CSVWriter
@@ -24,7 +24,7 @@ class StoreIntoCSVTaskDataUI(val name: String,val columns: List[(IPrototypeDataP
                            columns.map{e=> (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)},
                            protoFile.get.dataUI.coreObject.asInstanceOf[IPrototype[File]],
                            ',',CSVWriter.NO_QUOTE_CHARACTER)
-    else throw new GUIUserBadDataError("No output prototype file is defined !")}
+    else throw new UserBadDataError("No output prototype file is defined !")}
   
   override def coreClass= classOf[StoreIntoCSVTask]
   

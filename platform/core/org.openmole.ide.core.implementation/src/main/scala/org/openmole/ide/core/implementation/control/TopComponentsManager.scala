@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.workspace.Workspace
@@ -68,7 +68,7 @@ object TopComponentsManager {
   def executionManager(execution: IMoleExecution) = executionTabs.values.filter(_.moleExecution==execution).head
     
   def currentExecutionManager: ExecutionManager = executionTabs.getOrElse(PaletteSupport.currentMoleSceneTopComponent.get.getMoleScene,
-                                                                          throw new GUIUserBadDataError("This Mole can not be run. Pleas build it first"))
+                                                                          throw new UserBadDataError("This Mole can not be run. Pleas build it first"))
   
   def registerTopComponent(tc: MoleSceneTopComponent) = topComponents.getOrElseUpdate(tc, new ListBuffer[MoleSceneTopComponent])
   

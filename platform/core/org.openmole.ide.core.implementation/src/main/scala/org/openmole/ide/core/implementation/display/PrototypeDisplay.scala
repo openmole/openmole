@@ -20,7 +20,7 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.display.IPrototypeDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
@@ -56,7 +56,7 @@ object PrototypeDisplay extends IPrototypeDisplay{
   }
   
   override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
     if (Displays.initMode) Proxys.addPrototypeElement(currentDataProxy.get)
   }
 }

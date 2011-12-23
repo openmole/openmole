@@ -30,7 +30,7 @@ import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
@@ -56,7 +56,7 @@ object MoleMaker {
             envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
             strat.select(capsuleMap(c),env)
           }catch {
-            case e: GUIUserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+            case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
           }
         }}
       val mgs = new MoleJobGrouping
@@ -73,14 +73,14 @@ object MoleMaker {
     
       (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
     }
-    else throw new GUIUserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
+    else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
   def buildTask(capsuleUI: ICapsuleUI) = {
     capsuleUI.capsuleType match {
       case EXPLORATION_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
       case BASIC_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject)
-      case CAPSULE=> throw new GUIUserBadDataError("A capsule without any task can not be run")  
+      case CAPSULE=> throw new UserBadDataError("A capsule without any task can not be run")  
     }
   }
   
@@ -95,7 +95,7 @@ object MoleMaker {
       case BASIC_TRANSITION=> new Transition(sourceCapsule,targetCapsule) 
       case AGGREGATION_TRANSITION=> new AggregationTransition(sourceCapsule,targetCapsule)
       case EXPLORATION_TRANSITION=> new ExplorationTransition(sourceCapsule,targetCapsule)
-      case _=> throw new GUIUserBadDataError("No matching type between capsule " + sourceCapsule +" and " + targetCapsule +". The transition can not be built")
+      case _=> throw new UserBadDataError("No matching type between capsule " + sourceCapsule +" and " + targetCapsule +". The transition can not be built")
     }
   }
 }

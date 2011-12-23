@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.sampling.csv
 
 
 import java.io.File
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
@@ -24,9 +24,9 @@ class CSVSamplingDataUI(val name: String,
       if (fi.isFile) new CSVSampling(fi) {
         prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach{m=>addColumnAs(m._1,m._2.dataUI.coreObject)}
       }
-      else throw new GUIUserBadDataError("CSV file " + csvFilePath + " does not exist")
+      else throw new UserBadDataError("CSV file " + csvFilePath + " does not exist")
     }
-    else throw new GUIUserBadDataError("CSV file path missing to instanciate the CSV sampling " + name)
+    else throw new UserBadDataError("CSV file path missing to instanciate the CSV sampling " + name)
   }
 
   override def coreClass = classOf[CSVSampling] 

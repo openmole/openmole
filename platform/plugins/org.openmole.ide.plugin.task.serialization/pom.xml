@@ -37,8 +37,8 @@
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.exception</artifactId>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${openmole.gui.version}</version>
         </dependency>
         <dependency>

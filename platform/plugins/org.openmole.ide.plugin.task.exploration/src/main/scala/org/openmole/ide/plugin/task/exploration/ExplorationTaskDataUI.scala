@@ -19,14 +19,14 @@ package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.data.TaskDataUI
 
 class ExplorationTaskDataUI(val name: String) extends TaskDataUI{
    
   override def coreObject = {
     if (sampling.isDefined) new ExplorationTask(name,sampling.get.dataUI.coreObject)
-    else throw new GUIUserBadDataError("Sampling missing to instanciate the exploration task " + name)
+    else throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
   } 
   
   override def coreClass= classOf[ExplorationTask]

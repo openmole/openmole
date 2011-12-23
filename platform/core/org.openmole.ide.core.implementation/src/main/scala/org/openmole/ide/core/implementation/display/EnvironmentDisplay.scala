@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.PopupMenu
-import org.openmole.ide.misc.exception.GUIUserBadDataError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
@@ -59,7 +59,7 @@ object EnvironmentDisplay extends IEnvironmentDisplay{
   
   
   override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new GUIUserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
     if (Displays.initMode) Proxys.addEnvironmentElement(currentDataProxy.get)
   }
    
