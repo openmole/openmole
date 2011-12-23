@@ -34,4 +34,7 @@ class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
     (ctx, None)
   }
+  
+  override def toString = "Globus proxy file path = " + proxyFile
+  
 }

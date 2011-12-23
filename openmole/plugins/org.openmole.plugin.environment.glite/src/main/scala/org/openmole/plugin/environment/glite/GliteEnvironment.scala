@@ -19,12 +19,10 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.InteractiveConfiguration
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
@@ -32,32 +30,9 @@ import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
 
-import scala.annotation.target.field
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
 
 object GliteEnvironment {
-
-  @field @InteractiveConfiguration(label = "Credential type", choices = Array("pem", "p12", "proxy"))
-  val CertificateType = new ConfigurationLocation("GliteEnvironment", "CertificateType")
-
-  @field @InteractiveConfiguration(label = "PEM Certificate location", dependOn = "CertificateType", value = "pem")
-  val CertificatePathLocation = new ConfigurationLocation("GliteEnvironment", "CertificatePath")
-
-  @field @InteractiveConfiguration(label = "PEM Key location", dependOn = "CertificateType", value = "pem")
-  val KeyPathLocation = new ConfigurationLocation("GliteEnvironment", "KeyPath")
-
-  @field @InteractiveConfiguration(label = "P12 Certificate Location", dependOn = "CertificateType", value = "p12")
-  val P12CertificateLocation = new ConfigurationLocation("GliteEnvironment", "P12CertificateLocation")
-
-  @field @InteractiveConfiguration(label = "Key password", dependOn = "CertificateType", value = "(p12|pem)")
-  val PasswordLocation = new ConfigurationLocation("GliteEnvironment", "Password", true)
-       
-  @field @InteractiveConfiguration(label = "Proxy Location", dependOn = "CertificateType", value = "proxy")
-  val ProxyLocation = new ConfigurationLocation("GliteEnvironment", "ProxyLocation")
-  
-  //@field @InteractiveConfiguration(label = "Proxy type", dependOn = "CertificateType", value = "proxy")
-  //val ProxyType = new ConfigurationLocation("GliteEnvironment", "ProxyType")
   
   val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
  
@@ -80,16 +55,6 @@ object GliteEnvironment {
   val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
   val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
 
-  Workspace += (CertificatePathLocation, () => System.getProperty("user.home") + "/.globus/usercert.pem")
-
-  Workspace += (KeyPathLocation, () => System.getProperty("user.home") + "/.globus/userkey.pem")
-
-  Workspace += (P12CertificateLocation, () => System.getProperty("user.home") + "/.globus/certificate.p12")
-
-  //Workspace += (ProxyLocation, () => System.getProperty("user.home") + "/.globus/x509u")
-  //Workspace += (ProxyType, "old")
-
-  Workspace += (CertificateType, "p12")
   Workspace += (TimeLocation, "PT24H")
 
   Workspace += (FetchRessourcesTimeOutLocation, "PT5M")

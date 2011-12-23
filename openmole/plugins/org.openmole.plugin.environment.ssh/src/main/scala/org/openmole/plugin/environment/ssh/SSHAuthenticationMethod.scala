@@ -29,4 +29,6 @@ trait SSHAuthenticationMethod extends AuthenticationMethod {
   def init = JSAGASessionService.addContext(target, context)
   
   def context: Context
+  
+  override def toString = "Target = " + target
 }

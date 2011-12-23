@@ -24,6 +24,7 @@ import org.codehaus.groovy.ant.Groovy
 import org.codehaus.groovy.tools.shell.Command
 import org.codehaus.groovy.tools.shell.Groovysh
 import org.codehaus.groovy.tools.shell.IO
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
@@ -31,6 +32,23 @@ import org.openmole.misc.workspace.Workspace
 
 object Console {
 
+  def initPassword = {
+    val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
+    
+    var ok = false
+    do {
+      val password = new jline.ConsoleReader().readLine(message, '*')
+      try {
+        Workspace.password_=(password)
+        ok = true
+      } catch {
+        case e: UserBadDataError => println("Password incorrect.")
+      }
+    } while(!ok)
+  }
+  
+  initPassword
+  
   val pluginManager = "plugin"
   val workspace = "workspace"
   val registry = "registry"
@@ -64,8 +82,7 @@ object Console {
   run("import org.openmole.core.implementation.sampling.*")
   run("import org.openmole.core.implementation.task.*")
   run("import org.openmole.core.implementation.transition.*")
-  run("import scala.Tuple2")
-
+  
   def setVariable(name: String, value: Object) = binding.setVariable(name, value)
 
   def run(command: String) = groovysh.run(command)

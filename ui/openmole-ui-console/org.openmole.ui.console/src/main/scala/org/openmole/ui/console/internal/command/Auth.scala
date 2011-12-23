@@ -19,6 +19,7 @@ package org.openmole.ui.console.internal.command
 
 import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.environment.AuthenticationMethod
 import org.openmole.core.batch.environment.AuthenticationMethod._
@@ -30,6 +31,7 @@ class Auth(shell: Shell, muteShell: Shell, string: String, string1: String) exte
 
   override def execute(list: List[_]): Object = {
     if(list.head == "-l") {
+      if(list.size < 2) throw new UserBadDataError("Usage -l classOf[AuthenticationMethod]")
       val method = shell.execute(list.tail.head.asInstanceOf[String]).asInstanceOf[Class[_]]
       Workspace.persistentList(method).foreach {
         case (i, m) => println(i + ": " + m)

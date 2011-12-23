@@ -130,7 +130,7 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
       if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) new GlobusProxyFile(System.getenv.get("X509_USER_PROXY"))
       else Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
         case Some((i,a)) => a
-        case None => getAuthenticationMethodFromPrefences
+        case None => throw new UserBadDataError("Preferences not set for grid authentication")
       }
     
     val (ctx, time) = authenticationMethod.init(this)
@@ -143,20 +143,6 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
       case None =>
     }
     addContext(context)
-  }
-  
-  def getAuthenticationMethodFromPrefences = Workspace.preference(CertificateType) match {
-    case "pem" => 
-      if(!Workspace.isPreferenceSet(PasswordLocation)) throw new UserBadDataError("Preferences not set for grid authentication")
-      new PEMCertificate(Workspace.rawPreference(PasswordLocation), 
-                         Workspace.preference(CertificatePathLocation), 
-                         Workspace.preference(KeyPathLocation))
-    case "p12" => 
-      if(!Workspace.isPreferenceSet(PasswordLocation)) throw new UserBadDataError("Preferences not set for grid authentication")
-      new P12Certificate(Workspace.rawPreference(PasswordLocation),
-                         Workspace.preference(P12CertificateLocation))
-    case "proxy" => 
-      new VOMSProxyFile(Workspace.preference(ProxyLocation))
   }
 
 }

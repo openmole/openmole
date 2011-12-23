@@ -31,4 +31,6 @@ class SSHLoginPassword(val login: String, val cypheredPassword: String, val targ
     ctx
   }
   
+  override def toString = super.toString + ", Login / password, login = " + login 
+  
 }

@@ -16,7 +16,6 @@ import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.ui.console.internal.command.Get;
-import org.openmole.ui.console.internal.command.Init;
 import org.openmole.ui.console.internal.command.Print;
 import org.openmole.ui.console.internal.command.Auth;
 import org.openmole.ui.console.internal.command.Encrypt;
@@ -61,12 +60,11 @@ public class Application implements IApplication {
         Groovysh g = Console.groovysh();
         Groovysh muteShell = Console.muteGroovysh();
         g.leftShift(new Print(g, "print", "\\pr"));
-        g.leftShift(new Init(g, muteShell, "init", "\\in"));
         g.leftShift(new Get(g, muteShell, "get", "\\g"));
         g.leftShift(new Auth(g, muteShell, "auth", "\\au"));
         g.leftShift(new Encrypt(g, muteShell, "encrypt", "\\en"));
          
-        Console.run("init " + Console.workspace());
+        //Console.run("init " + Console.workspace());
         
         // Process CLI options
         if (cmd.hasOption(optionPluginsDir.getOpt())) {

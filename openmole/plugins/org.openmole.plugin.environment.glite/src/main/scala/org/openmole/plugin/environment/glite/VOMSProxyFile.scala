@@ -34,4 +34,6 @@ class VOMSProxyFile(proxyFile: String) extends GliteAuthenticationMethod {
     ctx.setAttribute(VOMSContext.PROXYTYPE, "RFC820")
     (ctx, None)
   }
+  
+  override def toString = "VOMS proxy file path = " + proxyFile
 }
