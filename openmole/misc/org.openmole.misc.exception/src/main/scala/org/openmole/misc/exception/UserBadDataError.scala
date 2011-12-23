@@ -17,7 +17,7 @@
 
 package org.openmole.misc.exception
 
-class UserBadDataError(exception: Throwable, message: String) extends Exception(message, exception) {
+class UserBadDataError(exception: Throwable,val message: String) extends Exception(message, exception) {
 
     def this (message: String) = {
         this(null, message)
