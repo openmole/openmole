@@ -149,8 +149,7 @@
     </mailingLists>
 
     <scm>
-        <connection>scm:git://git.openmole.org</connection>
-        <url>git://git.openmole.org</url>
+        <connection>scm:git:gitosis@git.openmole.org:openmole</connection>
     </scm>
 
     <issueManagement>
