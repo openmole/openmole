@@ -17,19 +17,21 @@
 
 package org.openmole.plugin.sampling.combine
 
+import java.io.File
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 
-class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
-  
-  override def prototypes = reference.prototypes ++ List(index) 
+class ZipWithName(factor: IFactor[File, IDomain[File]], prototype: IPrototype[String]) extends ISampling {
+
+  override def prototypes = List(factor.prototype, prototype)
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    reference.build(context).zipWithIndex.map {
-      case(line, i) => line ++ List(new Variable(index, i))
+    factor.domain.iterator(context).map {
+      v => List(new Variable(factor.prototype, v), new Variable(prototype, v.getName))
     }
-
 }

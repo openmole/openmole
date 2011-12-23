@@ -32,8 +32,9 @@ class ListFilesDomain(dir: File, filter: File => Boolean) extends IFiniteDomain[
   import ListFilesDomain._
   
   def this(dir: File) = this(dir, f => true)
-
   def this(dir: File, pattern: String) = this(dir, _.getName.matches(pattern))
+  def this(dir: String, pattern: String) = this(new File(dir), _.getName.matches(pattern))
+  def this(dir: String) = this(new File(dir))
 
   override def computeValues(context: IContext): Iterable[File] = {
     val files = dir.listFiles(filter)
