@@ -8,7 +8,12 @@
 
     <groupId>org.openmole</groupId>
     <artifactId>openmole</artifactId>
-    <version>0.4-RC3-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
+
+    <modules>
+        <module>openmole-core</module>
+        <module>openmole-gui</module>
+    </modules>
 
 
     <!-- ************************************************************* -->

@@ -1,0 +1,6 @@
+[submodule "openmole-core"]
+	path = openmole-core
+	url = gitosis@git.openmole.org:openmole-core
+[submodule "openmole-gui"]
+	path = openmole-gui
+	url = gitosis@git.openmole.org:openmole-gui
