@@ -19,35 +19,28 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
+import scala.util.control.Breaks._ 
 
-class FactorSampling(factor: IFactor[T,IDomain[T]] forSome{type T}) extends ISampling {
- 
-  override def prototypes = List(factor.prototype)
+class CompleteSampling(samplings: Iterable[ISampling]) extends ISampling {
+
+  def this(samplings: Array[ISampling]) = this(samplings.toIterable)
+
+  def this(samplings: ISampling*) = this(samplings.toIterable)
+
+  override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap{_.prototypes}
   
-  override def build(context: IContext): Iterable[Iterable[IVariable[_]]] =
-    typedBuild(context, factor)
-  
-  private def typedBuild[T](context: IContext, factor: IFactor[T,IDomain[T]]): Iterable[Iterable[IVariable[T]]] = {
-    return new Iterable[Iterable[IVariable[T]]] {
-
-      override def iterator: Iterator[Iterable[IVariable[T]]] = {
-        new Iterator[Iterable[IVariable[T]]] {
-
-          val iterator = factor.domain.iterator(context)
-
-          override def hasNext: Boolean = iterator.hasNext
-                    
-          override def next: Iterable[IVariable[T]] = {
-            val v = new Variable(factor.prototype, iterator.next)
-            List(v) 
-          }
-        }
-      }
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    if(samplings.isEmpty) Iterator.empty
+    else {
+      val values = samplings.map{_.build(context).toIterable}
+      val composed = values.view.map{_.map(e => List(e))}.reduceRight((v1, v2) => v1.flatMap(e1 => v2.map{e2 =>  e1 ::: e2}))
+      composed.flatten.iterator //map{comp => factors.zip(comp).map{case (f,v) => new Variable(f.prototype.asInstanceOf[IPrototype[Any]], v)}}.iterator
     }
-  }
   
+
 }

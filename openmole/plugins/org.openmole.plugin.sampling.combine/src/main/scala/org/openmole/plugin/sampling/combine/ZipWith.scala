@@ -15,12 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.sampling
+package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
-class EmptySampling extends ISampling {
-  override def prototypes = List.empty
-  override def build(context: IContext) = Iterator.empty
+class ZipWithIndex(reference: ISampling, index: IPrototype[Int]) extends ISampling {
+  
+  override def prototypes = reference.prototypes ++ List(index) 
+  
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    reference.build(context).zipWithIndex.map {
+      case(line, i) => line ++ List(new Variable(index, i))
+    }
+
 }

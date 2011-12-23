@@ -18,10 +18,18 @@
 package org.openmole.core.implementation.sampling
 
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
 
 class Factor[T, +D <: IDomain[T]](val prototype: IPrototype[T], val domain: D) extends IFactor[T, D] {
   def this(name: String, t: Class[T], domain: D) = this(new Prototype[T](name, t), domain)
+
+  override def prototypes = List(prototype)
+  
+  override def build(context: IContext): Iterator[Iterable[IVariable[T]]] = 
+    domain.iterator(context).map{v => List(new Variable(prototype, v))}
 }

@@ -18,7 +18,8 @@
 package org.openmole.plugin.sampling.lhs
 
 import org.openmole.core.model.sampling.ISampling
-import org.openmole.misc.tools.service.RNG
+import org.openmole.misc.tools.service.RNG._
+import java.util.Random
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
@@ -29,11 +30,14 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) extends ISampling {
+class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], rng: Random) extends ISampling {
 
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], seed: Int) = this(samples, factors, new Random(seed))
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) = this(samples, factors, 0)
+  
   override def prototypes = factors.map{_.prototype}
   
-  override def build(context: IContext): Iterable[Iterable[IVariable[Double]]] = {
+  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
      
     //System.out.println("LHSPlan::computeValues");
     //Inititalize a temp structure
@@ -48,12 +52,12 @@ class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] w
       for (f <- factors) {
         val tempMin = f.domain.min(context)
         val tempMax = f.domain.max(context)
-        TempFactors(i) += ( ((j + RNG.nextDouble) / samples) * (tempMax - tempMin) + tempMin)
+        TempFactors(i) += ( ((j + rng.nextDouble) / samples) * (tempMax - tempMin) + tempMin)
         i += 1
       }
     }
 
-    for (i <- 0 until factors.size) RNG.shuffle(TempFactors(i))
+    for (i <- 0 until factors.size) rng.shuffle(TempFactors(i))
     
     // TODO : TempFactors is now centered and reduced. It must be corrected according to factor's parameters.
     // affect computed values and names to the plan
@@ -70,6 +74,6 @@ class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] w
       listOfListOfValues(j) = factorValues
     }
     //System.out.println("LHSPlan::computeValues  end.");
-    listOfListOfValues
+    listOfListOfValues.iterator
   }
 }

@@ -44,7 +44,7 @@ class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
     
     val sampling = new ISampling {
       override def prototypes = List(p1, p2, p3)
-      override def build(context: IContext) = List(pList(1,2,3), pList(4,3,4), pList(1,5,3), pList(2,3,4), pList(6,7,8))
+      override def build(context: IContext) = List(pList(1,2,3), pList(4,3,4), pList(1,5,3), pList(2,3,4), pList(6,7,8)).iterator
     }
     
     val f1 = new IFilter {

@@ -25,21 +25,21 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 
-object SlidingSliceFilesAndNamesDomain extends Logger {
+object SlidingSliceFilesDomain extends Logger {
   val defaultPattern = "^[a-zA-Z]*([0-9]+).*"
 }
 
-import SlidingSliceFilesAndNamesDomain._
+import SlidingSliceFilesDomain._
 
-class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IFiniteDomain[Array[(File,String)]] {
+class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IFiniteDomain[Array[File]] {
  
   def this(dir: File, numberPattern: String, sliceSize: Int) = this(dir, numberPattern, sliceSize, f => true)
   
-  def this(dir: File, sliceSize: Int) = this(dir, SlidingSliceFilesAndNamesDomain.defaultPattern, sliceSize)
+  def this(dir: File, sliceSize: Int) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize)
   
-  def this(dir: File, sliceSize: Int, filter: File => Boolean) = this(dir, SlidingSliceFilesAndNamesDomain.defaultPattern, sliceSize, filter)
+  def this(dir: File, sliceSize: Int, filter: File => Boolean) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize, filter)
 
-  override def computeValues(context: IContext): Iterable[Array[(File,String)]] = {
+  override def computeValues(context: IContext): Iterable[Array[File]] = {
     val pattern = Pattern.compile(numberPattern)
     
     val files = dir.listFiles(filter).flatMap{
@@ -54,7 +54,7 @@ class SlidingSliceFilesAndNamesDomain(dir: File, numberPattern: String, sliceSiz
     
     
     (0 to files.size - sliceSize).map {
-      i => files.slice(i, i + sliceSize).map(f => f -> f.getName)
+      i => files.slice(i, i + sliceSize)
     }
   }
 

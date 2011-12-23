@@ -163,12 +163,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.sampling.complete</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
@@ -217,7 +211,7 @@
         </dependency>
     	<dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.hook.filemanagement</artifactId>
+            <artifactId>org.openmole.plugin.hook.file</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

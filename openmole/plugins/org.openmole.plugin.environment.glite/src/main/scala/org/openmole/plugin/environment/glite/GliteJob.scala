@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.glite
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
-import org.openmole.misc.tools.service.RNG
+import org.openmole.misc.tools.service.RNG._
 import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
@@ -45,9 +45,9 @@ class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobServic
       }
       
       val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingInterval)
-      if(nbInterval < 1) if(RNG.nextDouble < nbInterval * probability) {
+      if(nbInterval < 1) if(rng.nextDouble < nbInterval * probability) {
         throw new ShouldBeKilledException("Killed in shaking process")
-      } else for(i <- 0 to nbInterval.toInt) if(RNG.nextDouble < probability){
+      } else for(i <- 0 to nbInterval.toInt) if(rng.nextDouble < probability){
         throw new ShouldBeKilledException("Killed in shaking process")
       }
     }
