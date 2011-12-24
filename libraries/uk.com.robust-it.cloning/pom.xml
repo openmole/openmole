@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>uk.com.robustit.cloning</artifactId>
-    <version>${lib.uk.com.robust-it.cloning.version}</version>
 
     <dependencies>
         <dependency>

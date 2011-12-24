@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.gnu.crypto</artifactId>
-    <version>${lib.org.gnu.crypto.version}</version>
 
     <dependencies>
         <dependency>

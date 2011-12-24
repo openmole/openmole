@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.objenesis</artifactId>
-    <version>${lib.org.objenesis.version}</version>
 
     <dependencies>
         <dependency>

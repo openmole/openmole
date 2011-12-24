@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.sshd</artifactId>
-    <version>${lib.org.apache.sshd.version}</version>
 
     <dependencies>
         <dependency>

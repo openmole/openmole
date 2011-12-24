@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>net.sourceforge.jline</artifactId>
-    <version>${lib.net.sourceforge.jline.version}</version>
 
     <dependencies>
         <dependency>

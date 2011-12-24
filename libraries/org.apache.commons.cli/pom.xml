@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.commons.cli</artifactId>
-    <version>${lib.org.apache.commons.cli.version}</version>
 
     <dependencies>
         <dependency>

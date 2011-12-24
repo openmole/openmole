@@ -59,12 +59,12 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
+            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.cli</artifactId>
-            <version>${lib.org.apache.commons.cli.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
@@ -74,12 +74,12 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
-            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.joda.time</artifactId>
-            <version>${lib.org.joda.time.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

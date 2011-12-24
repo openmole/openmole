@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.ant</artifactId>
-    <version>${lib.org.apache.ant.version}</version>
 
     <dependencies>
 	<dependency>

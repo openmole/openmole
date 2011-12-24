@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.log4j</artifactId>
-    <version>${lib.org.apache.log4j.version}</version>
 
     <dependencies>
         <dependency>

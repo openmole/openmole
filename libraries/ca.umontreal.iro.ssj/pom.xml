@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>ca.umontreal.iro.ssj</artifactId>
-    <version>${lib.ca.umontreal.iro.ssj.version}</version>
 
     <dependencies>
         <dependency>

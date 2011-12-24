@@ -80,17 +80,17 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.cli</artifactId>
-            <version>${lib.org.apache.commons.cli.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
-            <version>${lib.org.codehaus.groovy.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
-            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
@@ -107,52 +107,52 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>net.sourceforge.jline</artifactId>
-            <version>${lib.net.sourceforge.jline.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.ant</artifactId>
-            <version>${lib.org.apache.ant.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>uk.com.robustit.cloning</artifactId>
-            <version>${lib.uk.com.robust-it.cloning.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.joda.time</artifactId>
-            <version>${lib.org.joda.time.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.slf4j</artifactId>
-            <version>${lib.org.slf4j.version}</version>
+            <version>${project.version}</version>
         </dependency>
      	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.jasypt.encryption</artifactId>
-            <version>${lib.org.jasypt.encryption.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.configuration</artifactId>
-            <version>${lib.org.apache.commons.configuration.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.log4j</artifactId>
-            <version>${lib.org.apache.log4j.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.objenesis</artifactId>
-            <version>${lib.org.objenesis.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

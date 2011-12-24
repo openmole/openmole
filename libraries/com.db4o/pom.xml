@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>com.db4o</artifactId>
-    <version>${lib.com.db4o.version}</version>
 
     <dependencies>
         <dependency>

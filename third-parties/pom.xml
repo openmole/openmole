@@ -16,7 +16,6 @@
     <artifactId>third-parties</artifactId>
 
     <modules>
-	<module>aspectj-maven-plugin</module>
 	<module>com.ice.tar</module>
 	<module>fr.in2p3.jsaga.adaptor.ssh</module>
 	<module>ch.ethz.ssh2</module>

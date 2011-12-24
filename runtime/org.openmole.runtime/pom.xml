@@ -39,12 +39,12 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
+            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.cli</artifactId>
-            <version>${lib.org.apache.commons.cli.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>

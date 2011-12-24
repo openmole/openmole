@@ -30,7 +30,6 @@
         <module>org.apache.commons.cli</module>
 	<module>org.apache.commons.configuration</module>
 	<module>org.jasypt.encryption</module>
-        <module>org.nuiton.j2r</module>
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>
         <module>net.sourceforge.jline</module>
@@ -44,7 +43,6 @@
 	<module>org.apache.commons.math</module>
 	<module>org.slf4j</module>
 	<module>net.java.dev.j3d</module>
-	<module>org.aspectj.runtime</module>
 	<module>org.objenesis</module>
 	<module>org.apache.sshd</module>
     </modules>

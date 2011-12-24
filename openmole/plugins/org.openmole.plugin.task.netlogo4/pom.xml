@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
-            <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -19,17 +19,17 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.slf4j</artifactId>
-            <version>${lib.org.slf4j.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>net.java.dev.j3d</artifactId>
-    <version>${lib.net.java.dev.j3d.version}</version>
 
     <dependencies>
         <dependency>

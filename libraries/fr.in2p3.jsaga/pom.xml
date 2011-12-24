@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>fr.in2p3.jsaga</artifactId>
-    <version>${lib.fr.in2p3.jsaga.version}</version>
 
     <dependencies>
         <dependency>
@@ -57,7 +56,7 @@
        	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga.adaptor.ssh</artifactId>
-            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

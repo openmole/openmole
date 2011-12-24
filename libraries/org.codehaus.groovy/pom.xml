@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.codehaus.groovy</artifactId>
-    <version>${lib.org.codehaus.groovy.version}</version>
 
     <dependencies>
 	<dependency>

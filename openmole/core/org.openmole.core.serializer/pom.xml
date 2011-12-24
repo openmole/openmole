@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
-            <version>${lib.com.thoughtworks.xstream.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
@@ -33,7 +33,7 @@
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.pool</artifactId>
-	    <version>${lib.org.apache.commons.pool.version}</version>
+	    <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>

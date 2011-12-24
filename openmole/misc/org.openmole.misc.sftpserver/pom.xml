@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.sshd</artifactId>
-            <version>${lib.org.apache.sshd.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

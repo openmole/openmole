@@ -28,37 +28,37 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
-            <version>${lib.com.thoughtworks.xstream.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.ibm.icu</artifactId>
-            <version>${lib.com.ibm.icu.version}</version>
+            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
-            <version>${lib.org.codehaus.groovy.version}</version>
+            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.ice.tar</artifactId>
-            <version>${lib.com.ice.tar.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
-            <version>${lib.org.apache.commons.exec.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.objenesis</artifactId>
-            <version>${lib.org.objenesis.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.pool</artifactId>
-            <version>${lib.org.apache.commons.pool.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

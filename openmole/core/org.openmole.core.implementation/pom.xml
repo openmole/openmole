@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>uk.com.robustit.cloning</artifactId>
-            <version>${lib.uk.com.robust-it.cloning.version}</version>
+            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>

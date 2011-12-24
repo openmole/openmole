@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.commons.configuration</artifactId>
-    <version>${lib.org.apache.commons.configuration.version}</version>
 
     <dependencies>
         <dependency>

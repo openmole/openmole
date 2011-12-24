@@ -29,7 +29,7 @@
 	<dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
-            <version>${lib.org.codehaus.groovy.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>

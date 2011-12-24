@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.jfree.jfreechart</artifactId>
-    <version>${lib.org.jfree.jfreechart.version}</version>
 
     <dependencies>
        <dependency>

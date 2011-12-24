@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.gnu.crypto</artifactId>
-            <version>${lib.org.gnu.crypto.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.pool</artifactId>
-	    <version>${lib.org.apache.commons.pool.version}</version>
+	    <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>

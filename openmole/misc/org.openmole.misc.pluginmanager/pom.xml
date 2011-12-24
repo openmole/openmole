@@ -33,7 +33,7 @@
 	<dependency>
 	    <groupId>org.openmole.core</groupId>
 	    <artifactId>org.apache.commons.collections15</artifactId>
-    	    <version>${lib.org.apache.commons.collections15.version}</version>
+    	    <version>${project.version}</version>
 	</dependency>
     </dependencies>
 

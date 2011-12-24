@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.exec</artifactId>
-            <version>${lib.org.apache.commons.exec.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

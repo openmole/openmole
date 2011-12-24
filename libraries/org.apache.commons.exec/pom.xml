@@ -15,7 +15,6 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.apache.commons.exec</artifactId>
-    <version>${lib.org.apache.commons.exec.version}</version>
 
     <dependencies>
         <dependency>

@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>

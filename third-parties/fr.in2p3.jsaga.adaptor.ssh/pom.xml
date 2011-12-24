@@ -14,7 +14,6 @@
     </parent>
 
     <artifactId>fr.in2p3.jsaga.adaptor.ssh</artifactId>
-    <version>${lib.fr.in2p3.jsaga.version}</version>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
@@ -44,7 +43,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>ch.ethz.ssh2</artifactId>
-            <version>${lib.ch.ethz.ssh2.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
            <groupId>org.scala-lang</groupId>
