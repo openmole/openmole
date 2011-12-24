@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.hook.filemanagement</artifactId>
+            <artifactId>org.openmole.plugin.hook.file</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
