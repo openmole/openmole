@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${openmole.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.miglayout</groupId>
