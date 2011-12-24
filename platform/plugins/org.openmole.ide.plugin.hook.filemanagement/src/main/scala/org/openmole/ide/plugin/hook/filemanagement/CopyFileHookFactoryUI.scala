@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.hook.filemanagement
 
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.plugin.hook.filemanagement.CopyFileHook
+import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookFactoryUI extends IHookFactoryUI {
   def buildPanelUI(executionManager: IExecutionManager) = new CopyFileHookPanelUI(executionManager)
