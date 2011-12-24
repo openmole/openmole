@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.sampling.complete</artifactId>
+            <artifactId>org.openmole.plugin.sampling.combine</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
