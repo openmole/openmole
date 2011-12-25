@@ -28,72 +28,72 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>branding</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.core.model</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.core.implementation</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.task.groovy</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>	   
             <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.task.systemexec</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.task.serialization</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>  
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.complete</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.hook.filemanagement</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.domain.distribution</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -103,22 +103,22 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.environment.local</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>   
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>   
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.environment.desktopgrid</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.groupingstrategy.batch</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apidesign</groupId>

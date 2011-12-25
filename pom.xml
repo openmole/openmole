@@ -48,6 +48,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:git://git.openmole.org:openmole-gui</connection>
+        <developerConnection>scm:git:gitosis@git.openmole.org:openmole-gui</developerConnection>
+        <url>git://git.openmole.org:openmole-gui</url>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>maven.openmole.org</id>

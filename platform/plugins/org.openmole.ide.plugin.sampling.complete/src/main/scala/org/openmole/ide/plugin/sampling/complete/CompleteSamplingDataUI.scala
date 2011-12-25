@@ -8,7 +8,7 @@ package org.openmole.ide.plugin.sampling.complete
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
-import org.openmole.plugin.sampling.complete.CompleteSampling
+import org.openmole.plugin.sampling.combine.CompleteSampling
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain

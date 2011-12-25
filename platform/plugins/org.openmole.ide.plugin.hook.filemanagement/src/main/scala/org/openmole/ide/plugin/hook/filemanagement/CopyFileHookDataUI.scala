@@ -22,7 +22,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.plugin.hook.filemanagement.CopyFileHook
+import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookDataUI(executionManager: IExecutionManager,
                          toBeHooked: (ICapsule,IPrototype[File],String)) extends IHookDataUI{

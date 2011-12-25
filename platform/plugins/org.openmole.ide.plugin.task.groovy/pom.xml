@@ -29,17 +29,17 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.implementation</artifactId>
-            <version>${openmole.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${openmole.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.task.groovy</artifactId>
-            <version>${openmole.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.widget</artifactId>
-            <version>${openmole.gui.version}</version>
+            <version>${project.version}</version>
         </dependency> 
         <dependency>
             <groupId>org.netbeans.api</groupId>

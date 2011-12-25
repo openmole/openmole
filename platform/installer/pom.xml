@@ -43,7 +43,7 @@
                                 <artifactItem>
                                     <groupId>org.openmole.core</groupId>
                                     <artifactId>org.openmole.runtime</artifactId>
-                                    <version>${openmole.core.version}</version>
+                                    <version>${project.version}</version>
                                     <type>tar.gz</type>
                                     <destFileName>org.openmole.runtime.tar.gz</destFileName>
                                 </artifactItem>
@@ -77,7 +77,7 @@
                                 <artifactItem>
         			    <groupId>org.openmole.ide</groupId>
         			    <artifactId>org.openmole.ide.application</artifactId>
-		                    <version>${openmole.gui.version}</version>
+		                    <version>${project.version}</version>
                                     <type>tar.gz</type>
                                 </artifactItem>
                             </artifactItems>
