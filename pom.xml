@@ -241,17 +241,6 @@
         </plugins>
     </build>
 
-    <reporting>
-
-        <plugins>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
-            </plugin>
-        </plugins>
-    </reporting>
-
     <distributionManagement>
         <repository>
             <id>maven.openmole.org</id>
