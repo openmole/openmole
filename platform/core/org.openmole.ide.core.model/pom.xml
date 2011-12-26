@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.thoughtworks.xstream</artifactId>
-            <version>1.4.1</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
