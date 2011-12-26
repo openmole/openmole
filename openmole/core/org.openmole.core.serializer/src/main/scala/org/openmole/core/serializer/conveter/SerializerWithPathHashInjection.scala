@@ -20,7 +20,7 @@ package org.openmole.core.serializer.converter
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.misc.tools.io.StringInputStream
-import org.openmole.misc.fileservice.internal.FileService
+import org.openmole.misc.fileservice.FileService
 import org.openmole.misc.hashservice.HashService
 import scala.collection.immutable.TreeMap
 import java.io.OutputStream

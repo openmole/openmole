@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.fileservice.internal
+package org.openmole.misc.fileservice
 
 import com.ice.tar.TarOutputStream
 import java.io.File
@@ -40,8 +40,8 @@ object FileService {
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
   class HashWithLastModified(val hash: IHash, val lastModified: Long)
     
-  private val hashCache = new AssociativeCache[String, HashWithLastModified]
-  private val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
+  private[fileservice] val hashCache = new AssociativeCache[String, HashWithLastModified]
+  private[fileservice] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
   Updater.delay(new FileServiceGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
@@ -56,7 +56,7 @@ object FileService {
     hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(HashService.computeHash(file), file.lastModified)).hash
   }
 
-  private def invalidateHashCacheIfModified(file: File, cacheLength: Object) = 
+  private[fileservice] def invalidateHashCacheIfModified(file: File, cacheLength: Object) = 
     hashCache.cached(cacheLength, file.getAbsolutePath) match {
       case None =>
       case Some(hash) => 
@@ -81,7 +81,7 @@ object FileService {
       })
   }
 
-  private def invalidateDirCacheIfModified(file: File, cacheLenght: Object) = 
+  private[fileservice] def invalidateDirCacheIfModified(file: File, cacheLenght: Object) = 
     archiveCache.cached(cacheLenght, file.getAbsolutePath) match {
       case None =>
       case Some(cached) => 

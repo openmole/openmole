@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.fileservice.internal
+package org.openmole.misc.fileservice
 
 import java.io.File
 import org.openmole.misc.updater.IUpdatable

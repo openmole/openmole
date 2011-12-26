@@ -42,7 +42,7 @@ import org.openmole.misc.tools.io.TarArchiver._
 
 import scala.io.Source._
 import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.fileservice.internal.FileService
+import org.openmole.misc.fileservice.FileService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
