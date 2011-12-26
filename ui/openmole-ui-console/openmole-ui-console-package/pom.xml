@@ -73,6 +73,13 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.openmole.ui.console</groupId>
+                                    <artifactId>org.openmole.ui.console</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+				    <outputDirectory>${package.directory}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui.console</groupId>
                                     <artifactId>plugins</artifactId>
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
@@ -83,12 +90,6 @@
                                     <artifactId>plugins-ui</artifactId>
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
-                                    <artifactId>org.openmole.ui.console</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
 				    <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
@@ -96,44 +97,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-openmole</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${package.directory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../org.openmole.ui.console/target/product/</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--<plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <descriptor>src/main/assembly/openmole-console-package.xml</descriptor>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> 
-                        <phase>package</phase> 
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
         </plugins>
     </build>
 </project>
