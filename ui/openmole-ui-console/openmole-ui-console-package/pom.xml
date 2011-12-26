@@ -26,13 +26,13 @@
             <groupId>org.openmole.ui.console</groupId>
             <artifactId>plugins</artifactId>
             <version>${project.version}</version>
-            <type>pom</type>
+            <type>tar.gz</type>
         </dependency>
         <dependency>
             <groupId>org.openmole.ui.console</groupId>
             <artifactId>plugins-ui</artifactId>
             <version>${project.version}</version>
-            <type>pom</type>
+            <type>tar.gz</type>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
@@ -70,7 +70,7 @@
                 <version>2.2</version>
                 <executions>
                     <execution>
-                        <id>copy</id>
+                        <id>unpack</id>
                         <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
