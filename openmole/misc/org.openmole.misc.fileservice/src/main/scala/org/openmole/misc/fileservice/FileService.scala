@@ -40,14 +40,14 @@ object FileService {
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
   class HashWithLastModified(val hash: IHash, val lastModified: Long)
     
-  private[internal] val hashCache = new AssociativeCache[String, HashWithLastModified]
-  private[internal] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
+  private val hashCache = new AssociativeCache[String, HashWithLastModified]
+  private val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
   Updater.delay(new FileServiceGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
   def hash(file: File): IHash =     
     if(file.isDirectory) hash(archiveForDir(file).file(false), file)
-  else hash(file, file)
+    else hash(file, file)
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
     
@@ -56,35 +56,32 @@ object FileService {
     hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(HashService.computeHash(file), file.lastModified)).hash
   }
 
-  private def invalidateHashCacheIfModified(file: File, cacheLength: Object) = {
-    val hashWithLastModified = hashCache.cached(cacheLength, file.getAbsolutePath) match {
+  private def invalidateHashCacheIfModified(file: File, cacheLength: Object) = 
+    hashCache.cached(cacheLength, file.getAbsolutePath) match {
       case None =>
       case Some(hash) => 
         if (hash.lastModified < file.lastModification) {
-          Logger.getLogger(FileService.getClass.getName).fine("Invalidate cache " + file.getAbsolutePath)
+          //Logger.getLogger(FileService.getClass.getName).fine("Invalidate cache " + file.getAbsolutePath)
           hashCache.invalidateCache(cacheLength, file.getAbsolutePath)
         }
     }
-  }
+  
 
   def archiveForDir(file: File, cacheLenght: Object): IFileCache = {
 
     invalidateDirCacheIfModified(file, cacheLenght)
 
-    return archiveCache.cache(cacheLenght, file.getAbsolutePath, {
+    archiveCache.cache(cacheLenght, file.getAbsolutePath, {
         val ret = Workspace.newFile("archive", ".tar");
         val os = new TarOutputStream(new FileOutputStream(ret))
-        try {
-          os.createDirArchiveWithRelativePathNoVariableContent(file)
-        } finally {
-          os.close
-        }
+        try os.createDirArchiveWithRelativePathNoVariableContent(file)
+        finally os.close
 
         new CachedArchiveForDir(ret, file.lastModification)
       })
   }
 
-  private def invalidateDirCacheIfModified(file: File, cacheLenght: Object) = {
+  private def invalidateDirCacheIfModified(file: File, cacheLenght: Object) = 
     archiveCache.cached(cacheLenght, file.getAbsolutePath) match {
       case None =>
       case Some(cached) => 
@@ -92,5 +89,5 @@ object FileService {
           archiveCache.invalidateCache(cacheLenght, file.getAbsolutePath)
         }
     }
-  }
+  
 }
