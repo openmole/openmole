@@ -27,7 +27,7 @@ import scala.swing.Action
 class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
     try {
-        val clone = TopComponentsManager.addExecutionTopComponent(tc)
+      val clone = TopComponentsManager.addExecutionTopComponent(tc.getMoleComponent)
         FrozenProxys.freeze(clone)
         clone.requestActive
     } catch {

@@ -25,25 +25,26 @@ import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.palette.ICategory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.workflow._
 import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openide.nodes.Node
 import org.openide.nodes.Children
-import org.openmole.ide.core.model.commons.MoleSceneType._
+import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
-class CategoryBuilder(val sceneType: MoleSceneType) extends Children.Keys[ICategory]{
+class CategoryBuilder(val moleScene: IMoleScene) extends Children.Keys[ICategory]{
   
   override protected def createNodes(key: ICategory) = Array[Node](new CategoryNode(key.asInstanceOf[ICategory]))
   
   override def addNotify = {
     super.addNotify
-      setKeys(sceneType match {
-        case BUILD=>List(
+      setKeys(moleScene match {
+        case x:BuildMoleScene=>List(
             new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task,TASK_DATA_FLAVOR)),
             new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
             new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR)),
             new GenericCategory(ENVIRONMENT,"Environments" ,new GenericChildren(Proxys.environment,ENVIRONMENT_DATA_FLAVOR))).toIterable
-        case EXECUTION => List (
+        case x:ExecutionMoleScene => List (
             new GenericCategory(TASK,"Tasks" ,new GenericChildren(Proxys.task,TASK_DATA_FLAVOR)),
             new GenericCategory(PROTOTYPE,"Prototypes" ,new GenericChildren(Proxys.prototype,PROTOTYPE_DATA_FLAVOR)),
             new GenericCategory(SAMPLING,"Samplings" ,new GenericChildren(Proxys.sampling,SAMPLING_DATA_FLAVOR)),

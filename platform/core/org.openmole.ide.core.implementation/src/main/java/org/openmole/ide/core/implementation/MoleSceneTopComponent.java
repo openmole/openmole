@@ -2,7 +2,7 @@
  * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the termoleScene of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -46,6 +46,7 @@ import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.action.StartMoleAction;
 import org.openmole.ide.core.implementation.action.StopMoleAction;
+import org.openmole.ide.core.model.control.IMoleComponent;
 import org.openmole.ide.core.implementation.dialog.DialogFactory;
 import org.openmole.ide.core.model.workflow.IMoleScene;
 import org.openmole.ide.misc.widget.ToolBarButton;
@@ -75,24 +76,22 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     private final InstanceContent ic = new InstanceContent();
     private PaletteController palette;
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
-    private IMoleScene ms;
-
-    public MoleSceneTopComponent(IMoleScene clonedMoleScene) {
-        initialize(clonedMoleScene);
-    }
+    private IMoleScene moleScene;
+    private IMoleComponent moleComponent;
 
     public MoleSceneTopComponent() {
-        this(TopComponentsManager.buildMoleScene());
     }
 
-    private void initialize(IMoleScene m) {
-        ms = m;
+    public void initialize(IMoleScene ms,
+            IMoleComponent mc) {
+        moleScene = ms;
+        moleComponent = mc;
         associateLookup(new AbstractLookup(ic));
         addPalette();
         initComponents();
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        TopComponentsManager.registerTopComponent(this);
+        // TopComponentsManager.registerTopComponent(this);
         detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
@@ -115,20 +114,24 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         toolBar.add(stopButton.peer());
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
-        setDisplayName(ms.manager().name().get());
-        setName(ms.manager().name().get());
-        add(new JScrollPane(ms.graphScene().createView()), BorderLayout.CENTER);
+        setDisplayName(moleScene.manager().name().get());
+        setName(moleScene.manager().name().get());
+        add(new JScrollPane(moleScene.graphScene().createView()), BorderLayout.CENTER);
         etc.close();
         repaint();
         ((EntityPropertyTopComponent) WindowManager.getDefault().findTopComponent("EntityPropertyTopComponent")).open();
     }
 
+    public IMoleComponent getMoleComponent() {
+        return moleComponent;
+    }
+
     public IMoleScene getMoleScene() {
-        return ms;
+        return moleScene;
     }
 
     public void addPalette() {
-        palette = PaletteSupport.createPalette(ms.moleSceneType());
+        palette = PaletteSupport.createPalette(moleScene);
         ic.add(palette);
     }
 
@@ -191,10 +194,10 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     @Override
     public void componentActivated() {
         PaletteSupport.setCurrentMoleSceneTopComponent(this);
-        refresh(ms.isBuildScene());
+        refresh(moleScene.isBuildScene());
         Displays.propertyPanel().cleanViewport();
-        TopComponentsManager.displayExecutionView(ms);
-        if (!ms.isBuildScene()) {
+        TopComponentsManager.displayExecutionView(moleComponent);
+        if (!moleScene.isBuildScene()) {
             etc.open();
         }
         PaletteSupport.modified_$eq(false);
@@ -207,19 +210,17 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
 
     @Override
     public boolean canClose() {
-        if (ms.isBuildScene()) {
+        if (moleScene.isBuildScene()) {
             return true;
         } else {
-            return DialogFactory.closeExecutionTab(ms);
+            return DialogFactory.closeExecutionTab(moleComponent);
         }
     }
 
     @Override
     public void componentClosed() {
-        if (ms.isBuildScene()) {
-            TopComponentsManager.removeAllExecutionTopComponent(this);
-        }
-        TopComponentsManager.removeTopComponent(this);
+        TopComponentsManager.stopAndCloseExecutions(moleComponent);
+        TopComponentsManager.removeTopComponent(moleComponent);
     }
 
     void writeProperties(java.util.Properties p) {

@@ -21,20 +21,23 @@ import java.awt.Color
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
+import org.openmole.ide.core.model.control.IMoleComponent
 import scala.swing.Label
 
 object DialogFactory {
   
-  def closeExecutionTab(ms: IMoleScene): Boolean = { 
-    if (TopComponentsManager.executionTabs(ms).moleExecution.finished) true
-    else if (TopComponentsManager.executionTabs(ms).moleExecution.started){
-      val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>"){
-        background = Color.white}.peer
-      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
-      else false 
+  def closeExecutionTab(mc: IMoleComponent): Boolean = { 
+    mc match {
+      case x: ExecutionMoleComponent=> 
+        if (x.executionManager.moleExecution.finished) true
+        else if (x.executionManager.moleExecution.started){
+          val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>"){
+            background = Color.white}.peer
+          if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+          else false 
+        }
+        else true
     }
-    else true
   }
 }

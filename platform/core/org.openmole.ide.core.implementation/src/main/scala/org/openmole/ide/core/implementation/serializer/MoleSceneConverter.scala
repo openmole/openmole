@@ -25,11 +25,11 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
+import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.model.commons.MoleSceneType._
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
@@ -94,7 +94,7 @@ class MoleSceneConverter extends Converter{
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
     
-    val scene = new MoleScene(BUILD)
+    val scene = new BuildMoleScene
     scene.manager.name = Some(reader.getAttribute("name"))
         
     
@@ -131,5 +131,5 @@ class MoleSceneConverter extends Converter{
     scene
   }
   
-  override def canConvert(t: Class[_]) = t.equals(classOf[MoleScene])
+  override def canConvert(t: Class[_]) = t.equals(classOf[BuildMoleScene])
 }

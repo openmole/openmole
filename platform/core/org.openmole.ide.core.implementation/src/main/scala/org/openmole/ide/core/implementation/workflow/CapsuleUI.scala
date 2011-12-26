@@ -23,7 +23,6 @@ import org.openmole.ide.core.implementation.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
-import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -77,7 +76,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     if (on) startingCapsule = on
     
     nbInputSlots+= 1
-    val im = new InputSlotWidget(scene.graphScene,this,nbInputSlots,on,scene.moleSceneType == EXECUTION)
+    val im = new InputSlotWidget(scene,this,nbInputSlots,on)
     connectableWidget.addInputSlot(im)
     scene.validate
     scene.refresh

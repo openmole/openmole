@@ -27,12 +27,12 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.palette.FrozenProxys
 import org.openmole.ide.core.implementation.palette.PaletteSupport
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object GUISerializer {
@@ -57,8 +57,7 @@ object GUISerializer {
     //molescenes
     TopComponentsManager.moleScenes.foreach(ms=>
       ms match {
-        case x: IMoleScene=> 
-          if (x.moleSceneType == BUILD) out.writeObject(x)
+        case x: BuildMoleScene=> out.writeObject(x)
         case _=>})
     out.close
   }
@@ -76,7 +75,7 @@ object GUISerializer {
         val readObject = in.readObject
         readObject match{
           case x: SerializedProxys=> x.loadProxys
-          case x: IMoleScene=> {TopComponentsManager.addTopComponent(new MoleSceneTopComponent(x))}
+          case x: BuildMoleScene=> {TopComponentsManager.addTopComponent(x)}
           case _=> throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }

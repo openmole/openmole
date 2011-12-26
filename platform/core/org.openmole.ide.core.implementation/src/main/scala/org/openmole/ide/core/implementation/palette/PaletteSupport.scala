@@ -17,11 +17,9 @@
 
 package org.openmole.ide.core.implementation.palette
 
-import com.rits.cloning.Cloner
 import java.awt.Image
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
-import javax.swing.Action
 import org.netbeans.spi.palette.DragAndDropHandler
 import org.netbeans.spi.palette.PaletteActions
 import org.netbeans.spi.palette.PaletteController
@@ -33,13 +31,13 @@ import org.openide.nodes.Node
 import java.beans.BeanInfo
 import java.awt.datatransfer.DataFlavor
 import org.openide.util.datatransfer.ExTransferable
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.implementation.display.Displays
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.netbeans.spi.palette.PaletteController
 import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.model.commons.MoleSceneType
-import org.openmole.ide.core.model.commons.MoleSceneType._
+import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
 object PaletteSupport {
@@ -49,35 +47,45 @@ object PaletteSupport {
   val ENVIRONMENT_DATA_FLAVOR= new DataFlavor(classOf[EnvironmentDataProxyUI], ENVIRONMENT)
   val DOMAIN_DATA_FLAVOR= new DataFlavor(classOf[DomainDataProxyUI], DOMAIN)
 
-  var currentType = BUILD
   var modified= false
   var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None
     
   def closeOpenedTopComponents = {
-    if (currentMoleSceneTopComponent.isDefined)
-      currentMoleSceneTopComponent.get.getOpened.foreach(_.close)
+    currentMoleSceneTopComponent match {
+      case Some(x: MoleSceneTopComponent)=>x.getOpened.foreach(_.close)
+      case _=>
+    }
   }
   
   def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
   
-  def createPalette(mst: MoleSceneType): PaletteController = {
-      currentType = mst
-      val paletteR = new AbstractNode(new CategoryBuilder(mst))
-      paletteR.setName("Entities")
-      var p = PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler)
-      p.addPropertyChangeListener( new MyAddPropertyChangeListener(p))
-      p
-    }
+  def createPalette(ms: IMoleScene): PaletteController = {
+    val paletteR = new AbstractNode(new CategoryBuilder(ms))
+    paletteR.setName("Entities")
+    var p = PaletteFactory.createPalette(paletteR, new MyActions, new MyPaletteFilter, new MyDnDHandler)
+    p.addPropertyChangeListener( new MyAddPropertyChangeListener(p))
+    p
+  }
   
-  def createPalette: PaletteController = createPalette(currentType)
-  
-  def refreshPalette(mst: MoleSceneType) = {
+  def refreshPalette(ms: IMoleScene) = {
     modified = true
-    if (currentMoleSceneTopComponent.isDefined) {
-      currentMoleSceneTopComponent.get.refresh(mst == BUILD)
-      modified = false}
+    currentMoleSceneTopComponent match {
+      case Some(x: MoleSceneTopComponent)=>
+        ms match {
+          case x: BuildMoleScene=> currentMoleSceneTopComponent.get.refresh(true)
+          case _=> currentMoleSceneTopComponent.get.refresh(false)
+        }
+        modified = false
+      case _=>
+    }
   }  
-  def refreshPalette: Unit = refreshPalette(currentType)
+  
+  def refreshPalette: Unit = {
+    currentMoleSceneTopComponent match {
+      case Some(x: MoleSceneTopComponent)=>refreshPalette(x.getMoleScene)
+      case _=>
+    }
+  }
 }
   
 class MyAddPropertyChangeListener(palette: PaletteController) extends PropertyChangeListener  {

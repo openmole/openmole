@@ -43,7 +43,6 @@ import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
-import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
@@ -51,9 +50,9 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
  
 
-class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager) extends GraphScene.StringGraph with IMoleScene{
-  def this(mst: MoleSceneType)= this(mst,new MoleSceneManager)
+abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
+  val manager = new MoleSceneManager
   var obUI: Option[Widget]= None
   val capsuleLayer= new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
@@ -73,21 +72,6 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
   val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
-  
-  override def copy =  {
-    var capsuleMapping = new HashMap[ICapsuleUI,ICapsuleUI]
-    var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = new MoleScene(EXECUTION)
-    manager.capsules.foreach(n=> {
-        val (caps,islotMapping) = n._2.copy(ms)
-        if (n._2.startingCapsule) ms.manager.setStartingCapsule(caps)
-        SceneItemFactory.createCapsule(caps,ms, new Point(n._2.connectableWidget.x.toInt,n._2.connectableWidget.y.toInt))
-        capsuleMapping+= n._2-> caps
-        islots++= islotMapping})
-    manager.transitions.foreach(t=> {SceneItemFactory.createEdge(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)
-      })
-    ms
-  }
   
   override def graphScene = this
   
@@ -114,32 +98,12 @@ class MoleScene(val moleSceneType: MoleSceneType,val manager: IMoleSceneManager)
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
     
-  override def initCapsuleAdd(w: ICapsuleUI)= {
-    obUI= Some(w.asInstanceOf[Widget])
-    obUI.get.createActions(SELECT).addAction(selectAction)
-    if (moleSceneType == BUILD) {
-      obUI.get.createActions(CONNECT).addAction(connectAction)
-    }
-    obUI.get.createActions(CONNECT).addAction(moveAction)
-  }
   
   override def attachNodeWidget(n: String)= {
     capsuleLayer.addChild(obUI.get)
     obUI.get
   } 
 
-  override def attachEdgeWidget(e: String)= {
-    val connectionWidget = new LabeledConnectionWidget(graphScene,manager.transition(e))
-    connectLayer.addChild(connectionWidget);
-    connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
-    if (moleSceneType == BUILD) {
-      connectionWidget.getActions.addAction(createSelectAction)
-      connectionWidget.getActions.addAction(createObjectHoverAction)
-      connectionWidget.getActions.addAction(reconnectAction)
-      connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
-    }
-    connectionWidget
-  }
   
   class MoleSceneConnectProvider extends ConnectProvider {
     var source: Option[String]= None

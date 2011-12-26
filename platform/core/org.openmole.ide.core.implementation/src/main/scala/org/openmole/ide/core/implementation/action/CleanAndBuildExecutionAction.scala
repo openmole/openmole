@@ -18,13 +18,17 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.implementation.palette.FrozenProxys
+import org.openmole.ide.core.implementation.control.BuildMoleComponent
 import scala.swing.Action
 
 class CleanAndBuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
-      TopComponentsManager.removeAllExecutionTopComponent(tc)
+    tc.getMoleComponent match {
+      case x: BuildMoleComponent=> x.stopAndCloseExecutions
+      case _=>
+    }
+   // tc.getMoleComponent.executionMoleSceneComponents.foreach()
+    //  TopComponentsManager.removeAllExecutionTopComponent(tc)
       new BuildExecutionAction(tc)()
   }
 }

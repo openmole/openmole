@@ -18,7 +18,6 @@
 package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.graph.GraphScene
-import org.openmole.ide.core.model.commons.MoleSceneType
 
 trait IMoleScene { 
   def manager: IMoleSceneManager
@@ -31,13 +30,9 @@ trait IMoleScene {
   
   def initCapsuleAdd(w: ICapsuleUI)
   
-  def moleSceneType: MoleSceneType.Value
-  
-  def isBuildScene: Boolean = moleSceneType == MoleSceneType.BUILD
-  
   def graphScene: GraphScene[String,String]
   
-  def copy: IMoleScene
-  
   def createEdge(sourceNodeID:String, targetNodeID: String)
+  
+  def isBuildScene: Boolean
 }

@@ -24,16 +24,16 @@ import java.awt.Graphics2D
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectableWidget
-import org.openmole.ide.core.model.commons.MoleSceneType._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.ListBuffer
 
-class ConnectableWidget(scene: IMoleScene, val capsule: CapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
+class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWidget(scene, capsule) with IConnectableWidget{
 
   var islots= ListBuffer.empty[IInputSlotWidget]
-  val oslot= new OutputSlotWidget(scene.graphScene,capsule,scene.moleSceneType == EXECUTION)
+  val oslot= new OutputSlotWidget(scene,capsule)
   var samplingWidget: Option[SamplingWidget] = None
   
   addChild(oslot)

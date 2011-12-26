@@ -27,6 +27,9 @@ class EnableTaskDetailedViewAction extends ActionListener{
   
   override def actionPerformed(ae: ActionEvent)= {
     TopComponentsManager.detailedView= ae.getSource.asInstanceOf[AbstractButton].isSelected
-    TopComponentsManager.topComponents.keys.foreach(tc=> {tc.getMoleScene.manager.capsules.values.foreach(_.connectableWidget.setDetailedView);tc.getMoleScene.validate;tc.getMoleScene.refresh})
+    TopComponentsManager.topComponents.foreach{tc=> tc.moleScene.manager.capsules.values.foreach(_.connectableWidget.setDetailedView)
+                                               tc.moleScene.validate
+                                               tc.moleScene.refresh}
+  //  TopComponentsManager.topComponents.keys.foreach(tc=> {tc.getMoleScene.manager.capsules.values.foreach(_.connectableWidget.setDetailedView);tc.getMoleScene.validate;tc.getMoleScene.refresh})
   }
 }

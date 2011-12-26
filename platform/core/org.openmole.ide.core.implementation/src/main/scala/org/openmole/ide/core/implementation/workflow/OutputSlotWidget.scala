@@ -18,12 +18,15 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
-import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.core.model.commons.Constants
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class OutputSlotWidget(scene: Scene,val capsule: CapsuleUI,val isExecutableMode: Boolean)   extends SlotWidget(scene){
-  if(isExecutableMode) setImage(Images.IMAGE_OUTPUT_EXE_SLOT)
-  else setImage(Images.IMAGE_OUTPUT_SLOT)
+class OutputSlotWidget(scene: IMoleScene,val capsule: ICapsuleUI)   extends SlotWidget(scene.graphScene){
+  scene match {
+    case x: ExecutionMoleScene=> setImage(Images.IMAGE_OUTPUT_EXE_SLOT)
+    case _=>setImage(Images.IMAGE_OUTPUT_SLOT)
+  }
   
   setDetailedView(Constants.TASK_CONTAINER_WIDTH)
   
