@@ -34,6 +34,12 @@
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.runtime.daemon</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -91,6 +97,32 @@
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
 				    <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.openmole.core</groupId>
+                                    <artifactId>org.openmole.runtime</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+				    <destFileName>runtime.tar.gz</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
