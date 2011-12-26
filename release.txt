@@ -1,0 +1,2 @@
+mvn release:prepare -DignoreSnapshots=true -Dresume=false -DreleaseVersion=$1 -DdevelopmentVersion=$2
+mvn release:perform
