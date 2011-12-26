@@ -170,7 +170,7 @@
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
+                <version>${plugin.org.scala-tools.maven-scala-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>scala-compile-first</id>
@@ -195,10 +195,11 @@
                 <extensions>true</extensions>
                 <configuration>
                     <manifestLocation>target/META-INF</manifestLocation>
-                    <finalName>${symbolic.name}_${project.version}</finalName>
+                    <finalName>${symbolic.name}_${bundle.version}</finalName>
                     <instructions>
                         <Bundle-Name>${bundle.name}</Bundle-Name>
                         <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
+			<Bundle-Version>${bundle.version}</Bundle-Version>
                         <Bundle-Description>${bundle.description}</Bundle-Description>
                         <Import-Package>${import.packages}</Import-Package>
                         <Export-Package>${export.packages}</Export-Package>

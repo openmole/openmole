@@ -76,6 +76,7 @@
                                     <artifactId>plugins</artifactId>
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
+				    <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.openmole.ui.console</groupId>
@@ -88,6 +89,7 @@
                                     <artifactId>org.openmole.ui.console</artifactId>
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
+				    <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -109,43 +111,6 @@
                             <resources>
                                 <resource>
                                     <directory>../org.openmole.ui.console/target/product/</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
- 
-                    <execution>
-                        <id>copy-plugin</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>./target/dependency/plugins-0.4-SNAPSHOT/</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-ui-plugin</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>./target/dependency/plugins-ui-0.4-SNAPSHOT/</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

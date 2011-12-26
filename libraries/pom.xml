@@ -73,18 +73,18 @@
 
     <build>
         <plugins>
-            <!-- Bundles creation -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
                     <outputDirectory>${basedir}</outputDirectory>
+                    <finalName>${symbolic.name}_${bundle.version}</finalName>
                     <instructions>
                         <Bundle-Name>${bundle.name}</Bundle-Name>
+                        <Bundle-Version>${bundle.version}</Bundle-Version>
                         <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
                         <Bundle-Description>${bundle.description}</Bundle-Description>
-                        <!--<Import-Package>${import.packages}</Import-Package>-->
                         <Export-Package>${libraries.export.packages}</Export-Package>
                         <Embed-Dependency>${embed-dep}</Embed-Dependency>
                         <Embed-Transitive>${embed-transitive}</Embed-Transitive>

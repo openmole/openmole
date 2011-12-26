@@ -1,15 +1,13 @@
 <assembly>
   <id>console</id>
+  <baseDirectory></baseDirectory>
   <formats>
     <format>tar.gz</format>
   </formats>
   <fileSets>
     <fileSet>
-      <directory>target/dependency</directory>
-      <outputDirectory></outputDirectory>
-      <includes>
-        <include>**</include>
-      </includes>
+      <directory>${project.build.directory}/dependency</directory>
+      <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
