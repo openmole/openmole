@@ -10,7 +10,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.4-SNAPSHOT</version>
+        <version>0.4-RC2</version>
     </parent>
 
     <artifactId>org.openmole.plugin.environment.glite</artifactId>
@@ -73,7 +73,7 @@
     <!-- ************************************************************* -->
 
     <name>${project.artifactId} ${project.version}</name>
-    <description></description>
+    <description />
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->

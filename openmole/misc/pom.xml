@@ -10,13 +10,13 @@
     <parent>
         <artifactId>openmole</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.4-SNAPSHOT</version>
+        <version>0.4-RC2</version>
     </parent>
 
     <artifactId>misc</artifactId>
 
     <properties>
-        <include></include>
+        <include />
     </properties>
 
     <modules>

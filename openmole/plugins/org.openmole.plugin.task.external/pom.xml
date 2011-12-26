@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.4-SNAPSHOT</version>
+        <version>0.4-RC2</version>
     </parent>
 
     <artifactId>org.openmole.plugin.task.external</artifactId>
@@ -33,7 +32,7 @@
     <!-- ************************************************************* -->
 
     <name>${project.artifactId} ${project.version}</name>
-    <description></description>
+    <description />
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
