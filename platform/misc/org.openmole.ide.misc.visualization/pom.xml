@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>de.erichseifert.gral</artifactId>
-            <version>${lib.de.erichseifert.gral.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
