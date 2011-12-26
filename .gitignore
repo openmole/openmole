@@ -1,0 +1,15 @@
+*.log
+target/
+target/*
+*.orig
+build
+build/*
+dist
+dist/*
+private
+private/*
+release/
+release/*
+*.iml
+*.ipr
+*.iws
