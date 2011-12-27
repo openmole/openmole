@@ -23,7 +23,6 @@ import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.workspace.Workspace
@@ -32,36 +31,25 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 object TopComponentsManager {
 
   var countExec= new AtomicInteger
-  var topComponents= new HashSet[BuildMoleComponent] 
   EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
   
-  def moleScenes = topComponents.map{_.moleScene}
+  def moleScenes = topComponents.map{_.getMoleScene}
   
-  def removeTopComponent(mc: IMoleComponent) = {
-    mc match {
-      case x: BuildMoleComponent=> topComponents-= x
-      case _=>
-    }
-  }
-  
+  def topComponents = TopComponent.getRegistry.getOpened.
+  filter(_.isInstanceOf[MoleSceneTopComponent]).
+  map{_.asInstanceOf[MoleSceneTopComponent]}
+    
   def setDetailedView(b: Boolean) = moleScenes.foreach{ ms=>
     ms.manager.capsules.values.foreach{c=>
       c.detailedView = b
       c.connectableWidget.setDetailedView}
     ms.validate
     ms.refresh}
-//  def topComponents: List[MoleSceneTopComponent] = TopComponent.getRegistry.getOpened.filter{tc=>
-//    tc match {
-//      case x: MoleSceneTopComponent=> true
-//      case _=> false
-//    }
-//  }.toList
   
   def addTopComponent:MoleSceneTopComponent = addTopComponent(new BuildMoleScene(DialogFactory.newTabName))
   
   def addTopComponent(ms: BuildMoleScene): MoleSceneTopComponent= {
     val mc= new BuildMoleComponent(ms)
-    topComponents+= mc
     mc.moleSceneTopComponent.open
     mc.moleSceneTopComponent.requestActive
     mc.moleSceneTopComponent

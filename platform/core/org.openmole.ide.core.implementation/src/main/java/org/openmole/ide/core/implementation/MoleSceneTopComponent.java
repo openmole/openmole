@@ -221,7 +221,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     @Override
     public void componentClosed() {
         TopComponentsManager.stopAndCloseExecutions(moleComponent);
-        TopComponentsManager.removeTopComponent(moleComponent);
+       // TopComponentsManager.removeTopComponent(moleComponent);
     }
 
     void writeProperties(java.util.Properties p) {
