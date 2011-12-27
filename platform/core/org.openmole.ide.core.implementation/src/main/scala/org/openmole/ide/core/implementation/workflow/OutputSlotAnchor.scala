@@ -20,7 +20,6 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
 import org.openmole.ide.core.model.commons.Constants
-import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidget) {
@@ -30,7 +29,7 @@ class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidg
   
   override def compute(entry: Anchor.Entry)= {
     var detailedEffect= 0
-    if (TopComponentsManager.detailedView)
+    if (relatedWidget.detailedView)
       detailedEffect= Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH
     new Result(relatedWidget.widget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
   }

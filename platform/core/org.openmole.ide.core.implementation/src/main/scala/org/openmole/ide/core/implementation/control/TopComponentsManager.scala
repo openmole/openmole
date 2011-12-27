@@ -31,7 +31,6 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 
 object TopComponentsManager {
 
-  var detailedView= false
   var countExec= new AtomicInteger
   var topComponents= new HashSet[BuildMoleComponent] 
   EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
@@ -44,6 +43,19 @@ object TopComponentsManager {
       case _=>
     }
   }
+  
+  def setDetailedView(b: Boolean) = moleScenes.foreach{ ms=>
+    ms.manager.capsules.values.foreach{c=>
+      c.detailedView = b
+      c.connectableWidget.setDetailedView}
+    ms.validate
+    ms.refresh}
+//  def topComponents: List[MoleSceneTopComponent] = TopComponent.getRegistry.getOpened.filter{tc=>
+//    tc match {
+//      case x: MoleSceneTopComponent=> true
+//      case _=> false
+//    }
+//  }.toList
   
   def addTopComponent:MoleSceneTopComponent = addTopComponent(new BuildMoleScene(DialogFactory.newTabName))
   

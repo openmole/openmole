@@ -194,6 +194,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     @Override
     public void componentActivated() {
         PaletteSupport.setCurrentMoleSceneTopComponent(this);
+        TopComponentsManager.setDetailedView(detailedViewButton.isSelected());
         refresh(moleScene.isBuildScene());
         Displays.propertyPanel().cleanViewport();
         TopComponentsManager.displayExecutionView(moleComponent);

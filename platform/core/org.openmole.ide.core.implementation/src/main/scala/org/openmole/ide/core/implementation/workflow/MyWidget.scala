@@ -23,7 +23,6 @@ import java.awt.Font
 import java.awt.Graphics2D
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import java.awt.BasicStroke
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -42,7 +41,7 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
   
   
   def setWidthHint= {
-    if (TopComponentsManager.detailedView) {
+    if (capsule.detailedView) {
       taskWidth = EXPANDED_TASK_CONTAINER_WIDTH
       taskImageOffset = EXPANDED_TASK_IMAGE_WIDTH_OFFSET
     }

@@ -36,4 +36,8 @@ trait ICapsuleUI {
   def widget: Widget
   
   def copy(sc: IMoleScene): (ICapsuleUI,HashMap[IInputSlotWidget,IInputSlotWidget])
+  
+  def detailedView : Boolean
+  
+  def detailedView_=(b : Boolean)
 }

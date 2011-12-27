@@ -39,6 +39,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   val connectableWidget= new ConnectableWidget(scene,this)
   val dndTaskIntoCapsuleProvider = new DnDTaskIntoCapsuleProvider(scene, this)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
+  override var detailedView = false
   
   addChild(connectableWidget)
         

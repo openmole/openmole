@@ -22,7 +22,6 @@ import java.awt.Container
 import java.awt.Font
 import java.awt.Graphics2D
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectableWidget
@@ -95,7 +94,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
           val h = 5 + TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
           graphics.drawImage(Images.thumb(p.dataUI.imagePath),x - taskWidth / 2, h ,new Container)
           graphics.setColor(new Color(102,102,102))
-          if (TopComponentsManager.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
+          if (capsule.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
           i+= 1
         })
 
