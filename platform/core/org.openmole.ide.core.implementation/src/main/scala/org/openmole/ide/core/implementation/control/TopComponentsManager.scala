@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.control
 
 import org.openmole.ide.core.model.control.IMoleComponent
 import java.util.concurrent.atomic.AtomicInteger
+import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
@@ -43,7 +44,6 @@ object TopComponentsManager {
       case _=>
     }
   }
-    
   
   def addTopComponent:MoleSceneTopComponent = addTopComponent(new BuildMoleScene(DialogFactory.newTabName))
   
@@ -51,7 +51,7 @@ object TopComponentsManager {
     val mc= new BuildMoleComponent(ms)
     topComponents+= mc
     mc.moleSceneTopComponent.open
-    mc.moleSceneTopComponent.setVisible(true)
+    mc.moleSceneTopComponent.requestActive
     mc.moleSceneTopComponent
   }
     
