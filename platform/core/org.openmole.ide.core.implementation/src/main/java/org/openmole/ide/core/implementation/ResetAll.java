@@ -39,10 +39,8 @@ public final class ResetAll implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-     //   TopComponentsManager.removeMoleScenes();
         PaletteSupport.closeOpenedTopComponents();
         Proxys.clearAll();
-        TopComponentsManager.addTopComponent();
         PaletteSupport.refreshPalette();
         Displays.propertyPanel().cleanViewport();
     }

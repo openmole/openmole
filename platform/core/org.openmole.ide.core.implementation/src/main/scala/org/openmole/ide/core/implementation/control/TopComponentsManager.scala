@@ -18,30 +18,20 @@
 package org.openmole.ide.core.implementation.control
 
 import org.openmole.ide.core.model.control.IMoleComponent
-import org.openmole.ide.core.model.workflow.IMoleScene
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleScene
-import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.model.workflow.IMoleScene
-import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
-import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.workspace.Workspace
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 
 object TopComponentsManager {
 
   var detailedView= false
-  //var countMole= new AtomicInteger
   var countExec= new AtomicInteger
-  //var topComponents= new HashMap[MoleSceneTopComponent, ListBuffer[MoleSceneTopComponent]] 
   var topComponents= new HashSet[BuildMoleComponent] 
   EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
   
@@ -55,25 +45,16 @@ object TopComponentsManager {
   }
     
   
-  def addTopComponent:MoleSceneTopComponent = {
-    val sc = new BuildMoleScene
-    //  sc.manager.name = Some({countMole+= 1; "Mole"+countMole})
-    sc.manager.name = Some("LENOM")
-    addTopComponent(sc)
-  }
+  def addTopComponent:MoleSceneTopComponent = addTopComponent(new BuildMoleScene(DialogFactory.newTabName))
   
   def addTopComponent(ms: BuildMoleScene): MoleSceneTopComponent= {
     val mc= new BuildMoleComponent(ms)
     topComponents+= mc
     mc.moleSceneTopComponent.open
+    mc.moleSceneTopComponent.setVisible(true)
     mc.moleSceneTopComponent
   }
     
-//  def currentExecutionManager: ExecutionManager = executionTabs.getOrElse(PaletteSupport.currentMoleSceneTopComponent.get.getMoleScene,
-  //                                                                         throw new UserBadDataError("This Mole can not be run. Please build it first"))
-  
-  //def registerTopComponent(tc: MoleSceneTopComponent) = topComponents.getOrElseUpdate(tc, new ListBuffer[MoleSceneTopComponent])
-  
   def addExecutionTopComponent(mc : IMoleComponent): MoleSceneTopComponent = {
     mc match {
       case x:BuildMoleComponent=>
@@ -98,6 +79,7 @@ object TopComponentsManager {
     tc match {
       case x:ExecutionMoleComponent=>
         ExecutionSupport.changeView(x.executionManager)
+      case _=>
     }
   }
 }

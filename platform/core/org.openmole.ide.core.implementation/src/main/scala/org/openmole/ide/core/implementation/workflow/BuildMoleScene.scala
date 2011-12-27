@@ -28,8 +28,10 @@ import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
-class BuildMoleScene extends MoleScene {
+class BuildMoleScene(n: String) extends MoleScene {
 
+  def this() = this("")
+  manager.name = Some(n)
   override val isBuildScene = true
   
   def copy =  {

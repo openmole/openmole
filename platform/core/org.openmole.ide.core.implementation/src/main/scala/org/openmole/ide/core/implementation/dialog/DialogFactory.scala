@@ -18,10 +18,13 @@
 package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
+import javax.swing.JOptionPane
+import javax.swing.JOptionPane._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.control.IMoleComponent
 import scala.swing.Label
 
@@ -39,5 +42,14 @@ object DialogFactory {
         }
         else true
     }
+  }
+  
+  def newTabName: String = { 
+    val tabName = JOptionPane.showInputDialog(null, "Mole name:","Mole_" + (TopComponentsManager.topComponents.size + 1))
+    tabName match {
+      case null=> CLOSED_OPTION
+      case _=>
+    }
+    tabName
   }
 }

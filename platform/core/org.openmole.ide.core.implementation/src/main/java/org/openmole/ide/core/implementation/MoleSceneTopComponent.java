@@ -58,7 +58,7 @@ import org.openmole.ide.misc.widget.ToolBarButton;
 autostore = false)
 @TopComponent.Description(preferredID = "MoleSceneTopComponent", iconBase = "img/addMole.png", persistenceType = TopComponent.PERSISTENCE_NEVER)
 //iconBase="SET/PATH/TO/ICON/HERE", 
-@TopComponent.Registration(mode = "editor", openAtStartup = true)
+@TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "File", id = "org.openmole.ide.core.implementation.MoleSceneTopComponent")
 //@ActionReferences({
 // @ActionReference(path = "Menu/File", position = 30),

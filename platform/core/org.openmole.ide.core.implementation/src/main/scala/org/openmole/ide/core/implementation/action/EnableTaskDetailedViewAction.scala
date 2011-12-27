@@ -21,6 +21,8 @@ import scala.collection.JavaConversions._
 import javax.swing.AbstractButton
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import org.openide.windows.Mode
+import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 
 class EnableTaskDetailedViewAction extends ActionListener{
