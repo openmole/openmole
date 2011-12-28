@@ -101,7 +101,7 @@ object URIFile extends Logger {
         withFailureControl(src.storageDescription,
                            is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally is.close
-    } finally os.flushClose
+    } finally os.close
   }
 
   def copy(src: File, dest: IURIFile): Unit = withToken(dest.storageDescription, copy(src, dest,_))
@@ -113,7 +113,7 @@ object URIFile extends Logger {
       try withFailureControl(dest.storageDescription, 
                              is.copy(os, Workspace.preferenceAsInt(BufferSize), 
                                      Workspace.preferenceAsDurationInMs(CopyTimeout)))
-      finally os.flushClose
+      finally os.close
     } finally is.close
   }
 
@@ -176,19 +176,13 @@ class URIFile(val location: String) extends IURIFile with Id {
   protected def SAGAURL: URL = trycatch(fromLocation(location))
   
   private def parentLocationAndName(token: AccessToken) = {
-    val n = name(token)
+    val n = name
     val indice = location.lastIndexOfSlice(n)
     val parent = location.slice(0, indice)
     (parent, n)
   }
   
-  override def name = withToken(name)
-
-  override def name(token: AccessToken) = {
-    val entry = fetchEntry(token)
-    try entry.getName.getPath
-    finally close(entry)
-  }
+  override def name = new File(SAGAURL.getPath).getName
   
   /*-------------------- is a directory ---------------------------*/
   override def isDirectory: Boolean = withToken(isDirectory(_))

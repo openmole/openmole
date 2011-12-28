@@ -138,7 +138,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
           } finally script.delete
           
           try {
-            val name = remoteScript.name(token)
+            val name = remoteScript.name
             val install = JobFactory.createJobDescription
             install.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
             install.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](name))

@@ -78,7 +78,6 @@ trait IURIFile {
   def exist(name: String, token: AccessToken): Boolean 
 
   def name: String
-  def name(token: AccessToken): String
   
   def modificationTime(name: String): Long 
   def modificationTime(name: String, token: AccessToken): Long
