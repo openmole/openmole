@@ -10,7 +10,7 @@
     <parent>
         <artifactId>libraries</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.4-RC3-SNAPSHOT</version>
+        <version>0.4-RC3</version>
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
