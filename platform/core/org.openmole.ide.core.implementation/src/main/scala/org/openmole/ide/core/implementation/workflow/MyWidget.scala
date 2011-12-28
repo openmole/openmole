@@ -78,12 +78,12 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
   def drawBox(graphics: Graphics2D,c1: Color, c2: Color) = {
     scene match {
       case x: BuildMoleScene=> graphics.setColor(c1)
-      case _=> new Color(215,238,244,64)
+      case _=> graphics.setColor(new Color(215,238,244,64))
     }
     graphics.fill(bodyArea)
     scene match {
       case x: BuildMoleScene=> graphics.setColor(c2)
-      case _=> new Color(44,137,160,64)
+      case _=> graphics.setColor(new Color(44,137,160,64))
     }
     graphics.draw(new BasicStroke(1.3f, 1, 1).createStrokedShape(bodyArea))
   }
