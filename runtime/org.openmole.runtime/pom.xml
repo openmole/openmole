@@ -93,7 +93,7 @@
                                 <artifactItem>
                                     <groupId>com.oracle</groupId>
                                     <artifactId>java-jre-linux-i386</artifactId>
-                                    <version>7u1</version>
+                                    <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>jvm-linux-i386.tar.gz</destFileName>
@@ -101,7 +101,7 @@
                                 <artifactItem>
                                     <groupId>com.oracle</groupId>
                                     <artifactId>java-jre-linux-x64</artifactId>
-                                    <version>7u1</version>
+                                    <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>jvm-linux-x64.tar.gz</destFileName>

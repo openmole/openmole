@@ -124,6 +124,22 @@
                                     <outputDirectory>${project.build.directory}</outputDirectory>
 				    <destFileName>runtime.tar.gz</destFileName>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-i386</artifactId>
+                                    <version>${lib.runtime.jvm.version}</version>
+                                    <type>tgz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm-linux-i386.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.oracle</groupId>
+                                    <artifactId>java-jre-linux-x64</artifactId>
+                                    <version>${lib.runtime.jvm.version}</version>
+                                    <type>tgz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>jvm-linux-x64.tar.gz</destFileName>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
