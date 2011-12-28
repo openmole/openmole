@@ -102,18 +102,21 @@
                                     <artifactId>plugins</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
+                                    <outputDirectory>${project.build.directory}/openmole-plugins/</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.openmole.ui.console</groupId>
                                     <artifactId>plugins-ui</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
+                                    <outputDirectory>${project.build.directory}/openmole-plugins-ui/</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.openmole.ui.console</groupId>
                                     <artifactId>org.openmole.ui.console</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
+                                    <outputDirectory>${project.build.directory}/console/</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

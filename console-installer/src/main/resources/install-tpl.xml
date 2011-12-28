@@ -11,12 +11,12 @@
     <packs>
         <pack name="OpenMOLE Console" required="yes">
             <description>OpenMOLE</description>
-            <fileset dir="../dependency/org.openmole.ui.console-$VERSION$/" targetdir="$INSTALL_PATH" />
+            <fileset dir="../console/" targetdir="$INSTALL_PATH" />
             <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../jvm-linux-x64.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../jvm-linux-i386.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
-            <fileset dir="../dependency/plugins-$VERSION$/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
-            <fileset dir="../dependency/plugins-ui-$VERSION$/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
+            <fileset dir="../openmole-plugins/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
+            <fileset dir="../openmole-plugins-ui/" targetdir="$INSTALL_PATH/openmole-plugins-ui/" /> 
         </pack>
     </packs>
     
