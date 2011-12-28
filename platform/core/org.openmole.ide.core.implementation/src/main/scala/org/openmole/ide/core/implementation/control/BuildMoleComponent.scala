@@ -30,7 +30,7 @@ class BuildMoleComponent(val moleScene: BuildMoleScene) extends IMoleComponent{
   def stopAndCloseExecutions = {
     executionMoleSceneComponents.foreach{emc=>
       emc.executionManager.cancel
-        moleSceneTopComponent.close
+      emc.moleSceneTopComponent.close
     }
     executionMoleSceneComponents.clear
   }
