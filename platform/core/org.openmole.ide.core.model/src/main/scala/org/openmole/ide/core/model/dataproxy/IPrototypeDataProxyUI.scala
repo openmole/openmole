@@ -23,4 +23,9 @@ trait IPrototypeDataProxyUI extends IDataProxyUI{
   def dataUI_=(d: IPrototypeDataUI[_])
   
   override def dataUI: IPrototypeDataUI[_] 
+  
+  override def toString = {
+    if (dataUI.dim > 0) dataUI.name + " [" + dataUI.dim+"]"
+    else dataUI.name
+  }
 }
