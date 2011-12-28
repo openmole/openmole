@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.openmole.ide</groupId>
         <artifactId>ide</artifactId>
-        <version>0.4-RC3-SNAPSHOT</version> 
+        <version>0.4-RC3</version> 
     </parent>
 
     <artifactId>platform</artifactId>
-    <version>0.4-RC3-SNAPSHOT</version>
+    <version>0.4-RC3</version>
     <packaging>pom</packaging>
 
     <repositories> 
