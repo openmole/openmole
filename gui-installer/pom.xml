@@ -3,6 +3,12 @@
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+<!--    <parent>
+    	<groupId>org.openmole</groupId>
+	<artifactId>openmole</artifactId>
+        <version>${version}</version>
+    </parent>-->
+
     <groupId>org.openmole.ide</groupId>
     <artifactId>installer</artifactId>
     <version>${version}</version>
@@ -16,6 +22,7 @@
     </dependencies>
 
     <properties>
+	<lib.runtime.jvm.version>7u1</lib.runtime.jvm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
         <izpack.standalone.compiler.version>4.3.4</izpack.standalone.compiler.version>
