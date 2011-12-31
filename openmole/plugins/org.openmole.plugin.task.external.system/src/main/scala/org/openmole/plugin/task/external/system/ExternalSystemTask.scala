@@ -56,30 +56,29 @@ abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
 
 
   def fetchOutputFiles(context: IContext, localDir: File, links: Set[File]): IContext = {
-    listOutputFiles(context,localDir) match {
-      case(resultContext, outputFiles) =>
-        val usedFiles = outputFiles.map(
-          f => {
-            if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
-            f.file
-          }
-        ).toSet
+    val (resultContext, outputFiles) = listOutputFiles(context,localDir)
 
-        val unusedFiles = new ListBuffer[File]
-        val unusedDirs = new ListBuffer[File]
+    val usedFiles = outputFiles.map(
+      f => {
+        if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
+        f.file
+      }
+    ).toSet
 
-        localDir.applyRecursive(
-          f => 
-            if(f.isFile) unusedFiles += f
-            else unusedDirs += f
-          , usedFiles ++ links)
+    val unusedFiles = new ListBuffer[File]
+    val unusedDirs = new ListBuffer[File]
 
-        links.foreach(_.delete)
-        unusedFiles.foreach(_.delete)
+    localDir.applyRecursive (
+      f => if(f.isFile) unusedFiles += f else unusedDirs += f,
+      usedFiles ++ links
+    )
 
-        //TODO algorithm is no optimal and may be problematic for a huge number of dirs
-        unusedDirs.foreach{d => if(d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete}
-        resultContext
-    }
+    links.foreach(_.delete)
+    unusedFiles.foreach(_.delete)
+
+    //TODO algorithm is no optimal and may be problematic for a huge number of dirs
+    unusedDirs.foreach{d => if(d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete}
+    resultContext
   }
+  
 }

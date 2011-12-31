@@ -63,13 +63,14 @@ object SerializerService {
     val fileReplacement = 
       new TreeMap[File, File] ++ extractDir.listFiles.filter(f => fi.contains(f.getName)).map {
         f => 
-        val (file, isDirectory) = fi(f.getName)
-        file -> (if (isDirectory) {
-            val extractedDir = Workspace.newDir("extractionDir")
-            f.extractDirArchiveWithRelativePath(file)
-            f.delete
-            extractedDir
-          } else f)
+          val (file, isDirectory) = fi(f.getName)
+          file -> 
+            (if (isDirectory) {
+              val extractedDir = Workspace.newDir("extractionDir")
+              f.extractDirArchiveWithRelativePath(extractedDir)
+              f.delete
+              extractedDir
+            } else f)
       }
 
     val contentFile = new File(extractDir, content)
@@ -92,21 +93,22 @@ object SerializerService {
         file =>
         //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
 
-        val name = UUID.randomUUID        
+          val name = UUID.randomUUID        
         
-        val toArchive =  if (file.isDirectory) {
-          val toArchive = Workspace.newFile
-          val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
+          val toArchive = 
+            if (file.isDirectory) {
+              val toArchive = Workspace.newFile
+              val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
 
-          try outputStream.createDirArchiveWithRelativePath(file)
-          finally outputStream.close
+              try outputStream.createDirArchiveWithRelativePath(file)
+              finally outputStream.close
                 
-          toArchive
-        } else file
+              toArchive
+            } else file
 
-        tos.addFile(toArchive, name.toString)
+          tos.addFile(toArchive, name.toString)
               
-        (name.toString, (file, file.isDirectory))
+          (name.toString, (file, file.isDirectory))
       }
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)

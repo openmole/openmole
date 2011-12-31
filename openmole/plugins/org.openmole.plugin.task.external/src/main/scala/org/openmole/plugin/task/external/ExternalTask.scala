@@ -77,10 +77,10 @@ abstract class ExternalTask(name: String) extends Task(name) {
 
   protected def listOutputFiles(context: IContext, localDir: File): (IContext, Iterable[ToGet]) = {
 
-    val file1 = outFileNames.map {
+    val f1 = outFileNames.map {
       case(fileProto, rawName, nameProtoOption) => 
         val filename = expandData(context, rawName)
-        val fo = new File(localDir,filename)
+        val fo = new File(localDir, filename)
         
         val fileVariable = new Variable(fileProto, fo)
         
@@ -90,22 +90,15 @@ abstract class ExternalTask(name: String) extends Task(name) {
           }) -> new ToGet(filename, fo)
     }
 
-    val file2 = outFileNamesFromVar map { 
+    val f2 = outFileNamesFromVar map { 
       case(fileProto, fileNameProto) => 
         val filename = context.value(fileNameProto).getOrElse(throw new UserBadDataError("Variable containing the output file name should exist in the context at the end of the task" + name))
         val fo = new File(localDir, filename)
         new Variable(fileProto, fo) -> new ToGet(filename, fo)
     }
 
-    (context ++ file1.flatMap{_._1} ++ file2.map{_._1}) -> (file1.map{_._2} ++ file2.map{_._2})
+    (context ++ f1.flatMap{_._1} ++ f2.map{_._1}) -> (f1.map{_._2} ++ f2.map{_._2})
   }
-
-  /*def addInput(fileList: IPrototype[Array[File]], names: IPrototype[Array[String]], link: Boolean): this.type = {
-    inContextFileList += ((fileList, names))
-    super.addInput(fileList)
-    super.addInput(names)
-    this
-  }*/
 
   def addInput(fileProt: IPrototype[File], name: String, link: Boolean): this.type = {
     inContextFiles += ((fileProt, name, link))

@@ -119,6 +119,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
       case e =>
         EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, WARNING))
         logger.log(WARNING, "Error in job update: " + e.getMessage)
+        logger.log(FINE, "Stack of the error in job update" , e)
         kill
     }
     val newState = state
