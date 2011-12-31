@@ -4,7 +4,7 @@
   <parent>
         <groupId>org.openmole.ide</groupId>
         <artifactId>platform</artifactId>
-        <version>0.4-RC4</version>
+        <version>0.4-RC5-SNAPSHOT</version>
   </parent>
 
   <artifactId>branding</artifactId>
