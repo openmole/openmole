@@ -10,7 +10,7 @@
     <parent>
         <artifactId>openmole-ui-console</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.4-RC4-SNAPSHOT</version>
+        <version>0.4-RC4</version>
     </parent>
 
     <groupId>org.openmole.ui.console</groupId>
