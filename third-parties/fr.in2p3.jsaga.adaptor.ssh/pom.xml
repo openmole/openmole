@@ -51,7 +51,7 @@
            <version>${lib.org.scala-lang.scala.version}</version>
            <scope>provided</scope>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest</artifactId>
             <version>${lib.org.scalatest.version}</version>
@@ -62,7 +62,7 @@
            <artifactId>junit</artifactId>
            <version>${lib.org.junit.version}</version>
            <scope>test</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
 

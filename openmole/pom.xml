@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest</artifactId>
+            <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
             <version>${lib.org.scalatest.version}</version>
             <scope>test</scope>
         </dependency>
