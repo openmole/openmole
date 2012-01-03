@@ -38,6 +38,7 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.IEnvironment
+import org.openmole.misc.tools.collection.OrderedSlidingList
 
 object BatchEnvironment {
   
@@ -61,7 +62,8 @@ object BatchEnvironment {
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval");
- 
+  val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
+
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
@@ -76,6 +78,7 @@ object BatchEnvironment {
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
   Workspace += (CheckFileExistsInterval, "PT1H")
+  Workspace += (StatisticsHistorySize, "10000")
   
 }
 
@@ -83,7 +86,8 @@ import BatchEnvironment._
 
 abstract class BatchEnvironment extends Environment {
   
-  val jobRegistry = new ExecutionJobRegistry[BatchExecutionJob]
+  val jobRegistry = new ExecutionJobRegistry
+  val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
       
@@ -103,7 +107,7 @@ abstract class BatchEnvironment extends Environment {
     jobRegistry.register(bej)
   }
   
-  def executionJob(job: IJob) = new BatchExecutionJob(this, job, nextExecutionJobId)
+  def executionJob(job: IJob) = new BatchExecutionJob(this, job)
   
   def minUpdateInterval = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
   def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)

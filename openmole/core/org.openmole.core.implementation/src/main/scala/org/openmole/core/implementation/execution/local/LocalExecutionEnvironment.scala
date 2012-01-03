@@ -105,7 +105,7 @@ class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
     }
   }
 
-  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job, nextExecutionJobId))
+  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job))
 
   def submit(moleJob: IMoleJob): Unit = submit(new Job(moleJob.id.executionId, List(moleJob)))
 

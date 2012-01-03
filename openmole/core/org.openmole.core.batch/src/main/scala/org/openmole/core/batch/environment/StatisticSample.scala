@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2011 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,20 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.execution
+package org.openmole.core.batch.environment
 
-object IExecutionJobId {
-  implicit def order = new Ordering[IExecutionJobId] {
-    def compare(left: IExecutionJobId, right: IExecutionJobId): Int = {
-      val comp = left.id.compare(right.id)
-      if(comp != 0) return comp
-      left.environmentId.compare(right.environmentId)
-    }
+import org.openmole.core.model.execution.ExecutionState._
+
+object StatisticSample {
+  implicit val orderingByDone = new Ordering[StatisticSample] {
+    def compare (x: StatisticSample, y: StatisticSample): Int = (x.done - y.done).toInt
   }
 }
 
-
-trait IExecutionJobId {
-  def environmentId: String
-  def id: Long
+class StatisticSample(val submitted: Long, val running: Long, val done: Long) {
+  def this(job: BatchJob) = this(job.timeStemp(SUBMITTED), job.timeStemp(RUNNING), job.timeStemp(DONE))
 }

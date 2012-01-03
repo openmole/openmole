@@ -24,7 +24,7 @@ import org.openmole.misc.tools.service.RNG._
 import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
-
+import org.openmole.core.model.execution.ExecutionState
 
 class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(resultPath, jobService){
 
@@ -55,4 +55,5 @@ class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobServic
     lastUpdate = System.currentTimeMillis
     state
   }
-}
+  
+ }

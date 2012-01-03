@@ -40,9 +40,10 @@ class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends I
       case None => return false
       case Some(env) => env
     }
+    
     val registry = environment.jobRegistry
     val jobGroupsToRemove = new ListBuffer[IJob]
-        
+    
     registry.synchronized  {
       for (val job <- registry.allJobs) {
 
@@ -61,12 +62,7 @@ class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends I
        
           for (ej <- executionJobsToRemove) registry.remove(ej)
 
-          if (registry.nbExecutionJobs(job) == 0) {
-            try environment.submit(job)
-            catch {
-              case(e) => logger.log(SEVERE, "Submission of job failed, job isn't being executed.", e)
-            }
-          }
+          if (registry.executionJobs(job).isEmpty)  environment.submit(job)
         }
       }
 

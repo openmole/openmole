@@ -23,6 +23,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
+import org.openmole.core.batch.environment.ExecutionJobRegistry
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
@@ -87,7 +88,8 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
 
   val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySELocation)
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
-       
+  
+  
   Updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
@@ -119,8 +121,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: MyProxy, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), None, fqan)
  
   def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: MyProxy, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), Some(memoryForRuntime), fqan)
-   
-   
+
   override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 

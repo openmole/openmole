@@ -21,12 +21,11 @@ import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.IExecutionJob
 
-class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(environment, job, id) {
+class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob) extends ExecutionJob(environment, job) {
   private var _state: ExecutionState = READY
     
   override def state = _state

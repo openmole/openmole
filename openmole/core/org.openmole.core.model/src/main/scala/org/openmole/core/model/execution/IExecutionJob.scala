@@ -33,5 +33,4 @@ trait IExecutionJob {
   def environment: IEnvironment
   def job: IJob
   def timeStamps: Seq[ITimeStamp[ExecutionState]]
-  def id: IExecutionJobId
 }

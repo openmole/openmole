@@ -38,7 +38,7 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
   
   def this(jobService: JobService) = this(jobService.description)
   
-  val timeStemps = new Array[Long](ExecutionState.values.size)
+  val timeStemps = ExecutionState.values.map{v => System.currentTimeMillis}.toArray
 
   var _state: ExecutionState = null
   state = SUBMITTED

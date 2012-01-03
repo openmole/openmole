@@ -29,8 +29,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
 object Environment {
-  val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
-  Workspace += (StatisticsHistorySize, "1000")
+
 }
 
 
@@ -56,9 +55,9 @@ abstract class Environment extends IEnvironment {
   
   EventDispatcher.listen(this.asInstanceOf[IEnvironment], new JobSubmissionListner, classOf[IEnvironment.JobSubmitted])
    
-  val id = UUID.randomUUID.toString
-  val executionJobId = new AtomicLong
+  //val id = UUID.randomUUID.toString
+  //val executionJobId = new AtomicLong
 
-  def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
+  //def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
   
 }

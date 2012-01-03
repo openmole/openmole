@@ -17,88 +17,27 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.model.execution.IExecutionJob
-import org.openmole.core.model.execution.IExecutionJob
-import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.job.IJob
-import org.openmole.core.implementation.execution.StatisticKey
-
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
-import java.util.Comparator
-import java.util.TreeSet
-import scala.collection.JavaConversions._
+import scala.collection.mutable.Set
+import scala.collection.mutable.MultiMap
 
-class ExecutionJobRegistry [EXECUTIONJOB <: IExecutionJob]{
+class ExecutionJobRegistry {
 
-  private def ExecutionJobOrderOnTime = new Comparator[EXECUTIONJOB] {
-    override def compare(o1: EXECUTIONJOB, o2: EXECUTIONJOB): Int = {
-      val comp = o2.timeStamps.head.time.compare(o1.timeStamps.head.time)
-      if(comp != 0) comp
-      else IExecutionJobId.order.compare(o2.id, o1.id)
-    }
-  }
-  
-  //FIXME Move to tree map
-  var jobs = new HashMap[IJob, TreeSet[EXECUTIONJOB]]
-  var categories = new HashMap[StatisticKey, HashSet[IJob]]
+  val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob] 
 
-  def allJobs: Iterable[IJob] = jobs.keySet
+  def allJobs: Iterable[IJob] = synchronized { jobs.keySet }
 
-  def executionJobs(job: IJob): Iterable[EXECUTIONJOB] = jobs.get(job) match {
-    case Some(ejobs) => ejobs
-    case None => Iterable.empty
-  }
+  def executionJobs(job: IJob): Iterable[BatchExecutionJob] = synchronized { jobs.getOrElse(job, Set.empty) }
 
-  def remove(ejob: EXECUTIONJOB) = 
-    jobs.get(ejob.job) match {
-      case Some(ejobs) => ejobs -= ejob
-      case None =>
-    }     
+  def remove(ejob: BatchExecutionJob) = synchronized { jobs.removeBinding(ejob.job, ejob) }
 
-  def isEmpty: Boolean = jobs.isEmpty
+  def isEmpty: Boolean = synchronized { jobs.isEmpty }
 
-  def register(ejob: EXECUTIONJOB) = synchronized {
-    jobs.getOrElseUpdate(ejob.job, new TreeSet[EXECUTIONJOB](ExecutionJobOrderOnTime)) += ejob
-    val category = new StatisticKey(ejob.job)
-    categories.getOrElseUpdate(category, new HashSet[IJob]) += ejob.job
-  }
-    
-  def nbExecutionJobs(job: IJob): Int =  executionJobs(job).size
+  def register(ejob: BatchExecutionJob) = synchronized { jobs.addBinding (ejob.job, ejob) }
 
-  def removeJob(job: IJob) = synchronized {
-    jobs -= job
+  def removeJob(job: IJob) = synchronized { jobs -= job }
 
-    val category = new StatisticKey(job)
-    categories.get(category) match {
-      case Some(jobs) => {
-          val newJobs = jobs - job
-          if(newJobs.isEmpty) categories -= category
-          else categories(category) = newJobs
-        }
-      case None =>
-    }
-  }
-
-  def allExecutionJobs:  Iterable[EXECUTIONJOB] = for (job <- allJobs ; ejob <- executionJobs(job)) yield ejob
-
-  def lastExecutionJob(job: IJob): Option[EXECUTIONJOB] =
-    jobs.get(job) match {
-      case None => None
-      case Some(ejobs) => ejobs.headOption
-    }
-
-  def executionJobs(category: StatisticKey): Iterable[EXECUTIONJOB] =
-    categories.get(category) match {
-      case Some(js) => for(j <- js; if jobs.contains(j); ejob <- jobs(j)) yield ejob
-      case None => Iterable.empty
-    }  
- 
-
-  def jobs(category: StatisticKey): Iterable[IJob] = 
-    categories.get(category) match {
-      case None => Iterable.empty
-      case Some(jobs) => jobs
-    }
+  def allExecutionJobs:  Iterable[BatchExecutionJob] = synchronized { jobs.values.flatten }
 
 }

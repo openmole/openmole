@@ -39,7 +39,6 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IJob
-import org.openmole.core.implementation.execution.{StatisticSample, StatisticRegistry}
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
 
@@ -59,10 +58,10 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   import GetResultFromEnvironment._
   import communicationStorage._
   
-  private def successFullFinish(running: Long, done: Long) = {
+  /*private def successFullFinish(running: Long, done: Long) = {
     import batchJob.timeStemp
     StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
-  }
+  }*/
 
   override def call: Unit = {
     val token = UsageControl.get(communicationStorage.description).waitAToken
@@ -111,7 +110,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       }
 
       //If sucessfull for full group update stats
-      if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
+      //if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
 
     } finally UsageControl.get(communicationStorage.description).releaseToken(token)
   }

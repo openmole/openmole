@@ -27,7 +27,6 @@ import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.implementation.execution.ExecutionJob
-import org.openmole.core.model.execution.IExecutionJobId
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
@@ -42,7 +41,7 @@ import BatchEnvironment._
 
 object BatchExecutionJob extends Logger
 
-class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, id: IExecutionJobId) extends ExecutionJob(executionEnvironment, job, id) with IUpdatableWithVariableDelay {
+class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) extends ExecutionJob(executionEnvironment, job) with IUpdatableWithVariableDelay {
 
   import executionEnvironment.{minUpdateInterval, incrementUpdateInterval, maxUpdateInterval}
   
@@ -106,6 +105,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob, i
               case FAILED => resubmit
               case DONE => tryFinalise(batchJob)
             }
+            
+            if(oldState != newState && newState == DONE) executionEnvironment.statistics += new StatisticSample(batchJob)
             if(oldState != newState) minUpdateInterval
             else incrementedDelay
         }

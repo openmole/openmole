@@ -22,8 +22,7 @@ import java.util.logging.Logger
 
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.implementation.execution.{StatisticKey, StatisticRegistry}
-import org.openmole.core.implementation.execution.StatisticSample
+import org.openmole.core.batch.environment.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
@@ -56,88 +55,81 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
     val registry = env.jobRegistry
     registry.synchronized {
 
-      val toProceed = 
-        registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
-                                  filter( elt => {elt._1 != null && elt._2.size > 0} )
+      val jobs = registry.allExecutionJobs
+      // registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
+      //                         filter( elt => {elt._1 != null && elt._2.size > 0} )
       //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
-    
-      toProceed.foreach {
-        case(k, jobs) => {
-            val now = System.currentTimeMillis
-            val stillRunning = jobs.filter(_.state == RUNNING)
-            val stillReady = jobs.filter(_.state == READY)
+
+      val now = System.currentTimeMillis
+      val stillRunning = jobs.filter(_.state == RUNNING)
+      val stillReady = jobs.filter(_.state == READY)
             
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running " + stillRunning.size )
+      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running " + stillRunning.size )
   
-            val stillRunningSamples = jobs.view.flatMap{_.batchJob}.
-                                                filter(_.state == RUNNING).
-                                                map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
+      val stillRunningSamples = jobs.view.flatMap{_.batchJob}.filter(_.state == RUNNING).
+      map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
                                                 
-            val samples = (StatisticRegistry.statistic(env)(k._1, k._2) ++ stillRunningSamples).toArray
+      val samples = (env.statistics ++ stillRunningSamples).toArray
  
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
+      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running samples " + stillRunningSamples.size  + " samples size " + samples.size)
 
-            var nbRessub = if(!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
-              val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
-              val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
+      var nbRessub = if(!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
+        val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
+        val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
             
-              val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
-              val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
+        val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
+        val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
             
-              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
+        Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
             
-              val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
+        val maxNbRunning = (for(date <- (samples(windowStart).submitted) until(samples.last.done, interval)) yield samples.count( s => s.running <= date && s.done >= date)).max 
             
-              Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"max running " + maxNbRunning)
-              val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
-              if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
-            } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
+        Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"max running " + maxNbRunning)
+        val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+        if(maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
+      } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
             
-            Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
-            val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"NbRessub " + nbRessub)
+      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
             
-            if (nbRessub > 0) {
-              // Resubmit nbRessub jobs in a fair manner
-              val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
-              var keys = new TreeSet[Int]
+      if (nbRessub > 0) {
+        // Resubmit nbRessub jobs in a fair manner
+        val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+        var keys = new TreeSet[Int]
 
-              for (job <- jobs.map{_.job}) {
-                val nb = registry.nbExecutionJobs(job)
-                if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-                  val set = order.getOrElseUpdate(nb, new HashSet[IJob])
-                  set += job
-                  keys += nb
-                }
-              }
-
-              if (!keys.isEmpty) {
-                while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-                  var key = keys.head
-                  val jobs = order(keys.head)
-                  val it = jobs.iterator
-                  val job = it.next
-
-                  try env.submit(job)
-                  catch {
-                    case e => Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.WARNING, "Submission of job failed, oversubmission failed.", e);
-                  }
-
-                  jobs -= job
-                  if (jobs.isEmpty) {
-                    order -= key
-                    keys -= key
-                  }
-
-                  key += 1
-                  order.getOrElseUpdate(key, new HashSet[IJob]) += job
-                  keys += key
-                  nbRessub -= 1
-                }
-              }
-            }
+        for (job <- registry.allJobs) {
+          val nb = registry.executionJobs(job).size
+          if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            order.addBinding(nb, job)
+            keys += nb
           }
-      }
-      
+        }
+
+        if (!keys.isEmpty) {
+          while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            val key = keys.head
+            val jobs = order(keys.head)
+            val job = 
+              jobs.find(j => registry.executionJobs(j).isEmpty) match {
+                case Some(j) => j
+                case None => 
+                  jobs.find( j => !registry.executionJobs(j).exists(_.state != SUBMITTED) ) match {
+                    case Some(j) => j
+                    case None => jobs.head
+                  }
+              }
+
+            env.submit(job)
+
+            order.removeBinding(key, job)
+            if (jobs.isEmpty) keys -= key
+
+            order.addBinding(key + 1, job)
+            keys += (key + 1)
+            nbRessub -= 1
+          }
+        }
+      } 
     }
  
     true
