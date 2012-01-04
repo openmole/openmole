@@ -8,7 +8,7 @@
 
     <groupId>org.openmole</groupId>
     <artifactId>openmole</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
 
 <!--    <modules>
         <module>openmole-core</module>
