@@ -80,7 +80,7 @@
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
         <lib.org.scala-lang.scala.version>2.9.1</lib.org.scala-lang.scala.version>
         <lib.org.objenesis.version>1.2</lib.org.objenesis.version>
-        <lib.org.apache.commons.exec.version>1.0.1</lib.org.apache.commons.exec.version>
+        <lib.org.apache.commons.exec.version>1.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
         <lib.ch.ethz.ssh2.version>250-SNAPSHOT</lib.ch.ethz.ssh2.version>
 	<lib.org.apache.sshd.version>0.5.1-SNAPSHOT</lib.org.apache.sshd.version>
