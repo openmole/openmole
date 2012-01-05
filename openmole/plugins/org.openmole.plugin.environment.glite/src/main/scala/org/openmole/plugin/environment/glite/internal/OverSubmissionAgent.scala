@@ -75,7 +75,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
       var nbRessub = if(!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
         val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
-        val windowStart = if(samples.size > windowSize) samples.size - windowSize else 0
+        val windowStart = if(samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
             
         val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
         val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples) 
