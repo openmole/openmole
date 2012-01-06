@@ -30,8 +30,8 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 
 object TopComponentsManager {
 
-  var countExec= new AtomicInteger
-  EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
+  var countExec = new AtomicInteger
+  PasswordListner.apply
   
   def moleScenes = topComponents.map{_.getMoleScene}
   

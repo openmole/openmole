@@ -26,6 +26,8 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
+import org.openmole.ide.core.implementation.control.PasswordListner;
+import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.preference.PreferenceContent;
 
 @ActionID(category = "Edit",
@@ -38,6 +40,10 @@ id = "org.openmole.ide.core.implementation.PreferenceAction")
 @Messages("CTL_PreferenceAction=Preferences")
 public final class PreferenceAction implements ActionListener {
 
+    static {
+        PasswordListner.apply();
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         PreferenceContent pc = new PreferenceContent();
