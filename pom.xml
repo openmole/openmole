@@ -14,7 +14,7 @@
 
     <groupId>org.openmole.ide</groupId>
     <artifactId>ide</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.4.1</version>
 
     <modules>
         <module>libraries</module>
