@@ -17,7 +17,4 @@
 
 package org.openmole.core.batch.message
 
-import java.io.File
-import org.openmole.core.batch.file.IURIFile
-
 class RuntimeResult(val stdOut: FileMessage, val stdErr: FileMessage, val exception: Throwable, val contextResultPath: String)

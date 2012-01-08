@@ -29,6 +29,7 @@ import org.openmole.plugin.environment.desktopgrid.DesktopGridJobMessage
 import org.openmole.plugin.environment.desktopgrid.SFTPAuthentication
 import org.openmole.plugin.environment.desktopgrid.DesktopEnvironment._
 import org.openmole.core.batch.message.FileMessage
+import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
@@ -39,6 +40,8 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
+
+import org.openmole.core.batch.message.FileMessage._
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.HashMap
 import actors.Future
@@ -52,7 +55,9 @@ object JobLauncher extends Logger {
 class JobLauncher(debug: Boolean = false) {
   import JobLauncher._
   
-  val cache = new HashMap[String, Future[File]] with SynchronizedMap[String, Future[File]]
+  val cache = new FileCache {
+    val limit = 4000000000L
+  }
   
   def launch(userHostPort: String, password: String, nbWorkers: Int) = {
     val splitUser = userHostPort.split("@") 
@@ -70,7 +75,7 @@ class JobLauncher(debug: Boolean = false) {
     
     (0 until nbWorkers).foreach{
       i => 
-        background{runJobs(user, host, port, password, authFile)}
+      background{runJobs(user, host, port, password, authFile)}
     }
     Thread.currentThread.join
   }
@@ -86,21 +91,18 @@ class JobLauncher(debug: Boolean = false) {
     
     import relativePath._
     
-    def downloadCache(fileMessage: FileMessage) =
-      cache.getOrElseUpdate(fileMessage.hash, future({logger.info("Create task for downloading " + fileMessage.hash); getFileVerifyHash(fileMessage)}))
-    
     def getFileVerifyHash(fileMessage: FileMessage) = {
       import fileMessage._
       val file = path.cacheUnziped
       if(file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
-      file
+      file -> hash
     }
     
-    def copyVerifyHash(fileMessage: FileMessage, to: File) = {
-      import fileMessage._
-      path.toGZURIFile.copy(to)
-      if(to.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
-    }
+    /*def copyVerifyHash(fileMessage: FileMessage, to: File) = {
+     import fileMessage._
+     path.toGZURIFile.copy(to)
+     if(to.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
+     }*/
     
     while(true) {
       try{
@@ -135,9 +137,7 @@ class JobLauncher(debug: Boolean = false) {
               
             def olderTimeStemp(job: String) = groupedStemps(job).map{v => timeStempsDir.modificationTime(v._2)}.min
       
-            possibleChoices._2.map{job => olderTimeStemp(job) -> job}.min(new Ordering[(Long, String)] {
-                override def compare(v1: (Long, String), v2: (Long, String)) = v1._1 compare v2._1
-              })._2
+            possibleChoices._2.map{job => olderTimeStemp(job) -> job}.min(Ordering.by{j: (Long, _) => j._1})._2
             
           }
           logger.info("Choosen job is " + job)
@@ -146,60 +146,57 @@ class JobLauncher(debug: Boolean = false) {
           val os = jobsDir.child(job).cache.gzipedBufferedInputStream
           val jobMessage = 
             try SerializerService.deserialize[DesktopGridJobMessage](os)
-          finally os.close
-          
+            finally os.close
+
           logger.info("Job execution message is " + jobMessage.executionMessagePath)
           
-          runtime.foreach{
-            case(hash, file) => 
-              if(hash != jobMessage.runtime.hash) {
-                logger.info("Deleting outdated runtime.")
-                file.recursiveDelete
-                runtime = None
-              } 
-          }
-            
-          val runtimeLocation = runtime match {
-            case None => 
-              val dir = Workspace.newDir
-              logger.info("Downloading the runtime.")
-              val runtimeArchive = downloadCache(jobMessage.runtime)()
-              logger.info("Extracting runtime.")
-              runtimeArchive.extractUncompressDirArchiveWithRelativePath(dir)
-              runtime = Some(jobMessage.runtime.hash -> dir)
-              dir
-            case Some(r) => r._2
-          }
-          
-          logger.info("Downloading environment plugins.")
-          val pluginDir = Workspace.newDir
+          var cached = List.empty[FileMessage]
+         
           try {
-            jobMessage.runtimePlugins.foreach {
-              fileMessage => 
-                val file = File.createTempFile("plugin", ".jar", pluginDir)
-                copyVerifyHash(fileMessage, file)
-            }
+            val runtime = cache.cache(jobMessage.runtime, 
+                                      msg => {
+                val dir = Workspace.newDir
+                logger.info("Downloading the runtime.")
+                val (archive, hash) = getFileVerifyHash(msg)
+                logger.info("Extracting runtime.")
+                archive.extractUncompressDirArchiveWithRelativePath(dir)
+                dir -> hash
+              })
+            cached ::= jobMessage.runtime
+   
 
-            val resultFile = resultsDir.newFileInDir(job, ".res")
-            val configurationDir = Workspace.newDir
-            val workspaceDir = Workspace.newDir
+            val pluginDir = Workspace.newDir
             try {
+              jobMessage.runtimePlugins.foreach {
+                fileMessage =>
+                  val plugin = cache.cache(fileMessage, getFileVerifyHash)
+                  cached ::= fileMessage
+                  plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
+              }
+
+              val resultFile = resultsDir.newFileInDir(job, ".res")
+              val configurationDir = Workspace.newDir
+              val workspaceDir = Workspace.newDir
+              try {
               
-              val cmd = "java -Xmx" + jobMessage.memory + "m " + UUID.randomUUID +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
+                val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + UUID.randomUUID +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
-              logger.info("Executing runtime: " + cmd)
-              //val commandLine = CommandLine.parse(cmd)
-              val process = Runtime.getRuntime.exec(cmd, null, runtimeLocation) //commandLine.toString, null, runtimeLocation)
-              executeProcess(process, System.out, System.err)
-            } finally {
-              if(debug) configurationDir.recursiveDelete
-              if(debug) workspaceDir.recursiveDelete
-            }
+                logger.info("Executing runtime: " + cmd)
+                //val commandLine = CommandLine.parse(cmd)
+                val process = Runtime.getRuntime.exec(cmd, null, runtime) //commandLine.toString, null, runtimeLocation)
+                executeProcess(process, System.out, System.err)
+              } finally {
+                if(debug) configurationDir.recursiveDelete
+                if(debug) workspaceDir.recursiveDelete
+              }
            
-            logger.info("Process finished.")
-            //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
+              logger.info("Process finished.")
+              //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
            
-          } finally pluginDir.recursiveDelete 
+            } finally pluginDir.recursiveDelete 
+          } finally {
+            cache.release(cached)
+          }
         } else {
           logger.info("Job list is empty on the remote host.")
           Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))

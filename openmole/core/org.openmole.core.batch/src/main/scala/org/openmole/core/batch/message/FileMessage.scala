@@ -19,6 +19,8 @@ package org.openmole.core.batch.message
 
 object FileMessage {
   val EMPTY_RESULT = new FileMessage(null, null)
+  
+  implicit def replicatedFile2FileMessage(r: ReplicatedFile) = new FileMessage(r)
 }
 
 class FileMessage(val path: String, val hash: String) {

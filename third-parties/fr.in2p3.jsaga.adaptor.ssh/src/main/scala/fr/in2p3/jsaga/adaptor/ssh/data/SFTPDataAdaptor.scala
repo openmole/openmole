@@ -156,11 +156,9 @@ class SFTPDataAdaptor extends SSHAdaptor with FileReaderGetter with FileWriterPu
   
   override def connect(userInfo: String, host: String, port: Int, basePath: String, attributes: java.util.Map[_, _]) = {
     super.connect(userInfo, host, port, basePath, attributes)
-
   }
  
   override def disconnect = mapExceptions {
-    //sftpClient.close
     super.disconnect
   }
 
