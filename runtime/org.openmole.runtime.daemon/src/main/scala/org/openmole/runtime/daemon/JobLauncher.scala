@@ -28,6 +28,7 @@ import org.openmole.core.batch.file.URIFile
 import org.openmole.plugin.environment.desktopgrid.DesktopGridJobMessage
 import org.openmole.plugin.environment.desktopgrid.SFTPAuthentication
 import org.openmole.plugin.environment.desktopgrid.DesktopEnvironment._
+import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.serializer.SerializerService
@@ -174,20 +175,43 @@ class JobLauncher(debug: Boolean = false) {
                   plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
               }
 
+              import storage._
+              
+              val executionMesageFileCache = jobMessage.executionMessagePath.cacheUnziped
+              val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+              executionMesageFileCache.delete
+              
+              def localReplicatedFile(replicatedFile: ReplicatedFile) = {
+                  val localFile = cache.cache(replicatedFile, getFileVerifyHash)
+                  cached ::= replicatedFile
+                  import replicatedFile._
+                  new ReplicatedFile(src, directory, hash, localFile.getAbsolutePath, mode)
+              }
+              
+              val files = executionMessage.files.map(localReplicatedFile) 
+              val plugins = executionMessage.plugins.map(localReplicatedFile) 
+              
+              val executionMsg = new ExecutionMessage(plugins, files, executionMessage.jobs, executionMessage.communicationDirPath)
+              
               val resultFile = resultsDir.newFileInDir(job, ".res")
               val configurationDir = Workspace.newDir
               val workspaceDir = Workspace.newDir
+              val localStorageSpace = Workspace.newDir
+              val osgiDir = new File(runtime, UUID.randomUUID.toString)
               try {
               
-                val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + UUID.randomUUID +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + storage + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
+                val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + osgiDir.getName +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file:/" + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + jobMessage.executionMessagePath + "\" -o \"" + resultFile.URI.toString + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
                 val process = Runtime.getRuntime.exec(cmd, null, runtime) //commandLine.toString, null, runtimeLocation)
                 executeProcess(process, System.out, System.err)
               } finally {
-                if(debug) configurationDir.recursiveDelete
-                if(debug) workspaceDir.recursiveDelete
+                if(!debug) {
+                  configurationDir.recursiveDelete
+                  workspaceDir.recursiveDelete
+                  osgiDir.recursiveDelete
+                }
               }
            
               logger.info("Process finished.")
