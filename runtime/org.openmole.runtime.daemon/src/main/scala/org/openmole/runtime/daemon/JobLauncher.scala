@@ -53,11 +53,11 @@ object JobLauncher extends Logger {
   Workspace += (jobCheckInterval, "PT1M")
 }
 
-class JobLauncher(debug: Boolean = false) {
+class JobLauncher(cacheSize: Long, debug: Boolean) {
   import JobLauncher._
   
   val cache = new FileCache {
-    val limit = 4000000000L
+    val limit = cacheSize
   }
   
   def launch(userHostPort: String, password: String, nbWorkers: Int) = {

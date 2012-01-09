@@ -50,6 +50,7 @@ public class Daemon implements IApplication {
             options.addOption("p", true, "password");
             options.addOption("w", true, "number of workers");
             options.addOption("d", false, "debug mode");
+            options.addOption("c", true, "cache size in Mo (default is 2000)");
             
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
@@ -76,51 +77,10 @@ public class Daemon implements IApplication {
                 return IApplication.EXIT_OK;                
             }
             
-            new JobLauncher(debug).launch(userHostnamePort, password, workers);
-
-
-
-            /*boolean debug = false;
+            long cacheSize = 2000;
+            if(cmdLine.hasOption("c")) cacheSize = new Long(cmdLine.getOptionValue("c"));
             
-            try {
-            cmdLine = parser.parse(options, args);
-            } catch (ParseException e) {
-            Logger.getLogger(Daemon.class.getName()).severe("Error while parsing command line arguments");
-            new HelpFormatter().printHelp(" ", options);
-            return IApplication.EXIT_OK;
-            }
-            
-            Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
-            
-            //init jsaga
-            JSAGASessionService.session();
-            
-            String environmentPluginDirPath = cmdLine.getOptionValue("p");
-            String executionMessageURI = cmdLine.getOptionValue("i");
-            String baseURI = cmdLine.getOptionValue("s");
-            String communicationPath = cmdLine.getOptionValue("c");
-            
-            File environmentPluginDir = new File(environmentPluginDirPath);
-            PluginManager.loadDir(environmentPluginDir);
-            
-            
-            if ( cmdLine.hasOption("l") ) {
-            Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
-            debug = true;
-            }
-            
-            if (cmdLine.hasOption("a")) {
-            File envFile = new File(cmdLine.getOptionValue("a"));
-            Authentication authentication = SerializerService.deserialize(envFile);
-            authentication.initialize();
-            if(!debug) envFile.delete();
-            }
-            
-            
-            String outMesseageURI = cmdLine.getOptionValue("o");
-            
-            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);*/
-            
+            new JobLauncher(cacheSize * 1024 * 1024, debug).launch(userHostnamePort, password, workers);
             
         } catch (Throwable t) {
             Logger.getLogger(Daemon.class.getName()).log(Level.SEVERE, "Error durring runtime execution", t);

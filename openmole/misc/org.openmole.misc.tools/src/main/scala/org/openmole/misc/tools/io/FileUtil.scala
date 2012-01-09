@@ -155,6 +155,12 @@ object FileUtil {
       if((m & read) != 0) file.setReadable(true) else file.setReadable(false)
     }
     
+    def recursiveSize = {
+      var size = 0L
+      applyRecursive((f: File) => size += f.length)
+      size
+    }
+    
     def applyRecursive(operation: File => Unit): Unit = 
       applyRecursive(operation, Set.empty)
 

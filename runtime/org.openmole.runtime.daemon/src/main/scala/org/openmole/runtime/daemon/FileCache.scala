@@ -32,18 +32,18 @@ abstract class FileCache {
 
   def limit: Long
   
-  val cached = new HashMap[String, (File, Long, Int)]
+  val cached = new HashMap[String, (File, Long, Int, Long)]
   
-  def size = synchronized { cached.map {case(hash, (file, _, _)) => file.length.toLong}.sum }
+  def size = synchronized { cached.map {case(_, (_, _, _, size)) => size}.sum }
   
   def cache(f: FileMessage, get: FileMessage => (File, String)) = synchronized {
     cached.get(f.hash) match {
-      case Some((file, access, usage)) => 
-        cached(f.hash) = (file, System.currentTimeMillis, usage + 1)
+      case Some((file, access, usage, size)) => 
+        cached(f.hash) = (file, System.currentTimeMillis, usage + 1, size)
         file
       case None =>
         val (file, hash) = get(f)
-        cached(f.hash) = (file, System.currentTimeMillis, 1)
+        cached(f.hash) = (file, System.currentTimeMillis, 1, file.recursiveSize)
         file
     }
   }
@@ -61,18 +61,20 @@ abstract class FileCache {
   
   private def releaseOne(f: FileMessage) = synchronized {
     cached.get(f.hash) match {
-      case Some((file, access, usage)) =>
-        cached(f.hash) = (file, System.currentTimeMillis, usage - 1)
+      case Some((file, access, usage, size)) =>
+        cached(f.hash) = (file, System.currentTimeMillis, usage - 1, size)
       case None => logger.warning("Hash " + f.hash + " not in cache")
     }
   }
   
   def enforceLimit = synchronized {
-    val overhead = size - limit
+    val curSize = size
+    logger.info("Cache size is " + curSize)
+    val overhead = curSize - limit
     if(overhead > 0) {
       val sortedFiles = cached.toList.
-        filter{case(_, (_,_,usage)) => usage == 0 }.
-        sorted(Ordering.by{l: (String, (File, Long, Int)) => l._2._2}).map{case(hash, (file, _,_)) => hash -> file}
+        filter{case(_, (_,_,usage,_)) => usage == 0 }.
+        sorted(Ordering.by{l: (String, (File, Long, Int, Long)) => l._2._2}).map{case(hash, (file, _, _, _)) => hash -> file}
         
       def remove(files: List[(String, File)], overhead: Long): Unit = 
         if(!(files.isEmpty || overhead <= 0)) {
