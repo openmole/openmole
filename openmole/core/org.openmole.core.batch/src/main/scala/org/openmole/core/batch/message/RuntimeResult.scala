@@ -17,4 +17,4 @@
 
 package org.openmole.core.batch.message
 
-class RuntimeResult(val stdOut: FileMessage, val stdErr: FileMessage, val exception: Throwable, val contextResultPath: String)
+class RuntimeResult(val stdOut: Option[FileMessage], val stdErr: Option[FileMessage], val result: Either[FileMessage, Throwable])

@@ -59,59 +59,57 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
   import communicationStorage._
   
   /*private def successFullFinish(running: Long, done: Long) = {
-    import batchJob.timeStemp
-    StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
-  }*/
+   import batchJob.timeStemp
+   StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
+   }*/
 
   override def call: Unit = {
     val token = UsageControl.get(communicationStorage.description).waitAToken
 
     try {
-      val result = getRuntimeResult(outputFilePath, token)
+      val runtimeResult = getRuntimeResult(outputFilePath, token)
+      
+      display(runtimeResult.stdOut, "Output", token)
+      display(runtimeResult.stdErr, "Error output", token)
+      
+      runtimeResult.result match {
+        case Right(exception) => throw new InternalProcessingError(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
+        case Left(result) => 
+          val contextResults = getContextResults(result, token)
 
-      if (result.exception != null)
-        throw new InternalProcessingError(result.exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
+          //var successfull = 0
+          var firstRunning = Long.MaxValue
+          var lastCompleted = 0L
 
-      display(result.stdOut, "Output", token)
-      display(result.stdErr, "Error output", token)
-
-      //val fileReplacement = getFiles(result.tarResult, result.filesInfo, token)
-
-      val contextResults = getContextResults(result.contextResultPath, token)
-
-      var successfull = 0
-      var firstRunning = Long.MaxValue
-      var lastCompleted = 0L
-
-      //Try to download the results for all the jobs of the group
-      for (moleJob <- job.moleJobs) {
-        if (contextResults.results.isDefinedAt(moleJob.id)) {
-         val executionResult = contextResults.results(moleJob.id)
+          //Try to download the results for all the jobs of the group
+          for (moleJob <- job.moleJobs) {
+            if (contextResults.results.isDefinedAt(moleJob.id)) {
+              val executionResult = contextResults.results(moleJob.id)
          
-          moleJob.synchronized {
-            if (!moleJob.isFinished) {
+              moleJob.synchronized {
+                if (!moleJob.isFinished) {
 
-                executionResult._1 match {
-                  case Left(context) =>
-                    val timeStamps = executionResult._2
-                    val completed = timeStamps.view.reverse.find( _.state == State.COMPLETED ).get.time
-                    if(completed > lastCompleted) lastCompleted = completed
-                    val running = timeStamps.view.reverse.find( _.state == State.RUNNING ).get.time
-                    if(running < firstRunning) firstRunning = running
-                    moleJob.finished(context, executionResult._2)
-                    successfull +=1 
-                  case Right(e) => 
-                    EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, WARNING))
-                    logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
-                }
-            } //else logger.fine("Molejob " + moleJob.id + " is finished.")
-          } 
-        } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
+                  executionResult._1 match {
+                    case Left(context) =>
+                      val timeStamps = executionResult._2
+                      val completed = timeStamps.view.reverse.find( _.state == State.COMPLETED ).get.time
+                      if(completed > lastCompleted) lastCompleted = completed
+                      val running = timeStamps.view.reverse.find( _.state == State.RUNNING ).get.time
+                      if(running < firstRunning) firstRunning = running
+                      moleJob.finished(context, executionResult._2)
+                      //successfull +=1 
+                    case Right(e) => 
+                      EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, WARNING))
+                      logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
+                  }
+                } //else logger.fine("Molejob " + moleJob.id + " is finished.")
+              } 
+            } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
+          }
+
+          //If sucessfull for full group update stats
+          //if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
       }
-
-      //If sucessfull for full group update stats
-      //if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
-
     } finally UsageControl.get(communicationStorage.description).releaseToken(token)
   }
 
@@ -122,11 +120,10 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
     finally resultFile.delete
   }
 
-  private def display(message: FileMessage, description: String, token: AccessToken) = {
-    if (message == null) logger.log(WARNING, "{0} is null.", description)
-    else {
-      try {
-        if (!message.isEmpty) {
+  private def display(message: Option[FileMessage], description: String, token: AccessToken) = 
+    message match {
+      case Some(message) =>
+        try {
           val stdOutFile = message.path.cacheUnziped(token)
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
@@ -140,17 +137,19 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
               System.out.println("-------------------------------------------------------")
             }
           } finally stdOutFile.delete
+        
+        } catch {
+          case(e: IOException) => logger.log(WARNING, description + " transfer has failed.", e);
         }
-      } catch {
-        case(e: IOException) => logger.log(WARNING, description + " transfer has failed.", e);
-      }
+      case None => 
     }
-  }
+  
 
-  private def getContextResults(resultPath: String, token: AccessToken): ContextResults = {
+  private def getContextResults(resultPath: FileMessage, token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    val contextResutsFileCache = resultPath.cacheUnziped(token)
-
+    val contextResutsFileCache = resultPath.path.cacheUnziped(token)
+    if(HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
+    
     try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     finally contextResutsFileCache.delete
   }

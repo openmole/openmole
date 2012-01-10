@@ -77,31 +77,27 @@ class Runtime {
       System.setOut(outSt)
       System.setErr(errSt)
     }
-        
-    var exception: Throwable = null
-    var outputMessage: FileMessage = null
-    var errorMessage: FileMessage = null
-    var contextResult: IURIFile = null
-        
-    try {
-      Workspace.setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
+         
+    Workspace.setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
                         
-      /*--- get execution message and job for runtime---*/
-      val usedFiles = new HashMap[File, File]
+    /*--- get execution message and job for runtime---*/
+    val usedFiles = new HashMap[File, File]
 
-      val executionMesageFileCache = executionMessageURI.cacheUnziped
-      val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
-      executionMesageFileCache.delete
-            
+    val executionMesageFileCache = executionMessageURI.cacheUnziped
+    val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+    executionMesageFileCache.delete
+    
+    
+    val result = try { 
       val pluginDir = Workspace.newDir
 
       for (plugin <- executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
         val replicaFileCache = plugin.replicaPath.toGZURIFile.copy(inPluginDirLocalFile)
 
-        if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash) {
+        if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash)
           throw new InternalProcessingError("Hash of a plugin does't match.")
-        }
+
         usedFiles.put(plugin.src, inPluginDirLocalFile)
       }
 
@@ -135,73 +131,68 @@ class Runtime {
       
       val jobsFileCache = executionMessage.jobs.path.cacheUnziped
 
-      if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash)
-        throw new InternalProcessingError("Hash of the execution job does't match.");
+      if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))     
       val allMoleJobs =  tis.applyAndClose( e => {SerializerService.deserializeReplaceFiles[IMoleJob](tis, usedFiles)})
-
-      //val jobForRuntime = Activator.getSerialiser.deserializeReplaceFiles[JobForRuntime](jobForRuntimeFileCache, usedFiles)
       jobsFileCache.delete
-            
-      try {
 
-        /* --- Submit all jobs to the local environment --*/
+      /* --- Submit all jobs to the local environment --*/
+      val allFinished = new AllFinished
+      val saver = new ContextSaver
 
-        val allFinished = new AllFinished
-        val saver = new ContextSaver
-
-        for (toProcess <- allMoleJobs) {
-          EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
-          allFinished.registerJob(toProcess)
-          LocalExecutionEnvironment.default.submit(toProcess)
-        }
-        allFinished.waitAllFinished
-
-        val contextResults = new ContextResults(saver.results)
-        val contextResultFile = Workspace.newFile
-
-        //val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
-        val serializationResult = SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
-        val uploadedcontextResults = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("uplodedTar", ".tgz"))
-
-        retry( URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry )
-
-        contextResult = uploadedcontextResults
-        contextResultFile.delete
-
-      } finally {
-        outSt.close
-        errSt.close
-
-        System.setOut(oldOut)
-        System.setErr(oldErr)
-
-        outputMessage = if (out.length != 0) {
-          val output = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("output", ".txt"))
-          URIFile.copy(out, output)
-          new FileMessage(output.path, HashService.computeHash(out).toString)
-        } else FileMessage.EMPTY_RESULT
-
-        errorMessage = if (err.length != 0) {                    
-          val errout = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("outputError", ".txt"))
-          URIFile.copy(err, errout)
-          new FileMessage(errout.path, HashService.computeHash(err).toString)
-        } else FileMessage.EMPTY_RESULT
-        
-        out.delete
-        err.delete
+      for (toProcess <- allMoleJobs) {
+        EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
+        allFinished.registerJob(toProcess)
+        LocalExecutionEnvironment.default.submit(toProcess)
       }
+      allFinished.waitAllFinished
+
+      val contextResults = new ContextResults(saver.results)
+      val contextResultFile = Workspace.newFile
+
+      //val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
+      SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
+      val uploadedcontextResults = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("uplodedTar", ".tgz"))
+      val result = new FileMessage(uploadedcontextResults.path, HashService.computeHash(contextResultFile).toString)
+      retry( URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry )
+      contextResultFile.delete
+      Left(result)
+
     } catch {
-      case(t: Throwable) => {
+      case t => {
           if(debug) Logger.getLogger(classOf[Runtime].getName).log(Level.SEVERE, "", t)
-          exception = t
+          Right(t)
         }
+    } finally {
+      outSt.close
+      errSt.close
+
+      System.setOut(oldOut)
+      System.setErr(oldErr)
     }
 
-    val runtimeResult = new RuntimeResult(outputMessage, errorMessage, exception, contextResult.path)
-        
+    val outputMessage = 
+      if (out.length != 0) {
+        val output = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("output", ".txt"))
+        URIFile.copy(out, output)
+        Some(new FileMessage(output.path, HashService.computeHash(out).toString))
+      } else None
+
+    out.delete
+    
+    val errorMessage = 
+      if (err.length != 0) {                    
+        val errout = new GZURIFile(executionMessage.communicationDirPath.toURIFile.newFileInDir("outputError", ".txt"))
+        URIFile.copy(err, errout)
+        Some(new FileMessage(errout.path, HashService.computeHash(err).toString))
+      } else None
+
+    err.delete
+
+    val runtimeResult = new RuntimeResult(outputMessage, errorMessage, result)
+
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
     try {
