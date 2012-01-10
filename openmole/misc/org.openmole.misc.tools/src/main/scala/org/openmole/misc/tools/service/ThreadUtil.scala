@@ -21,21 +21,24 @@ import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
-object ThreadUtil {
+object ThreadUtil extends Logger {
   val daemonThreadFactory = new ThreadFactory {
 
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r)
       t.setDaemon(true)
-      t.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
-          override def uncaughtException(t: Thread, e: Throwable) = {
-            println("Uncaught"); e.printStackTrace
-          }
-        })
+      /*t.setUncaughtExceptionHandler(
+        new UncaughtExceptionHandler {
+          override def uncaughtException(t: Thread, e: Throwable) = logger.warning("", e)
+          
+        })*/
       t
     }
 
   }
   
-  def background[F](f: => F) = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(new Runnable { def run { f } } )
+  implicit def function2Runnable[F](f: => F) = new Runnable { def run { f } } 
+  
+  def background[F](f: => F) = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(f)
+
 }

@@ -26,6 +26,7 @@ import org.apache.commons.exec.CommandLine
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.file.IURIFile
 import org.openmole.plugin.environment.desktopgrid.DesktopGridJobMessage
 import org.openmole.plugin.environment.desktopgrid.SFTPAuthentication
 import org.openmole.plugin.environment.desktopgrid.DesktopEnvironment._
@@ -85,16 +86,13 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   
   def runJobs(user: String, host: String, port: Int, password: String, authFile: File) = {
     val id = UUID.randomUUID
-    val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
+    implicit val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
     var runtime: Option[(String, File)] = None
 
     val storage = "sftp://" + user + '@' + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
-
-    
     import relativePath._
-    
-    
+        
     def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
       import fileMessage._
       val file =  fileMessage.path.cacheUnziped
@@ -110,74 +108,34 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     while(true) {
       try{
+        val resultsDir = resultsDirName.toURIFile
         val jobsDir = jobsDirName.toURIFile
-        val jobs = jobsDir.list
+        val timeStempsDir = timeStempsDirName.toURIFile
         
-        if(!jobs.isEmpty) {
-          val timeStempsDir = timeStempsDirName.toURIFile
-          val timeStemps = timeStempsDir.list
-          
-          val resultsDir = resultsDirName.toURIFile
-
-          val groupedStemps = timeStemps.map{ts => ts.split(timeStempSeparator).head -> ts}.groupBy{_._1}
-          val stempsByJob = jobs.map{j => j -> groupedStemps.getOrElse(j, Iterable.empty).map{_._2}}
-          
-  
-          val possibleChoices = stempsByJob.map{case(j, s) => s.size -> j}.foldLeft(Int.MaxValue -> List.empty[String]){
-            (acc, cur) => 
-            if(cur._1 < acc._1) cur._1 -> List(cur._2) 
-            else if(cur._1 > acc._1) acc
-            else acc._1 -> (cur._2 +: acc._2)
-          }
-          
-          logger.info("Choose between " + possibleChoices._2.size + " jobs with " + possibleChoices._1 + " timestemps ")
-          
-          val job = if(possibleChoices._1 == 0) {
-            logger.info("Choose a job at random")
-            val index = rng.nextInt(possibleChoices._2.size)
-            possibleChoices._2(index)
-          } else {
-            logger.info("Choose a job with older timestemp")
-              
-            def olderTimeStemp(job: String) = groupedStemps(job).map{v => timeStempsDir.modificationTime(v._2)}.min
-      
-            possibleChoices._2.map{job => olderTimeStemp(job) -> job}.min(Ordering.by{j: (Long, _) => j._1})._2
-            
-          }
-          logger.info("Choosen job is " + job)
-          timeStempsDir.child(job + timeStempSeparator + id.toString).touch
-          
-          
-          val jobMessage = {
-            val os = jobsDir.child(job).cache.gzipedBufferedInputStream
-            try SerializerService.deserialize[DesktopGridJobMessage](os)
-            finally os.close
-          }
-
-          logger.info("Job execution message is " + jobMessage.executionMessagePath)
-          
-          var cached = List.empty[FileMessage]
+        selectAJob(jobsDir, timeStempsDir, resultsDir, id) match {
+          case Some((job, jobMessage))=>
+        
+            var cached = List.empty[FileMessage]
          
-          try {
-            val runtime = cache.cache(jobMessage.runtime, 
-                                      msg => {
-                val dir = Workspace.newDir
-                logger.info("Downloading the runtime.")
-                val (archive, hash) = getFileUnzipVerifyHash(msg)
-                logger.info("Extracting runtime.")
-                archive.extractUncompressDirArchiveWithRelativePath(dir)
-                dir -> hash
-              })
-            cached ::= jobMessage.runtime
-   
-
-            val pluginDir = Workspace.newDir
             try {
+              val runtime = cache.cache(jobMessage.runtime, 
+                                        msg => {
+                  val dir = Workspace.newDir
+                  logger.info("Downloading the runtime.")
+                  val (archive, hash) = getFileUnzipVerifyHash(msg)
+                  logger.info("Extracting runtime.")
+                  archive.extractUncompressDirArchiveWithRelativePath(dir)
+                  dir -> hash
+                })
+              cached ::= jobMessage.runtime
+   
+              val pluginDir = Workspace.newDir
+            
               jobMessage.runtimePlugins.foreach {
                 fileMessage =>
-                  val plugin = cache.cache(fileMessage, getFileUnzipVerifyHash)
-                  cached ::= fileMessage
-                  plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
+                val plugin = cache.cache(fileMessage, getFileUnzipVerifyHash)
+                cached ::= fileMessage
+                plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
               }
               
               val executionMesageFileCache = jobMessage.executionMessagePath.cacheUnziped
@@ -196,7 +154,6 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               val jobs = new FileMessage(new URIFile(executionMessage.jobs.path.cache).location, executionMessage.jobs.hash)
               
               val communicationDirPath = Workspace.newDir
-              
               val localExecutionMessgage = Workspace.newFile("executionMessage", ".gz")
               
               val os = localExecutionMessgage.gzipedBufferedOutputStream
@@ -206,85 +163,81 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               val localResultFile = Workspace.newFile("job", ".res")
               val configurationDir = Workspace.newDir("configuration")
               val workspaceDir = Workspace.newDir("workspace")
-
-              val osgiDir = new File(runtime, UUID.randomUUID.toString)
-              try {
+              val osgiDir = new File(runtime, UUID.randomUUID.toString)       
               
-                val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + osgiDir.getName +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + localExecutionMessgage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
+              val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + osgiDir.getName +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + localExecutionMessgage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
-                logger.info("Executing runtime: " + cmd)
-                //val commandLine = CommandLine.parse(cmd)
-                val process = Runtime.getRuntime.exec(cmd, null, runtime) //commandLine.toString, null, runtimeLocation)
-                executeProcess(process, System.out, System.err)
+              logger.info("Executing runtime: " + cmd)
+              //val commandLine = CommandLine.parse(cmd)
+              val process = Runtime.getRuntime.exec(cmd, null, runtime) //commandLine.toString, null, runtimeLocation)
+              executeProcess(process, System.out, System.err)
 
-                val runtimeResult = {
-                  val is = localResultFile.gzipedBufferedInputStream
-                  try SerializerService.deserialize[RuntimeResult](is)
-                  finally is.close
-                }
+              configurationDir.recursiveDelete
+              workspaceDir.recursiveDelete
+              osgiDir.recursiveDelete
+              pluginDir.recursiveDelete 
+              localExecutionMessgage.delete
                 
-                logger.info("Uploading context results")
-                
-                
-                def uploadFileMessage(msg: FileMessage) = {
-                    val localFile = new File(msg.path)
-                    val uploadedFile = executionMessage.communicationDirPath.toURIFile.newFileInDir("fileMsg", ".bin")
-                    try URIFile.copy(localFile, uploadedFile)
-                    finally localFile.delete
-                    new FileMessage(uploadedFile.path, msg.hash)
-                }
-                
-                val uplodadedResult = runtimeResult.result match {
-                  case Left(result) => Left(uploadFileMessage(result))
-                  case Right(e) => Right(e)
-                }
-
-                val uploadedStdOut = runtimeResult.stdOut match {
-                  case Some(stdOut) =>  logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-                  case None => None
-                }
-  
-                val uploadedStdErr = runtimeResult.stdErr match {
-                  case Some(stdErr) => logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-                  case None => None
-                }
-
-                logger.info("Context results uploaded" ) 
-                
-                val resultToSend = new RuntimeResult(
-                  uploadedStdOut, 
-                  uploadedStdErr,
-                  uplodadedResult)
-                
-                // Upload the result
-                val outputLocal = Workspace.newFile("output", ".res")
-                logger.info("Uploading job results")
-                SerializerService.serialize(resultToSend, outputLocal)
-                try URIFile.copy(outputLocal, new GZURIFile(resultsDir.newFileInDir(job, ".res")))
-                finally outputLocal.delete
-                logger.info("Job results uploaded" )
-              } finally {
-                if(!debug) {
-                  configurationDir.recursiveDelete
-                  workspaceDir.recursiveDelete
-                  osgiDir.recursiveDelete
-                  communicationDirPath.recursiveDelete
-                  localResultFile.delete
-                  localExecutionMessgage.delete
-                }
+              val runtimeResult = {
+                val is = localResultFile.gzipedBufferedInputStream
+                try SerializerService.deserialize[RuntimeResult](is)
+                finally is.close
               }
+                
+              logger.info("Uploading context results")
+                              
+              def uploadFileMessage(msg: FileMessage) = {
+                val localFile = new File(msg.path)
+                val uploadedFile = executionMessage.communicationDirPath.toURIFile.newFileInDir("fileMsg", ".bin")
+                try URIFile.copy(localFile, uploadedFile)
+                finally localFile.delete
+                new FileMessage(uploadedFile.path, msg.hash)
+              }
+                
+              val uplodadedResult = runtimeResult.result match {
+                case Left(result) => Left(uploadFileMessage(result))
+                case Right(e) => Right(e)
+              }
+
+              val uploadedStdOut = runtimeResult.stdOut match {
+                case Some(stdOut) =>  logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
+                case None => None
+              }
+  
+              val uploadedStdErr = runtimeResult.stdErr match {
+                case Some(stdErr) => logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
+                case None => None
+              }
+
+              logger.info("Context results uploaded" ) 
+                
+              val resultToSend = new RuntimeResult(
+                uploadedStdOut, 
+                uploadedStdErr,
+                uplodadedResult)
+                
+              // Upload the result
+              val outputLocal = Workspace.newFile("output", ".res")
+              logger.info("Uploading job results")
+              SerializerService.serialize(resultToSend, outputLocal)
+              try URIFile.copy(outputLocal, new GZURIFile(resultsDir.newFileInDir(job, ".res")))
+              finally outputLocal.delete
+              logger.info("Job results uploaded" )
+                
+              communicationDirPath.recursiveDelete
+              localResultFile.delete
            
               logger.info("Process finished.")
               //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
-           
-            } finally pluginDir.recursiveDelete 
-          } finally {
-            cache.release(cached)
-          }
-        } else {
-          logger.info("Job list is empty on the remote host.")
-          Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-        }
+  
+            } finally {
+              cache.release(cached)
+            }
+          case None  => 
+            logger.info("Job list is empty on the remote host.")
+            Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
+      
+        } 
  
       } catch {
         case e: Exception => 
@@ -293,6 +246,51 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }
     }
   }
-  
 
+  
+  def selectAJob(jobsDir: IURIFile, timeStempsDir: IURIFile, resultDir: IURIFile, id: UUID)(implicit rng: Random) = {
+    val jobs = jobsDir.list
+        
+    if(!jobs.isEmpty) {
+      val timeStemps = timeStempsDir.list
+
+      val groupedStemps = timeStemps.map{ts => ts.split(timeStempSeparator).head -> ts}.groupBy{_._1}
+      val stempsByJob = jobs.map{j => j -> groupedStemps.getOrElse(j, Iterable.empty).map{_._2}}
+          
+  
+      val possibleChoices = stempsByJob.map{case(j, s) => s.size -> j}.foldLeft(Int.MaxValue -> List.empty[String]){
+        (acc, cur) => 
+        if(cur._1 < acc._1) cur._1 -> List(cur._2) 
+        else if(cur._1 > acc._1) acc
+        else acc._1 -> (cur._2 +: acc._2)
+      }
+          
+      logger.info("Choose between " + possibleChoices._2.size + " jobs with " + possibleChoices._1 + " timestemps ")
+          
+      val job = if(possibleChoices._1 == 0) {
+        logger.info("Choose a job at random")
+        val index = rng.nextInt(possibleChoices._2.size)
+        possibleChoices._2(index)
+      } else {
+        logger.info("Choose a job with older timestemp")
+              
+        def olderTimeStemp(job: String) = groupedStemps(job).map{v => timeStempsDir.modificationTime(v._2)}.min
+      
+        possibleChoices._2.map{job => olderTimeStemp(job) -> job}.min(Ordering.by{j: (Long, _) => j._1})._2
+            
+      }
+      logger.info("Choosen job is " + job)
+      timeStempsDir.child(job + timeStempSeparator + id.toString).touch
+          
+      val jobMessage = {
+        val os = jobsDir.child(job).cache.gzipedBufferedInputStream
+        try SerializerService.deserialize[DesktopGridJobMessage](os)
+        finally os.close
+      }
+
+      logger.info("Job execution message is " + jobMessage.executionMessagePath)
+      Some(job -> jobMessage)
+    } else None
+  }
+  
 }
