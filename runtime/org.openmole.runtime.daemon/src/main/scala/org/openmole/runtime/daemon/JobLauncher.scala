@@ -96,80 +96,23 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val storage = "sftp://" + user + '@' + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
     import relativePath._
-        
-    def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
-      import fileMessage._
-      val file =  fileMessage.path.cacheUnziped
-      if(file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
-      file -> hash
-    }
-
-    def getFile(fileMessage: FileMessage) = {
-      import fileMessage._
-      val file = fileMessage.path.cache
-      file -> hash
-    }
 
     while(true) {
       try {
         val resultsDir = resultsDirName.toURIFile
         val jobsDir = jobsDirName.toURIFile
         val timeStempsDir = timeStempsDirName.toURIFile
-        
-        selectAJob(jobsDir, timeStempsDir, resultsDir, id) match {
-          case Some((job, jobMessage)) =>        
-            var cached = List.empty[FileMessage]
-         
-            val (executionMessage, localResultFile, localCommunicationDirPath) =
-              try {
-                val runtime = cache.cache(jobMessage.runtime, 
-                                          msg => {
-                    val dir = Workspace.newDir
-                    logger.info("Downloading the runtime.")
-                    val (archive, hash) = getFileUnzipVerifyHash(msg)
-                    logger.info("Extracting runtime.")
-                    archive.extractUncompressDirArchiveWithRelativePath(dir)
-                    dir -> hash
-                  })
-                cached ::= jobMessage.runtime
+        fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) match {
    
-                val pluginDir = Workspace.newDir
-            
-                jobMessage.runtimePlugins.foreach {
-                  fileMessage =>
-                  val plugin = cache.cache(fileMessage, getFileUnzipVerifyHash)
-                  cached ::= fileMessage
-                  plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
-                }
-              
-                val executionMesageFileCache = jobMessage.executionMessagePath.cacheUnziped
-                val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
-                executionMesageFileCache.delete
-              
-                def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
-                  val localFile = cache.cache(replicatedFile, getFile)
-                  cached ::= replicatedFile
-                  import replicatedFile._
-                  new ReplicatedFile(src, directory, hash, new URIFile(localFile).location, mode)
-                }
-
-                val files = executionMessage.files.map(localCachedReplicatedFile) 
-                val plugins = executionMessage.plugins.map(localCachedReplicatedFile) 
-                val jobs = new FileMessage(new URIFile(executionMessage.jobs.path.cache).location, executionMessage.jobs.hash)
-              
-                val localCommunicationDirPath = Workspace.newDir
-                val localExecutionMessgage = Workspace.newFile("executionMessage", ".gz")
-              
-                val os = localExecutionMessgage.gzipedBufferedOutputStream
-                try SerializerService.serialize(new ExecutionMessage(plugins, files, jobs, new URIFile(localCommunicationDirPath).location), os)
-                finally os.close
-              
+          case Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, memory, executionMessage, job, cached)) =>
+            val localResultFile = 
+              try {
                 val localResultFile = Workspace.newFile("job", ".res")
                 val configurationDir = Workspace.newDir("configuration")
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)       
               
-                val cmd = "java -Xmx" + jobMessage.memory + "m -Dosgi.configuration.area=" + osgiDir.getName +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + localExecutionMessgage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
+                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName +" -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath +  "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -w \"" + workspaceDir.getAbsolutePath  + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if(debug) " -d " else "")
             
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
@@ -181,26 +124,23 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 workspaceDir.recursiveDelete
                 osgiDir.recursiveDelete
                 pluginDir.recursiveDelete 
-                localExecutionMessgage.delete
-                (executionMessage, localResultFile, localCommunicationDirPath)
+                localExecutionMessage.delete
+                localResultFile
               } finally {
                 cache.release(cached)
               }
-            resultUploader.submit( 
-              { 
+            
+            resultUploader.submit({ 
                 uploadResult(localResultFile, executionMessage.communicationDirPath.toURIFile, resultsDir, job)
                 localCommunicationDirPath.recursiveDelete
                 localResultFile.delete
               })
-    
 
             //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
-  
-        
+ 
           case None  => 
             logger.info("Job list is empty on the remote host.")
             Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-      
         } 
  
       } catch {
@@ -304,6 +244,79 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
       Some(job -> jobMessage)
     } else None
+  }
+  
+  def fetchAJob(jobsDir: IURIFile, timeStempsDir: IURIFile, resultsDir: IURIFile, id: UUID, relativePath: RelativePath)(implicit rng: Random) = {
+    import relativePath._
+     
+    def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
+      import fileMessage._
+      val file =  fileMessage.path.cacheUnziped
+      if(file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
+      file -> hash
+    }
+
+    def getFile(fileMessage: FileMessage) = {
+      import fileMessage._
+      val file = fileMessage.path.cache
+      file -> hash
+    }
+
+    selectAJob(jobsDir, timeStempsDir, resultsDir, id) match {
+      case Some((job, jobMessage)) =>        
+        var cached = List.empty[FileMessage]
+        
+        try {
+          val runtime = cache.cache(jobMessage.runtime, 
+                                    msg => {
+              val dir = Workspace.newDir
+              logger.info("Downloading the runtime.")
+              val (archive, hash) = getFileUnzipVerifyHash(msg)
+              logger.info("Extracting runtime.")
+              archive.extractUncompressDirArchiveWithRelativePath(dir)
+              dir -> hash
+            })
+          cached ::= jobMessage.runtime
+   
+          val pluginDir = Workspace.newDir
+            
+          jobMessage.runtimePlugins.foreach {
+            fileMessage =>
+            val plugin = cache.cache(fileMessage, getFileUnzipVerifyHash)
+            cached ::= fileMessage
+            plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
+          }
+              
+          val executionMesageFileCache = jobMessage.executionMessagePath.cacheUnziped
+          val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+          executionMesageFileCache.delete
+              
+          def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
+            val localFile = cache.cache(replicatedFile, getFile)
+            cached ::= replicatedFile
+            import replicatedFile._
+            new ReplicatedFile(src, directory, hash, new URIFile(localFile).location, mode)
+          }
+
+          val files = executionMessage.files.map(localCachedReplicatedFile) 
+          val plugins = executionMessage.plugins.map(localCachedReplicatedFile) 
+          val jobs = new FileMessage(new URIFile(executionMessage.jobs.path.cache).location, executionMessage.jobs.hash)
+              
+          val localCommunicationDirPath = Workspace.newDir
+          val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
+              
+          val os = localExecutionMessage.gzipedBufferedOutputStream
+          try SerializerService.serialize(new ExecutionMessage(plugins, files, jobs, new URIFile(localCommunicationDirPath).location), os)
+          finally os.close
+
+          Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
+        } catch {
+          case e => 
+            cache.release(cached)
+            throw e
+        }
+      case None => None 
+    }
   }
   
 }
