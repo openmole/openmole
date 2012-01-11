@@ -18,8 +18,10 @@
 package org.openmole.misc.tools.service
 
 import java.lang.Thread.UncaughtExceptionHandler
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
+import java.util.concurrent.Future
 
 object ThreadUtil extends Logger {
   val daemonThreadFactory = new ThreadFactory {
@@ -37,8 +39,9 @@ object ThreadUtil extends Logger {
 
   }
   
-  implicit def function2Runnable[F](f: => F) = new Runnable { def run { f } } 
+  implicit def future2Function[A](f: Future[A]) = () => f.get
+  implicit def function2Runnable[F](f: => F) = new Callable[F] { def call = f } 
   
-  def background[F](f: => F) = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(f)
+  def background[F](f: => F): Future[F] = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(f)
 
 }

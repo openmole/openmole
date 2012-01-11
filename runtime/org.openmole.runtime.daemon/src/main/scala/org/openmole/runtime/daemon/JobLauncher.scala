@@ -48,7 +48,6 @@ import org.openmole.misc.hashservice.HashService._
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
-import actors.Futures._
 
 object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval") 
@@ -97,14 +96,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val jobsDir = jobsDirName.toURIFile
     val timeStempsDir = timeStempsDirName.toURIFile
         
-    processJob( future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)} )
+    processJob( background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) })
         
     @tailrec def processJob(fetchJobResult: () => Option[(File, File, File, File, Int, ExecutionMessage, String, List[FileMessage])]): Unit = {
       val next = try {
         fetchJobResult() match {
    
           case Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, memory, executionMessage, job, cached)) =>
-            val next = future {fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
+            val next = background {fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
 
             val localResultFile = 
               try {
@@ -142,13 +141,13 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           case None  => 
             logger.info("Job list is empty on the remote host.")
             Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-            future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
+            background{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
         } 
       } catch {
         case e: Exception => 
           logger.log(WARNING, "Error while looking for jobs.", e)
           Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-          future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
+          background{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
       }
       processJob(next)
     }
