@@ -47,9 +47,7 @@ import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
 
 import org.openmole.core.batch.message.FileMessage._
-import scala.collection.mutable.SynchronizedMap
-import scala.collection.mutable.HashMap
-import actors.Future
+import scala.annotation.tailrec
 import actors.Futures._
 
 object JobLauncher extends Logger {
@@ -91,20 +89,23 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val id = UUID.randomUUID
     implicit val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
 
-    var runtime: Option[(String, File)] = None
-
     val storage = "sftp://" + user + '@' + host + ":" + port + "/"
     val relativePath = new RelativePath(storage)
     import relativePath._
 
-    while(true) {
-      try {
-        val resultsDir = resultsDirName.toURIFile
-        val jobsDir = jobsDirName.toURIFile
-        val timeStempsDir = timeStempsDirName.toURIFile
-        fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) match {
+    val resultsDir = resultsDirName.toURIFile
+    val jobsDir = jobsDirName.toURIFile
+    val timeStempsDir = timeStempsDirName.toURIFile
+        
+    processJob( future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)} )
+        
+    @tailrec def processJob(fetchJobResult: () => Option[(File, File, File, File, Int, ExecutionMessage, String, List[FileMessage])]): Unit = {
+      val next = try {
+        fetchJobResult() match {
    
           case Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, memory, executionMessage, job, cached)) =>
+            val next = future {fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
+
             val localResultFile = 
               try {
                 val localResultFile = Workspace.newFile("job", ".res")
@@ -137,17 +138,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               })
 
             //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
- 
+              next
           case None  => 
             logger.info("Job list is empty on the remote host.")
             Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
+            future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
         } 
- 
       } catch {
         case e: Exception => 
-          logger.log(WARNING, "Error while looking for jobs.",e)
+          logger.log(WARNING, "Error while looking for jobs.", e)
           Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
+          future{fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath)}
       }
+      processJob(next)
     }
   }
   
