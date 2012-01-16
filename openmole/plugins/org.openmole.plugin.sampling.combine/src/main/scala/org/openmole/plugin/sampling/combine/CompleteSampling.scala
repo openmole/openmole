@@ -37,10 +37,13 @@ class CompleteSampling(samplings: Iterable[ISampling]) extends ISampling {
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
     if(samplings.isEmpty) Iterator.empty
     else {
-      val values = samplings.map{_.build(context).toIterable}
-      val composed = values.view.map{_.map(e => List(e))}.reduceRight((v1, v2) => v1.flatMap(e1 => v2.map{e2 =>  e1 ::: e2}))
-      composed.flatten.iterator //map{comp => factors.zip(comp).map{case (f,v) => new Variable(f.prototype.asInstanceOf[IPrototype[Any]], v)}}.iterator
+      val values = samplings.map{_.build(context).toList}   
+      val composed = values.view.reduce{(a, b) => combine(a, b)}
+      composed.iterator //map{comp => factors.zip(comp).map{case (f,v) => new Variable(f.prototype.asInstanceOf[IPrototype[Any]], v)}}.iterator
     }
   
-
+  def combine[A](it1: List[Iterable[A]], it2: List[Iterable[A]]): List[Iterable[A]] = 
+    for(v1 <- it1; v2 <- it2) yield v1 ++ v2
+  
+  
 }

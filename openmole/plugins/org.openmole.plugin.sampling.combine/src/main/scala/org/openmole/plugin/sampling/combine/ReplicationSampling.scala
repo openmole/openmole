@@ -18,21 +18,20 @@
 package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IInfiniteDomain
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.plugin.domain.modifier.SlicedDomain
 
 class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IInfiniteDomain[T]], nbReplication: Int) extends ISampling {
 
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
   
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-    val factorIts = seederFactor.domain.iterator(context).sliding(nbReplication, nbReplication)
-
-    (for(sample <- sampling.build(context).toIterable) yield sample -> factorIts.next).flatMap {
-      case(sample, factorIt) => factorIt.map(rep => sample ++ List(new Variable(seederFactor.prototype, rep)))
-    }.iterator
-  }
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    new CompleteSampling(sampling, new Factor(seederFactor.prototype, new SlicedDomain(seederFactor.domain, nbReplication))).build(context)
+ 
+ 
 }
