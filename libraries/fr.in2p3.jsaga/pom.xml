@@ -81,6 +81,8 @@
     <properties>
         <import.packages>scala.*,*;resolution:=optional</import.packages>
         <libraries.export.packages>org.ogf.saga.*,fr.in2p3.jsaga.*,org.globus.*</libraries.export.packages>
+        <embed-dep>*;groupId=bouncycastle;artifactId=bcprov-jdk13,*;type=!pom;inline=true</embed-dep>
+        <bundle.classpath>bcprov-jdk13-140.jar,.</bundle.classpath>
     </properties>
 
     <build>
