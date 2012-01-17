@@ -194,21 +194,30 @@ object FileUtil {
     }
 
     def copy(toF: File) = {
-      val toCopy = new ListBuffer[(File, File)]
-      toCopy += ((file, toF))
-
-      while (!toCopy.isEmpty) {
-        val (curFrom, curTo) = toCopy.remove(0)
-        if (curFrom.isDirectory) {
-          curTo.mkdir
-
-          for (child <- curFrom.listFiles) {
-            val to = new File(curTo, child.getName)
-            toCopy += ((child, to))
+      
+      def goThrough(f: (File, File) => Unit) = {
+        val toCopy = new ListBuffer[(File, File)]
+        toCopy += ((file, toF))
+      
+        while (!toCopy.isEmpty) {
+          val (curFrom, curTo) = toCopy.remove(0)
+          f(curFrom, curTo)
+          if (curFrom.isDirectory) {
+            for (child <- curFrom.listFiles) {
+              val to = new File(curTo, child.getName)
+              toCopy += ((child, to))
+            }
           }
-        } else curFrom.copyFile(curTo)
-        curTo.setSamePermissionsAs(curFrom)
+        }
       }
+      
+      goThrough (
+        (curFrom, curTo) =>
+          if (curFrom.isDirectory) curTo.mkdir
+          else curFrom.copyFile(curTo)
+      )
+      
+      goThrough((curFrom, curTo) => curTo.setSamePermissionsAs(curFrom))
     }
     
     def setSamePermissionsAs(other: File) = {
@@ -280,11 +289,11 @@ object FileUtil {
       finally s.close
     }
     
-     def contentOption =    
-       try Some(file.content)
-       catch {
-        case e: IOException => None
-       }
+    def contentOption =    
+      try Some(file.content)
+    catch {
+      case e: IOException => None
+    }
     
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
     
