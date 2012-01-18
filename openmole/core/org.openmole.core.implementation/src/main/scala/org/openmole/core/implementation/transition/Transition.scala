@@ -19,12 +19,11 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.ContextAggregator._
-import org.openmole.core.implementation.tools.TypeUtil._
+import org.openmole.core.implementation.validation.TypeUtil._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.task.{ITask, IExplorationTask}
 import org.openmole.core.model.transition.{ICondition, ITransition, ISlot}
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.misc.tools.service.LockRepository

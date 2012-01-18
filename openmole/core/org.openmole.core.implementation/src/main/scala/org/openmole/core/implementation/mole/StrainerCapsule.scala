@@ -23,7 +23,7 @@ import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet._
 import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.tools.TypeUtil._
+import org.openmole.core.implementation.validation.TypeUtil._
 
 object StrainerCapsule {
   class StrainerTaskDecorator(task: ITask) extends Task(task.name) {

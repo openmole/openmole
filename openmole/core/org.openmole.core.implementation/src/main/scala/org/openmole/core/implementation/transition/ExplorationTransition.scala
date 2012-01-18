@@ -95,7 +95,6 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
         val fp = fromArray(p)
         if(fp.accepts(v)) variables += new Variable(fp, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
-
       }
       submitNextJobsIfReady(ListBuffer() ++ variables.toContext, newTicket, subMole)
     }

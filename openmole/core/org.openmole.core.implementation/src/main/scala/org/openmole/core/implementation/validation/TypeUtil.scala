@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.model.transition.ISlot
