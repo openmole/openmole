@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,4 +17,4 @@
 
 package org.openmole.core.model.transition
 
-trait ISlaveTransition extends ITransition
+trait IEndExplorationTransition extends ITransition

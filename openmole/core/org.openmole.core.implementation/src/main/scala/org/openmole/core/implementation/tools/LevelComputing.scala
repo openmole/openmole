@@ -17,11 +17,10 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.misc.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.{IMole, IMoleExecution}
-import org.openmole.core.model.transition.{ITransition,IAggregationTransition, IExplorationTransition}
-import scala.collection.immutable.HashSet
+import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.transition.{ITransition,IAggregationTransition, IExplorationTransition, IEndExplorationTransition}
 import scala.collection.mutable.WeakHashMap
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.ListBuffer
@@ -54,6 +53,7 @@ object LevelComputing {
   def nextCaspules(from: ICapsule, lvl: Int) = 
     from.outputTransitions.map {
       case t: IAggregationTransition => t.end.capsule -> (lvl - 1)
+      case t: IEndExplorationTransition => t.end.capsule -> (lvl - 1)
       case t: IExplorationTransition => t.end.capsule -> (lvl + 1)
       case t: ITransition => t.end.capsule -> lvl
     }

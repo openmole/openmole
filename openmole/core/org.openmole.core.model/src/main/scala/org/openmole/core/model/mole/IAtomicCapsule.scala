@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition
+package org.openmole.core.model.mole
 
-import org.openmole.core.model.task.ITask
-
-trait IMaster {
-  def selection: ITask
-  def master: ISlot
-  def condition: ICondition
-  def transition: ITransition
-}
+trait IAtomicCapsule { this: ICapsule => }

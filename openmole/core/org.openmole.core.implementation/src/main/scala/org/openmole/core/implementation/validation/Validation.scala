@@ -21,6 +21,7 @@ import org.openmole.core.model.mole.IMole
 import TypeUtil.receivedTypes
 import org.openmole.core.model.data.DataModeMask._
 import scala.collection.immutable.TreeMap
+import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.tools.obj.ClassUtils._
 import DataflowProblem._
 
@@ -29,6 +30,11 @@ object Validation {
   def typeErrors(mole: IMole) = 
     mole.capsules
       .flatMap {
+        c => c.task match {
+          case task: IMoleTask => task.mole.capsules
+          case _ => List(c)
+        }
+      }.flatMap {
         c => c.intputSlots.map {
           s => (c, s, TreeMap(receivedTypes(s).map{p => p.name -> p}.toSeq: _*))
         }
@@ -44,5 +50,7 @@ object Validation {
               }
           )
       }
-      
+ 
+  def topologyErrors = {}
+  
 }

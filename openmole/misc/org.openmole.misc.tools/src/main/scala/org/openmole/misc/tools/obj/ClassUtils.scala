@@ -104,7 +104,7 @@ object ClassUtils {
   
   def unArrayify(c: Iterable[Class[_]]): (Iterable[Class[_]], Int) = {
     @tailrec def rec(c: Iterable[Class[_]], level: Int = 0): (Iterable[Class[_]], Int)= {
-      if(c.exists(!_.isArray)) (c, level)
+      if(c.isEmpty || c.exists(!_.isArray)) (c, level)
       else rec(c.map{_.getComponentType}, level + 1)
     }
     rec(c)

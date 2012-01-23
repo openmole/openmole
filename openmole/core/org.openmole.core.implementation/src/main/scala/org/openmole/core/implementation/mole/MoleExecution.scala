@@ -45,6 +45,7 @@ import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.data.IDataChannel
+import org.openmole.core.model.mole.IAtomicCapsule
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
@@ -98,7 +99,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   
 
   override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
-    if(!canceled.get)  {
+    if(!canceled.get) {
       EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
       EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
     
@@ -109,7 +110,12 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
       inProgress += moleJob -> ticket
 
-      if(!instantRerun.rerun(moleJob, capsule)) subMole.group(moleJob, capsule, moleJobGrouping(capsule))
+      if(!instantRerun.rerun(moleJob, capsule)) {
+        capsule match {
+          case _: IAtomicCapsule => moleJob.perform
+          case _ => subMole.group(moleJob, capsule, moleJobGrouping(capsule))
+        }
+      }
     }
   }
 
@@ -123,8 +129,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   def start(context: IContext): this.type = {
     val ticket = nextTicket(rootTicket)
     val subMole = SubMoleExecution(this)
-    //val moleJob = mole.root.toJob(context, nextJobId, subMole, ticket)
-      
     subMole.submit(mole.root, context, ticket)
     this
   }

@@ -103,9 +103,8 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
-    //println("_perform")
+
     if(!hasBeenPerformed(subMole, parentTicket)) {
-      //println("perform 2")
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(resultContexts) =>
           //Store the result context

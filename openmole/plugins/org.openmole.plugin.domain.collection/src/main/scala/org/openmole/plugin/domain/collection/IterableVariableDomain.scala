@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
@@ -27,5 +26,5 @@ import scala.collection.JavaConversions._
 class IterableVariableDomain[T](variable: IPrototype[java.lang.Iterable[_ <: T]]) extends IDomain[T] {
 
   override def iterator(context: IContext): Iterator[T] = 
-    context.value(variable).getOrElse(throw new UserBadDataError("Value not found in context for prototype " + variable.toString())).iterator  
+    context.valueOrException(variable).iterator  
 }

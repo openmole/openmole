@@ -20,7 +20,6 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IRegistryWithTicket
-import org.openmole.core.model.transition.IMasterTransition
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.MultipleException

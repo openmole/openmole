@@ -22,7 +22,6 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.IMasterTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.Event
 import scala.collection.mutable.Buffer
@@ -50,7 +49,7 @@ trait ISubMoleExecution {
   
   def cancel
   
-  def masterTransitionRegistry: IRegistryWithTicket[IMasterTransition, IContext]
+  def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, IContext]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 

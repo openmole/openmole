@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition
+package org.openmole.plugin.domain.collection
 
-trait ISlaveTransition extends ITransition
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.domain.IDomain
+
+import collection.JavaConversions._
+
+class VariableDomain[A](variable: IPrototype[Array[A]]) extends IDomain[A] {
+  
+  override def iterator(context: IContext): Iterator[A] = 
+    context.valueOrException(variable).iterator
+  
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.transition
+package org.openmole.core.implementation.validation
 
-import org.openmole.core.model.task.ITask
-
-trait IMasterTransition extends IAggregationTransition {
-  def master: IMaster
-}
+case class TopologyProblem extends Problem

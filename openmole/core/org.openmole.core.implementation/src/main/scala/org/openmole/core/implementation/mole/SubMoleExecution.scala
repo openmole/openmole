@@ -18,17 +18,15 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.IMasterTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
@@ -40,7 +38,6 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
-import scala.actors.threadpool.AtomicInteger
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
@@ -75,7 +72,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   private var canceled = false
   
-  val masterTransitionRegistry = new RegistryWithTicket[IMasterTransition, IContext]
+  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
@@ -140,7 +137,6 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
 
       this += moleJob
-      
       moleExecution.submit(moleJob, capsule, this, ticket)
     }
   }
