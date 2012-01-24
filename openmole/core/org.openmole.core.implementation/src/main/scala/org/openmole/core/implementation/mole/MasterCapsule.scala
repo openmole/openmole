@@ -22,24 +22,31 @@ import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.misc.exception.UserBadDataError
 
-class MasterCapsule(_task: Option[ITask] = None) extends Capsule(_task) with IMasterCapsule {
+class MasterCapsule(_task: Option[ITask] = None, val persist: Set[String] = Set.empty) extends Capsule(_task) with IMasterCapsule {
   
-  def this(t: ITask) = this(Some(t))
+  def this (t: ITask, persist: String*) = this(Some(t), persist.toSet)
   
+  def this (t: ITask, head: IPrototype[_], persist: IPrototype[_]*) = this(Some(t), (head :: persist.toList).map{_.name}.toSet)
+    
+  def this(t: ITask, head: String, persist: Array[String]) = this(t, (head :: persist.toList): _*)
+  
+  def this(t: ITask, head: IPrototype[_], persist: Array[IPrototype[_]]) = this(t, head, persist: _*)
+    
   override def toJob(context: IContext, jobId: MoleJobId, subMoleExecution: ISubMoleExecution, ticket: ITicket): IMoleJob = {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Parrent ticket is not avialable."))
     val savedContext = subMoleExecution.masterCapsuleRegistry.remove(this, parentTicket).getOrElse(new Context)
-    super.toJob(savedContext ++ context, jobId, subMoleExecution, ticket)
+    super.toJob(context ++ savedContext, jobId, subMoleExecution, ticket)
   }
 
   override protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {   
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Parrent ticket is not avialable."))
-    subMole.masterCapsuleRegistry.register(this, parentTicket, context)
+    subMole.masterCapsuleRegistry.register(this, parentTicket, persist.flatMap{n => context.variable(n).toList})
     super.performTransition(context, ticket, subMole)
   }
   

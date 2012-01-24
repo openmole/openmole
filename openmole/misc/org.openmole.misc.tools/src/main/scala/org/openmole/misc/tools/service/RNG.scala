@@ -18,11 +18,26 @@
 package org.openmole.misc.tools.service
 
 import java.util.Random
+import java.util.UUID
+import org.apache.commons.math.random.{RandomGenerator, Well44497b, RandomAdaptor}
 import scala.collection.mutable.IndexedSeq
 
 object RNG {
   
-  lazy val rng = new Random
+  val rng = new RandomAdaptor(new RandomGenerator {
+      val generator = new Well44497b( {
+          val uuid = UUID.randomUUID
+          uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
+      })
+    
+    def nextBoolean = synchronized { generator.nextBoolean }
+    def	nextBytes(bytes: Array[Byte]) = synchronized { generator.nextBytes(bytes) }
+    def nextDouble = synchronized { generator.nextDouble }
+    def nextFloat = synchronized { generator.nextFloat }
+    def	nextGaussian = synchronized { generator.nextGaussian }
+    def nextInt = synchronized { generator.nextInt }
+    def nextInt(n: Int) = synchronized { generator.nextInt(n) }
+  })
   
   @transient lazy val longInterval = {
     val min = BigDecimal(Long.MinValue)

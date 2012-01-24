@@ -17,22 +17,33 @@
 
 package org.openmole.plugin.domain.distribution
 
+import org.apache.commons.math.random.RandomAdaptor
+import org.apache.commons.math.random.Well44497b
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IInfiniteDomain
 import java.util.Random
+import org.openmole.misc.tools.service.RNG
 
-class UniformIntDistribution(generator: Random, topBound: Option[Int]= None) extends IInfiniteDomain[Int] {
+class UniformIntDistribution(seed: Option[Long], topBound: Option[Int]) extends IInfiniteDomain[Int] {
  
-  def this(seed: Long) = this(new Random(seed),None)
-  def this(seed: Long, b: Int) = this(new Random(seed),Some(b))
-    
-  override def iterator(context: IContext): Iterator[Int] = {
-    new Iterator[Int] {
-      override def hasNext: Boolean = true
-      override def next: Int = topBound match {
-        case Some(i)=> generator.nextInt(i)
-        case None=> generator.nextInt
-      }
+  def this(seed: Long) = this(Some(seed), None)
+  def this(seed: Long, b: Int) = this(Some(seed), Some(b))
+  def this() = this(None, None)
+  def this(b: Int) = this(None, Some(b))
+  
+  @transient lazy val generator = {
+    seed match {
+      case Some(seed) => new RandomAdaptor(new Well44497b(seed))
+      case None => RNG.rng
     }
   }
+    
+  override def iterator(context: IContext): Iterator[Int] = 
+    Iterator.continually {
+      topBound match {
+        case Some(i) => generator.nextInt(i)
+        case None => generator.nextInt
+      }
+    }
+  
 }

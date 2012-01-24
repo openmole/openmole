@@ -18,19 +18,23 @@
 package org.openmole.core.implementation.tools
 
 import groovy.lang.Binding
+import java.util.Random
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.service.RNG
 import org.openmole.misc.workspace.Workspace
 
 
 object GroovyContextAdapter {
   val workspaceVar = new Prototype("workspace", Workspace.getClass)
+  val rngVar = new Prototype("rng", classOf[Random])
   
-  implicit def variablesDecorator(variables: Iterable[IVariable[_]]) = new Object() {
+  implicit def variablesDecorator(variables: Iterable[IVariable[_]]) = new {
     def toBinding = {
       val binding = new Binding
       binding.setVariable(workspaceVar.name, Workspace)
+      binding.setVariable(rngVar.name, RNG.rng)
       variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
       binding
     }

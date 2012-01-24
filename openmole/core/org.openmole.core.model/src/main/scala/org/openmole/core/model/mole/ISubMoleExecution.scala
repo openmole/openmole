@@ -49,7 +49,7 @@ trait ISubMoleExecution {
   
   def cancel
   
-  def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, IContext]
+  def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 

@@ -72,7 +72,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   private var canceled = false
   
-  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
+  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 

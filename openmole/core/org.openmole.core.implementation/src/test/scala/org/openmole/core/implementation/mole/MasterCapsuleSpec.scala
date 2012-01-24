@@ -94,7 +94,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     select.addOutput(n)
     select.addOutput(i)
     
-    val selectCaps = new MasterCapsule(select)
+    val selectCaps = new MasterCapsule(select, n)
 
     new ExplorationTransition(exc, emptyC)
     new Transition(emptyC, selectCaps)
@@ -156,7 +156,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     select.addOutput(n)
     select.addOutput(i)
 
-    val selectCaps = new MasterCapsule(select)
+    val selectCaps = new MasterCapsule(select, n, isaved)
     
     new ExplorationTransition(exc, emptyC)
     new Transition(emptyC, selectCaps)
