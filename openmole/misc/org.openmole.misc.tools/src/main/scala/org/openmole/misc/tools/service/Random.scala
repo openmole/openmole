@@ -17,27 +17,30 @@
 
 package org.openmole.misc.tools.service
 
-import java.util.Random
 import java.util.UUID
 import org.apache.commons.math.random.{RandomGenerator, Well44497b, RandomAdaptor}
 import scala.collection.mutable.IndexedSeq
 
-object RNG {
+object Random {
+  implicit def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
   
-  val rng = new RandomAdaptor(new RandomGenerator {
-      val generator = new Well44497b( {
-          val uuid = UUID.randomUUID
-          uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
-      })
-    
-    def nextBoolean = synchronized { generator.nextBoolean }
-    def	nextBytes(bytes: Array[Byte]) = synchronized { generator.nextBytes(bytes) }
-    def nextDouble = synchronized { generator.nextDouble }
-    def nextFloat = synchronized { generator.nextFloat }
-    def	nextGaussian = synchronized { generator.nextGaussian }
-    def nextInt = synchronized { generator.nextInt }
-    def nextInt(n: Int) = synchronized { generator.nextInt(n) }
-  })
+  val default = buildSynchronized(UUID.randomUUID)
+  
+  def buildSynchronized(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
+  
+  def build(seed: Long) = new RandomAdaptor(new Well44497b(seed))
+  
+  class SynchronizedRandom(generator: RandomGenerator) extends java.util.Random {
+    override def nextBoolean = synchronized { generator.nextBoolean }
+    override def nextBytes(bytes: Array[Byte]) = synchronized { generator.nextBytes(bytes) }
+    override def nextDouble = synchronized { generator.nextDouble }
+    override def nextFloat = synchronized { generator.nextFloat }
+    override def nextGaussian = synchronized { generator.nextGaussian }
+    override def nextInt = synchronized { generator.nextInt }
+    override def nextInt(n: Int) = synchronized { generator.nextInt(n) }
+    override def nextLong = synchronized { generator.nextLong }
+    override def setSeed(seed: Long) = synchronized { generator.setSeed(seed) }
+  }
   
   @transient lazy val longInterval = {
     val min = BigDecimal(Long.MinValue)
@@ -45,7 +48,8 @@ object RNG {
     max - min
   }
   
-  implicit def randomDecorator(rng: Random) = new {
+  
+  implicit def randomDecorator(rng: java.util.Random) = new {
     def shuffle[T](a: IndexedSeq[T]) ={
       for (i <- 1 until a.size reverse) {
         val j = rng.nextInt (i + 1)
@@ -57,9 +61,11 @@ object RNG {
     }
   
     def nextLong(max: Long): Long = {
-      val v = BigDecimal(rng.nextLong())
+      val v = BigDecimal(rng.nextLong)
       ((v - Long.MinValue) * (BigDecimal(max) / longInterval)).toLong
     }
   }
   
 }
+
+

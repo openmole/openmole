@@ -25,7 +25,7 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
-import org.openmole.misc.tools.service.RNG._
+import org.openmole.misc.tools.service.Random
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
@@ -78,7 +78,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
         }
 
         if (!notLoaded.isEmpty) {
-          var selected = rng.nextDouble * notLoaded.map{_._3}.sum
+          var selected = Random.default.nextDouble * notLoaded.map{_._3}.sum
           
           for ((service, token, fitness) <- notLoaded) { 
             if(!ret.isDefined && selected <= fitness) ret = Some((service, token))

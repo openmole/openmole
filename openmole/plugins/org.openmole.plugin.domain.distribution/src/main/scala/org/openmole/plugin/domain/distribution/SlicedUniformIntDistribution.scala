@@ -20,14 +20,12 @@ package org.openmole.plugin.domain.distribution
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
 
-class SlicedUniformIntDistribution(seed: Option[Long], size: Int, topBound: Option[Int]= None) extends IFiniteDomain[Int]{
+class SlicedUniformIntDistribution(domain: UniformIntDistribution, size: Int, topBound: Option[Int]= None) extends IFiniteDomain[Int]{
     
-  def this(seed: Long, size: Int) = this(Some(seed), size,None)
-  def this(seed: Long, size: Int, b: Int) = this(Some(seed), size,Some(b))
-  def this(size: Int) = this(None, size,None)
-  def this(size: Int, b: Int) = this(None, size,Some(b))
- 
-  @transient lazy val domain = new UniformIntDistribution(seed, topBound)
+  def this(seed: Long, size: Int) = this(new UniformIntDistribution(seed), size, None)
+  def this(seed: Long, size: Int, b: Int) = this(new UniformIntDistribution(seed), size,Some(b))
+  def this(size: Int) = this(new UniformIntDistribution, size,None)
+  def this(size: Int, b: Int) = this(new UniformIntDistribution, size,Some(b))
 
   override def computeValues(context: IContext) = domain.iterator(context).take(size).toIterable
 }

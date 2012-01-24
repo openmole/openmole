@@ -18,8 +18,10 @@
 package org.openmole.plugin.sampling.lhs
 
 import org.openmole.core.model.sampling.ISampling
-import org.openmole.misc.tools.service.RNG._
+import org.openmole.misc.tools.service.Random._
+import org.openmole.misc.tools.service.Random.randomDecorator
 import java.util.Random
+import org.apache.commons.math.random.Well44497b
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
@@ -27,26 +29,24 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IWithRange
 import org.openmole.core.model.sampling.IFactor
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConversions
+import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ListBuffer
 
 class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], rng: Random) extends ISampling {
 
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], seed: Int) = this(samples, factors, new Random(seed))
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) = this(samples, factors, 0)
-  
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], seed: Long) = this(samples, factors, buildSynchronized(seed))
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) = this(samples, factors, Workspace.newRNG)
+
   override def prototypes = factors.map{_.prototype}
   
   override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
-     
-    //System.out.println("LHSPlan::computeValues");
+    
     //Inititalize a temp structure
     val TempFactors = new Array[ArrayBuffer[Double]](factors.size)//(ArrayList<Double>[])new ArrayList[nbOfExperiments]; //new  List<Double>[nbOfExperiments] ;  //ArrayList<Double>(nbOfExperiments)[nbOfExperiments]; //= new double[getExperimentalDesign().getFactors().size()][nbOfExperiments] ;
     for(i <- 0 until factors.size) {
       TempFactors(i) = new ArrayBuffer[Double](samples)
     }
 
-    //System.out.println("LHSPlan::computeValues  Sampling step.");
     for (j <- 0 until samples) {
       var i = 0
       for (f <- factors) {
@@ -73,7 +73,6 @@ class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] w
       }
       listOfListOfValues(j) = factorValues
     }
-    //System.out.println("LHSPlan::computeValues  end.");
     listOfListOfValues.iterator
   }
 }

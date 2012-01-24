@@ -22,7 +22,6 @@ import java.util.Random
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.tools.groovy.GroovyProxy
-import org.openmole.misc.tools.service.RNG
 import org.openmole.misc.workspace.Workspace
 
 
@@ -34,7 +33,7 @@ object GroovyContextAdapter {
     def toBinding = {
       val binding = new Binding
       binding.setVariable(workspaceVar.name, Workspace)
-      binding.setVariable(rngVar.name, RNG.rng)
+      binding.setVariable(rngVar.name, Workspace.newRNG)
       variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
       binding
     }

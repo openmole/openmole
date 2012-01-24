@@ -28,6 +28,8 @@ import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
 import org.jasypt.util.text.BasicTextEncryptor
 import org.joda.time.format.ISOPeriodFormat
+import org.openmole.misc.tools.service.Random
+import org.openmole.misc.tools.service.Random._
 import scala.collection.mutable.HashMap
 import org.openmole.misc.eventdispatcher.{EventDispatcher, Event}
 import org.openmole.misc.exception.InternalProcessingError
@@ -48,7 +50,7 @@ object Workspace {
   val PersitentLocation = "persistent"
   val running = ".running"
   val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
-
+ 
   private val group = "Workspace"
   private val fixedPrefix = "file"
   private val fixedPostfix = ".wf"
@@ -146,12 +148,17 @@ object Workspace {
   def decrypt(s: String) = instance.decrypt(s)
   
   def encrypt(s: String) = instance.encrypt(s)
+  
+  def rng = instance.rng
+  
+  def newRNG = instance.newRNG
+  
 }
 
 
 class Workspace(val location: File) {
 
-  import Workspace.{PersitentLocation,fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, TmpLocation, ConfigurationFile, configurations, sessionUUID, noUniqueResourceProperty}
+  import Workspace.{PersitentLocation,fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, TmpLocation, ConfigurationFile, configurations, sessionUUID, UniqueID, noUniqueResourceProperty}
   
   location.mkdirs
   val run = new File(location, running)
@@ -170,6 +177,9 @@ class Workspace(val location: File) {
   
   @transient val persistentDir = new File(location, PersitentLocation)
   persistentDir.mkdirs
+  
+  def newRNG = Random.buildSynchronized(rng.nextLong)
+  lazy val rng = Random.buildSynchronized(sessionUUID)
   
   private def textEncryptor(password: Option[String]) = {
     password match {

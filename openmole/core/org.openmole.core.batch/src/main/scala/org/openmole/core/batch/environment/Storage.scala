@@ -17,27 +17,15 @@
 
 package org.openmole.core.batch.environment
 
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.service.RNG
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.QualityControl
-import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.RelativePath
-import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.file.URIFileCleaner
-import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.misc.executorservice.ExecutorService
-import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.misc.workspace.ConfigurationLocation
 
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
