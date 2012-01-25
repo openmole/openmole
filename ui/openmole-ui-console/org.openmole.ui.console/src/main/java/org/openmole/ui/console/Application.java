@@ -19,6 +19,7 @@ import org.openmole.ui.console.internal.command.Get;
 import org.openmole.ui.console.internal.command.Print;
 import org.openmole.ui.console.internal.command.Auth;
 import org.openmole.ui.console.internal.command.Encrypt;
+import org.openmole.ui.console.internal.command.Verify;
 
 public class Application implements IApplication {
 
@@ -63,6 +64,7 @@ public class Application implements IApplication {
         g.leftShift(new Get(g, muteShell, "get", "\\g"));
         g.leftShift(new Auth(g, muteShell, "auth", "\\au"));
         g.leftShift(new Encrypt(g, muteShell, "encrypt", "\\en"));
+        g.leftShift(new Verify(g, muteShell, "verify", "\\vf"));
          
         //Console.run("init " + Console.workspace());
         

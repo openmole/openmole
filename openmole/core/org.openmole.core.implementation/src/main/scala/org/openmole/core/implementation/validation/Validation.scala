@@ -56,7 +56,7 @@ object Validation {
           )
       }
 
-  def topologyProblems(mole: IMole) = {
+  def topologyErrors(mole: IMole) = {
     val errors = new ListBuffer[TopologyProblem]
     val seen = new HashMap[ICapsule, (List[(List[ICapsule], Int)])]
     val toProcess = new Queue[(ICapsule, Int, List[ICapsule])]
@@ -78,5 +78,8 @@ object Validation {
       case(caps, paths) => new TopologyProblem(caps, paths)
     }
   }
+  
+  def apply(mole: IMole) = typeErrors(mole) ++ topologyErrors(mole)
+
   
 }

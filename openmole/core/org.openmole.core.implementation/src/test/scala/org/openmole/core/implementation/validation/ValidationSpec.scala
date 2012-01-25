@@ -46,7 +46,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.typeErrors(new Mole(c1))
     errors.headOption match {
       case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
-      case None => error("Error should have been detected")
+      case None => sys.error("Error should have been detected")
     }
   }
   
@@ -69,7 +69,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       case Some(WrongType(_,_,d,t)) => 
         assert(d.prototype == pString)
         assert(t == pInt)
-      case None => error("Error should have been detected")
+      case None => sys.error("Error should have been detected")
     }
   }
   
@@ -85,7 +85,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     new ExplorationTransition(c1, c2)
     new Transition(c2, c1)
     
-    val errors = Validation.topologyProblems(new Mole(c1))
+    val errors = Validation.topologyErrors(new Mole(c1))
     errors.isEmpty should equal (false) 
   }
 
