@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.data._
@@ -70,6 +71,22 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
         assert(t == pInt)
       case None => error("Error should have been detected")
     }
+  }
+  
+  "Validation" should "detect a topology error" in {
+    val p = new Prototype("t", classOf[String])
+    
+    val t1 = new EmptyTask("t1")
+    val t2 = new EmptyTask("t2")
+    
+    val c1 = new Capsule(t1)
+    val c2 = new Capsule(t2)
+    
+    new ExplorationTransition(c1, c2)
+    new Transition(c2, c1)
+    
+    val errors = Validation.topologyProblems(new Mole(c1))
+    errors.isEmpty should equal (false) 
   }
 
 }

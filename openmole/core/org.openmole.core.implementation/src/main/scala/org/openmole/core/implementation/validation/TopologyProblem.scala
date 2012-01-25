@@ -17,4 +17,8 @@
 
 package org.openmole.core.implementation.validation
 
-case class TopologyProblem extends Problem
+import org.openmole.core.model.mole.ICapsule
+
+case class TopologyProblem(
+  capsule: ICapsule,
+  paths: List[(List[ICapsule], Int)]) extends Problem

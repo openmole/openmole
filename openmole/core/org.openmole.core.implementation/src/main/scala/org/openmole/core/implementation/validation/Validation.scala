@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.validation
 
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import TypeUtil.receivedTypes
 import org.openmole.core.model.data.DataModeMask._
@@ -24,6 +25,10 @@ import scala.collection.immutable.TreeMap
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.tools.obj.ClassUtils._
 import DataflowProblem._
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.Queue
+import org.openmole.core.implementation.tools.LevelComputing._
 
 object Validation {
   
@@ -50,7 +55,28 @@ object Validation {
               }
           )
       }
- 
-  def topologyErrors = {}
+
+  def topologyProblems(mole: IMole) = {
+    val errors = new ListBuffer[TopologyProblem]
+    val seen = new HashMap[ICapsule, (List[(List[ICapsule], Int)])]
+    val toProcess = new Queue[(ICapsule, Int, List[ICapsule])]
+    
+    toProcess.enqueue((mole.root, 0, List.empty))
+    seen(mole.root) = List((List.empty -> 0))
+    
+    while(!toProcess.isEmpty) {
+      val (capsule, level, path) = toProcess.dequeue
+      
+      nextCaspules(capsule, level).foreach {
+        case (nCap, nLvl) => 
+          if(!seen.contains(nCap)) toProcess.enqueue((nCap, nLvl, capsule :: path))
+          seen(nCap) = ((capsule :: path) -> nLvl) :: seen.getOrElse(nCap, List.empty)
+      }
+    }
+    
+    seen.filter{case (caps, paths) => paths.map{case(path, level) => level}.distinct.size > 1}.map {
+      case(caps, paths) => new TopologyProblem(caps, paths)
+    }
+  }
   
 }
