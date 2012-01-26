@@ -58,7 +58,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
       case Some(proxy) => 
         ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
-        ctx.setAttribute(VOMSContext.MYPROXYUSERID,proxy.userId)
+        ctx.setAttribute(VOMSContext.MYPROXYUSERID, proxy.userId)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
         None
       case None =>
@@ -80,6 +80,8 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
     _init(ctx)
     
     val interval = (getTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+    
+    logger.fine("Renew proxy in " + interval)
     Updater.delay(new ProxyChecker(ctx, proxyDuration, new WeakReference(authentication)), ExecutorType.OWN, interval)
         
     (ctx, proxyDuration)

@@ -66,7 +66,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
   
-  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val lockKey = (end, subMole, ticket)
     lockRepository.lock(lockKey)
     try {

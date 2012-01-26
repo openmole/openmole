@@ -28,14 +28,21 @@ object DataModeMask {
    * execution no error will be raised and the task should accomodate of it.
    *
    */
-  val optional = new DataModeMask(0x0001)
+  val optional = new DataModeMask(0x0001) {
+    override def toString = "optional"
+  }
   
   /**
    * The value corresponding to the IData can be used by an exploration 
    * transition as a exploration set. This should be set only on array.
    *
    */
-  val explore = new DataModeMask(0x0002)
+  val explore = new DataModeMask(0x0002) {
+    override def toString = "explore"
+  }
+  
+  val values = List(optional, explore)
+  
 }
 
 class DataModeMask(val value: Int)

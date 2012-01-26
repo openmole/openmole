@@ -21,6 +21,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
+import org.openmole.misc.tools.io.StringUtil._
 
 class Slot(val capsule: ICapsule) extends ISlot {
   capsule.addInputSlot(this)
@@ -40,5 +41,7 @@ class Slot(val capsule: ICapsule) extends ISlot {
   override def transitions: Iterable[ITransition] =  _transitions
     
   override def contains(transition: ITransition) = _transitions.contains(transition)
+  
+  override def toString = "Slot from (" + transitions.toCSV + ") to " + capsule.toString
 
 }

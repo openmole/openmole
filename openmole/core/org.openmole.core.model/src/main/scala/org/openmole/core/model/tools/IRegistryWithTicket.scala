@@ -31,42 +31,44 @@ import org.openmole.core.model.mole.ITicket
  */
 trait IRegistryWithTicket[K, V] {
 
-    /**
-     * 
-     * Consult a value for a given key and ticket.
-     * 
-     * @param key the index key 
-     * @param ticket the index ticket
-     * @return the value or null if not found
-     */
-    def consult(key: K, ticket: ITicket): Option[V] 
+  /**
+   * 
+   * Consult a value for a given key and ticket.
+   * 
+   * @param key the index key 
+   * @param ticket the index ticket
+   * @return the value or null if not found
+   */
+  def consult(key: K, ticket: ITicket): Option[V] 
 
-    /**
-     *
-     * Look if a value is registred for a given key and ticket.
-     *
-     * @param key the index key
-     * @param ticket the index ticket
-     * @return true if the value is present
-     */
-    def isRegistred(key: K, ticket: ITicket): Boolean
+  /**
+   *
+   * Look if a value is registred for a given key and ticket.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   * @return true if the value is present
+   */
+  def isRegistred(key: K, ticket: ITicket): Boolean
 
-    /**
-     *
-     * Register a value for given key and ticket.
-     *
-     * @param key the index key
-     * @param ticket the index ticket
-     * @param val the value to register
-     */
-    def register(key: K, ticket: ITicket, value: V)
+  /**
+   *
+   * Register a value for given key and ticket.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   * @param val the value to register
+   */
+  def register(key: K, ticket: ITicket, value: V)
 
-    /**
-     *
-     * Remove a value from the registry.
-     *
-     * @param key the index key
-     * @param ticket the index ticket
-     */
-    def remove(key: K, ticket: ITicket): Option[V]
+  /**
+   *
+   * Remove a value from the registry.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   */
+  def remove(key: K, ticket: ITicket): Option[V]
+    
+  def getOrElseUpdate(key: K, ticket: ITicket, f: => V): V
 }

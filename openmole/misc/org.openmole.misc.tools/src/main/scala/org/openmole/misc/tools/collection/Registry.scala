@@ -33,4 +33,7 @@ class Registry [K, V] {
   def apply(key: K): Option[V] = registry.get(key)
        
   def isEmpty = registry.isEmpty
+  
+  def getOrElseUpdate(k: K, f: => V) = registry.getOrElseUpdate(k, f)
+  
 }

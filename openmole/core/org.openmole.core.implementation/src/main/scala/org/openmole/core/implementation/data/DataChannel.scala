@@ -50,7 +50,7 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     {
-      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket) getOrElse(new ListBuffer[IVariable[_]])
+      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[IVariable[_]])
       else {
         val workingOnTicket = (0 until levelDelta).foldLeft(ticket) {
           (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
@@ -60,32 +60,22 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
     }.toIterable
   }
 
-  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = synchronized {
+  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
-
     val dataChannelRegistry = moleExecution.dataChannelRegistry
-
-    dataChannelRegistry.synchronized {
-      if (levelDelta >= 0) {
-        val toContext = ListBuffer() ++ fromContext.filter(v => variableNames.contains(v.prototype.name))
-        dataChannelRegistry.register(this, ticket, toContext)
-      }
-      else {
-        val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
-          (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
-        }
-
-        val toContext = dataChannelRegistry.consult(this, workingOnTicket) match {
-          case Some(ctx) => ctx
-          case None => 
-            val ctx = new ListBuffer[IVariable[_]]
-            dataChannelRegistry.register(this, workingOnTicket, ctx)
-            ctx
-        }
-
-        toContext ++= fromContext.filter(v => variableNames.contains(v.prototype.name))
-      }  
+    if (levelDelta >= 0) {
+      val toContext = ListBuffer() ++ fromContext.filter(v => variableNames.contains(v.prototype.name))
+      dataChannelRegistry.register(this, ticket, toContext)
     }
+    else {
+      val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
+        (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+      }
+        
+      val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[IVariable[_]]) 
+      toContext ++= fromContext.filter(v => variableNames.contains(v.prototype.name))
+    }  
+    
   }
   
   def data: Iterable[IData[_]] =

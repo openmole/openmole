@@ -23,8 +23,6 @@ import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.mole.IMole
 import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.misc.workspace.Workspace
-import org.openmole.ui.console.internal.command.getter.IGetter
-import org.openmole.ui.console.internal.command.getter.MoleGetter
 import java.util.List
 import scala.collection.JavaConversions._
 import org.openmole.ui.console.Console

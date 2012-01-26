@@ -19,6 +19,8 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.{DataModeMask,IDataMode}
 import org.openmole.core.model.data.DataModeMask._
+import org.openmole.misc.tools.io.StringUtil._
+
 
 object DataMode {
   val NONE = new DataMode(0)
@@ -33,4 +35,5 @@ object DataMode {
 
 class DataMode(mask: Int) extends IDataMode {
   override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
+  override def toString = values.flatMap{m => if(this is m) Some(m.toString) else None }.toCSV
 }

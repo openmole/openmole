@@ -18,7 +18,6 @@
 package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
@@ -32,7 +31,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
 
   import LocalExecuter._
   
-  var stop: Boolean = false;
+  var stop: Boolean = false
 
   override def run = {
     

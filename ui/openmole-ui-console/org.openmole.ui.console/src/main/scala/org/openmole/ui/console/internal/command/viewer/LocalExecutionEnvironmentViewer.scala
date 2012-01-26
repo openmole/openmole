@@ -24,6 +24,6 @@ class LocalExecutionEnvironmentViewer extends IViewer {
   override def view(obj: Object, args: Array[String]) {
     val env = obj.asInstanceOf[LocalExecutionEnvironment]
     println("Queued jobs: " + env.nbJobInQueue)
-    println("Number of threads: " + env.nbThread)
+    println("Number of threads: " + env.nbThreads)
   }
 }

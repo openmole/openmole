@@ -30,15 +30,26 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
     registries.getOrElseUpdate(ticket, new Registry[K, V]) 
   }
 
-  override def consult(key: K, ticket: ITicket): Option[V] = registry(ticket)(key)
-
-  override def isRegistred(key: K, ticket: ITicket): Boolean = registry(ticket).isRegistred(key)
-
-  override def register(key: K, ticket: ITicket, value: V) = registry(ticket) += (key, value)
-
+  override def consult(key: K, ticket: ITicket): Option[V] = synchronized {
+    registry(ticket)(key)
+  }
+  
+  override def isRegistred(key: K, ticket: ITicket): Boolean = synchronized {
+    registry(ticket).isRegistred(key)
+  }
+  
+  override def register(key: K, ticket: ITicket, value: V) = synchronized {
+    registry(ticket) += (key, value)
+  }
+  
   override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
     var ret = registry(ticket).remove(key)
     if(registries(ticket).isEmpty) registries -= ticket
     ret
   }
+  
+  override def getOrElseUpdate(key: K, ticket: ITicket, f: => V): V = synchronized {
+    registries.getOrElseUpdate(ticket, new Registry[K, V]).getOrElseUpdate(key, f)
+  }
+  
 }

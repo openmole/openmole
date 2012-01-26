@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.validation
+package org.openmole.misc.tools.io
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.misc.tools.io.StringUtil._
+object StringUtil {
 
-case class TopologyProblem(
-  capsule: ICapsule,
-  paths: List[(List[ICapsule], Int)]) extends Problem {
+  implicit def iterableDecorator[T](it: Iterable[T]) = new {
+    def toCSV[T] = if(it.isEmpty) "" else it.map(_.toString).reduceLeft(_ + "," + _)
+  }
   
-  override def toString = "TopologyProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.toCSV + " has level " + l + ")"}.toCSV
 }

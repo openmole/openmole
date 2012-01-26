@@ -41,4 +41,6 @@ class Data[T](val prototype: IPrototype[T], val mode: IDataMode) extends IData[T
 
   def this(name: String, `type`: Class[T], masks: Array[DataModeMask]) = this(new Prototype[T](name, `type`), masks)
 
+  override def toString = "prototye: " + prototype.toString + ", mode: " + mode.toString
+  
 }

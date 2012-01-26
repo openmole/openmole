@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.execution.local
 
-import java.util.LinkedList
 import java.util.concurrent.Semaphore
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.job.Job
@@ -53,57 +52,32 @@ object LocalExecutionEnvironment extends Environment {
   
 }
 
-class LocalExecutionEnvironment(var nbThreadVar: Int) extends Environment {
+class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
   
   import LocalExecutionEnvironment._
   
   private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
   private val jobInQueue = new Semaphore(0)
   
-  private val executers = new LinkedList[LocalExecuter]
+  private var executers = List.empty[(LocalExecuter, Thread)]
        
-  addExecuters(nbThread)
+  addExecuters(nbThreads)
+  
+  override def finalize = executers.foreach{
+    case(exe, thread) => exe.stop = true; thread.interrupt
+  }
     
-  private[local] def addExecuters(nbExecuters: Int) = {
+  private[local] def addExecuters(nbExecuters: Int) = synchronized {
     for (i <- 0 until nbExecuters) {
       val executer = new LocalExecuter(this)
-      executers.synchronized {
-        val thread = daemonThreadFactory.newThread(executer)
-        thread.start
-        executers.add(executer)
-      }
+      val thread = daemonThreadFactory.newThread(executer)
+      thread.start
+      executers ::= executer -> thread
     }
+    executers = executers.filterNot(_._1.stop)
   }
 
-  def nbThread: Int = nbThreadVar
   def nbJobInQueue = jobs.size
-  
-  def setNbThread(newNbThread: Int) = {
-    synchronized {
-      if (nbThread != newNbThread) {
- 
-        if (newNbThread > nbThread) {
-          addExecuters(newNbThread - nbThread)
-        } else {
-          var toStop = nbThread - newNbThread
-          executers.synchronized {
-            val it = executers.iterator
-
-            while (it.hasNext && toStop > 0) {
-              val exe = it.next
-              if (!exe.stop) {
-                exe.stop = true
-                it.remove
-                toStop -= 1
-              }
-            }
-          }
-        }
-
-        nbThreadVar = newNbThread
-      }
-    }
-  }
 
   override def submit(job: IJob) = submit(new LocalExecutionJob(this, job))
 

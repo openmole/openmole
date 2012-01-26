@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.misc.tools.obj.Id
 import java.util.UUID
 
 class MyProxy(val url: String, val userId: String, val pass: String) {
