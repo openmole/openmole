@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.Set;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -31,15 +32,11 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openide.windows.Workspace;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.palette.PaletteSupport;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.netbeans.spi.palette.PaletteController;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
@@ -48,6 +45,7 @@ import org.openmole.ide.core.implementation.action.StartMoleAction;
 import org.openmole.ide.core.implementation.action.StopMoleAction;
 import org.openmole.ide.core.model.control.IMoleComponent;
 import org.openmole.ide.core.implementation.dialog.DialogFactory;
+import org.openmole.ide.core.implementation.display.ConceptMenu;
 import org.openmole.ide.core.model.workflow.IMoleScene;
 import org.openmole.ide.misc.widget.ToolBarButton;
 
@@ -73,6 +71,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     private ToolBarButton startButton;
     private ToolBarButton stopButton;
     private JToggleButton detailedViewButton;
+    private ConceptMenu conceptMenu = new ConceptMenu();
     private final InstanceContent ic = new InstanceContent();
     private PaletteController palette;
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
@@ -108,6 +107,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
 
         toolBar.add(detailedViewButton);
         toolBar.add(new JToolBar.Separator());
+        toolBar.add(conceptMenu.menuBar().peer());
         toolBar.add(buildButton.peer());
         toolBar.add(cleanAndBuildButton.peer());
         toolBar.add(startButton.peer());
