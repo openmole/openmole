@@ -248,13 +248,13 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
-            <version>${project.version}</version>
+            <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>ccl.northwestern.edu.netlogo5</artifactId>
-            <version>${project.version}</version>
+            <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

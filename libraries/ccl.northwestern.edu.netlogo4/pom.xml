@@ -15,6 +15,7 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
+    <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
 
     <dependencies>
         <dependency>
