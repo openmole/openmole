@@ -45,12 +45,11 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
 
   def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
    
-  override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = {
+  override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
-
-    {
-      if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[IVariable[_]])
+    
+    { if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[IVariable[_]])
       else {
         val workingOnTicket = (0 until levelDelta).foldLeft(ticket) {
           (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
@@ -60,14 +59,13 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
     }.toIterable
   }
 
-  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = {
+  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (levelDelta >= 0) {
       val toContext = ListBuffer() ++ fromContext.filter(v => variableNames.contains(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
-    }
-    else {
+    } else {
       val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
         (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
