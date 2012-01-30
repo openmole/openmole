@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.core.implementation.data.{DataSet,Variable,Prototype}
-import org.openmole.core.model.data.{IDataSet,IData,IContext,IVariable,IPrototype}
+import org.openmole.core.implementation.data.{Variable,Prototype}
+import org.openmole.core.model.data.{IDataSet,IContext,IVariable,IPrototype}
 import org.openmole.misc.exception.InternalProcessingError
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._

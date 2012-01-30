@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.misc.tools.service
 
 import java.net.InetAddress
 import java.util.UUID
-import java.util.logging.Logger
-import java.util.logging.Level
 
-object LocalHostName {
+object LocalHostName extends Logger {
 
   @transient
   lazy val localHostName = 
@@ -30,7 +28,7 @@ object LocalHostName {
       InetAddress.getLocalHost.getCanonicalHostName
     } catch {
       case ex =>
-        Logger.getLogger(LocalHostName.getClass.getName).log(Level.WARNING, "Was not able to get local host name.", ex)
+        logger.log(WARNING, "Was not able to get local host name.", ex)
         UUID.randomUUID.toString
     }
 

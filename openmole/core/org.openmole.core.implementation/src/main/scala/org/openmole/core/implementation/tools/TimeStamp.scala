@@ -19,6 +19,7 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.job.State._
+import org.openmole.misc.tools.service.LocalHostName
 
 class TimeStamp[T](val state: T, val hostName: String, val time: Long) extends ITimeStamp[T] {
   def this(state: T, time: Long) = this(state, LocalHostName.localHostName, time)
