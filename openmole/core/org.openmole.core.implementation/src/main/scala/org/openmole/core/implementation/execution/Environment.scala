@@ -17,21 +17,11 @@
 
 package org.openmole.core.implementation.execution
 
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
-import org.openmole.core.model.job.IJob
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
-
-object Environment {
-
-}
-
 
 abstract class Environment extends IEnvironment {
  
@@ -55,9 +45,4 @@ abstract class Environment extends IEnvironment {
   
   EventDispatcher.listen(this.asInstanceOf[IEnvironment], new JobSubmissionListner, classOf[IEnvironment.JobSubmitted])
    
-  //val id = UUID.randomUUID.toString
-  //val executionJobId = new AtomicLong
-
-  //def nextExecutionJobId = new ExecutionJobId(id, executionJobId.getAndIncrement)
-  
 }

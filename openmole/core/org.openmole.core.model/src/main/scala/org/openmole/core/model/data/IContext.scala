@@ -62,7 +62,7 @@ trait IContext extends Iterable[IVariable[_]] {
   def value[T](name: String): Option[T]
 
   /**
-   * Get a variable valaue given a prototype name. This method get the variable by its
+   * Get a variable value given a prototype name. This method get the variable by its
    * name and then cast it to the correct type.
    * 
    * @param proto the prototype that matches the name of the variable
@@ -71,68 +71,100 @@ trait IContext extends Iterable[IVariable[_]] {
    */
   def value[T](proto: IPrototype[T]): Option[T]
   
+    /**
+   * Get a variable valaue given a prototype name. This method get the variable by its
+   * name and then cast it to the correct type.
+   * 
+   * @param proto the prototype that matches the name of the variable
+   * @return value the value
+   * @throws a UserBadDataError if the variable hasn't been found
+   */
   def valueOrException[T](name: String): T = value(name).getOrElse(throw new UserBadDataError("Variable " + name + " has not been found in the context"))
+  
+  /**
+   * Get a variable valaue given a prototype name. This method get the variable by its
+   * name and then cast it to the correct type.
+   * 
+   * @param proto the prototype that matches the name of the variable
+   * @return value the value
+   * @throws a UserBadDataError if the variable hasn't been found
+   */
   def valueOrException[T](proto: IPrototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
 
   
   /**
-   * Add a variable to this context.
+   * Build a new context containing the variables of the current context plus the 
+   * variable give as parameter.
    * 
    * @param variable the variable to add
-   * @return the context itself
+   * @return the new context
    */
   def +(variable: IVariable[_]): IContext
 
   /**
-   * Construct ant add a variable to this context.
+   * Build a new context containing the variables of the current context plus the 
+   * variable constructed from the parameters.
    * 
    * @param name the name of the variable
    * @param value the value of the variable
-   * @return the context itself
+   * @return the new context
    */
   def +(name: String, value: Object): IContext
 
   /**
-   * Construct and add a variable to this context.
+   * Build a new context containing the variables of the current context plus the 
+   * variable constructed from the parameters.
    * 
    * @param name the name of the variable
    * @param t the type of the variable
    * @param value the value of the variable
-   * @return the context itself
+   * @return the new context
    */
   def +[T] (name: String, t: Class[T], value: T): IContext
     
   /**
-   * Construct and add a variable to this context.
+   * Build a new context containing the variables of the current context plus the 
+   * variable constructed from the parameters.
    * 
    * @param prototype the prototype of the variable
    * @param value the value of the variable
-   * @return the context itself
+   * @return the new context
    */
   def +[T] (proto: IPrototype[T], value: T): IContext
+  
+  /**
+   * Build a new context containing the variables of the current context plus the 
+   * variable constructed from the parameters.
+   * 
+   * @param tuple a tuple (prototype, value) to construct the variable
+   * @return the new context
+   */
   def +[T] (tuple: (IPrototype[T],T)): IContext = this.+(tuple._1, tuple._2)
 
   /**
-   * Add a collection of variables to this context
+   * Build a new context containing the variables of the current context plus the 
+   * variables given in parameter.
    *
    * @param variables the variables to add
-   * @return the context itself
+   * @return the new context
    */
   def ++(variables: Traversable[IVariable[_]] ): IContext
   
   /**
-   * Remove a variable from this context given its name.
+   * Build a new context containing the variables of the current context minus the
+   * variable which name has been passed in parameter.
    * 
    * @param name the name of the variable
-   * @return the context itself
+   * @return the new context
    */
   def -(name: String): IContext
   
   /**
-   * Remove variables from this context given theire names.
+   * Build a new context containing the variables of the current context minus the
+   * variable which names have been passed in parameter.
    * 
    * @param names the names of the variables
-   * @return the context itself
+   * @return the new context
    */
   def --(name: Traversable[String]): IContext
 

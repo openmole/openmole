@@ -41,6 +41,9 @@ object DataModeMask {
     override def toString = "explore"
   }
   
+  /**
+   * All the possible values for the data mode mask.
+   */
   val values = List(optional, explore)
   
 }
