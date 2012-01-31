@@ -50,6 +50,22 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
   
+  "Validation" should "not detect a missing input error" in {
+    val p = new Prototype("t", classOf[String])
+    
+    val t1 = new EmptyTask("t1")
+    val t2 = new EmptyTask("t2")
+    t2.addInput(p)
+    t2.addParameter(p, "Test")
+    
+    val c1 = new Capsule(t1)
+    val c2 = new Capsule(t2)
+    
+    new Transition(c1, c2)
+    
+    Validation.typeErrors(new Mole(c1)).isEmpty should equal (true)
+  }
+  
   "Validation" should "detect a type error" in {
     val pInt = new Prototype("t", classOf[Int])
     val pString = new Prototype("t", classOf[String])

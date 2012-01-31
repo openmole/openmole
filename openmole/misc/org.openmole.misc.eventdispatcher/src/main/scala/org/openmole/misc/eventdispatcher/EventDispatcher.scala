@@ -39,7 +39,7 @@ object EventDispatcher {
    
   def trigger[T](obj: T, event: Event[T]) = {
     /* --- Listners without args ---*/
-    val listeners = triggerListenerMap.get(obj, event.getClass)
+    val listeners = triggerListenerMap.get(obj, event.getClass.asInstanceOf[Class[Event[T]]])
 
     for (listener <- listeners) listener.triggered(obj, event)
   }
