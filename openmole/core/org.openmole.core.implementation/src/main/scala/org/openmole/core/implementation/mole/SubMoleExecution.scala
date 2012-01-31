@@ -25,6 +25,7 @@ import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
+import org.openmole.core.model.mole.IAtomicCapsule
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.core.model.data.IContext
@@ -38,6 +39,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
+import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
@@ -142,16 +144,19 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   }
 
   override def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy]) = synchronized {
-    grouping match {
-      case Some(strategy) =>
-        val category = strategy.group(moleJob.context)
-
-        val key = (capsule, category)
-        waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
-        incNbJobWaitingInGroup(1)
-      case None =>
-        val job = new Job(moleExecution.id, List(moleJob))
-        moleExecution.submitToEnvironment(job, capsule)
+    capsule match {
+      case _: IAtomicCapsule => moleJob.performAndSignalException
+      case _ => 
+        grouping match {
+          case Some(strategy) =>
+            val category = strategy.group(moleJob.context)
+            val key = (capsule, category)
+            waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
+            incNbJobWaitingInGroup(1)
+          case None =>
+            val job = new Job(moleExecution.id, List(moleJob))
+            moleExecution.submitToEnvironment(job, capsule)
+        }
     }
   }
     

@@ -28,10 +28,10 @@ object MoleJobGrouping {
 
 class MoleJobGrouping(groupers: HashMap[ICapsule, IGroupingStrategy]) extends IMoleJobGrouping {
 
-    def this() = this(new HashMap[ICapsule, IGroupingStrategy])
+  def this() = this(new HashMap[ICapsule, IGroupingStrategy])
     
-    override def apply(capsule: ICapsule): Option[IGroupingStrategy] = groupers.get(capsule);
-   
-    def set(capsule: ICapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy);
+  override def apply(capsule: ICapsule): Option[IGroupingStrategy] = groupers.get(capsule)
+
+  def set(capsule: ICapsule, strategy: IGroupingStrategy) = groupers.put(capsule, strategy)
    
 }

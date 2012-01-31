@@ -45,13 +45,11 @@ import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.data.IDataChannel
-import org.openmole.core.model.mole.IAtomicCapsule
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
-import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
@@ -99,26 +97,24 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   val exceptions = new ListBuffer[Throwable]
   
 
-  override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit = synchronized {
+  override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit =
     if(!canceled.get) {
-      EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
-      EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
+      val instant = synchronized {
+        EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
+        EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
     
-      EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
-      EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
-      EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
-      EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.ExceptionRaised])
+        EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
+        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
+        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
+        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.ExceptionRaised])
 
-      inProgress += moleJob -> ticket
-
-      if(!instantRerun.rerun(moleJob, capsule)) {
-        capsule match {
-          case _: IAtomicCapsule => moleJob.performAndSignalException
-          case _ => subMole.group(moleJob, capsule, moleJobGrouping(capsule))
-        }
+        inProgress += moleJob -> ticket
+        instantRerun.rerun(moleJob, capsule)
       }
+        
+      if(!instant) subMole.group(moleJob, capsule, moleJobGrouping(capsule))
     }
-  }
+  
 
   override def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
     (environmentSelection.select(capsule) match {
