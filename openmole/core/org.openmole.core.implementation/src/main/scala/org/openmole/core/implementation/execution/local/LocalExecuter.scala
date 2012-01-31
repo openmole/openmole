@@ -21,6 +21,7 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
+import org.openmole.core.implementation.job.MoleJob._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
@@ -45,15 +46,7 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         for (moleJob <- job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
-            moleJob.perform
-            
-            moleJob.exception match {
-              case None =>
-              case Some(e) =>
-                EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, SEVERE))
-                //EventDispatcher.trigger(executionJob, new IExecutionJob.ExceptionRaised(e, SEVERE))
-                logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
-            }
+            moleJob.performAndSignalException
           }
         }
         executionJob.state = ExecutionState.DONE

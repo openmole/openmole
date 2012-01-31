@@ -29,7 +29,21 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
-object MoleJob extends Logger 
+object MoleJob extends Logger {
+  
+  implicit def moleJobDecorator(moleJob: IMoleJob) = new {
+    def performAndSignalException = {
+      moleJob.perform
+      moleJob.exception match {
+        case None =>
+        case Some(e) =>
+          EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, SEVERE))
+          logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
+      }
+    }
+  }
+             
+}
 
 class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
    

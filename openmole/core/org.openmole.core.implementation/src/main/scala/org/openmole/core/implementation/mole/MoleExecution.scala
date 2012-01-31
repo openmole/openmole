@@ -51,6 +51,7 @@ import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
+import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
@@ -112,7 +113,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
       if(!instantRerun.rerun(moleJob, capsule)) {
         capsule match {
-          case _: IAtomicCapsule => moleJob.perform
+          case _: IAtomicCapsule => moleJob.performAndSignalException
           case _ => subMole.group(moleJob, capsule, moleJobGrouping(capsule))
         }
       }

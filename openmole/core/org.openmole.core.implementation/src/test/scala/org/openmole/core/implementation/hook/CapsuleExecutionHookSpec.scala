@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.hook
 
-import org.openmole.core.implementation.mole.Capsule
+import org.openmole.core.implementation.mole.{Capsule, MasterCapsule}
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
@@ -60,6 +60,37 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     
     executed should equal (true)
   }
+  
+  "A capsule execution hook" should "intersept the execution of a master capsule" in {
+    var executed = false
+    
+    val p = new Prototype("p", classOf[String])
+    
+    val t1 = new Task("Test") {
+      override def process(context: IContext) = context + (p -> "test")
+      
+    }
+    
+    t1.addOutput(p)
+    
+    val t1c = new MasterCapsule(t1)
+    val ex = new MoleExecution(new Mole(t1c))
+    
+    new CapsuleExecutionHook(ex, t1c) {
+      override def process(moleJob: IMoleJob) = {
+        moleJob.context.contains(p) should equal (true)
+        moleJob.context.value(p).get should equal ("test")
+        executed = true
+      }
+    }
+    
+    ex.start.waitUntilEnded
+    
+    executed should equal (true)
+  }
+  
+  
+  
   
   "After release a capsule execution hook" should "not be executed" in {
     var executed = false
