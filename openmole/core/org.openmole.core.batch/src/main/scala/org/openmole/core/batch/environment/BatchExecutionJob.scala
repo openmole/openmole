@@ -55,15 +55,11 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
     ExecutorService.executorService(ExecutorType.UPLOAD).submit(new CopyToEnvironment(executionEnvironment, job))
   
   var finalizeExecutionFuture: Option[Future[_]] = None
- 
   val killed = new AtomicBoolean(false)
-
   var _delay = minUpdateInterval
-
 
   
   private def updateAndGetState = {
-    //val oldState = state
     if (killed.get) KILLED
     else batchJob match {
       case None => READY
@@ -131,7 +127,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
     !killed.get
   }
     
-  private def tryFinalise(batchJob: BatchJob) = {
+  private def tryFinalise(batchJob: BatchJob) = 
     finalizeExecutionFuture match {
       case None => 
         finalizeExecutionFuture = Some(ExecutorService.executorService(ExecutorType.DOWNLOAD).
@@ -146,7 +142,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
           kill
         }
     }
-  }
 
   private def trySubmit(serializedJob: SerializedJob) = {
     val (js, token) = executionEnvironment.selectAJobService
@@ -181,12 +176,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
     if (!killed.getAndSet(true)) {
       try {
         EventDispatcher.trigger(this, new IExecutionJob.StateChanged(KILLED, oldState))
-        copyToEnvironmentExecFuture.cancel(true)
-
-        finalizeExecutionFuture match {
-          case Some(f) => f.cancel(true)
-          case None =>
-        }       
+        copyToEnvironmentExecFuture.cancel(true)      
         clean
       } finally {
         batchJob match {

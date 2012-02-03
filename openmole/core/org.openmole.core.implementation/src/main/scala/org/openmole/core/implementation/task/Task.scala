@@ -55,7 +55,7 @@ abstract class Task(val name: String) extends ITask {
       d => val p = d.prototype
       context.variable(p) match {
         case None => 
-          if (!(d.mode is optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString +" in not optional and has not found in output of task" + name +".")
+          if (!(d.mode is optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString +" in not optional and has not found in output of task " + name +".")
           else Option.empty[IVariable[_]]
         case Some(v) =>
           if (p.accepts(v.value)) Some(v)

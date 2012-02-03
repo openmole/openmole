@@ -53,7 +53,7 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
   val timeStamps: ListBuffer[ITimeStamp[State.State]] = new ListBuffer
   var exception: Option[Throwable] = None
   
-  @volatile  private var _state: State = null
+  @volatile private var _state: State = null
   state = READY
       
   override def state: State = _state
