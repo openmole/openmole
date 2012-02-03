@@ -13,12 +13,11 @@ import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 
-class CSVSamplingDataUI(val name: String,
-                        var csvFilePath: String, 
-                        var prototypeMapping: List[(String,IPrototypeDataProxyUI)]) extends ISamplingDataUI {
-  def this(n:String) = this(n,"",List())
+class CSVSamplingDataUI(val name: String="",
+                        var csvFilePath: String="", 
+                        var prototypeMapping: List[(String,IPrototypeDataProxyUI)]= List.empty) extends ISamplingDataUI {
   
-  override def coreObject = {  
+  def coreObject = {  
     if (csvFilePath != "") {
       val fi = new File(csvFilePath)
       if (fi.isFile) new CSVSampling(fi) {
@@ -29,9 +28,11 @@ class CSVSamplingDataUI(val name: String,
     else throw new UserBadDataError("CSV file path missing to instanciate the CSV sampling " + name)
   }
 
-  override def coreClass = classOf[CSVSampling] 
+  def coreClass = classOf[CSVSampling] 
   
-  override def imagePath = "img/csvSampling.png" 
+  def imagePath = "img/csvSampling.png" 
   
-  override def buildPanelUI = new CSVSamplingPanelUI(this)
+  override def fatImagePath = "img/csvSampling_fat.png" 
+  
+  def buildPanelUI = new CSVSamplingPanelUI(this)
 }

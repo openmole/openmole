@@ -10,7 +10,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.distribution.SlicedUniformIntDistribution
 
-class SlicedUniformIntegerDistributionDataUI(val name: String,val seed: Long=0,val size: Int=1) extends IDomainDataUI {
+class SlicedUniformIntegerDistributionDataUI(val name: String="",val seed: Long=0,val size: Int=1) extends IDomainDataUI {
   
   def coreObject(proto: IPrototype[_]) = new SlicedUniformIntDistribution(seed,size)
 

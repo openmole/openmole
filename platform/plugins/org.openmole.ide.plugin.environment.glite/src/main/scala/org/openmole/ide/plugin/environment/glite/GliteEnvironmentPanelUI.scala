@@ -18,20 +18,22 @@
 package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.TextField
 import scala.swing.event.ButtonClicked
 
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
-  val voTextField = new TextField
-  val vomsTextField = new TextField
-  val bdiiTextField = new TextField
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IEnvironmentPanelUI{
+  
+  val voTextField = new TextField(20) {tooltip = Help.tooltip("Virtual Organization name","vo.complex-systems.eu")}
+  val vomsTextField = new TextField(20) {tooltip = Help.tooltip("Virtual Organization Membership Service url","voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr")}
+  val bdiiTextField = new TextField(20) {tooltip = Help.tooltip("Berkeley Database Information Index url","ldap://topbdii.grif.fr:2170")}
   
   val proxyCheckBox = new CheckBox("MyProxy")
-  val proxyURLTextField = new TextField
-  val proxyUserTextField = new TextField
+  val proxyURLTextField = new TextField(18)
+  val proxyUserTextField = new TextField(18)
   val proxyURLLabel = new Label("url")
   val proxyUserLabel = new Label("user")
   
@@ -39,30 +41,40 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   val architectureCheckBox = new CheckBox("64 bits")
   val runtimeMemoryLabel = new Label("Runtime memory")
   val runtimeMemoryTextField = new TextField(4)
-  val workerNodeMemoryLabel = new Label("Worker node memory")
+  val workerNodeMemoryLabel = new Label("Worker memory")
   val workerNodeMemoryTextField = new TextField(4)
   val maxCPUTimeLabel = new Label("Max CPU Time")
   val maxCPUTimeTextField = new TextField(4)
+  val otherRequirementLabel = new Label("Other")
+  val otherRequirementTextField = new TextField(16)
   
-  contents+= (new Label("VO"),"gap para")
-  contents+= voTextField
-  contents+= (new Label("VOMS"),"gap para")
-  contents+= vomsTextField
-  contents+= (new Label("BDII"),"gap para")
-  contents+= bdiiTextField
-  contents+= (proxyCheckBox,"wrap")
-  contents+= (proxyURLLabel,"gap para")
-  contents+= proxyURLTextField
-  contents+= (proxyUserLabel,"gap para")
-  contents+= proxyUserTextField
-  contents+= (requirementCheckBox,"wrap")
-  contents+= (architectureCheckBox,"wrap")
-  contents+= (runtimeMemoryLabel,"gap para")
-  contents+= runtimeMemoryTextField
-  contents+= (workerNodeMemoryLabel,"gap para")
-  contents+= workerNodeMemoryTextField
-  contents+= (maxCPUTimeLabel,"gap para")
-  contents+= maxCPUTimeTextField  
+  contents+= (new MigPanel("wrap 2") {
+      contents+= (new Label("VO"),"gap para")
+      contents+= voTextField
+      contents+= (new Label("VOMS"),"gap para")
+      contents+= vomsTextField
+      contents+= (new Label("BDII"),"gap para")
+      contents+= bdiiTextField
+    },"wrap")
+  contents+= (new MigPanel("wrap 2") {
+      contents+= (proxyCheckBox,"wrap")
+      contents+= (proxyURLLabel,"gap para")
+      contents+= proxyURLTextField
+      contents+= (proxyUserLabel,"gap para")
+      contents+= proxyUserTextField
+    },"wrap")
+  contents+= (new MigPanel("wrap 2") {
+      contents+= (requirementCheckBox,"wrap")
+      contents+= (architectureCheckBox,"wrap")
+      contents+= (runtimeMemoryLabel,"gap para")
+      contents+= runtimeMemoryTextField
+      contents+= (workerNodeMemoryLabel,"gap para")
+      contents+= workerNodeMemoryTextField
+      contents+= (maxCPUTimeLabel,"gap para")
+      contents+= maxCPUTimeTextField
+      contents+= otherRequirementLabel
+      contents+= otherRequirementTextField
+    },"wrap")
   
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
@@ -77,6 +89,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   maxCPUTimeTextField.text = pud.maxCPUTime
   showProxy(pud.proxy)
   showRequirements(pud.requirement)
+  otherRequirementTextField.text = pud.otherRequirements
   
   listenTo(`proxyCheckBox`,`requirementCheckBox`)
   reactions += {
@@ -91,21 +104,24 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
     
   private def showRequirements(b: Boolean) = {
     List(architectureCheckBox, runtimeMemoryLabel, 
-    runtimeMemoryTextField, workerNodeMemoryLabel,
-    workerNodeMemoryTextField, maxCPUTimeLabel,
-    maxCPUTimeTextField).foreach{_.visible = b}
-    }
+         runtimeMemoryTextField, workerNodeMemoryLabel,
+         workerNodeMemoryTextField, maxCPUTimeLabel,
+         maxCPUTimeTextField,otherRequirementLabel,otherRequirementTextField).foreach{_.visible = b}
+  }
   
-  override def saveContent(name: String) = new GliteEnvironmentDataUI(name,
-                                                                      voTextField.text,
-                                                                      vomsTextField.text,
-                                                                      bdiiTextField.text,
-                                                                      proxyCheckBox.selected,
-                                                                      proxyURLTextField.text,
-                                                                      proxyUserTextField.text,
-                                                                      requirementCheckBox.selected,
-                                                                      architectureCheckBox.selected,
-                                                                      runtimeMemoryTextField.text,
-                                                                      workerNodeMemoryTextField.text,
-                                                                      maxCPUTimeTextField.text)
+  override def saveContent(name: String) = 
+    new GliteEnvironmentDataUI(name,
+                               voTextField.text,
+                               vomsTextField.text,
+                               bdiiTextField.text,
+                               proxyCheckBox.selected,
+                               proxyURLTextField.text,
+                               proxyUserTextField.text,
+                               requirementCheckBox.selected,
+                               architectureCheckBox.selected,
+                               runtimeMemoryTextField.text,
+                               workerNodeMemoryTextField.text,
+                               maxCPUTimeTextField.text,
+                               otherRequirementTextField.text)
+  
 }

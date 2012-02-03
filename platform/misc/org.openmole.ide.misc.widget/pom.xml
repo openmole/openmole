@@ -36,6 +36,11 @@
            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>jsyntaxpane</groupId>
+            <artifactId>jsyntaxpane</artifactId>
+           <version>0.9.6</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.image</artifactId>
             <version>${project.version}</version>

@@ -27,7 +27,6 @@ import org.openide.windows.WindowManager;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.dataproxy.Proxys;
-import org.openmole.ide.core.implementation.palette.PaletteSupport;
 
 @ActionID(category = "File",
 id = "org.openmole.ide.core.implementation.ResetAll")
@@ -39,9 +38,8 @@ public final class ResetAll implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PaletteSupport.closeOpenedTopComponents();
+        TopComponentsManager.closeOpenedTopComponents();
         Proxys.clearAll();
-        PaletteSupport.refreshPalette();
         Displays.propertyPanel().cleanViewport();
     }
 }

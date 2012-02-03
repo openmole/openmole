@@ -22,9 +22,7 @@ import java.awt.datatransfer.Transferable
 import org.netbeans.api.visual.widget.Widget
 import org.netbeans.api.visual.action.ConnectorState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.implementation.display.TaskDisplay
-import org.openmole.ide.core.implementation.palette.PaletteSupport._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
@@ -46,19 +44,20 @@ class DnDTaskIntoCapsuleProvider(molescene: IMoleScene,val capsule: ICapsuleUI) 
   }
   
   override def accept(widget: Widget,point: Point,transferable: Transferable)= { 
-    Displays.dataProxy.get match {
-      case dpu:ITaskDataProxyUI => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
-        if (molescene.manager.capsules.size == 1) capsule.defineAsStartingCapsule(true)
-      case dpu:IPrototypeDataProxyUI=> { 
-          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
-          else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
-        }
-      case dpu:ISamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
-      case dpu:IEnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
-    }
-    // selectTask
-    molescene.graphScene.repaint
-    molescene.graphScene.validate
+//    Displays.dataProxy.get match {
+//      case dpu:ITaskDataProxyUI => capsule.encapsule(transferable.getTransferData(TASK_DATA_FLAVOR).asInstanceOf[TaskDataProxyUI])
+//        if (molescene.manager.capsules.size == 1) capsule.defineAsStartingCapsule(true)
+//      case dpu:IPrototypeDataProxyUI=> { 
+//          if (point.x < capsule.connectableWidget.widgetWidth / 2) capsuleDataUI.addPrototype(dpu, IOType.INPUT)
+//          else capsuleDataUI.addPrototype(dpu, IOType.OUTPUT)
+//        }
+//      case dpu:ISamplingDataProxyUI=> capsuleDataUI.sampling = Some(dpu)
+//      case dpu:IEnvironmentDataProxyUI=> capsuleDataUI.environment = Some(dpu)
+//    }
+//    // selectTask
+//    molescene.graphScene.repaint
+//    molescene.graphScene.validate
+    true
   }
   
   private def selectTask{

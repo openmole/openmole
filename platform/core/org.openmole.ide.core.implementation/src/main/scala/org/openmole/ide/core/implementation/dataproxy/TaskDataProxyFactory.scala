@@ -22,5 +22,5 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends ITaskDataProxyFactory{
 
-  def buildDataProxyUI(name:String) = new TaskDataProxyUI(factory.buildDataUI(name))
+  def buildDataProxyUI = new TaskDataProxyUI(factory.buildDataUI)
 }

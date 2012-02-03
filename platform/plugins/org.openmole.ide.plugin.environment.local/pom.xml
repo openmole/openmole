@@ -52,6 +52,11 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${project.version}</version>

@@ -13,13 +13,12 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 
-class SystemExecTaskDataUI(val name: String,
-                           val workdir: String,
-                           val lauchingCommands: String, 
-                           val resources: List[String],
-                           val inputMap: List[(IPrototypeDataProxyUI,String)],
-                           val outputMap: List[(String,IPrototypeDataProxyUI)]) extends TaskDataUI {
-  def this(n: String) = this(n,"","",List.empty,List.empty,List.empty)
+class SystemExecTaskDataUI(val name: String="",
+                           val workdir: String="",
+                           val lauchingCommands: String="", 
+                           val resources: List[String]= List.empty,
+                           val inputMap: List[(IPrototypeDataProxyUI,String)]=List.empty,
+                           val outputMap: List[(String,IPrototypeDataProxyUI)]= List.empty) extends TaskDataUI {
   
   override def coreObject = {
     val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workdir)

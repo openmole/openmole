@@ -18,5 +18,5 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.ITaskDataUI
 
 trait ITaskPanelUI extends IPanelUI{
-  def saveContent(name:String): ITaskDataUI
+  def saveContent(name: String) : ITaskDataUI
 }

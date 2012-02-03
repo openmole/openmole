@@ -30,8 +30,18 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 
 object TopComponentsManager {
 
-  var countExec = new AtomicInteger
+  var countExec = new AtomicInteger  
+  var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None  
   PasswordListner.apply
+  
+  def closeOpenedTopComponents = {
+    currentMoleSceneTopComponent match {
+      case Some(x: MoleSceneTopComponent)=>x.getOpened.foreach(_.close)
+      case _=>
+    }
+  }
+  
+  def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
   
   def moleScenes = topComponents.map{_.getMoleScene}
   

@@ -20,7 +20,7 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class DoublePrototypeDataUI(val name: String,d: Int=0) extends GenericPrototypeDataUI[Double](d){
+class DoublePrototypeDataUI(val name: String="",d: Int=0) extends GenericPrototypeDataUI[Double](d){
   def displayTypedName = displayName + " : Double"
   
   def coreClass = classOf[IPrototype[Double]]

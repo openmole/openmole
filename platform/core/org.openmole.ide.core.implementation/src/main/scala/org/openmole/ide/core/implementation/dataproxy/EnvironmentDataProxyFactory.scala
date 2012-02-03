@@ -23,5 +23,5 @@ import scala.collection.JavaConversions._
 
 class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends IEnvironmentDataProxyFactory{
   
-  override def buildDataProxyUI(name:String) = new EnvironmentDataProxyUI(factory.buildDataUI(name))
+  override def buildDataProxyUI = new EnvironmentDataProxyUI(factory.buildDataUI)
 }

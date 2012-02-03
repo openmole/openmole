@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class IntegerPrototypeDataUI(val name: String, d: Int = 0) extends GenericPrototypeDataUI[Int](d){
+class IntegerPrototypeDataUI(val name: String="", d: Int = 0) extends GenericPrototypeDataUI[Int](d){
   def displayTypedName = displayName + " : Int"
   
   def coreClass = classOf[IPrototype[Int]]

@@ -15,8 +15,8 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import scala.collection.JavaConversions._
 
-class CompleteSamplingDataUI(val name: String, val factors: List[(IPrototypeDataProxyUI,String,IDomainDataUI)]) extends ISamplingDataUI {
-  def this(n:String) = this(n,List.empty)
+class CompleteSamplingDataUI(val name: String="", 
+                             val factors: List[(IPrototypeDataProxyUI ,String,IDomainDataUI)] = List.empty) extends ISamplingDataUI {
 
   def coreObject = new CompleteSampling(factors.map(f=>new Factor(
         f._1.dataUI.coreObject.asInstanceOf[IPrototype[Any]],
@@ -26,6 +26,8 @@ class CompleteSamplingDataUI(val name: String, val factors: List[(IPrototypeData
   def coreClass = classOf[CompleteSampling] 
   
   def imagePath = "img/completeSampling.png" 
+  
+  override def fatImagePath = "img/completeSampling_fat.png" 
   
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 }

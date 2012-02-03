@@ -23,12 +23,14 @@ import scala.swing.Label
 import scala.swing.event.MousePressed
 
 class LinkLabel(textLink: String,
-                action: Action) extends Label {
+                var action: Action) extends Label {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  text = "<html><font color=\"#0000CF\"><u>"+textLink+"</u></font></html>"
+  link(textLink)
   
   listenTo(this.mouse.clicks)
   reactions += {
     case e: MousePressed => action.apply
   }
+  
+  def link(t: String) = text = "<html><font color=\"#0000CF\"><u>"+t+"</u></font></html>"
 }

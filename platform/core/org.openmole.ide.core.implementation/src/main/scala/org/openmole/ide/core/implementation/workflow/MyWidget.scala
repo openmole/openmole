@@ -26,6 +26,9 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import java.awt.BasicStroke
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.LinkLabel
+import scala.swing.Action
 
 class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graphScene) {
 
@@ -67,10 +70,13 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
     if(capsule.dataProxy.isDefined){
       val tpud = capsule.dataProxy.get.dataUI
       drawBox(graphics,tpud.backgroundColor,tpud.borderColor)
-      graphics.fill(titleArea)
+      //graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)
       graphics.setFont(new Font("Ubuntu", Font.PLAIN, 15))
       graphics.drawString(tpud.name, 10, 15)
+   // val wi = new Widget(scene.graphScene)
+   // wi.addChild(new ComponentWidget(scene.graphScene,
+    //                                new LinkLabel(tpud.name,new Action("") { def apply = scene.displayPropertyPanel(capsule.dataProxy.get,EDIT)}).peer))
     }
     else drawBox(graphics,new Color(204,204,204,128),new Color(204,204,204))
   }

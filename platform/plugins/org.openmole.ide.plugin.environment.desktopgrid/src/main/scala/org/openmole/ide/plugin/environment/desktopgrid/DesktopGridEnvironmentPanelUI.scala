@@ -17,13 +17,10 @@
 
 package org.openmole.ide.plugin.environment.desktopgrid
 
-import java.text.NumberFormat
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.FormattedTextField
 import scala.swing.Label
 import scala.swing.TextField
-import scala.swing.PasswordField
 
 class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
   val loginTextField = new TextField(20)

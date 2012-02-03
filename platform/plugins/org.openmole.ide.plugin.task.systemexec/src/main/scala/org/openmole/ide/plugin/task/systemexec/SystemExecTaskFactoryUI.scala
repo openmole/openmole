@@ -22,5 +22,5 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class SystemExecTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "System exec"
-  override def buildDataUI(name: String) = new SystemExecTaskDataUI(name)
+  override def buildDataUI = new SystemExecTaskDataUI
 }

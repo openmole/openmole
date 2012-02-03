@@ -32,9 +32,9 @@ import swing.Swing._
 class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends MigPanel("wrap 2") with ITaskPanelUI{
   var columns = new HashSet[ColumnPanel]
   val loaded = sdu.columns.groupBy(_._1)
-  val protoFileComboBox = new ComboBox(Proxys.prototype.values.filter(p=>p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)
+  val protoFileComboBox = new ComboBox(Proxys.prototype.filter(p=>p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)
   if (sdu.protoFile.isDefined) protoFileComboBox.selection.item= sdu.protoFile.get
-  Proxys.prototype.values.filter(_.dataUI.dim>0).foreach(columns+= buildColumn(_))
+  Proxys.prototype.filter(_.dataUI.dim>0).foreach(columns+= buildColumn(_))
   contents+= new Label("File Prototype to be stored")
   contents+= protoFileComboBox
   

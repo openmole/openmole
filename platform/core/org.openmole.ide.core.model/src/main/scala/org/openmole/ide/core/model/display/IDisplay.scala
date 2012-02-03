@@ -28,11 +28,11 @@ trait IDisplay{
   
   def currentDataProxy: Option[IDataProxyUI]
   
-  def buildPanelUI: IPanelUI
+ // def buildPanelUI: IPanelUI
   
-  def saveContent(name: String)
+  def saveContent
   
-  def setCurrentDataProxy(pID: Int)
+ // def setCurrentDataProxy(pID: Int)
   
-  def firstManagementMenu: PopupMenu
+ // def firstManagementMenu: PopupMenu
 }

@@ -31,7 +31,6 @@ import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.display.IEnvironmentDisplay
 import org.openmole.ide.core.implementation.action.DetachEnvironmentAction
-import org.openmole.ide.core.implementation.action.RemoveEnvironmentAction
 import scala.swing.MenuItem
 
 object EnvironmentDisplay extends IEnvironmentDisplay{
@@ -41,26 +40,26 @@ object EnvironmentDisplay extends IEnvironmentDisplay{
   
   Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).foreach(f=>{modelEnvironments += new EnvironmentDataProxyFactory(f)})
   
-  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.environment(pID))
+ // override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.environment(pID))
   
   override def implementationClasses = modelEnvironments
   
-  override def  buildPanelUI = {
-    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
-    currentPanel.get
-  }
+//  override def  buildPanelUI = {
+//   // currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
+//   // currentPanel.get
+//  }
+//  
+//  override def firstManagementMenu= new PopupMenu{
+//    add(new MenuItem(new RemoveEnvironmentAction(Displays.currentProxyID)))}
+//  
+//  override def secondManagementMenu(taskProxy: ITaskDataProxyUI,environmentProxy: IEnvironmentDataProxyUI) = {
+//    new PopupMenu {
+//    add(new MenuItem(new DetachEnvironmentAction(Some(taskProxy))))}}
+//  
   
-  override def firstManagementMenu= new PopupMenu{
-    add(new MenuItem(new RemoveEnvironmentAction(Displays.currentProxyID)))}
-  
-  override def secondManagementMenu(taskProxy: ITaskDataProxyUI,environmentProxy: IEnvironmentDataProxyUI) = {
-    new PopupMenu {
-    add(new MenuItem(new DetachEnvironmentAction(Some(taskProxy))))}}
-  
-  
-  override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
-    if (Displays.initMode) Proxys.addEnvironmentElement(currentDataProxy.get)
+  override def saveContent = {
+    //currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent
+    if (Displays.initMode) Proxys.environments += currentDataProxy.get
   }
    
 }

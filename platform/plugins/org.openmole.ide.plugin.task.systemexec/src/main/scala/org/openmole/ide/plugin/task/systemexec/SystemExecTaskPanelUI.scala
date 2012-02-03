@@ -59,5 +59,5 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,w
                                                                                  inputMapMultiComboTextField.content,
                                                                                  outputMapMultiTextFieldCombo.content)
   
-  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI(""))::Proxys.filePrototypes
+  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)::Proxys.filePrototypes
 }

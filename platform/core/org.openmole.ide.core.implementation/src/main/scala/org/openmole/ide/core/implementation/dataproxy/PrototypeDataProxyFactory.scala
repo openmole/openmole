@@ -23,6 +23,6 @@ import scala.collection.JavaConversions._
 
 class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory{
   
-  override def buildDataProxyUI(name:String) = new PrototypeDataProxyUI(factory.buildDataUI(name))
+  override def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI)
 }
   

@@ -24,30 +24,27 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
 import org.netbeans.api.visual.action.SelectProvider
-import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.commons.Constants
+import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.implementation.display.Displays
-import org.openmole.ide.core.implementation.display.TaskDisplay
+import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.DnDNewTaskProvider
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
-import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.JavaConversions._
-import scala.collection.mutable.HashMap
+import org.openmole.ide.core.model.panel.PanelMode._
  
 
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
@@ -56,12 +53,18 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   var obUI: Option[Widget]= None
   val capsuleLayer= new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
+  val propertyLayer= new LayerWidget(this)
   var currentSlotIndex= 1
+  var currentPanel : Option[BasePanelUI] = None
   
   val moveAction = ActionFactory.createMoveAction
     
   addChild(capsuleLayer)
   addChild(connectLayer)
+  addChild(propertyLayer)
+  
+  val propertyWidget = new Widget(this)
+  propertyLayer.addChild(propertyWidget)
   
   setPreferredSize(new Dimension((Constants.SCREEN_WIDTH * 0.8).toInt, (Constants.SCREEN_HEIGHT * 0.8).toInt))
   setActiveTool(CONNECT)  
@@ -73,11 +76,41 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
-  override def graphScene = this
+  def displayPropertyPanel(proxy: IDataProxyUI,
+                           mode: PanelMode.Value) = {
+    removePropertyPanel
+    proxy match {
+      case x: ITaskDataProxyUI=> currentPanel = Some(new TaskPanelUI(x,this,mode))
+      case x: IPrototypeDataProxyUI=> currentPanel = Some(new PrototypePanelUI(x,this,mode))
+      case x: IEnvironmentDataProxyUI=> currentPanel = Some(new EnvironmentPanelUI(x,this,mode))
+      case x: ISamplingDataProxyUI=> currentPanel = Some(new SamplingPanelUI(x,this,mode))
+      case _=>
+    }
+    
+    currentPanel match {
+      case Some(x:BasePanelUI)=> propertyWidget.addChild(new ComponentWidget(this,x.peer))
+      case _=>
+    }
+    
+    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt - currentPanel.get.size.width, 20))
+    getSceneAnimator.animatePreferredLocation(propertyWidget, new Point(getView.getBounds().x.toInt + currentPanel.get.bounds.width +20, 20))
+    refresh
+  } 
   
-  override def refresh= {validate; repaint}
+  def removePropertyPanel : Unit = {
+    currentPanel match {
+      case Some(x:BasePanelUI)=> x.save
+      case _=>
+    }
+    propertyWidget.removeChildren
+    refresh
+  }
+    
+  def graphScene = this
   
-  override def setLayout= {
+  def refresh= {validate; repaint}
+  
+  def setLayout= {
     val graphLayout = GraphLayoutFactory.createHierarchicalGraphLayout(this, true)
     graphLayout.layoutGraph(this)
     val sceneGraphLayout = LayoutFactory.createSceneGraphLayout(this, graphLayout)
@@ -232,10 +265,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
         case x: ICapsuleUI=> { 
             if(x.dataProxy.isDefined)
               x.dataProxy.get match{
-                case y: ITaskDataProxyUI=> {
-                    Displays.currentType = TASK
-                    TaskDisplay.currentDataProxy = Some(y)
-                    Displays.propertyPanel.displayCurrentEntity}
+                case y: ITaskDataProxyUI=> displayPropertyPanel(y,EDIT)
+                case _=>
               }
           }
       }

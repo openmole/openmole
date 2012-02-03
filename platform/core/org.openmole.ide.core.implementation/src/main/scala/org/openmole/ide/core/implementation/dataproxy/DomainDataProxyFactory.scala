@@ -28,6 +28,6 @@ object DomainDataProxyFactory{
 }
 
 class DomainDataProxyFactory(val factory: IDomainFactoryUI) extends IDomainDataProxyFactory {
-  override def buildDataProxyUI(name:String) = new DomainDataProxyUI(factory.buildDataUI(name))
+  override def buildDataProxyUI = new DomainDataProxyUI(factory.buildDataUI)
   override def toString= factory.displayName
 }

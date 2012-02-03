@@ -21,10 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.implementation.palette.FrozenProxys
-import org.openmole.ide.core.implementation.palette.PaletteSupport
+import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import java.io.File
 
@@ -32,55 +33,56 @@ object Proxys {
     
   val incr = new AtomicInteger
   
-  var tasks = new WeakHashMap[Int,ITaskDataProxyUI]
-  var prototypes = new WeakHashMap[Int,IPrototypeDataProxyUI]
-  var samplings = new WeakHashMap[Int,ISamplingDataProxyUI]
-  var environments = new WeakHashMap[Int,IEnvironmentDataProxyUI]
+  var tasks = new HashSet[ITaskDataProxyUI]
+  var prototypes = new HashSet[IPrototypeDataProxyUI]
+  var samplings = new HashSet[ISamplingDataProxyUI]
+  var environments = new HashSet[IEnvironmentDataProxyUI]
+//  
+//  
+//  var tasks = new HashSet[ITaskDataProxyUI]
+//  var prototypes = new HashSet[IPrototypeDataProxyUI]
+//  var samplings = new HashSet[ISamplingDataProxyUI]
+//  var environments = new HashSet[IEnvironmentDataProxyUI]
       
-  def task = {
-    PaletteSupport.currentMoleSceneTopComponent match {
-      case None => tasks.toMap
-      case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) {
-          FrozenProxys.task(PaletteSupport.currentMoleSceneTopComponent.get)}
-        else {tasks.toMap}}}
+  def task = TopComponentsManager.currentMoleSceneTopComponent match {
+    case None => tasks.toSet
+    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
+        FrozenProxys.task(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
+      else tasks.toSet
+  }
   
-  def prototype= PaletteSupport.currentMoleSceneTopComponent match {
-    case None => prototypes.toMap
-    case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
-      FrozenProxys.prototype(PaletteSupport.currentMoleSceneTopComponent.get)
-      else prototypes.toMap}
   
-  def sampling = PaletteSupport.currentMoleSceneTopComponent match {
-    case None => samplings.toMap
-    case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
-      FrozenProxys.sampling(PaletteSupport.currentMoleSceneTopComponent.get)
-      else samplings.toMap}
+  def prototype= TopComponentsManager.currentMoleSceneTopComponent match {
+    case None => prototypes.toSet
+    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
+        FrozenProxys.prototype(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
+        else prototypes.toSet
+  }
+
   
-  def environment = PaletteSupport.currentMoleSceneTopComponent match {
-    case None => environments.toMap
-    case _=> if (FrozenProxys.maps.contains(PaletteSupport.currentMoleSceneTopComponent.get)) 
-      FrozenProxys.environment(PaletteSupport.currentMoleSceneTopComponent.get)
-      else environments.toMap}
+  def sampling = TopComponentsManager.currentMoleSceneTopComponent match {
+    case None => samplings.toSet
+    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
+      FrozenProxys.sampling(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
+      else samplings.toSet
+  }
+      
+  def environment = TopComponentsManager.currentMoleSceneTopComponent match {
+    case None => environments.toSet
+    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
+      FrozenProxys.environment(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
+      else environments.toSet
+      }
   
-  def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.values.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
+  def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
   .toList
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
-  
-  def addTaskElement(dpu: ITaskDataProxyUI) = tasks += incr.getAndIncrement->dpu
-  def addPrototypeElement(dpu: IPrototypeDataProxyUI) = prototypes += incr.getAndIncrement->dpu
-  def addSamplingElement(dpu: ISamplingDataProxyUI) = samplings += incr.getAndIncrement->dpu
-  def addEnvironmentElement(dpu: IEnvironmentDataProxyUI) = environments += incr.getAndIncrement->dpu
-  
-  def addTaskElement(dpu: ITaskDataProxyUI, id:Int) = tasks += id->dpu
-  def addPrototypeElement(dpu: IPrototypeDataProxyUI,id:Int) = prototypes += id->dpu
-  def addSamplingElement(dpu: ISamplingDataProxyUI,id:Int) = samplings += id->dpu
-  def addEnvironmentElement(dpu: IEnvironmentDataProxyUI,id:Int) = environments += id->dpu
-  
-  def clearAllTaskElement = tasks.clear
-  def clearAllPrototypeElement = prototypes.clear
-  def clearAllSamplingElement = samplings.clear
-  def clearAllEnvironmentElement = environments.clear
+    
+  def clearAllTaskElement = {tasks.foreach{ConceptMenu.removeItem};tasks.clear}
+  def clearAllPrototypeElement = {prototypes.foreach{ConceptMenu.removeItem};prototypes.clear}
+  def clearAllSamplingElement = {samplings.foreach{ConceptMenu.removeItem};samplings.clear}
+  def clearAllEnvironmentElement = {environments.foreach{ConceptMenu.removeItem};environments.clear}
   
   def clearAll: Unit = {
     clearAllTaskElement
@@ -89,6 +91,5 @@ object Proxys {
     clearAllEnvironmentElement
     FrozenProxys.clear
   }
-  
 } 
   

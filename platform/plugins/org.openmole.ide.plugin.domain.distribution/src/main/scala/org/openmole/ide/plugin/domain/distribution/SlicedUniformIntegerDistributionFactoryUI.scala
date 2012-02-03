@@ -21,5 +21,5 @@ import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class SlicedUniformIntegerDistributionFactoryUI extends IDomainFactoryUI {
   override def displayName = "Uniform distribution"
-  override def buildDataUI(name: String) = new SlicedUniformIntegerDistributionDataUI(name)
+  override def buildDataUI = new SlicedUniformIntegerDistributionDataUI
 }

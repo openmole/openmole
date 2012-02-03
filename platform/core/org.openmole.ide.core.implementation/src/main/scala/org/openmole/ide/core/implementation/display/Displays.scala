@@ -30,26 +30,26 @@ object Displays {
   
   def name = if(dataProxy.isDefined) dataProxy.get.dataUI.name else ""
   
-  def setCurrentProxyID(pID: Int) = {
-    currentDisplay.setCurrentDataProxy(pID)
-    currentProxyID = pID}
+ // def setCurrentProxyID(pID: Int) = {
+  //  currentDisplay.setCurrentDataProxy(pID)
+   // currentProxyID = pID}
     
   def implementationClasses = currentDisplay.implementationClasses
   
   def dataProxy = currentDisplay.currentDataProxy
   
-  def buildPanelUI = currentDisplay.buildPanelUI
+//  def buildPanelUI = currentDisplay.buildPanelUI
   
-  def saveContent(name: String) = currentDisplay.saveContent(name)
+  def saveContent = currentDisplay.saveContent
   
-  def firstManagementMenu = currentDisplay.firstManagementMenu
+ // def firstManagementMenu = currentDisplay.firstManagementMenu
     
-  private def currentDisplay :IDisplay= 
+  private def currentDisplay :IDisplay = 
     currentType match{
-      case TASK=> TaskDisplay
-      case PROTOTYPE=> PrototypeDisplay
-      case SAMPLING=> SamplingDisplay
-      case ENVIRONMENT=> EnvironmentDisplay
+//      case TASK=> TaskDisplay
+//      case PROTOTYPE=> PrototypeDisplay
+//      case SAMPLING=> SamplingDisplay
+//      case ENVIRONMENT=> EnvironmentDisplay
       case _=> throw new UserBadDataError("Unknown type " + currentType + " No display is available.")
   }
 }

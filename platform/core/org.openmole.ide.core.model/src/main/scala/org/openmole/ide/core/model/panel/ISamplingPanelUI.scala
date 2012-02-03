@@ -20,5 +20,5 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
 trait ISamplingPanelUI extends IPanelUI{
-  def saveContent(name:String): ISamplingDataUI
+  def saveContent(name: String): ISamplingDataUI
 }

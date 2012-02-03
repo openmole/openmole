@@ -21,5 +21,5 @@ import swing.Swing._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends BoxPanel(Orientation.Horizontal) with ITaskPanelUI {
-  override def saveContent(name: String) = new ExplorationTaskDataUI(name)
+  override def saveContent(name: String) = new ExplorationTaskDataUI
 }

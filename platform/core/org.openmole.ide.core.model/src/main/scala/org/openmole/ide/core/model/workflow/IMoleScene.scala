@@ -18,6 +18,8 @@
 package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.graph.GraphScene
+import org.openmole.ide.core.model.panel.PanelMode
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 
 trait IMoleScene { 
   def manager: IMoleSceneManager
@@ -35,4 +37,8 @@ trait IMoleScene {
   def createEdge(sourceNodeID:String, targetNodeID: String)
   
   def isBuildScene: Boolean
+  
+  def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
+  
+  def removePropertyPanel
 }

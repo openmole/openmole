@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.palette.FrozenProxys
+import org.openmole.ide.core.implementation.dataproxy.FrozenProxys
 import org.openide.awt.StatusDisplayer
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager

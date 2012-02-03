@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-class NetLogo4TaskDataUI(val name: String,
+class NetLogo4TaskDataUI(val name: String="",
                          val workspaceEmbedded: Boolean= false,
                          val nlogoPath: String = "", 
                          val lauchingCommands: String="",
@@ -21,7 +21,7 @@ class NetLogo4TaskDataUI(val name: String,
                          val prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)]= List(),
                          val globals: List[String]= List()) extends TaskDataUI {
   
-  override def coreObject = {val nlt = new NetLogo4Task(name,
+  def coreObject = {val nlt = new NetLogo4Task(name,
                                                         new File(nlogoPath),
                                                         asJavaIterable(Source.fromString(lauchingCommands).getLines.toIterable),
                                                         workspaceEmbedded)
@@ -29,13 +29,15 @@ class NetLogo4TaskDataUI(val name: String,
                              prototypeMappingOutput.foreach(pm=>nlt.addNetLogoOutput(pm._1,pm._2.dataUI.coreObject))
                              nlt
   }
-  override def coreClass= classOf[NetLogo4Task]
+  def coreClass= classOf[NetLogo4Task]
   
-  override def imagePath = "img/netlogo4.png"
+  def imagePath = "img/netlogo4.png"
   
-  override def buildPanelUI = new NetLogo4TaskPanelUI(this)
+  override def fatImagePath = "img/netlogo4_fat.png"
   
-  override def borderColor = new Color(19,118,8)
+  def buildPanelUI = new NetLogo4TaskPanelUI(this)
   
-  override def backgroundColor = new Color(175,233,175,128)
+  def borderColor = new Color(19,118,8)
+  
+  def backgroundColor = new Color(175,233,175,128)
 }

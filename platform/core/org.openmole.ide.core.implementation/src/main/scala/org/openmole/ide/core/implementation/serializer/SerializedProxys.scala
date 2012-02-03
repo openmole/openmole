@@ -18,24 +18,25 @@
 package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy._
 
-class SerializedProxys(val task: Map[Int,ITaskDataProxyUI],
-                       val prototype: Map[Int,IPrototypeDataProxyUI],
-                       val sampling: Map[Int,ISamplingDataProxyUI],
-                       val environment: Map[Int,IEnvironmentDataProxyUI],
+class SerializedProxys(val task: Set[ITaskDataProxyUI],
+                       val prototype: Set[IPrototypeDataProxyUI],
+                       val sampling: Set[ISamplingDataProxyUI],
+                       val environment: Set[IEnvironmentDataProxyUI],
                        val incr: Int) {
-  def this() = this(Proxys.tasks.toMap,
-              Proxys.prototypes.toMap,
-              Proxys.samplings.toMap,
-              Proxys.environments.toMap,
+  def this() = this(Proxys.tasks.toSet,
+              Proxys.prototypes.toSet,
+              Proxys.samplings.toSet,
+              Proxys.environments.toSet,
               0)
     
   def loadProxys = {
-    task.foreach(t=>Proxys.addTaskElement(t._2,t._1))
-    prototype.foreach(p=>Proxys.addPrototypeElement(p._2,p._1))
-    sampling.foreach(s=>Proxys.addSamplingElement(s._2,s._1))
-    environment.foreach(e=>Proxys.addEnvironmentElement(e._2,e._1))
+    task.foreach{t=>Proxys.tasks += t; ConceptMenu.taskMenu.contents += ConceptMenu.addItem(t)}
+    prototype.foreach{p=>Proxys.prototypes+= p; ConceptMenu.prototypeMenu.contents += ConceptMenu.addItem(p)}
+    sampling.foreach{s=>Proxys.samplings += s; ConceptMenu.samplingMenu.contents += ConceptMenu.addItem(s)}
+    environment.foreach{e=>Proxys.environments+= e; ConceptMenu.environmentMenu.contents += ConceptMenu.addItem(e)}
     Proxys.incr.set(incr)
   }
   

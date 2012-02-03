@@ -23,5 +23,5 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.widget.PopupMenu
 
 trait IPrototypeDisplay extends IDisplay{
-  def secondManagementMenu(taskProxy: ITaskDataProxyUI, attachedProxy: IPrototypeDataProxyUI, py: IOType.Value): PopupMenu
+ // def secondManagementMenu(taskProxy: ITaskDataProxyUI, attachedProxy: IPrototypeDataProxyUI, py: IOType.Value): PopupMenu
 }

@@ -16,7 +16,7 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._
 
-class GliteEnvironmentDataUI(val name: String,
+class GliteEnvironmentDataUI(val name: String="",
                              val vo: String="",
                              val voms: String="",
                              val bdii: String="",
@@ -27,12 +27,15 @@ class GliteEnvironmentDataUI(val name: String,
                              val architecture64: Boolean = false, 
                              val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
                              val workerNodeMemory: String="",
-                             val maxCPUTime:String="") extends IEnvironmentDataUI {
+                             val maxCPUTime:String="",
+                             val otherRequirements: String= "") extends IEnvironmentDataUI {
+  
   def coreObject = {
     val requirementMap = new HashMap[String,String]
     if (architecture64 == true) requirementMap+= CPU_ARCHITECTURE-> "x86_64"
     if (workerNodeMemory != "") requirementMap+= MEMORY->runtimeMemory
     if (maxCPUTime != "") requirementMap+= CPU_TIME-> maxCPUTime
+    if (otherRequirements != "")requirementMap+= "REQUIREMENTS"->otherRequirements
     val rtm = if (runtimeMemory != "") runtimeMemory.toInt else Workspace.preference(BatchEnvironment.MemorySizeForRuntime).toInt
     
     
@@ -50,6 +53,8 @@ class GliteEnvironmentDataUI(val name: String,
   def coreClass = classOf[GliteEnvironment] 
   
   def imagePath = "img/glite.png" 
+  
+  override def fatImagePath = "img/glite_fat.png"
   
   def buildPanelUI = new GliteEnvironmentPanelUI(this)
 }

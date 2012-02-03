@@ -18,22 +18,24 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
 object EmptyDataUIs {
   
-  class  EmptyPrototypeDataUI(val name: String) extends IPrototypeDataUI[Any]  {
+  class  EmptyPrototypeDataUI extends IPrototypeDataUI[Any]  {
+    def name = ""
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
-    def coreObject = new Prototype(name,classOf[Any])
+    def coreObject = new Prototype("empty",classOf[Any])
     def imagePath = ""
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
     
     class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
-      def peer = this.peer
-      def saveContent(name:String) = new EmptyPrototypeDataUI("")}
+      override def peer = this.peer
+      def saveContent(name: String) = new EmptyPrototypeDataUI}
   }
 }

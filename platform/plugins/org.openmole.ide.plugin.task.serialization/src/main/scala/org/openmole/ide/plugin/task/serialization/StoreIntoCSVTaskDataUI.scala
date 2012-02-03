@@ -16,7 +16,7 @@ import scala.collection.JavaConversions._
 import au.com.bytecode.opencsv.CSVWriter
 import org.openmole.core.implementation.data.Prototype._
 
-class StoreIntoCSVTaskDataUI(val name: String,val columns: List[(IPrototypeDataProxyUI,String)]= List.empty,val protoFile: Option[IPrototypeDataProxyUI]= None) extends TaskDataUI {
+class StoreIntoCSVTaskDataUI(val name: String="",val columns: List[(IPrototypeDataProxyUI,String)]= List.empty,val protoFile: Option[IPrototypeDataProxyUI]= None) extends TaskDataUI {
  
   override def coreObject = {
     if (protoFile.isDefined)

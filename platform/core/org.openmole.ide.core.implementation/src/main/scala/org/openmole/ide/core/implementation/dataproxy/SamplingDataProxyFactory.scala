@@ -20,5 +20,5 @@ import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyFactory
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class SamplingDataProxyFactory (val factory: ISamplingFactoryUI) extends ISamplingDataProxyFactory{
-  def buildDataProxyUI(name:String) = new SamplingDataProxyUI(factory.buildDataUI(name))
+  def buildDataProxyUI = new SamplingDataProxyUI(factory.buildDataUI)
 }

@@ -1,5 +1,6 @@
+
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.action
+package org.openmole.ide.misc.widget.example
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.display.Displays
-import scala.swing.Action
+import java.awt.Dimension
+import org.openmole.ide.misc.widget.GroovyEditor
+import scala.swing.MainFrame
+import scala.swing.Panel
+import scala.swing.ScrollPane
+import scala.swing.SimpleSwingApplication
 
-class RemovePrototypeAction(proxyID: Int) extends Action("Remove"){
-  override def apply= {Proxys.prototypes-= proxyID 
-                       Displays.propertyPanel.cleanViewport}
+object GroovyEditorExampleApp extends SimpleSwingApplication
+{
+  def top = new MainFrame {
+    title = "Groovy editor Demo"
+    contents = new ScrollPane((new GroovyEditor))
+    size = new Dimension(200,200)
+  }
 }

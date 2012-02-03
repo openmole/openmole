@@ -23,7 +23,6 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.core.implementation.action.RemoveTaskAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.display.ITaskDisplay
@@ -37,30 +36,30 @@ object TaskDisplay extends ITaskDisplay{
   
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).foreach(f=>{modelTasks += new TaskDataProxyFactory(f)})
   
-  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.task(pID))
+ // override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.task(pID))
   
   override def implementationClasses = modelTasks
 
-  override def buildPanelUI = {
-    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
-    currentPanel.get
-  }
+//  override def buildPanelUI = {
+//    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
+//    currentPanel.get
+//  }
   
-  override def firstManagementMenu= new PopupMenu{
-   add(new MenuItem(new RemoveTaskAction(Displays.currentProxyID)))}
-  
-  override def secondManagementMenu(damainProxy: ITaskDataProxyUI) = new PopupMenu {}
-  
-  override def saveContent(name: String) = {
+//  override def firstManagementMenu= new PopupMenu{
+//   add(new MenuItem(new RemoveTaskAction(Displays.currentProxyID)))}
+//  
+//  override def secondManagementMenu(damainProxy: ITaskDataProxyUI) = new PopupMenu {}
+//  
+  override def saveContent = {
     val env = currentDataProxy.get.dataUI.environment
     val sample = currentDataProxy.get.dataUI.sampling
     val protoI = currentDataProxy.get.dataUI.prototypesIn
     val protoO = currentDataProxy.get.dataUI.prototypesOut
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
+   // currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
     currentDataProxy.get.dataUI.prototypesIn_=(protoI)
     currentDataProxy.get.dataUI.prototypesOut_=(protoO)
     currentDataProxy.get.dataUI.sampling_=(sample)
     currentDataProxy.get.dataUI.environment_=(env)
-    if (Displays.initMode) Proxys.addTaskElement(currentDataProxy.get)
+    if (Displays.initMode) Proxys.tasks += currentDataProxy.get
   }
 }

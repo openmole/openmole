@@ -24,5 +24,5 @@ class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[scala.BigInt] {
   
   override def displayName = "BigInteger"
   
-  override def buildDataUI(name: String) = new BigIntegerPrototypeDataUI(name)
+  override def buildDataUI = new BigIntegerPrototypeDataUI
 }

@@ -25,7 +25,6 @@ import org.openmole.ide.core.model.display.IPrototypeDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.implementation.action.DetachPrototypeAction
-import org.openmole.ide.core.implementation.action.RemovePrototypeAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy._
@@ -39,24 +38,24 @@ object PrototypeDisplay extends IPrototypeDisplay{
   
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).foreach(f=>{modelPrototypes += new PrototypeDataProxyFactory(f)})
   
-  override def firstManagementMenu =
-    new PopupMenu{
-      add(new MenuItem(new RemovePrototypeAction(Displays.currentProxyID)))}
+//  override def firstManagementMenu =
+//    new PopupMenu{
+//      add(new MenuItem(new RemovePrototypeAction(Displays.currentProxyID)))}
+//  
+//  override def secondManagementMenu(taskProxy: ITaskDataProxyUI,protoProxy: IPrototypeDataProxyUI, ty: IOType.Value) = new PopupMenu {
+//   add(new MenuItem(new DetachPrototypeAction(taskProxy,protoProxy,ty)))}
   
-  override def secondManagementMenu(taskProxy: ITaskDataProxyUI,protoProxy: IPrototypeDataProxyUI, ty: IOType.Value) = new PopupMenu {
-   add(new MenuItem(new DetachPrototypeAction(taskProxy,protoProxy,ty)))}
-  
-  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.prototypes(pID))
+  //override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.prototypes(pID))
   
   override def implementationClasses = modelPrototypes
   
-  def  buildPanelUI= {
-    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
-    currentPanel.get
-  }
+//  def  buildPanelUI= {
+//    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
+//    currentPanel.get
+//  }
   
-  override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
-    if (Displays.initMode) Proxys.addPrototypeElement(currentDataProxy.get)
+  override def saveContent = {
+  //  currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.prototypes += currentDataProxy.get
   }
 }

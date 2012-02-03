@@ -19,16 +19,17 @@ package org.openmole.ide.core.implementation.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
-import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.provider.GenericMenuProvider
+import org.openmole.ide.core.implementation.workflow.SceneItemFactory
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class AddTaskAction(moleScene: MoleScene ,capsule: CapsuleUI,dpu: TaskDataProxyUI) extends ActionListener{
+class AddTaskAction(moleScene: IMoleScene,
+                    dpu: ITaskDataProxyUI,
+                    provider: GenericMenuProvider) extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
+    val capsule = SceneItemFactory.createCapsule(moleScene,provider.currentPoint)
     capsule.encapsule(dpu)
-    moleScene.validate
-    moleScene.refresh
-        
+    capsule.addInputSlot(moleScene.manager.capsules.size == 1)
   }
 }

@@ -20,7 +20,7 @@ package org.openmole.ide.core.model.factory
 import org.openmole.ide.core.model.data.ITaskDataUI
 
 trait ITaskFactoryUI extends IFactoryUI{ 
-  override def displayName: String = buildDataUI("").coreClass.getSimpleName
+  override def displayName: String = buildDataUI.coreClass.getSimpleName
   
-  def buildDataUI(name: String): ITaskDataUI
+  def buildDataUI: ITaskDataUI
 }

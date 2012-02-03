@@ -21,7 +21,6 @@ import org.openide.util.Lookup
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.action.DetachSamplingAction
-import org.openmole.ide.core.implementation.action.RemoveSamplingAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.misc.widget.PopupMenu
@@ -39,23 +38,23 @@ object SamplingDisplay extends ISamplingDisplay{
   
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).foreach(f=>modelSamplings += new SamplingDataProxyFactory(f))
   
-  override def firstManagementMenu= new PopupMenu{
-    add(new MenuItem(new RemoveSamplingAction(Displays.currentProxyID)))}
-  
-  override def secondManagementMenu(taskProxy : ITaskDataProxyUI, samplingProxy: ISamplingDataProxyUI) = new PopupMenu {
-    add(new MenuItem(new DetachSamplingAction(Some(taskProxy))))}
-  
-  override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.samplings(pID))
+//  override def firstManagementMenu= new PopupMenu{
+//    add(new MenuItem(new RemoveSamplingAction(Displays.currentProxyID)))}
+//  
+//  override def secondManagementMenu(taskProxy : ITaskDataProxyUI, samplingProxy: ISamplingDataProxyUI) = new PopupMenu {
+//    add(new MenuItem(new DetachSamplingAction(Some(taskProxy))))}
+//  
+ // override def setCurrentDataProxy(pID: Int) = currentDataProxy = Some(Proxys.samplings(pID))
   
   override def implementationClasses = modelSamplings
   
-  override def  buildPanelUI = {
-    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
-    currentPanel.get
-  }
+//  override def  buildPanelUI = {
+//    currentPanel = Some(currentDataProxy.get.dataUI.buildPanelUI)
+//    currentPanel.get
+//  }
   
-  override def saveContent(name: String) = {
-    currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
-    if (Displays.initMode) Proxys.addSamplingElement(currentDataProxy.get)}
+  override def saveContent = {
+   // currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
+    if (Displays.initMode) Proxys.samplings += currentDataProxy.get}
   
 }

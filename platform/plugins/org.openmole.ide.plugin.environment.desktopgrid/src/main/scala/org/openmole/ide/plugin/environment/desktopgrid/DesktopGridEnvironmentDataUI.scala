@@ -10,8 +10,10 @@ import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
-class DesktopGridEnvironmentDataUI(val name: String,val login: String,val pass: String,val port: Int) extends IEnvironmentDataUI {
-  def this(n:String) = this(n,"","",0)
+class DesktopGridEnvironmentDataUI(val name: String="",
+                                   val login: String="",
+                                   val pass: String="",
+                                   val port: Int=0) extends IEnvironmentDataUI {
 
   override def coreObject = {
     if (login != "" && pass != "") new DesktopGridEnvironment(port,login,pass)
@@ -21,6 +23,8 @@ class DesktopGridEnvironmentDataUI(val name: String,val login: String,val pass: 
   override def coreClass = classOf[DesktopGridEnvironment] 
   
   override def imagePath = "img/desktop_grid.png" 
+  
+  override def fatImagePath = "img/desktop_grid_fat.png" 
   
   override def buildPanelUI = new DesktopGridEnvironmentPanelUI(this)
 }

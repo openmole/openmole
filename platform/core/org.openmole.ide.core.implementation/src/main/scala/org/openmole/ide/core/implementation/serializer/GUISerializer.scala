@@ -30,8 +30,6 @@ import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.implementation.palette.FrozenProxys
-import org.openmole.ide.core.implementation.palette.PaletteSupport
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
@@ -49,10 +47,10 @@ object GUISerializer {
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    out.writeObject(new SerializedProxys(Proxys.tasks.toMap,
-                                         Proxys.prototypes.toMap,
-                                         Proxys.samplings.toMap,
-                                         Proxys.environments.toMap,
+    out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
+                                         Proxys.prototypes.toSet,
+                                         Proxys.samplings.toSet,
+                                         Proxys.environments.toSet,
                                          Proxys.incr.get+1))
     //molescenes
     TopComponentsManager.moleScenes.foreach(ms=>
@@ -68,7 +66,7 @@ object GUISerializer {
    
     Proxys.clearAll
     FrozenProxys.clear
-    PaletteSupport.closeOpenedTopComponents
+    TopComponentsManager.closeOpenedTopComponents
     
     try {
       while(true) {
@@ -82,7 +80,6 @@ object GUISerializer {
     } catch {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
     } finally {
-      PaletteSupport.refreshPalette
       in.close
     }
   }

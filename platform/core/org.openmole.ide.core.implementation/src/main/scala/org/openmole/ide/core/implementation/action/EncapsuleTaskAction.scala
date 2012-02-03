@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,17 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.display.Displays
-import scala.swing.Action
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class RemoveTaskAction(proxyID: Int) extends Action("Remove"){
-  override def apply = {Proxys.tasks-= proxyID
-                        Displays.propertyPanel.cleanViewport}
+class EncapsuleTaskAction(moleScene: IMoleScene,
+                          capsule: CapsuleUI,
+                          dpu: TaskDataProxyUI) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent)= {
+    capsule.encapsule(dpu)
+    moleScene.refresh
+  }
 }

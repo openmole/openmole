@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.palette
+package org.openmole.ide.core.implementation.dataproxy
 
 import com.rits.cloning.Cloner
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.serializer.SerializedProxys
 import scala.collection.mutable.WeakHashMap
 
@@ -31,10 +30,10 @@ object FrozenProxys {
   def environment(tc: MoleSceneTopComponent) = maps(tc).environment
   def freeze(tc: MoleSceneTopComponent) = {
     val cloner = new Cloner
-    maps+= tc-> new SerializedProxys(cloner.deepClone(Proxys.tasks).toMap,
-                                     cloner.deepClone(Proxys.prototypes).toMap,
-                                     cloner.deepClone(Proxys.sampling).toMap,
-                                     cloner.deepClone(Proxys.environment).toMap,
+    maps+= tc-> new SerializedProxys(cloner.deepClone(Proxys.tasks).toSet,
+                                     cloner.deepClone(Proxys.prototypes).toSet,
+                                     cloner.deepClone(Proxys.sampling).toSet,
+                                     cloner.deepClone(Proxys.environment).toSet,
                                      Proxys.incr.get+1)
   }
   def clear = maps.clear

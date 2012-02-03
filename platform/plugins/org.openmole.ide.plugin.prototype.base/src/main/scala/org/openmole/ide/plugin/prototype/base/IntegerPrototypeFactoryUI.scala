@@ -23,6 +23,6 @@ class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI[Int] {
   
   override def displayName = "Integer"
   
-  override def buildDataUI(name: String) = new IntegerPrototypeDataUI(name)
+  override def buildDataUI = new IntegerPrototypeDataUI
 }
 

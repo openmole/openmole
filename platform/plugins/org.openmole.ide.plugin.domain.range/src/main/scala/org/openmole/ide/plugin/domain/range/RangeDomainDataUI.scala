@@ -24,7 +24,7 @@ import org.openmole.plugin.domain.range.BigDecimalRange
 import org.openmole.plugin.domain.range.DoubleRange
 import org.openmole.plugin.domain.range.IntegerRange
 
-class RangeDomainDataUI (val name: String = "",
+class RangeDomainDataUI (val name: String="",
                          val min: String = "",
                          val max: String = "",
                          val step: String = "") extends IDomainDataUI {

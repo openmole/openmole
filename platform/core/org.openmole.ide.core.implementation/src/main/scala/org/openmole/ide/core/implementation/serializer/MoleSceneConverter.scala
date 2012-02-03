@@ -25,7 +25,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
-import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -42,7 +41,6 @@ class MoleSceneConverter extends Converter{
     
     var firstSlotID = new HashMap[ICapsuleUI, Int]
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
-    val taskProxyIds= (Map() ++ Proxys.tasks.map(_.swap))
     
     val molescene= o.asInstanceOf[IMoleScene]
     var slotcount = 0
@@ -73,7 +71,7 @@ class MoleSceneConverter extends Converter{
         //Task
         if (view.capsuleType != CAPSULE) {
           writer.startNode("task");
-          writer.addAttribute("id", taskProxyIds(view.dataProxy.get).toString)
+          writer.addAttribute("id", view.dataProxy.get.id.toString)
           writer.endNode
         }
         writer.endNode
@@ -114,7 +112,7 @@ class MoleSceneConverter extends Converter{
               n1 match{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
-                case "task"=> caps.encapsule(Proxys.task(reader.getAttribute("id").toInt))  
+                case "task"=> caps.encapsule(Proxys.tasks.filter(p=> p.id == reader.getAttribute("id").toInt).head)  
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
               reader.moveUp

@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Exploration"
-  override def buildDataUI(name: String) = new ExplorationTaskDataUI(name)
+  override def buildDataUI = new ExplorationTaskDataUI
 }
 
   

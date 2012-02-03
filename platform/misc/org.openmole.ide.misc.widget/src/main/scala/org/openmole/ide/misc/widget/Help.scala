@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,10 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.palette
+package org.openmole.ide.misc.widget
 
-trait IGenericChildren
+object Help {
+
+  def tooltip(text: String,
+              example: String="") = "<html>"+text+ (if (example.isEmpty) "</html>" else "<p style=\"color:#ADD8E6\">Ex: "+example+"</p></html>")
+}

@@ -62,7 +62,7 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wra
   import CompleteSamplingPanelUI._
   if (!Proxys.prototypes.isEmpty){
     rowFactory(this)
-    val protos = Proxys.prototypes.map(_._2).toList
+    val protos = Proxys.prototypes.toList
     val domains = Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).toList.map{_.displayName}
     val csrs = if (cud.factors.size>0) cud.factors.map{f=> 
       val rw = new TwoCombosRowWidget(protos,f._1,domains,f._2,"defined on ",ADD)
@@ -86,7 +86,7 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wra
   }
   
   def addRow(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String],  p: IPrototype[_]):Unit =
-    addRow(twocombrow ,DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI("").dataUI,p)
+    addRow(twocombrow ,DomainDataProxyFactory.factoryByName(twocombrow.combo2.selection.item).buildDataProxyUI.dataUI,p)
   
   override def saveContent(name: String) = sampleDomainCombos match {
     case x:Some[MultiTwoCombos[IPrototypeDataProxyUI,String]]=> new CompleteSamplingDataUI(name,x.get.rowWidgets.map(r=>

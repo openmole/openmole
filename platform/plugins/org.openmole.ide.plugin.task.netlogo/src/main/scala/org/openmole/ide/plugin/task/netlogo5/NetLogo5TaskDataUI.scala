@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-class NetLogo5TaskDataUI(val name: String,
+class NetLogo5TaskDataUI(val name: String="",
                          val workspaceEmbedded: Boolean=false,
                          val nlogoPath: String = "", 
                          val lauchingCommands: String = "",
@@ -21,7 +21,7 @@ class NetLogo5TaskDataUI(val name: String,
                          var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)] = List(),
                          val globals: List[String] = List()) extends TaskDataUI {
   
-  override def coreObject = {
+  def coreObject = {
     val nlt = new NetLogo5Task(name,
                                new File(nlogoPath),
                                asJavaIterable(Source.fromString(lauchingCommands).getLines.toIterable),
@@ -31,13 +31,15 @@ class NetLogo5TaskDataUI(val name: String,
     nlt
   }
   
-  override def coreClass= classOf[NetLogo5Task]
+  def coreClass= classOf[NetLogo5Task]
   
-  override def imagePath = "img/netlogo5.png"
+  def imagePath = "img/netlogo5.png"
   
-  override def buildPanelUI = new NetLogo5TaskPanelUI(this)
+  override def fatImagePath = "img/netlogo5_fat.png"
   
-  override def borderColor = new Color(19,118,8)
+  def buildPanelUI = new NetLogo5TaskPanelUI(this)
   
-  override def backgroundColor = new Color(175,233,175,128)
+  def borderColor = new Color(19,118,8)
+  
+  def backgroundColor = new Color(175,233,175,128)
 }

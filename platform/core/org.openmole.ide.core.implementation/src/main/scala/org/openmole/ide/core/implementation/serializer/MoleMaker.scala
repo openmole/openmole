@@ -67,7 +67,7 @@ object MoleMaker {
   
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
-      val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.values.map{p=> p->p.dataUI.coreObject}.toMap
+      val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
       val capsuleMap= manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2))}.toMap
       capsuleMap.foreach{case (cui,ccore)=> manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))}
     
