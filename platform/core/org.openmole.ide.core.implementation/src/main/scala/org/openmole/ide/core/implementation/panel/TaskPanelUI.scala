@@ -36,6 +36,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
   def create = {
     Proxys.tasks += proxy
+    save
     ConceptMenu.taskMenu.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
   
