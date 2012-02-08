@@ -21,15 +21,13 @@ package org.openmole.ide.misc.widget.example
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.GroovyEditor
 import scala.swing.MainFrame
-import scala.swing.Panel
-import scala.swing.ScrollPane
 import scala.swing.SimpleSwingApplication
 
 object GroovyEditorExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Groovy editor Demo"
-    contents = new ScrollPane((new GroovyEditor))
+    contents = new GroovyEditor
     size = new Dimension(200,200)
   }
 }

@@ -18,11 +18,14 @@
 package org.openmole.ide.misc.widget
 
 import jsyntaxpane.lexers.GroovyLexer
-import scala.swing.EditorPane
 import jsyntaxpane.DefaultSyntaxKit
+import scala.swing.EditorPane
+import scala.swing.ScrollPane
 
-class GroovyEditor extends EditorPane{
-  contentType ="text/groovy"
-  editorKit =new DefaultSyntaxKit(new GroovyLexer)
+class GroovyEditor extends ScrollPane{
+  val editor = new EditorPane
+  viewportView = editor
+  editor.contentType = "text/groovy"
+  editor.editorKit = new DefaultSyntaxKit(new GroovyLexer)
 }
 
