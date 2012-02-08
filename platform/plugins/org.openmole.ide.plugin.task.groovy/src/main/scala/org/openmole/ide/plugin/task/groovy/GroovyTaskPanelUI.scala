@@ -22,19 +22,20 @@ import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import scala.swing.FileChooser.SelectionMode._
+import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Label
-import scala.swing.ScrollPane
-import scala.swing.TextArea
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
   
-  val codeTextArea = new TextArea {text = pud.code}
+  val codeTextArea = new GroovyEditor
+  codeTextArea.editor.text = pud.code
+  codeTextArea.minimumSize = new Dimension(150,150)
   val libMultiTextField = new MultiChooseFileTextField("Lib",pud.libs,"Select a file", Some("Lib files"), FilesOnly,Some("jar"))
   val pluginMultiTextField = new MultiChooseFileTextField("Plugin",pud.plugins,"Select a file", Some("Plugin files"), FilesOnly,Some("jar"))
   
   contents += (new Label("Code"),"left")
-  contents += (new ScrollPane(codeTextArea){minimumSize = new Dimension(150,150)},"span,growx")
+  contents += (codeTextArea,"span,growx")
   contents += libMultiTextField.panel
   contents += pluginMultiTextField.panel
   

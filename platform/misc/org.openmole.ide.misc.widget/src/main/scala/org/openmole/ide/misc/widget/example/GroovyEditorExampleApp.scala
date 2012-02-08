@@ -27,7 +27,9 @@ object GroovyEditorExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Groovy editor Demo"
-    contents = new GroovyEditor
+    val editor = new GroovyEditor
+    editor.editor.text = "class MyClass"
+    contents = editor
     size = new Dimension(200,200)
   }
 }
