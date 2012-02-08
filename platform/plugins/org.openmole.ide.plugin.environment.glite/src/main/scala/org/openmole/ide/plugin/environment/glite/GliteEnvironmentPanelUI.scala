@@ -31,22 +31,22 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends MigPanel("fil
   val vomsTextField = new TextField(20) {tooltip = Help.tooltip("Virtual Organization Membership Service url","voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr")}
   val bdiiTextField = new TextField(20) {tooltip = Help.tooltip("Berkeley Database Information Index url","ldap://topbdii.grif.fr:2170")}
   
-  val proxyCheckBox = new CheckBox("MyProxy")
-  val proxyURLTextField = new TextField(18)
-  val proxyUserTextField = new TextField(18)
+  val proxyCheckBox = new CheckBox("MyProxy") {tooltip = Help.tooltip("Set Proxy settings")}
+  val proxyURLTextField = new TextField(18) {tooltip = Help.tooltip("","")} 
+  val proxyUserTextField = new TextField(18){tooltip = Help.tooltip("","")}
   val proxyURLLabel = new Label("url")
   val proxyUserLabel = new Label("user")
   
-  val requirementCheckBox = new CheckBox("Requirements")
-  val architectureCheckBox = new CheckBox("64 bits")
-  val runtimeMemoryLabel = new Label("Runtime memory")
-  val runtimeMemoryTextField = new TextField(4)
+  val requirementCheckBox = new CheckBox("Requirements") {tooltip = Help.tooltip("Adds specific requirements")}
+  val architectureCheckBox = new CheckBox("64 bits") {tooltip = Help.tooltip("64 bits worker nodes only")}
+  val runtimeMemoryLabel = new Label("Runtime memory") 
+  val runtimeMemoryTextField = new TextField(4) 
   val workerNodeMemoryLabel = new Label("Worker memory")
-  val workerNodeMemoryTextField = new TextField(4)
+  val workerNodeMemoryTextField = new TextField(4) {tooltip = Help.tooltip("Specify a minimal size of RAM for the worker nodes","4Go")}
   val maxCPUTimeLabel = new Label("Max CPU Time")
   val maxCPUTimeTextField = new TextField(4)
   val otherRequirementLabel = new Label("Other")
-  val otherRequirementTextField = new TextField(16)
+  val otherRequirementTextField = new TextField(16) {tooltip = Help.tooltip("Free requirement specification","4Go")}
   
   contents+= (new MigPanel("wrap 2") {
       contents+= (new Label("VO"),"gap para")
