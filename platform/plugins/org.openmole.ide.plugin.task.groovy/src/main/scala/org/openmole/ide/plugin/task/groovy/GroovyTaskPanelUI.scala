@@ -23,17 +23,16 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.GroovyEditor
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Label
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
   
-  val codeTextArea = new GroovyEditor
-  codeTextArea.editor.text = pud.code
-  codeTextArea.minimumSize = new Dimension(150,150)
-  val libMultiTextField = new MultiChooseFileTextField("Lib",pud.libs,"Select a file", Some("Lib files"), FilesOnly,Some("jar"))
-  val pluginMultiTextField = new MultiChooseFileTextField("Plugin",pud.plugins,"Select a file", Some("Plugin files"), FilesOnly,Some("jar"))
-  
+  val codeTextArea = new GroovyEditor{editor.text = pud.code;minimumSize = new Dimension(150,150); tooltip = Help.tooltip("Groovy code. Right click on the editor for more options", "hello = \"Hello OpenMOLE\"")}
+  val libMultiTextField = new MultiChooseFileTextField("Lib",pud.libs,"Select a file", Some("Lib files"), FilesOnly,Some("jar")) {tooltip = Help.tooltip("Library path", "/home/path/to/my/lib")}
+  val pluginMultiTextField = new MultiCehooseFileTextField("Plugin",pud.plugins,"Select a file", Some("Plugin files"), FilesOnly,Some("jar")) {tooltip = Help.tooltip("Plugin path. Can be used to link a jar file for instance", "/home/path/to/myjar.jar")}
+
   contents += (new Label("Code"),"left")
   contents += (codeTextArea,"span,growx")
   contents += libMultiTextField.panel
@@ -44,12 +43,3 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[l
                                                                             libMultiTextField.content.filterNot(_.isEmpty),
                                                                             pluginMultiTextField.content.filterNot(_.isEmpty))
 }
-
-//  val editorPane= new JEditorPane
-//    val kit= CloneableEditorSupport.getEditorKit("text/x-groovy")
-//    editorPane.setEditorKit(kit)
-//    val fob= FileUtil.createMemoryFileSystem().getRoot().createData("tmp","groovy")
-//    val dob= DataObject.find(fob)
-//    editorPane.getDocument.putProperty(Document.StreamDescriptionProperty, dob)
-//    editorPane.setText("package dummy;")
-//    
