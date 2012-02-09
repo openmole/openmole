@@ -18,6 +18,7 @@
 package org.openmole.core.model.task
 
 import org.openmole.core.model.data.{IParameter,IPrototype,IDataSet, IData, DataModeMask}
+import java.io.File
 import org.openmole.core.model.data.IContext
 
 trait ITask {
@@ -137,4 +138,8 @@ trait ITask {
    * @return the parameters configured for this task.
    */
   def parameters: Iterable[IParameter[_]]
+  
+  def addPlugin(plugin: File): this.type
+  def addPlugin(plugin: String): this.type
+  def plugins: Iterable[File]
 }

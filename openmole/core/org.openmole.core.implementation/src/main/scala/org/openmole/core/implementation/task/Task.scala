@@ -27,6 +27,10 @@ import org.openmole.core.model.data.{IContext,IData,IParameter,IVariable,IProtot
 import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.data.Context._
 import scala.collection.immutable.TreeSet
+import java.io.File
+import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.misc.pluginmanager.PluginManagerInfo
+import org.openmole.misc.tools.io.FileUtil.fileOrdering
 
 abstract class Task(val name: String) extends ITask {
   
@@ -36,6 +40,7 @@ abstract class Task(val name: String) extends ITask {
   private var _inputs = TreeSet.empty[IData[_]]
   private var _outputs = TreeSet.empty[IData[_]]
   private var _parameters = TreeSet.empty[IParameter[_]]
+  private var _plugins = new TreeSet[File]
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
@@ -63,7 +68,10 @@ abstract class Task(val name: String) extends ITask {
       }
     }.toContext
 
-  private def init(context: IContext): IContext =
+  private def init(context: IContext): IContext = {
+    if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins) 
+    else if(!plugins.isEmpty) throw new InternalProcessingError("Plugins can't be loadded cause the application isn't runned in an osgi environment.")
+
     verifyInput(
       context ++ 
         parameters.flatMap {
@@ -72,6 +80,7 @@ abstract class Task(val name: String) extends ITask {
             else Option.empty[IVariable[_]]
         }
     )
+  }
 
   private def end(context: IContext) = filterOutput(context)
   
@@ -137,6 +146,10 @@ abstract class Task(val name: String) extends ITask {
     
   override def parameters: Iterable[IParameter[_]]= _parameters
    
+  override def addPlugin(plugin: File): this.type = {_plugins += plugin; this}
+  override def addPlugin(plugin: String): this.type = addPlugin(new File(plugin))
+  override def plugins = _plugins
+  
   override def toString: String = name       
     
 }
