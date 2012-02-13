@@ -36,6 +36,8 @@ object Images {
   val IMAGE_OUTPUT_EXE_SLOT= ImageUtilities.loadImage("img/outputSlotExe.png")
   val AGGREGATION_TRANSITON = ImageUtilities.loadImage("img/aggregation.png")
   val EXPLORATION_TRANSITON = ImageUtilities.loadImage("img/exploration.png")
+  val IMAGE_INPUT_DATA_CHANNEL = ImageUtilities.loadImage("img/inputDataChannel.png")
+  val IMAGE_OUTPUT_DATA_CHANNEL = ImageUtilities.loadImage("img/outputDataChannel.png")
   val THUMB_SIZE = 24
 
   var thumbPaths = new HashMap[String,Image]

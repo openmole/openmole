@@ -23,6 +23,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
@@ -57,13 +58,19 @@ class BuildMoleScene(n: String) extends MoleScene {
   }
   
   def attachEdgeWidget(e: String)= {
-    val connectionWidget = new LabeledConnectionWidget(graphScene,manager.transition(e))
+    val connectionWidget = TopComponentsManager.connectMode match {
+      case true=> val x = new LabeledConnectionWidget(graphScene,manager.transition(e))
+        x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
+        x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,x)))
+        x
+      case false=> val x = new DataChannelConnectionWidget(graphScene)
+        x
+    }
+    
     connectLayer.addChild(connectionWidget);
-    connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(reconnectAction)
-    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,connectionWidget)));
     connectionWidget
   }
 }

@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 
@@ -32,9 +32,11 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   var capsules= new DualHashBidiMap[String, ICapsuleUI]
   var transitionMap= new DualHashBidiMap[String, ITransitionUI]
+  var dataChannelMap = new DualHashBidiMap[String, IDataChannelUI]
   var capsuleConnections= new HashMap[ICapsuleUI, HashSet[ITransitionUI]]
-  var nodeID= 0
-  var edgeID= 0
+  var nodeID = 0
+  var edgeID = 0
+  var dataChannelID = 0
   var name: Option[String]= None
   
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
@@ -46,9 +48,11 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     startingCapsule.get.defineAsStartingCapsule(true)
   }
   
-  override def getNodeID: String= "node" + nodeID
+  def getNodeID: String= "node" + nodeID
   
   def getEdgeID: String= "edge" + edgeID
+  
+  def getDataChannelID: String= "dc" + dataChannelID
   
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID+= 1
@@ -58,7 +62,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     capsuleConnections+= cv-> HashSet.empty[ITransitionUI]
   }
   
-  override def removeCapsuleUI(nodeID: String) = {
+  def removeCapsuleUI(nodeID: String) = {
     startingCapsule match {
       case None=>
       case Some(caps)=> if (capsules.get(nodeID) == caps) startingCapsule = None
@@ -70,15 +74,19 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     
     //remove incoming transitionMap
     removeIncomingTransitions(capsules.get(nodeID))
+    removeDataChannel(capsules.get(nodeID))
     
     capsules.remove(nodeID)
   }
   
-  override def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
   
-  override def transitions= transitionMap.values 
+  def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
   
-  override def transition(edgeID: String) = transitionMap.get(edgeID)
+  def transitions= transitionMap.values 
+  
+  def dataChannels= dataChannelMap.values
+  
+  def transition(edgeID: String) = transitionMap.get(edgeID)
   
   private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) {
         removeTransition(t._1)
@@ -87,14 +95,30 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     })
   
   
-  override def removeTransition(edge: String) = transitionMap.remove(edge)
+  def removeTransition(edge: String) = transitionMap.remove(edge)
   
-  override def registerTransition(s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
+  def removeDataChannel(id: String) : Unit = dataChannelMap.remove(id)
+  
+  def removeDataChannel(capsule: ICapsuleUI) : Unit = {
+    dataChannelMap.foreach{case(k,v)=> if (v.source == capsule || v.target == capsule) removeDataChannel(k)}
+  }
+  
+  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI) : Boolean = {
+    dataChannelID+= 1
+    registerDataChannel(getDataChannelID, source, target)
+  }
+  
+  def registerDataChannel(id: String,source: ICapsuleUI, target: ICapsuleUI) : Boolean = {
+    if (!dataChannelMap.keys.contains(id)) {dataChannelMap.put(id,new DataChannelUI(source,target));return true}
+    false
+  }
+  
+  def registerTransition(s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
     edgeID+= 1
     registerTransition(getEdgeID,s,t,transitionType,cond)
   }
   
-  override def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
+  def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean = {
     if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)

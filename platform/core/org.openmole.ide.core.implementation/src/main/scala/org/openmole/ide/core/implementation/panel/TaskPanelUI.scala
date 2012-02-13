@@ -29,7 +29,7 @@ import org.openmole.ide.misc.image.ImageTool
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                          scene: IMoleScene,
                          mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode){
-  iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.imagePath,50,50))
+  iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
   peer.setBorder(BorderFactory.createLineBorder(proxy.dataUI.borderColor,2))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer

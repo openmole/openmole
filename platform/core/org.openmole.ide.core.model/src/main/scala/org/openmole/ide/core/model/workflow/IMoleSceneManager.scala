@@ -33,6 +33,8 @@ trait IMoleSceneManager {
   
   def getEdgeID: String
   
+  def getDataChannelID : String
+  
   def capsuleID(cv: ICapsuleUI): String
   
   def capsules:DualHashBidiMap[String, ICapsuleUI]
@@ -49,11 +51,19 @@ trait IMoleSceneManager {
   
   def transitions: Iterable[ITransitionUI] 
   
+  def dataChannels: Iterable[IDataChannelUI]
+  
   def transition(edgeID: String): ITransitionUI
   
   def removeTransition(edgeID: String)
   
+  def removeDataChannel(id: String)
+  
   def registerTransition(s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
   
   def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
+  
+  def registerDataChannel(id:String, source: ICapsuleUI, target: ICapsuleUI): Boolean
+  
+  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI): Boolean
  }

@@ -37,6 +37,7 @@ import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
+import org.openmole.ide.core.implementation.action.ConnectionVsDataChannelAction;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
 import org.openmole.ide.core.implementation.action.StartMoleAction;
@@ -69,6 +70,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     private ToolBarButton startButton;
     private ToolBarButton stopButton;
     private JToggleButton detailedViewButton;
+    private JToggleButton connectionVsDataChannelButton;
     private final InstanceContent ic = new InstanceContent();
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
     private IMoleScene moleScene;
@@ -88,6 +90,10 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
         detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
 
+        connectionVsDataChannelButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/connectMode.png")));
+        connectionVsDataChannelButton.addActionListener(new ConnectionVsDataChannelAction());
+        connectionVsDataChannelButton.setSelected(true);
+        
         buildButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/build.png")),
                 "Build the workflow",
                 new BuildExecutionAction(this));
@@ -99,7 +105,8 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")), "Stop the workflow",
                 new StopMoleAction());
 
-        toolBar.add(detailedViewButton);
+      //  toolBar.add(detailedViewButton);
+        toolBar.add(connectionVsDataChannelButton);
         toolBar.add(new JToolBar.Separator());
         toolBar.add(ConceptMenu.menuBar().peer());
         toolBar.add(buildButton.peer());

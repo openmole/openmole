@@ -34,8 +34,8 @@ import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.DnDNewTaskProvider
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
@@ -117,20 +117,42 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     sceneGraphLayout.invokeLayout
   }
     
-  override def createEdge(sourceNodeID:String, targetNodeID: String)= {
-    val ed= manager.getEdgeID
-    addEdge(ed)
-    setEdgeSource(ed,sourceNodeID)
-    setEdgeTarget(ed,targetNodeID)
+  def createConnectEdge(sourceNodeID:String, targetNodeID: String) = createEdge(sourceNodeID,targetNodeID,manager.getEdgeID)
+  
+  def createDataChannelEdge(sourceNodeID:String, targetNodeID: String) = createEdge(sourceNodeID,targetNodeID,manager.getDataChannelID)
+  
+  override def createEdge(sourceNodeID:String, targetNodeID: String, id: String)= {
+   // val ed= manager.getEdgeID
+    addEdge(id)
+    setEdgeSource(id,sourceNodeID)
+    setEdgeTarget(id,targetNodeID)
   }
 
+  
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
-    val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
-    if (findWidget(sourceNode) != null) cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+    if (findWidget(sourceNode) != null) {
+      println("attache source " + TopComponentsManager.connectMode)
+      TopComponentsManager.connectMode match {
+        case true => 
+          findWidget(edge).asInstanceOf[LabeledConnectionWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+        case false=> 
+          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(new OutputDataChannelAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+      }
+    }
+    // val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
+    // if (findWidget(sourceNode) != null) cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
   }
   
-  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
-    
+  override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {
+    if (findWidget(targetNode)!=null){TopComponentsManager.connectMode match {
+        case true => 
+          findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+        case false=> 
+          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new OutputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
+      }
+    }
+    // if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+  }
   
   override def attachNodeWidget(n: String)= {
     capsuleLayer.addChild(obUI.get)
@@ -157,11 +179,15 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       val o= findObject(targetWidget)
       target= None
       if(isNode(o)) target= Some(o.asInstanceOf[String])
-      if (targetWidget.getClass.equals(classOf[InputSlotWidget])){
-        val iw= targetWidget.asInstanceOf[InputSlotWidget]
-        currentSlotIndex = iw.index
-        if (source.equals(target)) return ConnectorState.REJECT_AND_STOP 
-        else return ConnectorState.ACCEPT
+      TopComponentsManager.connectMode match {
+        case false => if (targetWidget.getClass.equals(classOf[ConnectableWidget])) return ConnectorState.ACCEPT
+        case true=> 
+          if (targetWidget.getClass.equals(classOf[InputSlotWidget])){
+            val iw= targetWidget.asInstanceOf[InputSlotWidget]
+            currentSlotIndex = iw.index
+            if (source.equals(target)) return ConnectorState.REJECT_AND_STOP 
+            else return ConnectorState.ACCEPT
+          }
       }
       if (o == null) return ConnectorState.REJECT
       return ConnectorState.REJECT_AND_STOP
@@ -173,8 +199,15 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
-        createEdge(source.get, target.get)
+      TopComponentsManager.connectMode match {
+        case true=>
+          if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
+            createConnectEdge(source.get, target.get)
+        case false=> 
+          println("XXX :: " + manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[ConnectableWidget].capsule))
+          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[ConnectableWidget].capsule))
+            createDataChannelEdge(source.get, target.get  )
+      }
     }
   }
   

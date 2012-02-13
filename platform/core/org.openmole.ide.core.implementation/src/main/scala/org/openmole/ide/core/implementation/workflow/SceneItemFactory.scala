@@ -36,6 +36,6 @@ object SceneItemFactory {
     
   def createEdge(scene: IMoleScene,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]) = {
     if (scene.manager.registerTransition(s, t, transitionType,cond))
-      scene.createEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))  
+      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))  
   }
 }

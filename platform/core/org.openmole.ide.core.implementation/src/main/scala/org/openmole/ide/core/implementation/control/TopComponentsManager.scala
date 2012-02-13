@@ -32,6 +32,7 @@ object TopComponentsManager {
 
   var countExec = new AtomicInteger  
   var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None  
+  var connectMode = true
   PasswordListner.apply
   
   def closeOpenedTopComponents = {
