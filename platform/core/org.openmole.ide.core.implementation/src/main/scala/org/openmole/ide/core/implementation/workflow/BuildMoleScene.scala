@@ -63,7 +63,7 @@ class BuildMoleScene(n: String) extends MoleScene {
         x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
         x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,x)))
         x
-      case false=> val x = new DataChannelConnectionWidget(graphScene)
+      case false=> val x = new DataChannelConnectionWidget(graphScene,manager.dataChannel(e))
         x
     }
     

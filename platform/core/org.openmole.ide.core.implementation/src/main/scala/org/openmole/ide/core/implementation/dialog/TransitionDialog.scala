@@ -22,7 +22,7 @@ import javax.swing.JOptionPane._
 import org.openmole.ide.core.implementation.workflow.LabeledConnectionWidget
 
 object TransitionDialog {
-  def displayTransitionDialog(connectionWidget: LabeledConnectionWidget) {
+  def display(connectionWidget: LabeledConnectionWidget) {
     connectionWidget.transition.condition = None
     val cond = JOptionPane.showInputDialog(null, "Edit transition condition:", connectionWidget.transition.condition)
     if (cond == null) CLOSED_OPTION

@@ -99,7 +99,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   def removePropertyPanel : Unit = {
     currentPanel match {
-      case Some(x:BasePanelUI)=> x.save
+      case Some(x:BasePanelUI)=> x.baseSave
       case _=>
     }
     propertyWidget.removeChildren
@@ -131,7 +131,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
     if (findWidget(sourceNode) != null) {
-      println("attache source " + TopComponentsManager.connectMode)
       TopComponentsManager.connectMode match {
         case true => 
           findWidget(edge).asInstanceOf[LabeledConnectionWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
@@ -204,7 +203,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
             createConnectEdge(source.get, target.get)
         case false=> 
-          println("XXX :: " + manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[ConnectableWidget].capsule))
           if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[ConnectableWidget].capsule))
             createDataChannelEdge(source.get, target.get  )
       }

@@ -20,35 +20,33 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Cursor
-import java.awt.Stroke
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
+import java.awt.Point
+import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.action.SelectProvider
 import org.netbeans.api.visual.action.WidgetAction
 import org.netbeans.api.visual.action.WidgetAction._
 import org.netbeans.api.visual.anchor.AnchorShapeFactory
-import org.netbeans.api.visual.border.BorderFactory
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
-import scala.swing.UIElement
-import scala.swing.event.MousePressed
+import org.openmole.ide.core.model.workflow.IDataChannelUI
+import org.openmole.ide.core.implementation.dialog.DataChannelDialog
 
-class DataChannelConnectionWidget(scene: Scene) extends ConnectionWidget(scene){
-  //setBorder(BorderFactory.createDashedBorder(Color.red,3,3))
-  setLineColor(Color.gray)
-  setStroke(new BasicStroke(10, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
-  setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
+class DataChannelConnectionWidget(scene: Scene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene){
+  setLineColor(new Color(230,230,230))
+  setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
+  getActions.addAction(ActionFactory.createSelectAction(new ObjectSelectProvider))
+   setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   
   setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_OUTPUT_DATA_CHANNEL,false))
   setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_OUTPUT_DATA_CHANNEL,false))
   
-  def mousePressed (widget: Widget,event: WidgetAction.WidgetMouseEvent) : State  = {
-    println("pressed")
-    State.CONSUMED
-  }
-  
-  def mouseClicked (widget: Widget,event: WidgetAction.WidgetMouseEvent) : State  = {
-    println("pressed")
-    State.CONSUMED
+  class ObjectSelectProvider extends SelectProvider {
+        
+    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
+                
+    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
+        
+    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = DataChannelDialog.display(DataChannelConnectionWidget.this)
   }
 }

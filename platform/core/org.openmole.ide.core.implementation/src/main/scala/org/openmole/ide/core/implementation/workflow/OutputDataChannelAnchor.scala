@@ -27,11 +27,5 @@ class OutputDataChannelAnchor(relatedWidget: ICapsuleUI) extends Anchor(relatedW
   
   override def compute(entry: Anchor.Entry)= 
     new Result(relatedWidget.widget.convertLocalToScene(new Point(Constants.TASK_CONTAINER_WIDTH/2,
-                                                                  Constants.TASK_CONTAINER_HEIGHT + Constants.TASK_TITLE_HEIGHT - 15)),Anchor.Direction.BOTTOM)
-    
-//    var detailedEffect= 0
-//    if (relatedWidget.detailedView)
-//      detailedEffect= Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH
-//    new Result(relatedWidget.widget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
-//  }
+                                                                  Constants.TASK_CONTAINER_HEIGHT + Constants.TASK_TITLE_HEIGHT - 18)),Anchor.Direction.BOTTOM)    
 }

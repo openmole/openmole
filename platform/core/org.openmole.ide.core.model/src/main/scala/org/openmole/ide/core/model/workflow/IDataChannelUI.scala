@@ -25,4 +25,6 @@ trait IDataChannelUI {
   def target: ICapsuleUI
   
   def prototypes: List[IPrototypeDataProxyUI]
+  
+  def prototypes_=(li: List[IPrototypeDataProxyUI])
 }

@@ -55,6 +55,8 @@ trait IMoleSceneManager {
   
   def transition(edgeID: String): ITransitionUI
   
+  def dataChannel(dID: String): IDataChannelUI
+  
   def removeTransition(edgeID: String)
   
   def removeDataChannel(id: String)

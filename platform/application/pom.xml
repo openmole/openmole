@@ -195,7 +195,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.7</version>
+                <version>3.6</version>
                 <configuration>
                     <etcConfFile>src/main/resources/openmole_gui.conf</etcConfFile>
                 </configuration>

@@ -69,6 +69,11 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     scene.removePropertyPanel
   }
   
+  def baseSave : Unit = {
+    save
+    ConceptMenu.refreshItem(proxy)
+  }
+  
   def create: Unit
   
   def delete: Unit

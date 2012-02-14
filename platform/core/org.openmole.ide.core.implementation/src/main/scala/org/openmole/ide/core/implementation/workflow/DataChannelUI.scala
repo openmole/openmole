@@ -22,4 +22,4 @@ import org.openmole.ide.core.model.workflow._
 
 class DataChannelUI(val source: ICapsuleUI,
                     val target: ICapsuleUI,
-                    val prototypes: List[IPrototypeDataProxyUI]= List.empty) extends IDataChannelUI
+                    var prototypes: List[IPrototypeDataProxyUI]= List.empty) extends IDataChannelUI

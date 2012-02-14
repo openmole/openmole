@@ -114,9 +114,16 @@ object ConceptMenu {
   
   def addItem(name: String,
               proxy: IDataProxyUI) : MenuItem = {
-    menuItemMapping += proxy-> new MenuItem( new Action(name) {
-        override def apply = ConceptMenu.display(proxy,EDIT)
+    menuItemMapping += proxy-> new MenuItem( new Action(proxy.dataUI.name) {
+        override def apply = {
+          ConceptMenu.display(proxy,EDIT)
+        }
       })
     menuItemMapping(proxy)
+  }
+  
+  def refreshItem(proxy: IDataProxyUI) = {
+    if (menuItemMapping.contains(proxy))
+      menuItemMapping(proxy).action.title = proxy.dataUI.name
   }
 }

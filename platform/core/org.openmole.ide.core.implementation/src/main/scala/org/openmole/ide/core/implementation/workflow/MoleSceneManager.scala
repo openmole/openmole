@@ -86,14 +86,15 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   def dataChannels= dataChannelMap.values
   
-  def transition(edgeID: String) = transitionMap.get(edgeID)
+  def transition(eID: String) = transitionMap.get(eID)
+  
+  def dataChannel(dID: String) = dataChannelMap.get(dID)
   
   private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) {
         removeTransition(t._1)
         capsuleConnections(t._2.source)-= t._2    
       }
     })
-  
   
   def removeTransition(edge: String) = transitionMap.remove(edge)
   
