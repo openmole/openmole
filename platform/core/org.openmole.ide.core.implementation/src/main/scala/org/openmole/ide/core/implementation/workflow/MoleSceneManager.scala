@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.workflow
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
@@ -104,13 +105,13 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     dataChannelMap.foreach{case(k,v)=> if (v.source == capsule || v.target == capsule) removeDataChannel(k)}
   }
   
-  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI) : Boolean = {
+  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]= List.empty) : Boolean = {
     dataChannelID+= 1
-    registerDataChannel(getDataChannelID, source, target)
+    registerDataChannel(getDataChannelID, source, target, prototypes)
   }
   
-  def registerDataChannel(id: String,source: ICapsuleUI, target: ICapsuleUI) : Boolean = {
-    if (!dataChannelMap.keys.contains(id)) {dataChannelMap.put(id,new DataChannelUI(source,target));return true}
+  def registerDataChannel(id: String,source: ICapsuleUI, target: ICapsuleUI , prototypes: List[IPrototypeDataProxyUI]) : Boolean = {
+    if (!dataChannelMap.keys.contains(id)) {dataChannelMap.put(id,new DataChannelUI(source,target,prototypes));return true}
     false
   }
   

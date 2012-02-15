@@ -19,6 +19,7 @@ package org.openmole.ide.core.model.workflow
 
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
@@ -65,7 +66,7 @@ trait IMoleSceneManager {
   
   def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
   
-  def registerDataChannel(id:String, source: ICapsuleUI, target: ICapsuleUI): Boolean
+  def registerDataChannel(id:String, source: ICapsuleUI, target: ICapsuleUI,prototypes: List[IPrototypeDataProxyUI]): Boolean
   
-  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI): Boolean
+  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI,prototypes: List[IPrototypeDataProxyUI]): Boolean
  }

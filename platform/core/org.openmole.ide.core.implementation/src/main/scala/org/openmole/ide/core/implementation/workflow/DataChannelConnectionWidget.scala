@@ -33,7 +33,7 @@ import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.implementation.dialog.DataChannelDialog
 
 class DataChannelConnectionWidget(scene: Scene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene){
-  setLineColor(new Color(230,230,230))
+  setLineColor(new Color(188,188,188))
   setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
   getActions.addAction(ActionFactory.createSelectAction(new ObjectSelectProvider))
    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))

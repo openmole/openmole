@@ -117,9 +117,11 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     sceneGraphLayout.invokeLayout
   }
     
-  def createConnectEdge(sourceNodeID:String, targetNodeID: String) = createEdge(sourceNodeID,targetNodeID,manager.getEdgeID)
+  def createConnectEdge(sourceNodeID:String, targetNodeID: String) = 
+    createEdge(sourceNodeID,targetNodeID,manager.getEdgeID)
   
-  def createDataChannelEdge(sourceNodeID:String, targetNodeID: String) = createEdge(sourceNodeID,targetNodeID,manager.getDataChannelID)
+  def createDataChannelEdge(sourceNodeID:String, targetNodeID: String) = 
+    createEdge(sourceNodeID,targetNodeID,manager.getDataChannelID)
   
   override def createEdge(sourceNodeID:String, targetNodeID: String, id: String)= {
    // val ed= manager.getEdgeID

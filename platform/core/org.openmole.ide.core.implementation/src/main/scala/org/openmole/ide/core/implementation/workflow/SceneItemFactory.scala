@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -34,8 +35,13 @@ object SceneItemFactory {
   
   def createCapsule(scene: IMoleScene, locationPoint: Point): ICapsuleUI = createCapsule(new CapsuleUI(scene),scene, locationPoint)
     
-  def createEdge(scene: IMoleScene,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]) = {
+  def createTransition(scene: IMoleScene,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]) = {
     if (scene.manager.registerTransition(s, t, transitionType,cond))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))  
+  }
+  
+  def createDataChannel(scene: IMoleScene, s: ICapsuleUI, t: ICapsuleUI, li: List[IPrototypeDataProxyUI]) = {
+    if (scene.manager.registerDataChannel(s, t,li))
+      scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t))
   }
 }

@@ -45,8 +45,8 @@ class BuildMoleScene(n: String) extends MoleScene {
         SceneItemFactory.createCapsule(caps,ms, new Point(n._2.connectableWidget.x.toInt,n._2.connectableWidget.y.toInt))
         capsuleMapping+= n._2-> caps
         islots++= islotMapping})
-    manager.transitions.foreach(t=> {SceneItemFactory.createEdge(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)
-      })
+    manager.transitions.foreach(t=> {SceneItemFactory.createTransition(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)})
+    manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
     ms
   }
   

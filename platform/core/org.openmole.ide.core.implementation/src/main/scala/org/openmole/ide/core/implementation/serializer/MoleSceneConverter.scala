@@ -26,6 +26,7 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
@@ -34,6 +35,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 
 class MoleSceneConverter extends Converter{
@@ -76,14 +78,25 @@ class MoleSceneConverter extends Converter{
         }
         writer.endNode
       })
+    
     //Transitions
     molescene.manager.transitions.foreach(trans=> {
-        writer.startNode("transition");
+        writer.startNode("transition")
         writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
         writer.addAttribute("target", iSlotMapping(trans.target).toString)
         writer.addAttribute("type", TransitionType.toString(trans.transitionType))
-        
         writer.addAttribute("condition", trans.condition.getOrElse(""))
+        writer.endNode
+      })
+    
+    //Data channels
+    molescene.manager.dataChannels.foreach(dc => {
+        writer.startNode("datachannel")
+        writer.addAttribute("source",(firstSlotID(dc.source)).toString)
+        writer.addAttribute("target",(firstSlotID(dc.target)).toString)
+        dc.prototypes.foreach{p=>writer.startNode("prototype")
+                              writer.addAttribute("id",p.id.toString)
+                              writer.endNode}
         writer.endNode
       })
   }
@@ -102,11 +115,11 @@ class MoleSceneConverter extends Converter{
       val n0 = reader.getNodeName
       n0 match {
         case "capsule"=> {val p= new Point
-            p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
-            val caps = SceneItemFactory.createCapsule(scene, p)
-            val start = reader.getAttribute("start").toBoolean
-            if (start) scene.manager.startingCapsule = Some(caps)
-            while (reader.hasMoreChildren) {
+                          p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
+                          val caps = SceneItemFactory.createCapsule(scene, p)
+                          val start = reader.getAttribute("start").toBoolean
+                          if (start) scene.manager.startingCapsule = Some(caps)
+                          while (reader.hasMoreChildren) {
               reader.moveDown
               val n1= reader.getNodeName
               n1 match{
@@ -118,10 +131,31 @@ class MoleSceneConverter extends Converter{
               reader.moveUp
             }     
           }
-        case "transition"=> {SceneItemFactory.createEdge(scene, 
-                                                          oslots(reader.getAttribute("source")), 
-                                                          islots(reader.getAttribute("target")), 
-                                                          TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))}
+        case "transition"=> 
+          TopComponentsManager.connectMode = true
+          SceneItemFactory.createTransition(scene, 
+                                            oslots(reader.getAttribute("source")), 
+                                            islots(reader.getAttribute("target")), 
+                                            TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))
+        case "datachannel"=>     
+          TopComponentsManager.connectMode = false
+          val source = islots(reader.getAttribute("source")).capsule
+          val target = islots(reader.getAttribute("target")).capsule
+          var protoIds = new HashSet[Int]
+          while (reader.hasMoreChildren) {
+            reader.moveDown
+            val p = reader.getNodeName
+            p match { 
+              case "prototype"=> protoIds += reader.getAttribute("id").toInt
+              case _=> MoleExceptionManagement.showException("Unknown balise "+ p)
+            }
+            reader.moveUp
+          }
+          Proxys.prototypes.filter{p=>protoIds.contains(p.id)}.toList.foreach(println)
+          SceneItemFactory.createDataChannel(scene, 
+                                             source,
+                                             target,
+                                             Proxys.prototypes.filter{p=>protoIds.contains(p.id)}.toList)
         case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        
       }
       reader.moveUp
