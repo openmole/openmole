@@ -40,7 +40,16 @@
         </dependencies>
     </dependencyManagement>
 
-
+    
+    <dependencies>
+	<dependency>
+     	   <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>${lib.org.junit.version}</version>
+           <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->

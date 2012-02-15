@@ -37,12 +37,6 @@
             <version>${lib.org.scalatest.version}</version>
             <scope>test</scope>
         </dependency>
-	<dependency>
-     	   <groupId>junit</groupId>
-           <artifactId>junit</artifactId>
-           <version>${lib.org.junit.version}</version>
-           <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <!--<build>
