@@ -18,8 +18,10 @@
 package org.openmole.ide.core.implementation.dialog
 
 import javax.swing._
+import java.awt.Dimension
 import javax.swing.JOptionPane._
 import scala.swing.ScrollPane
+import scala.swing.ScrollPane._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.workflow.DataChannelConnectionWidget
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -35,13 +37,15 @@ object DataChannelDialog {
     Proxys.prototypes.isEmpty match{
       case false=>
         val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.prototypes)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel){size.height = 200}.peer, "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION)) 
+        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel){verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}.peer,
+                                                                   "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION)) 
           dcWidget.dataChannelUI.prototypes = prototypePanel.multiPrototypeCombo.content
       case true=> StatusDisplayer.getDefault.setStatusText("No Prototype is defined !")
     }
   }
   
   class PrototypePanel(protoProxys: List[IPrototypeDataProxyUI]) extends MigPanel("") {
+    preferredSize = new Dimension(250,300)
     val multiPrototypeCombo = new MultiCombo("Prototypes",Proxys.prototypes.toList,protoProxys)
     contents+= multiPrototypeCombo.panel
   }
