@@ -23,7 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
-import org.openmole.ide.core.implementation.control.TopComponentsManager;
+import org.openmole.ide.core.implementation.dialog.DialogFactory;
 
 @ActionID(category = "File",
 id = "org.openmole.ide.core.implementation.AddMoleAction")
@@ -39,6 +39,6 @@ public final class AddMoleAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        TopComponentsManager.addTopComponent();
+        DialogFactory.newTabName();
     }
 }

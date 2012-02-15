@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.control.IMoleComponent
 import scala.swing.Label
+import scala.swing.TextField
 
 object DialogFactory {
   
@@ -44,12 +45,9 @@ object DialogFactory {
     }
   }
   
-  def newTabName: String = { 
-    val tabName = JOptionPane.showInputDialog(null, "Mole name:","Mole_" + (TopComponentsManager.topComponents.size + 1))
-    tabName match {
-      case null=> CLOSED_OPTION
-      case _=>
-    }
-    tabName
+  def newTabName = { 
+    val textField = new TextField("Mole_" + (TopComponentsManager.topComponents.size + 1),20)
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
+      TopComponentsManager.addTopComponent(textField.text)
   }
 }

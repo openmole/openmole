@@ -57,7 +57,9 @@ object TopComponentsManager {
     ms.validate
     ms.refresh}
   
-  def addTopComponent:MoleSceneTopComponent = addTopComponent(new BuildMoleScene(DialogFactory.newTabName))
+  def addTopComponent: MoleSceneTopComponent = addTopComponent("")
+  
+  def addTopComponent(name: String): MoleSceneTopComponent = addTopComponent(new BuildMoleScene(name))
   
   def addTopComponent(ms: BuildMoleScene): MoleSceneTopComponent= {
     val mc= new BuildMoleComponent(ms)
