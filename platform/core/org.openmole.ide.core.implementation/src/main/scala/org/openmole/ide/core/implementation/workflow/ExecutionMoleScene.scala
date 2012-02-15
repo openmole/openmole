@@ -34,7 +34,7 @@ class ExecutionMoleScene extends MoleScene{
   }
   
   def attachEdgeWidget(e: String)= {
-    val connectionWidget = new LabeledConnectionWidget(graphScene,manager.transition(e))
+    val connectionWidget = new ConnectorWidget(this,manager.transition(e))
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget

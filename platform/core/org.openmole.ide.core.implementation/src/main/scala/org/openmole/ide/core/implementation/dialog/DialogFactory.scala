@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
+import java.awt.Dimension
 import javax.swing.JOptionPane
 import javax.swing.JOptionPane._
 import org.openide.DialogDescriptor
@@ -26,6 +27,7 @@ import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.control.IMoleComponent
+import org.openmole.ide.misc.widget.GroovyEditor
 import scala.swing.Label
 import scala.swing.TextField
 
@@ -49,5 +51,11 @@ object DialogFactory {
     val textField = new TextField("Mole_" + (TopComponentsManager.topComponents.size + 1),20)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
       TopComponentsManager.addTopComponent(textField.text)
+  }
+  
+  def groovyEditor(content: String) : String = {
+    val editor = new GroovyEditor{editor.text = content;preferredSize = new Dimension(150,150)}
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, "Conditon")).equals(NotifyDescriptor.OK_OPTION)) editor.editor.text
+    else content
   }
 }

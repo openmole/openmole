@@ -18,9 +18,8 @@
 package org.openmole.ide.core.implementation.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.implementation.dialog.TransitionDialog
-import org.openmole.ide.core.implementation.workflow.LabeledConnectionWidget
+import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
-class AddTransitionConditionAction(connectionWidget: LabeledConnectionWidget) extends ActionListener{
-  override def actionPerformed(ae: ActionEvent)= TransitionDialog.display(connectionWidget)
+class AddTransitionConditionAction(connectionWidget: ConnectorWidget) extends ActionListener{
+  override def actionPerformed(ae: ActionEvent)= connectionWidget.addConditionLabel
 }

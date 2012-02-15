@@ -25,9 +25,9 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.implementation.action.AddTransitionConditionAction
 import org.openmole.ide.core.implementation.action.AggregationTransitionAction
 import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.implementation.workflow.LabeledConnectionWidget
+import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
-class TransitionMenuProvider(scene: MoleScene,connectionWidget: LabeledConnectionWidget) extends GenericMenuProvider {  
+class TransitionMenuProvider(scene: MoleScene,connectionWidget: ConnectorWidget) extends GenericMenuProvider {  
   val itCond = new JMenuItem("Edit condition")
   itCond.addActionListener(new AddTransitionConditionAction(connectionWidget))
   

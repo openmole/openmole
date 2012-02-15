@@ -135,24 +135,24 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     if (findWidget(sourceNode) != null) {
       TopComponentsManager.connectMode match {
         case true => 
-          findWidget(edge).asInstanceOf[LabeledConnectionWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+          findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
         case false=> 
           findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(new OutputDataChannelAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
       }
     }
-    // val cw = findWidget(edge).asInstanceOf[LabeledConnectionWidget]
+    // val cw = findWidget(edge).asInstanceOf[ConnectorWidget]
     // if (findWidget(sourceNode) != null) cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
   }
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {
     if (findWidget(targetNode)!=null){TopComponentsManager.connectMode match {
         case true => 
-          findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+          findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
         case false=> 
           findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new OutputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
       }
     }
-    // if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[LabeledConnectionWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+    // if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
   }
   
   override def attachNodeWidget(n: String)= {

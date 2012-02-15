@@ -59,7 +59,7 @@ class BuildMoleScene(n: String) extends MoleScene {
   
   def attachEdgeWidget(e: String)= {
     val connectionWidget = TopComponentsManager.connectMode match {
-      case true=> val x = new LabeledConnectionWidget(graphScene,manager.transition(e))
+      case true=> val x = new ConnectorWidget(this,manager.transition(e))
         x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
         x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,x)))
         x
