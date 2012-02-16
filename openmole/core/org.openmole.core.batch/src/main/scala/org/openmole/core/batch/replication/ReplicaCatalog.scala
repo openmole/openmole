@@ -64,9 +64,11 @@ object ReplicaCatalog {
 
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval")
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
+  val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
+  Workspace += (NoAccessCleanTime, "PT30D")
   
   lazy val dbFile = Workspace.file(Workspace.preference(ObjectRepoLocation))
   lazy val locks = new ReplicaLockRepository

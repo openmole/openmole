@@ -19,12 +19,15 @@ package org.openmole.core.batch.replication
 
 import org.openmole.core.batch.environment.AuthenticationRegistry
 import org.openmole.misc.updater.IUpdatable
+import org.openmole.misc.workspace.Workspace
 
 class ReplicaCatalogGC extends IUpdatable {
 
   override def update: Boolean = {
     for (replica <- ReplicaCatalog.allReplicas) {  
-      if (AuthenticationRegistry.isRegistred(replica.authenticationKey) && !replica.sourceFile.exists) ReplicaCatalog.clean(replica)
+      if (AuthenticationRegistry.isRegistred(replica.authenticationKey) && 
+          (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDurationInMs(ReplicaCatalog.NoAccessCleanTime)))
+             ReplicaCatalog.clean(replica)
     }
     true
   }
