@@ -19,6 +19,8 @@ package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.MainLinkLabel
+import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Action
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
@@ -27,8 +29,12 @@ object LinkLabelExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Link Label Demo"
-    contents = new LinkLabel("My hyper label ",
-                             new Action(""){def apply = println("My link !")})
-    size = new Dimension(200,200)
+    contents = new MigPanel(""){
+      contents +=new MainLinkLabel("Edit",
+                                   new Action(""){def apply = println("My main link !")})
+      contents +=new LinkLabel("My hyper label ",
+                               new Action(""){def apply = println("My link !")})
+    }
+    size = new Dimension(250,200)
   }
 }
