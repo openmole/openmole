@@ -32,5 +32,5 @@ class LinkLabel(textLink: String,
     case e: MousePressed => action.apply
   }
   
-  def link(t: String) = text = "<html><font color=\"#0000CF\"><u>"+t+"</u></font></html>"
+  def link(t: String) = text = "<html><font color=\"#0000CF\" size=\"4\"><u>"+t+"</u></font></html>"
 }

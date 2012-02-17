@@ -31,8 +31,8 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies> 
-        <dependency>
+    <dependencies>   
+    <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>uk.com.robustit.cloning</artifactId>
             <version>${project.version}</version>

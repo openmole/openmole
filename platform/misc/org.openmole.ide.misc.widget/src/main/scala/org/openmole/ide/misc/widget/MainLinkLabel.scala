@@ -18,9 +18,10 @@
 package org.openmole.ide.misc.widget
 
 import scala.swing.Action
+import scala.swing.Alignment._
 
 class MainLinkLabel(textLink: String,
                     action: Action) extends LinkLabel(textLink,action) {
-  override def link(t: String) = text = "<html><font color=\"#bbc807\" <font size=\"5\"><u>"+t+"</u></font></html>"
-
+  override def link(t: String) = text = "<html><font color=\"#bbc807\" size=\"6\"><u>"+t+"</u></font></html>"
+  horizontalAlignment = Right
 }

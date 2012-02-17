@@ -37,7 +37,7 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import scala.swing.Label
 import scala.swing.event.MousePressed
 
-class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI) extends ConnectionWidget(scene.graphScene){
+class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene){
   
   val label = new ConnectorLabel
   transition.condition match {
@@ -47,6 +47,7 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI) exten
     case None=>
   }
   drawTransitionType
+  toBeEdited = true
   
   def addConditionLabel = {
     val componentWidget = new ComponentWidget(scene.graphScene,label.peer)
@@ -89,8 +90,10 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI) exten
     }
     
     def edit = {
+      if (toBeEdited) {
         text = DialogFactory.groovyEditor(text)
         revalidate
+      }
     }
   }
   
