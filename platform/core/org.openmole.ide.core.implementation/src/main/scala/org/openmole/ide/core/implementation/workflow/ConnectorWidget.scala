@@ -19,7 +19,9 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Color
 import java.awt.Cursor
 import java.awt.Dimension
-import javax.swing.border.LineBorder
+import java.awt.BasicStroke
+import java.awt.Rectangle
+import java.awt.RenderingHints
 import org.netbeans.api.visual.anchor.AnchorShape
 import org.netbeans.api.visual.anchor.AnchorShapeFactory
 import org.netbeans.api.visual.border.BorderFactory
@@ -40,31 +42,22 @@ import scala.swing.event.MousePressed
 class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene){
   
   val label = new ConnectorLabel
+  val componentWidget = new ConditionWidget(scene,label)
+  setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+  addChild(componentWidget)
+    
   transition.condition match {
-    case Some(x:String)=>
-      addConditionLabel
-      setConditionLabel(transition.condition)
+    case Some(x:String)=>label.text = x
     case None=>
   }
+  
+  setLabelVisible
   drawTransitionType
   toBeEdited = true
   
-  def addConditionLabel = {
-    val componentWidget = new ComponentWidget(scene.graphScene,label.peer)
-    setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
-    componentWidget.setOpaque(true)
-    addChild(componentWidget)
-    scene.refresh
-    label.edit
-  }
-  
-  def setConditionLabel(cond: Option[String])= {
-    label.text = cond.getOrElse("")
-    setLabelVisible
-  }
-  
   def setLabelVisible= {
-    label.visible = !label.text.isEmpty 
+    //label.visible = !label.text.isEmpty 
+    componentWidget.setVisible(!label.text.isEmpty)
     label.revalidate
     scene.refresh
   }
@@ -77,10 +70,31 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var t
     }
   }
   
+  class ConditionWidget(scene: IMoleScene,label: ConnectorLabel) extends ComponentWidget(scene.graphScene,label.peer) {
+    setPreferredBounds(new Rectangle(81, 31))
+    setOpaque(true)
+    override def paintBackground = {
+      val g = scene.graphScene.getGraphics
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                         RenderingHints.VALUE_ANTIALIAS_ON)
+      g.setColor(new Color(0, 0, 0, 200))
+      g.fillRoundRect(0, 0, label.size.width, label.size.height,10, 10)
+      revalidate
+    }
+  
+    override def paintBorder = {
+      val g = scene.graphScene.getGraphics
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                         RenderingHints.VALUE_ANTIALIAS_ON)
+      g.setStroke(new BasicStroke(3f))
+      g.setColor(new Color(200,200,200))
+      g.drawRoundRect(0,0,label.size.width + 1,label.size.height+1,10,10)
+      revalidate
+    }
+  }
+  
   class ConnectorLabel extends Label {
-    foreground = Constants.CONNECTOR_LABEL_FONT_COLOR
-    background = Constants.CONNECTOR_LABEL_BACKGROUND_COLOR
-    border = new LineBorder(Constants.CONNECTOR_LABEL_BORDER_COLOR,3)
+    foreground = Color.white
     preferredSize = new Dimension(80,30)
     cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   
@@ -92,10 +106,10 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var t
     def edit = {
       if (toBeEdited) {
         text = DialogFactory.groovyEditor(text)
+        ConnectorWidget.this.transition.condition = Some(text)
         revalidate
       }
     }
   }
-  
 }
   

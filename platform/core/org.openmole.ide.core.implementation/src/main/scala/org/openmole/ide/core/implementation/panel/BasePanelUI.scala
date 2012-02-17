@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.panel
 
+import java.awt.Color
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -32,12 +33,11 @@ import scala.swing.TextField
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value) extends ScrollPane {
-
   val iconLabel = new Label{ icon = new ImageIcon(ImageTool.loadImage("img/empty.png",50,50))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
-  val labelLink = new LinkLabel("create",new Action("") { def apply = baseCreate})
+  val labelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   if (mode == EDIT) deleteLink
-  
+
   val mainPanel = new MigPanel("wrap"){
     contents += new MigPanel("wrap 2") {
       contents += iconLabel
@@ -49,6 +49,8 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   }
   contents = mainPanel
   preferredSize.width = 200
+  background = new Color(0, 0, 0, 180)
+  foreground = Color.white
   
   verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
   horizontalScrollBarPolicy = ScrollPane.BarPolicy.Never

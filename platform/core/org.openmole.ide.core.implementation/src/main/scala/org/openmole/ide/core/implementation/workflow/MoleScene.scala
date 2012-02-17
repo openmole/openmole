@@ -16,10 +16,13 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
+import java.awt.BasicStroke
+import java.awt.Color
 import java.awt.Dimension
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
 import java.awt.Point
+import java.awt.RenderingHints
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
@@ -45,6 +48,7 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
+import scala.swing.ScrollPane
  
 
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
@@ -305,5 +309,28 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       }
     }
   }
+ 
   
+  class PropertyComponentWidget(scene: IMoleScene, p: ScrollPane) extends ComponentWidget(scene.graphScene,p.peer){
+    p.foreground = Color.WHITE
+    
+    override def paintBackground = {
+      val g = scene.graphScene.getGraphics
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                         RenderingHints.VALUE_ANTIALIAS_ON)
+      g.setColor(new Color(0, 0, 0, 200))
+      revalidate
+    }
+  
+    override def paintBorder = {
+      val g = scene.graphScene.getGraphics
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                         RenderingHints.VALUE_ANTIALIAS_ON)
+      
+      g.setStroke(new BasicStroke(3f))
+      g.setColor(new Color(200,200,200))
+      g.drawRoundRect(0,0,p.size.width + 1,p.size.height+1,10,10)
+      revalidate
+    }
+  }
 }
