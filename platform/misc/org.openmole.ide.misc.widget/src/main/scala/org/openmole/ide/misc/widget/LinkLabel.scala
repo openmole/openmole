@@ -23,7 +23,8 @@ import scala.swing.Label
 import scala.swing.event.MousePressed
 
 class LinkLabel(textLink: String,
-                var action: Action) extends Label {
+                var action: Action,
+                val textSize: Int = 4) extends Label {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   link(textLink)
   
@@ -32,5 +33,5 @@ class LinkLabel(textLink: String,
     case e: MousePressed => action.apply
   }
   
-  def link(t: String) = text = "<html><font color=\"#0000CF\" size=\"4\"><u>"+t+"</u></font></html>"
+  def link(t: String) = text = "<html><font color=\"#0000CF\" size=\""+textSize+"\">"+t+"</font></html>"
 }
