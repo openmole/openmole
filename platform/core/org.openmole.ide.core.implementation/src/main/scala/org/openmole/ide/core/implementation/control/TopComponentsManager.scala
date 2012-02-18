@@ -24,9 +24,6 @@ import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import scala.collection.JavaConversions._
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.workspace.Workspace
-import org.openmole.ide.core.implementation.dialog.DialogFactory
 
 object TopComponentsManager {
 
@@ -41,6 +38,8 @@ object TopComponentsManager {
       case _=>
     }
   }
+  
+  def noCurrentMoleSceneTopComponent = if (topComponents.size == 1) currentMoleSceneTopComponent = None
   
   def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
   

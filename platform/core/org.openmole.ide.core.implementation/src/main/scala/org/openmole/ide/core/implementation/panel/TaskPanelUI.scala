@@ -36,7 +36,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
   def create = {
     Proxys.tasks += proxy
-    ConceptMenu.taskMenu.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+    ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
   
   def delete = {

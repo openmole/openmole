@@ -34,19 +34,21 @@ import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
+import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
 
   val menuItemMapping = new HashMap[IDataProxyUI,MenuItem]
-  
-  val environmentMenu = new Menu("Environment")
+    
   val environementClasses = new Menu("New")
   Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => environementClasses.contents += new MenuItem(new Action(d.factory.displayName){
@@ -55,9 +57,8 @@ object ConceptMenu {
           display(proxy,CREATION)
         }}))
     
-  environmentMenu.contents += environementClasses
+  val environmentMenu = new PopupToolBarPresenter("Environments", environementClasses)
   
-  val taskMenu = new Menu("Task")
   val taskClasses = new Menu("New") 
   Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => taskClasses.contents += new MenuItem(new Action(d.factory.displayName){
@@ -66,10 +67,9 @@ object ConceptMenu {
           display(proxy,CREATION)
         }}))
   
-  taskMenu.contents += taskClasses
+  val taskMenu = new PopupToolBarPresenter("Tasks", taskClasses)
   
   
-  val prototypeMenu = new Menu("Prototype")
   val prototypeClasses = new Menu("New")
   Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => prototypeClasses.contents += new MenuItem(new Action(d.factory.displayName){
@@ -78,10 +78,9 @@ object ConceptMenu {
           display(proxy,CREATION)
         }}))
   
-  prototypeMenu.contents += prototypeClasses
+  val prototypeMenu = new PopupToolBarPresenter("Prototypes", prototypeClasses)
   
   
-  val samplingMenu = new Menu("Sampling")
   val samplingClasses = new Menu("New")
   Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => samplingClasses.contents += new MenuItem(new Action(d.factory.displayName){
@@ -90,7 +89,8 @@ object ConceptMenu {
           display(proxy,CREATION)
         }}))
   
-  samplingMenu.contents += samplingClasses
+  
+  val samplingMenu = new PopupToolBarPresenter("Samplings", samplingClasses)
   
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
@@ -108,7 +108,13 @@ object ConceptMenu {
         
   def display(proxy: IDataProxyUI,
               mode: Value) = 
-                TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayPropertyPanel(proxy,mode)
+                TopComponentsManager.currentMoleSceneTopComponent match {
+      case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
+      case None=> DialogFactory.newTabName match {
+          case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
+          case None=>
+        }
+    }
   
   def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name,proxy)
   

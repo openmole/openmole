@@ -37,7 +37,7 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
   
   def create = {
     Proxys.environments += proxy
-    ConceptMenu.environmentMenu.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+    ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
   
   def delete = {

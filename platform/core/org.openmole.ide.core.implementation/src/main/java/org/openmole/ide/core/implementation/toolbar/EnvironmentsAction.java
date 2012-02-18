@@ -26,7 +26,6 @@ import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.actions.Presenter;
 import org.openmole.ide.core.implementation.panel.ConceptMenu;
-import org.openmole.ide.core.implementation.panel.PopupToolBarPresenter;
 
 @ActionID(category = "Edit",
 id = "org.openmole.ide.core.implementation.toolbar.EnvironmentsAction")
@@ -43,7 +42,7 @@ public class EnvironmentsAction extends AbstractAction implements Presenter.Tool
 
     @Override
     public Component getToolbarPresenter() {
-        return new PopupToolBarPresenter("Environments", ConceptMenu.environmentMenu()).peer();
+        return ConceptMenu.environmentMenu().peer();
     }
 
 }

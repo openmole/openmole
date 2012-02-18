@@ -107,8 +107,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
 
       //  toolBar.add(detailedViewButton);
         toolBar.add(connectionVsDataChannelButton);
-        toolBar.add(new JToolBar.Separator());
-        toolBar.add(ConceptMenu.menuBar().peer());
         toolBar.add(buildButton.peer());
         toolBar.add(cleanAndBuildButton.peer());
         toolBar.add(startButton.peer());
@@ -183,7 +181,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     public Set<TopComponent> getOpened() {
         return getRegistry().getOpened();
     }
-
+    
     @Override
     public void componentActivated() {
         TopComponentsManager.setCurrentMoleSceneTopComponent(this);
@@ -213,6 +211,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     @Override
     public void componentClosed() {
         TopComponentsManager.stopAndCloseExecutions(moleComponent);
+        TopComponentsManager.noCurrentMoleSceneTopComponent();
        // TopComponentsManager.removeTopComponent(moleComponent);
     }
 

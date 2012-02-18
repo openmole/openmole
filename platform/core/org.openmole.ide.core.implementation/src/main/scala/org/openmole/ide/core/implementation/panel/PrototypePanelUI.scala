@@ -36,7 +36,7 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
   
   def create = {
     Proxys.prototypes += proxy
-    ConceptMenu.prototypeMenu.contents += ConceptMenu.addItem(proxy.dataUI.name, proxy)
+    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(proxy.dataUI.name, proxy)
   }
   
   def delete = {

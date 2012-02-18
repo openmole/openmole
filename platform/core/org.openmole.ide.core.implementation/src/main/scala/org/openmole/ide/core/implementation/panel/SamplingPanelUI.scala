@@ -36,7 +36,7 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
   
   def create = {
     Proxys.samplings += proxy
-    ConceptMenu.samplingMenu.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+    ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
   
   def delete = {

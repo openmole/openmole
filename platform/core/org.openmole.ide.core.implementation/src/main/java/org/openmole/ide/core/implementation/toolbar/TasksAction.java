@@ -25,7 +25,6 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.actions.Presenter;
-import org.openmole.ide.core.implementation.panel.PopupToolBarPresenter;
 import org.openmole.ide.core.implementation.panel.ConceptMenu;
 
 @ActionID(category = "Edit",
@@ -43,7 +42,7 @@ public class TasksAction extends AbstractAction implements Presenter.Toolbar {
 
     @Override
     public Component getToolbarPresenter() {
-        return new PopupToolBarPresenter("Tasks", ConceptMenu.taskMenu()).peer();
+        return ConceptMenu.taskMenu().peer();
     }
 
 }

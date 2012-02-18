@@ -24,6 +24,7 @@ import javax.swing.JOptionPane._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
+import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.control.IMoleComponent
@@ -47,10 +48,11 @@ object DialogFactory {
     }
   }
   
-  def newTabName = { 
+  def newTabName : Option[MoleSceneTopComponent]= { 
     val textField = new TextField("Mole_" + (TopComponentsManager.topComponents.size + 1),20)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
-      TopComponentsManager.addTopComponent(textField.text)
+      Some(TopComponentsManager.addTopComponent(textField.text))
+    else None
   }
   
   def groovyEditor(content: String) : String = {
