@@ -90,9 +90,9 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       case x: ISamplingDataProxyUI=> currentPanel = Some(new SamplingPanelUI(x,this,mode))
       case _=>
     }
-    
     currentPanel match {
-      case Some(x:BasePanelUI)=> propertyWidget.addChild(new ComponentWidget(this,x.peer))
+      case Some(x:BasePanelUI)=> 
+        propertyWidget.addChild(new ComponentWidget(this,x.peer))
       case _=>
     }
     
@@ -128,7 +128,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     createEdge(sourceNodeID,targetNodeID,manager.getDataChannelID)
   
   override def createEdge(sourceNodeID:String, targetNodeID: String, id: String)= {
-   // val ed= manager.getEdgeID
+    // val ed= manager.getEdgeID
     addEdge(id)
     setEdgeSource(id,sourceNodeID)
     setEdgeTarget(id,targetNodeID)
@@ -144,8 +144,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
           findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(new OutputDataChannelAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
       }
     }
-    // val cw = findWidget(edge).asInstanceOf[ConnectorWidget]
-    // if (findWidget(sourceNode) != null) cw.setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
   }
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {
@@ -156,7 +154,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
           findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new OutputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
       }
     }
-    // if(findWidget(targetNode)!=null) findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
   }
   
   override def attachNodeWidget(n: String)= {
@@ -311,26 +308,24 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   }
  
   
-  class PropertyComponentWidget(scene: IMoleScene, p: ScrollPane) extends ComponentWidget(scene.graphScene,p.peer){
-    p.foreground = Color.WHITE
-    
-    override def paintBackground = {
-      val g = scene.graphScene.getGraphics
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
-      g.setColor(new Color(0, 0, 0, 200))
-      revalidate
-    }
-  
-    override def paintBorder = {
-      val g = scene.graphScene.getGraphics
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
-      
-      g.setStroke(new BasicStroke(3f))
-      g.setColor(new Color(200,200,200))
-      g.drawRoundRect(0,0,p.size.width + 1,p.size.height+1,10,10)
-      revalidate
-    }
-  }
+//  class PropertyComponentWidget(scene: IMoleScene) extends ComponentWidget(scene.graphScene,(new ScrollPane).peer){
+//    override def paintBackground = {
+//      val g = scene.graphScene.getGraphics
+//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+//                         RenderingHints.VALUE_ANTIALIAS_ON)
+//      g.setColor(new Color(0, 0, 0, 200))
+//      revalidate
+//    }
+//  
+//    override def paintBorder = {
+//      val g = scene.graphScene.getGraphics
+//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+//                         RenderingHints.VALUE_ANTIALIAS_ON)
+//      
+//      g.setStroke(new BasicStroke(3f))
+//      g.setColor(new Color(200,200,200))
+//      g.drawRoundRect(0,0,this.getComponent.getSize.width + 1,this.getComponent.getSize.height+1,10,10)
+//      revalidate
+//    }
+//  }
 }
