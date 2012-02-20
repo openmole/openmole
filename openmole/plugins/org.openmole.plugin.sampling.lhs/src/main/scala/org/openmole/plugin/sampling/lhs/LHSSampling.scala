@@ -21,7 +21,6 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.tools.service.Random.randomDecorator
 import java.util.Random
-import org.apache.commons.math.random.Well44497b
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable

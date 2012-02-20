@@ -18,7 +18,7 @@
 package org.openmole.misc.tools.service
 
 import java.util.UUID
-import org.apache.commons.math.random.{RandomGenerator, Well44497b, RandomAdaptor}
+import org.apache.commons.math3.random.{RandomGenerator, Well44497b, RandomAdaptor}
 import scala.collection.mutable.IndexedSeq
 
 object Random {
