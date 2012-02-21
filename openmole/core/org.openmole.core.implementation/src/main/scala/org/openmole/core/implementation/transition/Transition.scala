@@ -88,7 +88,6 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
       
         val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
         val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
-        
         subMole.submit(end.capsule, newContext, newTicket)
       }
     } finally lockRepository.unlock(lockKey)

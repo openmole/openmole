@@ -30,6 +30,7 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job.IMoleJob.moleJobOrdering
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
@@ -51,6 +52,7 @@ import org.openmole.core.implementation.execution.local.LocalExecutionEnvironmen
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.immutable.TreeMap
+import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -82,7 +84,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
       }
   }
  
-  private var inProgress = new TreeMap[IMoleJob, ITicket] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
+  private var inProgress = TreeSet.empty[IMoleJob] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
   private val _started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
   private val _finished = new Semaphore(0)
@@ -108,7 +110,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
         EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
         EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.ExceptionRaised])
 
-        inProgress += moleJob -> ticket
+        inProgress += moleJob
         instantRerun.rerun(moleJob, capsule)
       }
         
@@ -138,13 +140,13 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   override def cancel: this.type = {
     if(!canceled.getAndSet(true)) {
       for (moleJob <- inProgress.keySet) moleJob.cancel
-      inProgress = TreeMap.empty
+      inProgress = TreeSet.empty[IMoleJob]
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
     this
   }
 
-  override def moleJobs = inProgress.keys
+  override def moleJobs = inProgress
 
   override def waitUntilEnded = {
     _finished.acquire
@@ -181,7 +183,4 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
         
-  def ticket(job: IMoleJob) =
-    inProgress.getOrElse(job, throw new InternalProcessingError("Error in mole execution job info not found"))
-
 }

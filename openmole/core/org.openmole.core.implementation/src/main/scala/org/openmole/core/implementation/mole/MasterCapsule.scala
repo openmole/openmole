@@ -20,7 +20,7 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.task.ITask
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
@@ -37,17 +37,7 @@ class MasterCapsule(_task: Option[ITask] = None, val persist: Set[String] = Set.
   def this(t: ITask, head: String, persist: Array[String]) = this(t, (head :: persist.toList): _*)
   
   def this(t: ITask, head: IPrototype[_], persist: Array[IPrototype[_]]) = this(t, head, persist: _*)
-    
-  override def toJob(context: IContext, jobId: MoleJobId, subMoleExecution: ISubMoleExecution, ticket: ITicket): IMoleJob = {
-    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Parrent ticket is not avialable."))
-    val savedContext = subMoleExecution.masterCapsuleRegistry.remove(this, parentTicket).getOrElse(new Context)
-    super.toJob(context ++ savedContext, jobId, subMoleExecution, ticket)
-  }
 
-  override protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {   
-    val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Parrent ticket is not avialable."))
-    subMole.masterCapsuleRegistry.register(this, parentTicket, persist.flatMap{n => context.variable(n).toList})
-    super.performTransition(context, ticket, subMole)
-  }
+  override def toPersist(context: IContext) =  persist.flatMap{n => context.variable(n).toList}.toContext
   
 }

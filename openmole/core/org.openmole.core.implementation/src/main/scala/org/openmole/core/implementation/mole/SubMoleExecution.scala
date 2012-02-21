@@ -17,6 +17,8 @@
 
 package org.openmole.core.implementation.mole
 
+import java.util.TreeMap
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
@@ -35,16 +37,19 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.job.State._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
+import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.job.MoleJob._
-import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import collection.JavaConversions._
 
 object SubMoleExecution {
   
@@ -56,22 +61,28 @@ object SubMoleExecution {
 
 
 class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution: IMoleExecution) extends ISubMoleExecution {
+  
+  val jobListener = new EventListener[IMoleJob] {
 
-  val subMoleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
-    override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
+    override def triggered(obj: IMoleJob, ev: Event[IMoleJob]) = 
       ev match {
-        case ev: IMoleJob.TransitionPerformed => jobFinished(job, ev.capsule)
-        case ev: IMoleJob.JobFailedOrCanceled => jobFinished(job, ev.capsule)
+        case ev: IMoleJob.StateChanged => 
+          ev.newState match {
+            case COMPLETED => jobFinished(obj)
+            case FAILED | CANCELED => jobFailedOrCanceled(obj)
+            case _ =>
+          }
       }
   }
   
-  private var submittedJobs = TreeSet[IMoleJob]()
   private var waiting = List[IJob]()
   private var _nbJobInProgress = 0
   private var _nbJobWaitingInGroup = 0
   private var childs = new HashSet[ISubMoleExecution]
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   
+  private var jobs = new TreeMap[IMoleJob, (ICapsule, ITicket)](IMoleJob.moleJobOrdering)
+
   private var canceled = false
   
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
@@ -82,22 +93,11 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
 
   override def isRoot = !parent.isDefined
   
-  override def nbJobInProgess = _nbJobInProgress //_nbJobInProgress
-  
-  def += (moleJob: IMoleJob) = synchronized {
-    submittedJobs += moleJob
-    incNbJobInProgress(1)
-    nbJobInProgess
-  }
-  
-  def -= (moleJob: IMoleJob) = synchronized {
-    submittedJobs -= moleJob
-    decNbJobInProgress(1)
-    nbJobInProgess
-  }
+  override def nbJobInProgress = _nbJobInProgress 
   
   override def cancel = synchronized {
-    submittedJobs.foreach{_.cancel}
+    jobs.keys.foreach{_.cancel}
+    jobs.clear
     childs.foreach{_.cancel}
     parrentApply(_.removeChild(this))
     canceled = true
@@ -114,31 +114,68 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   override def incNbJobInProgress(nb: Int) =  {
     synchronized {_nbJobInProgress += nb}
     parrentApply(_.incNbJobInProgress(nb))
+    nbJobInProgress
   }
 
   override def decNbJobInProgress(nb: Int) = {
     if(synchronized{_nbJobInProgress -= nb; checkAllJobsWaitingInGroup}) submitJobs
     parrentApply(_.decNbJobInProgress(nb))
+    nbJobInProgress
   }
   
   override def incNbJobWaitingInGroup(nb: Int) = {
     if(synchronized {_nbJobWaitingInGroup += nb; checkAllJobsWaitingInGroup}) submitJobs
     parrentApply(_.incNbJobWaitingInGroup(nb))
+    _nbJobWaitingInGroup
   }
 
   override def decNbJobWaitingInGroup(nb: Int) = synchronized {
     _nbJobWaitingInGroup -= nb
     parrentApply(_.decNbJobWaitingInGroup(nb))
+    _nbJobWaitingInGroup
+  }
+  
+  private def jobFailedOrCanceled(job: IMoleJob) = synchronized {
+    val (capsule, ticket) = jobs(job)
+    jobs -= job
+    
+    if (decNbJobInProgress(1) == 0) EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
+    EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
+  }
+  
+  private def jobFinished(job: IMoleJob) = synchronized {
+    val (capsule, ticket) = Option(jobs.remove(job)).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))    
+    try {
+      capsule match {
+        case c: IMasterCapsule => masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(job.context))
+        case _ =>
+      }
+      
+      EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
+      
+      capsule.outputDataChannels.foreach{_.provides(job.context, ticket, moleExecution)}
+      capsule.outputTransitions.foreach{_.perform(job.context, ticket, this)}
+    } catch {
+      case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
+    } finally {
+      if (decNbJobInProgress(1) == 0) EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
+      EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(capsule))
+    }
   }
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
-      val moleJob = capsule.toJob(context, moleExecution.nextJobId, this, ticket)
-
-      EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
-      EventDispatcher.listen(moleJob, Priority.HIGH, subMoleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
-
-      this += moleJob
+      val moleJob: IMoleJob = capsule match {
+        case c: IMasterCapsule => 
+          val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
+          new MoleJob(capsule.taskOrException, context ++ savedContext, moleExecution.nextJobId)
+        case _ => new MoleJob(capsule.taskOrException, context, moleExecution.nextJobId)
+      }
+      
+      jobs += (moleJob -> (capsule, ticket))
+      EventDispatcher.listen(moleJob, Priority.HIGH, jobListener, classOf[IMoleJob.StateChanged])
+      
+      incNbJobInProgress(1)
       moleExecution.submit(moleJob, capsule, this, ticket)
     }
   }
@@ -175,15 +212,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       case None => 
       case Some(p) => f(p)
     }
-    
-  private def jobFinished(job: IMoleJob, capsule: ICapsule): Unit = { 
-    val nbJobInProgress = (this -= job)
-    if (nbJobInProgress == 0) {
-      val ticket = moleExecution.ticket(job)
-      EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
-    }
-  }
-  
-  private def checkAllJobsWaitingInGroup = (nbJobInProgess == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
+   
+ private def checkAllJobsWaitingInGroup = (nbJobInProgress == _nbJobWaitingInGroup && _nbJobWaitingInGroup > 0)
    
 }

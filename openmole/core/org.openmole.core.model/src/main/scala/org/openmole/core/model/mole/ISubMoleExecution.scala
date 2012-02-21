@@ -36,16 +36,16 @@ trait ISubMoleExecution {
   def isRoot: Boolean
   def moleExecution: IMoleExecution
 
-  def nbJobInProgess: Int
+  def nbJobInProgress: Int
     
   def addChild(submoleExecution: ISubMoleExecution)
   def removeChild(submoleExecution: ISubMoleExecution)
    
-  def incNbJobInProgress(value: Int) 
-  def decNbJobInProgress(value: Int) 
+  def incNbJobInProgress(value: Int): Int
+  def decNbJobInProgress(value: Int): Int
     
-  def incNbJobWaitingInGroup(value: Int)
-  def decNbJobWaitingInGroup(value: Int)
+  def incNbJobWaitingInGroup(value: Int): Int
+  def decNbJobWaitingInGroup(value: Int): Int
   
   def cancel
   

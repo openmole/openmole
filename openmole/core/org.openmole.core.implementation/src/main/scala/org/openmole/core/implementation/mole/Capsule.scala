@@ -43,18 +43,7 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
 
-  class CapsuleAdapter extends EventListener[IMoleJob] {
-
-    override def triggered(obj: IMoleJob, ev: Event[IMoleJob]) = 
-      ev match {
-        case ev: IMoleJob.StateChanged => 
-          ev.newState match {
-            case COMPLETED => jobFinished(obj)
-            case FAILED | CANCELED => jobFailedOrCanceled(obj)
-            case _ =>
-          }
-     }
-  }
+  
   
   private val _inputSlots = new HashSet[ISlot]
   private val _defaultInputSlot = new Slot(this)
@@ -113,41 +102,12 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     this
   }
 
-  override def toJob(context: IContext, jobId: MoleJobId, subMoleExecution: ISubMoleExecution, ticket: ITicket): IMoleJob = {
-    val job: IMoleJob = new MoleJob(taskOrException, context, jobId)
-    MoleJobRegistry += (job, subMoleExecution, this, ticket)
-    EventDispatcher.listen(job, Priority.LOWEST, new CapsuleAdapter, classOf[IMoleJob.StateChanged])
-    job
-  }
-
   override def intputSlots: Iterable[ISlot] = _inputSlots
 
   override def task_=(task: ITask) = this.task = Some(task) 
   override def task_=(task: Option[ITask]) = _task = task
   override def task = _task
   
-  private def jobFailedOrCanceled(job: IMoleJob) = {
-    val execution = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))._1
-    EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(this))
-  }
-  
-  private def jobFinished(job: IMoleJob) = {
-    try {
-      val (subMole, capsule, ticket) = MoleJobRegistry.remove(job).getOrElse(throw new InternalProcessingError("BUG: job not registred"))
-       
-      EventDispatcher.trigger(subMole.moleExecution, new IMoleExecution.JobInCapsuleFinished(job, this))
-      performTransition(job.context, ticket, subMole)
-    } catch {
-      case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for task " + task)
-    } finally EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(this))
-  }
-
-  protected def performTransition(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {    
-    import subMole.moleExecution
-
-    outputDataChannels.foreach{_.provides(context, ticket, moleExecution)}
-    outputTransitions.foreach{_.perform(context, ticket, subMole)}
-  }
 
   override def toString = task match {
     case Some(t) => t.toString

@@ -31,6 +31,8 @@ trait ITicket {
   def content: Long
   def category: String
   def parent: Option[ITicket]
+  def parentOrException = parent.getOrElse(throw new InternalError("This is a root ticket, it has no parent."))
+  
   def isRoot: Boolean = parent.equals(None)
   
   override def equals(obj: Any): Boolean = (content, category).equals(obj) 

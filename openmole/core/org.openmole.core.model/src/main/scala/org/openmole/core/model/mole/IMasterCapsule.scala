@@ -17,4 +17,8 @@
 
 package org.openmole.core.model.mole
 
-trait IMasterCapsule extends ICapsule with IAtomicCapsule
+import org.openmole.core.model.data.IContext
+
+trait IMasterCapsule extends ICapsule with IAtomicCapsule {
+  def toPersist(context: IContext): IContext
+}
