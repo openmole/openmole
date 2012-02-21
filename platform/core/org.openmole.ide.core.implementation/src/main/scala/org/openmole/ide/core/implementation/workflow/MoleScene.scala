@@ -48,6 +48,7 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
+import scala.swing.Component
 import scala.swing.ScrollPane
  
 
@@ -67,7 +68,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(connectLayer)
   addChild(propertyLayer)
   
-  val propertyWidget = new Widget(this)
+  val propertyWidget = new Widget(this) 
   propertyLayer.addChild(propertyWidget)
   
   setPreferredSize(new Dimension((Constants.SCREEN_WIDTH * 0.8).toInt, (Constants.SCREEN_HEIGHT * 0.8).toInt))
@@ -306,26 +307,12 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       }
     }
   }
- 
   
-//  class PropertyComponentWidget(scene: IMoleScene) extends ComponentWidget(scene.graphScene,(new ScrollPane).peer){
-//    override def paintBackground = {
-//      val g = scene.graphScene.getGraphics
-//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-//                         RenderingHints.VALUE_ANTIALIAS_ON)
-//      g.setColor(new Color(0, 0, 0, 200))
-//      revalidate
-//    }
-//  
-//    override def paintBorder = {
-//      val g = scene.graphScene.getGraphics
-//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-//                         RenderingHints.VALUE_ANTIALIAS_ON)
-//      
-//      g.setStroke(new BasicStroke(3f))
-//      g.setColor(new Color(200,200,200))
-//      g.drawRoundRect(0,0,this.getComponent.getSize.width + 1,this.getComponent.getSize.height+1,10,10)
-//      revalidate
-//    }
-//  }
+  class PropertyWidget (scene: IMoleScene,wi: Component) extends ComponentWidget(scene.graphScene,wi.peer){
+    override def paintBackground{
+      val g = scene.graphScene.getGraphics
+      g.fill(wi.bounds)
+      revalidate
+    }
+  }
 }
