@@ -18,11 +18,11 @@
 package org.openmole.ide.plugin.environment.desktopgrid
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends MigPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
+class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends PluginPanel("fillx,wrap 2","[left][grow,fill]","") with IEnvironmentPanelUI{
   val loginTextField = new TextField(20)
   val passTextField = new TextField(20)
   val portTextField = new TextField(5)

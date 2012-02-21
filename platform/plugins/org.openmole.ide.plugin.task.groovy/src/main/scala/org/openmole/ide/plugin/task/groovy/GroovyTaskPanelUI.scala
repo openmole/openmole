@@ -24,10 +24,10 @@ import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends MigPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
   
   val codeTextArea = new GroovyEditor{editor.text = pud.code;minimumSize = new Dimension(150,150); tooltip = Help.tooltip("Groovy code. Right click on the editor for more options", "hello = \"Hello OpenMOLE\"")}
   val libMultiTextField = new MultiChooseFileTextField("Lib",pud.libs,"Select a file", Some("Lib files"), FilesOnly,Some("jar")) {tooltip = Help.tooltip("Library path", "/home/path/to/my/lib")}

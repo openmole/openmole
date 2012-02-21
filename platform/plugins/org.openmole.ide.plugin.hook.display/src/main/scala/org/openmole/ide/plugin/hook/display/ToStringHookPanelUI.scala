@@ -29,7 +29,7 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import java.awt.Font
 import java.awt.Font._
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
@@ -56,7 +56,7 @@ object ToStringHookPanelUI{
   }
 }
 import ToStringHookPanelUI._
-class ToStringHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
+class ToStringHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI{
 
   val capsules = executionManager.capsuleMapping.values.filter(!_.outputs.isEmpty).toList
   

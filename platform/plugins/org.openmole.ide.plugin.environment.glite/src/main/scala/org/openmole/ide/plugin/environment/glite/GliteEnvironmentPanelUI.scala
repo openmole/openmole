@@ -17,15 +17,15 @@
 
 package org.openmole.ide.plugin.environment.glite
 
+import java.awt.Color
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
-import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.PropertyPanel
+import org.openmole.ide.misc.widget._
 import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.TextField
 import scala.swing.event.ButtonClicked
 
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PropertyPanel("fillx","[left][grow,fill]","") with IEnvironmentPanelUI{
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IEnvironmentPanelUI{
   
   val voTextField = new TextField(20) {tooltip = Help.tooltip("Virtual Organization name","vo.complex-systems.eu")}
   val vomsTextField = new TextField(20) {tooltip = Help.tooltip("Virtual Organization Membership Service url","voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr")}
@@ -48,7 +48,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PropertyPanel
   val otherRequirementLabel = new Label("Other")
   val otherRequirementTextField = new TextField(16) {tooltip = Help.tooltip("Free requirement specification","4Go")}
   
-  contents+= (new PropertyPanel("wrap 2") {
+  contents+= (new PluginPanel("wrap 2") {
       contents+= (new Label("VO"),"gap para")
       contents+= voTextField
       contents+= (new Label("VOMS"),"gap para")
@@ -56,14 +56,14 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PropertyPanel
       contents+= (new Label("BDII"),"gap para")
       contents+= bdiiTextField
     },"wrap")
-  contents+= (new PropertyPanel("wrap 2") {
+  contents+= (new PluginPanel("wrap 2") {
       contents+= (proxyCheckBox,"wrap")
       contents+= (proxyURLLabel,"gap para")
       contents+= proxyURLTextField
       contents+= (proxyUserLabel,"gap para")
       contents+= proxyUserTextField
     },"wrap")
-  contents+= (new PropertyPanel("wrap 2") {
+  contents+= (new PluginPanel("wrap 2") {
       contents+= (requirementCheckBox,"wrap")
       contents+= (architectureCheckBox,"wrap")
       contents+= (runtimeMemoryLabel,"gap para")

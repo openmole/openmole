@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.control.IExecutionManager
 import java.awt.Font
 import java.awt.Font._
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField
@@ -63,7 +63,7 @@ object CopyFileHookPanelUI{
 
 import CopyFileHookPanelUI._
 
-class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends MigPanel("wrap") with IHookPanelUI{
+class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI{
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
   
   val multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = {

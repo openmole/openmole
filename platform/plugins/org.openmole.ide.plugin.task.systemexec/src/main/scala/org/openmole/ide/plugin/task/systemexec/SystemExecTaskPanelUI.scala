@@ -24,14 +24,14 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiTextFieldCombo
 import scala.swing.FileChooser._
 import scala.swing._
 import swing.Swing._
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends MigPanel("fillx,wrap 2", "[left][grow,fill]","") with ITaskPanelUI{
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]","") with ITaskPanelUI{
  
   val workdirTextField = new TextField(ndu.workdir)
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource",ndu.resources,SelectionMode.FilesAndDirectories)

@@ -23,13 +23,13 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.collection.mutable.HashSet
 import scala.swing._
 import scala.swing.event.ButtonClicked
 import swing.Swing._
 
-class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends MigPanel("wrap 2") with ITaskPanelUI{
+class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI{
   var columns = new HashSet[ColumnPanel]
   val loaded = sdu.columns.groupBy(_._1)
   val protoFileComboBox = new ComboBox(Proxys.prototype.filter(p=>p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)

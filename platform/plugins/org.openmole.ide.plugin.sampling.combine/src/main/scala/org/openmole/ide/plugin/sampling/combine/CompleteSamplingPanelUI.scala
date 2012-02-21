@@ -29,7 +29,7 @@ import org.openmole.ide.core.model.panel._
 import org.openide.util.Lookup
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import scala.collection.mutable.HashMap
@@ -54,7 +54,7 @@ object CompleteSamplingPanelUI{
   }
 }
 
-class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends MigPanel("wrap 2","","") with ISamplingPanelUI {
+class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap 2","","") with ISamplingPanelUI {
   var sampleDomainCombos: Option[MultiTwoCombos[IPrototypeDataProxyUI,String]]= None
   var rowMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IDomainPanelUI]
   var extMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IDomainDataUI]

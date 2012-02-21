@@ -18,14 +18,12 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
-import java.awt.Graphics2D
-import java.awt.RenderingHints
+import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.image.ImageTool
-import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import scala.swing.Label
@@ -34,16 +32,18 @@ import scala.swing.TextField
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
-                           mode : Value) extends ScrollPane {
+                           mode : Value,
+                           borderColor : Color = new Color(200,200,200)) extends ScrollPane {
   val iconLabel = new Label{ icon = new ImageIcon(ImageTool.loadImage("img/empty.png",50,50))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val labelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   if (mode == EDIT) deleteLink
+  border = BorderFactory.createEmptyBorder
 
-  val mainPanel = new PropertyPanel("wrap"){
-    contents += new PropertyPanel("wrap 2") {
+  val mainPanel = new PropertyPanel(borderColor,"wrap"){
+    contents += new PluginPanel("wrap 2") {
       contents += iconLabel
-      contents += new PropertyPanel("wrap"){
+      contents += new PluginPanel("wrap"){
         contents += nameTextField
         contents += labelLink
       }
@@ -51,7 +51,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   }
   contents = mainPanel
   preferredSize.width = 200
-  // background = new Color(0, 0, 0, 180)
   foreground = Color.white
   
   verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded

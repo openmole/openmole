@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.environment.glite
 import java.awt.Color
 import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.GliteAuthenticationMethod
 import org.openmole.plugin.environment.glite.GlobusProxyFile
@@ -41,7 +41,7 @@ object GliteAuthentificationPanelUI {
   val GREEN = new Color(136,170,0)
 }
 
-class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with IAuthentificationPanelUI{
+class GliteAuthentificationPanelUI extends PluginPanel("","[left][right]","") with IAuthentificationPanelUI{
   var passString = ""
   var initButton: Option[RadioButton] = None 
   val pemButton = new RadioButton("pem")
@@ -57,7 +57,7 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
   val p12TextField= new ChooseFileTextField("Certificate path", "Select a file", Some("p12 file"), FilesOnly,Some("p12"))
   val proxyTextField = new ChooseFileTextField("", "Select a file", Some("proxy file"), FilesOnly,Some("proxy"))
   
-  contents+= new MigPanel("wrap","","[]15[]15[]"){
+  contents+= new PluginPanel("wrap","","[]15[]15[]"){
     contents+= pemButton
     contents+= p12Button
     contents+= proxyButton}
@@ -131,7 +131,7 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
   }
   
   def buildPemPanel =
-    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+    new PluginPanel("fillx,wrap 2","[left][grow,fill]","") {
       contents+= (new Label("Certification"),"gap para")
       contents+= pem1TextField
       contents+= (new Label("Key"),"gap para")
@@ -140,13 +140,13 @@ class GliteAuthentificationPanelUI extends MigPanel("","[left][right]","") with 
       
   
   def buildP12Panel = 
-    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+    new PluginPanel("fillx,wrap 2","[left][grow,fill]","") {
       contents+= (new Label("Certification"),"gap para")
       contents+= p12TextField
       contents+= (new Label("password"),"gap para")}
   
   def buildProxyPanel = 
-    new MigPanel("fillx,wrap 2","[left][grow,fill]","") {
+    new PluginPanel("fillx,wrap 2","[left][grow,fill]","") {
       contents+= (new Label("Proxy"),"gap para")
       contents+= proxyTextField}
 }

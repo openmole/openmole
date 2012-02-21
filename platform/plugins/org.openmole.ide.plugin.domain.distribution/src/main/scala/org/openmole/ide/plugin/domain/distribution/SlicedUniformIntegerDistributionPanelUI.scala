@@ -22,10 +22,10 @@ import swing.Swing._
 import swing.ListView._
 import scala.swing.Table.ElementMode._
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 
-class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends MigPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
+class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
   val seedField = new TextField(6)
   val sizeField = new TextField(6)
   

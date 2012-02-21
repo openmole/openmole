@@ -32,11 +32,11 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import scala.swing.BorderPanel.Position._
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends MigPanel("","[][grow,fill]","") with ISamplingPanelUI {
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("","[][grow,fill]","") with ISamplingPanelUI {
   
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   var comboMulti: Option[MultiTwoCombos[String,IPrototypeDataProxyUI]]= None

@@ -28,9 +28,8 @@ import org.openmole.ide.misc.image.ImageTool
 
 class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
                          scene: IMoleScene,
-                         mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode){
+                         mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode,new Color(68,120,33)){
   iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
-  peer.setBorder(BorderFactory.createLineBorder(new Color(68,120,33),2))
   
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer

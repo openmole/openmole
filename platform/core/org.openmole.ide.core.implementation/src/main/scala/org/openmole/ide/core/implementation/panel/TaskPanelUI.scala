@@ -17,8 +17,6 @@
 
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.Color
-import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -27,10 +25,9 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.image.ImageTool
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
-                         scene: IMoleScene,
-                         mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode){
+                  scene: IMoleScene,
+                  mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
   iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
-  peer.setBorder(BorderFactory.createLineBorder(proxy.dataUI.borderColor,2))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
   

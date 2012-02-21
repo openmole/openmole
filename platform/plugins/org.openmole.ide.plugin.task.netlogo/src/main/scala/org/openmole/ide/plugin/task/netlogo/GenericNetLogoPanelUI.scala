@@ -23,7 +23,7 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
 import swing.Swing._
 import org.openmole.ide.osgi.netlogo4.NetLogo4
@@ -34,7 +34,7 @@ class GenericNetLogoPanelUI(nlogoPath: String,
                             lauchingCommands: String,
                             prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
                             prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
-                            g: List[String]) extends MigPanel("","[left]rel[grow,fill]","[]5[]5[]5[]2[]0[]"){
+                            g: List[String]) extends PluginPanel("","[left]rel[grow,fill]","[]5[]5[]5[]2[]0[]"){
  
   val nlogoTextField = new ChooseFileTextField(nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
   val workspaceCheckBox = new CheckBox("Embedd Workspace"){selected = workspaceEmbedded}

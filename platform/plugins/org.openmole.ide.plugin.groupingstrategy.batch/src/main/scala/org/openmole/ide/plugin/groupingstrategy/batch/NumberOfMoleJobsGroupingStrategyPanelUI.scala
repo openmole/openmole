@@ -28,7 +28,7 @@ import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Panel
 
 object NumberOfMoleJobsGroupingStrategyPanelUI {
@@ -45,7 +45,7 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
 
 import NumberOfMoleJobsGroupingStrategyPanelUI._
 //
-class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends MigPanel("") with IGroupingStrategyPanelUI{
+class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingStrategyPanelUI{
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
   val multiRow = 

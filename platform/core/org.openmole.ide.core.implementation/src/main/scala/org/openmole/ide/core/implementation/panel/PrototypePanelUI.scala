@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
-import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -28,9 +27,8 @@ import org.openmole.ide.core.model.panel.PanelMode._
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                          scene: IMoleScene,
-                         mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode){
+                         mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,new Color(255,204,0)){
   iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
-  peer.setBorder(BorderFactory.createLineBorder(new Color(102,102,102),2))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
   
