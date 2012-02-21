@@ -18,10 +18,10 @@
 package org.openmole.ide.misc.widget.multirow
 
 import java.awt.Color
-import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashSet
 import scala.swing.Label
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 
 object MultiWidget extends Enumeration {
@@ -40,7 +40,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
                                  allowEmpty: Minus= NO_EMPTY){
   val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel =  new MigPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 -2 5")
+  val panel =  new PluginPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 -2 5")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
   panel.contents += (titleLabel,"wrap")
   

@@ -30,6 +30,6 @@ class PropertyPanel(borderColor: Color,
     super.paintComponent(g)
     g.setStroke(new BasicStroke(5f))
     g.setColor(borderColor)
-    g.drawRoundRect(0,0,size.width -2,size.height-2,20,20)
+    g.drawRoundRect(1,1,size.width -4,size.height-4,20,20)
   }  
 }
