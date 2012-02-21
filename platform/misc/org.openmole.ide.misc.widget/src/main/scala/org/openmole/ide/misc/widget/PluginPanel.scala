@@ -17,19 +17,22 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
+import java.awt.RenderingHints
+import scala.swing._
 
-class PropertyPanel(borderColor: Color,
-                    mig1: String, 
-                    mig2: String ="", 
-                    mig3: String="") extends PluginPanel(mig1,mig2,mig3) {
-
+class PluginPanel (mig1: String, mig2: String ="", mig3: String="") extends MigPanel(mig1,mig2,mig3) {
   override def paintComponent(g: Graphics2D) = {
-    super.paintComponent(g)
-    g.setStroke(new BasicStroke(5f))
-    g.setColor(borderColor)
-    g.drawRoundRect(0,0,size.width -2,size.height-2,20,20)
-  }  
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                       RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setColor(new Color(77,77,77))
+    g.fillRoundRect(0, 0, size.width, size.height,20, 20)
+    contents.foreach(c=> c match {
+        case x: TextField=> x.foreground= Color.BLACK
+        case x: UIElement=> x.foreground= Color.WHITE
+        case _=>
+      })
+    revalidate
+  }   
 }

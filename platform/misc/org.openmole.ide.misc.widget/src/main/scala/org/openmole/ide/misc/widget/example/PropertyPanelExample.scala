@@ -17,22 +17,25 @@
 
 package org.openmole.ide.misc.widget.example
 
+import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.Color
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.misc.widget.PropertyPanel
-import org.openmole.ide.misc.widget.TransparentPanel
-import scala.swing.Label
-import scala.swing.MainFrame
-import scala.swing.SimpleSwingApplication
+import javax.swing.UIManager
+import org.openmole.ide.misc.widget._
+import scala.swing._
 
 object PropertyPanelExample extends SimpleSwingApplication
 {
   def top = new MainFrame {
+    UIManager.setLookAndFeel(new NimbusLookAndFeel)
     title = "Link Label Demo"
-    contents = new PropertyPanel("wrap"){
-      contents +=new Label("first"){foreground = Color.white}
-      contents += new TransparentPanel("wrap"){contents += new Label("second")}
+    contents = new PropertyPanel(Color.green,"wrap"){
+      contents +=new Label("first")
+      contents += new TextField("TextField")
+      contents += new ComboBox(List.empty)
+      contents += new PluginPanel("wrap"){
+        contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
+        contents += new Label("Tranparent panel")}
     }
     size = new Dimension(250,200)
   }
