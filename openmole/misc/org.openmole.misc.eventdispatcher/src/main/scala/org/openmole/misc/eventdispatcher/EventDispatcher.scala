@@ -21,9 +21,6 @@ import java.util.concurrent.Executors
 import org.openmole.misc.tools.service.Priority
 
 object EventDispatcher {
-  
-  //TODO maybe change to fixed thread pool some time 
-  private val Executor = Executors.newCachedThreadPool
    
   private val triggerListenerMap = new ObjectListenerMap
   //private val objectChangedWithArgsMap = new ObjectListenerMap

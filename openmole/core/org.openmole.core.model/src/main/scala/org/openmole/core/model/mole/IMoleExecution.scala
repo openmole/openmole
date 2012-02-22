@@ -21,11 +21,7 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.MultipleException
-import org.openmole.misc.exception.UserBadDataError
 import java.util.logging.Level
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
@@ -57,19 +53,19 @@ trait IMoleExecution {
   
   def finished: Boolean
 
-  def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket)
-  def submitToEnvironment(job: IJob, capsule: ICapsule)
+  //def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket)
+  //def submitToEnvironment(job: IJob, capsule: ICapsule)
 
   def mole: IMole
 
-  def rootTicket: ITicket
-  def nextTicket(parent: ITicket): ITicket
+  //def rootTicket: ITicket
   
-  def nextJobId: MoleJobId
+  //def nextJobId: MoleJobId
   
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
   def moleJobs: Iterable[IMoleJob]
   def id: String
+  def nextTicket(parent: ITicket): ITicket
 
 }

@@ -51,16 +51,9 @@ import scala.collection.mutable.ListBuffer
 import collection.JavaConversions._
 import scala.collection.mutable.SynchronizedSet
 
-object SubMoleExecution {
-  
-  def apply(moleExecution: IMoleExecution) = new SubMoleExecution(None, moleExecution)
-
-  def apply(parent: ISubMoleExecution) = new SubMoleExecution(Some(parent), parent.moleExecution)
-  
-}
 
 
-class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution: IMoleExecution) extends ISubMoleExecution {
+class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: MoleExecution) extends ISubMoleExecution {
   
   val jobListener = new EventListener[IMoleJob] {
 
@@ -73,13 +66,16 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
             case _ =>
           }
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
+        case ev: IMoleJob.ExceptionRaised => 
+          EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, ev.exception, ev.level))
+
       }
   }
   
   private var _submitting = false
   private var _nbJobGrouping = 0
   
-  private var _childs = new HashSet[ISubMoleExecution] with SynchronizedSet[ISubMoleExecution]
+  private var _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
   private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
   
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
@@ -93,11 +89,11 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def isRoot = !parent.isDefined
   
-  override def nbJobInProgress = {
+  def nbJobInProgress: Int = {
     _jobs.size + childs.map{_.nbJobInProgress}.sum
   }
 
-  override def nbJobGrouping = {
+  def nbJobGrouping: Int = {
     _nbJobGrouping + childs.map{_.nbJobGrouping}.sum
   }
   
@@ -115,11 +111,11 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def childs = _childs.toList
   
-  override def +=(submoleExecution: ISubMoleExecution) = {
+  def +=(submoleExecution: SubMoleExecution) = {
     _childs += submoleExecution
   }
 
-  override def -=(submoleExecution: ISubMoleExecution) = {
+  def -=(submoleExecution: SubMoleExecution) = {
     _childs -= submoleExecution
   }
   
@@ -132,6 +128,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     _jobs -= job
     
     checkFinished(ticket)
+    moleExecution.jobFailedOrCanceled(job, capsule)
     EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
   }
   
@@ -153,6 +150,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       case e => throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {
       checkFinished(ticket)
+      moleExecution.jobOutputTransitionsPerformed(job, capsule)
       EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(capsule))
     }
     if(allJobsWaitingInGroup) submitJobs
@@ -175,6 +173,8 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       
       _jobs += (moleJob -> (capsule, ticket))
       EventDispatcher.listen(moleJob, Priority.HIGH, jobListener, classOf[IMoleJob.StateChanged])
+      EventDispatcher.listen(moleJob, Priority.NORMAL, jobListener, classOf[IMoleJob.ExceptionRaised])
+
       moleExecution.submit(moleJob, capsule, this, ticket)
     }
   }
@@ -196,6 +196,8 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     }
   }
     
+  def newChild: ISubMoleExecution = new SubMoleExecution(Some(this), moleExecution)
+  
   private def submitJobs = synchronized {
     waitingJobs.foreach {
       case((capsule, category), jobs) => 
@@ -206,7 +208,7 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     waitingJobs.empty
   }
   
-  private def parrentApply(f: ISubMoleExecution => Unit) = 
+  private def parrentApply(f: SubMoleExecution => Unit) = 
     parent match {
       case None => 
       case Some(p) => f(p)

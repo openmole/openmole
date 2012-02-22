@@ -17,22 +17,22 @@
 
 package org.openmole.misc.eventdispatcher
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.OpenHashMap
 import scala.collection.mutable.WeakHashMap
 
 class ObjectListenerMap {
 
-  val listnerTypeMap = new WeakHashMap[Any, HashMap[Class[Event[Any]], SortedListeners[Any]]] //forSome {type T; type L <: IObjectListener[T]} = WeakHashMap.empty
+  val listnerTypeMap = new WeakHashMap[Any, OpenHashMap[Class[Event[Any]], SortedListeners[Any]]] //forSome {type T; type L <: IObjectListener[T]} = WeakHashMap.empty
   
   private def getOrCreateListeners[T, E <: Event[T]](obj: T, event: Class[E]): SortedListeners[EventListener[T]] = 
-    listnerTypeMap.getOrElseUpdate(obj, HashMap.empty).getOrElseUpdate(event.asInstanceOf[Class[Event[Any]]], new SortedListeners[Any]).asInstanceOf[SortedListeners[EventListener[T]]]
+    listnerTypeMap.getOrElseUpdate(obj, new OpenHashMap(1)).getOrElseUpdate(event.asInstanceOf[Class[Event[Any]]], new SortedListeners[Any]).asInstanceOf[SortedListeners[EventListener[T]]]
   
   def get[T, E <: Event[T]](obj: T, event: Class[E]): Iterable[EventListener[T]] = synchronized {
-    listnerTypeMap.getOrElse(obj, HashMap.empty).getOrElse(event.asInstanceOf[Class[Event[Any]]], Iterable.empty).asInstanceOf[Iterable[EventListener[T]]]
+    listnerTypeMap.getOrElse(obj, new OpenHashMap(1)).getOrElse(event.asInstanceOf[Class[Event[Any]]], Iterable.empty).asInstanceOf[Iterable[EventListener[T]]]
   }
 
   def unregister[T, E <: Event[T], L <: EventListener[T]](obj: T, listener: L, event: Class[E]) = synchronized {
-    val map = listnerTypeMap.getOrElse(obj, HashMap.empty).asInstanceOf[HashMap[Class[E], SortedListeners[L]]]
+    val map = listnerTypeMap.getOrElse(obj, OpenHashMap.empty).asInstanceOf[OpenHashMap[Class[E], SortedListeners[L]]]
     
     map.get(event) match {
       case Some(listeners) => 

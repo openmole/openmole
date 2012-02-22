@@ -17,8 +17,6 @@
 
 package org.openmole.misc.eventdispatcher
 
-import scala.collection.immutable.TreeMap
-
 class SortedListeners[T] extends Iterable[T] {
   
   class Listners(listners: List[(Int, T)]) {

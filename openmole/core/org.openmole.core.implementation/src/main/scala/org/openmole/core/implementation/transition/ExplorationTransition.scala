@@ -63,7 +63,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
 
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
-    val subSubMole = SubMoleExecution(subMole)
+    val subSubMole = subMole.newChild
     
     registerAggregationTransitions(ticket, subSubMole)
     submitIn(context, ticket, subSubMole)

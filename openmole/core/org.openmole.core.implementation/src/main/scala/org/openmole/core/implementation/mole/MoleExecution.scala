@@ -18,16 +18,13 @@
 package org.openmole.core.implementation.mole
 
 import java.util.UUID
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob.moleJobOrdering
@@ -41,18 +38,13 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.job.State.State
-import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.data.IDataChannel
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IInstantRerun
-import scala.collection.immutable.TreeMap
-import scala.collection.immutable.TreeSet
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -73,17 +65,6 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   import IMoleExecution._
   import MoleExecution._
-
-  @transient lazy private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
-    override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
-      ev match {
-        case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
-        case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
-        case ev: IMoleJob.ExceptionRaised => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.ExceptionRaised(job, ev.exception, ev.level))
-      }
-  }
- 
- // private var inProgress = TreeSet.empty[IMoleJob] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
  
   private val _started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
@@ -94,24 +75,18 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val currentJobId = new AtomicLong
 
   
-  val rootSubMoleExecution = SubMoleExecution(this)
+  val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
   val exceptions = new ListBuffer[Throwable]
   
 
-  override def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit =
+  def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket): Unit =
     if(!canceled.get) {
       val instant = synchronized {
         EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
         EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
-    
-        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
-        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
-        EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.ExceptionRaised])
-
-        //inProgress += moleJob
         instantRerun.rerun(moleJob, capsule)
       }
         
@@ -119,7 +94,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   
 
-  override def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
+  def submitToEnvironment(job: IJob, capsule: ICapsule): Unit = {
     (environmentSelection.select(capsule) match {
         case Some(environment) => environment
         case None => LocalExecutionEnvironment
@@ -127,9 +102,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
  
   def start(context: IContext): this.type = {
-    val ticket = nextTicket(rootTicket)
-    val subMole = SubMoleExecution(rootSubMoleExecution)
-    subMole.submit(mole.root, context, ticket)
+    rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     this
   }
   
@@ -179,6 +152,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
-  override def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
-        
+  def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
+ 
+  
 }

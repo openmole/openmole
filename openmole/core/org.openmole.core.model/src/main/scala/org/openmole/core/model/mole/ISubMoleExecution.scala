@@ -38,12 +38,12 @@ trait ISubMoleExecution {
   def isRoot: Boolean
   def moleExecution: IMoleExecution
     
-  def +=(submoleExecution: ISubMoleExecution)
-  def -=(submoleExecution: ISubMoleExecution)
+  //def +=(submoleExecution: ISubMoleExecution)
+  //def -=(submoleExecution: ISubMoleExecution)
    
   def jobs: Iterable[IMoleJob]
-  def nbJobInProgress: Int
-  def nbJobGrouping: Int
+  //def nbJobInProgress: Int
+  //def nbJobGrouping: Int
   def submitting_=(b: Boolean)
   
   def cancel
@@ -54,5 +54,6 @@ trait ISubMoleExecution {
 
   def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
   def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy])
-
+  def newChild: ISubMoleExecution 
+ 
 }
