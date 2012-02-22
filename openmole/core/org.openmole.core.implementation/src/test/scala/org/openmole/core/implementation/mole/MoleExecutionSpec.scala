@@ -42,10 +42,10 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     
     var group = true
     
-    override def group(context: IContext): IMoleJobGroup = {
+    override def group(context: IContext) = {
       val ret = new MoleJobGroup(Array(group))
       group = !group
-      ret
+      (ret, false)
     }
   }
   

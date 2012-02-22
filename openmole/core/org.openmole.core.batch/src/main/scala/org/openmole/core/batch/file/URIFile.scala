@@ -258,7 +258,6 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def openInputStream: InputStream = withToken(openInputStream(_))
 
   override def openInputStream(token: AccessToken): InputStream = trycatch {
-
     val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL);
 
     trycatch(

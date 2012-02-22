@@ -20,7 +20,5 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.data.IContext
 
 trait IGroupingStrategy {
-  
-  @throws(classOf[Throwable])
-  def group(context: IContext): IMoleJobGroup
+  def group(context: IContext): (IMoleJobGroup, Boolean)
 }

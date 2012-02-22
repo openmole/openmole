@@ -53,6 +53,6 @@ class NumberOfRandomizedBatchGroupingStrategy(numberOfBatch: Int, seed: Option[I
     case Some(seed) => new Random(seed)
   }
 
-  override def group(context: IContext): IMoleJobGroup = new MoleJobGroup(Array[Any](random.nextInt(numberOfBatch)))
+  override def group(context: IContext) = (new MoleJobGroup(Array[Any](random.nextInt(numberOfBatch))), false)
 
 }

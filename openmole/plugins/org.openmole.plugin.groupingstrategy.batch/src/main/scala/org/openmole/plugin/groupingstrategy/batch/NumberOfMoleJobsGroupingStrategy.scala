@@ -20,7 +20,6 @@ package org.openmole.plugin.groupingstrategy.batch
 import org.openmole.core.implementation.mole.MoleJobGroup
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.core.model.mole.IMoleJobGroup
 
 /**
  * Group mole jobs by group of numberOfMoleJobs.
@@ -32,13 +31,14 @@ class NumberOfMoleJobsGroupingStrategy(numberOfMoleJobs: Int) extends IGroupingS
   private var currentBatchNumber = 0
   private var currentNumberOfJobs = 0
 
-  override def group(context: IContext): IMoleJobGroup = {
+  override def group(context: IContext) = {
     val ret = new MoleJobGroup(Array(currentBatchNumber))
     currentNumberOfJobs += 1
     if(currentNumberOfJobs >= numberOfMoleJobs) {
       currentNumberOfJobs = 0
       currentBatchNumber += 1
+      (ret, true)
     }
-    ret
+    (ret, false)
   }
 }

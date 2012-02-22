@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.job
 
-import org.openmole.core.implementation.mole.SubMoleExecution
 import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.data.IContext

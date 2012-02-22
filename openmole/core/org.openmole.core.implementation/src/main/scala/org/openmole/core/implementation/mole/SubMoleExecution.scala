@@ -56,23 +56,6 @@ import scala.collection.mutable.SynchronizedSet
 
 class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: MoleExecution) extends ISubMoleExecution {
   
-  /*val jobListener = new EventListener[IMoleJob] {
-
-   override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
-   ev match {
-   case ev: IMoleJob.StateChanged => 
-   ev.newState match {
-   case COMPLETED => jobFinished(job)
-   case FAILED | CANCELED => jobFailedOrCanceled(job)
-   case _ =>
-   }
-   EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
-   case ev: IMoleJob.ExceptionRaised => 
-   EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, ev.exception, ev.level))
-
-   }
-   }*/
-  
   private var _submitting = false
   private var _nbJobGrouping = 0
   
@@ -130,7 +113,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     
     checkFinished(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
-//    EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
+    //EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
   }
   
   private def jobFinished(job: IMoleJob) = synchronized {
@@ -152,7 +135,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     } finally {
       checkFinished(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
-  //    EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(capsule))
+      //    EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(capsule))
     }
     if(allJobsWaitingInGroup) submitJobs
   }
@@ -173,9 +156,6 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
       }
       
       _jobs += (moleJob -> (capsule, ticket))
-      // EventDispatcher.listen(moleJob, Priority.HIGH, jobListener, classOf[IMoleJob.StateChanged])
-      // EventDispatcher.listen(moleJob, Priority.NORMAL, jobListener, classOf[IMoleJob.ExceptionRaised])
-
       moleExecution.submit(moleJob, capsule, this, ticket)
     }
   }
@@ -186,10 +166,15 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
       case _ => 
         grouping match {
           case Some(strategy) =>
-            val category = strategy.group(moleJob.context)
+            val (category, complete) = strategy.group(moleJob.context)
             val key = (capsule, category)
-            waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
-            _nbJobGrouping += 1
+            if(!complete) {
+              waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
+              _nbJobGrouping += 1
+            } else {
+              val toSubmit = waitingJobs.remove(key).getOrElse(new ListBuffer[IMoleJob]) += moleJob
+              submitGrouped(toSubmit, capsule)
+            }
           case None =>
             val job = new Job(moleExecution.id, List(moleJob))
             moleExecution.submitToEnvironment(job, capsule)
@@ -199,12 +184,16 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     
   def newChild: ISubMoleExecution = new SubMoleExecution(Some(this), moleExecution)
   
+  private def submitGrouped(jobs: Iterable[IMoleJob], capsule: ICapsule) = {
+    
+    val job = new Job(moleExecution.id, jobs)
+    moleExecution.submitToEnvironment(job, capsule)
+    _nbJobGrouping += job.moleJobs.size
+  }
+  
   private def submitJobs = synchronized {
     waitingJobs.foreach {
-      case((capsule, category), jobs) => 
-        val job = new Job(moleExecution.id, jobs)
-        moleExecution.submitToEnvironment(job, capsule)
-        _nbJobGrouping += job.moleJobs.size
+      case((capsule, category), jobs) => submitGrouped(jobs, capsule)
     }
     waitingJobs.empty
   }
