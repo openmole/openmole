@@ -20,11 +20,13 @@ package org.openmole.core.model.execution
 
 import java.util.logging.Level
 import org.openmole.core.model.job.IJob
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.eventdispatcher.Event
 
 object IEnvironment {
   case class JobSubmitted(val job: IExecutionJob) extends Event[IEnvironment]
-  case class ExceptionRaised(val job: IExecutionJob, val exception: Throwable, level: Level) extends Event[IEnvironment]
+  case class ExceptionRaised(val job: IExecutionJob, val exception: Throwable, val level: Level) extends Event[IEnvironment]
+  case class MoleJobExceptionRaised(override val job: IExecutionJob, override val exception: Throwable, override val level: Level, val moleJob: IMoleJob) extends ExceptionRaised(job, exception, level)
 }
 
 trait IEnvironment {

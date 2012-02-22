@@ -17,32 +17,44 @@
 
 package org.openmole.runtime
 
+import java.util.concurrent.Semaphore
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.eventdispatcher.Event
 
-class ContextSaver extends EventListener[IMoleJob] {
+class ContextSaver(val nbJobs: Int) {
+  
+  val allFinished = new Semaphore(0)
+  
+  @volatile var nbFinished = 0
   
   var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp[State]])]
   def results = _results
 
-  override def triggered(job: IMoleJob, ev: Event[IMoleJob])= synchronized {
-    ev match {
-      case ev: IMoleJob.StateChanged =>
-        ev.newState match {
-          case COMPLETED | FAILED =>
-            job.exception match {
-              case None => _results += job.id -> (Left(job.context), job.timeStamps)
-              case Some(t) => _results += job.id -> (Right(t), job.timeStamps)
-            }
-          case _ =>
+  def save(job: IMoleJob, oldState: State, newState: State) = synchronized {
+    newState match {
+      case COMPLETED | FAILED =>
+        job.exception match {
+          case None => _results += job.id -> (Left(job.context), job.timeStamps)
+          case Some(t) => _results += job.id -> (Right(t), job.timeStamps)
         }
+      case _ =>
+    }
+    
+    if (newState.isFinal) {
+      nbFinished += 1
+      if (nbFinished >= nbJobs) allFinished.release
     }
   }
+  
+  def waitAllFinished = {
+    allFinished.acquire
+    allFinished.release
+  }
+  
+  
   
 }

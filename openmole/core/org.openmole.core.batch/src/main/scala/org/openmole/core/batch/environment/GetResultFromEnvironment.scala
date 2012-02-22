@@ -38,6 +38,7 @@ import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
@@ -54,7 +55,7 @@ import BatchEnvironment._
 
 object GetResultFromEnvironment extends Logger
 
-class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchJob: BatchJob) extends Callable[Unit] {
+class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
   import communicationStorage._
   
@@ -99,7 +100,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
                       moleJob.finished(context, executionResult._2)
                       //successfull +=1 
                     case Right(e) => 
-                      EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, WARNING))
+                      EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.MoleJobExceptionRaised(batchExecutionJob, e, SEVERE, moleJob))
                       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
                   }
                 } //else logger.fine("Molejob " + moleJob.id + " is finished.")
@@ -107,8 +108,6 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
             } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
           }
 
-          //If sucessfull for full group update stats
-          //if (successfull == job.moleJobs.size) successFullFinish(firstRunning, lastCompleted)
       }
     } finally UsageControl.get(communicationStorage.description).releaseToken(token)
   }

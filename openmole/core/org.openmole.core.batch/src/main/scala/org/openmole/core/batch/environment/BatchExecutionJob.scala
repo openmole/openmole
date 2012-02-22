@@ -135,7 +135,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
                                                                            batchJob.resultPath, 
                                                                            job, 
                                                                            executionEnvironment, 
-                                                                           batchJob)))
+                                                                           this)))
       case Some(f) => 
         if (f.isDone) {
           f.get

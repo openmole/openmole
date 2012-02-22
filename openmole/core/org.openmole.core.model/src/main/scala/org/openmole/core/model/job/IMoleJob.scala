@@ -17,19 +17,16 @@
 
 package org.openmole.core.model.job
 
-import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.task.ITask
-import java.util.logging.Level
 import org.openmole.core.model.data.IContext
-import org.openmole.misc.eventdispatcher.Event
 
 object IMoleJob {
 
-  case class TransitionPerformed(val capsule: ICapsule) extends Event[IMoleJob]
+  /*case class TransitionPerformed(val capsule: ICapsule) extends Event[IMoleJob]
   case class JobFailedOrCanceled(val capsule: ICapsule) extends Event[IMoleJob]
   case class StateChanged(val newState: State.State, val oldState: State.State) extends Event[IMoleJob]
-  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleJob]
+  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleJob]*/
   
   implicit val moleJobOrdering = new Ordering[IMoleJob] {
     

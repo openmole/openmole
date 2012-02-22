@@ -162,7 +162,6 @@ class URIFile(val location: String) extends IURIFile with Id {
     trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
   }
     
-
   private def fetchEntryAsDirectory(token: AccessToken): NSDirectory = trycatch {
     val task = NSFactory.createNSDirectory(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL)
     trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)

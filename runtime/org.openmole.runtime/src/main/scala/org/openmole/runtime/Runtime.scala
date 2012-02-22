@@ -36,10 +36,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.batch.message.ContextResults
-import org.openmole.core.batch.message.ExecutionMessage
-import org.openmole.core.batch.message.FileMessage
-import org.openmole.core.batch.message.RuntimeResult
+import org.openmole.core.batch.message._
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.tools.service.Retry._
@@ -133,21 +130,19 @@ class Runtime {
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
-
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))     
-      val allMoleJobs =  tis.applyAndClose( e => {SerializerService.deserializeReplaceFiles[IMoleJob](tis, usedFiles)})
+      val runableTasks = tis.applyAndClose(e => {SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles)})
       jobsFileCache.delete
 
+       val saver = new ContextSaver(runableTasks.size)
+       val allMoleJobs = runableTasks.map{_.toMoleJob(saver.save)}
+      
       /* --- Submit all jobs to the local environment --*/
-      val allFinished = new AllFinished
-      val saver = new ContextSaver
-
       for (toProcess <- allMoleJobs) {
-        EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
-        allFinished.registerJob(toProcess)
+        //EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
         LocalExecutionEnvironment.default.submit(toProcess)
       }
-      allFinished.waitAllFinished
+      saver.waitAllFinished
 
       val contextResults = new ContextResults(saver.results)
       val contextResultFile = Workspace.newFile

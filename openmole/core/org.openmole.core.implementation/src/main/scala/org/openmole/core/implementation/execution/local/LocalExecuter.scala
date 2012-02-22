@@ -18,6 +18,8 @@
 package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.model.execution.ExecutionState
+import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.IEnvironment.MoleJobExceptionRaised
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
@@ -46,11 +48,15 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         for (moleJob <- job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
-            moleJob.performAndSignalException
+            moleJob.perform
+            
+            moleJob.exception match {
+              case Some(e) => EventDispatcher.trigger(environment: IEnvironment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+              case _ =>
+            }
           }
         }
         executionJob.state = ExecutionState.DONE
-        //StatisticRegistry.sample(environment, job, new StatisticSample(executionJob.timeStamps.head.time, running, System.currentTimeMillis))
       } catch {
         case e: InterruptedException => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
         case e => logger.log(SEVERE, null, e)

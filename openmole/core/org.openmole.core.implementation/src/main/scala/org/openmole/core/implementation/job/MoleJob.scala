@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.job
 
+import org.openmole.core.implementation.mole.SubMoleExecution
 import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.data.IContext
@@ -25,27 +26,20 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.ITask
-import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger {
-  
-  implicit def moleJobDecorator(moleJob: IMoleJob) = new {
-    def performAndSignalException = {
-      moleJob.perform
-      moleJob.exception match {
-        case None =>
-        case Some(e) =>
-          EventDispatcher.trigger(moleJob, new IMoleJob.ExceptionRaised(e, SEVERE))
-          logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
-      }
-    }
-  }
+  type StateChangedCallBack = (IMoleJob, State, State) => Unit
              
 }
+import MoleJob._
 
-class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId) extends IMoleJob {
+class MoleJob(
+  val task: ITask,
+  private var _context: IContext,
+  val id: MoleJobId,
+  val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
    
   import IMoleJob._
   import MoleJob._
@@ -72,9 +66,10 @@ class MoleJob(val task: ITask, private var _context: IContext, val id: MoleJobId
         Some(oldState)
       } else None
     }
+    
     changed match {
-      case Some(oldState) => EventDispatcher.trigger(this, new IMoleJob.StateChanged(state, oldState))
-      case None =>
+      case Some(oldState) => stateChangedCallBack(this, oldState, state)
+      case _ =>
     }
   }
 
