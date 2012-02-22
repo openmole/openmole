@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.mole
 
-import java.util.logging.Level
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.ISubMoleExecution
@@ -113,7 +112,6 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     
     checkFinished(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
-    //EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
   }
   
   private def jobFinished(job: IMoleJob) = synchronized {
@@ -135,7 +133,6 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     } finally {
       checkFinished(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
-      //    EventDispatcher.trigger(job, new IMoleJob.TransitionPerformed(capsule))
     }
     if(allJobsWaitingInGroup) submitJobs
   }

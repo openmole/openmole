@@ -21,8 +21,15 @@ import org.openmole.core.implementation.job.MoleJob
 
 import org.openmole.core.implementation.job.MoleJob.StateChangedCallBack
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.task.ITask
+
+object RunnableTask {
+  
+  def apply(moleJob: IMoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
+  
+}
 
 class RunnableTask(val task: ITask, val context: IContext, val id: MoleJobId) {
   def toMoleJob(stateChangedCallBack: StateChangedCallBack) = new MoleJob(task, context, id, stateChangedCallBack)

@@ -25,6 +25,7 @@ import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.Callable
 import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.message.RunnableTask
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.message.ExecutionMessage
 import org.openmole.core.batch.message.FileMessage
@@ -106,7 +107,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
         if(!moleJob.isFinished) {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
-            val serializationResult = SerializerService.serializeGetPluginClassAndFiles(moleJob, moleJobFile)
+            val serializationResult = SerializerService.serializeGetPluginClassAndFiles(
+              RunnableTask(moleJob), 
+              moleJobFile)
             
             files ++= serializationResult.files
             classes ++= serializationResult.classes
