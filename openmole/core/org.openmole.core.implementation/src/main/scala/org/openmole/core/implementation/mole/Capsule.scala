@@ -42,8 +42,6 @@ import org.openmole.core.model.data.IDataSet
 class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
-
-  
   
   private val _inputSlots = new HashSet[ISlot]
   private val _defaultInputSlot = new Slot(this)

@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.mole
 
-import java.util.TreeMap
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.ISubMoleExecution
@@ -32,7 +31,6 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IGroupingStrategy
@@ -45,11 +43,13 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.job.MoleJob._
+import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import collection.JavaConversions._
+import scala.collection.mutable.SynchronizedSet
 
 object SubMoleExecution {
   
@@ -77,15 +77,12 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   }
   
   private var _submitting = false
-  private var waiting = List[IJob]()
   private var _nbJobGrouping = 0
   
-  private var _childs = new HashSet[ISubMoleExecution]
+  private var _childs = new HashSet[ISubMoleExecution] with SynchronizedSet[ISubMoleExecution]
+  private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
   
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
-  
-  private var _jobs = new TreeMap[IMoleJob, (ICapsule, ITicket)](IMoleJob.moleJobOrdering)
-
   private var canceled = false
   
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
@@ -96,11 +93,11 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
   
   override def isRoot = !parent.isDefined
   
-  override def nbJobInProgress = synchronized {
+  override def nbJobInProgress = {
     _jobs.size + childs.map{_.nbJobInProgress}.sum
   }
 
-  override def nbJobGrouping = synchronized {
+  override def nbJobGrouping = {
     _nbJobGrouping + childs.map{_.nbJobGrouping}.sum
   }
   
@@ -116,28 +113,32 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
     canceled = true
   }
   
-  override def childs = synchronized { _childs.toList }
+  override def childs = _childs.toList
   
-  override def +=(submoleExecution: ISubMoleExecution) = synchronized {
+  override def +=(submoleExecution: ISubMoleExecution) = {
     _childs += submoleExecution
   }
 
-  override def -=(submoleExecution: ISubMoleExecution) = synchronized {
+  override def -=(submoleExecution: ISubMoleExecution) = {
     _childs -= submoleExecution
   }
   
-  override def jobs = synchronized {
+  override def jobs = {
     _jobs.keys.toList ::: childs.flatMap(_.jobs.toList)
   }
   
   private def jobFailedOrCanceled(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = Option(_jobs.remove(job)).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))    
+    val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))    
+    _jobs -= job
+    
     checkFinished(ticket)
     EventDispatcher.trigger(job, new IMoleJob.JobFailedOrCanceled(capsule))
   }
   
   private def jobFinished(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = Option(_jobs.remove(job)).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+    val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+    _jobs -= job
+    
     try {
       capsule match {
         case c: IMasterCapsule => masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(job.context))
@@ -174,8 +175,6 @@ class SubMoleExecution(val parent: Option[ISubMoleExecution], val moleExecution:
       
       _jobs += (moleJob -> (capsule, ticket))
       EventDispatcher.listen(moleJob, Priority.HIGH, jobListener, classOf[IMoleJob.StateChanged])
-      
-      //_nbJobInProgress -= 1
       moleExecution.submit(moleJob, capsule, this, ticket)
     }
   }
