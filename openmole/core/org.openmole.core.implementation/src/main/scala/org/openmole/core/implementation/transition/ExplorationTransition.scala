@@ -63,7 +63,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
 
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
-    val subSubMole = SubMoleExecution(subMole.moleExecution, subMole)
+    val subSubMole = SubMoleExecution(subMole)
     
     registerAggregationTransitions(ticket, subSubMole)
     submitIn(context, ticket, subSubMole)
@@ -73,13 +73,14 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
     val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
-    var size = 0
+//   var size = 0
         
     val endTask = end.capsule.taskOrException
+    subMole.submitting_=(true)
+    
     
     for(value <- values) {
-      size += 1
-      subMole.incNbJobInProgress(1)
+//      subMole.incNbJobInProgress(1)
 
       val newTicket = subMole.moleExecution.nextTicket(ticket)
       
@@ -98,8 +99,8 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
       }
       submitNextJobsIfReady(ListBuffer() ++ variables.toContext, newTicket, subMole)
     }
-
-    subMole.decNbJobInProgress(size)
+    
+    subMole.submitting_=(false)
   }
   
   private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {

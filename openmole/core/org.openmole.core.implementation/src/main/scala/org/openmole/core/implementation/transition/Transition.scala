@@ -30,9 +30,9 @@ import org.openmole.misc.tools.service.LockRepository
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 
-object Transition {
+/*object Transition {
   val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
-}
+}*/
 
 class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends ITransition {
 
@@ -55,8 +55,6 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
   def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
 
   def this(start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-
-  import Transition._
   
   start.addOutputTransition(this)
   end += this
@@ -67,9 +65,9 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
   }
   
   protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
-    val lockKey = (end, subMole, ticket)
-    lockRepository.lock(lockKey)
-    try {
+    //val lockKey = (end, subMole, ticket)
+    //lockRepository.lock(lockKey)
+   // try {
       import subMole.moleExecution
       val registry = subMole.transitionRegistry
       registry.register(this, ticket, context)
@@ -90,7 +88,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
         val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
         subMole.submit(end.capsule, newContext, newTicket)
       }
-    } finally lockRepository.unlock(lockKey)
+  //  } finally lockRepository.unlock(lockKey)
   }
 
   override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =

@@ -104,7 +104,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
   }
   
   "A end of exploration transition" should "end the master slave process" in {
-    var endCapsExecuted = 0
+    @volatile var endCapsExecuted = 0
     
     val data = List("A","A","B","C")
     val i = new Prototype("i", classOf[String])
@@ -121,7 +121,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     
     val emptyC = new Capsule(emptyT)
     
-    val testT = new Task("Test") {
+    val testT = new Task("Test end") {
       override def process(context: IContext) = {
         context.contains(isaved) should equal (true)
         context.value(isaved).get.size should equal (10)

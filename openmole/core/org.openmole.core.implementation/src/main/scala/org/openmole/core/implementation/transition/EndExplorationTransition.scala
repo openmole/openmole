@@ -48,11 +48,10 @@ class EndExplorationTransition(trigger: ICondition, start: ICapsule, end: ISlot,
   
   override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     if(trigger.evaluate(context)) {
-      subMole.cancel
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-
       super._perform(context, parentTicket, subMoleParent)
+      subMole.cancel
     }
   }
 

@@ -33,19 +33,18 @@ object ISubMoleExecution {
 trait ISubMoleExecution {
  
   def parent: Option[ISubMoleExecution]
+  def childs: Iterable[ISubMoleExecution]
+  
   def isRoot: Boolean
   def moleExecution: IMoleExecution
-
-  def nbJobInProgress: Int
     
-  def addChild(submoleExecution: ISubMoleExecution)
-  def removeChild(submoleExecution: ISubMoleExecution)
+  def +=(submoleExecution: ISubMoleExecution)
+  def -=(submoleExecution: ISubMoleExecution)
    
-  def incNbJobInProgress(value: Int): Int
-  def decNbJobInProgress(value: Int): Int
-    
-  def incNbJobWaitingInGroup(value: Int): Int
-  def decNbJobWaitingInGroup(value: Int): Int
+  def jobs: Iterable[IMoleJob]
+  def nbJobInProgress: Int
+  def nbJobGrouping: Int
+  def submitting_=(b: Boolean)
   
   def cancel
   

@@ -77,14 +77,14 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   @transient lazy private val moleExecutionAdapterForMoleJob = new EventListener[IMoleJob] {
     override def triggered(job: IMoleJob, ev: Event[IMoleJob]) = 
       ev match {
-        case ev: IMoleJob.StateChanged => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.OneJobStatusChanged(job, ev.newState, ev.oldState))
         case ev: IMoleJob.TransitionPerformed => MoleExecution.this.jobOutputTransitionsPerformed(job, ev.capsule)
         case ev: IMoleJob.JobFailedOrCanceled => MoleExecution.this.jobFailedOrCanceled(job, ev.capsule)
         case ev: IMoleJob.ExceptionRaised => EventDispatcher.trigger(MoleExecution.this, new IMoleExecution.ExceptionRaised(job, ev.exception, ev.level))
       }
   }
  
-  private var inProgress = TreeSet.empty[IMoleJob] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
+ // private var inProgress = TreeSet.empty[IMoleJob] //with SynchronizedMap[IMoleJob, (ISubMoleExecution, ITicket)] 
+ 
   private val _started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
   private val _finished = new Semaphore(0)
@@ -93,6 +93,8 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
 
+  
+  val rootSubMoleExecution = SubMoleExecution(this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
@@ -105,12 +107,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
         EventDispatcher.trigger(this, new JobInCapsuleStarting(moleJob, capsule))
         EventDispatcher.trigger(this, new IMoleExecution.OneJobSubmitted(moleJob))
     
-        EventDispatcher.listen(moleJob, Priority.HIGH, moleExecutionAdapterForMoleJob, classOf[IMoleJob.StateChanged])
         EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.TransitionPerformed])
         EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.JobFailedOrCanceled])
         EventDispatcher.listen(moleJob, Priority.NORMAL, moleExecutionAdapterForMoleJob, classOf[IMoleJob.ExceptionRaised])
 
-        inProgress += moleJob
+        //inProgress += moleJob
         instantRerun.rerun(moleJob, capsule)
       }
         
@@ -127,7 +128,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
  
   def start(context: IContext): this.type = {
     val ticket = nextTicket(rootTicket)
-    val subMole = SubMoleExecution(this)
+    val subMole = SubMoleExecution(rootSubMoleExecution)
     subMole.submit(mole.root, context, ticket)
     this
   }
@@ -139,14 +140,13 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   
   override def cancel: this.type = {
     if(!canceled.getAndSet(true)) {
-      for (moleJob <- inProgress.keySet) moleJob.cancel
-      inProgress = TreeSet.empty[IMoleJob]
+      rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
     this
   }
 
-  override def moleJobs = inProgress
+  override def moleJobs = rootSubMoleExecution.jobs
 
   override def waitUntilEnded = {
     _finished.acquire
@@ -155,7 +155,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     this
   }
     
-  private def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
+  def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
     moleJob.exception match {
       case None =>
       case Some(e) => exceptions += e
@@ -163,11 +163,9 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 
-  private def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
+  def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
     if(!canceled.get)  {
-      inProgress -= job
       instantRerun.jobFinished(job, capsule)
-     
       if (finished) {  
         _finished.release
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
@@ -175,7 +173,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
     }
   }
   
-  override def finished: Boolean = inProgress.isEmpty
+  override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
   
   override def started: Boolean = _started.get
 
