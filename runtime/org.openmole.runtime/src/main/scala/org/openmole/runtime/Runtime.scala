@@ -134,8 +134,8 @@ class Runtime {
       val runableTasks = tis.applyAndClose(e => {SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles)})
       jobsFileCache.delete
 
-       val saver = new ContextSaver(runableTasks.size)
-       val allMoleJobs = runableTasks.map{_.toMoleJob(saver.save)}
+      val saver = new ContextSaver(runableTasks.size)
+      val allMoleJobs = runableTasks.map{_.toMoleJob(saver.save)}
       
       /* --- Submit all jobs to the local environment --*/
       for (toProcess <- allMoleJobs) {

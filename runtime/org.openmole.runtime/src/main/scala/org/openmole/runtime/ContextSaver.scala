@@ -29,8 +29,7 @@ class ContextSaver(val nbJobs: Int) {
   
   val allFinished = new Semaphore(0)
   
-  @volatile var nbFinished = 0
-  
+  var nbFinished = 0
   var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp[State]])]
   def results = _results
 
