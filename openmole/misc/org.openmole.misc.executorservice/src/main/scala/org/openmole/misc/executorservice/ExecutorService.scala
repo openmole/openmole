@@ -25,7 +25,7 @@ import scala.collection.mutable.HashMap
 
 object ExecutorService {
   private val NbTread = new ConfigurationLocation("ExecutorService", "NbThreadsByExecutorTypes")
-  Workspace += (NbTread, "20")
+  Workspace += (NbTread, "50")
 
   private val executorServices = new HashMap[ExecutorType.Value, java.util.concurrent.ExecutorService]
   private def nbThreads = Workspace.preferenceAsInt(ExecutorService.NbTread)
@@ -35,7 +35,8 @@ object ExecutorService {
     getOrCreateExecutorService(purpose)
   }
     
-  private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = 
+  private def getOrCreateExecutorService(purpose: ExecutorType.Value): java.util.concurrent.ExecutorService = synchronized {
     executorServices.getOrElseUpdate(purpose, Executors.newFixedThreadPool(nbThreads, daemonThreadFactory))
+  }
   
 }
