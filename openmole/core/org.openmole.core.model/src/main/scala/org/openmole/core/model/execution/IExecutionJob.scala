@@ -17,16 +17,14 @@
 
 package org.openmole.core.model.execution
 
-import java.util.logging.Level
 import org.openmole.core.model.job.IJob
-import org.openmole.misc.eventdispatcher.Event
 import org.openmole.core.model.tools.ITimeStamp
 import ExecutionState._
 
-object IExecutionJob {
+/*object IExecutionJob {
   case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IExecutionJob]
   case class StateChanged(val newState: ExecutionState, oldState: ExecutionState) extends Event[IExecutionJob]
-}
+}*/
 
 trait IExecutionJob {  
   def state: ExecutionState

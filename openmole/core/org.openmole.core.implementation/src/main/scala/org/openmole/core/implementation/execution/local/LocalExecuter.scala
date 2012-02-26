@@ -19,7 +19,7 @@ package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.execution.IEnvironment.MoleJobExceptionRaised
+import org.openmole.core.model.execution.IEnvironment._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
@@ -58,8 +58,14 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         }
         executionJob.state = ExecutionState.DONE
       } catch {
-        case e: InterruptedException => if (!stop) logger.log(WARNING, "Interrupted despite stop is false.", e)  
-        case e => logger.log(SEVERE, null, e)
+        case e: InterruptedException => 
+          if (!stop) {
+            EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
+            logger.log(WARNING, "Interrupted despite stop is false.", e)  
+          }
+        case e => 
+          EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
+          logger.log(SEVERE, null, e)
       } finally executionJob.state = ExecutionState.KILLED
     }
   }

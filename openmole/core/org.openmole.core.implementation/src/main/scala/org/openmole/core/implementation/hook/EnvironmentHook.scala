@@ -35,32 +35,21 @@ class EnvironmentHook(private val environment: WeakReference[IEnvironment]) exte
   import Priority._
   import EventDispatcher._
   import IEnvironment._
-  import IExecutionJob._
   
   resume
   
   override def resume = {
-    listen(environment(), HIGH, environmentListener, classOf[JobSubmitted])
+    listen(environment(), HIGH, environmentListener, classOf[JobStateChanged])
   }
   
   override def release = {
-    unlisten(environment(), environmentListener, classOf[JobSubmitted])
+    unlisten(environment(), environmentListener, classOf[JobStateChanged])
   }
   
-  @transient lazy val environmentListener = new EventListener[IEnvironment] {
-    override def triggered(obj: IEnvironment, ev: Event[IEnvironment]) =
+  val environmentListener = new EventListener[IEnvironment] {
+    override def triggered(obj: IEnvironment, ev: Event[IEnvironment]) = 
       ev match {
-        case ev: JobSubmitted => 
-          try jobStatusChanged(ev.job, SUBMITTED, READY)
-          finally listen(ev.job, new ExecutionJobListner, classOf[StateChanged])
-        case _ =>
-      }
-  }
-  
-  class ExecutionJobListner extends EventListener[IExecutionJob] {
-    override def triggered(obj: IExecutionJob, ev: Event[IExecutionJob]) = 
-      ev match {
-        case ev: StateChanged => jobStatusChanged(obj, ev.newState, ev.oldState)
+        case ev: JobStateChanged => jobStatusChanged(ev.job, ev.newState, ev.oldState)
         case _ =>
       }
     

@@ -35,6 +35,7 @@ import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.implementation.tools.TimeStamp
 import BatchEnvironment._
@@ -114,7 +115,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
       case (e: CancellationException) => logger.log(FINE, "Operation interrupted cause job was killed.", e)
       case (e: ShouldBeKilledException) => kill
       case e =>
-        EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, WARNING))
+        EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.ExceptionRaised(this, e, WARNING))
         logger.log(WARNING, "Error in job update: " + e.getMessage)
         logger.log(FINE, "Stack of the error in job update" , e)
         kill
@@ -122,7 +123,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
     val newState = state
     if(oldState != newState) {
       timeStamps += new TimeStamp(newState)
-      EventDispatcher.trigger(this, new IExecutionJob.StateChanged(newState, oldState))
+      EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.JobStateChanged(this, newState, oldState))
     }
     !killed.get
   }
@@ -150,7 +151,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
       Some(js.submit(serializedJob, token))
     } catch {
       case e => 
-        EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, FINE))
+        EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.ExceptionRaised(this, e, FINE))
         logger.log(FINE, "Error durring job submission.", e)
         None
     } finally UsageControl.get(js.description).releaseToken(token)
@@ -166,16 +167,16 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
         ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
       } catch {
         case e => 
-          EventDispatcher.trigger(this, new IExecutionJob.ExceptionRaised(e, FINE))
+          EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.ExceptionRaised(this, e, FINE))
           logger.log(FINE, "Error durring job cleaning.", e)
       }
     }
 
-  def kill = synchronized {
+  def kill = {
     val oldState = state
     if (!killed.getAndSet(true)) {
       try {
-        EventDispatcher.trigger(this, new IExecutionJob.StateChanged(KILLED, oldState))
+        EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.JobStateChanged(this, KILLED, oldState))
         copyToEnvironmentExecFuture.cancel(true)      
         clean
       } finally {

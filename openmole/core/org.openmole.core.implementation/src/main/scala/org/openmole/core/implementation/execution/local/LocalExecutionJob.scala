@@ -23,6 +23,7 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
 
 class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob) extends ExecutionJob(environment, job) {
@@ -32,7 +33,7 @@ class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob) exten
   
   def state_=(state: ExecutionState) {
     timeStamps += (new TimeStamp(state))
-    EventDispatcher.trigger(this, new IExecutionJob.StateChanged(state, this.state))
+    EventDispatcher.trigger(environment, new IEnvironment.JobStateChanged(this, state, this.state))
     _state = state
   }
 }

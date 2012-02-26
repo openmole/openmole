@@ -18,31 +18,5 @@
 package org.openmole.core.implementation.execution
 
 import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.execution.IExecutionJob
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.EventListener
 
-abstract class Environment extends IEnvironment {
- 
-  class JobSubmissionListner extends EventListener[IEnvironment] {
-    override def triggered(job: IEnvironment, ev: Event[IEnvironment]) = {
-      ev match {
-        case ev: IEnvironment.JobSubmitted => 
-          EventDispatcher.listen(ev.job, new JobExceptionListner, classOf[IExecutionJob.ExceptionRaised])
-      }
-    } 
-  }
-  
-  class JobExceptionListner extends EventListener[IExecutionJob] {
-    override def triggered(job: IExecutionJob, ev: Event[IExecutionJob]) {
-      ev match  {
-        case ev: IExecutionJob.ExceptionRaised => 
-          EventDispatcher.trigger(Environment.this, new IEnvironment.ExceptionRaised(job, ev.exception, ev.level))
-      }
-    }
-  } 
-  
-  EventDispatcher.listen(this.asInstanceOf[IEnvironment], new JobSubmissionListner, classOf[IEnvironment.JobSubmitted])
-   
-}
+abstract class Environment extends IEnvironment
