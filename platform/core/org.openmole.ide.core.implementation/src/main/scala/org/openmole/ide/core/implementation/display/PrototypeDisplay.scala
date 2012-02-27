@@ -24,7 +24,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.display.IPrototypeDisplay
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.openmole.ide.core.implementation.action.DetachPrototypeAction
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy._

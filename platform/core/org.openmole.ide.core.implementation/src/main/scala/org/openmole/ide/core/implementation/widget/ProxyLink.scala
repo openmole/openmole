@@ -15,19 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.panel
+package org.openmole.ide.core.implementation
 
-import org.openide.util.ImageUtilities
-import org.openmole.ide.misc.widget.PopupMenu
-import scala.swing.Menu
-import scala.swing.Button
-import scala.swing.event.ButtonClicked
+import java.awt.Cursor
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import scala.swing.Label
+import scala.swing.event.MousePressed
 
-class PopupToolBarPresenter(t: String, menu: Menu) extends Button(t){
-val popup = new PopupMenu {contents += menu}
-icon = ImageUtilities.loadImageIcon("org/openide/awt/resources/arrow.png", true)
-listenTo(mouse.clicks)
-    reactions += {
-      case x:ButtonClicked => popup.show(this, 0, size.height)
-    }
+class ProxyLink(proxy: IDataProxyUI,textSize: Int = 4) extends Label {
+
+  cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+  link(proxy.dataUI.displayName)
+  
+  listenTo(this.mouse.clicks)
+  reactions += {
+    case e: MousePressed => 
+  }
+  
+  def link(t: String) = text = "<html><font color=\"#0000CF\" size=\""+textSize+"\">"+t+"</font></html>"
+  
+  
 }

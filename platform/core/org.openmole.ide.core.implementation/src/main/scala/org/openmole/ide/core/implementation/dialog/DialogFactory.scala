@@ -54,10 +54,4 @@ object DialogFactory {
       Some(TopComponentsManager.addTopComponent(textField.text))
     else None
   }
-  
-  def groovyEditor(content: String) : String = {
-    val editor = new GroovyEditor{editor.text = content;preferredSize = new Dimension(150,150)}
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, "Conditon")).equals(NotifyDescriptor.OK_OPTION)) editor.editor.text
-    else content
-  }
 }

@@ -24,18 +24,13 @@ import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.netbeans.api.visual.anchor.AnchorShape
 import org.netbeans.api.visual.anchor.AnchorShapeFactory
-import org.netbeans.api.visual.border.BorderFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
-import org.netbeans.api.visual.widget.LabelWidget
-import org.netbeans.api.visual.widget.Scene
-import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.commons.Constants
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Label
 import scala.swing.event.MousePressed
 
@@ -56,7 +51,6 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var t
   toBeEdited = true
   
   def setLabelVisible= {
-    //label.visible = !label.text.isEmpty 
     componentWidget.setVisible(!label.text.isEmpty)
     label.revalidate
     scene.refresh
@@ -105,7 +99,7 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var t
     
     def edit = {
       if (toBeEdited) {
-        text = DialogFactory.groovyEditor(text)
+        text = DialogFactory.groovyEditor("Condition",text)
         ConnectorWidget.this.transition.condition = Some(text)
         revalidate
       }

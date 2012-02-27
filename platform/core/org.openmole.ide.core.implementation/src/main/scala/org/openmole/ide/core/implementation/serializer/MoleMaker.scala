@@ -28,6 +28,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
+import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.misc.exception.UserBadDataError
@@ -85,8 +86,14 @@ object MoleMaker {
   }
   
   def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
-    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach(pui=> {task.addInput( pui.dataUI.coreObject)})
-    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach(pui=> {task.addOutput(pui.dataUI.coreObject)})
+    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
+        val proto = pui.dataUI.coreObject
+        v.isEmpty match {
+          case true=> task.addInput(proto)
+         // case false=> task.addParameter(new Parameter(proto,v))
+        }
+      }}
+      capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
     task
   }
   

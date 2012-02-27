@@ -59,6 +59,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   val capsuleLayer= new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
   val propertyLayer= new LayerWidget(this)
+  val extraPropertyLayer= new LayerWidget(this)
   var currentSlotIndex= 1
   var currentPanel : Option[BasePanelUI] = None
   
@@ -67,8 +68,11 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(capsuleLayer)
   addChild(connectLayer)
   addChild(propertyLayer)
+  addChild(extraPropertyLayer)
   
+  val extraPropertyWidget = new Widget(this) 
   val propertyWidget = new Widget(this) 
+  extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
   
   setPreferredSize(new Dimension((Constants.SCREEN_WIDTH * 0.8).toInt, (Constants.SCREEN_HEIGHT * 0.8).toInt))
@@ -84,6 +88,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {
     removePropertyPanel
+    closeExtraProperty
     proxy match {
       case x: ITaskDataProxyUI=> currentPanel = Some(new TaskPanelUI(x,this,mode))
       case x: IPrototypeDataProxyUI=> currentPanel = Some(new PrototypePanelUI(x,this,mode))
@@ -101,6 +106,22 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     getSceneAnimator.animatePreferredLocation(propertyWidget, new Point(getView.getBounds().x.toInt + currentPanel.get.bounds.width +20, 20))
     refresh
   } 
+  
+  def closeExtraProperty = {
+    if (extraPropertyWidget.getChildren.size == 1) extraPropertyWidget.removeChildren
+    refresh
+  }
+    
+  def displayExtraProperty(dproxy: IDataProxyUI) = {
+    extraPropertyWidget.removeChildren
+    extraPropertyWidget.addChild(new ComponentWidget(this,dproxy match {
+          case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EDIT).peer
+          case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EDIT).peer
+        }))
+    extraPropertyWidget.setPreferredLocation(propertyWidget.getLocation)
+    getSceneAnimator.animatePreferredLocation(extraPropertyWidget, new Point(propertyWidget.getBounds.x.toInt + currentPanel.get.bounds.width +40, 20))
+    refresh
+  }
   
   def removePropertyPanel : Unit = {
     currentPanel match {

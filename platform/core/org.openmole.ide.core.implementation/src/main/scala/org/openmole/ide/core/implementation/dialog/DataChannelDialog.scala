@@ -26,6 +26,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.workflow.DataChannelConnectionWidget
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
@@ -44,7 +45,7 @@ object DataChannelDialog {
     }
   }
   
-  class PrototypePanel(protoProxys: List[IPrototypeDataProxyUI]) extends MigPanel("") {
+  class PrototypePanel(protoProxys: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
     preferredSize = new Dimension(250,300)
     val multiPrototypeCombo = new MultiCombo("Prototypes",Proxys.prototypes.toList,protoProxys)
     contents+= multiPrototypeCombo.panel

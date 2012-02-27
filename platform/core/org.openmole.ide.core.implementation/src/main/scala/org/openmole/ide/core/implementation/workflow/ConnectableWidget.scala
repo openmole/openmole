@@ -80,37 +80,14 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
     
     if (capsule.dataProxy.isDefined) {
       val dataUI = capsule.dataProxy.get.dataUI
-      var x = taskWidth / 2 + 5
-      var i= 0
-      var otherColumn = true
-      (dataUI.prototypesIn.toList:::dataUI.prototypesOut.toList).foreach(p=> {
-          if (i >= dataUI.prototypesIn.size && otherColumn == true) {
-            i= 0
-            x += taskWidth / 2 - 1
-            otherColumn = false
-          }
-          var st = p.dataUI.displayTypedName
-          if (st.length> 10) st = st.substring(0, 8).concat("...")
-          val h = 5 + TASK_TITLE_HEIGHT + i * Images.THUMB_SIZE
-          graphics.drawImage(Images.thumb(p.dataUI.imagePath),x - taskWidth / 2, h ,new Container)
-          graphics.setColor(new Color(102,102,102))
-          if (capsule.detailedView) graphics.drawString(st, 1 + x - taskWidth / 2 +  Images.THUMB_SIZE, h + Images.THUMB_SIZE / 2)
-          i+= 1
-        })
 
       graphics.setColor(new Color(204,204,204))
-      val newH= scala.math.max(dataUI.prototypesIn.size, dataUI.prototypesOut.size) * 22 + 45
-      val delta= bodyArea.height - newH
-      if (delta < 0) {
-        bodyArea.setSize(bodyArea.width, newH)
-        enlargeWidgetArea(0, -delta)
-      }
       var lineH = 0
       if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.dataUI.sampling.isDefined * 40
       graphics.drawLine(taskWidth / 2,
                         TASK_TITLE_HEIGHT,
                         taskWidth / 2,
-                        math.max(TASK_CONTAINER_HEIGHT- 3,newH) + lineH)
+                        math.max(TASK_CONTAINER_HEIGHT- 3,45) + lineH)
       
       if (dataUI.environment.isDefined) graphics.drawImage(Images.thumb(dataUI.environment.get.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
     }
