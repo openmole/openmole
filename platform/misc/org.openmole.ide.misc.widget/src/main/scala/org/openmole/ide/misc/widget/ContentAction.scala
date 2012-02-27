@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget.multirow
+package org.openmole.ide.misc.widget
 
-import javax.swing.ImageIcon
-import javax.swing.JPanel
-import org.openmole.ide.misc.image.ImageTool
-import org.openmole.ide.misc.widget.MainLinkLabel
 import scala.swing.Action
-import scala.swing.Panel
 
-trait IRowPanel extends Panel{
-  val removeButton = new MainLinkLabel("",new Action("") { def apply = {} }) {
-            icon = new ImageIcon(ImageTool.loadImage("img/del.png",15,15))}
-    
-  def extend(extendedPanel: JPanel): Unit
-}
+abstract class ContentAction[A](t: String, val content: A) extends Action(t)
+//trait ContentAction[A] {
+//  def apply(proxy : A)
+//}

@@ -36,6 +36,11 @@
            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
             <groupId>jsyntaxpane</groupId>
             <artifactId>jsyntaxpane</artifactId>
            <version>0.9.6</version>

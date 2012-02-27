@@ -18,20 +18,28 @@
 package org.openmole.ide.misc.widget
 
 import java.awt.Cursor
+import javax.swing.ImageIcon
+import org.openmole.ide.misc.image.ImageTool
+import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
-import scala.swing.Label
-import scala.swing.event.MousePressed
 
-class LinkLabel(textLink: String,
-                var action: Action,
-                val textSize: Int = 4) extends Label {
+class GroovyTextFieldEditor(val title : String,
+                            var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){                                              
+  setIcon
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  link(textLink)
-  
-  listenTo(this.mouse.clicks)
-  reactions += {
-    case e: MousePressed => action.apply
+  action = new Action(""){
+    def apply = {
+      editorText = DialogFactory.groovyEditor(title,editorText)
+      setIcon
+    }
   }
   
-  def link(t: String) = text = "<html><font color=\"#ffffff\" size=\""+textSize+"\">"+t+"</font></html>"
+  private def setIcon = {
+    editorText.isEmpty match {
+      case true => icon = new ImageIcon(ImageTool.loadImage("img/edit_empty.png",20,20))
+      case false => icon = new ImageIcon(ImageTool.loadImage("img/edit.png",20,20))
+    }
+    repaint
+    revalidate
+  }
 }

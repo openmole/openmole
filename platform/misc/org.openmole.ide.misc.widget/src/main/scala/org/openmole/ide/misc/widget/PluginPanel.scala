@@ -22,17 +22,13 @@ import java.awt.Graphics2D
 import java.awt.RenderingHints
 import scala.swing._
 
-class PluginPanel (mig1: String, mig2: String ="", mig3: String="") extends MigPanel(mig1,mig2,mig3) {
+class PluginPanel (mig1: String, mig2: String ="", mig3: String="") extends MyMigPanel(mig1,mig2,mig3) {
   override def paintComponent(g: Graphics2D) = {
+    super.paintComponent(g)
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(new Color(77,77,77))
-    g.fillRoundRect(0, 0, size.width, size.height,20, 20)
-    contents.foreach(c=> c match {
-        case x: TextField=> x.foreground= Color.BLACK
-        case x: UIElement=> x.foreground= Color.WHITE
-        case _=>
-      })
+    g.fillRect(0, 0, size.width, size.height)
     revalidate
   }   
 }

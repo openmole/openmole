@@ -18,9 +18,11 @@
 package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.EditableLinkLabel
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MainLinkLabel
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Action
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
@@ -29,12 +31,19 @@ object LinkLabelExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Link Label Demo"
-    contents = new MigPanel(""){
+    contents = new PluginPanel(""){
       contents +=new MainLinkLabel("Edit",
                                    new Action(""){def apply = println("My main link !")})
       contents +=new LinkLabel("My hyper label ",
                                new Action(""){def apply = println("My link !")})
+      
+      val li = List(new ContentAction("one",new Fake){override def apply = content.fakemethod(title)},new ContentAction("two",new Fake){def apply = content.fakemethod(title)})
+      contents += new EditableLinkLabel(li.head,li)
     }
     size = new Dimension(250,200)
+  }
+  
+  class Fake {
+    def fakemethod(s: String) = println("fake method from " + s)
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget.multirow
+package org.openmole.ide.misc.widget.dialog
 
-import javax.swing.ImageIcon
-import javax.swing.JPanel
-import org.openmole.ide.misc.image.ImageTool
-import org.openmole.ide.misc.widget.MainLinkLabel
-import scala.swing.Action
-import scala.swing.Panel
+import java.awt.Dimension
+import org.openmole.ide.misc.widget.GroovyEditor
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
+import org.openide.NotifyDescriptor
 
-trait IRowPanel extends Panel{
-  val removeButton = new MainLinkLabel("",new Action("") { def apply = {} }) {
-            icon = new ImageIcon(ImageTool.loadImage("img/del.png",15,15))}
-    
-  def extend(extendedPanel: JPanel): Unit
+object DialogFactory {
+
+  def groovyEditor(title: String,
+                   content: String) : String = {
+    val editor = new GroovyEditor
+    editor.preferredSize = new Dimension(150,150)
+    editor.editor.text = content
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION)) editor.editor.text
+    else content
+  }
+  
+  
 }
