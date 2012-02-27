@@ -35,17 +35,17 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject: Task
   
-  def prototypesIn: HashSet[IPrototypeDataProxyUI] 
+  def prototypesIn: HashSet[(IPrototypeDataProxyUI,String)]
   
-  def prototypesIn_=(pi: HashSet[IPrototypeDataProxyUI])
+  //def prototypesIn_[T]=(pi: HashSet[(IPrototypeDataProxyUI[T],T)])
   
   def prototypesOut: HashSet[IPrototypeDataProxyUI]
   
-  def prototypesOut_=(po: HashSet[IPrototypeDataProxyUI])
+  //def prototypesOut_=(po: HashSet[(IPrototypeDataProxyUI,String)])
   
-  def prototypes: HashSet[IPrototypeDataProxyUI] = prototypesIn++prototypesOut
+ // def prototypes: HashSet[IPrototypeDataProxyUI] = prototypesIn++prototypesOut
 
-  def addPrototype(p: IPrototypeDataProxyUI, ioType: IOType.Value)
+  //def addPrototype(p: IPrototypeDataProxyUI, ioType: IOType.Value)
   
   def sampling: Option[ISamplingDataProxyUI]
   
