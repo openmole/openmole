@@ -45,12 +45,6 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
   
   override def y = convertLocalToScene(getLocation).getY
   
-  override def setDetailedView= {
-    setWidthHint
-    oslot.setDetailedView(taskWidth)
-    if (samplingWidget.isDefined) samplingWidget.get.setDetailedView(taskWidth)
-  }
-  
   def addInputSlot(iw: InputSlotWidget) {
     islots += iw
     addChild(iw)
@@ -68,8 +62,6 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
     samplingWidget = Some(new SamplingWidget(scene,capsule))
     addChild(samplingWidget.get) 
     taskHeight += 50
-    setWidthHint
-    setDetailedView
   }
 
   

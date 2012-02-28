@@ -47,14 +47,8 @@ object TopComponentsManager {
   
   def topComponents = TopComponent.getRegistry.getOpened.
   filter(_.isInstanceOf[MoleSceneTopComponent]).
-  map{_.asInstanceOf[MoleSceneTopComponent]}
-    
-  def setDetailedView(b: Boolean) = moleScenes.foreach{ ms=>
-    ms.manager.capsules.values.foreach{c=>
-      c.detailedView = b
-      c.connectableWidget.setDetailedView}
-    ms.validate
-    ms.refresh}
+  map{_.asInstanceOf[MoleSceneTopComponent]
+  }
   
   def addTopComponent: MoleSceneTopComponent = addTopComponent("")
   

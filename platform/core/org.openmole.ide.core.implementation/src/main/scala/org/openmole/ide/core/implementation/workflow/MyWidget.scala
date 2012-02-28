@@ -27,8 +27,6 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import java.awt.BasicStroke
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.widget.LinkLabel
-import scala.swing.Action
 
 class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graphScene) {
 
@@ -38,36 +36,6 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
   val bodyArea = new Rectangle
   val widgetArea= new Rectangle
   val titleArea = new Rectangle
-  setWidthHint
-//  val wi = new Widget(scene.graphScene)
-//  wi.addChild(new ComponentWidget(scene.graphScene,
-//                                  new LinkLabel(capsule.dataProxy.get.dataUI.name,new Action("") { def apply = scene.displayPropertyPanel(capsule.dataProxy.get,EDIT)}).peer))
-//
-//  
-  def widgetWidth= widgetArea.width
-  
-  
-  def setWidthHint= {
-    if (capsule.detailedView) {
-      taskWidth = EXPANDED_TASK_CONTAINER_WIDTH
-      taskImageOffset = EXPANDED_TASK_IMAGE_WIDTH_OFFSET
-    }
-    else {
-      taskWidth = TASK_CONTAINER_WIDTH
-      taskImageOffset = TASK_IMAGE_WIDTH_OFFSET
-    }
-    bodyArea.setBounds(new Rectangle(0, 0,taskWidth,TASK_CONTAINER_HEIGHT))
-    widgetArea.setBounds(new Rectangle(-12, -11,taskWidth + 26,taskHeight+ 16))
-    titleArea.setBounds(new Rectangle(0, 0,taskWidth,TASK_TITLE_HEIGHT))
-    setPreferredBounds(widgetArea)
-    revalidate
-    repaint
-  }
-  
-  def enlargeWidgetArea(y: Int,height: Int) {
-    widgetArea.height += height
-    widgetArea.y -= y
-  }
   
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
