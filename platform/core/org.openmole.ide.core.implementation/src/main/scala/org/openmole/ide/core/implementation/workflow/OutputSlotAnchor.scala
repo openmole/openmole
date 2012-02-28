@@ -27,10 +27,7 @@ class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidg
   val x= Constants.TASK_CONTAINER_WIDTH + 10
   val y= Constants.TASK_TITLE_HEIGHT + 22
   
-  override def compute(entry: Anchor.Entry)= {
-    var detailedEffect= 0
-    if (relatedWidget.detailedView)
-      detailedEffect= Constants.EXPANDED_TASK_CONTAINER_WIDTH -Constants.TASK_CONTAINER_WIDTH
-    new Result(relatedWidget.widget.convertLocalToScene(new Point(x + detailedEffect, y)), Anchor.Direction.RIGHT)
-  }
+  override def compute(entry: Anchor.Entry)= 
+    new Result(relatedWidget.widget.convertLocalToScene(new Point(x, y)), Anchor.Direction.RIGHT)
+  
 }
