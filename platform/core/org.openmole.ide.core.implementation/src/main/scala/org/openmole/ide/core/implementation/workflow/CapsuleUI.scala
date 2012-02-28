@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
@@ -28,7 +29,11 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.HashMap
+import scala.swing.Action
+import scala.swing.Label
 
 class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],var capsuleType:CapsuleType,var startingCapsule: Boolean) extends Widget(scene.graphScene) with ICapsuleUI{
   def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0)
@@ -39,8 +44,13 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   val connectableWidget= new ConnectableWidget(scene,this)
   val dndTaskIntoCapsuleProvider = new DnDTaskIntoCapsuleProvider(scene, this)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
-  override var detailedView = false
   
+  var titleLabel = dataProxy match {
+    case Some(x: ITaskDataProxyUI)=> new LinkLabel(x.dataUI.name,new Action(""){
+      def apply = scene.displayPropertyPanel(x, EDIT)})
+    case None=> new Label("")
+  }
+  addChild(new ComponentWidget(scene.graphScene,titleLabel.peer))
   addChild(connectableWidget)
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
@@ -70,6 +80,8 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
+    titleLabel = new LinkLabel(dpu.dataUI.name,new Action(""){
+      def apply = scene.displayPropertyPanel(dpu, EDIT)})
   }
   
   

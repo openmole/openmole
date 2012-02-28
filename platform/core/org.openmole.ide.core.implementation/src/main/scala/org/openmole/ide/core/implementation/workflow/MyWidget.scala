@@ -30,11 +30,8 @@ import org.openmole.ide.core.model.panel.PanelMode._
 
 class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graphScene) {
 
-  var taskWidth= TASK_CONTAINER_WIDTH
   var taskHeight= TASK_CONTAINER_HEIGHT
-  var taskImageOffset= TASK_IMAGE_WIDTH_OFFSET
   val bodyArea = new Rectangle
-  val widgetArea= new Rectangle
   val titleArea = new Rectangle
   
   override def paintWidget= {
@@ -42,7 +39,6 @@ class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graph
     if(capsule.dataProxy.isDefined){
       val tpud = capsule.dataProxy.get.dataUI
       drawBox(graphics,tpud.backgroundColor,tpud.borderColor)
-      //graphics.fill(titleArea)
       graphics.setColor(Color.WHITE)
       graphics.setFont(new Font("Ubuntu", Font.PLAIN, 15))
       graphics.drawString(tpud.name, 10, 15)
