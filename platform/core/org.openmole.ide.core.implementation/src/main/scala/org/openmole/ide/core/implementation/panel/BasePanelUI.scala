@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
+import java.awt.Dimension
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
@@ -56,7 +57,9 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     }
   }
   contents = mainPanel
-  preferredSize.width = 200
+  preferredSize.width = 300
+  minimumSize.width = 300
+ // preferredSize.width = 300
   foreground = Color.white
   
   verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded

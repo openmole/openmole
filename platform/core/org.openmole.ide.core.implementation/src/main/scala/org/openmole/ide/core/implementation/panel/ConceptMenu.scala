@@ -42,7 +42,6 @@ import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
@@ -94,10 +93,10 @@ object ConceptMenu {
   
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
-      case x:IEnvironmentDataProxyUI=> environmentMenu.peer.remove(menuItemMapping(proxy).peer)
-      case x:IPrototypeDataProxyUI=> prototypeMenu.peer.remove(menuItemMapping(proxy).peer)
-      case x:ITaskDataProxyUI=> taskMenu.peer.remove(menuItemMapping(proxy).peer)
-      case x:ISamplingDataProxyUI=> samplingMenu.peer.remove(menuItemMapping(proxy).peer)
+      case x:IEnvironmentDataProxyUI=> environmentMenu.remove(menuItemMapping(proxy))
+      case x:IPrototypeDataProxyUI=> prototypeMenu.remove(menuItemMapping(proxy))
+      case x:ITaskDataProxyUI=> taskMenu.remove(menuItemMapping(proxy))
+      case x:ISamplingDataProxyUI=> samplingMenu.remove(menuItemMapping(proxy))
     }
   } 
   
@@ -131,5 +130,10 @@ object ConceptMenu {
   def refreshItem(proxy: IDataProxyUI) = {
     if (menuItemMapping.contains(proxy))
       menuItemMapping(proxy).action.title = proxy.dataUI.name
+  }
+  
+  def clearAllItems = {
+    List(samplingMenu,prototypeMenu,taskMenu,environmentMenu).foreach{_.removeAll}
+    menuItemMapping.clear
   }
 }

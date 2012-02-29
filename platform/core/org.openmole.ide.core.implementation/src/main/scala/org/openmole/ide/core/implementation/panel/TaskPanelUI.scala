@@ -19,17 +19,16 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import javax.swing.ImageIcon
-import org.openide.awt.StatusDisplayer
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.MainLinkLabel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.swing.Action
@@ -41,10 +40,10 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
   iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
   var panelUI = proxy.dataUI.buildPanelUI
-  var protoPanel: Option[IOPrototypePanel] = None
-  preferredSize.width = 300
-  //mainLinksPanel.contents += new Label("                        ")
-  var propertyMode = true
+  var protoPanel = Proxys.prototypes.isEmpty match {
+    case true => new PluginPanel("")
+    case false => new IOPrototypePanel
+  }
   properties
   
   def create = {
@@ -58,12 +57,10 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def save = {
-    propertyMode match {
-      case true=> 
-      case false=> protoPanel.get.save
+    protoPanel match {
+      case x:IOPrototypePanel => proxy.dataUI = panelUI.save(nameTextField.text,x.protoIn.content,x.protoOut.content)
+      case _ => proxy.dataUI = panelUI.saveContent(nameTextField.text)
     }
-    println("save :: " + nameTextField.text)
-    proxy.dataUI = panelUI.saveContent(nameTextField.text)
   }
   
   def switch = {
@@ -74,7 +71,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def properties = {
-    propertyMode = true
     switch
     panelUI = proxy.dataUI.buildPanelUI
     mainPanel.contents += panelUI.peer
@@ -85,33 +81,31 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def protos : Unit = {
-    if (Proxys.prototypes.isEmpty) StatusDisplayer.getDefault().setStatusText("Prototypes can not be set to this task since no one is defined yet")
-    else {
-      protoPanel = Some(new IOPrototypePanel(proxy))
-      propertyMode = false
-      switch
-      mainPanel.contents += protoPanel.get.peer
+    switch
+    mainPanel.contents += protoPanel.peer
     
-      mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = properties }) {
-        icon = new ImageIcon(ImageTool.loadImage("img/previous.png",20,20))}
-      revalidate
-      repaint
-    }
+    mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = properties }) {
+      icon = new ImageIcon(ImageTool.loadImage("img/previous.png",20,20))}
+    revalidate
+    repaint
   }
   
-  class IOPrototypePanel(taskproxy: ITaskDataProxyUI) extends Panel{
+  class IOPrototypePanel extends Panel{
     peer.setLayout(new BorderLayout)
-    //val action = new Action("") { override def apply = println("view")}
     val image = new ImageIcon(ImageTool.loadImage("img/eye.png",20,20))
+      
     val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
-                                                               proxy.dataUI.prototypesIn.map{case(proto,v) => (proto,contentAction(proto),v)}.toList,
+                                                               TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) => (proto,contentAction(proto),v)}.toList,
                                                                Proxys.prototypes.map{p=>(p,contentAction(p))}.toList,
                                                                image)        
                                                                       
     val protoOut = new MultiComboLinkLabel("Outputs",
-                                           proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
+                                           TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
                                            Proxys.prototypes.map{p=>(p,contentAction(p))}.toList,
                                            image)        
+    
+    if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoIn.removeAllRows
+    if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOut.removeAllRows
     
     peer.add(protoIn.panel.peer,BorderLayout.WEST)
     peer.add((new Separator).peer)
@@ -119,12 +113,5 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
       override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraProperty(proto)}
-    
-    def save = {
-      taskproxy.dataUI.prototypesOut.clear
-      taskproxy.dataUI.prototypesIn.clear
-      protoOut.content.foreach(taskproxy.dataUI.prototypesOut+=) 
-      protoIn.content.foreach(taskproxy.dataUI.prototypesIn+= )
-    }
   }
 }

@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
+import java.awt.Color
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.Widget
@@ -47,11 +48,12 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   
   var titleLabel = dataProxy match {
     case Some(x: ITaskDataProxyUI)=> new LinkLabel(x.dataUI.name,new Action(""){
-      def apply = scene.displayPropertyPanel(x, EDIT)})
+      def apply = scene.displayPropertyPanel(x, EDIT)}){
+          background = Color.red}
     case None=> new Label("")
   }
   addChild(new ComponentWidget(scene.graphScene,titleLabel.peer))
-  addChild(connectableWidget)
+ // addChild(connectableWidget)
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
