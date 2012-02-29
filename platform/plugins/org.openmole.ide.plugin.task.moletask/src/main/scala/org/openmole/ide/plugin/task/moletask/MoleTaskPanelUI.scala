@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.task.moletask
 
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
@@ -26,7 +27,8 @@ import scala.swing.ComboBox
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","","") with ITaskPanelUI{
   
-  val moleComboBox = new ComboBox(TopComponentsManager.moleScenes.toList)
+  val moleComboBox = new ComboBox(TopComponentsManager.moleScenes.toList) 
+  {tooltip = Help.tooltip("The name of the inner Mole to be run.","Mole_1")}
   contents+= (new Label("Embedded mole"),"gap para")
   contents += moleComboBox
   pud.mole match {
