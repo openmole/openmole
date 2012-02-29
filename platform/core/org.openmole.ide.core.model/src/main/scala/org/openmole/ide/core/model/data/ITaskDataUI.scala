@@ -19,12 +19,10 @@ package org.openmole.ide.core.model.data
 
 import java.awt.Color
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.commons.IOType
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.implementation.task.Task
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import scala.collection.mutable.HashSet
 
 trait ITaskDataUI extends IDataUI{
   override def entityType = TASK
@@ -35,13 +33,13 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject: Task
   
-  def prototypesIn: HashSet[(IPrototypeDataProxyUI,String)]
+  def prototypesIn: List[(IPrototypeDataProxyUI,String)]
   
-  //def prototypesIn_[T]=(pi: HashSet[(IPrototypeDataProxyUI[T],T)])
+  def prototypesIn_=(pi: List[(IPrototypeDataProxyUI,String)])
   
-  def prototypesOut: HashSet[IPrototypeDataProxyUI]
+  def prototypesOut: List[IPrototypeDataProxyUI]
   
-  //def prototypesOut_=(po: HashSet[(IPrototypeDataProxyUI,String)])
+  def prototypesOut_=(po: List[IPrototypeDataProxyUI])
   
  // def prototypes: HashSet[IPrototypeDataProxyUI] = prototypesIn++prototypesOut
 
