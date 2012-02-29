@@ -30,10 +30,13 @@ import org.openmole.ide.core.model.panel.PanelMode._
 
 class MyWidget(scene: IMoleScene,capsule: ICapsuleUI) extends Widget(scene.graphScene) {
 
-  var taskHeight= TASK_CONTAINER_HEIGHT
-  val bodyArea = new Rectangle(0,0,TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)
-  val titleArea = new Rectangle
-  scene.refresh
+  val bodyArea = new Rectangle
+  bodyArea.setBounds(new Rectangle(0, 0,TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT))  
+  
+  setPreferredBounds(new Rectangle(-12, -11,TASK_CONTAINER_WIDTH + 26,TASK_CONTAINER_HEIGHT+ 16))  
+  revalidate
+  repaint
+  
   override def paintWidget= {
     val graphics= getGraphics.asInstanceOf[Graphics2D]
     if(capsule.dataProxy.isDefined){

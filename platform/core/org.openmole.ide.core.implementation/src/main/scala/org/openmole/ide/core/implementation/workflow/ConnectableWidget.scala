@@ -61,7 +61,6 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
   def addSampling= {
     samplingWidget = Some(new SamplingWidget(scene,capsule))
     addChild(samplingWidget.get) 
-    taskHeight += 50
   }
 
   
@@ -75,11 +74,11 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
 
       graphics.setColor(new Color(204,204,204))
       var lineH = 0
-      if (samplingWidget.isDefined) lineH = samplingWidget.get.capsule.dataProxy.get.dataUI.sampling.isDefined * 40
+      if (samplingWidget.isDefined) lineH = 50
       graphics.drawLine(TASK_CONTAINER_WIDTH / 2,
                         TASK_TITLE_HEIGHT,
                         TASK_CONTAINER_WIDTH / 2,
-                        math.max(TASK_CONTAINER_HEIGHT- 3,45) + lineH)
+                        math.max(TASK_CONTAINER_HEIGHT- 3,45) + 50)
       
       if (dataUI.environment.isDefined) graphics.drawImage(Images.thumb(dataUI.environment.get.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
     }

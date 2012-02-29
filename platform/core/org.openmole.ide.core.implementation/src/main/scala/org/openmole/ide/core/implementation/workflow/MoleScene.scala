@@ -22,6 +22,7 @@ import java.awt.Dimension
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
 import java.awt.Point
+import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
@@ -46,6 +47,7 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Component
@@ -71,7 +73,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(extraPropertyLayer)
   
   val extraPropertyWidget = new Widget(this) 
-  val propertyWidget = new Widget(this) 
+  val propertyWidget = new ComponentWidget(this,new PluginPanel("").peer) 
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
   
@@ -99,6 +101,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     currentPanel match {
       case Some(x:BasePanelUI)=> 
         propertyWidget.addChild(new ComponentWidget(this,x.peer))
+      //  propertyWidget.setPreferredSize(new Dimension(800,500))
+      //  propertyWidget.setPreferredBounds(new Rectangle(0,0,800,500))
       case _=>
     }
     
@@ -173,7 +177,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
         case true => 
           findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
         case false=> 
-          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new OutputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
+          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new InputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
       }
     }
   }
@@ -330,9 +334,11 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   }
   
   class PropertyWidget (scene: IMoleScene,wi: Component) extends ComponentWidget(scene.graphScene,wi.peer){
+    setPreferredBounds(new Rectangle(0,0,800,500))
     override def paintBackground{
       val g = scene.graphScene.getGraphics
-      g.fill(wi.bounds)
+     // g.fill(wi.bounds)
+      g.fill(new Rectangle(0,0,800,500))
       revalidate
     }
   }

@@ -53,7 +53,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     case None=> new Label("")
   }
   addChild(new ComponentWidget(scene.graphScene,titleLabel.peer))
- // addChild(connectableWidget)
+  addChild(connectableWidget)
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))

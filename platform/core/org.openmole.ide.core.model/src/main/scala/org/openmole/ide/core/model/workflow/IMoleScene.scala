@@ -19,6 +19,7 @@ package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.panel.PanelMode
+import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 
 trait IMoleScene { 
@@ -49,6 +50,8 @@ trait IMoleScene {
   def closeExtraProperty
   
   def removePropertyPanel
+  
+  def propertyWidget : ComponentWidget
   
   override def toString = manager.name.getOrElse("")
 }
