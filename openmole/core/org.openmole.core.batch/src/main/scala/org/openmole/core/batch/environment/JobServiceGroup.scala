@@ -65,7 +65,7 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
                 val nbSubmitted = quality.submitted
                 val fitness = orMin(
                   if(quality.submitted > 0) math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
-                  else math.pow(quality.successRate, 2)
+                  else math.pow(quality.successRate, 3)
                 ) 
                 Some((cur, token, fitness))
             }   
