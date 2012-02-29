@@ -40,7 +40,7 @@ class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataCha
   setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
   
   setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_OUTPUT_DATA_CHANNEL,false))
-  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_OUTPUT_DATA_CHANNEL,false))
+  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_INPUT_DATA_CHANNEL,false))
   var labeled = false
   
   val componentWidget = new PrototypeWidget(scene,new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString,

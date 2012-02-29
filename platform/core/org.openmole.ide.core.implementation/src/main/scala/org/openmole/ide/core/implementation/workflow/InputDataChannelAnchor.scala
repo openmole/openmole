@@ -19,13 +19,12 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
-import org.netbeans.api.visual.anchor.Anchor.Direction._
 import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-class OutputDataChannelAnchor(relatedWidget: ICapsuleUI) extends Anchor(relatedWidget.widget) {
+class InputDataChannelAnchor(relatedWidget: ICapsuleUI) extends Anchor(relatedWidget.widget) {
   
   override def compute(entry: Anchor.Entry)= 
-    new Result(relatedWidget.widget.convertLocalToScene(new Point(Constants.TASK_CONTAINER_WIDTH,
-                                                                  Constants.TASK_CONTAINER_HEIGHT - 15)),Anchor.Direction.RIGHT)    
+    new Result(relatedWidget.widget.convertLocalToScene(new Point(0,
+                                                                  Constants.TASK_CONTAINER_HEIGHT - 15)),Anchor.Direction.LEFT)    
 }
