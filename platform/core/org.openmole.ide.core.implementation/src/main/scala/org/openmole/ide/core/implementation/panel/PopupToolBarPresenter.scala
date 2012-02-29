@@ -19,15 +19,28 @@ package org.openmole.ide.core.implementation.panel
 
 import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.PopupMenu
+import scala.swing.Component
 import scala.swing.Menu
 import scala.swing.Button
+import scala.swing.MenuItem
 import scala.swing.event.ButtonClicked
 
-class PopupToolBarPresenter(t: String, menu: Menu) extends Button(t){
-val popup = new PopupMenu {contents += menu}
-icon = ImageUtilities.loadImageIcon("org/openide/awt/resources/arrow.png", true)
-listenTo(mouse.clicks)
-    reactions += {
-      case x:ButtonClicked => popup.show(this, 0, size.height)
-    }
+class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t){
+  val popup = new PopupMenu {contents += basemenu}
+  icon = ImageUtilities.loadImageIcon("org/openide/awt/resources/arrow.png", true)
+  listenTo(mouse.clicks)
+  reactions += {
+    case x:ButtonClicked => popup.show(this, 0, size.height)
+  }
+    
+  def remove(c: Component) = c match {
+    case x: Menu =>
+    case x: MenuItem => popup.contents -= c
+  }
+    
+  def removeAll = {
+    popup.peer.removeAll
+    popup.contents += basemenu
+  }
+  
 }
