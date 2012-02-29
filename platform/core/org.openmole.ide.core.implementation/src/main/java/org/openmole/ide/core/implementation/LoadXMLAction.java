@@ -24,7 +24,7 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openmole.ide.core.implementation.action.LoadXML;
-import org.openmole.ide.core.implementation.serializer.GUISerializer;
+import org.openmole.ide.core.implementation.dataproxy.Proxys;
 
 @ActionID(category = "File",
 id = "org.openmole.ide.core.implementation.LoadXMLAction")
@@ -37,6 +37,7 @@ public final class LoadXMLAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Proxys.clearAll();
         LoadXML.show();
     }
 }
