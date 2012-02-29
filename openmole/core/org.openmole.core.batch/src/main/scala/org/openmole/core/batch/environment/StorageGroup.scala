@@ -72,15 +72,14 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
           UsageControl.get(cur.description).tryGetToken match {
             case None => None
             case Some(token) => 
-              val quality = StorageControl.qualityControl(cur.description)
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
               
-              val fitness = (
-                quality match {
-                  case Some(q) => 
-                    val v = math.pow(q.successRate, 2)
-                    val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-                    if(v < min) min else v
+              val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+              def orMin(v: Double) = if(v < min) min else v
+              
+              val fitness = orMin(
+                StorageControl.qualityControl(cur.description) match {
+                  case Some(q) => math.pow(q.successRate, 2)
                   case None => 1.
                 }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
               Some((cur, token, fitness))
@@ -105,7 +104,8 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
         val notLoaded = fitness
         selected(Random.default.nextDouble * notLoaded.map{case (_,_,fitness) => fitness}.sum, notLoaded) match {
           case Some(storage) => storage
-          case None => waiting.acquire
+          case None => 
+            waiting.acquire
             wait
         }
       } 
