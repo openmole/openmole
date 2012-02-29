@@ -20,14 +20,13 @@ package org.openmole.misc.tools.groovy
 import scala.collection.JavaConversions._
 import scala.collection.JavaConversions
 import groovy.lang.Binding
-import groovy.lang.GroovyClassLoader
 import groovy.lang.GroovyShell
 import java.io.File
 import java.net.URLClassLoader
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 
-class GroovyProxy(code: String, jars: Iterable[File]) {
+class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
 
   @transient 
   private lazy val compiledScript = {
@@ -47,11 +46,11 @@ class GroovyProxy(code: String, jars: Iterable[File]) {
    * @return the result of your script if a variable is returned.
    * @throws InternalProcessingError 
    */
-  def execute(binding: Binding): Object = compiledScript.synchronized {
+  def execute(binding: Binding = new Binding) = compiledScript.synchronized {
     executeUnsynchronized(binding)
   }
   
-  def executeUnsynchronized(binding: Binding): Object = {
+  def executeUnsynchronized(binding: Binding = new Binding) = {
     compiledScript.setBinding(binding)
     val ret = compiledScript.run
     InvokerHelper.removeClass(compiledScript.getClass)
