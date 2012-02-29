@@ -31,23 +31,3 @@ listenTo(mouse.clicks)
       case x:ButtonClicked => popup.show(this, 0, size.height)
     }
 }
-//
-//PopupToolbarPresenter extends JButton implements ActionListener {
-//
-//    private final JPopupMenu popup;
-//
-//    PopupToolbarPresenter(String text, JMenu menu) {
-//        this.setText(text);
-//        //Set the icon of the button:
-//        this.setIcon(ImageUtilities.loadImageIcon("org/openide/awt/resources/arrow.png", true));
-//        //Create a popup:
-//        popup = new JPopupMenu();
-//        popup.add(menu);
-//        //Show the button when the popup is clicked:
-//        this.addActionListener(PopupToolbarPresenter.this);
-//    }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent e) {
-//        popup.show(PopupToolbarPresenter.this, 0, PopupToolbarPresenter.this.getHeight());
-//    }

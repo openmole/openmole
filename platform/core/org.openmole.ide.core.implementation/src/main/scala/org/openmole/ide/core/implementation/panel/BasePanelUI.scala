@@ -36,7 +36,8 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
                            borderColor : Color = new Color(200,200,200)) extends ScrollPane {
   val iconLabel = new Label{ icon = new ImageIcon(ImageTool.loadImage("img/empty.png",50,50))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
-  val labelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
+  val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
+  val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
   if (mode == EDIT) deleteLink
   border = BorderFactory.createEmptyBorder
 
@@ -44,8 +45,13 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     contents += new PluginPanel("wrap 2") {
       contents += iconLabel
       contents += new PluginPanel("wrap"){
-        contents += nameTextField
-        contents += labelLink
+        contents += new PluginPanel("wrap 2"){
+          contents += nameTextField
+          contents += new MainLinkLabel("",
+                                        new Action("") { def apply = BasePanelUI.this.hide }) {
+            icon = new ImageIcon(ImageTool.loadImage("img/close.png",20,20))}
+        }
+        contents += mainLinksPanel
       }
     }
   }
@@ -56,9 +62,14 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
   horizontalScrollBarPolicy = ScrollPane.BarPolicy.Never
   
+  def hide = {
+    baseSave
+    visible = false
+  }
+  
   def deleteLink = {
-    labelLink.link("delete")
-    labelLink.action = new Action("") { def apply = baseDelete}
+    createLabelLink.link("delete")
+    createLabelLink.action = new Action("") { def apply = baseDelete}
   }
   
   def baseCreate : Unit = {

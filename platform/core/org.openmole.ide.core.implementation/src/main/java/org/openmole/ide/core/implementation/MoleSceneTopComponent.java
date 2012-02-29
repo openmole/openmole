@@ -34,7 +34,6 @@ import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
-import org.openmole.ide.core.implementation.action.EnableTaskDetailedViewAction;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -71,7 +70,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     private ToolBarButton cleanAndBuildButton;
     private ToolBarButton startButton;
     private ToolBarButton stopButton;
-    private JToggleButton detailedViewButton;
     private JToggleButton connectionVsDataChannelButton;
     private final InstanceContent ic = new InstanceContent();
     private ExecutionTopComponent etc = ((ExecutionTopComponent) WindowManager.getDefault().findTopComponent("ExecutionTopComponent"));
@@ -90,10 +88,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         initComponents();
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
 
-        // TopComponentsManager.registerTopComponent(this);
-        detailedViewButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/detailedView.png")));
-        detailedViewButton.addActionListener(new EnableTaskDetailedViewAction());
-
         connectionVsDataChannelButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("img/connectMode.png")));
         connectionVsDataChannelButton.addActionListener(new ConnectionVsDataChannelAction());
         connectionVsDataChannelButton.setSelected(true);
@@ -109,7 +103,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         stopButton = new ToolBarButton(new ImageIcon(ImageUtilities.loadImage("img/stopExe.png")), "Stop the workflow",
                 new StopMoleAction());
 
-      //  toolBar.add(detailedViewButton);
         toolBar.add(connectionVsDataChannelButton);
         toolBar.add(buildButton.peer());
         toolBar.add(cleanAndBuildButton.peer());
@@ -119,7 +112,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         add(toolBar, BorderLayout.NORTH);
         setDisplayName(moleScene.manager().name().get());
         setName(moleScene.manager().name().get());
-       // add(new JScrollPane(moleScene.graphScene().createView()), BorderLayout.CENTER);
         add(moleScene.graphScene().createView(), BorderLayout.CENTER);
         etc.close();
         repaint();
@@ -143,7 +135,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         cleanAndBuildButton.visible_$eq(b);
         startButton.visible_$eq(!b);
         stopButton.visible_$eq(!b);
-        detailedViewButton.setEnabled(b);
         if (b) {
             etc.close();
         } else {
@@ -189,7 +180,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     @Override
     public void componentActivated() {
         TopComponentsManager.setCurrentMoleSceneTopComponent(this);
-        TopComponentsManager.setDetailedView(detailedViewButton.isSelected());
         refresh(moleScene.isBuildScene());
         Displays.propertyPanel().cleanViewport();
         TopComponentsManager.displayExecutionView(moleComponent);

@@ -22,9 +22,5 @@ trait IConnectableWidget {
   
   def y: Double
   
-  def setDetailedView: Unit
-  
-  def widgetWidth: Int
-  
   def islots: Iterable[IInputSlotWidget]
 }

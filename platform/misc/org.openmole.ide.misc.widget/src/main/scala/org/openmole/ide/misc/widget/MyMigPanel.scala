@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget.multirow
+package org.openmole.ide.misc.widget
 
-import javax.swing.JPanel
-import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.multirow.RowWidget._
+import java.awt.Color
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import scala.swing._
 
-class RowPanel[T](val components: List[Component],
-               val plusAllowed: Plus= ADD) extends PluginPanel("wrap,insets -2 5 -2 5") with IRowPanel{
-  var extendedPanel: Option[JPanel] = None
+class MyMigPanel (mig1: String, mig2: String ="", mig3: String="") extends MigPanel(mig1,mig2,mig3) {
   
-  contents+= new PluginPanel(""){
-    components.foreach(contents+=)
-    contents += removeButton
-  }
-  
-  def extend(ext: JPanel) = {
-    if (extendedPanel.isDefined) contents-= extendedPanel.get
-    contents+= ext
-    extendedPanel = Some(ext)
-    repaint
-    revalidate
+  override def paintComponent(g: Graphics2D) = {
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                       RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setColor(new Color(77,77,77))
+    g.fillRoundRect(0, 0, size.width, size.height,20, 20)
+    contents.foreach(c=> c match {
+        case x: TextField=> x.foreground= Color.BLACK
+        case x: UIElement=> x.foreground= Color.WHITE
+        case _=>
+      })
   }
 }

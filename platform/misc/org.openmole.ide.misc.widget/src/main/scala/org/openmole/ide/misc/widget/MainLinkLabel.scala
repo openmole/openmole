@@ -21,6 +21,7 @@ import scala.swing.Action
 import scala.swing.Alignment._
 
 class MainLinkLabel(textLink: String,
-                    action: Action) extends LinkLabel(textLink,action,4) {
+                    action: Action,
+                    size: Int = 4) extends LinkLabel(textLink,action,size) {
   override def link(t: String) = text = "<html><font color=\"#bbc807\" size=\""+textSize+"\">"+t+"</font></html>"
 }

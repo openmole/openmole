@@ -44,6 +44,10 @@ trait IMoleScene {
   
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
   
+  def displayExtraProperty(proxy: IDataProxyUI)
+  
+  def closeExtraProperty
+  
   def removePropertyPanel
   
   override def toString = manager.name.getOrElse("")

@@ -19,7 +19,8 @@
 package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.GroovyEditor
+import org.openmole.ide.misc.widget.GroovyTextFieldEditor
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 
@@ -27,9 +28,10 @@ object GroovyEditorExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Groovy editor Demo"
-    val editor = new GroovyEditor
-    editor.editor.text = "class MyClass"
-    contents = editor
+    val editor = new GroovyTextFieldEditor("Demo")
+    val panel = new PluginPanel("")
+    panel.contents += editor
+    contents = panel
     size = new Dimension(200,200)
   }
 }

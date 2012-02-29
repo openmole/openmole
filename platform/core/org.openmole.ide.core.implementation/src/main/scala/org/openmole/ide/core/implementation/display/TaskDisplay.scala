@@ -56,8 +56,8 @@ object TaskDisplay extends ITaskDisplay{
     val protoI = currentDataProxy.get.dataUI.prototypesIn
     val protoO = currentDataProxy.get.dataUI.prototypesOut
    // currentDataProxy.get.dataUI = currentPanel.getOrElse(throw new UserBadDataError("No panel to print for entity " + name)).saveContent(name)
-    currentDataProxy.get.dataUI.prototypesIn_=(protoI)
-    currentDataProxy.get.dataUI.prototypesOut_=(protoO)
+//    currentDataProxy.get.dataUI.prototypesIn_=(protoI)
+//    currentDataProxy.get.dataUI.prototypesOut_=(protoO)
     currentDataProxy.get.dataUI.sampling_=(sample)
     currentDataProxy.get.dataUI.environment_=(env)
     if (Displays.initMode) Proxys.tasks += currentDataProxy.get

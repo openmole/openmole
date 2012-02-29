@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget.multirow
+package org.openmole.ide.core.implementation
 
-import javax.swing.ImageIcon
-import javax.swing.JPanel
-import org.openmole.ide.misc.image.ImageTool
-import org.openmole.ide.misc.widget.MainLinkLabel
-import scala.swing.Action
-import scala.swing.Panel
+import java.awt.Cursor
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import scala.swing.Label
+import scala.swing.event.MousePressed
 
-trait IRowPanel extends Panel{
-  val removeButton = new MainLinkLabel("",new Action("") { def apply = {} }) {
-            icon = new ImageIcon(ImageTool.loadImage("img/del.png",15,15))}
-    
-  def extend(extendedPanel: JPanel): Unit
+class ProxyLink(proxy: IDataProxyUI,textSize: Int = 4) extends Label {
+
+  cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+  link(proxy.dataUI.displayName)
+  
+  listenTo(this.mouse.clicks)
+  reactions += {
+    case e: MousePressed => 
+  }
+  
+  def link(t: String) = text = "<html><font color=\"#0000CF\" size=\""+textSize+"\">"+t+"</font></html>"
+  
+  
 }

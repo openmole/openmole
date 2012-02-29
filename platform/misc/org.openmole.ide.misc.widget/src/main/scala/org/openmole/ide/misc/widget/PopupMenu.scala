@@ -22,6 +22,17 @@ import scala.swing._
 
 class PopupMenu extends Component with SequentialContainer.Wrapper {
   override lazy val peer: JPopupMenu = new JPopupMenu
-  def show( owner: Component, x: Int, y: Int) { peer.show( owner.peer, x, y )}
+  var isOpened = false
+  
+  def show( owner: Component, x: Int, y: Int) = { 
+    peer.show( owner.peer, x, y )
+    isOpened = true
+  }
+  
+  def hide = {
+    peer.setVisible(false)
+    isOpened = false
+  }
+  
   def add(item: MenuItem) = contents += item
 }
