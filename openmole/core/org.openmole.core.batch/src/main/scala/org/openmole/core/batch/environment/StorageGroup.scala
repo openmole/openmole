@@ -32,11 +32,11 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
-
+import ServiceGroup._
 
 //object StorageGroup extends Logger
 
-class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends Iterable[Storage] {
+class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends ServiceGroup with Iterable[Storage] {
   
   class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
     override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
@@ -73,9 +73,6 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
             case None => None
             case Some(token) => 
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
-              
-              val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-              def orMin(v: Double) = if(v < min) min else v
               
               val fitness = orMin(
                 StorageControl.qualityControl(cur.description) match {

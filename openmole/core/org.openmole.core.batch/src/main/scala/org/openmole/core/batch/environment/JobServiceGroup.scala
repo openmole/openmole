@@ -19,20 +19,16 @@ package org.openmole.core.batch.environment
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
-import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.service.Random
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.misc.workspace.Workspace
-import scala.collection.mutable.ArrayBuffer
+import ServiceGroup._
 
-class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[JobService]) extends Iterable[JobService] {
+class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[JobService]) extends ServiceGroup with Iterable[JobService] {
 
   class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
     override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
@@ -67,12 +63,10 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
               case Some(token) => 
                 val quality = JobServiceControl.qualityControl(cur.description)
                 val nbSubmitted = quality.submitted
-                val fitness = (if(quality.submitted > 0) {
-                  val v = math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
-                  val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-                  if(v < min) min else v
-                } else math.pow(quality.successRate, 2)) 
-  
+                val fitness = orMin(
+                  if(quality.submitted > 0) math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
+                  else math.pow(quality.successRate, 2)
+                ) 
                 Some((cur, token, fitness))
             }   
         }
