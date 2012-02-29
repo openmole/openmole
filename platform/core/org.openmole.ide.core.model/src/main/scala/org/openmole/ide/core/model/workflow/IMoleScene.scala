@@ -49,4 +49,6 @@ trait IMoleScene {
   def closeExtraProperty
   
   def removePropertyPanel
+  
+  override def toString = manager.name.getOrElse("")
 }

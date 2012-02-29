@@ -81,5 +81,10 @@
             <artifactId>org-openide-util-lookup</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>org-openide-dialogs</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 </project>

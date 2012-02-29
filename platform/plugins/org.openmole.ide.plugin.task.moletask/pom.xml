@@ -7,7 +7,7 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
   
-    <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
+    <artifactId>org.openmole.ide.plugin.task.moletask</artifactId>
     <name>${project.artifactId} ${project.version}</name>
     <packaging>nbm</packaging>
 
@@ -22,38 +22,13 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.core.implementation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.task.netlogo4</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.task.netlogo5</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.core.model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.image</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -62,29 +37,49 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.core.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.implementation</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.widget</artifactId>
             <version>${project.version}</version>
-        </dependency>  
+        </dependency> 
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-swing</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.osgi.netlogo4</artifactId>
-            <version>${project.version}</version>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.osgi.netlogo5</artifactId>
-            <version>${project.version}</version>
+            <artifactId>org-openide-windows</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <artifactId>org-openide-dialogs</artifactId>

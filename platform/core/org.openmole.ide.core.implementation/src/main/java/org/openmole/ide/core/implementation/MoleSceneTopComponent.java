@@ -36,6 +36,8 @@ import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 import org.openmole.ide.core.implementation.action.ConnectionVsDataChannelAction;
 import org.openmole.ide.core.implementation.action.BuildExecutionAction;
 import org.openmole.ide.core.implementation.action.CleanAndBuildExecutionAction;
@@ -80,6 +82,8 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     public void initialize(IMoleScene ms,
             IMoleComponent mc) {
         moleScene = ms;
+        // to be aware of the current edited mole
+        associateLookup(Lookups.singleton(ms));
         moleComponent = mc;
         initComponents();
         setToolTipText(NbBundle.getMessage(MoleSceneTopComponent.class, "HINT_MoleSceneTopComponent"));
