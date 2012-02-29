@@ -35,6 +35,13 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+    </dependencies>
     <modules>
         <module>org.openmole.ide.plugin.task.groovy</module>        
         <module>org.openmole.ide.plugin.task.netlogo</module>
