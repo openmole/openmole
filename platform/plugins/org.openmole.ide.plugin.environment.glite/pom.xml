@@ -76,5 +76,10 @@
             <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>org-openide-dialogs</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 </project>
