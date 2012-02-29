@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
+import java.awt.Rectangle
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -86,6 +87,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     
     mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = properties }) {
       icon = new ImageIcon(ImageTool.loadImage("img/previous.png",20,20))}
+    println("panel area : " + protoPanel.size.width)
+    scene.propertyWidget.setPreferredBounds(new Rectangle(0,0,protoPanel.size.width+20,protoPanel.size.height+20))
+    println("widget area : " + scene.propertyWidget.getPreferredBounds)
+    scene.propertyWidget.revalidate
+    scene.propertyWidget.repaint
     revalidate
     repaint
   }

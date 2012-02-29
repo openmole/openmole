@@ -57,8 +57,8 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     }
   }
   contents = mainPanel
-  preferredSize.width = 300
-  minimumSize.width = 300
+  //preferredSize.width = 800
+  //minimumSize.width = 800
  // preferredSize.width = 300
   foreground = Color.white
   
