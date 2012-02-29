@@ -57,11 +57,6 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-text</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
@@ -70,21 +65,6 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-swing</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <groupId>org.netbeans.api</groupId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>org-openide-windows</artifactId>
-            <groupId>org.netbeans.api</groupId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>org-openide-dialogs</artifactId>
-            <groupId>org.netbeans.api</groupId>
-            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -19,29 +19,20 @@ package org.openmole.ide.plugin.task.moletask
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openide.windows.WindowManager
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import scala.swing.Label
 import scala.swing.ComboBox
-import org.openide.util.Utilities
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","","") with ITaskPanelUI{
   
-  // building the combobox
-  val mole = {
-    val currentMoleScene = Utilities.actionsGlobalContext().lookupResult(classOf[IMoleScene]).allInstances.toArray(new Array[IMoleScene](0))(0)
-    val otherMoleScenes:Array[IMoleScene] = WindowManager.getDefault.findMode("editor").getTopComponents
-    .filter(_.isInstanceOf[MoleSceneTopComponent]).map(_.asInstanceOf[MoleSceneTopComponent].getMoleScene)
-    .filter(_!=null).filter(_!=currentMoleScene)
-    println("current : "+currentMoleScene.manager.name.get)
-    otherMoleScenes.foreach{ms=>println(ms.manager.name.get)}
-    new ComboBox[IMoleScene](otherMoleScenes)
-  }
+  val moleComboBox = new ComboBox(TopComponentsManager.moleScenes.toList)
   contents+= (new Label("Embedded mole"),"gap para")
-  contents+= mole
-  // selecting the current mole
-  if (pud.mole!=None) mole.selection.item = pud.mole
+  contents += moleComboBox
+  pud.mole match {
+    case Some(x:IMoleScene) => moleComboBox.selection.item = x
+    case _ =>
+  }
   
-  override def saveContent(name: String) = new MoleTaskDataUI(name, mole.selection.item)
+  override def saveContent(name: String) = new MoleTaskDataUI(name, Some(moleComboBox.selection.item))
 }

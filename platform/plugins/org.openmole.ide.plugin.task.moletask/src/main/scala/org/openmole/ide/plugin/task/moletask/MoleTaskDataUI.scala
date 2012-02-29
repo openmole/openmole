@@ -10,11 +10,15 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.misc.exception.UserBadDataError
 
 class MoleTaskDataUI(val name: String="",
-			     val mole: IMoleScene= null) extends TaskDataUI {
+			     val mole: Option[IMoleScene] = None) extends TaskDataUI {
 
-  def coreObject = new MoleTask(name, MoleMaker.buildMole(mole.manager)._1)
+  def coreObject = mole match {
+    case Some(x: IMoleScene) => new MoleTask(name, MoleMaker.buildMole(x.manager)._1)
+    case _=> throw new UserBadDataError("No Mole is set ")
+  }
 
   def coreClass = classOf[MoleTask] 
   
