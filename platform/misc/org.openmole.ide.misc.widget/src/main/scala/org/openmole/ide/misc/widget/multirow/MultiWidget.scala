@@ -65,10 +65,11 @@ class MultiWidget[T<:IRowWidget](title: String = "",
           if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
             removeRow(rowWidget)
             rowWidget.doOnClose}}})
-    //titleLabel.visible = true
     refresh
     rowWidget
   }
+  
+  def removeAllRows = rowWidgets.foreach(removeRow)
   
   def removeRow(rowWidget: T) = {
     rowWidgets -= rowWidget
@@ -77,7 +78,6 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   }
   
   def refresh = {
-   // if (rowWidgets.isEmpty && allowEmpty == CLOSE_IF_EMPTY) titleLabel.visible = false
     panel.repaint
     panel.revalidate
   } 
