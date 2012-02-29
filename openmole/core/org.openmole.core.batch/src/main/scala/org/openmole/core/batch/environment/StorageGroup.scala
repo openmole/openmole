@@ -30,8 +30,8 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.replication.ReplicaCatalog
-import collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
+import scala.annotation.tailrec
 
 
 //object StorageGroup extends Logger
@@ -65,15 +65,12 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
       val totalFileSize = usedFiles.map{_.size}.sum
       val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)
 
-      var ret: Option[(Storage, AccessToken)] = None
-      do {
-        val notLoaded = resources.flatMap {   
+      def fitness = {
+        resources.flatMap {   
           cur =>
 
           UsageControl.get(cur.description).tryGetToken match {
-            case None => 
-             // logger.fine("no token")
-              None
+            case None => None
             case Some(token) => 
               val quality = StorageControl.qualityControl(cur.description)
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
@@ -81,32 +78,48 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
               val fitness = (
                 quality match {
                   case Some(q) => 
-                    val v = math.pow(1. * q.successRate, 2)
+                    val v = math.pow(q.successRate, 2)
                     val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
                     if(v < min) min else v
                   case None => 1.
-                }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) * Workspace.preferenceAsDouble(BatchEnvironment.DataAllReadyPresentOnStoragePreference) + 1
-                      else 1)
-              //logger.fine("Token " + (cur, token, fitness))
+                }) * (if(totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
               Some((cur, token, fitness))
           }
+        }    
+      }.toList
+          
+      @tailrec def selected(value: Double, storages: List[(Storage, AccessToken, Double)]): Option[(Storage, AccessToken)] = 
+        storages.headOption match {
+          case Some((storage, token, fitness)) => 
+            if(value <= fitness) {
+              releaseAll(storages.tail)
+              Some((storage, token))
+            } else { 
+              release(storage, token)
+              selected(value - fitness, storages.tail)
+            }
+          case None => None
         }
              
-        if (notLoaded.size > 0) {
-          var selected = Random.default.nextDouble * notLoaded.map{_._3}.sum
-          
-          for ((service, token, fitness) <- notLoaded) {    
-            if(!ret.isDefined && selected <= fitness) {
-             // logger.fine("resource selected "+ service)
-              ret = Some((service, token))
-            }
-            else UsageControl.get(service.description).releaseToken(token) 
-            selected -= fitness
-          }
-        } else waiting.acquire
-      } while (!ret.isDefined)
-      return ret.get
+      @tailrec def wait: (Storage, AccessToken) = {
+        val notLoaded = fitness
+        selected(Random.default.nextDouble * notLoaded.map{case (_,_,fitness) => fitness}.sum, notLoaded) match {
+          case Some(storage) => storage
+          case None => waiting.acquire
+            wait
+        }
+      } 
+      
+      wait
     } finally selectingRessource.unlock
   }
-
+     
+  private def releaseAll(storages: List[(Storage, AccessToken, Double)]) = 
+    storages.foreach{
+      case (storage, token, _) => release(storage, token)
+    }
+         
+  private def release(storage: Storage, token: AccessToken) = 
+    UsageControl.get(storage.description).releaseToken(token)
+  
 }

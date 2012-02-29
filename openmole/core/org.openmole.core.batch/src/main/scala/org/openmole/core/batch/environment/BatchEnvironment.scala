@@ -55,8 +55,6 @@ object BatchEnvironment {
   val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
   
-  val DataAllReadyPresentOnStoragePreference = new ConfigurationLocation("BatchEnvironment", "DataAllReadyPresentOnStoragePreference")
-  
   val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
   
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
@@ -76,7 +74,6 @@ object BatchEnvironment {
   Workspace += (QualityHysteresis, "1000")
   Workspace += (CheckInterval, "PT2M")
   Workspace += (MinValueForSelectionExploration, "0.001")
-  Workspace += (DataAllReadyPresentOnStoragePreference, "10.0")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
   
