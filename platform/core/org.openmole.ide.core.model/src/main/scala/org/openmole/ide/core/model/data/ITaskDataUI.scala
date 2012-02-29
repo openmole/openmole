@@ -41,10 +41,6 @@ trait ITaskDataUI extends IDataUI{
   
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
   
- // def prototypes: HashSet[IPrototypeDataProxyUI] = prototypesIn++prototypesOut
-
-  //def addPrototype(p: IPrototypeDataProxyUI, ioType: IOType.Value)
-  
   def sampling: Option[ISamplingDataProxyUI]
   
   def sampling_=(s: Option[ISamplingDataProxyUI])
