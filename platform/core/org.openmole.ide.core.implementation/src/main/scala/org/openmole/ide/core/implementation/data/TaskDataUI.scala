@@ -21,12 +21,11 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.collection.mutable.HashSet
 
 abstract class TaskDataUI extends ITaskDataUI{
   
-  override val prototypesIn = HashSet.empty[(IPrototypeDataProxyUI,String)]
-  override val prototypesOut = HashSet.empty[IPrototypeDataProxyUI]
+  override var prototypesIn = List.empty[(IPrototypeDataProxyUI,String)]
+  override var prototypesOut = List.empty[IPrototypeDataProxyUI]
   override var sampling: Option[ISamplingDataProxyUI] = None
   override var environment: Option[IEnvironmentDataProxyUI] = None
 }
