@@ -138,7 +138,9 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
           } finally stdOutFile.delete
         
         } catch {
-          case(e: IOException) => logger.log(WARNING, description + " transfer has failed.", e);
+          case(e: IOException) => 
+            logger.log(WARNING, description + " transfer has failed.")
+            logger.log(FINE, "Stack of the error durring tranfert" , e)
         }
       case None => 
     }
