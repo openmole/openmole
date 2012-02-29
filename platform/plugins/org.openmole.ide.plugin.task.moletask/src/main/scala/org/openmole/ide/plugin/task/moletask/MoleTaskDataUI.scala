@@ -28,7 +28,7 @@ class MoleTaskDataUI(val name: String="",
   
   def buildPanelUI = new MoleTaskPanelUI(this)
  
-  def borderColor = new Color(61,104,130)
+  def borderColor = new Color(0,102,128)
   
-  def backgroundColor = new Color(61,104,130,128)
+  def backgroundColor = new Color(0,102,128,128)
 }
