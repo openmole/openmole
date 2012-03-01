@@ -17,57 +17,40 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.core.model.task.ITask
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.Priority
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.Capsule._
-import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
-import org.openmole.core.model.data.IPrototype
-import scala.collection.immutable.TreeMap
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.ListBuffer
 
-class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask {
+class MoleTask(name: String, val mole: IMole, val lastCapsule: ICapsule) extends Task(name) with IMoleTask {
 
-  var forcedArray = List.empty[IPrototype[_]]
-  
   class ResultGathering extends EventListener[IMoleExecution] {
-    
-    val variables = new ListBuffer[IVariable[_]] 
+    var lastContext: Option[IContext] = None
      
-    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = 
+    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
         case ev: IMoleExecution.JobInCapsuleFinished =>  
-          outputCapsules.get(ev.capsule) match {
-            case None => //Logger.getLogger(classOf[MoleTask].getName).fine("No output registred for " + moleJob.task.name)
-            case Some(prototypes) =>
-              variables ++= prototypes.flatMap(p => ev.moleJob.context.variable(p).toList)
-          } 
+          if(ev.capsule == lastCapsule) lastContext = Some(ev.moleJob.context)
+        case _ =>
       }
+    }
   }
-
-  private val outputCapsules = new HashMap[ICapsule, ListBuffer[String]]
 
   override protected def process(context: IContext) = {
     val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
@@ -79,38 +62,18 @@ class MoleTask(name: String, val mole: IMole) extends Task(name) with IMoleTask 
 
     val execution = new MoleExecution(mole)
     val resultGathering = new ResultGathering
-    
+
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])
-    
+
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    val toArrayMap = TreeMap.empty[String, Manifest[_]] ++ forcedArray.map(e => e.name -> e.`type`)
-    
-    context ++ aggregate(outputs, toArrayMap, resultGathering.variables)
+    context ++ resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + lastCapsule + " has never been executed."))
   }
 
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype), forceArray)
-
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type = addOutput(capsule, new Data(prototype, masks), forceArray)
- 
-  def addOutput(capsule: ICapsule, data: IData[_], forceArray: Boolean): this.type = {
-    addOutput(data)
-    outputCapsules.getOrElseUpdate(capsule, new ListBuffer[String]) += data.prototype.name
-    if(forceArray) this.forceArray(data.prototype)
-    this
-  }
- 
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_]): this.type = addOutput(capsule, prototype, false)
-
-  def addOutput(capsule: ICapsule, data: IData[_]): this.type = addOutput(capsule, data, false)
-  
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type = addOutput(capsule, prototype, masks, false)
- 
   override def inputs: IDataSet = {
-    val firstTask = mole.root.task.getOrElse(throw new UserBadDataError("First task has not been assigned in the mole of the mole task " + name))
+    val firstTask = mole.root.taskOrException
     new DataSet(super.inputs ++ firstTask.inputs)
   }
   
-  private def forceArray(prototype: IPrototype[_]) = forcedArray = prototype +: forcedArray
 }

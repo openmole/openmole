@@ -23,10 +23,6 @@ package org.openmole.core.model.task
  *
  * @author Romain Reuillon <romain.reuillon at openmole.org>
  */
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 
@@ -39,16 +35,7 @@ trait IMoleTask extends ITask {
    * @return the mole executed by this task
    */
   def mole: IMole
-    
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_]): this.type
-
-  def addOutput(capsule: ICapsule, data: IData[_]): this.type
   
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask]): this.type
- 
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_], forceArray: Boolean): this.type
+  def lastCapsule: ICapsule
 
-  def addOutput(capsule: ICapsule, data: IData[_], forceArray: Boolean): this.type
-  
-  def addOutput(capsule: ICapsule, prototype: IPrototype[_],masks: Array[DataModeMask], forceArray: Boolean): this.type
 }
