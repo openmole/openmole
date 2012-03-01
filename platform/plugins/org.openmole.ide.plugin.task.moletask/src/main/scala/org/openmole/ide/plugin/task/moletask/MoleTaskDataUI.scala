@@ -16,7 +16,7 @@ class MoleTaskDataUI(val name: String="",
 			     val mole: Option[IMoleScene] = None) extends TaskDataUI {
 
   def coreObject = mole match {
-    case Some(x: IMoleScene) => new MoleTask(name, MoleMaker.buildMole(x.manager)._1)
+//    case Some(x: IMoleScene) => new MoleTask(name, MoleMaker.buildMole(x.manager)._1)
     case _=> throw new UserBadDataError("No Mole is set ")
   }
 
