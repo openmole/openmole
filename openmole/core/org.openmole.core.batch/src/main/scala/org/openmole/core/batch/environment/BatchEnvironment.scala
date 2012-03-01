@@ -71,7 +71,7 @@ object BatchEnvironment {
   Workspace += (JVMLinuxX64Location, () => new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
 
   Workspace += (MemorySizeForRuntime, "512")
-  Workspace += (QualityHysteresis, "1000")
+  Workspace += (QualityHysteresis, "100")
   Workspace += (CheckInterval, "PT2M")
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (CheckFileExistsInterval, "PT1H")
