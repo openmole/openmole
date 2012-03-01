@@ -195,7 +195,7 @@ class ExecutionManager(manager : IMoleSceneManager,
                     ExecutionState.FAILED->new AtomicInteger,
                     ExecutionState.KILLED-> new AtomicInteger)    
     environments+= e._1-> (e._2,m)
-    EventDispatcher.listen(e._1,new JobCreatedOnEnvironmentListener(this,moleExecution,e._1),classOf[IEnvironment.JobSubmitted])
+    EventDispatcher.listen(e._1,new JobStateChangedOnEnvironmentListener(this,moleExecution,e._1),classOf[IEnvironment.JobStateChanged])
   }
   
   

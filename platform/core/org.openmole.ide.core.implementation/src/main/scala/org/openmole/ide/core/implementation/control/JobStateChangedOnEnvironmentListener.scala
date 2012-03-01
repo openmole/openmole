@@ -18,19 +18,19 @@
 package org.openmole.ide.core.implementation.control
 
 import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.execution.ExecutionState._
 import ExecutionManager._
 
-class JobCreatedOnEnvironmentListener(exeManager: ExecutionManager,
-                                      moleExecution: IMoleExecution, 
-                                      environment: IEnvironment) extends EventListener[IEnvironment] {
+class JobStateChangedOnEnvironmentListener(exeManager: ExecutionManager,
+                                            moleExecution: IMoleExecution, 
+                                            environment: IEnvironment) extends EventListener[IEnvironment] {
   override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
-      case x: IEnvironment.JobSubmitted=>
-        EventDispatcher.listen(x.job,new JobOnEnvironmentStatusListener(exeManager,moleExecution,x.job),classOf[IExecutionJob.StateChanged])
+      case x: IEnvironment.JobStateChanged=>
+        exeManager.decrementEnvironmentState(environment, x.oldState)
+        exeManager.incrementEnvironmentState(environment, x.newState)
     }
   }
 }
