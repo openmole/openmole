@@ -120,15 +120,9 @@ object Builder {
    * @throws UserBadDataError
    * @throws InterruptedException
    */
-  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast): MoleTask = {  
-    val task = puzzle.last.task.getOrElse(throw new UserBadDataError("Task unasigned for last capsule of the puzzle"))
+  def moleTask(taskName: String, puzzle: IPuzzleFirstAndLast) = 
+    new MoleTask(taskName, new Mole(puzzle.first), puzzle.last)
 
-    val moleTask = new MoleTask(taskName, new Mole(puzzle.first))
-
-    for (data <- task.outputs) moleTask.addOutput(puzzle.last, data)
-    
-    moleTask
-  }
 
   /**
    * Builds a Mole.
@@ -291,7 +285,7 @@ object Builder {
    * @throws UserBadDataError
    * @throws InterruptedException
    */ 
-  def explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast): IMoleTask = {
+  def explorationMoleTask(taskName: String, explo: IExplorationTask, puzzle: IPuzzleFirstAndLast) = {
         
     val ft = puzzle.last.task.getOrElse(throw new UserBadDataError("Task unasigned for first capsule of the puzzle"))
     
@@ -300,13 +294,7 @@ object Builder {
     val exploPuz = exploration(explo, puzzle)
     
     // builds a mole containing a exploration, a puzzle, and an aggregation on the inputToGlobalTask
-    val moleTask = new MoleTask(taskName, new Mole(exploPuz.first))
-
-    // sets output available as an array
-    for (data <- ft.outputs) {
-      moleTask.addOutput(puzzle.last, Data.toArray(data), true)
-    }
-    moleTask
+    new MoleTask(taskName, new Mole(exploPuz.first), puzzle.last)
   }
   
   
