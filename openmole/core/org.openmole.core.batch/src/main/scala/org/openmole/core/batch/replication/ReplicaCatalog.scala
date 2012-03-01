@@ -44,6 +44,7 @@ import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
@@ -199,7 +200,7 @@ object ReplicaCatalog {
  
   private def uploadAndInsert(src: File, srcPath: File,hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
     val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
-    URIFile.copy(src, newFile, token)
+    signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
     val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
     insert(newReplica)
     newReplica

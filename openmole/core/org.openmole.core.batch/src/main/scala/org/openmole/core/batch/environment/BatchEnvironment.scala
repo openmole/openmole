@@ -18,29 +18,51 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
-import java.net.URI
-import java.util.concurrent.Semaphore
-import java.util.concurrent.atomic.AtomicInteger
 
-import java.util.concurrent.locks.ReentrantLock
 import org.openmole.misc.exception.InternalProcessingError
+import java.net.URI
+import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 
 import org.openmole.core.model.job.IJob
-import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.tools.collection.OrderedSlidingList
 
 object BatchEnvironment {
+ 
+  trait Transfert {
+    def id: Long
+  }
+  
+  val transfertId = new AtomicLong
+  
+  case class BeginUpload(val id: Long, val file: File, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  case class EndUpload(val id: Long, val file: File, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  
+  case class BeginDownload(val id: Long, val from: URI, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  case class EndDownload(val id: Long, val from: URI, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  
+  def signalUpload[T](upload: => T, file: File, storage: Storage) = {
+    val id = transfertId.getAndIncrement
+    EventDispatcher.trigger(storage.environment, new BeginUpload(id, file, storage))
+    try upload
+    finally EventDispatcher.trigger(storage.environment, new EndUpload(id, file, storage))
+  }
+  
+  def signalDownload[T](download: => T, from: URI, storage: Storage) = {
+    val id = transfertId.getAndIncrement
+    EventDispatcher.trigger(storage.environment, new BeginDownload(id, from, storage))
+    try download
+    finally EventDispatcher.trigger(storage.environment, new EndDownload(id, from, storage))
+  }
   
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
 

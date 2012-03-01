@@ -17,40 +17,28 @@
 
 package org.openmole.core.batch.environment
 
-import com.ice.tar.TarInputStream
-import java.io.File
+
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
-import java.net.URI
 import java.util.concurrent.Callable
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
-import org.openmole.core.batch.control.StorageControl
-import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.file.GZURIFile
-import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.job.IJob
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.execution.ExecutionState._
 
-import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
 import scala.Boolean._
-import scala.collection.immutable.TreeMap
 import BatchEnvironment._
 
 object GetResultFromEnvironment extends Logger
@@ -58,11 +46,6 @@ object GetResultFromEnvironment extends Logger
 class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
   import communicationStorage._
-  
-  /*private def successFullFinish(running: Long, done: Long) = {
-   import batchJob.timeStemp
-   StatisticRegistry.sample(environment, job, new StatisticSample(timeStemp(SUBMITTED), running, done))
-   }*/
 
   override def call: Unit = {
     val token = UsageControl.get(communicationStorage.description).waitAToken
@@ -98,14 +81,13 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
                       val running = timeStamps.view.reverse.find( _.state == State.RUNNING ).get.time
                       if(running < firstRunning) firstRunning = running
                       moleJob.finished(context, executionResult._2)
-                      //successfull +=1 
                     case Right(e) => 
                       EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.MoleJobExceptionRaised(batchExecutionJob, e, SEVERE, moleJob))
                       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
                   }
-                } //else logger.fine("Molejob " + moleJob.id + " is finished.")
+                } 
               } 
-            } //else logger.fine("Results does't contains result for " + moleJob.id + " " + contextResults.results.toString + ".")
+            }
           }
 
       }
@@ -114,7 +96,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
 
   private def getRuntimeResult(outputFilePath: String, token: AccessToken): RuntimeResult = {
-    val resultFile = outputFilePath.cacheUnziped(token)
+    val resultFile = signalDownload(outputFilePath.cacheUnziped(token), outputFilePath.toURI, communicationStorage)
     try SerializerService.deserialize(resultFile)
     finally resultFile.delete
   }
@@ -123,7 +105,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
     message match {
       case Some(message) =>
         try {
-          val stdOutFile = message.path.cacheUnziped(token)
+          val stdOutFile = signalDownload(message.path.cacheUnziped(token), message.path.toURI, communicationStorage)
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
             if (stdOutHash != message.hash)
@@ -148,7 +130,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
   private def getContextResults(resultPath: FileMessage, token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    val contextResutsFileCache = resultPath.path.cacheUnziped(token)
+    val contextResutsFileCache = signalDownload(resultPath.path.cacheUnziped(token), resultPath.path.toURI, communicationStorage)
     if(HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
     
     try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
