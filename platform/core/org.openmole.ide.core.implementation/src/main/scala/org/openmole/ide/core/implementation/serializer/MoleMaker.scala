@@ -28,7 +28,8 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
-import org.openmole.core.implementation.data.Parameter
+import org.openmole.core.implementation.data.DataChannel
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.misc.exception.UserBadDataError
@@ -70,8 +71,11 @@ object MoleMaker {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
       val capsuleMap= manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2))}.toMap
-      capsuleMap.foreach{case (cui,ccore)=> manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))}
-    
+      capsuleMap.foreach{case (cui,ccore)=> 
+          manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
+          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
+                                                                                             dc.prototypes.map{_.dataUI.name}.toSet)}}
+      
       (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
     }
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
@@ -87,13 +91,13 @@ object MoleMaker {
   
   def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
     capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
-        val proto = pui.dataUI.coreObject
-        v.isEmpty match {
-          case true=> task.addInput(proto)
-         // case false=> task.addParameter(new Parameter(proto,v))
-        }
-      }}
-      capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
+          val proto = pui.dataUI.coreObject
+          v.isEmpty match {
+            case true=> task.addInput(proto)
+              // case false=> task.addParameter(new Parameter(proto,v))
+          }
+        }}
+    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
     task
   }
   
