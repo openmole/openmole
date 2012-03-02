@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
