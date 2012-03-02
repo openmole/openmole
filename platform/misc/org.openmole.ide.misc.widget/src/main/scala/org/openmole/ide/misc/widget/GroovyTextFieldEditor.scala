@@ -20,24 +20,39 @@ package org.openmole.ide.misc.widget
 import java.awt.Cursor
 import javax.swing.ImageIcon
 import org.openmole.ide.misc.image.ImageTool
+import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
 
-class GroovyTextFieldEditor(val title : String,
-                            var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){                                              
-  setIcon
+class GroovyTextFieldEditor[A](val title : String,
+                               var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){                                              
+  setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   action = new Action(""){
     def apply = {
       editorText = DialogFactory.groovyEditor(title,editorText)
-      setIcon
+      setIcon(editorText)
     }
   }
   
-  private def setIcon = {
-    editorText.isEmpty match {
-      case true => icon = new ImageIcon(ImageTool.loadImage("img/edit_empty.png",20,20))
-      case false => icon = new ImageIcon(ImageTool.loadImage("img/edit.png",20,20))
+  private def setIcon(code : String) = {
+    icon = code.isEmpty match {
+      case true => new ImageIcon(ImageTool.loadImage("img/edit_empty.png",20,20))
+      case false => 
+        try {
+          new GroovyProxy(code).execute() match {
+            case x: A => 
+              tooltip = "Valid Groovy script : " + x
+              new ImageIcon(ImageTool.loadImage("img/edit.png",20,20))
+            case _ => 
+              tooltip = "No default value"
+              new ImageIcon(ImageTool.loadImage("img/edit_error.png",20,20))
+          }
+        } catch { 
+          case e => 
+            tooltip = e.getMessage
+            new ImageIcon(ImageTool.loadImage("img/edit_error.png",20,20))
+        }
     }
     repaint
     revalidate
