@@ -22,19 +22,29 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import scala.swing.event.SelectionChanged
 import scala.swing.Label
 import scala.swing.ComboBox
+import scala.collection.JavaConversions._
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","","") with ITaskPanelUI{
   
   val moleComboBox = new ComboBox(TopComponentsManager.moleScenes.toList) 
   {tooltip = Help.tooltip("The name of the inner Mole to be run.","Mole_1")}
-  contents+= (new Label("Embedded mole"),"gap para")
+  val capsuleComboBox = new ComboBox(moleComboBox.selection.item.manager.capsules.values.toList) 
+  
+  contents += (new Label("Embedded mole"),"gap para")
   contents += moleComboBox
   pud.mole match {
     case Some(x:IMoleScene) => moleComboBox.selection.item = x
     case _ =>
   }
+  contents += (new Label("Final capsule"),"gap para")
+  contents += capsuleComboBox
   
-  override def saveContent(name: String) = new MoleTaskDataUI(name, Some(moleComboBox.selection.item))
+ // listenTo(moleComboBox.selection)
+ // reactions += {
+ //   case SelectionChanged(`moleComboBox`) => capsuleComboBox.peer.setModel(ComboBox.newConstantModel(moleComboBox.selection.item.manager.capsules.values.toList)
+ // }
+ override def saveContent(name: String) = new MoleTaskDataUI(name, Some(moleComboBox.selection.item),Some(capsuleComboBox.selection.item))
 }
