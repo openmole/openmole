@@ -17,21 +17,20 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
+import javax.swing.BorderFactory
 
 class PropertyPanel(borderColor: Color,
                     mig1: String, 
                     mig2: String ="", 
                     mig3: String="") extends MyMigPanel(mig1,mig2,mig3) {
-
+  
   override def paintComponent(g: Graphics2D) = {
+  border = BorderFactory.createLineBorder(borderColor, 5)
     super.paintComponent(g)
     g.setColor(new Color(77,77,77))
-    g.fillRoundRect(0, 0, size.width, size.height,20, 20)
-    g.setStroke(new BasicStroke(5f))
-    g.setColor(borderColor)
-    g.drawRoundRect(1,1,size.width -4,size.height-4,20,20)
-  }  
+    g.fillRect(0, 0, size.width, size.height)
+    g.drawRect(1,1,size.width,size.height)  
+  }
 }

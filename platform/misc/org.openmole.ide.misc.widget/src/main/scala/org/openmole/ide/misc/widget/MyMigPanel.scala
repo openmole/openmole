@@ -19,16 +19,12 @@ package org.openmole.ide.misc.widget
 
 import java.awt.Color
 import java.awt.Graphics2D
-import java.awt.RenderingHints
 import scala.swing._
 
 class MyMigPanel (mig1: String, mig2: String ="", mig3: String="") extends MigPanel(mig1,mig2,mig3) {
-  
+    background = new Color(77,77,77)
+    
   override def paintComponent(g: Graphics2D) = {
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                       RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(new Color(77,77,77))
-    g.fillRoundRect(0, 0, size.width, size.height,20, 20)
     contents.foreach(c=> c match {
         case x: TextField=> x.foreground= Color.BLACK
         case x: UIElement=> x.foreground= Color.WHITE
