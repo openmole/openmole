@@ -47,7 +47,7 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.PropertyPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Component
@@ -72,8 +72,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(propertyLayer)
   addChild(extraPropertyLayer)
   
-  val extraPropertyWidget = new Widget(this) 
-  val propertyWidget = new ComponentWidget(this,new PluginPanel("").peer) 
+  val extraPropertyWidget = new ComponentWidget(this,new PropertyPanel(Color.WHITE,""){visible = false}.peer) 
+  val propertyWidget = new ComponentWidget(this,new PropertyPanel(Color.WHITE,""){visible = false}.peer) 
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
   
@@ -132,6 +132,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       case Some(x:BasePanelUI)=> x.baseSave
       case _=>
     }
+    closeExtraProperty
     propertyWidget.removeChildren
     refresh
   }
@@ -334,11 +335,10 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   }
   
   class PropertyWidget (scene: IMoleScene,wi: Component) extends ComponentWidget(scene.graphScene,wi.peer){
-    setPreferredBounds(new Rectangle(0,0,800,500))
-    override def paintBackground{
+    setPreferredBounds(new Rectangle(0,0,wi.preferredSize.width,wi.preferredSize.height))
+    override def paintBackground = {
       val g = scene.graphScene.getGraphics
-     // g.fill(wi.bounds)
-      g.fill(new Rectangle(0,0,800,500))
+      g.fill(wi.bounds)
       revalidate
     }
   }

@@ -17,10 +17,12 @@
 
 package org.openmole.ide.core.implementation.panel
 
+import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
+import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -28,13 +30,15 @@ import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import scala.swing.Label
-import scala.swing.ScrollPane
+import scala.swing.Panel
+import scala.swing.event.UIElementResized
 import scala.swing.TextField
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value,
-                           borderColor : Color = new Color(200,200,200)) extends ScrollPane {
+                           borderColor : Color = new Color(200,200,200)) extends Panel {
+  peer.setLayout(new BorderLayout)
   val iconLabel = new Label{ icon = new ImageIcon(ImageTool.loadImage("img/empty.png",50,50))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
@@ -56,18 +60,23 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       }
     }
   }
-  contents = mainPanel
-  //preferredSize.width = 800
-  //minimumSize.width = 800
- // preferredSize.width = 300
+  peer.add(mainPanel.peer,BorderLayout.CENTER)
+  preferredSize.width = 300
   foreground = Color.white
   
-  verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-  horizontalScrollBarPolicy = ScrollPane.BarPolicy.Never
+  mainPanel.contents.foreach { c =>
+    listenTo(c)
+    reactions += {
+      case x:UIElementResized =>
+        this.preferredSize =new Dimension(mainPanel.size.width + 30,mainPanel.size.height + 30)
+        scene.refresh
+    }
+  }
   
   def hide = {
     baseSave
     visible = false
+    scene.refresh
   }
   
   def deleteLink = {
@@ -96,4 +105,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def delete: Unit
   
   def save: Unit
+  
+  def panelUI: IPanelUI
 }
