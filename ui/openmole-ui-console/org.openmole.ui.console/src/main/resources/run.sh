@@ -7,9 +7,9 @@ then
 	MEM=$1	
 fi
 
-
 rm -Rf configuration/org*
 rm configuration/*.log
-java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar\
+java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -XX:+UseCompressedOops -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC \
+     -jar plugins/org.eclipse.equinox.launcher.jar \
      -p openmole-plugins,openmole-plugins-ui $@
 cat configuration/*.log
