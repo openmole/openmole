@@ -37,53 +37,14 @@
             <version>${lib.org.scalatest.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>${lib.org.junit.version}</version>
+           <scope>test</scope>
+        </dependency>
     </dependencies>
 
-    <!--<build>
-        <plugins>
-            <plugin>
-                <groupId>org.openmole.core</groupId>
-                <artifactId>aspectj-maven-plugin</artifactId>
-                <version>${lib.org.aspectj.version}</version>
-                <configuration>
-                    <complianceLevel>1.6</complianceLevel>
-                    <showWeaveInfo>true</showWeaveInfo>
-                    <verbose>true</verbose>
-                    <aspectLibrarys>
-                        <aspectLibrary>
-                            <groupId>org.openmole.core</groupId>
-                            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
-			    <version>${project.version}</version>
-                        </aspectLibrary>
-                        <aspectLibrary>
-                            <groupId>org.openmole.core</groupId>
-                            <artifactId>org.openmole.commons.aspect.caching</artifactId>
-			    <version>${project.version}</version>
-                        </aspectLibrary>
-                    </aspectLibrarys>
-                    <weaveDependencies>
-                        <weaveDependency>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.misc.eventdispatcher</artifactId>
-                        </weaveDependency>
-                        <weaveDependency>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>org.openmole.commons.aspect.caching</artifactId>
-                        </weaveDependency>
-                    </weaveDependencies>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>-->
-    
     <packaging>pom</packaging>
 
 </project>

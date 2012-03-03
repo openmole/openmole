@@ -41,14 +41,14 @@
     </dependencyManagement>
 
     
-    <dependencies>
+<!--    <dependencies>
 	<dependency>
      	   <groupId>junit</groupId>
            <artifactId>junit</artifactId>
            <version>${lib.org.junit.version}</version>
            <scope>test</scope>
         </dependency>
-    </dependencies>
+    </dependencies>-->
     
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
