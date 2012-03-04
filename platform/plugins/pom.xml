@@ -41,6 +41,16 @@
             <artifactId>org-openide-dialogs</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.misc.tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.codehaus.groovy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <modules>
         <module>org.openmole.ide.plugin.task.groovy</module>        
