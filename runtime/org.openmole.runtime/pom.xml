@@ -124,28 +124,6 @@
                             <excludeScope>provided</excludeScope>
                         </configuration>
                     </execution>
-                    <!--<execution>
-                        <id>unpack-jre</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.sun.java</groupId>
-                                    <artifactId>java-jre</artifactId>
-                                    <version>6u25</version>
-                                    <type>tgz</type>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${product.directory}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${product.directory}</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                        </configuration>
-                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

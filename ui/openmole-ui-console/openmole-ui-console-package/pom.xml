@@ -36,6 +36,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.runtime</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.runtime.daemon</artifactId>
             <version>${project.version}</version>
             <type>tar.gz</type>
