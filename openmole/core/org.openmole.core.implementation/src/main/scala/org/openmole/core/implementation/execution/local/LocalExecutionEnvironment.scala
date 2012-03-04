@@ -20,7 +20,6 @@ package org.openmole.core.implementation.execution.local
 import java.util.concurrent.Semaphore
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.job.Job
-import org.openmole.core.model.execution.IExecutionJob
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
@@ -29,19 +28,20 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.collection.mutable.SynchronizedPriorityQueue
 import org.openmole.core.model.execution.IEnvironment
+import scala.collection.immutable.TreeMap
 
 object LocalExecutionEnvironment extends Environment {
   
-  implicit def jobOrdering = new Ordering[LocalExecutionJob] {
-    override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
-      val nbMJLeft = left.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
-      val nbMJRight = right.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
+  
+  /*val jobOrdering = new Ordering[LocalExecutionJob] {
+   override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
+   val nbMJLeft = left.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
+   val nbMJRight = right.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
           
-      nbMJRight - nbMJLeft
-    }
-  }
+   nbMJRight - nbMJLeft
+   }
+   }*/
   
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
@@ -56,8 +56,7 @@ class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
   
   import LocalExecutionEnvironment._
   
-  private val jobs = new SynchronizedPriorityQueue[LocalExecutionJob]
-  private val jobInQueue = new Semaphore(0)
+  private val jobs = new JobPriorityQueue
   
   private var executers = List.empty[(LocalExecuter, Thread)]
        
@@ -86,12 +85,9 @@ class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
   private def submit(ejob: LocalExecutionJob) = {
     EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(ejob))
     ejob.state = ExecutionState.SUBMITTED
-    jobs += ejob
-    jobInQueue.release
+    jobs.enqueue(ejob)
   }
 
-  private[local] def takeNextjob: LocalExecutionJob = {
-    jobInQueue.acquire
-    jobs.dequeue
-  }
+  private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
+  
 }
