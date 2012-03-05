@@ -87,6 +87,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def baseCreate : Unit = {
     create  
     deleteLink
+    baseSave
     scene.refresh
   }
   
