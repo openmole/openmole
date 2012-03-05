@@ -26,6 +26,5 @@ abstract class TaskDataUI extends ITaskDataUI{
   
   override var prototypesIn = List.empty[(IPrototypeDataProxyUI,String)]
   override var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  override var sampling: Option[ISamplingDataProxyUI] = None
   override var environment: Option[IEnvironmentDataProxyUI] = None
 }

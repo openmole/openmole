@@ -18,8 +18,14 @@
 package org.openmole.ide.plugin.task.exploration
 import scala.swing._
 import swing.Swing._
+import org.openmole.ide.core.implementation.Proxys
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends BoxPanel(Orientation.Horizontal) with ITaskPanelUI {
-  override def saveContent(name: String) = new ExplorationTaskDataUI
+val samplingComboBox = new ComboBox(Proxys.sampling) 
+  {tooltip = Help.tooltip("The name of the sampling to be executed")}
+
+contents += samplingComboBox
+
+  override def saveContent(name: String) = new ExplorationTaskDataUI(samplingComboBox.selection.item)
 }

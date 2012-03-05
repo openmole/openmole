@@ -22,12 +22,15 @@ import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.data.TaskDataUI
 
-class ExplorationTaskDataUI(val name: String="") extends TaskDataUI{
+class ExplorationTaskDataUI(val name: String="",
+		                val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI{
    
   override def coreObject = {
-    if (sampling.isDefined) new ExplorationTask(name,sampling.get.dataUI.coreObject)
-    else throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
+    sampling match {
+      case Some(x: ISamplingDataProxyUI) => new ExplorationTask(name,x.dataUI.coreObject)
+      case _ => throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
   } 
+}
   
   override def coreClass= classOf[ExplorationTask]
   

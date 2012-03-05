@@ -41,10 +41,6 @@ trait ITaskDataUI extends IDataUI{
   
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
   
-  def sampling: Option[ISamplingDataProxyUI]
-  
-  def sampling_=(s: Option[ISamplingDataProxyUI])
-  
   def environment: Option[IEnvironmentDataProxyUI]
   
   def environment_=(s: Option[IEnvironmentDataProxyUI])
