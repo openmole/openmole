@@ -71,8 +71,9 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def properties = {
-    switch
-    mainPanel.contents += proxy.dataUI.buildPanelUI.peer
+    switch    
+    panelUI = proxy.dataUI.buildPanelUI
+    mainPanel.contents += panelUI.peer
     mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = protos }) {
       icon = new ImageIcon(ImageTool.loadImage("img/next.png",20,20))}
     revalidate
