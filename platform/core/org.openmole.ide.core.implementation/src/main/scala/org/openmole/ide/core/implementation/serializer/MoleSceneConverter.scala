@@ -32,6 +32,7 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -69,6 +70,15 @@ class MoleSceneConverter extends Converter{
         writer.startNode("oslot")
         writer.addAttribute("id", slotcount.toString)
         writer.endNode
+        
+        //Environment
+        view.environment match {
+          case Some(x:IEnvironmentDataProxyUI)=> 
+            writer.startNode("environment")
+            writer.addAttribute("id",x.id.toString)
+            writer.endNode
+          case _=>
+        }
         
         //Task
         if (view.capsuleType != CAPSULE) {
@@ -114,18 +124,25 @@ class MoleSceneConverter extends Converter{
       reader.moveDown
       val n0 = reader.getNodeName
       n0 match {
-        case "capsule"=> {val p= new Point
-                          p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
-                          val caps = SceneItemFactory.createCapsule(scene, p)
-                          val start = reader.getAttribute("start").toBoolean
-                          if (start) scene.manager.startingCapsule = Some(caps)
-                          while (reader.hasMoreChildren) {
+        case "capsule"=> {
+            val p= new Point
+            p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
+            val caps = SceneItemFactory.createCapsule(scene, p)
+            
+            val start = reader.getAttribute("start").toBoolean
+            start match {
+              case true => scene.manager.startingCapsule = Some(caps)
+              case false =>
+            }
+                        
+            while (reader.hasMoreChildren) {
               reader.moveDown
               val n1= reader.getNodeName
               n1 match{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> caps.encapsule(Proxys.tasks.filter(p=> p.id == reader.getAttribute("id").toInt).head)  
+                case "environment"=> caps.environment = Some(Proxys.environments.filter(e=> e.id == reader.getAttribute("id").toInt).head)
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
               reader.moveUp

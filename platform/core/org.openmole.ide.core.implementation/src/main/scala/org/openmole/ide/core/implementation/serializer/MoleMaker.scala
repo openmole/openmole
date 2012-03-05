@@ -23,6 +23,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
@@ -52,14 +53,16 @@ object MoleMaker {
       var envs = new HashSet[(IEnvironment,String)]
       val strat = new FixedEnvironmentSelection
       manager.capsules.values.foreach{c=> 
-        if (c.dataProxy.get.dataUI.environment.isDefined){ 
-          try {
-            val env= c.dataProxy.get.dataUI.environment.get.dataUI.coreObject
-            envs+= new Tuple2(env,c.dataProxy.get.dataUI.environment.get.dataUI.name)
-            strat.select(capsuleMap(c),env)
-          }catch {
-            case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
-          }
+        c.environment match {
+          case Some(x : IEnvironmentDataProxyUI) => 
+            try {
+              val env = x.dataUI.coreObject
+              envs += new Tuple2(env,x.dataUI.name)
+              strat.select(capsuleMap(c),env)
+            }catch {
+              case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+            }
+          case _ =>
         }}
       val mgs = new MoleJobGrouping
       groupingStrategies.foreach(s=>mgs.set(s._2,s._1))

@@ -25,5 +25,4 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 abstract class TaskDataUI extends ITaskDataUI{
   override var prototypesIn = List.empty[(IPrototypeDataProxyUI,String)]
   override var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  override var environment: Option[IEnvironmentDataProxyUI] = None
 }

@@ -26,6 +26,7 @@ import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -36,8 +37,13 @@ import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Label
 
-class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],var capsuleType:CapsuleType,var startingCapsule: Boolean) extends Widget(scene.graphScene) with ICapsuleUI{
+class CapsuleUI(val scene: IMoleScene, 
+                var dataProxy: Option[ITaskDataProxyUI],
+                var capsuleType:CapsuleType,
+                var startingCapsule: Boolean = false,
+                var environment: Option[IEnvironmentDataProxyUI] = None) extends Widget(scene.graphScene) with ICapsuleUI{
   def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0)
+  
     
   createActions(MOVE).addAction (ActionFactory.createMoveAction)
   
@@ -48,8 +54,8 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   
   var titleLabel = dataProxy match {
     case Some(x: ITaskDataProxyUI)=> new LinkLabel(x.dataUI.name,new Action(""){
-      def apply = scene.displayPropertyPanel(x, EDIT)}){
-          background = Color.red}
+          def apply = scene.displayPropertyPanel(x, EDIT)}){
+        background = Color.red}
     case None=> new Label("")
   }
   addChild(new ComponentWidget(scene.graphScene,titleLabel.peer))
@@ -62,7 +68,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
   
   def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
-    val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule)
+    val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule,environment)
     connectableWidget.islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
     if (dataProxy.isDefined) {
       c.setDataProxy(dataProxy.get)
@@ -83,7 +89,7 @@ class CapsuleUI(val scene: IMoleScene, var dataProxy: Option[ITaskDataProxyUI],v
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
     titleLabel = new LinkLabel(dpu.dataUI.name,new Action(""){
-      def apply = scene.displayPropertyPanel(dpu, EDIT)})
+        def apply = scene.displayPropertyPanel(dpu, EDIT)})
   }
   
   

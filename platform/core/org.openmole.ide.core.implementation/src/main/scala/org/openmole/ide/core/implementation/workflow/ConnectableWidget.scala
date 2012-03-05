@@ -25,6 +25,7 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectableWidget
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.ListBuffer
@@ -69,20 +70,22 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
     val graphics = getGraphics.asInstanceOf[Graphics2D]
     graphics.setFont(new Font("Ubuntu", Font.PLAIN, 12))
     
-    if (capsule.dataProxy.isDefined) {
-      val dataUI = capsule.dataProxy.get.dataUI
-
-      graphics.setColor(new Color(204,204,204))
-      var lineH = 0
-      if (samplingWidget.isDefined) lineH = 50
-      graphics.drawLine(TASK_CONTAINER_WIDTH / 2,
-                        TASK_TITLE_HEIGHT,
-                        TASK_CONTAINER_WIDTH / 2,
-                        math.max(TASK_CONTAINER_HEIGHT- 3,45) + 50)
+    capsule.dataProxy match {
+      case Some(x : ITaskDataProxyUI)=>
+        graphics.setColor(new Color(204,204,204))
+        var lineH = 0
+        if (samplingWidget.isDefined) lineH = 50
+        graphics.drawLine(TASK_CONTAINER_WIDTH / 2,
+                          TASK_TITLE_HEIGHT,
+                          TASK_CONTAINER_WIDTH / 2,
+                          math.max(TASK_CONTAINER_HEIGHT- 3,45) + 50)
+      case _=>
+    }
       
-      if (dataUI.environment.isDefined) graphics.drawImage(Images.thumb(dataUI.environment.get.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
+    capsule.environment match {
+      case Some(x:IEnvironmentDataProxyUI) => graphics.drawImage(Images.thumb(x.dataUI.imagePath), TASK_CONTAINER_WIDTH - 10, -10, new Container)
+      case _=>
     }
     revalidate
   }
-  
 }
