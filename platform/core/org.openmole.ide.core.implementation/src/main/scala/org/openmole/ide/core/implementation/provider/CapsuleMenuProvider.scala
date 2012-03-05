@@ -53,13 +53,8 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     if (encapsulated) {
       if (capsule.dataProxy.get.dataUI.environment.isDefined) {
         val itRe= new JMenuItem("Detach environment")
-        itRe.addActionListener(new DetachEnvironmentAction(capsule.dataProxy).peer)
+      //  itRe.addActionListener(new DetachEnvironmentAction(capsule.dataProxy).peer)
         items+=itRe
-      }
-      if (capsule.dataProxy.get.dataUI.sampling.isDefined) {
-        val itSa= new JMenuItem("Detach sampling")
-        itSa.addActionListener(new DetachSamplingAction(capsule.dataProxy).peer)
-        items+=itSa
       }
     }
     super.getPopupMenu(widget, point)

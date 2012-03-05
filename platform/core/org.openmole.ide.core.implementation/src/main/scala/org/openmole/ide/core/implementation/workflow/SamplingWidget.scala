@@ -21,13 +21,13 @@ import java.awt.Color
 import java.awt.Container
 import java.awt.Font
 import java.awt.Graphics2D
-import java.awt.Point
 import java.awt.Rectangle
 import org.netbeans.api.visual.widget.Widget
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openide.util.ImageUtilities
+import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 
 class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(scene.graphScene) {
   val titleArea = new Rectangle
@@ -35,19 +35,16 @@ class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(
   
   override def paintWidget= {
     super.paintWidget
-    val sampling = capsule.dataProxy.get.dataUI.sampling
-    if (sampling.isDefined){
-      val g = getGraphics.asInstanceOf[Graphics2D]
-      g.drawImage(ImageUtilities.loadImage(sampling.get.dataUI.imagePath),0,0,new Container)
+    capsule.dataProxy.get.dataUI match {
+      case x : AbstractExplorationTaskDataUI =>  
+        val g = getGraphics.asInstanceOf[Graphics2D]
+        g.drawImage(ImageUtilities.loadImage(x.imagePath),0,0,new Container)
       
-      g.setColor(new Color(77,77,77))
-      g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
+        g.setColor(new Color(77,77,77))
+        g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
       
-      val rect = g.getFontMetrics(g.getFont).getStringBounds(sampling.get.dataUI.name, g)
-      g.drawString(sampling.get.dataUI.name,
-                   ((titleArea.width- rect.getWidth)/2).asInstanceOf[Int],40)
+        val rect = g.getFontMetrics(g.getFont).getStringBounds(x.name, g)
+        g.drawString(x.name,((titleArea.width- rect.getWidth)/2).asInstanceOf[Int],40)
     }
   }
-  
-  def setDetailedView(w: Int)= setPreferredLocation(new Point(w/2-15,Constants.TASK_CONTAINER_HEIGHT+10))
 }
