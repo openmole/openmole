@@ -30,7 +30,6 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.display.IEnvironmentDisplay
-import org.openmole.ide.core.implementation.action.DetachEnvironmentAction
 import scala.swing.MenuItem
 
 object EnvironmentDisplay extends IEnvironmentDisplay{
