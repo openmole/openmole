@@ -21,7 +21,6 @@ import java.awt.Color
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.implementation.provider.DnDTaskIntoCapsuleProvider
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
@@ -49,7 +48,6 @@ class CapsuleUI(val scene: IMoleScene,
   
   var nbInputSlots = 0
   val connectableWidget= new ConnectableWidget(scene,this)
-  val dndTaskIntoCapsuleProvider = new DnDTaskIntoCapsuleProvider(scene, this)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
   var titleLabel = dataProxy match {
@@ -62,7 +60,6 @@ class CapsuleUI(val scene: IMoleScene,
   addChild(connectableWidget)
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
-  getActions.addAction(ActionFactory.createAcceptAction(dndTaskIntoCapsuleProvider))
     
   def widget = this
   

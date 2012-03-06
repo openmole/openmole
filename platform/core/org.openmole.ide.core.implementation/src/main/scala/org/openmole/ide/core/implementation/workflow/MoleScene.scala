@@ -41,7 +41,6 @@ import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.panel._
-import org.openmole.ide.core.implementation.provider.DnDNewTaskProvider
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
@@ -81,7 +80,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   setActiveTool(CONNECT)  
   
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
-  getActions.addAction(ActionFactory.createAcceptAction(new DnDNewTaskProvider(this)))
   
   val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
