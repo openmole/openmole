@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
+import fr.in2p3.jsaga.impl.context.ContextImpl
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.jsaga.JSAGASessionService
 
@@ -39,10 +40,15 @@ object SSHAuthentication {
 class SSHAuthentication(val method: SSHAuthenticationMethod) extends Authentication {
   
   override def key = method.target
-  
-  override def initialize = {
-    JSAGASessionService.addContext("ssh://" + method.target, method.context)
-    JSAGASessionService.addContext("sftp://" + method.target, method.context)
-  }
 
+  override def initialize = {
+    val ctxSSH = method.context
+    ctxSSH.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("ssh->ssh2://*"))
+    JSAGASessionService.addContext("ssh://" + method.target, ctxSSH)
+    
+    val ctxSFTP = method.context
+    ctxSFTP.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
+    JSAGASessionService.addContext("sftp://" + method.target, ctxSFTP)
+  }
+  
 }

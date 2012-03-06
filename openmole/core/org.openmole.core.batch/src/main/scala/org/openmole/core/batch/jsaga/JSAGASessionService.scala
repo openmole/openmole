@@ -37,7 +37,6 @@ object JSAGASessionService extends Logger {
   @transient lazy val init = {
     val varDir = Workspace.newDir
     System.setProperty("JSAGA_VAR", varDir.getAbsolutePath)
-
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
