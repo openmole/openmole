@@ -11,6 +11,11 @@ import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.HashMap
 
 trait ICapsuleUI {
+  override def toString = dataProxy match {
+    case Some(x : ITaskDataProxyUI)=> x.dataUI.name
+    case _=> ""
+  }
+  
   def capsuleType: CapsuleType.Value
   
   def dataProxy: Option[ITaskDataProxyUI]
