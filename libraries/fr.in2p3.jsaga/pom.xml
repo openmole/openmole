@@ -53,12 +53,18 @@
             <version>${lib.fr.in2p3.jsaga.version}</version>
             <scope>provided</scope>
         </dependency>
-       	<dependency>
+        <dependency>
+            <groupId>fr.in2p3.jsaga.adaptor</groupId>
+            <artifactId>jsaga-adaptor-ssh2</artifactId>
+            <version>${lib.fr.in2p3.jsaga.version}</version>
+            <scope>provided</scope>
+        </dependency>
+<!--       	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga.adaptor.ssh</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
            <groupId>xalan</groupId>
            <artifactId>xalan</artifactId>
@@ -81,7 +87,7 @@
     <properties>
         <import.packages>scala.*,*;resolution:=optional</import.packages>
         <libraries.export.packages>org.ogf.saga.*,fr.in2p3.jsaga.*,org.globus.*</libraries.export.packages>
-        <embed-dep>*;groupId=bouncycastle;artifactId=bcprov-jdk13,*;type=!pom;inline=true</embed-dep>
+        <embed-dep>*;groupId=bouncycastle;artifactId=bcprov-jdk13,*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
         <bundle.classpath>bcprov-jdk13-140.jar,.</bundle.classpath>
     </properties>
 
