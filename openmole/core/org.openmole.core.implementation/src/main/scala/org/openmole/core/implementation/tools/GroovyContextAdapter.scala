@@ -28,12 +28,18 @@ import org.openmole.misc.workspace.Workspace
 object GroovyContextAdapter {
   val workspaceVar = new Prototype("workspace", Workspace.getClass)
   val rngVar = new Prototype("rng", classOf[Random])
+  val seedVar = new Prototype("seed", classOf[Long])
   
   implicit def variablesDecorator(variables: Iterable[IVariable[_]]) = new {
     def toBinding = {
       val binding = new Binding
       binding.setVariable(workspaceVar.name, Workspace)
-      binding.setVariable(rngVar.name, Workspace.newRNG)
+      
+      val seed = Workspace.newSeed
+      val rng = Workspace.newRNG(seed)
+      
+      binding.setVariable(rngVar.name, rng)
+      binding.setVariable(seedVar.name, seed)
       variables.foreach{v => binding.setVariable(v.prototype.name, v.value)}
       binding
     }

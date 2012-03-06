@@ -20,6 +20,7 @@ package org.openmole.misc.workspace
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.IOException
+import java.util.{Random => JRandom}
 import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -151,8 +152,11 @@ object Workspace {
   
   def rng = instance.rng
   
+  def newRNG(seed: Long) = instance.newRNG(seed)
+  
   def newRNG = instance.newRNG
   
+  def newSeed = instance.newSeed
 }
 
 
@@ -178,8 +182,10 @@ class Workspace(val location: File) {
   @transient val persistentDir = new File(location, PersitentLocation)
   persistentDir.mkdirs
   
-  def newRNG = Random.buildSynchronized(rng.nextLong)
-  lazy val rng = Random.buildSynchronized(sessionUUID)
+  def newSeed = rng.nextLong
+  def newRNG(seed: Long): JRandom = Random.buildSynchronized(seed)
+  def newRNG: JRandom = newRNG(newSeed)
+  val rng = Random.buildSynchronized(sessionUUID)
   
   private def textEncryptor(password: Option[String]) = {
     password match {
