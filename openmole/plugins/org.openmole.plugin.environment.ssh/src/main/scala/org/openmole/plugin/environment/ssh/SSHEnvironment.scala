@@ -40,11 +40,11 @@ class SSHEnvironment(login: String, host: String, nbSlots: Int, dir: String, ove
   
   def this(login: String, host: String, nbSlots: Int, dir: String) = this(login, host, nbSlots, dir, None)
 
-  def this(login: String, host: String, nbSlots: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.UniqueID)
+  def this(login: String, host: String, nbSlots: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.preference(Workspace.UniqueID))
  
   def this(login: String, host: String, nbSlots: Int, dir: String, memory: Int) = this(login, host, nbSlots, dir, Some(memory))
 
-  def this(login: String, host: String, nbSlots: Int, memory: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.UniqueID, Some(memory))
+  def this(login: String, host: String, nbSlots: Int, memory: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.preference(Workspace.UniqueID), Some(memory))
  
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
   
