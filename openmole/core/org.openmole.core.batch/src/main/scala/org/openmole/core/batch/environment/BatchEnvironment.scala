@@ -85,7 +85,7 @@ object BatchEnvironment {
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
   Workspace += (MinUpdateInterval, "PT1M")
-  Workspace += (MaxUpdateInterval, "PT10M")
+  Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
   
   Workspace += (RuntimeLocation, () => new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)

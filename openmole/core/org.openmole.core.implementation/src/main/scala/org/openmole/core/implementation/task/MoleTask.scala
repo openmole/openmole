@@ -71,9 +71,7 @@ class MoleTask(name: String, val mole: IMole, val lastCapsule: ICapsule) extends
     context ++ resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + lastCapsule + " has never been executed."))
   }
 
-  override def inputs: IDataSet = {
-    val firstTask = mole.root.taskOrException
-    new DataSet(super.inputs ++ firstTask.inputs)
-  }
-  
+  override def inputs: IDataSet = new DataSet(super.inputs ++ mole.root.taskOrException.inputs)
+  override def outputs: IDataSet = new DataSet(super.inputs ++ lastCapsule.taskOrException.outputs)
+ 
 }
