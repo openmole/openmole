@@ -43,7 +43,7 @@
     </dependencies>
 
     <properties>
-	<lib.runtime.jvm.version>7u1</lib.runtime.jvm.version>
+	<lib.runtime.jvm.version>7-u3-2.1</lib.runtime.jvm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
         <izpack.standalone.compiler.version>4.3.4</izpack.standalone.compiler.version>
@@ -72,7 +72,7 @@
                                     <destFileName>org.openmole.runtime.tar.gz</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.oracle</groupId>
+                                    <groupId>net.java.openjdk</groupId>
                                     <artifactId>java-jre-linux-i386</artifactId>
                                     <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
@@ -80,7 +80,7 @@
                                     <destFileName>jvm-linux-i386.tar.gz</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.oracle</groupId>
+                                    <groupId>net.java.openjdk</groupId>
                                     <artifactId>java-jre-linux-x64</artifactId>
                                     <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
