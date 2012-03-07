@@ -105,7 +105,7 @@
         <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
         <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
 	<lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
-	<lib.runtime.jvm.version>7u1</lib.runtime.jvm.version>
+	<lib.runtime.jvm.version>7-u3-2.1</lib.runtime.jvm.version>
 	<plugin.org.scala-tools.maven-scala-plugin.version>2.15.2</plugin.org.scala-tools.maven-scala-plugin.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <!-- default configuration for the bundles -->
