@@ -51,7 +51,7 @@
                                     <destFileName>org.openmole.runtime.tar.gz</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>net.java.openjdk</groupId>
+                                    <groupId>com.oracle</groupId>
                                     <artifactId>java-jre-linux-i386</artifactId>
                                     <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
@@ -59,7 +59,7 @@
                                     <destFileName>jvm-linux-i386.tar.gz</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>net.java.openjdk</groupId>
+                                    <groupId>com.oracle</groupId>
                                     <artifactId>java-jre-linux-x64</artifactId>
                                     <version>${lib.runtime.jvm.version}</version>
                                     <type>tgz</type>
