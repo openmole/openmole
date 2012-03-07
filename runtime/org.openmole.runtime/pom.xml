@@ -82,7 +82,7 @@
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-                    <execution>
+                    <!--<execution>
                         <id>copy-jre</id>
                         <phase>package</phase>
                         <goals>
@@ -108,7 +108,7 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                    </execution>
+                    </execution>-->
 
                     <execution>
                         <id>copy-dependencies</id>
