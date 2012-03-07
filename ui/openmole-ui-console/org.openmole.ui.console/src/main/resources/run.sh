@@ -9,7 +9,7 @@ fi
 
 rm -Rf configuration/org*
 rm configuration/*.log
-java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -XX:+UseCompressedOops -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC \
+java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -XX:+UseCompressedOops -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar plugins/org.eclipse.equinox.launcher.jar \
      -p openmole-plugins,openmole-plugins-ui $@
 cat configuration/*.log
