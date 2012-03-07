@@ -21,43 +21,47 @@ import java.awt.Color
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.Widget
+import scala.swing.Component
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Label
+import scala.collection.mutable.ListBuffer
 
 class CapsuleUI(val scene: IMoleScene, 
                 var dataProxy: Option[ITaskDataProxyUI],
                 var capsuleType:CapsuleType,
                 var startingCapsule: Boolean = false,
                 var environment: Option[IEnvironmentDataProxyUI] = None) extends Widget(scene.graphScene) with ICapsuleUI{
-  def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0)
+  def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0,None)
   
-    
+  val taskComponentWidget = new TaskComponentWidget(scene,new TaskWidget(scene,this))
+  addChild(taskComponentWidget)
   createActions(MOVE).addAction (ActionFactory.createMoveAction)
   
+  
+  var islots= ListBuffer.empty[IInputSlotWidget]
+  val oslot= new OutputSlotWidget(scene,this)
+  var samplingWidget: Option[SamplingWidget] = None
   var nbInputSlots = 0
-  val connectableWidget= new ConnectableWidget(scene,this)
+//  val connectableWidget= new ConnectableWidget(scene,this)
+  //val connectableWidget= new TaskComponentWidget(scene,new TaskWidget(scene,this))
+//  addChild(connectableWidget)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
-  var titleLabel = dataProxy match {
-    case Some(x: ITaskDataProxyUI)=> new LinkLabel(x.dataUI.name,new Action(""){
-          def apply = scene.displayPropertyPanel(x, EDIT)}){
-        background = Color.red}
-    case None=> new Label("")
-  }
-  addChild(new ComponentWidget(scene.graphScene,titleLabel.peer))
-  addChild(connectableWidget)
+  scene.refresh
         
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
     
@@ -66,7 +70,7 @@ class CapsuleUI(val scene: IMoleScene,
   def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
     val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule,environment)
-    connectableWidget.islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
+    islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
     if (dataProxy.isDefined) {
       c.setDataProxy(dataProxy.get)
     } 
@@ -76,7 +80,7 @@ class CapsuleUI(val scene: IMoleScene,
   
   def defineAsStartingCapsule(b : Boolean) = {
     startingCapsule = b
-    connectableWidget.islots.foreach{ isw=>
+    islots.foreach{ isw=>
       isw.setStartingSlot(b)}
     scene.validate
     scene.refresh
@@ -85,8 +89,8 @@ class CapsuleUI(val scene: IMoleScene,
   def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
-    titleLabel = new LinkLabel(dpu.dataUI.name,new Action(""){
-        def apply = scene.displayPropertyPanel(dpu, EDIT)})
+//    titleLabel = new LinkLabel(dpu.dataUI.name,new Action(""){
+//        def apply = scene.displayPropertyPanel(dpu, EDIT)})
   }
   
   
@@ -95,7 +99,9 @@ class CapsuleUI(val scene: IMoleScene,
     
     nbInputSlots+= 1
     val im = new InputSlotWidget(scene,this,nbInputSlots,on)
-    connectableWidget.addInputSlot(im)
+   // addInputSlot(im)
+    islots += im
+    taskComponentWidget.addChild(im)
     scene.validate
     scene.refresh
     im
@@ -103,14 +109,25 @@ class CapsuleUI(val scene: IMoleScene,
 
   def removeInputSlot= {
     nbInputSlots-= 1
-    connectableWidget.removeFirstInputSlot
+    removeFirstInputSlot
   }
   
   def setDataProxy(dpu: ITaskDataProxyUI)={
     dataProxy= Some(dpu)
     if (Proxys.isExplorationTaskData(dpu.dataUI)) {
       capsuleType = EXPLORATION_TASK 
-      connectableWidget.addSampling
+      addSampling
     } else capsuleType = BASIC_TASK
   }
+  
+  
+  def x = convertLocalToScene(getLocation).getX
+  
+  def y = convertLocalToScene(getLocation).getY
+  
+  def addInputSlot(iw: InputSlotWidget) {}
+    
+  def removeFirstInputSlot = {}
+  
+  def addSampling = {}
 }

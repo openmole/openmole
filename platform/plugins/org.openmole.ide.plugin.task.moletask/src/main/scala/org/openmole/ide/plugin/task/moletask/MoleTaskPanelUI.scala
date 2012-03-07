@@ -27,11 +27,11 @@ import scala.swing.Label
 import scala.swing.ComboBox
 import scala.collection.JavaConversions._
 
-class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","","") with ITaskPanelUI{
+class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","left,grow,fill","") with ITaskPanelUI{
   
   val moleComboBox = new ComboBox(TopComponentsManager.moleScenes.toList) 
   {tooltip = Help.tooltip("The name of the inner Mole to be run.","Mole_1")}
-  val capsuleComboBox = new ComboBox(moleComboBox.selection.item.manager.capsules.values.toList) 
+  val capsuleComboBox = new ComboBox(TopComponentsManager.moleScenes.map{s=>s.manager.capsules.values.toList}.flatten.toList) 
   
   contents += (new Label("Embedded mole"),"gap para")
   contents += moleComboBox
@@ -42,9 +42,17 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2",""
   contents += (new Label("Final capsule"),"gap para")
   contents += capsuleComboBox
   
- // listenTo(moleComboBox.selection)
- // reactions += {
- //   case SelectionChanged(`moleComboBox`) => capsuleComboBox.peer.setModel(ComboBox.newConstantModel(moleComboBox.selection.item.manager.capsules.values.toList)
- // }
- override def saveContent(name: String) = new MoleTaskDataUI(name, Some(moleComboBox.selection.item),Some(capsuleComboBox.selection.item))
+  //wait for the scala bugfix SI-2154
+//  listenTo(moleComboBox.selection)
+//  reactions += {
+//    case SelectionChanged(`moleComboBox`) => 
+//      capsuleComboBox = currentCapsulesCombo
+//      repaint
+//      revalidate
+//      TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.refresh
+//  }
+  
+ // def currentCapsulesCombo = new ComboBox(moleComboBox.selection.item.manager.capsules.values.toList) 
+  
+  override def saveContent(name: String) = new MoleTaskDataUI(name, Some(moleComboBox.selection.item),Some(capsuleComboBox.selection.item))
 }

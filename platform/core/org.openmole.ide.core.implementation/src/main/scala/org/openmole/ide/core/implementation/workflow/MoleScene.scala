@@ -52,7 +52,32 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Component
 import scala.swing.ScrollPane
  
-
+//object MoleScene {
+//  
+//  val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
+//  
+//  class ObjectSelectProvider extends SelectProvider {
+//        
+//    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
+//                
+//    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
+//        
+//    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = {
+//      w match {
+//        case x : Any => println ("Any " + x)
+////        case x: ICapsuleUI=> { 
+////            if(x.dataProxy.isDefined)
+////              x.dataProxy.get match{
+////                case y: ITaskDataProxyUI=> x.scene.displayPropertyPanel(y,EDIT)
+////                case _=>
+////              }
+////          }
+//      }
+//    }
+//  }
+//}
+//
+//import MoleScene._
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   val manager = new MoleSceneManager
@@ -81,7 +106,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   
-  val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
@@ -99,8 +123,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     currentPanel match {
       case Some(x:BasePanelUI)=> 
         propertyWidget.addChild(new ComponentWidget(this,x.peer))
-      //  propertyWidget.setPreferredSize(new Dimension(800,500))
-      //  propertyWidget.setPreferredBounds(new Rectangle(0,0,800,500))
+        //  propertyWidget.setPreferredSize(new Dimension(800,500))
+        //  propertyWidget.setPreferredBounds(new Rectangle(0,0,800,500))
       case _=>
     }
     
@@ -207,7 +231,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       target= None
       if(isNode(o)) target= Some(o.asInstanceOf[String])
       TopComponentsManager.connectMode match {
-        case false => if (targetWidget.getClass.equals(classOf[ConnectableWidget])) return ConnectorState.ACCEPT
+        case false => if (targetWidget.getClass.equals(classOf[CapsuleUI])) return ConnectorState.ACCEPT
         case true=> 
           if (targetWidget.getClass.equals(classOf[InputSlotWidget])){
             val iw= targetWidget.asInstanceOf[InputSlotWidget]
@@ -231,7 +255,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
             createConnectEdge(source.get, target.get)
         case false=> 
-          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[ConnectableWidget].capsule))
+          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[CapsuleUI]))
             createDataChannelEdge(source.get, target.get  )
       }
     }
@@ -313,31 +337,24 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     }
   }
   
-  class ObjectSelectProvider extends SelectProvider {
-        
-    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
-                
-    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
-        
-    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = {
-      w match {
-        case x: ICapsuleUI=> { 
-            if(x.dataProxy.isDefined)
-              x.dataProxy.get match{
-                case y: ITaskDataProxyUI=> displayPropertyPanel(y,EDIT)
-                case _=>
-              }
-          }
-      }
-    }
-  }
   
-  class PropertyWidget (scene: IMoleScene,wi: Component) extends ComponentWidget(scene.graphScene,wi.peer){
+  import java.awt.event.ComponentListener
+  class PropertyWidget (scene: IMoleScene,wi: BasePanelUI) extends ComponentWidget(scene.graphScene,wi.peer){
     setPreferredBounds(new Rectangle(0,0,wi.preferredSize.width,wi.preferredSize.height))
+    wi.mainPanel.peer.addComponentListener(new PropertyWidgetListener)
     override def paintBackground = {
       val g = scene.graphScene.getGraphics
       g.fill(wi.bounds)
       revalidate
     }
+    
+    import java.awt.event.ComponentEvent
+    class PropertyWidgetListener extends ComponentListener {
+      def componentResized (e: ComponentEvent) {println("resijed " + e.getSource);revalidate}
+      def componentMoved (e: ComponentEvent) {println("move " + e.getSource);revalidate}
+      def componentShown (e: ComponentEvent) {}
+      def componentHidden (e: ComponentEvent) {}
+    }
+
   }
 }

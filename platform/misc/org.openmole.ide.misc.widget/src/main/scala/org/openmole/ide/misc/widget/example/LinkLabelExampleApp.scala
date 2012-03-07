@@ -18,14 +18,10 @@
 package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.EditableLinkLabel
-import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.misc.widget.MainLinkLabel
-import org.openmole.ide.misc.widget.ContentAction
-import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Action
-import scala.swing.MainFrame
-import scala.swing.SimpleSwingApplication
+import org.openmole.ide.misc.widget.{PluginPanel,ContentAction,MainLinkLabel,LinkLabel,EditableLinkLabel}
+import scala.collection.JavaConversions._
+import scala.swing.{ComboBox,Action,MainFrame,SimpleSwingApplication}
+import javax.swing.JComboBox
 
 object LinkLabelExampleApp extends SimpleSwingApplication
 {

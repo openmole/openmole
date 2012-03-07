@@ -52,13 +52,13 @@ class MoleSceneConverter extends Converter{
     molescene.manager.capsules.values.foreach(view=> {
         writer.startNode("capsule")
         writer.addAttribute("start", view.startingCapsule.toString)
-        writer.addAttribute("x", String.valueOf(view.connectableWidget.x))
-        writer.addAttribute("y", String.valueOf(view.connectableWidget.y))
+        writer.addAttribute("x", String.valueOf(view.x))
+        writer.addAttribute("y", String.valueOf(view.y))
 
         //Input slot
         slotcount+= 1
         firstSlotID.put(view, slotcount)
-        view.connectableWidget.islots.foreach(is=>{ 
+        view.islots.foreach(is=>{ 
             iSlotMapping += is-> slotcount
             writer.startNode("islot")
             writer.addAttribute("id",slotcount.toString)

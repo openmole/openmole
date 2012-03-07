@@ -29,7 +29,7 @@ class ExecutionMoleScene extends MoleScene{
   
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-    obUI.get.createActions(SELECT).addAction(selectAction)
+  //  obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
   

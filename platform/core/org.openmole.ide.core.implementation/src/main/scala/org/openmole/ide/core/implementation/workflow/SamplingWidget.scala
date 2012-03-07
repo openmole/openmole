@@ -19,32 +19,53 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Color
 import java.awt.Container
+import java.awt.Point
 import java.awt.Font
+import java.awt.Cursor
 import java.awt.Graphics2D
 import java.awt.Rectangle
+import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openide.util.ImageUtilities
+import org.netbeans.api.visual.action.SelectProvider
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.model.commons.Constants._
 
 class SamplingWidget(scene: IMoleScene,val capsule: ICapsuleUI ) extends Widget(scene.graphScene) {
   val titleArea = new Rectangle
   titleArea.setBounds(new Rectangle(0,33,33,Constants.TASK_TITLE_HEIGHT/2))
+//  createActions(SELECT).addAction(MoleScene.selectAction)
+//  setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   
   override def paintWidget= {
-    super.paintWidget
+  //  super.paintWidget
     capsule.dataProxy.get.dataUI match {
-      case x : AbstractExplorationTaskDataUI =>  
-        val g = getGraphics.asInstanceOf[Graphics2D]
-        g.drawImage(ImageUtilities.loadImage(x.imagePath),0,0,new Container)
+      case x : AbstractExplorationTaskDataUI => x.sampling match {
+          case Some(y : ISamplingDataProxyUI)=> 
+            val g = getGraphics.asInstanceOf[Graphics2D]
+            g.drawImage(ImageUtilities.loadImage(y.dataUI.imagePath),0,0,new Container)
       
-        g.setColor(new Color(77,77,77))
-        g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
+            g.setColor(new Color(77,77,77))
+            g.setFont(new Font("Ubuntu", Font.PLAIN, 10))
       
-        val rect = g.getFontMetrics(g.getFont).getStringBounds(x.name, g)
-        g.drawString(x.name,((titleArea.width- rect.getWidth)/2).asInstanceOf[Int],40)
+            val rect = g.getFontMetrics(g.getFont).getStringBounds(x.name, g)
+            g.drawString(x.name,((titleArea.width- rect.getWidth)/2).asInstanceOf[Int],40)
+          case _=>
+        }
+      case _=>
     }
   }
+  
+//  class ObjectSelectProvider extends SelectProvider {
+//        
+//    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
+//                
+//    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
+//        
+//    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = println( "selecte samnpling")
+//  }
 }

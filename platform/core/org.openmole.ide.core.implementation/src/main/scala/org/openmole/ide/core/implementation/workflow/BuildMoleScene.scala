@@ -42,7 +42,7 @@ class BuildMoleScene(n: String) extends MoleScene {
     manager.capsules.foreach(n=> {
         val (caps,islotMapping) = n._2.copy(ms)
         if (n._2.startingCapsule) ms.manager.setStartingCapsule(caps)
-        SceneItemFactory.createCapsule(caps,ms, new Point(n._2.connectableWidget.x.toInt,n._2.connectableWidget.y.toInt))
+        SceneItemFactory.createCapsule(caps,ms, new Point(n._2.x.toInt,n._2.y.toInt))
         capsuleMapping+= n._2-> caps
         islots++= islotMapping})
     manager.transitions.foreach(t=> {SceneItemFactory.createTransition(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)})
@@ -52,7 +52,7 @@ class BuildMoleScene(n: String) extends MoleScene {
   
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-    obUI.get.createActions(SELECT).addAction(selectAction)
+ //   obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
     obUI.get.createActions(CONNECT).addAction(connectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
@@ -68,7 +68,7 @@ class BuildMoleScene(n: String) extends MoleScene {
     }
     
     connectLayer.addChild(connectionWidget);
-    connectionWidget.getActions.addAction(createSelectAction)
+  //  connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(reconnectAction)
     connectionWidget

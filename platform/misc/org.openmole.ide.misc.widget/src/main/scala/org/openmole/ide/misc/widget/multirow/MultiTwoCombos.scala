@@ -42,8 +42,8 @@ object MultiTwoCombos {
                                 val inBetweenString: String,
                                 val plus: Plus) extends IRowWidget2[A,B]{
     
-    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
-    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB ; preferredSize = new Dimension(8,size.height) }
+    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
+    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
     
     override val panel = new RowPanel(List(combo1,new Label(inBetweenString),combo2),plus)
     
